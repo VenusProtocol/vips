@@ -20,11 +20,10 @@ yarn install
 
 ### Run Simulations
 
+```
 npx hardhat test simulations/vip-80/vip-80.ts
 npx hardhat test simulations/vip-98/vip-98.ts
 npx hardhat test simulations/vip-99/vip-99.ts
 npx hardhat test simulations/vip-101/vip-101.ts
-
-```
 
 ```
