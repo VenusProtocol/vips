@@ -1,18 +1,11 @@
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-ethers";
-import "@nomiclabs/hardhat-etherscan";
-import "@openzeppelin/hardhat-upgrades";
-import "@typechain/hardhat";
 import { ethers } from "ethers";
 import fs from "fs";
-import "hardhat-deploy";
 import { HardhatUserConfig, task } from "hardhat/config";
-import "solidity-docgen";
 
 require("dotenv").config();
-
-const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY;
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -54,38 +47,6 @@ task("run-script", "Runs a hardhard script by name")
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
-  solidity: {
-    compilers: [
-      {
-        version: "0.5.16",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-          outputSelection: {
-            "*": {
-              "*": ["storageLayout"],
-            },
-          },
-        },
-      },
-      {
-        version: "0.8.13",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 10000,
-          },
-          outputSelection: {
-            "*": {
-              "*": ["storageLayout"],
-            },
-          },
-        },
-      },
-    ],
-  },
   networks: {
     hardhat: isFork(),
     bsctestnet: {
@@ -104,39 +65,11 @@ const config: HardhatUserConfig = {
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
   },
-  etherscan: {
-    apiKey: BSCSCAN_API_KEY,
-  },
   paths: {
-    sources: "./contracts",
     tests: "./tests",
-    cache: "./cache",
-    artifacts: "./artifacts",
   },
   mocha: {
     timeout: 200000000,
-  },
-  typechain: {
-    outDir: "typechain",
-    target: "ethers-v5",
-  },
-  // Hardhat deploy
-  namedAccounts: {
-    deployer: {
-      default: 0, // here this will by default take the first account as deployer
-    },
-  },
-  external: {
-    contracts: [
-      {
-        artifacts: "node_modules/@venusprotocol/isolated-pools/artifacts",
-      },
-    ],
-  },
-  docgen: {
-    outputDir: "./docgen-docs",
-    pages: "files",
-    templates: "docgen-templates",
   },
 };
 
