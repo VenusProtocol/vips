@@ -55,4 +55,4 @@ jobs:
       - name: Run hardhat compile and tests coverage
         run: |
           source .env.example
-          yarn hardhat:compile && yarn hardhat:coverage
+          yarn hardhat compile && yarn hardhat coverage
