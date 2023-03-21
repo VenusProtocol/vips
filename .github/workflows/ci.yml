@@ -54,4 +54,4 @@ jobs:
 
       - name: Run hardhat compile and tests coverage
         run: |
-          yarn hardhat compile && yarn hardhat coverage
+          yarn hardhat compile && yarn hardhat test
