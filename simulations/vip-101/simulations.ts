@@ -13,7 +13,7 @@ const OLD_VTRX = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
 const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 
 forking(26107552, () => {
-  let comptroller: any;
+  let comptroller: ethers.Contract;
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
@@ -57,7 +57,7 @@ forking(26107552, () => {
 });
 
 forking(26107552, () => {
-  let comptroller: any;
+  let comptroller: ethers.Contract;
 
   before(async () => {
     const provider = ethers.provider;

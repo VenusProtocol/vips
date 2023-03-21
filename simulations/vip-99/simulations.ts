@@ -34,17 +34,17 @@ forking(25918391, () => {
 
 // Ressetting the fork to prevent oracle prices from getting stale
 forking(25918391, () => {
-  let comptroller: any;
-  let busd: any;
-  let usdt: any;
-  let btc: any;
-  let vBUSD: any;
-  let vUSDC: any;
-  let vUSDT: any;
-  let vBTC: any;
-  let vETH: any;
-  let swapDebtDelegate: any;
-  let oracle: any;
+  let comptroller: ethers.Contract;
+  let busd: ethers.Contract;
+  let usdt: ethers.Contract;
+  let btc: ethers.Contract;
+  let vBUSD: ethers.Contract;
+  let vUSDC: ethers.Contract;
+  let vUSDT: ethers.Contract;
+  let vBTC: ethers.Contract;
+  let vETH: ethers.Contract;
+  let swapDebtDelegate: ethers.Contract;
+  let oracle: ethers.Contract;
 
   before(async () => {
     const provider = ethers.provider;
@@ -55,7 +55,7 @@ forking(25918391, () => {
       }),
     );
     [busd, , usdt, btc] = await Promise.all(
-      [vBUSD, vUSDC, vUSDT, vBTC, vETH].map(async (vToken: any) => {
+      [vBUSD, vUSDC, vUSDT, vBTC, vETH].map(async (vToken: ethers.Contract) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20_UPGRADABLE_ABI, provider);
       }),

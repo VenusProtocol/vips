@@ -23,11 +23,11 @@ forking(25892445, () => {
 });
 
 forking(25892445, () => {
-  let comptroller: any;
-  let trx: any;
-  let vTrxOld: any;
-  let vTrx: any;
-  let oracle: any;
+  let comptroller: ethers.Contract;
+  let trx: ethers.Contract;
+  let vTrxOld: ethers.Contract;
+  let vTrx: ethers.Contract;
+  let oracle: ethers.Contract;
   const provider = ethers.provider;
 
   before(async () => {

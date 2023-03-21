@@ -39,7 +39,7 @@ jobs:
     env:
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v2
         with:
@@ -54,5 +54,4 @@ jobs:
 
       - name: Run hardhat compile and tests coverage
         run: |
-          source .env.example
           yarn hardhat compile && yarn hardhat coverage

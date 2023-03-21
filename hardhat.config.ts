@@ -26,7 +26,8 @@ task("run-script", "Runs a hardhard script by name")
       console.log("Make sure you pass an existing script path. Available scripts:");
       fs.readdirSync("./script/hardhat", { withFileTypes: true }).forEach((file: fs.Dirent) => {
         // Some directories don't contain files that can be run this way
-        if (file.isDirectory() && file.name !== "simulations" && file.name !== "utils" && file.name !== "vips") {
+        const excludeDirs = ["simulations", "utils", "vips"];
+        if (file.isDirectory() && !excludeDirs.includes(file.name)) {
           console.log(`${file.name}/`);
           fs.readdirSync(`./script/hardhat/${file.name}`).forEach((file: string) => {
             console.log(`  ${file}`);
@@ -79,7 +80,7 @@ function isFork() {
         allowUnlimitedContractSize: false,
         loggingEnabled: false,
         forking: {
-          url: `https://tame-white-dinghy.bsc.discover.quiknode.pro/${process.env.QUICK_NODE_KEY}/`,
+          url: `${process.env.BSC_ARCHIVE_NODE}`,
           blockNumber: 21068448,
         },
         accounts: {

@@ -11,7 +11,7 @@ const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 
 export const vip101 = () => {
   const meta = {
-    version: "v1",
+    version: "v2",
     title: "VIP-101 Venus Parameter Recommendation",
     description: `
     Lower collateral factor of SXP from 35% to 30%.

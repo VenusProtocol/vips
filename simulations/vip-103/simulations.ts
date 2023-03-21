@@ -18,7 +18,7 @@ forking(26544741, () => {
 });
 
 forking(26544741, () => {
-  let comptroller: any;
+  let comptroller: ethers.Contract;
   const provider = ethers.provider;
 
   before(async () => {

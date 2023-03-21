@@ -1,11 +1,8 @@
 {
-  "name": "@UrAvgDeveloper/governance-contracts",
-  "description": "",
-  "version": "1.0.0",
-  "author": {
-    "name": "UrAvgDeveloper",
-    "url": "https://github.com/UrAvgDeveloper"
-  },
+  "name": "@venusprotocol/vips",
+  "description": "Venus Protocol VIP simulation",
+  "version": "0.0.1",
+  "author": "",
   "devDependencies": {
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
@@ -28,7 +25,6 @@
     "@types/fs-extra": "^9.0.13",
     "@types/mocha": "^10.0.0",
     "@types/node": "^18.11.9",
-    "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
     "chai": "^4.3.7",
@@ -41,7 +37,6 @@
     "ethers": "^5.7.2",
     "fs-extra": "^10.1.0",
     "hardhat": "^2.12.2",
-    "hardhat-deploy": "^0.11.23",
     "hardhat-gas-reporter": "^1.0.9",
     "husky": "^8.0.2",
     "lint-staged": "^13.0.4",
@@ -49,17 +44,11 @@
     "mocha": "^10.1.0",
     "pinst": "^3.0.0",
     "prettier": "^2.8.4",
-    "prettier-plugin-solidity": "^1.1.2",
-    "shx": "^0.3.4",
-    "sinon": "^15.0.2",
-    "solhint": "^3.4.0",
-    "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "^0.8.2",
-    "solidity-docgen": "^0.6.0-beta.34",
     "ts-generator": "^0.1.1",
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
-    "typescript": "^4.9.3"
+    "typescript": "^4.9.3",
+    "sinon": "^15.0.2"
   },
   "files": [
     "/contracts"
@@ -84,10 +73,8 @@
     "test": "hardhat test",
     "build": "rm -rf dist && tsc --declaration && hardhat compile && cp -r ./{package.json,yarn.lock,artifacts,contracts,networks} dist/",
     "publish:dist": "yarn build && cd dist && yarn publish --access public",
-    "lint": "yarn lint:ts && yarn lint:sol && yarn prettier:check",
+    "lint": "yarn lint:ts && yarn prettier:check",
     "lint:ts": "eslint --config ./.eslintrc.yaml --ignore-path ./.eslintignore --ext .js,.ts .",
-    "lint:sol": "solhint \"contracts/**/*.sol\"",
-    "lint:sol:fix": "prettier --write \"contracts/**/*.sol\"",
     "prettier": "prettier --config ./.prettierrc.yaml --write \"**/*.{js,json,md,ts,yaml,yml,sol}\"",
     "prettier:check": "prettier --check --config ./.prettierrc.yaml \"**/*.{js,json,md,ts,yaml,yml,sol}\"",
     "docgen": "hardhat docgen"

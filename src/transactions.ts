@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 
-import { Proposal } from "./types";
 import { getCalldatas } from "./utils";
 
 const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
@@ -11,13 +10,7 @@ export const loadProposal = async (num: number) => {
 };
 
 export const proposeVIP = async (vipNumber: number, governorProxyAddress?: string) => {
-  let proposal: Proposal;
-
-  try {
-    proposal = await loadProposal(vipNumber);
-  } catch {
-    throw new Error("Meta Data Not Available");
-  }
+  const proposal = await loadProposal(vipNumber);
 
   const { targets, signatures, values, meta } = proposal;
 
