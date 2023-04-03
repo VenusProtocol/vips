@@ -16,7 +16,7 @@ function getNetworkName(networkId: number) {
     case 97:
       return process.env.BSC_TESTNET_NODE || "https://data-seed-prebsc-1-s1.binance.org:8545";
     case 56:
-      return process.env.BSC_TESTNET_NODE || "https://bsc-dataseed.binance.org/";
+      return process.env.BSC_MAINNET_NODE || "https://bsc-dataseed.binance.org/";
     default:
       throw new Error(`Unsupported network ID: ${networkId}`);
   }
