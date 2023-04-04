@@ -30,7 +30,7 @@ describe("proposeVIP", () => {
   afterEach(function () {
     sinon.restore();
   });
-  it("should match calldata with proposal type", async () => {
+  it("should match calldata without proposal type", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
     const result = await transaction.proposeVIP(1);

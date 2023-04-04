@@ -9,8 +9,6 @@ import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
-
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
@@ -72,7 +70,7 @@ export const setMaxStalePeriodInOracle = async (
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
   const provider = ethers.provider;
-  const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(comptrollerAddress, COMPTROLLER_ABI, provider);
 
   const oracle = new ethers.Contract(await comptroller.oracle(), VENUS_CHAINLINK_ORACLE_ABI, provider);
   const oracleAdmin = await initMainnetUser(await oracle.admin(), ethers.utils.parseEther("1.0"));
