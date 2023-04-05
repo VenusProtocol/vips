@@ -6,7 +6,7 @@ https://github.com/compound-finance/compound-protocol/tree/a3214f67b73310d547e00
 
 ### Prerequisites
 
-- NodeJS - 12.x
+- NodeJS - 16.x
 
 - Solc - v0.8.13 (https://github.com/ethereum/solidity/releases/tag/v0.8.13)
 
