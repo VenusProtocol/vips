@@ -39,21 +39,21 @@ export const vip106 = () => {
       },
       {
         target: CHAINLINK_ORACLE,
-        signature: "setTokenConfig(TokenConfig)",
-        params: [{
-          asset: USDC,
-          feed: USDC_CHAINLINK_FEED,
-          maxStalePeriod: MAX_STALE_PERIOD
-        }],
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[
+          USDC, USDC_CHAINLINK_FEED, MAX_STALE_PERIOD
+        ]],
       },
       {
         target: RESILIENT_ORACLE,
-        signature: "setTokenConfig(TokenConfig)",
-        params: [{
-          asset: USDC,
-          oracles: [CHAINLINK_ORACLE, false, false],
-          enableFlagsForOracles: [true,false,false]
-        }],
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            USDC,
+            [CHAINLINK_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
+            [true,false,false]
+          ]
+        ]
       },
       {
         target: COMPTROLLER,
