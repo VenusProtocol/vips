@@ -32,11 +32,18 @@ export interface TestingOptions {
 }
 
 const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
-  const iface = new ethers.utils.Interface([`function ${proposal.signatures[commandIdx]}`]);
+  const encodeMethodCall = (signature: string, params: any[]): string => {
+    if (signature === "") {
+      return "0x";
+    }
+    const iface = new ethers.utils.Interface([`function ${signature}`]);
+    return iface.encodeFunctionData(signature, params);
+  };
+
   await timelock.sendTransaction({
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
-    data: iface.encodeFunctionData(proposal.signatures[commandIdx], proposal.params[commandIdx]),
+    data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
     gasLimit: 8000000,
   });
 };
