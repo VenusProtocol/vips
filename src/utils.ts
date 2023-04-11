@@ -28,11 +28,11 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
     let types = getArgs(signatures[i]);
     // Fix for the oracle VIP as there is struct in types and defaultAbiCoder
     // is unable to process struct.
-  
+
     if (signatures[i] == "setTokenConfig((address,address,uint256))") {
-      types = ["tuple(address, address, uint256)"]
+      types = ["tuple(address, address, uint256)"];
     } else if (signatures[i] == "setTokenConfig((address,address[3],bool[3]))") {
-      types = ["tuple(address, address[3], bool[3])"]
+      types = ["tuple(address, address[3], bool[3])"];
     }
 
     return defaultAbiCoder.encode(types, args);
