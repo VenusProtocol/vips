@@ -40,4 +40,11 @@ forking(27116217, () => {
   });
 
   testVip("VIP-106 Change Oracle and Configure Resilient Oracle", vip106());
+
+  describe("Post-VIP behavior", async () => {
+    it("valid USDC price", async () => {
+      const price = (await priceOracle.getUnderlyingPrice(vUSDC));
+      expect(price).to.equal(parseUnits("0.999769", 18));
+    });
+  })
 });
