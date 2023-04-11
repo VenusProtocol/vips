@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInOracle } from "../../src/utils";
+import { setMaxStalePeriodInOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip106 } from "../../vips/vip-106";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -19,7 +19,6 @@ interface vTokenConfig {
   name: string;
   address: string;
   price: string;
-  fetchedPrice?: string;
 }
 
 const vTokens: vTokenConfig[] = [
@@ -143,6 +142,11 @@ const vTokens: vTokenConfig[] = [
     address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
     price: "66466450000"
   },
+  {
+    name: "VAI",
+    address: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
+    price: "0.96847512"
+  },
 ]
 
 forking(27116217, () => {
@@ -160,20 +164,12 @@ forking(27116217, () => {
     await setMaxStalePeriodInOracle(COMPTROLLER);
   });
 
-  const updatePrice = async (index: number) => {
-    const price = (await priceOracle.getUnderlyingPrice(vTokens[index].address));
-    vTokens[index].fetchedPrice = price;
-  }
-
   describe("Pre-VIP behavior", async () => {
     it("validate vToken prices", async () => {
-      await Promise.all(vTokens.map((_, index) => {
-        return updatePrice(index)
-      }))
-
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i]
-        expect(vToken.fetchedPrice).to.be.equal(parseUnits(vToken.price, 18))
+        const price = (await priceOracle.getUnderlyingPrice(vToken.address));
+        expect(price).to.be.equal(parseUnits(vToken.price, 18))
       }
     });
   });
@@ -182,13 +178,13 @@ forking(27116217, () => {
 
   describe("Post-VIP behavior", async () => {
     it("validate vToken prices", async () => {
-      await Promise.all(vTokens.map((_, index) => {
-        return updatePrice(index)
-      }))
-
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i]
-        expect(vToken.fetchedPrice).to.be.equal(parseUnits(vToken.price, 18))
+        console.log(vToken.name)
+        const config = await resilientOracle.getTokenConfig(vToken.address);
+        console.log(config)
+        const price = (await resilientOracle.getUnderlyingPrice(vToken.address));
+        expect(price).to.be.equal(parseUnits(vToken.price, 18))
       }
     });
   })

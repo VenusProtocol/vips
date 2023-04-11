@@ -7,7 +7,13 @@ const CHAINLINK_ORACLE = "0x672Ba3b2f5d9c36F36309BA913D708C4a5a25eb0";
 const RESILIENT_ORACLE = "0xe40C7548bFB764C48f9A037753A9F08c5B3Fde15";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-const ASSETS = [
+interface AssetConfig {
+  name: string;
+  address: string;
+  feed: string;
+}
+
+const ASSETS: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
