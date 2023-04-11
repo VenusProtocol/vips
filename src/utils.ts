@@ -26,11 +26,15 @@ export async function setForkBlock(blockNumber: number) {
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
     let types = getArgs(signatures[i]);
-    // Fix for the diamond VIP as there is struct in types and defaultAbiCoder
+    // Fix for the oracle VIP as there is struct in types and defaultAbiCoder
     // is unable to process struct.
-    if (signatures[i] == "diamondCut((address,uint8,bytes4[])[],address,bytes)") {
-      types = ["tuple(address, uint8, bytes4[])[]", "address", "bytes"];
+  
+    if (signatures[i] == "setTokenConfig((address,address,uint256))") {
+      types = ["tuple(address, address, bool)"]
+    } else if (signatures[i] == "setTokenConfig((address,address[3],bool[3]))") {
+      types = ["tuple(address, address[3], bool[3])"]
     }
+
     return defaultAbiCoder.encode(types, args);
   });
 }
