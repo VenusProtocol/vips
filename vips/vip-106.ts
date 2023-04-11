@@ -129,9 +129,19 @@ const ASSETS: AssetConfig[] = [
     address: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
     feed: "0xf4c5e535756d11994fcbb12ba8add0192d9b88be"
   },
+  {
+    name: "BNB",
+    address: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    feed: "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee"
+  },
+  {
+    name: "VAI",
+    address: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
+    feed: "0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53"
+  },
 ]
 
-const MAX_STALE_PERIOD = 24 * 60 * 60; // 24 hour
+const MAX_STALE_PERIOD = Date.now();
 
 export const vip106 = () => {
   const meta = {

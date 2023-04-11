@@ -180,10 +180,7 @@ forking(27116217, () => {
     it("validate vToken prices", async () => {
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i]
-        console.log(vToken.name)
-        const config = await resilientOracle.getTokenConfig(vToken.address);
-        console.log(config)
-        const price = (await resilientOracle.getUnderlyingPrice(vToken.address));
+        const price = (await chainlinkOracle.getUnderlyingPrice(vToken.address));
         expect(price).to.be.equal(parseUnits(vToken.price, 18))
       }
     });

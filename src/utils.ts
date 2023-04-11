@@ -30,7 +30,7 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
     // is unable to process struct.
   
     if (signatures[i] == "setTokenConfig((address,address,uint256))") {
-      types = ["tuple(address, address, bool)"]
+      types = ["tuple(address, address, uint256)"]
     } else if (signatures[i] == "setTokenConfig((address,address[3],bool[3]))") {
       types = ["tuple(address, address[3], bool[3])"]
     }
