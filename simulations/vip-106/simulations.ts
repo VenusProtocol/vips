@@ -7,15 +7,18 @@ import { vip106 } from "../../vips/vip-106";
 import PAIR_ABI from "./abi/pairAbi.json";
 
 const PAIR = "0xD94FeFc80a7d10d4708b140c7210569061a7eddb";
+const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
-forking(26881099, () => {
+forking(27255735, () => {
   let pair: ethers.Contract;
   const provider = ethers.provider;
   const currentLiquidityUsdt = parseUnits("90.294422022310547114", 18);
   const currentLiquidityVai = parseUnits("87.950866165080484144", 18);
+  let prevBalance: number;
 
   before(async () => {
     pair = new ethers.Contract(PAIR, PAIR_ABI, provider);
+    prevBalance = await pair.balanceOf(TREASURY);
   });
 
   testVip("VIP-106 Provide Liquidity in Pancake Swap", vip106());
@@ -29,6 +32,11 @@ forking(26881099, () => {
 
       expected = parseUnits("178200", 18).add(currentLiquidityVai);
       expect(newLiquidityVai).greaterThanOrEqual(expected);
+    });
+
+    it("Should increse LP token balance of treasury", async () => {
+      const newBalance = await pair.balanceOf(TREASURY);
+      expect(newBalance).greaterThan(prevBalance);
     });
   });
 });
