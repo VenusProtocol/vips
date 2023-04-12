@@ -7,7 +7,8 @@ import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
-import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
+import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
+import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";``
 
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
@@ -87,6 +88,27 @@ export const setMaxStalePeriodInOracle = async (
   const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(maxStalePeriodInSeconds);
   await tx.wait();
 };
+
+export const setMaxStalePeriodInChainlinkOracle = async (
+  chainlinkOracleAddress: string,
+  asset: string,
+  feed: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const provider = ethers.provider;
+
+  const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds
+  })
+  await tx.wait();
+};
+
 
 export const expectEvents = async (
   txResponse: TransactionResponse,

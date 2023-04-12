@@ -17,7 +17,7 @@ const ASSETS: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
-    feed: "0x51597f405303C4377E36123cBc172b13269EA163",
+    feed: "0x51597f405303C4377E36123cBc172b13269EA163"
   },
   {
     name: "USDT",
@@ -141,7 +141,7 @@ const ASSETS: AssetConfig[] = [
   },
 ];
 
-const MAX_STALE_PERIOD = Date.now();
+const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
 export const vip106 = () => {
   const meta = {
