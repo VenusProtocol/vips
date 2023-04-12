@@ -2,11 +2,13 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle } from "../../src/utils";
+import { setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle, expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip106 } from "../../vips/vip-106";
 import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const CHAINLINK_ORACLE = "0x672Ba3b2f5d9c36F36309BA913D708C4a5a25eb0";
@@ -220,7 +222,30 @@ forking(27116217, () => {
     });
   });
 
-  testVip("VIP-106 Change Oracle and Configure Resilient Oracle", vip106());
+  testVip("VIP-106 Change Oracle and Configure Resilient Oracle", vip106(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [CHAINLINK_ORACLE_ABI],
+        ["TokenConfigAdded"],
+        [vTokens.length],
+      );
+
+      await expectEvents(
+        txResponse,
+        [RESILIENT_ORACLE_ABI],
+        ["TokenConfigAdded"],
+        [vTokens.length],
+      );
+
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI],
+        ["NewPriceOracle"],
+        [1],
+      );
+    }
+  });
 
   describe("Post-VIP behavior", async () => {
     let resilientOracle: ethers.Contract;
