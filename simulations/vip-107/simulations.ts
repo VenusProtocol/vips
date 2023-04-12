@@ -12,7 +12,6 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const CHAINLINK_ORACLE = "0x672Ba3b2f5d9c36F36309BA913D708C4a5a25eb0";
-const RESILIENT_ORACLE = "0xe40C7548bFB764C48f9A037753A9F08c5B3Fde15";
 const PRICE_ORACLE = "0x7FabdD617200C9CB4dcf3dd2C41273e60552068A";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
@@ -249,9 +248,11 @@ forking(27116217, () => {
 
   describe("Post-VIP behavior", async () => {
     let resilientOracle: ethers.Contract;
+    let comptroller: ethers.Contract;
 
     before(async () => {
-      resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+      comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
+      resilientOracle = new ethers.Contract(await comptroller.oracle(), RESILIENT_ORACLE_ABI, provider);
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
