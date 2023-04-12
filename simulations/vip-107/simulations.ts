@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle, expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip106 } from "../../vips/vip-106";
+import { vip107 } from "../../vips/vip-107";
 import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -222,7 +222,7 @@ forking(27116217, () => {
     });
   });
 
-  testVip("VIP-106 Change Oracle and Configure Resilient Oracle", vip106(), {
+  testVip("VIP-107 Change Oracle and Configure Resilient Oracle", vip107(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

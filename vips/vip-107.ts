@@ -143,7 +143,7 @@ const ASSETS: AssetConfig[] = [
 
 const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
-export const vip106 = () => {
+export const vip107 = () => {
   const meta = {
     version: "v2",
     title: "VIP-106 Resilient Oracle",
