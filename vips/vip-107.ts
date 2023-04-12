@@ -6,6 +6,11 @@ const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const CHAINLINK_ORACLE = "0x672Ba3b2f5d9c36F36309BA913D708C4a5a25eb0";
 const RESILIENT_ORACLE = "0xe40C7548bFB764C48f9A037753A9F08c5B3Fde15";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+const CRITICAL_TIMELOCK = "0x685B1ded8013785d6623CC18D214320b6Bb64759"; // needs to be updated
+const BOUND_VALIDATOR = "0x41b9E16Be32FB4f17e49e3075F05618BA35898C0";
+const PYTH_ORACLE = "0xF44f7e2F4A646c0b7cfC3D13E8BDCE36791eD1b4";
+const TWAP_ORACLE = "0x43Ea33BCD79C8D34f8F00D030949203B39f38Ada";
 
 interface AssetConfig {
   name: string;
@@ -161,12 +166,107 @@ export const vip107 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
+        params: [BOUND_VALIDATOR, "setValidateConfigs(ValidateConfig[])", NORMAL_TIMELOCK]
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
+        params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(VBep20Interface,uint256)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setUnderlyingPythOracle(IPyth)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [TWAP_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "unpause()", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "pause()", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "unpause()", FAST_TRACK_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "pause()", FAST_TRACK_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "unpause()", CRITICAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "pause()", CRITICAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setOracle(address,address,OracleRole)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "enableOracle(address,OracleRole,bool)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
       },
       ...ASSETS.map(asset => {
         return {
