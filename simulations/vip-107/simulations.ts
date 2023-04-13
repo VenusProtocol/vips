@@ -2,13 +2,13 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle, expectEvents } from "../../src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip107 } from "../../vips/vip-107";
-import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const CHAINLINK_ORACLE = "0x672Ba3b2f5d9c36F36309BA913D708C4a5a25eb0";
@@ -29,7 +29,7 @@ const vTokens: vTokenConfig[] = [
     address: "0xeca88125a5adbe82614ffc12d0db554e2e2867c8",
     price: "0.999769",
     assetAddress: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
-    feed: "0x51597f405303C4377E36123cBc172b13269EA163"
+    feed: "0x51597f405303C4377E36123cBc172b13269EA163",
   },
   {
     name: "vUSDT",
@@ -210,7 +210,7 @@ forking(27116217, () => {
     before(async () => {
       priceOracle = new ethers.Contract(PRICE_ORACLE, PRICE_ORACLE_ABI, provider);
       await setMaxStalePeriodInOracle(COMPTROLLER);
-    })
+    });
 
     it("validate vToken prices", async () => {
       for (let i = 0; i < vTokens.length; i++) {
@@ -223,27 +223,12 @@ forking(27116217, () => {
 
   testVip("VIP-107 Change Oracle and Configure Resilient Oracle", vip107(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [CHAINLINK_ORACLE_ABI],
-        ["TokenConfigAdded"],
-        [vTokens.length],
-      );
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
 
-      await expectEvents(
-        txResponse,
-        [RESILIENT_ORACLE_ABI],
-        ["TokenConfigAdded"],
-        [vTokens.length],
-      );
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
 
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        ["NewPriceOracle"],
-        [1],
-      );
-    }
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewPriceOracle"], [1]);
+    },
   });
 
   describe("Post-VIP behavior", async () => {
@@ -256,12 +241,7 @@ forking(27116217, () => {
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
-        await setMaxStalePeriodInChainlinkOracle(
-          CHAINLINK_ORACLE,
-          vToken.assetAddress,
-          vToken.feed,
-          NORMAL_TIMELOCK
-        )
+        await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, NORMAL_TIMELOCK);
       }
     });
 

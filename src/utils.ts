@@ -8,7 +8,9 @@ import { ethers, network } from "hardhat";
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
-import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";``
+import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
+
+``;
 
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
@@ -104,11 +106,10 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   const tx = await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
-    maxStalePeriod: maxStalePeriodInSeconds
-  })
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
   await tx.wait();
 };
-
 
 export const expectEvents = async (
   txResponse: TransactionResponse,

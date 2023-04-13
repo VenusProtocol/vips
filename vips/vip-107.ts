@@ -23,7 +23,7 @@ const ASSETS: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
-    feed: "0x51597f405303C4377E36123cBc172b13269EA163"
+    feed: "0x51597f405303C4377E36123cBc172b13269EA163",
   },
   {
     name: "USDT",
@@ -167,112 +167,112 @@ export const vip107 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [BOUND_VALIDATOR, "setValidateConfigs(ValidateConfig[])", NORMAL_TIMELOCK]
+        params: [BOUND_VALIDATOR, "setValidateConfigs(ValidateConfig[])", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", NORMAL_TIMELOCK]
+        params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(VBep20Interface,uint256)", NORMAL_TIMELOCK]
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(VBep20Interface,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NORMAL_TIMELOCK]
+        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+        params: [CHAINLINK_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+        params: [PYTH_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setUnderlyingPythOracle(IPyth)", NORMAL_TIMELOCK]
+        params: [PYTH_ORACLE, "setUnderlyingPythOracle(IPyth)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [TWAP_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+        params: [TWAP_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "unpause()", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "unpause()", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "pause()", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "pause()", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "unpause()", FAST_TRACK_TIMELOCK]
+        params: [RESILIENT_ORACLE, "unpause()", FAST_TRACK_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "pause()", FAST_TRACK_TIMELOCK]
+        params: [RESILIENT_ORACLE, "pause()", FAST_TRACK_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "unpause()", CRITICAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "unpause()", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "pause()", CRITICAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "pause()", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setOracle(address,address,OracleRole)", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "setOracle(address,address,OracleRole)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "enableOracle(address,OracleRole,bool)", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "enableOracle(address,OracleRole,bool)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK]
+        params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK],
       },
       ...ASSETS.map(asset => {
         return {
