@@ -11,6 +11,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const BOUND_VALIDATOR = "0x41b9E16Be32FB4f17e49e3075F05618BA35898C0";
 const PYTH_ORACLE = "0xF44f7e2F4A646c0b7cfC3D13E8BDCE36791eD1b4";
 const TWAP_ORACLE = "0x43Ea33BCD79C8D34f8F00D030949203B39f38Ada";
+const BINANCE_ORACLE = "0xb0119Be19b209Aa22782A11997fd0025ba0201C9";
 
 interface AssetConfig {
   name: string;
@@ -267,6 +268,11 @@ export const vip107 = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK]
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK]
       },
       ...ASSETS.map(asset => {
         return {
