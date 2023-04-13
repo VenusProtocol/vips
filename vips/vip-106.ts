@@ -9,10 +9,10 @@ const OLD_VTRX = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
 const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const VXVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
 
-export const vip107 = () => {
+export const vip106 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-107 Risk Parameters Update",
+    title: "VIP-106 Risk Parameters Update",
     description: `
     TRX:
         Increase borrow cap to 9m tokens from 8m
