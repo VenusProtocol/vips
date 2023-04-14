@@ -242,35 +242,35 @@ export const vip107Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK],
       },
-      ...ASSETS.map(asset => {
-        return {
-          target: CHAINLINK_ORACLE,
-          signature: "setTokenConfig((address,address,uint256))",
-          params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
-        };
-      }),
-      ...ASSETS.map(asset => {
-        return {
-          target: RESILIENT_ORACLE,
-          signature: "setTokenConfig((address,address[3],bool[3]))",
-          params: [
-            [
-              asset.address,
-              [
-                CHAINLINK_ORACLE,
-                "0x0000000000000000000000000000000000000000",
-                "0x0000000000000000000000000000000000000000",
-              ],
-              [true, false, false],
-            ],
-          ],
-        };
-      }),
-      {
-        target: COMPTROLLER,
-        signature: "_setPriceOracle(address)",
-        params: [RESILIENT_ORACLE],
-      },
+      // ...ASSETS.map(asset => {
+      //   return {
+      //     target: CHAINLINK_ORACLE,
+      //     signature: "setTokenConfig((address,address,uint256))",
+      //     params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
+      //   };
+      // }),
+      // ...ASSETS.map(asset => {
+      //   return {
+      //     target: RESILIENT_ORACLE,
+      //     signature: "setTokenConfig((address,address[3],bool[3]))",
+      //     params: [
+      //       [
+      //         asset.address,
+      //         [
+      //           CHAINLINK_ORACLE,
+      //           "0x0000000000000000000000000000000000000000",
+      //           "0x0000000000000000000000000000000000000000",
+      //         ],
+      //         [true, false, false],
+      //       ],
+      //     ],
+      //   };
+      // }),
+      // {
+      //   target: COMPTROLLER,
+      //   signature: "_setPriceOracle(address)",
+      //   params: [RESILIENT_ORACLE],
+      // },
     ],
     meta,
     ProposalType.REGULAR,
