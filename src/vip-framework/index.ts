@@ -22,7 +22,6 @@ if (process.env.FORK_TESTNET === "true") {
   NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 }
 
-
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
     before(async () => {

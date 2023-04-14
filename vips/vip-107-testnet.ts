@@ -1,7 +1,6 @@
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
@@ -111,8 +110,8 @@ const ASSETS: AssetConfig[] = [
   {
     name: "BUSD",
     address: "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
-    feed: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa"
-  }
+    feed: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa",
+  },
 ];
 
 const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours

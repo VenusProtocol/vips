@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle, setMaxStalePeriodInOracle } from "../../src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip107Testnet } from "../../vips/vip-107-testnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -194,10 +194,10 @@ forking(28932706, () => {
         const vToken = vTokens[i];
         const price = await resilientOracle.getUnderlyingPrice(vToken.address);
         if (vToken.name === "vXVS") {
-          expect(price).to.be.equal(parseUnits("7.65720649", 18)) // in testnet XVS price is returned wrong by old oracle
+          expect(price).to.be.equal(parseUnits("7.65720649", 18)); // in testnet XVS price is returned wrong by old oracle
         } else {
           expect(price).to.be.equal(parseUnits(vToken.price, 18));
-        } 
+        }
       }
     });
   });
