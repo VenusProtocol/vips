@@ -153,7 +153,6 @@ forking(28932706, () => {
 
     before(async () => {
       priceOracle = new ethers.Contract(PRICE_ORACLE, PRICE_ORACLE_ABI, provider);
-      // await setMaxStalePeriodInOracle(COMPTROLLER);
     });
 
     it("validate vToken prices", async () => {
