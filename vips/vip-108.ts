@@ -9,10 +9,10 @@ const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-export const vip106 = () => {
+export const vip108 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-106 Provide Liquidity in Pancake Swap",
+    title: "VIP-108 Provide Liquidity in Pancake Swap",
     description: `
         withdraw 180K VAI to the Normal Timelock contract from the treasury
         withdraw 180K USDT to the Normal Timelock contract from the treasury

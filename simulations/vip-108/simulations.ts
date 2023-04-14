@@ -3,7 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import { vip106 } from "../../vips/vip-106";
+import { vip108 } from "../../vips/vip-108";
 import PAIR_ABI from "./abi/pairAbi.json";
 
 const PAIR = "0xD94FeFc80a7d10d4708b140c7210569061a7eddb";
@@ -21,7 +21,7 @@ forking(27255735, () => {
     prevBalance = await pair.balanceOf(TREASURY);
   });
 
-  testVip("VIP-106 Provide Liquidity in Pancake Swap", vip106());
+  testVip("VIP-108 Provide Liquidity in Pancake Swap", vip108());
   describe("Post-VIP behavior", async () => {
     it("Should increse Liquidity", async () => {
       const newLiquidityUsdt = (await pair.getReserves())[0];
