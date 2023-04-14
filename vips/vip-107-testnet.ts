@@ -5,12 +5,12 @@ import { makeProposal } from "../src/utils";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
-const CHAINLINK_ORACLE = "0xaDcED21ccd8cE69aA63356A1132f8BE9C7412714";
-const RESILIENT_ORACLE = "0xb0de3Fce006d3434342383f941bD22720Ff9Fc0C";
-const BOUND_VALIDATOR = "0xb4Ef35A739063BC0de878eE90BC1a2476b734E74";
-const PYTH_ORACLE = "0xBdA7a25316B8F97c9930A882c5c6B193C65595C4";
-const TWAP_ORACLE = "0x3Bb15361507f59F8F07D0C6417D2B1Ee58eFC752";
-const BINANCE_ORACLE = "0xCEE187C42cF060486d0960102BaeA96e24870150";
+const CHAINLINK_ORACLE = "0x17085867e4Bd42b7770171a986893431BCd7b918";
+const RESILIENT_ORACLE = "0x31d26B1EB86cF65de2C6D9E095Ca8f875DeDD183";
+const BOUND_VALIDATOR = "0x02B5C02432970336D1bd94a382633A5853299947";
+const PYTH_ORACLE = "0x0A1f968b9eCdb6bC8933C5d9409f2A0A4A950df3";
+const TWAP_ORACLE = "0x3Ae7fE5A2610FFC1f5Ae719809c3A3A580e87A9D";
+const BINANCE_ORACLE = "0x7b4236F11324A02B685C5AF392BD2159FDB2b27e";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
@@ -105,7 +105,7 @@ const ASSETS: AssetConfig[] = [
   },
   {
     name: "BNB",
-    address: "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c",
+    address: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
     feed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
   },
   {
@@ -242,35 +242,35 @@ export const vip107Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK],
       },
-      // ...ASSETS.map(asset => {
-      //   return {
-      //     target: CHAINLINK_ORACLE,
-      //     signature: "setTokenConfig((address,address,uint256))",
-      //     params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
-      //   };
-      // }),
-      // ...ASSETS.map(asset => {
-      //   return {
-      //     target: RESILIENT_ORACLE,
-      //     signature: "setTokenConfig((address,address[3],bool[3]))",
-      //     params: [
-      //       [
-      //         asset.address,
-      //         [
-      //           CHAINLINK_ORACLE,
-      //           "0x0000000000000000000000000000000000000000",
-      //           "0x0000000000000000000000000000000000000000",
-      //         ],
-      //         [true, false, false],
-      //       ],
-      //     ],
-      //   };
-      // }),
-      // {
-      //   target: COMPTROLLER,
-      //   signature: "_setPriceOracle(address)",
-      //   params: [RESILIENT_ORACLE],
-      // },
+      ...ASSETS.map(asset => {
+        return {
+          target: CHAINLINK_ORACLE,
+          signature: "setTokenConfig((address,address,uint256))",
+          params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
+        };
+      }),
+      ...ASSETS.map(asset => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3]))",
+          params: [
+            [
+              asset.address,
+              [
+                CHAINLINK_ORACLE,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+              ],
+              [true, false, false],
+            ],
+          ],
+        };
+      }),
+      {
+        target: COMPTROLLER,
+        signature: "_setPriceOracle(address)",
+        params: [RESILIENT_ORACLE],
+      },
     ],
     meta,
     ProposalType.REGULAR,
