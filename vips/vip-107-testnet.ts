@@ -64,7 +64,7 @@ const ASSETS: AssetConfig[] = [
   },
   {
     name: "ADA",
-    address: "0xcD34BC54107bd45A04Ed99EBcC2A6a3e70d7210F",
+    address: "0xcD34BC54106bd45A04Ed99EBcC2A6a3e70d7210F",
     feed: "0x5e66a1775BbC249b5D51C13d29245522582E671C",
   },
   {
