@@ -12,7 +12,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const VENUS_DEPLOYER = "0x1ca3Ac3686071be692be7f1FBeCd668641476D7e";
 
-forking(27425251, () => {
+forking(27430345, () => {
   const provider = ethers.provider;
   let vai: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
