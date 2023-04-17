@@ -152,7 +152,7 @@ const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 export const vip107 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-106 Resilient Oracle",
+    title: "VIP-107 Resilient Oracle",
     description: `
     Configure Price Feeds for Existing Markets
     Configure Oracle Address in Comptroller

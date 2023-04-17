@@ -64,7 +64,7 @@ const ASSETS: AssetConfig[] = [
   },
   {
     name: "ADA",
-    address: "0xcD34BC54106bd45A04Ed99EBcC2A6a3e70d7210F",
+    address: "0xcD34BC54107bd45A04Ed99EBcC2A6a3e70d7210F",
     feed: "0x5e66a1775BbC249b5D51C13d29245522582E671C",
   },
   {
@@ -119,7 +119,7 @@ const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 export const vip107Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-106 Resilient Oracle",
+    title: "VIP-107 Resilient Oracle",
     description: `
     Configure Price Feeds for Existing Markets
     Configure Oracle Address in Comptroller
