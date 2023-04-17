@@ -45,12 +45,6 @@ export const vip109 = () => {
       },
 
       {
-        target: VAI,
-        signature: "deny(address)",
-        params: [VENUS_DEPLOYER],
-      },
-
-      {
         target: VAI_CONTROLLER_PROXY,
         signature: "_setPendingImplementation(address)",
         params: [VAI_CONTROLLER_IMPL],
@@ -60,6 +54,12 @@ export const vip109 = () => {
         target: VAI_CONTROLLER_IMPL,
         signature: "_become(address)",
         params: [VAI_CONTROLLER_PROXY],
+      },
+
+      {
+        target: VAI,
+        signature: "deny(address)",
+        params: [VENUS_DEPLOYER],
       },
     ],
     meta,
