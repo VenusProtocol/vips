@@ -1,0 +1,78 @@
+[
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "contractAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "functionSig",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "accountToPermit",
+        "type": "address"
+      }
+    ],
+    "name": "giveCallPermission",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "functionSig",
+        "type": "string"
+      }
+    ],
+    "name": "isAllowedToCall",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "contractAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "functionSig",
+        "type": "string"
+      },
+      {
+        "internalType": "address",
+        "name": "accountToRevoke",
+        "type": "address"
+      }
+    ],
+    "name": "revokeCallPermission",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
