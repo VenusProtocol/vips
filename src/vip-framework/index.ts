@@ -8,12 +8,19 @@ import { Proposal } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
-const DEFAULT_PROPOSER_ADDRESS = "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D";
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const NORMAL_TIMELOCK_DELAY = 172800;
 const VOTING_PERIOD = 28800;
+
+let DEFAULT_PROPOSER_ADDRESS = "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D";
+let GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
+let NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+
+if (process.env.FORK_TESTNET === "true") {
+  DEFAULT_PROPOSER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+  GOVERNOR_PROXY = "0x5573422a1a59385c247ec3a66b93b7c08ec2f8f2";
+  NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+}
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
@@ -110,7 +117,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be voteable", async () => {
-      await mine();
+      await mine(150);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
