@@ -224,9 +224,7 @@ forking(27116217, () => {
   testVip("VIP-107 Change Oracle and Configure Resilient Oracle", vip107(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
-
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
-
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewPriceOracle"], [1]);
     },
   });

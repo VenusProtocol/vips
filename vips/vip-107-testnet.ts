@@ -241,6 +241,36 @@ export const vip107Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", NORMAL_TIMELOCK],
       },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: CHAINLINK_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: PYTH_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: TWAP_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: BOUND_VALIDATOR,
+        signature: "acceptOwnership()",
+        params: [],
+      },
       ...ASSETS.map(asset => {
         return {
           target: CHAINLINK_ORACLE,
