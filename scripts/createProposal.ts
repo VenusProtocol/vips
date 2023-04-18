@@ -5,10 +5,25 @@ import fs from "fs/promises";
 import { loadProposal, proposeVIP } from "../src/transactions";
 import { proposalSchema } from "../src/utils";
 
+const readline = require("readline-sync");
+
 const safeAddress = "0x12341234123412341234123412341232412341234";
-const vipNumber = process.env.VIP_NUMBER;
-const governorAddress = process.env.GOVERNOR_ADDRESS;
-const type = process.env.TRANSACTION_TYPE;
+
+let vipNumber: string;
+let governorAddress: string | null;
+let transactionType: string;
+
+function processInputs(): Promise<void> {
+  return new Promise(resolve => {
+    vipNumber = readline.question("Number of the VIP to propose => ");
+    transactionType = readline.question("Type of the proposal txBuilder/venusApp => ");
+    governorAddress = readline.question("Address of the governance contract (optional, press enter to skip) => ");
+    if (!governorAddress) {
+      governorAddress = null;
+    }
+    resolve();
+  });
+}
 
 const processJson = async data => {
   return JSON.stringify(data, null, 2);
@@ -39,15 +54,16 @@ const processVenusAppProposal = async () => {
   }
 };
 
-const createProposal = async type => {
+const createProposal = async () => {
+  await processInputs();
   let result;
-  if (type === "txBuilder") {
+  if (transactionType === "txBuilder") {
     result = await processTxBuilder();
   } else {
     result = await processVenusAppProposal();
   }
   console.log(result);
-  await fs.writeFile(`${type}.json`, result);
+  await fs.writeFile(`${transactionType}.json`, result);
 };
 
-createProposal(type);
+createProposal();
