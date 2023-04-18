@@ -755,6 +755,13 @@
     lodash "^4.17.16"
     uuid "^7.0.3"
 
+"@morpho-labs/gnosis-tx-builder@^1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@morpho-labs/gnosis-tx-builder/-/gnosis-tx-builder-1.3.1.tgz#dc30c85f73a38a36ed8a69563f4f18589d061e75"
+  integrity sha512-9jP8GglAIg+SzrZF09A9chE0dLGbLFB1VP/0BRTlvXyBARt1yqaDnTQGRhsIdKp+9kM8WapIKvp78/ShoS7DVQ==
+  dependencies:
+    ethers "^5.7.0"
+
 "@noble/hashes@1.2.0", "@noble/hashes@~1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@noble/hashes/-/hashes-1.2.0.tgz#a3150eeb09cc7ab207ebf6d7b9ad311a9bdbed12"
@@ -2910,7 +2917,7 @@ ethers@^4.0.40:
     uuid "2.0.1"
     xmlhttprequest "1.8.0"
 
-ethers@^5.7.2:
+ethers@^5.7.0, ethers@^5.7.2:
   version "5.7.2"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.7.2.tgz#3a7deeabbb8c030d4126b24f84e525466145872e"
   integrity sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg==
