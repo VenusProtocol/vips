@@ -107,3 +107,41 @@ export const expectEvents = async (
     ).to.have.lengthOf(expectedCounts[i]);
   }
 };
+
+export const proposalSchema = {
+  $schema: "http://json-schema.org/draft-07/schema#",
+  type: "object",
+  properties: {
+    signatures: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    targets: {
+      type: "array",
+      items: {
+        type: "string",
+      },
+    },
+    params: {
+      type: "array",
+      items: {
+        type: "array",
+      },
+    },
+    values: {
+      type: "array",
+      items: {
+        type: ["string", "number"],
+      },
+    },
+    meta: {
+      type: "object",
+    },
+    type: {
+      type: "number",
+    },
+  },
+  required: ["signatures", "targets", "params", "values", "meta", "type"],
+};

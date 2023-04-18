@@ -1,13 +1,20 @@
 import { TxBuilder } from "@morpho-labs/gnosis-tx-builder";
-import fs from "fs";
+import Ajv from "ajv";
+import fs from "fs/promises";
 
-import { proposeVIP } from "../src/transactions";
+import { loadProposal, proposeVIP } from "../src/transactions";
+import { proposalSchema } from "../src/utils";
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
-const vipNumber = process.env.VIP_NUMBER; // Replace with the VIP number you want to send in env
+const vipNumber = process.env.VIP_NUMBER;
 const governorAddress = process.env.GOVERNOR_ADDRESS;
+const type = process.env.TRANSACTION_TYPE;
 
-(async () => {
+const processJson = async data => {
+  return JSON.stringify(data, null, 2);
+};
+
+const processTxBuilder = async () => {
   const result = await proposeVIP(vipNumber, governorAddress);
   const transactions = [
     {
@@ -17,6 +24,30 @@ const governorAddress = process.env.GOVERNOR_ADDRESS;
     },
   ];
   const batchJson = TxBuilder.batch(safeAddress, transactions);
-  fs.writeFileSync("batchTx.json", JSON.stringify(batchJson, null, 2));
-  console.log(JSON.stringify(batchJson, null, 2));
-})();
+  return processJson(batchJson);
+};
+
+const processVenusAppProposal = async () => {
+  const proposal = await loadProposal(vipNumber);
+  const validate = new Ajv().compile(proposalSchema);
+  const isValid = validate(proposal);
+
+  if (isValid) {
+    return processJson(proposal);
+  } else {
+    console.error(validate.errors);
+  }
+};
+
+const processType = async type => {
+  let result;
+  if (type === "txBuilder") {
+    result = await processTxBuilder();
+  } else {
+    result = await processVenusAppProposal();
+  }
+  console.log(result);
+  await fs.writeFile(`${type}.json`, result);
+};
+
+processType(type);
