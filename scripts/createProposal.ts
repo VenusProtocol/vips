@@ -39,7 +39,7 @@ const processVenusAppProposal = async () => {
   }
 };
 
-const processType = async type => {
+const createProposal = async type => {
   let result;
   if (type === "txBuilder") {
     result = await processTxBuilder();
@@ -50,4 +50,4 @@ const processType = async type => {
   await fs.writeFile(`${type}.json`, result);
 };
 
-processType(type);
+createProposal(type);
