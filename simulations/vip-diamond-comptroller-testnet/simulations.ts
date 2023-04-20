@@ -58,7 +58,6 @@ forking(29101377, async () => {
     venusBorrowSpeeds: any,
     venusSupplySpeeds: any;
 
-  let USDT: ethers.contract;
   let BUSD: ethers.contract;
   let usdtHolder: ethers.Signer;
   let busdHolder: ethers.Signer;
@@ -67,12 +66,9 @@ forking(29101377, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    console.log("1+++++");
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
-    console.log("2+++++");
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);
-    console.log("3+++");
 
     await impersonateAccount(Owner);
     owner = await ethers.getSigner(Owner);
@@ -93,8 +89,8 @@ forking(29101377, async () => {
       }),
     );
 
-    [BUSD, USDT] = await Promise.all(
-      [vBUSD, vUSDT].map(async (vToken: any) => {
+    [BUSD] = await Promise.all(
+      [vBUSD].map(async (vToken: any) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
@@ -351,7 +347,7 @@ forking(29101377, async () => {
         expect(await diamondUnitroller.borrowCaps(vUSDT.address)).to.equal(currentBorrowCap);
       });
 
-      it("pausing mint action in vUSDT", async () => {
+      it("pausing mint action in vBUSD", async () => {
         expect(await diamondUnitroller.connect(owner)._setActionsPaused([vBUSD.address], [0], true)).to.emit(
           vBUSD,
           "ActionPausedMarket",
@@ -371,12 +367,9 @@ forking(29101377, async () => {
 
 forking(29101377, async () => {
   let owner, unitroller;
-  let USDT: ethers.contract;
   let BUSD: ethers.contract;
-  let usdtHolder: ethers.Signer;
   let busdHolder: ethers.Signer;
   let vBUSD: ethers.contract;
-  let vUSDT: ethers.contract;
   let diamondUnitroller: Contract;
 
   before(async () => {
@@ -396,15 +389,13 @@ forking(29101377, async () => {
 
     busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888");
 
-    usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE");
-
-    [vBUSD, vUSDT] = await Promise.all(
-      [VBUSD, VUSDT].map((address: string) => {
+    [vBUSD] = await Promise.all(
+      [VBUSD].map((address: string) => {
         return new ethers.Contract(address, VBEP20_DELEGATE_ABI, ethers.provider);
       }),
     );
-    [BUSD, USDT] = await Promise.all(
-      [vBUSD, vUSDT].map(async (vToken: any) => {
+    [BUSD] = await Promise.all(
+      [vBUSD].map(async (vToken: any) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
