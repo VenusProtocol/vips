@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip107Testnet } from "../../vips/vip-107-testnet";
+import { vip110Testnet } from "../../vips/vip-110-testnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
@@ -164,7 +164,7 @@ forking(29020724, () => {
     });
   });
 
-  testVip("VIP-107 Change Oracle and Configure Resilient Oracle", vip107Testnet(), {
+  testVip("VIP-110 Change Oracle and Configure Resilient Oracle", vip110Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [18]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [18]);

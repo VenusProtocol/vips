@@ -1,19 +1,17 @@
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-
-const CHAINLINK_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
-const RESILIENT_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
-const BOUND_VALIDATOR = "0x84e96554776607E5Ba78aeC299a81b70D03a53D6";
-const PYTH_ORACLE = "0xcBF6db3DC2f3F8e3552b12B564a8Faf74B64DaeA";
-const TWAP_ORACLE = "0x49be570231a5b9EfB0359CfC781EfDf5359dcD51";
-const BINANCE_ORACLE = "0x4aB96DCDE8c617FBBF95A381fDb21Fb49551ec63";
-
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
-const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
+const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
+const CHAINLINK_ORACLE = "0x3d54ca630A4aFf06deDb7e97705616437a68f6eF";
+const RESILIENT_ORACLE = "0x833c980ADDAa4B9d1f8432EDdA51B89676702759";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+const BOUND_VALIDATOR = "0xc3DBAC666eB8db8b4d861b51e622ED632BAf8786";
+const PYTH_ORACLE = "0x566107F08bB93E7f6102fFDF95B18f4A8a53F076";
+const TWAP_ORACLE = "0x526C79F944A28EB5B653DF4c0f9E7467B9850Eea";
+const BINANCE_ORACLE = "0x9663A87f5CDbb0792C0E73572c9AFcE2EE6d1f9d";
 
 interface AssetConfig {
   name: string;
@@ -23,103 +21,138 @@ interface AssetConfig {
 
 const ASSETS: AssetConfig[] = [
   {
-    name: "BNX",
-    address: "0xa8062D2bd49D1D2C6376B444bde19402B38938d0",
-    feed: "0xf51492DeD1308Da8195C3bfcCF4a7c70fDbF9daE",
-  },
-  {
-    name: "BTCB",
-    address: "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4",
-    feed: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
-  },
-  {
-    name: "TRX",
-    address: "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B",
-    feed: "0x135deD16bFFEB51E01afab45362D3C4be31AA2B0",
-  },
-  {
-    name: "TRX",
-    address: "0x19E7215abF8B2716EE807c9f4b83Af0e7f92653F",
-    feed: "0x135deD16bFFEB51E01afab45362D3C4be31AA2B0",
-  },
-  {
-    name: "AAVE",
-    address: "0x4B7268FC7C727B88c5Fc127D41b491BfAe63e144",
-    feed: "0x298619601ebCd58d0b526963Deb2365B485Edc74",
-  },
-  {
-    name: "MATIC",
-    address: "0xcfeb0103d4BEfa041EA4c2dACce7B3E83E1aE7E3",
-    feed: "0x957Eb0316f02ba4a9De3D308742eefd44a3c1719",
-  },
-  {
-    name: "CAKE",
-    address: "0xe8bd7cCC165FAEb9b81569B05424771B9A20cbEF",
-    feed: "0x81faeDDfeBc2F8Ac524327d70Cf913001732224C",
-  },
-  {
-    name: "DOGE",
-    address: "0x67D262CE2b8b846d9B94060BC04DC40a83F0e25B",
-    feed: "0x963D5e7f285Cc84ed566C486c3c1bC911291be38",
-  },
-  {
-    name: "ADA",
-    address: "0xcD34BC54106bd45A04Ed99EBcC2A6a3e70d7210F",
-    feed: "0x5e66a1775BbC249b5D51C13d29245522582E671C",
-  },
-  {
-    name: "XRP",
-    address: "0x3022A32fdAdB4f02281E8Fab33e0A6811237aab0",
-    feed: "0x4046332373C24Aed1dC8bAd489A04E187833B28d",
-  },
-  {
-    name: "LTC",
-    address: "0x969F147B6b8D81f86175de33206A4FD43dF17913",
-    feed: "0x9Dcf949BCA2F4A8a62350E0065d18902eE87Dca3",
-  },
-  {
-    name: "ETH",
-    address: "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7",
-    feed: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
-  },
-  {
-    name: "XVS",
-    address: "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff",
-    feed: "0xCfA786C17d6739CBC702693F23cA4417B5945491",
-  },
-  {
-    name: "SXP",
-    address: "0x75107940Cf1121232C0559c747A986DEfbc69DA9",
-    feed: "0x678AC35ACbcE272651874E782DB5343F9B8a7D66",
+    name: "USDC",
+    address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    feed: "0x51597f405303C4377E36123cBc172b13269EA163",
   },
   {
     name: "USDT",
-    address: "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c",
-    feed: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
+    address: "0x55d398326f99059fF775485246999027B3197955",
+    feed: "0xb97ad0e74fa7d920791e90258a6e2085088b4320",
   },
   {
-    name: "USDC",
-    address: "0x16227D60f7a0e586C66B005219dfc887D13C9531",
-    feed: "0x90c069C4538adAc136E051052E14c1cD799C41B7",
+    name: "BUSD",
+    address: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+    feed: "0xcbb98864ef56e9042e7d2efef76141f15731b82f",
+  },
+  {
+    name: "SXP",
+    address: "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A",
+    feed: "0xe188a9875af525d25334d75f3327863b2b8cd0f1",
+  },
+  {
+    name: "XVS",
+    address: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
+    feed: "0xbf63f430a79d4036a5900c19818aff1fa710f206",
+  },
+  {
+    name: "BTCB",
+    address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    feed: "0x264990fbd0a4796a3e3d8e37c4d5f87a3aca5ebf",
+  },
+  {
+    name: "ETH",
+    address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    feed: "0x9ef1b8c0e4f7dc8bf5719ea496883dc6401d5b2e",
+  },
+  {
+    name: "LTC",
+    address: "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94",
+    feed: "0x74e72f37a8c415c8f1a98ed42e78ff997435791d",
+  },
+  {
+    name: "XRP",
+    address: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+    feed: "0x93a67d414896a280bf8ffb3b389fe3686e014fda",
+  },
+  {
+    name: "BCH",
+    address: "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf",
+    feed: "0x43d80f616daf0b0b42a928eed32147dc59027d41",
+  },
+  {
+    name: "DOT",
+    address: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
+    feed: "0xc333eb0086309a16aa7c8308dfd32c8bba0a2592",
+  },
+  {
+    name: "LINK",
+    address: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+    feed: "0xca236e327f629f9fc2c30a4e95775ebf0b89fac8",
+  },
+  {
+    name: "DAI",
+    address: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+    feed: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA",
+  },
+  {
+    name: "FIL",
+    address: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
+    feed: "0xe5dbfd9003bff9df5feb2f4f445ca00fb121fb83",
+  },
+  {
+    name: "BETH",
+    address: "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B",
+    feed: "0x2a3796273d47c4ed363b361d3aefb7f7e2a13782",
+  },
+  {
+    name: "ADA",
+    address: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+    feed: "0xa767f745331D267c7751297D982b050c93985627",
+  },
+  {
+    name: "DOGE",
+    address: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
+    feed: "0x3ab0a0d137d4f946fbb19eecc6e92e64660231c8",
+  },
+  {
+    name: "MATIC",
+    address: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD",
+    feed: "0x7ca57b0ca6367191c94c8914d7df09a57655905f",
+  },
+  {
+    name: "CAKE",
+    address: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    feed: "0xb6064ed41d4f67e353768aa239ca86f4f73665a1",
+  },
+  {
+    name: "AAVE",
+    address: "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+    feed: "0xa8357bf572460fc40f4b0acacbb2a6a61c89f475",
+  },
+  {
+    name: "TUSD",
+    address: "0x14016E85a25aeb13065688cAFB43044C2ef86784",
+    feed: "0xa3334a9762090e827413a7495afece76f41dfc06",
+  },
+  {
+    name: "TRX",
+    address: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
+    feed: "0xf4c5e535756d11994fcbb12ba8add0192d9b88be",
+  },
+  {
+    name: "TRX",
+    address: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+    feed: "0xf4c5e535756d11994fcbb12ba8add0192d9b88be",
   },
   {
     name: "BNB",
     address: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-    feed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+    feed: "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",
   },
   {
-    name: "BUSD",
-    address: "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
-    feed: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa",
+    name: "VAI",
+    address: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
+    feed: "0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53",
   },
 ];
 
 const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
-export const vip107Testnet = () => {
+export const vip110 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-107 Resilient Oracle",
+    title: "VIP-110 Resilient Oracle",
     description: `
     Configure Price Feeds for Existing Markets
     Configure Oracle Address in Comptroller
