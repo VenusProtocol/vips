@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip111TestnetAddendum } from "../../vips/vip-110-testnet-addendum";
+import { vip110TestnetAddendum } from "../../vips/vip-110-testnet-addendum";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
@@ -46,7 +46,7 @@ forking(29212565, () => {
     });
   });
 
-  testVip("VIP-110-Addendum Set Feed for TUSD", vip111TestnetAddendum(), {
+  testVip("VIP-110-Addendum Set Feed for TUSD", vip110TestnetAddendum(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["PricePosted"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
