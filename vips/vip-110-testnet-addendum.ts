@@ -18,7 +18,7 @@ const ASSETS: AssetConfig[] = [
   },
 ];
 
-export const vip111Testnet = () => {
+export const vip111TestnetAddendum = () => {
   const meta = {
     version: "v2",
     title: "VIP-111 TUSD Price Configuration",
