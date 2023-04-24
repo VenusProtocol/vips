@@ -1,35 +1,22 @@
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-
 const CHAINLINK_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
 const RESILIENT_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
-const BOUND_VALIDATOR = "0x84e96554776607E5Ba78aeC299a81b70D03a53D6";
-const PYTH_ORACLE = "0xcBF6db3DC2f3F8e3552b12B564a8Faf74B64DaeA";
-const TWAP_ORACLE = "0x49be570231a5b9EfB0359CfC781EfDf5359dcD51";
-const BINANCE_ORACLE = "0x4aB96DCDE8c617FBBF95A381fDb21Fb49551ec63";
-
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
-const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 
 interface AssetConfig {
   name: string;
   address: string;
-  feed: string;
+  price: string;
 }
 
 const ASSETS: AssetConfig[] = [
   {
     name: "TUSD",
-    address: "0x3a00d9b02781f47d033bad62edc55fbf8d083fb0",
-    feed: "0xC6222C9fA907B9Ed797d6feA08139cDABd14bcB9",
+    address: "0xfec3a63401eb9c1476200d7c32c4009be0154169",
+    price: "1000000000000000000",
   },
 ];
-
-const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
 export const vip111Testnet = () => {
   const meta = {
@@ -48,8 +35,8 @@ export const vip111Testnet = () => {
       ...ASSETS.map(asset => {
         return {
           target: CHAINLINK_ORACLE,
-          signature: "setTokenConfig((address,address,uint256))",
-          params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
+          signature: "setDirectPrice(address,uint256)",
+          params: [asset.address, asset.price],
         };
       }),
       ...ASSETS.map(asset => {
