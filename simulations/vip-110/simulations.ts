@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import { vip109 } from "../../vips/vip-109";
+import { vip110 } from "../../vips/vip-110";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/VAIControllerProxy_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
 
@@ -22,7 +22,7 @@ forking(27430345, () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_PROXY_ABI, provider);
   });
 
-  testVip("VIP-109 Change Admin in VAI", vip109());
+  testVip("VIP-110 Change Admin in VAI", vip110());
   describe("Post-VIP behavior", async () => {
     it("Check admin of vai contract", async () => {
       const check = await vai.wards(NORMAL_TIMELOCK);

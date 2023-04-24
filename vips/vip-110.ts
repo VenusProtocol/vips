@@ -7,10 +7,10 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VENUS_DEPLOYER = "0x1ca3Ac3686071be692be7f1FBeCd668641476D7e";
 const VAI_CONTROLLER_IMPL_TEMP = "0xDe94DB16db2DD3b9c6aed563701c96BFcF750c57";
 
-export const vip109 = () => {
+export const vip110 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-109 Change Admin in VAI",
+    title: "VIP-110 Change Admin in VAI",
     description: `
         Replace the implementation of the VAIController with a temporary implementation that will include a function to:
             add the Normal Timelock as an admin in the VAI contract: VAI.rely(normalTimelockAddress)
