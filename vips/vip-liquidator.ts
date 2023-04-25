@@ -48,6 +48,24 @@ export const vipLiquidator = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "setTreasuryPercent(uint256)", NORMAL_TIMELOCK],
       },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "setMinLiquidatableVAI(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "pauseForceVAILiquidate()", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "resumeForceVAILiquidate()", NORMAL_TIMELOCK],
+      },
     ],
     meta,
     ProposalType.REGULAR,
