@@ -15,9 +15,9 @@ export const vip111 = () => {
     description: `
         We will start delisting BETH.
           `,
-    forDescription: "I agree that Venus Protocol should proceed with the Change Admin in VAI",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Change Admin in VAI",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Change Admin in VAI or not",
+    forDescription: "I agree that Venus Protocol should proceed with delisting vBETH",
+    againstDescription: "I do not think that Venus Protocol should proceed with the delisting vBETH",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the delisting vBETH",
   };
 
   return makeProposal(
