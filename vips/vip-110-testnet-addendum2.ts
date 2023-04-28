@@ -3,12 +3,32 @@ import { makeProposal } from "../src/utils";
 
 const CHAINLINK_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
 const RESILIENT_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
-
+const BINANCE_ORACLE = "0x4aB96DCDE8c617FBBF95A381fDb21Fb49551ec63";
 interface AssetConfig {
   name: string;
   address: string;
   price: string;
 }
+
+interface BinanceAssetConfig {
+  name: string;
+  address: string;
+}
+
+const BINANCE_SUPPORTED_ASSETS: BinanceAssetConfig[] = [
+  {
+    name: "HAY",
+    address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
+  },
+  {
+    name: "FLOKI",
+    address: "0xb22cF15FBc089d470f8e532aeAd2baB76bE87c88",
+  },
+  {
+    name: "BTT",
+    address: "0xE98344A7c691B200EF47c9b8829110087D832C64",
+  },
+]
 
 const ASSETS: AssetConfig[] = [
   {
@@ -21,20 +41,15 @@ const ASSETS: AssetConfig[] = [
     address: "0x7FCC76fc1F573d8Eb445c236Cc282246bC562bCE",
     price: "167199100000000000"
   },
-  // {
-  //   name: "ALPACA",
-  //   address: "",
-  //   price: "265440570000000000"
-  // },
+  {
+    name: "ALPACA",
+    address: "0x6923189d91fdF62dBAe623a55273F1d20306D9f2",
+    price: "266700000000000000"
+  },
   {
     name: "WOO",
     address: "0x65B849A4Fc306AF413E341D44dF8482F963fBB91",
     price: "292908560000000000"
-  },
-  {
-    name: "FLOKI",
-    address: "0xb22cF15FBc089d470f8e532aeAd2baB76bE87c88",
-    price: "36570000000000"
   },
   {
     name: "BNBx",
@@ -42,25 +57,15 @@ const ASSETS: AssetConfig[] = [
     price: "342500052660000000000"
   },
   {
-    name: "HAY",
-    address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
-    price: "1000000000000000000"
-  },
-  {
-    name: "BTT",
-    address: "0xE98344A7c691B200EF47c9b8829110087D832C64",
-    price: "639700000000"
-  },
-  {
     name: "WIN",
     address: "0x2E6Af3f3F059F43D764060968658c9F3c8f9479D",
     price: "85080000000000"
   },
-  // {
-  //   name: "USDD",
-  //   address: "",
-  //   price: "1000000000000000000"
-  // },
+  {
+    name: "USDD",
+    address: "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382",
+    price: "1000000000000000000"
+  },
   {
     name: "stkBNB",
     address: "0x2999C176eBf66ecda3a646E70CeB5FF4d5fCFb8C",
@@ -118,6 +123,23 @@ export const vip110TestnetAddendum2 = () => {
               asset.address,
               [
                 CHAINLINK_ORACLE,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+              ],
+              [true, false, false],
+            ],
+          ],
+        };
+      }),
+      ...BINANCE_SUPPORTED_ASSETS.map(asset => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3]))",
+          params: [
+            [
+              asset.address,
+              [
+                BINANCE_ORACLE,
                 "0x0000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000",
               ],

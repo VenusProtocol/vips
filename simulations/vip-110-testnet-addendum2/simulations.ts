@@ -12,7 +12,6 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const PRICE_ORACLE = "0xaac0ecd822c5da82d0bdab17972fc26dcbbaf5e4";
 const MOCK_VTOKEN = "0x65d77756974d3DA088F75DA527009c286F0228EE";
 const DUMMY_SIGNER= "0xF474Cf03ccEfF28aBc65C9cbaE594F725c80e12d";
 
@@ -33,11 +32,11 @@ const vTokens: vTokenConfig[] = [
     assetAddress: "0x7FCC76fc1F573d8Eb445c236Cc282246bC562bCE",
     price: "0.1671991"
   },
-  // {
-  //   assetName: "ALPACA",
-  //   assetAddress: "",
-  //   price: "265440570000000000"
-  // },
+  {
+    assetName: "ALPACA",
+    assetAddress: "0x6923189d91fdF62dBAe623a55273F1d20306D9f2",
+    price: "0.2667"
+  },
   {
     assetName: "WOO",
     assetAddress: "0x65B849A4Fc306AF413E341D44dF8482F963fBB91",
@@ -68,11 +67,11 @@ const vTokens: vTokenConfig[] = [
     assetAddress: "0x2E6Af3f3F059F43D764060968658c9F3c8f9479D",
     price: "0.00008508"
   },
-  // {
-  //   assetName: "USDD",
-  //   assetAddress: "",
-  //   price: "1000000000000000000"
-  // },
+  {
+    assetName: "USDD",
+    assetAddress: "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382",
+    price: "1"
+  },
   {
     assetName: "stkBNB",
     assetAddress: "0x2999C176eBf66ecda3a646E70CeB5FF4d5fCFb8C",
@@ -100,12 +99,12 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(29332649, () => {
+forking(29333297, () => {
   const provider = ethers.provider;
 
   testVip("VIP-110-Addendum Set Feed for IL Markets", vip110TestnetAddendum2(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["PricePosted"], [vTokens.length]);
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["PricePosted"], [vTokens.length - 3]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
     },
   });
@@ -127,6 +126,7 @@ forking(29332649, () => {
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
         await mockVToken.setUnderlyingAsset(vToken.assetAddress)
+        console.log(vToken.assetName)
         const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, "18"));
       }
