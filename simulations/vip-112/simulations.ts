@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip111 } from "../../vips/vip-111";
+import { vip112 } from "../../vips/vip-112";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
@@ -36,7 +36,7 @@ forking(27679359, () => {
     });
   });
 
-  testVip("VIP-106 Risk Parameters Update", vip111(), {
+  testVip("VIP-106 Risk Parameters Update", vip112(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

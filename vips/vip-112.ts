@@ -6,10 +6,10 @@ import { makeProposal } from "../src/utils";
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NEW_VTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";
 
-export const vip111 = () => {
+export const vip112 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-111 Risk Parameters Update",
+    title: "VIP-112 Risk Parameters Update",
     description: `
     TRX:
         Increase borrow cap to 10m tokens from 9m
