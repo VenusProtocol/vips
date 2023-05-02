@@ -28,70 +28,72 @@ const BINANCE_SUPPORTED_ASSETS: BinanceAssetConfig[] = [
     name: "BTT",
     address: "0xE98344A7c691B200EF47c9b8829110087D832C64",
   },
-]
+];
 
 const ASSETS: AssetConfig[] = [
   {
     name: "BIFI",
     address: "0x5B662703775171c4212F2FBAdb7F92e64116c154",
-    price: "448048050440000000000"
+    price: "448048050440000000000",
   },
   {
     name: "BSW",
     address: "0x7FCC76fc1F573d8Eb445c236Cc282246bC562bCE",
-    price: "167199100000000000"
+    price: "167199100000000000",
   },
   {
     name: "ALPACA",
     address: "0x6923189d91fdF62dBAe623a55273F1d20306D9f2",
-    price: "266700000000000000"
+    price: "266700000000000000",
   },
   {
     name: "WOO",
     address: "0x65B849A4Fc306AF413E341D44dF8482F963fBB91",
-    price: "292908560000000000"
+    price: "292908560000000000",
   },
   {
     name: "BNBx",
     address: "0x327d6E6FAC0228070884e913263CFF9eFed4a2C8",
-    price: "342500052660000000000"
+    price: "342500052660000000000",
   },
   {
     name: "WIN",
     address: "0x2E6Af3f3F059F43D764060968658c9F3c8f9479D",
-    price: "85080000000000"
+    price: "85080000000000",
   },
   {
     name: "USDD",
     address: "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382",
-    price: "1000000000000000000"
+    price: "1000000000000000000",
   },
   {
     name: "stkBNB",
     address: "0x2999C176eBf66ecda3a646E70CeB5FF4d5fCFb8C",
-    price: "328360000000000000000"
+    price: "328360000000000000000",
   },
   {
     name: "RACA",
     address: "0xD60cC803d888A3e743F21D0bdE4bF2cAfdEA1F26",
-    price: "190100000000000"
+    price: "190100000000000",
   },
   {
     name: "NFT",
     address: "0xc440e4F21AFc2C3bDBA1Af7D0E338ED35d3e25bA",
-    price: "366500000000"
+    price: "366500000000",
   },
   {
     name: "ankrBNB",
     address: "0x167F1F9EF531b3576201aa3146b13c57dbEda514",
-    price: "337950000000000000000"
+    price: "337950000000000000000",
   },
   {
     name: "ANKR",
     address: "0xe4a90EB942CF2DA7238e8F6cC9EF510c49FC8B4B",
-    price: "31120000000000000"
+    price: "31120000000000000",
   },
 ];
+
+const MAX_STALE_PERIOD = 60 * 60 * 24 * 7; // 7 days
 
 export const vip110TestnetAddendum2 = () => {
   const meta = {
@@ -129,6 +131,13 @@ export const vip110TestnetAddendum2 = () => {
               [true, false, false],
             ],
           ],
+        };
+      }),
+      ...BINANCE_SUPPORTED_ASSETS.map(asset => {
+        return {
+          target: BINANCE_ORACLE,
+          signature: "setMaxStalePeriod(string,uint256)",
+          params: [asset.name, MAX_STALE_PERIOD],
         };
       }),
       ...BINANCE_SUPPORTED_ASSETS.map(asset => {
