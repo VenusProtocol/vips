@@ -12,9 +12,9 @@ export const vipLiquidator = () => {
     description: `
     Update the implementation of liquidator to use ACM instead of onlyOwner
     `,
-    forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Vault Upgrades or not",
+    forDescription: "I agree that Venus Protocol should proceed with the Liquidator Upgrades",
+    againstDescription: "I do not think that Venus Protocol should proceed with the Liquidator Upgrades",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Liquidator Upgrades or not",
   };
 
   return makeProposal(
