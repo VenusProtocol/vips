@@ -32,7 +32,7 @@ const vTokens: vTokenConfig[] = [
 forking(29532024, () => {
   const provider = ethers.provider;
 
-  testVip("VIP-110-Addendum Set Feed for IL Markets", vip110TestnetAddendum3(), {
+  testVip("VIP-110-Addendum Set Feed for WBNB Market", vip110TestnetAddendum3(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
