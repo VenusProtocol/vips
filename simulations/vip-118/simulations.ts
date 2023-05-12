@@ -4,14 +4,14 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { vip117 } from "../../vips/vip-117";
+import { vip118 } from "../../vips/vip-118";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 
 const vETH = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8";
 const BORROWER = "0x7589dd3355dae848fdbf75044a3495351655cb1a";
 
 forking(28140349, () => {
-  testVip("VIP-117 Repay ETH debt on behalf debt", vip117());
+  testVip("VIP-118 Repay ETH debt on behalf debt", vip118());
 });
 
 // Testing the execution of a VIP in this framework spans about 200k blocks, which
@@ -25,7 +25,7 @@ forking(28140349, () => {
     before(async () => {
       vToken = new ethers.Contract(vETH, VBEP20_ABI, ethers.provider);
       prevBalance = await vToken.callStatic.borrowBalanceCurrent(BORROWER);
-      await pretendExecutingVip(vip117());
+      await pretendExecutingVip(vip118());
     });
 
     it("Should decrese Borrow Balance Stored", async () => {

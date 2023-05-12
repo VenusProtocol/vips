@@ -10,10 +10,10 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const BORROWER = "0x7589dd3355dae848fdbf75044a3495351655cb1a";
 const repayAmount = parseUnits("1437.5", 18);
 
-export const vip117 = () => {
+export const vip118 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-117 Repay ETH debt on behalf debt",
+    title: "VIP-118 Repay ETH debt on behalf debt",
     description: `
         transfer 1,437.5 ETH from the treasury to the Normal timelock contract
         repay 1,437.5 ETH debt on behalf of the account 0x7589dd3355dae848fdbf75044a3495351655cb1a from the Normal timelock contract`,
