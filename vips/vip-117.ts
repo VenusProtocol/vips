@@ -9,6 +9,8 @@ const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const SXP = "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A";
 const VSXP_RESERVES = "526189372708075633111";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+const BINANCE_SWAPPER_ADDRESS = "0x6657911F7411765979Da0794840D671Be55bA273";
+const SXP_FOR_SWAPPING = "26137012855296712152656"; // 25610823482588636519545 + 526189372708075633111. current balance + reduced reserves
 
 export const vip117 = () => {
   const meta = {
@@ -45,10 +47,17 @@ export const vip117 = () => {
         signature: "_reduceReserves(uint256)",
         params: [VSXP_RESERVES],
       },
+
       {
         target: SXP,
         signature: "transfer(address,uint256)",
         params: [TREASURY, VSXP_RESERVES],
+      },
+
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [SXP, SXP_FOR_SWAPPING, BINANCE_SWAPPER_ADDRESS],
       },
     ],
     meta,
