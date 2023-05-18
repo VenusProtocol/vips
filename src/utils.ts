@@ -4,6 +4,7 @@ import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/ty
 import { expect } from "chai";
 import { ContractInterface, TransactionResponse } from "ethers";
 import { ethers, network } from "hardhat";
+import { ParamType } from "ethers/lib/utils";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
@@ -32,22 +33,23 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
   });
 }
 
-const getArgs = (func: string) => {
-  if (func === "") return [];
-  // First match everything inside the function argument parens.
-  const match = func.match(/.*?\(([^]*)\)/);
-  const args = match ? match[1] : "";
-  // Split the arguments string into an array comma delimited.
-  return args
-    .split(",")
-    .map(arg => {
-      // Ensure no inline comments are parsed and trim the whitespace.
-      return arg.replace(/\/\*.*\*\//, "").trim();
-    })
-    .filter(arg => {
-      // Ensure no undefined values are added.
-      return arg;
-    });
+const formatParamType = (paramType: ParamType): string => {
+  if (paramType.type === "tuple") {
+    return `tuple(${paramType.components.map(formatParamType).join(", ")})`;
+  }
+
+  if (paramType.type === "tuple[]") {
+    return `tuple(${paramType.components.map(formatParamType).join(", ")})[]`;
+  }
+
+  return paramType.type;
+};
+
+const getArgs = (signature: string) => {
+  if (signature === "") return [];
+  const fragment = ethers.utils.FunctionFragment.from(signature);
+
+  return fragment.inputs.map(formatParamType);
 };
 
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
