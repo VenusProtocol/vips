@@ -11,7 +11,7 @@ import IERC20Upgradeable from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const DIAMOND = "0xF6A9DBc8453EB8b1528B6Cd3f08eC632134f831F";
+const DIAMOND = "0x52B88fc3F47f607DdcE4048c243050B7576e9cbD";
 
 const Owner = "0xce10739590001705F7FF231611ba4A48B2820327";
 const zeroAddr = "0x0000000000000000000000000000000000000000";
@@ -23,7 +23,7 @@ const initMainnetUser = async (user: string) => {
   return ethers.getSigner(user);
 };
 
-forking(29101377, async () => {
+forking(29886033, async () => {
   let owner: any,
     unitroller: Contract,
     // layout variables
@@ -365,7 +365,7 @@ forking(29101377, async () => {
   });
 });
 
-forking(29101377, async () => {
+forking(29886033, async () => {
   let owner, unitroller;
   let BUSD: ethers.contract;
   let busdHolder: ethers.Signer;
