@@ -3,8 +3,8 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { ContractInterface, TransactionResponse } from "ethers";
-import { ethers, network } from "hardhat";
 import { ParamType } from "ethers/lib/utils";
+import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
