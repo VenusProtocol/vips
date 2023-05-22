@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip121 } from "../../vips/vip-121";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
@@ -119,17 +120,21 @@ forking(28426745, () => {
         expect(await rateModel.kink()).to.equal(parseUnits("0.6", 18));
       });
 
-      it("has multiplier=12%", async () => {
+      it("has multiplier=15%", async () => {
         expect(await rateModel.multiplierPerBlock()).to.equal(toBlockRate(parseUnits("0.15", 18)));
       });
 
-      it("has jumpMultiplier=300%", async () => {
+      it("has jumpMultiplier=400%", async () => {
         expect(await rateModel.jumpMultiplierPerBlock()).to.equal(toBlockRate(parseUnits("4", 18)));
       });
     });
   });
 
-  testVip("VIP-121 Interest Rate Model Parameter Updates", vip121());
+  testVip("VIP-121 Interest Rate Model Parameter Updates", vip121(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel", "Failure"], [7, 0]);
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     it("Should match new interest rate model after VIP", async () => {
