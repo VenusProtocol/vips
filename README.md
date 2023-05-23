@@ -1,9 +1,5 @@
 # vip
 
-### Compound Fork Commit
-
-https://github.com/compound-finance/compound-protocol/tree/a3214f67b73310d547e00fc578e8355911c9d376
-
 ### Prerequisites
 
 - NodeJS - 16.x
@@ -26,4 +22,30 @@ npx hardhat test simulations/vip-98/simulations.ts
 npx hardhat test simulations/vip-99/simulations.ts
 npx hardhat test simulations/vip-101/simulations.ts
 
+```
+
+### Create Proposal
+
+Script to generate proposal data for multiple destinations such as venusApp bscexplorer and gnosis tx builder.
+
+Procedure for Creating a Proposal
+
+```
+npx hardhat test scripts/createProposal.ts
+
+Enter the number of vip for which you require proposal data.
+Select the type of destination, such as txBuilder/venusApp/bsc.
+Enter the governor_proxy address or enter to select the default one.
+```
+
+### Propose vip
+
+Script to build vip calldata and target.
+
+Procedure for Propose vip
+
+In .env, replace VIP_NUMBER with the number of vip to propose.
+
+```
+npx hardhat test scripts/proposeVIP.ts
 ```
