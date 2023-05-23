@@ -1,5 +1,6 @@
 import { TxBuilder } from "@morpho-labs/gnosis-tx-builder";
 import Ajv from "ajv";
+import { BigNumber } from "ethers";
 import fs from "fs/promises";
 
 import { loadProposal, proposeVIP } from "../src/transactions";
@@ -25,7 +26,20 @@ function processInputs(): Promise<void> {
   });
 }
 
-const processJson = async data => {
+type JsonObject = { [key: string]: any };
+
+const processJson = async (data: JsonObject) => {
+  const convertBigNumberToString = (obj: JsonObject) => {
+    for (const key in obj) {
+      if (obj[key] instanceof BigNumber) {
+        obj[key] = obj[key].toString(10); // Convert BigNumber to decimal representation
+      } else if (typeof obj[key] === "object" && obj[key] !== null) {
+        convertBigNumberToString(obj[key]); // Recursively convert nested objects
+      }
+    }
+  };
+
+  convertBigNumberToString(data);
   return JSON.stringify(data, null, 2);
 };
 
