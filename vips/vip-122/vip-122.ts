@@ -12,6 +12,7 @@ const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 const PYTH_ORACLE = "0xb893E38162f55fb80B18Aa44da76FaDf8E9B2262";
 const TWAP_ORACLE = "0xea2f042e1A4f057EF8A5220e57733AD747ea8867";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
+const MULTI_SIG_WALLET_3 = "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF";
 
 interface AssetConfig {
   name: string;
@@ -167,17 +168,32 @@ export const vip122 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [BOUND_VALIDATOR, "setValidateConfigs(ValidateConfig[])", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(VBep20Interface,uint256)", NORMAL_TIMELOCK],
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(address,uint256)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(address,uint256)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(address,uint256)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(address,uint256)", MULTI_SIG_WALLET_3],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
@@ -187,7 +203,17 @@ export const vip122 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
+        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
@@ -197,12 +223,17 @@ export const vip122 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
+        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setUnderlyingPythOracle(IPyth)", NORMAL_TIMELOCK],
+        params: [CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setUnderlyingPythOracle(address)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -212,12 +243,37 @@ export const vip122 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [TWAP_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
+        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PYTH_ORACLE, "setTokenConfig(TokenConfig)", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [TWAP_ORACLE, "setTokenConfig(TokenConfig)", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
@@ -252,22 +308,42 @@ export const vip122 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
+        params: [RESILIENT_ORACLE, "unpause()", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setOracle(address,address,OracleRole)", NORMAL_TIMELOCK],
+        params: [RESILIENT_ORACLE, "pause()", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "enableOracle(address,OracleRole,bool)", NORMAL_TIMELOCK],
+        params: [RESILIENT_ORACLE, "setOracle(address,address,uint8)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", MULTI_SIG_WALLET_3],
       },
       {
         target: ACM,
