@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInOracle } from "../../src/utils";
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip122 } from "../../vips/vip-122";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -17,7 +17,6 @@ forking(28541594, () => {
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    await setMaxStalePeriodInOracle(COMPTROLLER);
   });
 
   describe("Pre-VIP behavior", async () => {
