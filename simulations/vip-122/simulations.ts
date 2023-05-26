@@ -20,7 +20,7 @@ forking(28541594, () => {
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("supply cap of TRX (old) equals 18853000000000000000", async () => {
+    it("supply cap of TRX (old) equals 81207000000000000000", async () => {
       const oldCap = await comptroller.supplyCaps(OLD_VTRX);
       expect(oldCap).to.equal(parseUnits("81207000000000000000", 6));
     });
@@ -53,17 +53,17 @@ forking(28541594, () => {
       expect(newCap).to.equal(0);
     });
 
-    it("borrow cap of TRX (old) equals 8000000", async () => {
+    it("borrow cap of TRX (old) equals 0", async () => {
       const newCap = await comptroller.borrowCaps(OLD_VTRX);
       expect(newCap).to.equal(0);
     });
 
-    it("supply cap of SXP equals 1311000", async () => {
+    it("supply cap of SXP equals 0", async () => {
       const newCap = await comptroller.supplyCaps(VSXP);
       expect(newCap).to.equal(0);
     });
 
-    it("borrow cap of SXP equals 8000000", async () => {
+    it("borrow cap of SXP equals 0", async () => {
       const newCap = await comptroller.borrowCaps(VSXP);
       expect(newCap).to.equal(0);
     });
