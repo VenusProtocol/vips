@@ -15,7 +15,7 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const PRICE_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
+const PRICE_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
 const DUMMY_SIGNER = "0xF474Cf03ccEfF28aBc65C9cbaE594F725c80e12d";
 const MOCK_VTOKEN = "0x65d77756974d3DA088F75DA527009c286F0228EE";
 
@@ -39,7 +39,6 @@ interface ILVTokenConfig {
   assetAddress: string;
   price: string;
 }
-
 
 const vTokens: vTokenConfig[] = [
   {
@@ -281,9 +280,9 @@ forking(30141502, () => {
 
   testVip("VIP-122 Change Oracle and Configure Resilient Oracle", vip122Testnet(), {
     callbackAfterExecution: async txResponse => {
-      // await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [18]);
-      // await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [18]);
-      // await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewPriceOracle"], [1]);
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [19]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [35]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewPriceOracle"], [1]);
     },
   });
 
