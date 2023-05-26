@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
 const CHAINLINK_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
 const RESILIENT_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
@@ -95,10 +95,10 @@ const ASSETS: AssetConfig[] = [
 
 const MAX_STALE_PERIOD = 60 * 60 * 24 * 7; // 7 days
 
-export const vip110TestnetAddendum2 = () => {
+export const vip122TestnetAddendum2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-110 IL Markets Price Configuration",
+    title: "VIP-122 IL Markets Price Configuration",
     description: `
     Configure Price Feed for IL Markets
     `,

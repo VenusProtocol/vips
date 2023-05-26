@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { vip110TestnetAddendum3 } from "../../vips/vip-110-testnet-addendum3";
+import { expectEvents } from "../../../src/utils";
+import { forking, testVip } from "../../../src/vip-framework";
+import { vip122TestnetAddendum3 } from "../../../vips/vip-122/vip-122-testnet-addendum3";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
@@ -32,7 +32,7 @@ const vTokens: vTokenConfig[] = [
 forking(29532024, () => {
   const provider = ethers.provider;
 
-  testVip("VIP-110-Addendum Set Feed for WBNB Market", vip110TestnetAddendum3(), {
+  testVip("VIP-122-Addendum Set Feed for WBNB Market", vip122TestnetAddendum3(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
