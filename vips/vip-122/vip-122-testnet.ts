@@ -4,12 +4,12 @@ import { makeProposal } from "../../src/utils";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
-const CHAINLINK_ORACLE = "0xfc4e26B7fD56610E84d33372435F0275A359E8eF";
-const RESILIENT_ORACLE = "0xD9D16795A92212662a2D44AAc810eC68fdE61076";
-const BOUND_VALIDATOR = "0x84e96554776607E5Ba78aeC299a81b70D03a53D6";
-const PYTH_ORACLE = "0xcBF6db3DC2f3F8e3552b12B564a8Faf74B64DaeA";
-const TWAP_ORACLE = "0x49be570231a5b9EfB0359CfC781EfDf5359dcD51";
-const BINANCE_ORACLE = "0x4aB96DCDE8c617FBBF95A381fDb21Fb49551ec63";
+const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
+const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
+const BOUND_VALIDATOR = "0x2842140e4Ad3a92e9af30e27e290300dd785076d";
+const PYTH_ORACLE = "0x94E1534c14e0736BB24decA625f2F5364B198E0C";
+const TWAP_ORACLE = "0x3eeE05d929D1E9816185B1b6d8c470eC192b4432";
+const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
@@ -20,6 +20,100 @@ interface AssetConfig {
   address: string;
   feed: string;
 }
+
+interface DirectAssetConfig {
+  name: string;
+  address: string;
+  price: string;
+}
+
+interface BinanceAssetConfig {
+  name: string;
+  address: string;
+}
+
+const BINANCE_SUPPORTED_ASSETS: BinanceAssetConfig[] = [
+  {
+    name: "HAY",
+    address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
+  },
+  {
+    name: "FLOKI",
+    address: "0xb22cF15FBc089d470f8e532aeAd2baB76bE87c88",
+  },
+  {
+    name: "BTT",
+    address: "0xE98344A7c691B200EF47c9b8829110087D832C64",
+  },
+];
+
+const DIRECT_ASSETS: DirectAssetConfig[] = [
+  {
+    name: "TUSD",
+    address: "0xfec3a63401eb9c1476200d7c32c4009be0154169",
+    price: "1000000000000000000",
+  },
+  {
+    name: "BIFI",
+    address: "0x5B662703775171c4212F2FBAdb7F92e64116c154",
+    price: "448048050440000000000",
+  },
+  {
+    name: "BSW",
+    address: "0x7FCC76fc1F573d8Eb445c236Cc282246bC562bCE",
+    price: "167199100000000000",
+  },
+  {
+    name: "ALPACA",
+    address: "0x6923189d91fdF62dBAe623a55273F1d20306D9f2",
+    price: "266700000000000000",
+  },
+  {
+    name: "WOO",
+    address: "0x65B849A4Fc306AF413E341D44dF8482F963fBB91",
+    price: "292908560000000000",
+  },
+  {
+    name: "BNBx",
+    address: "0x327d6E6FAC0228070884e913263CFF9eFed4a2C8",
+    price: "342500052660000000000",
+  },
+  {
+    name: "WIN",
+    address: "0x2E6Af3f3F059F43D764060968658c9F3c8f9479D",
+    price: "85080000000000",
+  },
+  {
+    name: "USDD",
+    address: "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382",
+    price: "1000000000000000000",
+  },
+  {
+    name: "stkBNB",
+    address: "0x2999C176eBf66ecda3a646E70CeB5FF4d5fCFb8C",
+    price: "328360000000000000000",
+  },
+  {
+    name: "RACA",
+    address: "0xD60cC803d888A3e743F21D0bdE4bF2cAfdEA1F26",
+    price: "190100000000000",
+  },
+  {
+    name: "NFT",
+    address: "0xc440e4F21AFc2C3bDBA1Af7D0E338ED35d3e25bA",
+    price: "366500000000",
+  },
+  {
+    name: "ankrBNB",
+    address: "0x167F1F9EF531b3576201aa3146b13c57dbEda514",
+    price: "337950000000000000000",
+  },
+  {
+    name: "ANKR",
+    address: "0xe4a90EB942CF2DA7238e8F6cC9EF510c49FC8B4B",
+    price: "31120000000000000",
+  },
+];
 
 const ASSETS: AssetConfig[] = [
   {
@@ -112,9 +206,14 @@ const ASSETS: AssetConfig[] = [
     address: "0x8301F2213c0eeD49a7E28Ae4c3e91722919B8B47",
     feed: "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa",
   },
+  {
+    name: "WBNB",
+    address: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+    feed: "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+  },
 ];
 
-const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
+const MAX_STALE_PERIOD = 60 * 60 * 24 * 77; // 24 hours
 
 export const vip122Testnet = () => {
   const meta = {
@@ -144,7 +243,7 @@ export const vip122Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(VBep20Interface,uint256)", NORMAL_TIMELOCK],
+        params: [CHAINLINK_ORACLE, "setUnderlyingPrice(address,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -169,7 +268,7 @@ export const vip122Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PYTH_ORACLE, "setUnderlyingPythOracle(IPyth)", NORMAL_TIMELOCK],
+        params: [PYTH_ORACLE, "setUnderlyingPythOracle(address)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -224,12 +323,12 @@ export const vip122Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "setOracle(address,address,OracleRole)", NORMAL_TIMELOCK],
+        params: [RESILIENT_ORACLE, "setOracle(address,address,uint8)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [RESILIENT_ORACLE, "enableOracle(address,OracleRole,bool)", NORMAL_TIMELOCK],
+        params: [RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -287,6 +386,54 @@ export const vip122Testnet = () => {
               asset.address,
               [
                 CHAINLINK_ORACLE,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+              ],
+              [true, false, false],
+            ],
+          ],
+        };
+      }),
+      ...DIRECT_ASSETS.map(asset => {
+        return {
+          target: CHAINLINK_ORACLE,
+          signature: "setDirectPrice(address,uint256)",
+          params: [asset.address, asset.price],
+        };
+      }),
+      ...DIRECT_ASSETS.map(asset => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3]))",
+          params: [
+            [
+              asset.address,
+              [
+                CHAINLINK_ORACLE,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+              ],
+              [true, false, false],
+            ],
+          ],
+        };
+      }),
+      ...BINANCE_SUPPORTED_ASSETS.map(asset => {
+        return {
+          target: BINANCE_ORACLE,
+          signature: "setMaxStalePeriod(string,uint256)",
+          params: [asset.name, MAX_STALE_PERIOD],
+        };
+      }),
+      ...BINANCE_SUPPORTED_ASSETS.map(asset => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3]))",
+          params: [
+            [
+              asset.address,
+              [
+                BINANCE_ORACLE,
                 "0x0000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000",
               ],
