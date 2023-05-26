@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip121 } from "../../vips/vip-121";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
@@ -11,7 +12,11 @@ const vBTC = "0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b";
 const BORROWER = "0xef044206db68e40520bfa82d45419d498b4bc7bf";
 
 forking(28538732, () => {
-  testVip("VIP-121 Repay BTC debt on behalf", vip121());
+  testVip("VIP-121 Repay BTC debt on behalf", vip121(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [VBEP20_ABI], ["RepayBorrow", "Failure"], [1, 0]);
+    },
+  });
 });
 
 forking(28538732, () => {
