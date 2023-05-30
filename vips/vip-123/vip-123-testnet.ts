@@ -213,7 +213,7 @@ const ASSETS: AssetConfig[] = [
   },
 ];
 
-const MAX_STALE_PERIOD = 60 * 60 * 24 * 7; // 7 days
+const MAX_STALE_PERIOD = 60 * 60 * 24; // 1 day
 
 export const vip123Testnet = () => {
   const meta = {
