@@ -23,6 +23,12 @@ interface vTokenConfig {
   feed: string;
 }
 
+interface DirectVTokenConfig {
+  name: string;
+  address: string;
+  price: string;
+}
+
 const vTokens: vTokenConfig[] = [
   {
     name: "vUSDC",
@@ -201,6 +207,24 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
+const directVTokens: DirectVTokenConfig[] = [
+  {
+    name: "LUNA",
+    address: "0xb91A659E88B51474767CD97EF3196A3e7cEDD2c8",
+    price: "0.000001",
+  },
+  {
+    name: "UST",
+    address: "0x78366446547D062f45b4C0f320cDaa6d710D87bb",
+    price: "0.000001",
+  },
+  {
+    name: "CAN",
+    address: "0xeBD0070237a0713E8D94fEf1B728d3d993d290ef",
+    price: "0.000000000000000001",
+  },
+];
+
 forking(28526142, () => {
   const provider = ethers.provider;
 
@@ -218,13 +242,24 @@ forking(28526142, () => {
         const price = await priceOracle.getUnderlyingPrice(vToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, 18));
       }
+
+      for (let i = 0; i < directVTokens.length; i++) {
+        const vToken = directVTokens[i];
+        const price = await priceOracle.getUnderlyingPrice(vToken.address);
+        expect(price).to.be.equal(parseUnits(vToken.price, 18));
+      }
     });
   });
 
   testVip("VIP-123 Change Oracle and Configure Resilient Oracle", vip123(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
+      await expectEvents(
+        txResponse,
+        [RESILIENT_ORACLE_ABI],
+        ["TokenConfigAdded"],
+        [vTokens.length + directVTokens.length],
+      );
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewPriceOracle"], [1]);
     },
   });
@@ -246,6 +281,12 @@ forking(28526142, () => {
     it("validate vToken prices", async () => {
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
+        const price = await resilientOracle.getUnderlyingPrice(vToken.address);
+        expect(price).to.be.equal(parseUnits(vToken.price, 18));
+      }
+
+      for (let i = 0; i < directVTokens.length; i++) {
+        const vToken = directVTokens[i];
         const price = await resilientOracle.getUnderlyingPrice(vToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, 18));
       }

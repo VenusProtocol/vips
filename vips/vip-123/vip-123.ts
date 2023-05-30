@@ -20,6 +20,12 @@ interface AssetConfig {
   feed: string;
 }
 
+interface DirectAssetConfig {
+  name: string;
+  address: string;
+  price: string;
+}
+
 const ASSETS: AssetConfig[] = [
   {
     name: "USDC",
@@ -145,6 +151,24 @@ const ASSETS: AssetConfig[] = [
     name: "VAI",
     address: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
     feed: "0x058316f8Bb13aCD442ee7A216C7b60CFB4Ea1B53",
+  },
+];
+
+const DIRECT_ASSETS: DirectAssetConfig[] = [
+  {
+    name: "LUNA",
+    address: "0x156ab3346823b651294766e23e6cf87254d68962",
+    price: "1",
+  },
+  {
+    name: "UST",
+    address: "0x3d4350cd54aef9f9b2c29435e0fa809957b3f30a",
+    price: "1",
+  },
+  {
+    name: "CAN",
+    address: "0x20bff4bbeda07536ff00e073bd8359e5d80d733d",
+    price: "1",
   },
 ];
 
@@ -388,6 +412,30 @@ export const vip123 = () => {
         };
       }),
       ...ASSETS.map(asset => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3]))",
+          params: [
+            [
+              asset.address,
+              [
+                CHAINLINK_ORACLE,
+                "0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000",
+              ],
+              [true, false, false],
+            ],
+          ],
+        };
+      }),
+      ...DIRECT_ASSETS.map(asset => {
+        return {
+          target: CHAINLINK_ORACLE,
+          signature: "setDirectPrice(address,uint256)",
+          params: [asset.address, asset.price],
+        };
+      }),
+      ...DIRECT_ASSETS.map(asset => {
         return {
           target: RESILIENT_ORACLE,
           signature: "setTokenConfig((address,address[3],bool[3]))",
