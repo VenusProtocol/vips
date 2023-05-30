@@ -150,10 +150,10 @@ const ASSETS: AssetConfig[] = [
 
 const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
-export const vip122 = () => {
+export const vip123 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-122 Resilient Oracle",
+    title: "VIP-123 Resilient Oracle",
     description: `
     Configure Price Feeds for Existing Markets
     Configure Oracle Address in Comptroller
