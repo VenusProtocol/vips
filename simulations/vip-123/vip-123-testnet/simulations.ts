@@ -305,7 +305,6 @@ forking(30247983, () => {
       it("validate vToken prices", async () => {
         for (let i = 0; i < vTokens.length; i++) {
           const vToken = vTokens[i];
-          console.log(vToken.name)
           const price = await resilientOracle.getUnderlyingPrice(vToken.address);
           expect(price).to.be.equal(parseUnits(vToken.price, 18));
         }
@@ -325,9 +324,7 @@ forking(30247983, () => {
         for (let i = 0; i < ilPoolTokens.length; i++) {
           const vToken = ilPoolTokens[i];
           await mockVToken.setUnderlyingAsset(vToken.assetAddress);
-          console.log(vToken.assetName, vToken.assetAddress);
           const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
-          console.log(vToken.assetName, price.toString());
           expect(price).to.be.equal(parseUnits(vToken.price, "18"));
         }
       });
