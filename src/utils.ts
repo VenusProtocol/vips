@@ -10,8 +10,6 @@ import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-``;
-
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
