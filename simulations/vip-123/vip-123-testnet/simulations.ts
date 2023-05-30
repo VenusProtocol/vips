@@ -1,3 +1,4 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
@@ -7,10 +8,9 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { vip123Testnet } from "../../../vips/vip-123/vip-123-testnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
@@ -32,7 +32,6 @@ interface DirectVTokenConfig {
   address: string;
   price: string;
 }
-
 
 interface ILVTokenConfig {
   assetName: string;
@@ -251,7 +250,7 @@ const ilPoolTokens: ILVTokenConfig[] = [
     assetAddress: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
     price: "312.778175",
   },
-]
+];
 
 forking(30247983, () => {
   const provider = ethers.provider;
@@ -295,13 +294,13 @@ forking(30247983, () => {
       before(async () => {
         comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
         resilientOracle = new ethers.Contract(await comptroller.oracle(), RESILIENT_ORACLE_ABI, provider);
-  
+
         for (let i = 0; i < vTokens.length; i++) {
           const vToken = vTokens[i];
           await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, NORMAL_TIMELOCK);
         }
       });
-  
+
       it("validate vToken prices", async () => {
         for (let i = 0; i < vTokens.length; i++) {
           const vToken = vTokens[i];
@@ -309,13 +308,13 @@ forking(30247983, () => {
           expect(price).to.be.equal(parseUnits(vToken.price, 18));
         }
       });
-    })
+    });
 
     describe("IL VTokens", async () => {
       before(async () => {
         comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
         resilientOracle = new ethers.Contract(await comptroller.oracle(), RESILIENT_ORACLE_ABI, provider);
-  
+
         await impersonateAccount(DUMMY_SIGNER);
         mockVToken = new ethers.Contract(MOCK_VTOKEN, MOCK_VTOKEN_ABI, await ethers.getSigner(DUMMY_SIGNER));
       });
@@ -328,6 +327,6 @@ forking(30247983, () => {
           expect(price).to.be.equal(parseUnits(vToken.price, "18"));
         }
       });
-    })
+    });
   });
 });
