@@ -29,7 +29,7 @@ interface DirectVTokenConfig {
   price: string;
 }
 
-const vTokens: vTokenConfig[] = [
+const vTokens: VTokenConfig[] = [
   {
     name: "vUSDC",
     address: "0xeca88125a5adbe82614ffc12d0db554e2e2867c8",
