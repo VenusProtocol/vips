@@ -21,9 +21,5 @@ yarn install
 ### Run Simulations
 
 ```
-npx hardhat test simulations/vip-80/simulations.ts
-npx hardhat test simulations/vip-98/simulations.ts
-npx hardhat test simulations/vip-99/simulations.ts
-npx hardhat test simulations/vip-101/simulations.ts
-
+npx hardhat test simulations/<simulation-path>
 ```
