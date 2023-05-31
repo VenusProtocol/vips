@@ -15,7 +15,7 @@ const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const PRICE_ORACLE = "0x7FabdD617200C9CB4dcf3dd2C41273e60552068A";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-interface vTokenConfig {
+interface VTokenConfig {
   name: string;
   address: string;
   price: string;
