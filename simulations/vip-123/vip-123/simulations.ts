@@ -236,18 +236,18 @@ forking(28526142, () => {
       await setMaxStalePeriodInOracle(COMPTROLLER);
     });
 
-    it("validate vToken prices", async () => {
-      for (let i = 0; i < vTokens.length; i++) {
-        const vToken = vTokens[i];
+    vTokens.forEach((vToken: VTokenConfig) => {
+      it(`returns Chainlink price for ${vToken.name}`, async () => {
         const price = await priceOracle.getUnderlyingPrice(vToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, 18));
-      }
+      });
+    });
 
-      for (let i = 0; i < directVTokens.length; i++) {
-        const vToken = directVTokens[i];
+    directVTokens.forEach((vToken: DirectVTokenConfig) => {
+      it(`returns hardcoded price for ${vToken.name}`, async () => {
         const price = await priceOracle.getUnderlyingPrice(vToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, 18));
-      }
+      });
     });
   });
 
