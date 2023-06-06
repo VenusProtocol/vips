@@ -34,7 +34,7 @@ forking(forkBlockNumber, () => {
       expect(oldCap).to.equal(0);
     });
 
-    it("supply cap of SXP equals 0", async () => {
+    it("borrow cap of SXP equals 0", async () => {
       const oldCap = await comptroller.borrowCaps(vSXP);
       expect(oldCap).to.equal(0);
     });
@@ -52,7 +52,7 @@ forking(forkBlockNumber, () => {
       expect(newCap).to.equal(1);
     });
 
-    it("supply cap of SXP equals 0", async () => {
+    it("borrow cap of SXP equals 0", async () => {
       const newCap = await comptroller.borrowCaps(vSXP);
       expect(newCap).to.equal(1);
     });
