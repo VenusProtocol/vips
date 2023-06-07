@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip125 } from "../../vips/vip-125";
+import { vip124 } from "../../vips/vip-124";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
@@ -40,7 +40,7 @@ forking(forkBlockNumber, () => {
     });
   });
 
-  testVip("VIP-125 Borrow Cap Updates", vip125(), {
+  testVip("VIP-124 Borrow Cap Updates", vip124(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "Failure"], [3, 0]);
     },

@@ -10,10 +10,10 @@ const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 
 const BUSD_NEW_BORROW_CAP = parseUnits("80000000", 18); // 80 M
 
-export const vip125 = () => {
+export const vip124 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-125 Borrow Caps Update",
+    title: "VIP-124 Borrow Caps Update",
     description: `
 
     The Findecci team has been diligently monitoring the liquidity of BUSD within the PancakeSwap V2 decentralized exchange (DEX) following the temporary pause in BUSD minting. 
