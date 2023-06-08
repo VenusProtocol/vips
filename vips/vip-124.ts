@@ -98,7 +98,7 @@ const BINANCE_ASSETS: BinanceAssetConfig[] = [
   },
 ];
 
-const MAX_STALE_PERIOD = 60 * 60 * 24 * 30; // 24 hours
+const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 
 export const vip124 = () => {
   const meta = {
