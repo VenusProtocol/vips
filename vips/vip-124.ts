@@ -38,11 +38,6 @@ const CHAINLINK_ASSETS: ChainlinkAssetConfig[] = [
     feed: "0x08e70777b982a58d23d05e3d7714f44837c06a21",
   },
   {
-    name: "TRX",
-    address: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
-    feed: "0xf4c5e535756d11994fcbb12ba8add0192d9b88be",
-  },
-  {
     name: "WBNB",
     address: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
     feed: "0x0567f2323251f0aab15c8dfb1967e4e8a7d42aee",

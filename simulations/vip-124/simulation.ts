@@ -11,7 +11,6 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
-const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const DUMMY_SIGNER = "0xF474Cf03ccEfF28aBc65C9cbaE594F725c80e12d";
 
@@ -62,11 +61,6 @@ const vTokens: VTokenConfig[] = [
     price: "0.10180354",
   },
   {
-    name: "TRX",
-    assetAddress: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
-    price: "77495000000",
-  },
-  {
     name: "WBNB",
     assetAddress: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
     price: "261.35543723",
@@ -102,7 +96,7 @@ const vTokens: VTokenConfig[] = [
     price: "26820",
   },
   {
-    name: "HAY", //reverted with reason string "No pair access"
+    name: "HAY",
     assetAddress: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
     price: "1.00064968",
   },
@@ -133,7 +127,7 @@ forking(28919155, () => {
 
   testVip("VIP-124 Configure Resilient Oracle for IL Pool Tokens", vip124(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [8]);
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [7]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [9]);
     },
