@@ -129,7 +129,7 @@ export const vip124 = () => {
         return {
           target: CHAINLINK_ORACLE,
           signature: "setTokenConfig((address,address,uint256))",
-          params: [[asset.address, asset.feed, MAX_STALE_PERIOD]],
+          params: [[asset.address, asset.feed, asset.stalePeriod]],
         };
       }),
       ...CHAINLINK_ASSETS.map(asset => {
@@ -153,7 +153,7 @@ export const vip124 = () => {
         return {
           target: BINANCE_ORACLE,
           signature: "setMaxStalePeriod(string,uint256)",
-          params: [asset.name, MAX_STALE_PERIOD],
+          params: [asset.name, asset.stalePeriod],
         };
       }),
       ...BINANCE_ASSETS.map(asset => {
