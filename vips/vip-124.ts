@@ -111,7 +111,7 @@ const BINANCE_ASSETS: BinanceAssetConfig[] = [
   },
 ];
 
-export const vip124 = () => {
+export const vip124 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-124 Resilient Oracle",
@@ -129,7 +129,7 @@ export const vip124 = () => {
         return {
           target: CHAINLINK_ORACLE,
           signature: "setTokenConfig((address,address,uint256))",
-          params: [[asset.address, asset.feed, asset.stalePeriod]],
+          params: [[asset.address, asset.feed, maxStalePeriod || asset.stalePeriod]],
         };
       }),
       ...CHAINLINK_ASSETS.map(asset => {
@@ -153,7 +153,7 @@ export const vip124 = () => {
         return {
           target: BINANCE_ORACLE,
           signature: "setMaxStalePeriod(string,uint256)",
-          params: [asset.name, asset.stalePeriod],
+          params: [asset.name, maxStalePeriod || asset.stalePeriod],
         };
       }),
       ...BINANCE_ASSETS.map(asset => {
