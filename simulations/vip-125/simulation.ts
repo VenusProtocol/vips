@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip124 } from "../../vips/vip-124";
+import { vip125 } from "../../vips/vip-125";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -125,7 +125,7 @@ const vTokens: VTokenConfig[] = [
 forking(28919155, () => {
   const provider = ethers.provider;
 
-  testVip("VIP-124 Configure Resilient Oracle for IL Pool Tokens", vip124(60 * 60 * 24 * 3), {
+  testVip("VIP-125 Configure Resilient Oracle for IL Pool Tokens", vip125(60 * 60 * 24 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [7]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
