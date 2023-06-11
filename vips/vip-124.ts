@@ -12,7 +12,7 @@ const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const MULTISIG = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const LAST_ACCRUING_BLOCK = "29079555";
+const LAST_ACCRUING_BLOCK = "29108355";
 
 export const vip124 = () => {
   const meta = {
@@ -46,7 +46,7 @@ export const vip124 = () => {
       VRTVault:
         withdrawBep20(address,address,uint256)
       
-    Set the lastAcrruingBlock in VRTVault to 29079555, so after this block no rewards will be accrued in the VRT Vault.
+    Set the lastAcrruingBlock in VRTVault to 29108355, so after this block no rewards will be accrued in the VRT Vault.
     `,
     forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
     againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
