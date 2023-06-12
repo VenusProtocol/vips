@@ -111,10 +111,10 @@ const BINANCE_ASSETS: BinanceAssetConfig[] = [
   },
 ];
 
-export const vip125 = (maxStalePeriod?: number) => {
+export const vip126 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-125 Resilient Oracle",
+    title: "VIP-126 Resilient Oracle",
     description: `
     Configure Price Feeds for Isolated Pools Markets
     `,
