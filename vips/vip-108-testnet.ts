@@ -5,9 +5,6 @@ const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const VAI_VAULT_PROXY = "0x7Db4f5cC3bBA3e12FF1F528D2e3417afb0a57118";
 const VRT_VAULT_PROXY = "0x1ffD1b8B67A1AE0C189c734B0F58B0954522FF71";
-const VRT_NEW = "0x12D290de159341d36BB1a5A58904aD95053BDB20";
-const XVS_NEW = "0x87123996F4287A10a8627C86E5786E4Cf1962849";
-const VAI_NEW = "0x399984959c003A75765a6344B3469818f9657C68";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -44,60 +41,6 @@ export const vip108Testnet = () => {
 
   return makeProposal(
     [
-      {
-        target: XVS_VAULT_PROXY,
-        signature: "_acceptAdmin()",
-        params: [],
-      },
-
-      {
-        target: VRT_VAULT_PROXY,
-        signature: "_acceptAdmin()",
-        params: [],
-      },
-
-      {
-        target: VAI_VAULT_PROXY,
-        signature: "_acceptAdmin()",
-        params: [],
-      },
-
-      {
-        target: XVS_VAULT_PROXY,
-        signature: "_setPendingImplementation(address)",
-        params: [XVS_NEW],
-      },
-
-      {
-        target: VRT_VAULT_PROXY,
-        signature: "_setPendingImplementation(address)",
-        params: [VRT_NEW],
-      },
-
-      {
-        target: VAI_VAULT_PROXY,
-        signature: "_setPendingImplementation(address)",
-        params: [VAI_NEW],
-      },
-
-      {
-        target: XVS_NEW,
-        signature: "_become(address)",
-        params: [XVS_VAULT_PROXY],
-      },
-
-      {
-        target: VRT_NEW,
-        signature: "_become(address)",
-        params: [VRT_VAULT_PROXY],
-      },
-
-      {
-        target: VAI_NEW,
-        signature: "_become(address)",
-        params: [VAI_VAULT_PROXY],
-      },
-
       {
         target: VAI_VAULT_PROXY,
         signature: "setAccessControl(address)",
@@ -150,6 +93,30 @@ export const vip108Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [XVS_VAULT_PROXY, "resume()", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "set(address,uint256,uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "setRewardAmountPerBlock(address,uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", NORMAL_TIMELOCK],
       },
 
       {
@@ -223,17 +190,10 @@ export const vip108Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [VRT_VAULT_PROXY, "resume()", CRITICAL_TIMELOCK],
       },
-
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [VRT_VAULT_PROXY, "setLastAccruingBlock(uint256)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: VRT_VAULT_PROXY,
-        signature: "setLastAccruingBlock(uint256)",
-        params: [27348741],
+        params: [VRT_VAULT_PROXY, "withdrawBep20(address,address,uint256)", NORMAL_TIMELOCK],
       },
     ],
     meta,
