@@ -14,10 +14,10 @@ const MULTISIG = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const LAST_ACCRUING_BLOCK = "29108355";
 
-export const vip124 = () => {
+export const vip127 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-124 Vault Upgrades",
+    title: "VIP-127 Vault Upgrades",
     description: `
     Accept the ownership of the VRTVault contract (previously we had to execute a multisig TX to offer this change)
       the new owner will be the Normal timelock contract (0x939bd8d64c0a9583a7dcea9933f7b21697ab6396)

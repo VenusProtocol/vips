@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip124 } from "../../vips/vip-124";
+import { vip127 } from "../../vips/vip-127";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import VAIVault_ABI from "./abi/VAIVault_ABI.json";
 import VRTVault_ABI from "./abi/VRTVault_ABI.json";
@@ -76,7 +76,7 @@ forking(29007919, async () => {
     });
   });
 
-  testVip("VIP-124 Change Vault Implementation", vip124(), {
+  testVip("VIP-vip127 Change Vault Implementation", vip127(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
