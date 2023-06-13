@@ -9,10 +9,10 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-export const vip108Testnet = () => {
+export const vip127Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-108-testnet Vault Upgrades Testnet",
+    title: "VIP-127-testnet Vault Upgrades Testnet",
     description: `
       Accept the ownership of the XVSVault and VRTVault contracts (previously we had to execute a multisig TX to offer this change)
         the new owner will be the Normal timelock contract (0x939bd8d64c0a9583a7dcea9933f7b21697ab6396)
