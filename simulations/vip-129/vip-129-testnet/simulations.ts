@@ -3,13 +3,11 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip129Testnet } from "../../../vips/vip-129/vip-129-testnet";
 import WBETH_ABI from "./abi/IERC20UpgradableAbi.json";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
 import VWBETH_ABI from "./abi/VBep20Abi.json";
-import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -19,7 +17,6 @@ const VWBETH = "0xb72e16Cd59bA09fC461f05A5C3bc7ba4798622cf";
 const INITIAL_VTOKENS = parseUnits("5.499943", 8);
 const TUSD_INITIAL_SUPPLIER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 const RATE_MODEL = "0xebb0B3Ca7c4095b1392C75e96f8Dc565c9047FAa";
 
 const toBlockRate = (ratePerYear: BigNumber): BigNumber => {
@@ -32,7 +29,6 @@ forking(30711400, () => {
   let wbeth: ethers.Contract;
   let vWbeth: ethers.Contract;
   let oracle: ethers.Contract;
-  let binanceOracle: ethers.Contract;
   let rateModel: ethers.Contract;
   const provider = ethers.provider;
 
@@ -42,21 +38,15 @@ forking(30711400, () => {
     vWbeth = new ethers.Contract(VWBETH, VWBETH_ABI, provider);
     oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
     rateModel = new ethers.Contract(RATE_MODEL, RATE_MODEL_ABI, ethers.provider);
-    binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
   });
 
-  testVip("VIP-129-testnet Add WBETH Market", vip129Testnet());
+  testVip("VIP-129-testnet Add WBETH Market", vip129Testnet(24 * 60 * 60 * 3));
 
   describe("Post-VIP behavior", async () => {
     it("adds a new WBETH market", async () => {
       const market = await comptroller.markets(VWBETH);
       expect(market.isListed).to.equal(true);
-      // expect(market.collateralFactorMantissa).to.equal(parseUnits("0.50", 18));
-    });
-
-    it("get correct price from oracle ", async () => {
-      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, WBETH, NORMAL_TIMELOCK);
-      await binanceOracle.getUnderlyingPrice(VWBETH);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.50", 18));
     });
 
     it("reserves factor equal 20% of WBETH", async () => {
@@ -114,6 +104,11 @@ forking(30711400, () => {
 
     it("sets the admin to governance", async () => {
       expect(await vWbeth.admin()).to.equal(NORMAL_TIMELOCK);
+    });
+
+    it("get correct price from oracle ", async () => {
+      const price = await oracle.getUnderlyingPrice(VWBETH);
+      expect(price).to.equal(parseUnits("1643.66985822", 18));
     });
   });
 });

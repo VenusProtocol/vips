@@ -14,12 +14,11 @@ const WBETH_HOLDER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip129Testnet = () => {
+export const vip129Testnet = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-129 Add WBETH Market",
     description: `
-    VIP
     VIP
     Risk parameters suggested by Quants:
     Supply cap: 300 (full tokens)
@@ -68,7 +67,7 @@ export const vip129Testnet = () => {
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: [WBETH, MAX_STALE_PERIOD],
+        params: ["WBETH", maxStalePeriod || MAX_STALE_PERIOD],
       },
 
       {
@@ -87,11 +86,11 @@ export const vip129Testnet = () => {
         ],
       },
 
-      // {
-      //   target: COMPTROLLER,
-      //   signature: "_setCollateralFactor(address,uint256)",
-      //   params: [VWBETH, parseUnits("0.5", 18)],
-      // },
+      {
+        target: COMPTROLLER,
+        signature: "_setCollateralFactor(address,uint256)",
+        params: [VWBETH, parseUnits("0.5", 18)],
+      },
 
       {
         target: WBETH,

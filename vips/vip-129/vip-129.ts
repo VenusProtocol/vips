@@ -15,7 +15,7 @@ const VTOKEN_RECEIVER = "0x7d3217feb6f310f7e7b7c8ee130db59dcad1dd45";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip129 = () => {
+export const vip129 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-129 Add WBETH Market",
@@ -65,16 +65,10 @@ export const vip129 = () => {
         params: [[VWBETH], ["596440972222220"], ["596440972222220"]],
       },
 
-      // {
-      //   target: COMPTROLLER,
-      //   signature: "_setCollateralFactor(address,uint256)",
-      //   params: [VWBETH, parseUnits("0.5", 18)],
-      // },
-
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: [WBETH, MAX_STALE_PERIOD],
+        params: ["WBETH", maxStalePeriod || MAX_STALE_PERIOD],
       },
 
       {
@@ -92,6 +86,12 @@ export const vip129 = () => {
           ],
         ],
       },
+
+      // {
+      //   target: COMPTROLLER,
+      //   signature: "_setCollateralFactor(address,uint256)",
+      //   params: [VWBETH, parseUnits("0.5", 18)],
+      // },
 
       {
         target: TREASURY,

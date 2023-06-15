@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip129 } from "../../../vips/vip-129/vip-129";
 import WBETH_ABI from "./abi/IERC20UpgradableAbi.json";
@@ -45,18 +44,13 @@ forking(29121099, () => {
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
   });
 
-  testVip("VIP-129 Add WBETH Market", vip129());
+  testVip("VIP-129 Add WBETH Market", vip129(24 * 60 * 60 * 3));
 
   describe("Post-VIP behavior", async () => {
     it("adds a new WBETH market", async () => {
       const market = await comptroller.markets(VWBETH);
       expect(market.isListed).to.equal(true);
-      // expect(market.collateralFactorMantissa).to.equal(parseUnits("0.50", 18));
-    });
-
-    it("get correct price from oracle ", async () => {
-      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, WBETH, NORMAL_TIMELOCK);
-      await binanceOracle.getUnderlyingPrice(VWBETH);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.50", 18));
     });
 
     it("reserves factor equal 20% of WBETH", async () => {
@@ -114,6 +108,11 @@ forking(29121099, () => {
 
     it("sets the admin to governance", async () => {
       expect(await vWbeth.admin()).to.equal(NORMAL_TIMELOCK);
+    });
+
+    it("get correct price from oracle ", async () => {
+      const price = await binanceOracle.getUnderlyingPrice(VWBETH);
+      expect(price).to.equal(parseUnits("1643.66985822", 18));
     });
   });
 });
