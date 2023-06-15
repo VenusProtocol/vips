@@ -7,6 +7,7 @@ import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
+import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
@@ -106,6 +107,24 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
+  await tx.wait();
+};
+
+export const setMaxStalePeriodInBinanceOracle = async (
+  binanceOracle: string,
+  asset: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const provider = ethers.provider;
+
+  const oracle = new ethers.Contract(binanceOracle, BINANCE_ORACLE_ABI, provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+  console.log(1);
+
+  const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(asset, maxStalePeriodInSeconds);
+  console.log(2);
+
   await tx.wait();
 };
 

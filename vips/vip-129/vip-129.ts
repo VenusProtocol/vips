@@ -13,7 +13,7 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const VTOKEN_RECEIVER = "0x7d3217feb6f310f7e7b7c8ee130db59dcad1dd45";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
-const MAX_STALE_PERIOD = 24 * 60;
+const MAX_STALE_PERIOD = 60 * 25;
 
 export const vip129 = () => {
   const meta = {
@@ -64,6 +64,12 @@ export const vip129 = () => {
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
         params: [[VWBETH], ["596440972222220"], ["596440972222220"]],
       },
+
+      // {
+      //   target: COMPTROLLER,
+      //   signature: "_setCollateralFactor(address,uint256)",
+      //   params: [VWBETH, parseUnits("0.5", 18)],
+      // },
 
       {
         target: BINANCE_ORACLE,

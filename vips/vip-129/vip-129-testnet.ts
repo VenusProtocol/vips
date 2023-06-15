@@ -12,7 +12,7 @@ const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const WBETH_HOLDER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const MAX_STALE_PERIOD = 316 * 60 * 60;
+const MAX_STALE_PERIOD = 60 * 25;
 
 export const vip129Testnet = () => {
   const meta = {
@@ -86,6 +86,12 @@ export const vip129Testnet = () => {
           ],
         ],
       },
+
+      // {
+      //   target: COMPTROLLER,
+      //   signature: "_setCollateralFactor(address,uint256)",
+      //   params: [VWBETH, parseUnits("0.5", 18)],
+      // },
 
       {
         target: WBETH,
