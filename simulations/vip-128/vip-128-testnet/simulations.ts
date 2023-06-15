@@ -58,13 +58,13 @@ forking(30680185, () => {
     });
 
     it("pauses TUSDOLD borrowing", async () => {
-      const mintingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.BORROW);
-      expect(mintingPaused).to.equal(true);
+      const borrowingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.BORROW);
+      expect(borrowingPaused).to.equal(true);
     });
 
     it("pauses entering TUSDOLD market", async () => {
-      const mintingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.ENTER_MARKETS);
-      expect(mintingPaused).to.equal(true);
+      const enteringMarketPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.ENTER_MARKETS);
+      expect(enteringMarketPaused).to.equal(true);
     });
 
     it("sets TUSDOLD reserve factor to 100%", async () => {
