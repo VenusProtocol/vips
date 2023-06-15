@@ -1,8 +1,10 @@
+import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip129Testnet } from "../../../vips/vip-129/vip-129-testnet";
 import WBETH_ABI from "./abi/IERC20UpgradableAbi.json";
@@ -13,18 +15,21 @@ import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const WBETH = "0xccBB1b1Be3663D22530aAB798e90DE29e2cbC8EE";
-const VWBETH = "0xb72e16Cd59bA09fC461f05A5C3bc7ba4798622cf";
+const VWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
 const INITIAL_VTOKENS = parseUnits("5.499943", 8);
-const TUSD_INITIAL_SUPPLIER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RATE_MODEL = "0xebb0B3Ca7c4095b1392C75e96f8Dc565c9047FAa";
+const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
+const BINANCE_ORACLE_OLD = "0x1A915beDbf760e0951Ff8c3da9679073FaaA5a27";
+const BINANCE_ORACLE_NEW = "0x693A5ae5F9b8da5b8125f9BC0d8f04C7c63d2384";
 
 const toBlockRate = (ratePerYear: BigNumber): BigNumber => {
   const BLOCKS_PER_YEAR = BigNumber.from("10512000");
   return ratePerYear.div(BLOCKS_PER_YEAR);
 };
 
-forking(30711400, () => {
+forking(30720569, () => {
   let comptroller: ethers.Contract;
   let wbeth: ethers.Contract;
   let vWbeth: ethers.Contract;
@@ -38,11 +43,43 @@ forking(30711400, () => {
     vWbeth = new ethers.Contract(VWBETH, VWBETH_ABI, provider);
     oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
     rateModel = new ethers.Contract(RATE_MODEL, RATE_MODEL_ABI, ethers.provider);
+
+    // To get the admin address of the proxy
+    // import { getAdminAddress } from '@openzeppelin/upgrades-core';
+    // const adminAddress = await getAdminAddress(ethers.provider, BINANCE_ORACLE);
   });
 
-  testVip("VIP-129-testnet Add WBETH Market", vip129Testnet(24 * 60 * 60 * 3));
+  describe("Pre-VIP behavior", async () => {
+    it("Implementation of BinanceOracle", async () => {
+      const impl = await getImplementationAddress(ethers.provider, BINANCE_ORACLE);
+      expect(impl).to.equal(BINANCE_ORACLE_OLD);
+    });
+  });
+
+  testVip("VIP-129-testnet Add WBETH Market", vip129Testnet(24 * 60 * 60 * 3), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI],
+        [
+          "MarketListed",
+          "NewSupplyCap",
+          "NewBorrowCap",
+          "VenusSupplySpeedUpdated",
+          "VenusBorrowSpeedUpdated",
+          "NewCollateralFactor",
+        ],
+        [1, 1, 1, 1, 1, 1],
+      );
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
+    it("Implementation of BinanceOracle", async () => {
+      const impl = await getImplementationAddress(ethers.provider, BINANCE_ORACLE);
+      expect(impl).to.equal(BINANCE_ORACLE_NEW);
+    });
+
     it("adds a new WBETH market", async () => {
       const market = await comptroller.markets(VWBETH);
       expect(market.isListed).to.equal(true);
@@ -97,9 +134,9 @@ forking(30711400, () => {
       expect(timelockBalance).to.equal(0);
     });
 
-    it("moves INITIAL_VTOKENS vWBETH to TUSD_INITIAL_SUPPLIER", async () => {
-      const tusdInitialSupplierBalance = await vWbeth.balanceOf(TUSD_INITIAL_SUPPLIER);
-      expect(tusdInitialSupplierBalance).to.equal(INITIAL_VTOKENS);
+    it("moves INITIAL_VTOKENS vWBETH to VTOKEN_RECEIVER", async () => {
+      const vTokenReceiverBalance = await vWbeth.balanceOf(VTOKEN_RECEIVER);
+      expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
     });
 
     it("sets the admin to governance", async () => {
@@ -108,7 +145,7 @@ forking(30711400, () => {
 
     it("get correct price from oracle ", async () => {
       const price = await oracle.getUnderlyingPrice(VWBETH);
-      expect(price).to.equal(parseUnits("1643.66985822", 18));
+      expect(price).to.equal(parseUnits("1649.670295770000000000", 18));
     });
   });
 });

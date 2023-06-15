@@ -4,11 +4,13 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const WBETH = "0xccBB1b1Be3663D22530aAB798e90DE29e2cbC8EE";
-const VWBETH = "0xb72e16Cd59bA09fC461f05A5C3bc7ba4798622cf";
+const WBETH = "0xf9F98365566F4D55234f24b99caA1AfBE6428D44";
+const VWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
 const INITIAL_FUNDING = parseUnits("5.499943", 18);
 const INITIAL_VTOKENS = parseUnits("5.499943", 8);
 const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
+const BINANCE_ORACLE_NEW = "0x693A5ae5F9b8da5b8125f9BC0d8f04C7c63d2384";
+const BINANCE_PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const WBETH_HOLDER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -40,6 +42,12 @@ export const vip129Testnet = (maxStalePeriod?: number) => {
 
   return makeProposal(
     [
+      {
+        target: BINANCE_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [BINANCE_ORACLE, BINANCE_ORACLE_NEW],
+      },
+
       {
         target: COMPTROLLER,
         signature: "_supportMarket(address)",
