@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Signer } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { vip127 } from "../../vips/vip-127";
+import { expectEvents, initMainnetUser } from "../../../src/utils";
+import { forking, testVip } from "../../../src/vip-framework";
+import { vip127 } from "../../../vips/vip-127";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import VAIVault_ABI from "./abi/VAIVault_ABI.json";
 import VRTVault_ABI from "./abi/VRTVault_ABI.json";
