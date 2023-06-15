@@ -62,13 +62,13 @@ forking(29087109, () => {
     });
 
     it("pauses TUSDOLD borrowing", async () => {
-      const mintingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.BORROW);
-      expect(mintingPaused).to.equal(true);
+      const borrowingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.BORROW);
+      expect(borrowingPaused).to.equal(true);
     });
 
     it("pauses entering TUSDOLD market", async () => {
-      const mintingPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.ENTER_MARKETS);
-      expect(mintingPaused).to.equal(true);
+      const enteringMarketPaused = await comptroller.actionPaused(OLD_VTUSD, Actions.ENTER_MARKETS);
+      expect(enteringMarketPaused).to.equal(true);
     });
 
     it("sets TUSDOLD reserve factor to 100%", async () => {
@@ -82,7 +82,7 @@ forking(29087109, () => {
       expect(market.collateralFactorMantissa).to.equal(0);
     });
 
-    it("sets the supply cap to 100,00,00 TUSD", async () => {
+    it("sets the supply cap to 1,000,000 TUSD", async () => {
       const newCap = await comptroller.supplyCaps(NEW_VTUSD);
       expect(newCap).to.equal(parseUnits("1000000", 18));
     });

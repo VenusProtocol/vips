@@ -113,7 +113,11 @@ export const vip128Testnet = () => {
       {
         target: COMPTROLLER,
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [[NEW_VTUSD], ["868055555555556"], ["868055555555556"]],
+        params: [
+          [OLD_VTUSD, NEW_VTUSD],
+          ["0", "868055555555556"],
+          ["0", "868055555555556"],
+        ],
       },
 
       {
@@ -142,6 +146,12 @@ export const vip128Testnet = () => {
         target: NEW_TUSD,
         signature: "transferFrom(address,address,uint256)",
         params: [TUSD_HOLDER, NORMAL_TIMELOCK, INITIAL_FUNDING],
+      },
+
+      {
+        target: NEW_TUSD,
+        signature: "approve(address,uint256)",
+        params: [NEW_VTUSD, 0],
       },
 
       {

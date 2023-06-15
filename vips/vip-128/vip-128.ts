@@ -115,7 +115,11 @@ export const vip128 = () => {
       {
         target: COMPTROLLER,
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [[NEW_VTUSD], ["217013888888889"], ["217013888888889"]],
+        params: [
+          [OLD_VTUSD, NEW_VTUSD],
+          ["0", "217013888888889"],
+          ["0", "217013888888889"],
+        ],
       },
 
       {
@@ -144,6 +148,12 @@ export const vip128 = () => {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [NEW_TUSD, INITIAL_FUNDING, NORMAL_TIMELOCK],
+      },
+
+      {
+        target: NEW_TUSD,
+        signature: "approve(address,uint256)",
+        params: [NEW_VTUSD, 0],
       },
 
       {
