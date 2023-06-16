@@ -3,37 +3,38 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const WBETH = "0xf9F98365566F4D55234f24b99caA1AfBE6428D44";
-const VWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
+const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
+const WBETH = "0xa2e3356610840701bdf5611a53974510ae27e2e1";
+const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 const INITIAL_FUNDING = parseUnits("5.499943", 18);
 const INITIAL_VTOKENS = parseUnits("5.499943", 8);
-const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
-const BINANCE_ORACLE_NEW = "0x693A5ae5F9b8da5b8125f9BC0d8f04C7c63d2384";
-const BINANCE_PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
-const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
-const WBETH_HOLDER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
+const VTOKEN_RECEIVER = "0x7d3217feb6f310f7e7b7c8ee130db59dcad1dd45";
+const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
+const BINANCE_ORACLE_NEW = "0xe38AbE42948ef249E84f4e935e4f56483C1EE3B9";
+const BINANCE_PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip129Testnet = (maxStalePeriod?: number) => {
+export const vip128 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-129 Add WBETH Market",
+    title: "VIP-128 Add WBETH Market",
     description: `
     VIP
-    Risk parameters suggested by Quants:
-    Supply cap: 300 (full tokens)
-    Borrow cap: 200 (full tokens)
-    Collateral factor: 50%
-    Reserve factor: 20%
-    Interest rate: Base0bps_Slope1000bps_Jump20000bps_Kink7500bps
-    Initial supply:
-    amount: 5499943000000000000 (already available in the VTreasury)
-    vToken receiver: 0x7d3217feb6f310f7e7b7c8ee130db59dcad1dd45
-  XVS rewards:
-    borrowers: 596440972222220
-    suppliers: 596440972222220
+      Risk parameters suggested by Quants:
+      Supply cap: 300 (full tokens)
+      Borrow cap: 200 (full tokens)
+      Collateral factor: 50%
+      Reserve factor: 20%
+      Interest rate: Base0bps_Slope1000bps_Jump20000bps_Kink7500bps
+      Initial supply:
+      amount: 5499943000000000000 (already available in the VTreasury)
+      vToken receiver: 0x7d3217feb6f310f7e7b7c8ee130db59dcad1dd45
+    XVS rewards:
+      borrowers: 596440972222220
+      suppliers: 596440972222220
     `,
     forDescription: "I agree that Venus Protocol should proceed with the Add WBETH Market",
     againstDescription: "I do not think that Venus Protocol should proceed with the Add WBETH Market",
@@ -101,9 +102,9 @@ export const vip129Testnet = (maxStalePeriod?: number) => {
       },
 
       {
-        target: WBETH,
-        signature: "transferFrom(address,address,uint256)",
-        params: [WBETH_HOLDER, NORMAL_TIMELOCK, INITIAL_FUNDING],
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [WBETH, INITIAL_FUNDING, NORMAL_TIMELOCK],
       },
 
       {
@@ -127,7 +128,7 @@ export const vip129Testnet = (maxStalePeriod?: number) => {
       {
         target: VWBETH,
         signature: "transfer(address,uint256)",
-        params: [WBETH_HOLDER, INITIAL_VTOKENS],
+        params: [VTOKEN_RECEIVER, INITIAL_VTOKENS],
       },
 
       {
