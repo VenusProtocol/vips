@@ -13,7 +13,7 @@ const INITIAL_FUNDING = parseUnits("10000", 18);
 const INITIAL_VTOKENS = parseUnits("10000", 8);
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
-const TUSD_HOLDER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 export const Actions = {
@@ -151,7 +151,7 @@ export const vip128Testnet = () => {
       {
         target: NEW_TUSD,
         signature: "transferFrom(address,address,uint256)",
-        params: [TUSD_HOLDER, NORMAL_TIMELOCK, INITIAL_FUNDING],
+        params: [VTOKEN_RECEIVER, NORMAL_TIMELOCK, INITIAL_FUNDING],
       },
 
       {
@@ -175,7 +175,7 @@ export const vip128Testnet = () => {
       {
         target: NEW_VTUSD,
         signature: "transfer(address,uint256)",
-        params: [TUSD_HOLDER, INITIAL_VTOKENS],
+        params: [VTOKEN_RECEIVER, INITIAL_VTOKENS],
       },
 
       {

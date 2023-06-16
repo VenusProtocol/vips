@@ -17,7 +17,7 @@ const MAX_STALE_PERIOD = 60 * 60 * 24; // 24 hours
 const ORACLE_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const TUSD_INITIAL_SUPPLIER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const VTOKEN_RECEIVER = "0xBCb742AAdb031dE5de937108799e89A392f07df";
 
 export const Actions = {
   MINT: 0,
@@ -177,7 +177,7 @@ export const vip128 = () => {
       {
         target: NEW_VTUSD,
         signature: "transfer(address,uint256)",
-        params: [TUSD_INITIAL_SUPPLIER, INITIAL_VTOKENS],
+        params: [VTOKEN_RECEIVER, INITIAL_VTOKENS],
       },
 
       {

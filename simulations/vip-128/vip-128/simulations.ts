@@ -20,7 +20,7 @@ const OLD_TUSD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const ORACLE_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const TUSD_INITIAL_SUPPLIER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const VTOKEN_RECEIVER = "0xBCb742AAdb031dE5de937108799e89A392f07df";
 
 forking(29087109, () => {
   let comptroller: ethers.Contract;
@@ -128,9 +128,9 @@ forking(29087109, () => {
       expect(timelockBalance).to.equal(0);
     });
 
-    it("moves 10,000 vTUSD to TUSD_INITIAL_SUPPLIER", async () => {
-      const tusdInitialSupplierBalance = await vTusd.balanceOf(TUSD_INITIAL_SUPPLIER);
-      expect(tusdInitialSupplierBalance).to.equal(parseUnits("10000", 8));
+    it("moves 10,000 vTUSD to VTOKEN_RECEIVER", async () => {
+      const vTokenReceiverBalance = await vTusd.balanceOf(VTOKEN_RECEIVER);
+      expect(vTokenReceiverBalance).to.equal(parseUnits("10000", 8));
     });
 
     it("has the correct oracle price", async () => {

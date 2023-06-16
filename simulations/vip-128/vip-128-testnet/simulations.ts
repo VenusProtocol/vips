@@ -16,7 +16,7 @@ const NEW_VTUSD = "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23";
 const OLD_VTUSD = "0x3A00d9B02781f47d033BAd62edc55fBF8D083Fb0";
 const VTOKEN_IMPLEMENTATION = "0xc01902DBf72C2cCBFebADb9B7a9e23577893D3A3"; // Original implementation
 const NEW_TUSD = "0xB32171ecD878607FFc4F8FC0bCcE6852BB3149E0";
-const TUSD_INITIAL_SUPPLIER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 forking(30680185, () => {
@@ -125,9 +125,9 @@ forking(30680185, () => {
       expect(timelockBalance).to.equal(0);
     });
 
-    it("moves 10,000 vTUSD to TUSD_INITIAL_SUPPLIER", async () => {
-      const tusdInitialSupplierBalance = await vTusd.balanceOf(TUSD_INITIAL_SUPPLIER);
-      expect(tusdInitialSupplierBalance).to.equal(parseUnits("10000", 8));
+    it("moves 10,000 vTUSD to VTOKEN_RECEIVER", async () => {
+      const vTokenReceiverBalance = await vTusd.balanceOf(VTOKEN_RECEIVER);
+      expect(vTokenReceiverBalance).to.equal(parseUnits("10000", 8));
     });
 
     it("has the correct oracle price", async () => {
