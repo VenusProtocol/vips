@@ -145,6 +145,12 @@ export const vip128 = () => {
       },
 
       {
+        target: COMPTROLLER,
+        signature: "_setCollateralFactor(address,uint256)",
+        params: [NEW_VTUSD, 0],
+      },
+
+      {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [NEW_TUSD, INITIAL_FUNDING, NORMAL_TIMELOCK],

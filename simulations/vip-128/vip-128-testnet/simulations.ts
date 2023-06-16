@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { Actions, vip128Testnet } from "../../../vips/vip-128/vip-128-testnet";
 import TUSD_ABI from "./abi/IERC20UpgradableAbi.json";
@@ -35,7 +36,26 @@ forking(30680185, () => {
     vTusd = new ethers.Contract(NEW_VTUSD, VTUSD_ABI, provider);
   });
 
-  testVip("VIP-128-testnet TUSD Contract Migration", vip128Testnet());
+  testVip("VIP-128-testnet TUSD Contract Migration", vip128Testnet(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI, VBEP20_DELEGATOR_ABI],
+        [
+          "ActionPausedMarket",
+          "NewImplementation",
+          "MarketListed",
+          "NewSupplyCap",
+          "NewBorrowCap",
+          "VenusSupplySpeedUpdated",
+          "VenusBorrowSpeedUpdated",
+          "NewCollateralFactor",
+          "NewReserveFactor",
+        ],
+        [3, 2, 1, 1, 1, 2, 2, 2, 1],
+      );
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     it('sets TUSDOLD name to "Venus TUSDOLD"', async () => {
@@ -86,6 +106,13 @@ forking(30680185, () => {
     it("sets the borrow cap to 600,000 TUSD", async () => {
       const newCap = await comptroller.borrowCaps(NEW_VTUSD);
       expect(newCap).to.equal(parseUnits("600000", 18));
+    });
+
+    it("sets the supply and borrow speeds to 217013888888889", async () => {
+      const supplySpeed = await comptroller.venusSupplySpeeds(NEW_VTUSD);
+      const borrowSpeed = await comptroller.venusBorrowSpeeds(NEW_VTUSD);
+      expect(supplySpeed).to.equal("217013888888889");
+      expect(borrowSpeed).to.equal("217013888888889");
     });
 
     it("does not leave TUSD on the balance of the governance", async () => {

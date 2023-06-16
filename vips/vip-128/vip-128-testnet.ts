@@ -115,8 +115,8 @@ export const vip128Testnet = () => {
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
         params: [
           [OLD_VTUSD, NEW_VTUSD],
-          ["0", "868055555555556"],
-          ["0", "868055555555556"],
+          ["0", "217013888888889"],
+          ["0", "217013888888889"],
         ],
       },
 
@@ -140,6 +140,12 @@ export const vip128Testnet = () => {
             [true, false, false],
           ],
         ],
+      },
+
+      {
+        target: COMPTROLLER,
+        signature: "_setCollateralFactor(address,uint256)",
+        params: [NEW_VTUSD, 0],
       },
 
       {
