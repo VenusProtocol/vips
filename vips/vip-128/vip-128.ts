@@ -22,12 +22,14 @@ export const vip128 = (maxStalePeriod?: number) => {
     version: "v2",
     title: "VIP-128 Add WBETH market to the Venus Core pool",
     description: `
+#### Summary
+
 As part ot the BETH token deprecation and rebranding to WBETH as previously addressed in [VIP-111](https://app.venus.io/governance/proposal/111), if passed this VIP will perform the following actions: 
 
 * Add a new market in the Core pool for the token WBETH (wrapped Binance ETH).
 * Upgrade the BinanceOracle contract to support the new market
 
-**Description**
+#### Description
 
 A new market for WBETH will be added to the Core pool. 
 
@@ -43,7 +45,7 @@ These parameters will be monitored and adjusted if needed in the future.
 
 Moreover, in order to support the new market, it was needed to upgrade the implementation of the BinanceOracle contract. This upgrade translates the wBETH symbol of the token to WBETH, as expected by the Binance Oracle system.
 
-**Security and additional considerations**
+#### Security and additional considerations
 
 We applied the following security procedures for this upgrade:
 
@@ -53,16 +55,16 @@ We applied the following security procedures for this upgrade:
 
 5.499943 WBETH will be initially provided, as bootstrap liquidity for this market.This mitigates potential attacks on empty pools previously observed in other Lending protocols. The vTokens minted with this bootstrap liquidity are sent to Binance Simple Earn, the liquidity provider.
 
-**Deployed contracts on main net**
+#### Deployed contracts on main net
 
 * vWBETH (new market): [0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0](https://bscscan.com/address/0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0)
 * BinanceOracle (new implementation): [0xe38AbE42948ef249E84f4e935e4f56483C1EE3B9](https://bscscan.com/address/0xe38AbE42948ef249E84f4e935e4f56483C1EE3B9)
 
-**Fork tests (simulations)**
+#### Fork tests (simulations)
 
 * https://github.com/VenusProtocol/vips/pull/26 
 
-**References**
+#### References
 
 * [Repository](https://github.com/VenusProtocol/venus-protocol)
 * [WBETH token in BNB chain](https://bscscan.com/address/0xa2E3356610840701BDf5611a53974510Ae27E2e1)
