@@ -51,10 +51,10 @@ forking(29886033, async () => {
     treasuryAddress: any,
     treasuryPercent: any,
     liquidatorContract: any,
-    comptrollerLens: any,
+    comptrollerLens: any;
 
   const borrowSpeeds: any = {};
-  const supplySpeeds: any = {}
+  const supplySpeeds: any = {};
   const userBorrowIndexes: any = {};
   const userSupplyIndexes: any = {};
   const markets: any = {};
@@ -172,10 +172,10 @@ forking(29886033, async () => {
         // checking all public mappings
         allMarkets = await unitroller.getAllMarkets();
 
-        for( const marketIndex in allMarkets) {
-          const marketAddress = allMarkets[marketIndex].toString()
+        for (const marketIndex in allMarkets) {
+          const marketAddress = allMarkets[marketIndex].toString();
 
-          borrowSpeeds[marketAddress] = await unitroller.venusBorrowSpeeds(marketAddress)
+          borrowSpeeds[marketAddress] = await unitroller.venusBorrowSpeeds(marketAddress);
           supplySpeeds[marketAddress] = await unitroller.venusSupplySpeeds(marketAddress);
           markets[marketAddress] = await unitroller.markets(marketAddress);
 
@@ -281,8 +281,8 @@ forking(29886033, async () => {
         expect(comptrollerLens).to.equal(comptrollerLensUpgrade);
 
         // checking all public mappings
-        for( const marketIndex in allMarkets) {
-          const marketAddress = allMarkets[marketIndex].toString()
+        for (const marketIndex in allMarkets) {
+          const marketAddress = allMarkets[marketIndex].toString();
 
           const marketUpgrade = await diamondUnitroller.markets(marketAddress);
           expect(markets[marketAddress].collateralFactorMantissa).to.equal(marketUpgrade.collateralFactorMantissa);
@@ -295,7 +295,7 @@ forking(29886033, async () => {
           expect(supplySpeeds[marketAddress]).to.equal(venusSupplySpeed);
 
           const userBorrowIndex = await diamondUnitroller.venusBorrowerIndex(marketAddress, busdHolder.address);
-          const userSupplyIndex= await diamondUnitroller.venusSupplierIndex(marketAddress, busdHolder.address);
+          const userSupplyIndex = await diamondUnitroller.venusSupplierIndex(marketAddress, busdHolder.address);
           expect(userBorrowIndexes[marketAddress]).to.equal(userBorrowIndex);
           expect(userSupplyIndexes[marketAddress]).to.equal(userSupplyIndex);
         }
