@@ -52,11 +52,12 @@ forking(29886033, async () => {
     treasuryPercent: any,
     liquidatorContract: any,
     comptrollerLens: any,
-    market: any,
-    venusSupplierIndex: any,
-    venusBorrowerIndex: any,
-    venusBorrowSpeeds: any,
-    venusSupplySpeeds: any;
+
+  const borrowSpeeds: any = {};
+  const supplySpeeds: any = {}
+  const userBorrowIndexes: any = {};
+  const userSupplyIndexes: any = {};
+  const markets: any = {};
 
   let BUSD: ethers.contract;
   let usdtHolder: ethers.Signer;
@@ -128,8 +129,6 @@ forking(29886033, async () => {
 
         liquidationIncentiveMantissa = await unitroller.liquidationIncentiveMantissa();
 
-        allMarkets = await unitroller.allMarkets(0);
-
         venusRate = await unitroller.venusRate();
 
         venusSpeeds = await unitroller.venusSpeeds(BUSD.address);
@@ -145,7 +144,6 @@ forking(29886033, async () => {
         vaiController = await unitroller.vaiController();
 
         mintedVAIs = await unitroller.mintedVAIs(busdHolder.address);
-        unitroller.minte;
 
         mintVAIGuardianPaused = await unitroller.mintVAIGuardianPaused();
 
@@ -171,20 +169,24 @@ forking(29886033, async () => {
 
         comptrollerLens = await unitroller.comptrollerLens();
 
-        // cheking all public mappings
-        market = await unitroller.markets(vBUSD.address);
+        // checking all public mappings
+        allMarkets = await unitroller.getAllMarkets();
 
-        venusBorrowerIndex = await unitroller.venusBorrowerIndex(vBUSD.address, busdHolder.address);
+        for( const marketIndex in allMarkets) {
+          const marketAddress = allMarkets[marketIndex].toString()
 
-        venusSupplierIndex = await unitroller.venusSupplierIndex(vBUSD.address, busdHolder.address);
+          borrowSpeeds[marketAddress] = await unitroller.venusBorrowSpeeds(marketAddress)
+          supplySpeeds[marketAddress] = await unitroller.venusSupplySpeeds(marketAddress);
+          markets[marketAddress] = await unitroller.markets(marketAddress);
 
-        venusBorrowSpeeds = await unitroller.venusBorrowSpeeds(vUSDT.address);
-        venusSupplySpeeds = await unitroller.venusSupplySpeeds(vUSDT.address);
+          userBorrowIndexes[marketAddress] = await unitroller.venusBorrowerIndex(marketAddress, busdHolder.address);
+          userSupplyIndexes[marketAddress] = await unitroller.venusSupplierIndex(marketAddress, busdHolder.address);
+        }
       });
     });
   });
 
-  testVip("VIP-Diamond TRON Contract Migration", vipDiamondTestnet());
+  testVip("VIP-Diamond Contract Migration", vipDiamondTestnet());
 
   describe("Verify Storage slots after VIP execution", async () => {
     // These tests checks the storage collision of comptroller while updating it via diamond.
@@ -217,9 +219,6 @@ forking(29886033, async () => {
 
         const liquidationIncentiveMantissaAfterUpgrade = await diamondUnitroller.liquidationIncentiveMantissa();
         expect(liquidationIncentiveMantissa).to.equal(liquidationIncentiveMantissaAfterUpgrade);
-
-        const allMarketsAfterUpgrade = await diamondUnitroller.allMarkets(0);
-        expect(allMarkets).to.equal(allMarketsAfterUpgrade);
 
         const venusRateAfterUpgrade = await diamondUnitroller.venusRate();
         expect(venusRate).to.equal(venusRateAfterUpgrade);
@@ -281,23 +280,25 @@ forking(29886033, async () => {
         const comptrollerLensUpgrade = await diamondUnitroller.comptrollerLens();
         expect(comptrollerLens).to.equal(comptrollerLensUpgrade);
 
-        // cheking all public mappings
-        const marketUpgrade = await diamondUnitroller.markets(vBUSD.address);
-        expect(market.collateralFactorMantissa).to.equal(marketUpgrade.collateralFactorMantissa);
-        expect(market.isListed).to.equal(marketUpgrade.isListed);
-        expect(market.isVenus).to.equal(marketUpgrade.isVenus);
+        // checking all public mappings
+        for( const marketIndex in allMarkets) {
+          const marketAddress = allMarkets[marketIndex].toString()
 
-        const venusBorrowerIndexUpgrade = await diamondUnitroller.venusBorrowerIndex(vBUSD.address, busdHolder.address);
-        expect(venusBorrowerIndex).to.equal(venusBorrowerIndexUpgrade);
+          const marketUpgrade = await diamondUnitroller.markets(marketAddress);
+          expect(markets[marketAddress].collateralFactorMantissa).to.equal(marketUpgrade.collateralFactorMantissa);
+          expect(markets[marketAddress].isListed).to.equal(marketUpgrade.isListed);
+          expect(markets[marketAddress].isVenus).to.equal(marketUpgrade.isVenus);
 
-        const venusSupplierIndexUpgrade = await diamondUnitroller.venusSupplierIndex(vBUSD.address, busdHolder.address);
-        expect(venusSupplierIndex).to.equal(venusSupplierIndexUpgrade);
+          const venusBorrowSpeed = await diamondUnitroller.venusBorrowSpeeds(marketAddress);
+          const venusSupplySpeed = await diamondUnitroller.venusSupplySpeeds(marketAddress);
+          expect(borrowSpeeds[marketAddress]).to.equal(venusBorrowSpeed);
+          expect(supplySpeeds[marketAddress]).to.equal(venusSupplySpeed);
 
-        const venusBorrowSpeedsUpgrade = await diamondUnitroller.venusBorrowSpeeds(vUSDT.address);
-        const venusSupplySpeedsUpgrade = await diamondUnitroller.venusSupplySpeeds(vUSDT.address);
-
-        expect(venusBorrowSpeeds).to.equal(venusBorrowSpeedsUpgrade);
-        expect(venusSupplySpeeds).to.equal(venusSupplySpeedsUpgrade);
+          const userBorrowIndex = await diamondUnitroller.venusBorrowerIndex(marketAddress, busdHolder.address);
+          const userSupplyIndex= await diamondUnitroller.venusSupplierIndex(marketAddress, busdHolder.address);
+          expect(userBorrowIndexes[marketAddress]).to.equal(userBorrowIndex);
+          expect(userSupplyIndexes[marketAddress]).to.equal(userSupplyIndex);
+        }
       });
     });
   });
@@ -320,7 +321,7 @@ forking(29886033, async () => {
         expect(await diamondUnitroller.closeFactorMantissa()).to.equals(parseUnits(currentCloseFactor, 0));
       });
 
-      it("setting setting Liquidation Incentive", async () => {
+      it("setting Liquidation Incentive", async () => {
         await diamondUnitroller.connect(owner)._setLiquidationIncentive(parseUnits("13", 17));
         expect(await diamondUnitroller.liquidationIncentiveMantissa()).to.equal(parseUnits("13", 17));
 
