@@ -95,6 +95,19 @@ forking(29178963, () => {
       expect(newReserveFactor).to.equal(parseUnits("1.0", 18));
     });
 
+    it("sets TUSDOLD collateral factor to 55%", async () => {
+      const market = await comptroller.markets(OLD_VTUSD);
+      expect(market.isListed).to.equal(true);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.55", 18));
+    });
+
+    it("sets the supply and borrow XVS speeds to 0 for vTUSDOLD", async () => {
+      const supplySpeed = await comptroller.venusSupplySpeeds(OLD_VTUSD);
+      const borrowSpeed = await comptroller.venusBorrowSpeeds(OLD_VTUSD);
+      expect(supplySpeed).to.equal("0");
+      expect(borrowSpeed).to.equal("0");
+    });
+
     it("adds a new TUSD market", async () => {
       const market = await comptroller.markets(NEW_VTUSD);
       expect(market.isListed).to.equal(true);
