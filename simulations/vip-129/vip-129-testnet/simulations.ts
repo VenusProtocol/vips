@@ -2,27 +2,24 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { Actions, vip128 } from "../../../vips/vip-128/vip-128";
+import { Actions, vip129Testnet } from "../../../vips/vip-129/vip-129-testnet";
 import TUSD_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTUSD_ABI from "./abi/VBep20Abi.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20DelegatorAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
-const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
-const NEW_VTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
-const OLD_VTUSD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
-const VTOKEN_IMPLEMENTATION = "0x13f816511384D3534783241ddb5751c4b7a7e148"; // Original implementation
-const NEW_TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
-const OLD_TUSD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";
-const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
-const ORACLE_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VTOKEN_RECEIVER = "0xBCb742AAdb031dE5de937108799e89A392f07df";
+const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+const NEW_VTUSD = "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23";
+const OLD_VTUSD = "0x3A00d9B02781f47d033BAd62edc55fBF8D083Fb0";
+const VTOKEN_IMPLEMENTATION = "0xc01902DBf72C2cCBFebADb9B7a9e23577893D3A3"; // Original implementation
+const NEW_TUSD = "0xB32171ecD878607FFc4F8FC0bCcE6852BB3149E0";
+const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(29087109, () => {
+forking(30680185, () => {
   let comptroller: ethers.Contract;
   let tusd: ethers.Contract;
   let vTusdOld: ethers.Contract;
@@ -32,14 +29,14 @@ forking(29087109, () => {
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    oracle = new ethers.Contract(CHAINLINK_ORACLE, PRICE_ORACLE_ABI, provider);
+    const oracleAddress = await comptroller.oracle();
+    oracle = new ethers.Contract(oracleAddress, PRICE_ORACLE_ABI, provider);
     tusd = new ethers.Contract(NEW_TUSD, TUSD_ABI, provider);
     vTusdOld = new ethers.Contract(OLD_VTUSD, VTUSD_ABI, provider);
     vTusd = new ethers.Contract(NEW_VTUSD, VTUSD_ABI, provider);
-    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, OLD_TUSD, ORACLE_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-128 TUSD Contract Migration", vip128(), {
+  testVip("VIP-129-testnet TUSD Contract Migration", vip129Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -134,10 +131,8 @@ forking(29087109, () => {
     });
 
     it("has the correct oracle price", async () => {
-      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, NEW_TUSD, ORACLE_FEED, NORMAL_TIMELOCK);
-      const priceOld = await oracle.getUnderlyingPrice(OLD_VTUSD);
-      const priceNew = await oracle.getUnderlyingPrice(NEW_VTUSD);
-      expect(priceNew).to.equal(priceOld);
+      const price = await oracle.getUnderlyingPrice(NEW_VTUSD);
+      expect(price).to.equal(parseUnits("1", 18));
     });
 
     it("sets the admin to governance", async () => {

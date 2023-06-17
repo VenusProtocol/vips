@@ -25,10 +25,10 @@ export const Actions = {
   ENTER_MARKETS: 7,
 };
 
-export const vip128 = () => {
+export const vip129 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-128 TUSD Contract Migration",
+    title: "VIP-129 TUSD Contract Migration",
     description: `
     VIP
       Pause the following actions in the OLD TUSD market: mint, borrow, enter markets
