@@ -20,9 +20,9 @@ const OLD_TUSD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const ORACLE_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VTOKEN_RECEIVER = "0xBCb742AAdb031dE5de937108799e89A392f07df";
+const VTOKEN_RECEIVER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(29087109, () => {
+forking(29178963, () => {
   let comptroller: ethers.Contract;
   let tusd: ethers.Contract;
   let vTusdOld: ethers.Contract;
@@ -99,6 +99,11 @@ forking(29087109, () => {
       const market = await comptroller.markets(NEW_VTUSD);
       expect(market.isListed).to.equal(true);
       expect(market.collateralFactorMantissa).to.equal(0);
+    });
+
+    it("checks TUSD reserve factor to 25%", async () => {
+      const reserveFactor = await vTusd.reserveFactorMantissa();
+      expect(reserveFactor).to.equal(parseUnits("0.25", 18));
     });
 
     it("sets the supply cap to 1,000,000 TUSD", async () => {
