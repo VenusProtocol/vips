@@ -20,7 +20,7 @@ import { makeProposal } from "../../src/utils";
 // swapRouter IL 5 = "0xFdeBF4530F9c7d352ffFE88cd0e96C8Bb7391BD9";
 
 // Addresses of all the swapRouters
-const swapRouters = [
+export const swapRouters = [
   "0x83edf1deE1B730b7e8e13C00ba76027D63a51ac0",
   "0x7DcBd10E3479907e0B8C79d01D0572C8cc00227B",
   "0x76B88ff4579B35D2722B7383b9B9ce831dc89B72",
