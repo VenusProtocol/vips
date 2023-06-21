@@ -31,7 +31,7 @@ export const swapRouters = [
 
 export const vip130Testnet = () => {
   const meta = {
-    version: "v1",
+    version: "v2",
     title: "VIP-130 Accepting ownership for swap routers",
     description: `Swap routers are deployed for each pool including the core pool and the other five isolated pools,
       and the ownership of these routers is transferred to Timeclock and this VIP is to accept the ownership of all

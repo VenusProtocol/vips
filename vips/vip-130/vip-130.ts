@@ -9,7 +9,7 @@ export const swapRouterCorePool = "0x8938E6dA30b59c1E27d5f70a94688A89F7c815a4";
 
 export const vip130 = () => {
   const meta = {
-    version: "v1",
+    version: "v2",
     title: "VIP-130 Accepting ownership for swap router",
     description: `Swap router is deployed for core pool, and the ownership of these router is transferred to Timeclock
         and this VIP is to accept the ownership of the swap router.`,
