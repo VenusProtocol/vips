@@ -12,10 +12,10 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PSM_USDT = "";
 const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 
-export const vip130 = () => {
+export const vip131 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-130 Add Peg Stability (USDT)",
+    title: "VIP-131 Add Peg Stability (USDT)",
     description: `
        Add the Peg Stability Contract as an admin in the VAI contract: VAI.rely(pegStabilityAddress)
        Grant the Normal timelock contracts role to change the feeIn and feeOut, vaiMintCap, comptroller, venusTreasury variables within the PSM instance.

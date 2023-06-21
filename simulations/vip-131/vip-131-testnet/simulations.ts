@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip130 } from "../../../vips/vip-131/vip-130-testnet";
+import { vip131Testnet } from "../../../vips/vip-131/vip-131-testnet";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
@@ -33,7 +33,7 @@ forking(30883314, () => {
     psmSigner = await initMainnetUser(PSM_USDT, ethers.utils.parseEther("1"));
   });
 
-  testVip("VIP-130 Add Peg Stability (USDT)", vip130());
+  testVip("VIP-130 Add Peg Stability (USDT)", vip131Testnet());
   describe("Post-VIP behavior", async () => {
     it("Verify PSM_USDT is admin of VAI contract", async () => {
       const check = await vai.wards(PSM_USDT);
