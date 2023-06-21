@@ -11,7 +11,7 @@ export const vip130 = () => {
   const meta = {
     version: "v2",
     title: "VIP-130 Accepting ownership for swap router",
-    description: `Swap router is deployed for core pool, and the ownership of these router is transferred to Timeclock
+    description: `Swap router is deployed for core pool, and the ownership of these router is transferred to Timelock
         and this VIP is to accept the ownership of the swap router.`,
     forDescription: "I agree that Venus Protocol should proceed with accepting ownership for swap router",
     againstDescription: "I do not think that Venus Protocol should proceed with accepting ownership for swap router",

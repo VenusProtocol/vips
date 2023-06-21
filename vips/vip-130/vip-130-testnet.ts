@@ -15,7 +15,7 @@ export const vip130Testnet = () => {
     version: "v2",
     title: "VIP-130 Accepting ownership for swap routers",
     description: `Swap routers are deployed for each pool including the core pool and one isolated pool,
-      and the ownership of these routers is transferred to Timeclock and this VIP is to accept the ownership of all
+      and the ownership of these routers is transferred to Timelock and this VIP is to accept the ownership of all
       the swap routers.`,
     forDescription: "I agree that Venus Protocol should proceed with accepting ownership for swap routers",
     againstDescription: "I do not think that Venus Protocol should proceed with accepting ownership for swap routers",
