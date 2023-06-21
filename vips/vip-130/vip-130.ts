@@ -7,7 +7,7 @@ import { makeProposal } from "../../src/utils";
 // Addresses of all the swapRouters
 export const swapRouterCorePool = "0x8938E6dA30b59c1E27d5f70a94688A89F7c815a4";
 
-export const vip130MainnetCore = () => {
+export const vip130 = () => {
   const meta = {
     version: "v1",
     title: "VIP-130 Accepting ownership for swap router",
