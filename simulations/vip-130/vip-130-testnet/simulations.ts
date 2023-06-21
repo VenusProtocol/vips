@@ -15,10 +15,10 @@ const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
-const PSM_USDT = "0x6A79A72d78004dABbBa870Dd2Da6C142c78a3d06";
+const PSM_USDT = "0x2822E0Ac03e64F7BA26e0aCb79EC0B6336e9CA2A";
 const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 
-forking(30860798, () => {
+forking(30883314, () => {
   const provider = ethers.provider;
   let vai: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
