@@ -121,9 +121,9 @@ forking(29288200, () => {
       expect(newCap).to.equal(parseUnits("550", 18));
     });
 
-    it("borrow cap of BETH equals 0", async () => {
+    it("borrow cap of BETH equals 1", async () => {
       const newCap = await comptroller.borrowCaps(VBETH);
-      expect(newCap).to.equal(0);
+      expect(newCap).to.equal(1);
     });
 
     it("collateral factor of BETH equals 50%", async () => {

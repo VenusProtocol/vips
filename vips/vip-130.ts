@@ -45,7 +45,7 @@ export const vip130 = () => {
         signature: "_setMarketBorrowCaps(address[],uint256[])",
         params: [
           [VBETH, VWBETH],
-          [0, parseUnits("550", 18)],
+          [1, parseUnits("550", 18)],
         ],
       },
 
