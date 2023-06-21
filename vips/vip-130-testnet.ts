@@ -1,9 +1,9 @@
 import { parseUnits } from "ethers/lib/utils";
+
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-
-const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA"
+const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
 const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";

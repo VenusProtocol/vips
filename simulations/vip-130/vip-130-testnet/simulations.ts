@@ -1,13 +1,14 @@
 import { expect } from "chai";
+import { Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+
 import { initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip130 } from "../../../vips/vip-130-testnet";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
-import { Signer } from "ethers";
 
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -50,12 +51,21 @@ forking(30883314, () => {
         true,
       );
 
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeIn(uint256)")).equals(true);
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeOut(uint256)")).equals(true);
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVaiMintCap(uint256)")).equals(true);
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setComptroller(address)")).equals(true);
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVenusTreasury(address)")).equals(true);
-
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeIn(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeOut(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVaiMintCap(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setComptroller(address)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVenusTreasury(address)"),
+      ).equals(true);
     });
 
     it("Verify new VAI base rate is 2.72%", async () => {
