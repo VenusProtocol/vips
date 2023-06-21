@@ -16,12 +16,10 @@ const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-//TODO: insert mainnet address when PSM_USDT is deployed on mainnet
-const PSM_USDT = "";
+const PSM_USDT = "0x93dB3f46e1DC91c2b9D8Bc7443790bB4699c0E81";
 const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 
-//TODO: insert block number after deployment of PSM_USDT
-forking(30853771, () => {
+forking(29298113, () => {
   const provider = ethers.provider;
   let vai: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
