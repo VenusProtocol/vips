@@ -8,6 +8,9 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
+const RISK_MANAGER_MULTISIG = "0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9";
+const PAUSE_GUARDIAN_MULTISIG = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const COMPTROLLER_STABLECOINS = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
@@ -190,6 +193,26 @@ export const vip132 = () => {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [ANY_TARGET_CONTRACT, "setActionsPaused(address[],uint256[],bool)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ANY_TARGET_CONTRACT, "setCollateralFactor(address,uint256,uint256)", RISK_MANAGER_MULTISIG],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])", RISK_MANAGER_MULTISIG],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])", RISK_MANAGER_MULTISIG],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ANY_TARGET_CONTRACT, "setActionsPaused(address[],uint256[],bool)", PAUSE_GUARDIAN_MULTISIG],
       },
       {
         target: POOL_REGISTRY,
