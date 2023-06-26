@@ -12,6 +12,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
+import SWAP_ROUTER_ABI from "./abi/swapRouter.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
@@ -23,6 +24,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const COMPTROLLER_STABLECOINS = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+const SWAP_ROUTER_STABLECOINS = "0x50d8ac56FC8525dcA9F41b12De0dbc6bDf7771e3";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
@@ -35,9 +37,10 @@ const VUSDD_STABLECOINS = "0xc3a45ad8812189cAb659aD99E64B1376f6aCD035";
 const VHAY_RECEIVER = "0x09702Ea135d9D707DD51f530864f2B9220aAD87B";
 const VUSDD_RECEIVER = "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296";
 
-forking(29440000, () => {
+forking(29441800, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
+  let swapRouter: Contract;
   let vHAY: Contract;
   let vUSDT: Contract;
   let vUSDD: Contract;
@@ -45,6 +48,7 @@ forking(29440000, () => {
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_STABLECOINS);
+    swapRouter = await ethers.getContractAt(SWAP_ROUTER_ABI, SWAP_ROUTER_STABLECOINS);
     vHAY = await ethers.getContractAt(VTOKEN_ABI, VHAY_STABLECOINS);
     vUSDT = await ethers.getContractAt(VTOKEN_ABI, VUSDT_STABLECOINS);
     vUSDD = await ethers.getContractAt(VTOKEN_ABI, VUSDD_STABLECOINS);
@@ -172,6 +176,10 @@ forking(29440000, () => {
 
       it("should transfer ownership of Comptroller to Timelock", async () => {
         expect(await comptroller.owner()).to.equal(NORMAL_TIMELOCK);
+      });
+
+      it("should transfer ownership of SwapRouter to Timelock", async () => {
+        expect(await swapRouter.owner()).to.equal(NORMAL_TIMELOCK);
       });
 
       it("should transfer ownership of vHAY_Stablecoins to Timelock", async () => {

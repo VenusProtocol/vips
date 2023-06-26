@@ -11,6 +11,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const COMPTROLLER_STABLECOINS = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+const SWAP_ROUTER_STABLECOINS = "0x50d8ac56FC8525dcA9F41b12De0dbc6bDf7771e3";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
@@ -197,6 +198,11 @@ export const vip132 = () => {
       },
       {
         target: COMPTROLLER_STABLECOINS,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: SWAP_ROUTER_STABLECOINS,
         signature: "acceptOwnership()",
         params: [],
       },
