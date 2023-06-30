@@ -7,6 +7,7 @@ import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
+import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
@@ -26,37 +27,10 @@ export async function setForkBlock(blockNumber: number) {
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
-    let types = getArgs(signatures[i]);
-    // Fix for the oracle VIP as there is struct in types and defaultAbiCoder
-    // is unable to process struct.
-
-    if (signatures[i] == "setTokenConfig((address,address,uint256))") {
-      types = ["tuple(address, address, uint256)"];
-    } else if (signatures[i] == "setTokenConfig((address,address[3],bool[3]))") {
-      types = ["tuple(address, address[3], bool[3])"];
-    }
-
-    return defaultAbiCoder.encode(types, args);
+    const fragment = ethers.utils.FunctionFragment.from(signatures[i]);
+    return defaultAbiCoder.encode(fragment.inputs, args);
   });
 }
-
-const getArgs = (func: string) => {
-  if (func === "") return [];
-  // First match everything inside the function argument parens.
-  const match = func.match(/.*?\(([^]*)\)/);
-  const args = match ? match[1] : "";
-  // Split the arguments string into an array comma delimited.
-  return args
-    .split(",")
-    .map(arg => {
-      // Ensure no inline comments are parsed and trim the whitespace.
-      return arg.replace(/\/\*.*\*\//, "").trim();
-    })
-    .filter(arg => {
-      // Ensure no undefined values are added.
-      return arg;
-    });
-};
 
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
   await impersonateAccount(user);
@@ -86,6 +60,18 @@ export const setMaxStalePeriodInOracle = async (
   const oracleAdmin = await initMainnetUser(await oracle.admin(), ethers.utils.parseEther("1.0"));
 
   const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(maxStalePeriodInSeconds);
+  await tx.wait();
+};
+
+export const setMaxStalePeriodInBinanceOracle = async (
+  binanceOracleAddress: string,
+  assetSymbol: string,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const oracle = await ethers.getContractAt(BINANCE_ORACLE_ABI, binanceOracleAddress);
+  const oracleAdmin = await initMainnetUser(await oracle.owner(), ethers.utils.parseEther("1.0"));
+
+  const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(assetSymbol, maxStalePeriodInSeconds);
   await tx.wait();
 };
 
