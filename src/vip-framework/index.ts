@@ -123,7 +123,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
 
-    it("should be queued sucessfully", async () => {
+    it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
       await tx.wait();
