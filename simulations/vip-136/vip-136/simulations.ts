@@ -23,6 +23,9 @@ const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+const SWAP_ROUTER_STABLECOINS = "0xBBd8E2b5d69fcE9Aaa599c50F0f0960AA58B32aA";
+
+const VBNB_CORE_POOL = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 
 type PoolId = "DeFi" | "GameFi" | "LiquidStakedBNB" | "Tron";
 
@@ -34,19 +37,19 @@ interface PoolContracts {
 const pools: { [key in PoolId]: PoolContracts } = {
   DeFi: {
     comptroller: "0x3344417c9360b963ca93A4e8305361AEde340Ab9",
-    swapRouter: "0x41cD8071670D7B3846b5fAf82697D47a12b8495e",
+    swapRouter: "0x47bEe99BD8Cf5D8d7e815e2D2a3E2985CBCcC04b",
   },
   GameFi: {
     comptroller: "0x1b43ea8622e76627B81665B1eCeBB4867566B963",
-    swapRouter: "0x36248B3e394e13978f08bE0361A8241a16b95f44",
+    swapRouter: "0x9B15462a79D0948BdDF679E0E5a9841C44aAFB7A",
   },
   LiquidStakedBNB: {
     comptroller: "0xd933909A4a2b7A4638903028f44D1d38ce27c352",
-    swapRouter: "0x17e6C5AFa0CAf38044dF3a9a9dDe33aaE8229653",
+    swapRouter: "0x5f0ce69Aa564468492e860e8083BB001e4eb8d56",
   },
   Tron: {
     comptroller: "0x23b4404E4E5eC5FF5a6FFb70B7d14E3FabF237B0",
-    swapRouter: "0x63555cca63c99e698b27e766b8e81282Bd2771b8",
+    swapRouter: "0xacD270Ed7DFd4466Bd931d84fe5B904080E28Bfc",
   },
 };
 
@@ -609,7 +612,7 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-forking(29558002, () => {
+forking(29562000, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -833,6 +836,11 @@ forking(29558002, () => {
     });
 
     describe("Pool configuration", () => {
+      it("should accept ownerdship over Stablecoins SwapRouter", async () => {
+        const swapRouter = await ethers.getContractAt(SWAP_ROUTER_ABI, SWAP_ROUTER_STABLECOINS);
+        expect(await swapRouter.owner()).to.equal(NORMAL_TIMELOCK);
+      });
+
       for (const [name, pool] of Object.entries(pools) as [PoolId, PoolContracts][]) {
         describe(`${name} Comptroller`, () => {
           let comptroller: Contract;
@@ -867,6 +875,14 @@ forking(29558002, () => {
 
           before(async () => {
             swapRouter = await ethers.getContractAt(SWAP_ROUTER_ABI, pool.swapRouter);
+          });
+
+          it(`should have WBNB = ${tokens.WBNB}`, async () => {
+            expect(await swapRouter.WBNB()).to.equal(tokens.WBNB);
+          });
+
+          it(`should have vBNB = core pool vBNB (${VBNB_CORE_POOL})`, async () => {
+            expect(await swapRouter.vBNBAddress()).to.equal(VBNB_CORE_POOL);
           });
 
           it(`should have comptroller = Comptroller_${name}`, async () => {
