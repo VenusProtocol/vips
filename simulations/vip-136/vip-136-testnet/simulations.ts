@@ -21,6 +21,8 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
+const VBNB_CORE_POOL = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
+
 type PoolId = "DeFi" | "GameFi" | "LiquidStakedBNB" | "Tron";
 
 interface PoolContracts {
@@ -31,19 +33,19 @@ interface PoolContracts {
 const pools: { [key in PoolId]: PoolContracts } = {
   DeFi: {
     comptroller: "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD",
-    swapRouter: "0x83eE40aC6Ba395037130BE19D9041D2bd9B8F41b",
+    swapRouter: "0x89Bc8dFe0Af08b60ec285071d133FCdfa9B3C08e",
   },
   GameFi: {
     comptroller: "0x1F4f0989C51f12DAcacD4025018176711f3Bf289",
-    swapRouter: "0x7aDe210F23a8a70958A3b2C642050DeB8935d33B",
+    swapRouter: "0x5D254Bc7c7f2670395B9E0716C21249083D41a4f",
   },
   LiquidStakedBNB: {
     comptroller: "0x596B11acAACF03217287939f88d63b51d3771704",
-    swapRouter: "0x7128BD940305Aed0A86e3e48fC89bDff9382F9b1",
+    swapRouter: "0xb16792E90d6478DaBbd0144e13f41CeA21ACE116",
   },
   Tron: {
     comptroller: "0x11537D023f489E4EF0C7157cc729C7B69CbE0c97",
-    swapRouter: "0x624DB9D9078f78e20F7c801D06715392131E56E6",
+    swapRouter: "0x1D8cA5AFB88F07489786A3d2E0FF50F3F9314d97",
   },
 };
 
@@ -588,7 +590,7 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-forking(31151385, () => {
+forking(31152370, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -842,6 +844,14 @@ forking(31151385, () => {
 
           before(async () => {
             swapRouter = await ethers.getContractAt(SWAP_ROUTER_ABI, pool.swapRouter);
+          });
+
+          it(`should have WBNB = ${tokens.WBNB}`, async () => {
+            expect(await swapRouter.WBNB()).to.equal(tokens.WBNB);
+          });
+
+          it(`should have vBNB = core pool vBNB (${VBNB_CORE_POOL})`, async () => {
+            expect(await swapRouter.vBNBAddress()).to.equal(VBNB_CORE_POOL);
           });
 
           it(`should have comptroller = Comptroller_${name}`, async () => {
