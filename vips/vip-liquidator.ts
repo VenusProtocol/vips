@@ -6,6 +6,7 @@ const LIQUIDATOR = "0x0870793286aada55d39ce7f82fb2766e8004cf43";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
 
 export const vipLiquidator = () => {
   const meta = {
@@ -122,6 +123,12 @@ export const vipLiquidator = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "setPendingRedeemChunkLength(uint256)", NORMAL_TIMELOCK],
       },
+
+      // {
+      //   target: PROXY_ADMIN,
+      //   signature: "upgrade(address,address)",
+      //   params: [LIQUIDATOR, "NEW_IMPLEMENTATION_ADDRESS"],
+      // },
     ],
     meta,
     ProposalType.REGULAR,
