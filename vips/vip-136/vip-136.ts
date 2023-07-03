@@ -1,7 +1,13 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+const ANY_TARGET_CONTRACT = "0x0000000000000000000000000000000000000000";
+
+const ACCESS_CONTROL_MANAGER = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
@@ -20,6 +26,36 @@ const SWAP_ROUTER_TRON = "0xacD270Ed7DFd4466Bd931d84fe5B904080E28Bfc";
 const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
 const commands = [
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setReserveFactor(uint256)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setInterestRateModel(address)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "updateJumpRateModel(uint256,uint256,uint256,uint256)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setReserveFactor(uint256)", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setInterestRateModel(address)", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "updateJumpRateModel(uint256,uint256,uint256,uint256)", CRITICAL_TIMELOCK],
+  },
   {
     target: SWAP_ROUTER_STABLECOINS,
     signature: "acceptOwnership()",

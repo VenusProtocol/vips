@@ -1,7 +1,13 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+const ANY_TARGET_CONTRACT = "0x0000000000000000000000000000000000000000";
+
+const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
@@ -19,6 +25,36 @@ const SWAP_ROUTER_TRON = "0x1D8cA5AFB88F07489786A3d2E0FF50F3F9314d97";
 const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 
 const commands = [
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setReserveFactor(uint256)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setInterestRateModel(address)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "updateJumpRateModel(uint256,uint256,uint256,uint256)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setReserveFactor(uint256)", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "setInterestRateModel(address)", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACCESS_CONTROL_MANAGER,
+    signature: "giveCallPermission(address,string,address)",
+    params: [ANY_TARGET_CONTRACT, "updateJumpRateModel(uint256,uint256,uint256,uint256)", CRITICAL_TIMELOCK],
+  },
   {
     target: COMPTROLLER_DEFI,
     signature: "acceptOwnership()",
