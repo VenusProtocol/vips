@@ -24,6 +24,8 @@ const SWAP_ROUTER_LIQUID_STAKED_BNB = "0x5f0ce69Aa564468492e860e8083BB001e4eb8d5
 const SWAP_ROUTER_TRON = "0xacD270Ed7DFd4466Bd931d84fe5B904080E28Bfc";
 
 const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDD = "0xd17479997F34dd9156Deef8F95A52D81D265be9c";
 
 const commands = [
   {
@@ -269,19 +271,19 @@ const commands = [
   {
     target: TREASURY,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: ["0x55d398326f99059fF775485246999027B3197955", "40000000000000000000000", NORMAL_TIMELOCK],
+    params: [USDT, "30000000000000000000000", NORMAL_TIMELOCK],
     value: "0",
   },
   {
-    target: "0x55d398326f99059fF775485246999027B3197955",
+    target: USDT,
     signature: "approve(address,uint256)",
     params: [POOL_REGISTRY, 0],
     value: "0",
   },
   {
-    target: "0x55d398326f99059fF775485246999027B3197955",
+    target: USDT,
     signature: "approve(address,uint256)",
-    params: [POOL_REGISTRY, "40000000000000000000000"],
+    params: [POOL_REGISTRY, "30000000000000000000000"],
     value: "0",
   },
   {
@@ -303,17 +305,17 @@ const commands = [
   {
     target: TREASURY,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: ["0xd17479997F34dd9156Deef8F95A52D81D265be9c", "40000000000000000000000", NORMAL_TIMELOCK],
+    params: [USDD, "40000000000000000000000", NORMAL_TIMELOCK],
     value: "0",
   },
   {
-    target: "0xd17479997F34dd9156Deef8F95A52D81D265be9c",
+    target: USDD,
     signature: "approve(address,uint256)",
     params: [POOL_REGISTRY, 0],
     value: "0",
   },
   {
-    target: "0xd17479997F34dd9156Deef8F95A52D81D265be9c",
+    target: USDD,
     signature: "approve(address,uint256)",
     params: [POOL_REGISTRY, "40000000000000000000000"],
     value: "0",
@@ -612,38 +614,6 @@ const commands = [
     value: "0",
   },
   {
-    target: POOL_REGISTRY,
-    signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    params: [
-      [
-        "0xB3CD745D46A7551C7DF21e0DEfEB710f546bca62",
-        "800000000000000000",
-        "880000000000000000",
-        "10000000000000000000000",
-        TREASURY,
-        "18600000000000000000000000",
-        "14880000000000000000000000",
-      ],
-    ],
-    value: "0",
-  },
-  {
-    target: POOL_REGISTRY,
-    signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    params: [
-      [
-        "0x3ee4be3425e5CC72445cd4C5325A6B5A15507670",
-        "650000000000000000",
-        "700000000000000000",
-        "10000000000000000000000",
-        "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296",
-        "2000000000000000000000000",
-        "1600000000000000000000000",
-      ],
-    ],
-    value: "0",
-  },
-  {
     target: TREASURY,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
     params: ["0x352Cb5E19b12FC216548a2677bD0fce83BaE434B", "16753000000000000000000000000", NORMAL_TIMELOCK],
@@ -769,7 +739,7 @@ const commands = [
         "0xf1da185CCe5BeD1BeBbb3007Ef738Ea4224025F7",
         "650000000000000000",
         "700000000000000000",
-        "10000000000000000000000",
+        "20000000000000000000000",
         "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296",
         "2000000000000000000000000",
         "1600000000000000000000000",

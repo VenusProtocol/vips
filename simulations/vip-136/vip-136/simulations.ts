@@ -82,8 +82,6 @@ type VTokenSymbol =
   | "vUSDD_GameFi"
   | "vUSDT_GameFi"
   | "vBNBx_LiquidStakedBNB"
-  | "vUSDD_LiquidStakedBNB"
-  | "vUSDT_LiquidStakedBNB"
   | "vWBNB_LiquidStakedBNB"
   | "vankrBNB_LiquidStakedBNB"
   | "vstkBNB_LiquidStakedBNB"
@@ -107,8 +105,6 @@ const vTokens: { [key in VTokenSymbol]: string } = {
   vUSDT_GameFi: "0x4978591f17670A846137d9d613e333C38dc68A37",
 
   vBNBx_LiquidStakedBNB: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
-  vUSDD_LiquidStakedBNB: "0x3ee4be3425e5CC72445cd4C5325A6B5A15507670",
-  vUSDT_LiquidStakedBNB: "0xB3CD745D46A7551C7DF21e0DEfEB710f546bca62",
   vWBNB_LiquidStakedBNB: "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2",
   vankrBNB_LiquidStakedBNB: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
   vstkBNB_LiquidStakedBNB: "0xcc5D9e502574cda17215E70bC0B4546663785227",
@@ -242,22 +238,6 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     symbol: "vBNBx_LiquidStakedBNB",
     decimals: 8,
     underlying: tokens.BNBx,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: pools.LiquidStakedBNB.comptroller,
-  },
-  vUSDD_LiquidStakedBNB: {
-    name: "Venus USDD (Liquid Staked BNB)",
-    symbol: "vUSDD_LiquidStakedBNB",
-    decimals: 8,
-    underlying: tokens.USDD,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: pools.LiquidStakedBNB.comptroller,
-  },
-  vUSDT_LiquidStakedBNB: {
-    name: "Venus USDT (Liquid Staked BNB)",
-    symbol: "vUSDT_LiquidStakedBNB",
-    decimals: 8,
-    underlying: tokens.USDT,
     exchangeRate: parseUnits("1", 28),
     comptroller: pools.LiquidStakedBNB.comptroller,
   },
@@ -497,24 +477,6 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "35",
     vTokenReceiver: treasuries["Venus Treasury"],
   },
-  vUSDT_LiquidStakedBNB: {
-    borrowCap: "14880000",
-    supplyCap: "18600000",
-    collateralFactor: "0.8",
-    liquidationThreshold: "0.88",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
-    vTokenReceiver: treasuries["Venus Treasury"],
-  },
-  vUSDD_LiquidStakedBNB: {
-    borrowCap: "1600000",
-    supplyCap: "2000000",
-    collateralFactor: "0.65",
-    liquidationThreshold: "0.7",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
-    vTokenReceiver: treasuries["Tron Ecosystem"],
-  },
 
   // Pool Tron
   vBTT_Tron: {
@@ -559,7 +521,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.65",
     liquidationThreshold: "0.7",
     reserveFactor: "0.1",
-    initialSupply: "10000",
+    initialSupply: "20000",
     vTokenReceiver: treasuries["Tron Ecosystem"],
   },
 };
@@ -595,16 +557,7 @@ const interestRateModels: InterestRateModelSpec[] = [
     jump: "3",
   },
   {
-    vTokens: [
-      "vUSDT_DeFi",
-      "vUSDD_DeFi",
-      "vUSDT_GameFi",
-      "vUSDD_GameFi",
-      "vUSDT_LiquidStakedBNB",
-      "vUSDD_LiquidStakedBNB",
-      "vUSDT_Tron",
-      "vUSDD_Tron",
-    ],
+    vTokens: ["vUSDT_DeFi", "vUSDD_DeFi", "vUSDT_GameFi", "vUSDD_GameFi", "vUSDT_Tron", "vUSDD_Tron"],
     kink: "0.6",
     base: "0.03",
     multiplier: "0.1",
@@ -739,10 +692,8 @@ forking(29562000, () => {
       it("should register Liquid Staked BNB pool vTokens in Liquid Staked BNB pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, pools.LiquidStakedBNB.comptroller);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(6);
+        expect(poolVTokens).to.have.lengthOf(4);
         expect(poolVTokens).to.include(vTokens.vBNBx_LiquidStakedBNB);
-        expect(poolVTokens).to.include(vTokens.vUSDD_LiquidStakedBNB);
-        expect(poolVTokens).to.include(vTokens.vUSDT_LiquidStakedBNB);
         expect(poolVTokens).to.include(vTokens.vWBNB_LiquidStakedBNB);
         expect(poolVTokens).to.include(vTokens.vankrBNB_LiquidStakedBNB);
         expect(poolVTokens).to.include(vTokens.vstkBNB_LiquidStakedBNB);
