@@ -27,6 +27,9 @@ export async function setForkBlock(blockNumber: number) {
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
+    if (signatures[i] === "") {
+      return "0x";
+    }
     const fragment = ethers.utils.FunctionFragment.from(signatures[i]);
     return defaultAbiCoder.encode(fragment.inputs, args);
   });
