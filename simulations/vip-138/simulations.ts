@@ -36,7 +36,10 @@ forking(29726604, () => {
     prevBalanceOZ = await usdc.balanceOf(OZ_RECEIVER);
   });
 
-  testVip("VIP-138 Payments for auditors", vip138());
+  testVip("VIP-138 Payments for auditors", vip138(), {
+    proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
+    supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
+  });
 
   describe("Post-VIP behavior", async () => {
     it("Should increase balances of Peckshield receiver", async () => {
