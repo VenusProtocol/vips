@@ -20,7 +20,7 @@ const BETH_FEED = "0x2a3796273d47c4ed363b361d3aefb7f7e2a13782";
 const OLD_TUSD_FEED = "0xa3334a9762090e827413a7495afece76f41dfc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(29724705, () => {
+forking(29835855, () => {
   let comptroller: ethers.Contract;
   const provider = ethers.provider;
 
@@ -64,7 +64,7 @@ forking(29724705, () => {
         txResponse,
         [COMPTROLLER_ABI],
         ["NewCollateralFactor", "NewBorrowCap", "NewSupplyCap", "Failure"],
-        [3, 1, 3, 0],
+        [3, 1, 1, 0],
       );
     },
   });
