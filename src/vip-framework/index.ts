@@ -4,12 +4,16 @@ import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
 import { ethers } from "hardhat";
 
-import { Proposal } from "../types";
+import { Proposal, ProposalType } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-let NORMAL_TIMELOCK_DELAY_BLOCKS = 57600;
+const DELAY_BLOCKS = {
+  [ProposalType.REGULAR]: 57600,
+  [ProposalType.FAST_TRACK]: 7200,
+  [ProposalType.CRITICAL]: 1200,
+};
 const VOTING_PERIOD = 28800;
 
 let DEFAULT_PROPOSER_ADDRESS = "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D";
@@ -20,7 +24,11 @@ if (process.env.FORK_TESTNET === "true") {
   DEFAULT_PROPOSER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
   GOVERNOR_PROXY = "0x5573422a1a59385c247ec3a66b93b7c08ec2f8f2";
   NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-  NORMAL_TIMELOCK_DELAY_BLOCKS = 200;
+  const DELAY_BLOCKS = {
+    [ProposalType.REGULAR]: 200,
+    [ProposalType.FAST_TRACK]: 100,
+    [ProposalType.CRITICAL]: 34,
+  };
 }
 
 export const forking = (blockNumber: number, fn: () => void) => {
@@ -130,9 +138,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + NORMAL_TIMELOCK_DELAY_BLOCKS);
-      const proposal = await governorProxy.proposals(proposalId);
-      await time.increaseTo(proposal.eta.toNumber());
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
+      const blockchainProposal = await governorProxy.proposals(proposalId);
+      await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
       const txResponse = await tx.wait();
 
