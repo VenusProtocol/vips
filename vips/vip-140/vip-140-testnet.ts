@@ -24,6 +24,29 @@ const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 
 const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6"
 
+interface BinanceAssetConfig {
+  name: string;
+  address: string;
+}
+
+const BINANCE_SUPPORTED_ASSETS: BinanceAssetConfig[] = [
+  {
+    name: "HAY",
+    address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
+  },
+  {
+    name: "FLOKI",
+    address: "0xb22cF15FBc089d470f8e532aeAd2baB76bE87c88",
+  },
+  {
+    name: "BTT",
+    address: "0xE98344A7c691B200EF47c9b8829110087D832C64",
+  },
+];
+
+const MAX_STALE_PERIOD = 60 * 60 * 24; // 1 day
+
+
 export const vip140Testnet = () => {
   const meta = {
     version: "v2",
