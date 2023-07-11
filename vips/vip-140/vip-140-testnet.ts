@@ -44,6 +44,31 @@ export const vip140Testnet = () => {
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE,RESILIENT_ORACLE_IMPL],
       },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [CHAINLINK_ORACLE,CHAINLINK_ORACLE_IMPL],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [BOUND_VALIDATOR,BOUND_VALIDATOR_IMPL],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [PYTH_ORACLE,PYTH_ORACLE_IMPL],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [TWAP_ORACLE,TWAP_ORACLE_IMPL],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [BINANCE_ORACLE,BINANCE_ORACLE_IMPL],
+      },
     ],
     meta,
     ProposalType.REGULAR,
