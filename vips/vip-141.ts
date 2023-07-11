@@ -5,7 +5,6 @@ import { makeProposal } from "../src/utils";
 
 const DeFi_Pool = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const vANKR_DeFi = "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362";
-const vBIFI_DeFi = "0xC718c51958d3fd44f5F9580c9fFAC2F89815C909";
 const vBSW_DeFi = "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379";
 const vALPACA_DeFi = "0x02c5Fb0F26761093D297165e902e96D08576D344";
 const vUSDT_DeFi = "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854";
@@ -57,10 +56,6 @@ export const vip141 = () => {
       CF: 0.25 -> 0.2
       SupplyCap: 9,508,802 -> 17,700,000
       BorrowCap: 6,656,161 -> 8,850,000
-    Venus BIFI (DeFi)
-      CF: 0.25 -> 0.2
-      SupplyCap: 379 -> 600
-      BorrowCap: 266 -> 300
     Venus BSW (DeFi)
       CF: 0.25 -> 0.2
       SupplyCap: 15,000,000 -> 11,600,000
@@ -72,13 +67,13 @@ export const vip141 = () => {
     Venus USDT (DeFi)
       CF: 0.8 -> 0.75
       LT: 0.88 -> 0.8
-      SupplyCap: 18,600,000 -> 1,150,000
-      BorrowCap: 14,880,000 -> 920,000
+      SupplyCap: 18,600,000 -> 1,387,500
+      BorrowCap: 14,880,000 -> 925,000
       kink: 0.6 -> 0.8
       base: 0.03 -> 0.02
     Venus USDD (DeFi)
-      SupplyCap: 2,000,000 -> 350,000
-      BorrowCap: 1,600,000 -> 280,000
+      SupplyCap: 2,000,000 -> 450,000
+      BorrowCap: 1,600,000 -> 300,000
       kink: 0.6 -> 0.7
       base: 0.03 -> 0.02
     vFLOKI_GameFi
@@ -94,13 +89,13 @@ export const vip141 = () => {
     vUSDT_GameFi
       CF: 0.8 -> 0.75
       LT: 0.88 -> 0.8
-      SupplyCap: 18,600,000 -> 1,000,000
+      SupplyCap: 18,600,000 -> 1,200,000
       BorrowCap: 14,880,000 -> 800,000
       kink: 0.6 -> 0.8
       base: 0.03 -> 0.02
     vUSDD_GameFi
-      SupplyCap: 2,000,000 -> 250,000
-      BorrowCap: 1,600,000 -> 200,000
+      SupplyCap: 2,000,000 -> 450,000
+      BorrowCap: 1,600,000 -> 300,000
       kink: 0.6 -> 0.7
       base: 0.03 -> 0.02
     vankrBNB_LiquidStakedBNB
@@ -135,14 +130,14 @@ export const vip141 = () => {
     vUSDT_Stablecoins
       CF: 0.8 -> 0.75
       LT: 0.88 -> 0.8
-      SupplyCap: 1,000,000 -> 800,000
+      SupplyCap: 1,000,000 -> 960,000
       BorrowCap: 400,000 -> 640,000
       kink: 0.6 -> 0.8
       multiplier: 0.05 -> 0.1
     vUSDD_Stablecoins
       CF: 0.65 -> 0.75
       LT: 0.7 -> 0.8
-      SupplyCap: 1,000,000 -> 200,000
+      SupplyCap: 1,000,000 -> 240,000
       BorrowCap: 400,000 -> 160,000
       kink: 0.8 -> 0.7
       jumpMultiplier: 3 -> 2.5
@@ -164,13 +159,13 @@ export const vip141 = () => {
     vUSDT_Tron
       CF: 0.8 -> 0.75
       LT: 0.88 -> 0.8
-      SupplyCap: 18,600,000 -> 910,000
-      BorrowCap: 14,880,000 -> 730,000
+      SupplyCap: 18,600,000 -> 1,380,000
+      BorrowCap: 14,880,000 -> 920,000
       base: 0.03 -> 0.02
       kink: 0.6 -> 0.8
     vUSDD_Tron
-      SupplyCap: 2,000,000 -> 225,000
-      BorrowCap: 1,600,000 -> 180,000
+      SupplyCap: 2,000,000 -> 1,950,000
+      BorrowCap: 1,600,000 -> 1,300,000
       base: 0.03 -> 0.02
       kink: 0.6 -> 0.7`,
 
@@ -188,12 +183,6 @@ export const vip141 = () => {
         target: DeFi_Pool,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [vANKR_DeFi, parseUnits("0.2", 18), parseUnits("0.3", 18)],
-      },
-
-      {
-        target: DeFi_Pool,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [vBIFI_DeFi, parseUnits("0.2", 18), parseUnits("0.3", 18)],
       },
 
       {
@@ -218,14 +207,13 @@ export const vip141 = () => {
         target: DeFi_Pool,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
-          [vANKR_DeFi, vBIFI_DeFi, vBSW_DeFi, vALPACA_DeFi, vUSDT_DeFi, vUSDD_DeFi],
+          [vANKR_DeFi, vBSW_DeFi, vALPACA_DeFi, vUSDT_DeFi, vUSDD_DeFi],
           [
             parseUnits("17700000", 18),
-            parseUnits("600", 18),
             parseUnits("11600000", 18),
             parseUnits("1500000", 18),
-            parseUnits("1150000", 18),
-            parseUnits("350000", 18),
+            parseUnits("1387500", 18),
+            parseUnits("450000", 18),
           ],
         ],
       },
@@ -234,14 +222,13 @@ export const vip141 = () => {
         target: DeFi_Pool,
         signature: "setMarketBorrowCaps(address[],uint256[])",
         params: [
-          [vANKR_DeFi, vBIFI_DeFi, vBSW_DeFi, vALPACA_DeFi, vUSDT_DeFi, vUSDD_DeFi],
+          [vANKR_DeFi, vBSW_DeFi, vALPACA_DeFi, vUSDT_DeFi, vUSDD_DeFi],
           [
             parseUnits("8850000", 18),
-            parseUnits("300", 18),
             parseUnits("5800000", 18),
             parseUnits("750000", 18),
-            parseUnits("920000", 18),
-            parseUnits("280000", 18),
+            parseUnits("925000", 18),
+            parseUnits("300000", 18),
           ],
         ],
       },
@@ -288,8 +275,8 @@ export const vip141 = () => {
           [
             parseUnits("22000000000", 9),
             parseUnits("4200000000", 18),
-            parseUnits("1000000", 18),
-            parseUnits("250000", 18),
+            parseUnits("1200000", 18),
+            parseUnits("450000", 18),
           ],
         ],
       },
@@ -303,7 +290,7 @@ export const vip141 = () => {
             parseUnits("11000000000", 9),
             parseUnits("2100000000", 18),
             parseUnits("800000", 18),
-            parseUnits("200000", 18),
+            parseUnits("300000", 18),
           ],
         ],
       },
@@ -399,7 +386,7 @@ export const vip141 = () => {
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [
           [vUSDT_Stablecoins, vUSDD_Stablecoins],
-          [parseUnits("800000", 18), parseUnits("200000", 18)],
+          [parseUnits("960000", 18), parseUnits("240000", 18)],
         ],
       },
 
@@ -473,8 +460,8 @@ export const vip141 = () => {
             parseUnits("1130000000000", 18),
             parseUnits("2300000000", 18),
             parseUnits("6300000", 6),
-            parseUnits("910000", 18),
-            parseUnits("225000", 18),
+            parseUnits("1380000", 18),
+            parseUnits("1950000", 18),
           ],
         ],
       },
@@ -488,8 +475,8 @@ export const vip141 = () => {
             parseUnits("565000000000", 18),
             parseUnits("1150000000", 18),
             parseUnits("3150000", 6),
-            parseUnits("730000", 18),
-            parseUnits("180000", 18),
+            parseUnits("920000", 18),
+            parseUnits("1300000", 18),
           ],
         ],
       },
@@ -507,6 +494,6 @@ export const vip141 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };

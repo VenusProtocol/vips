@@ -12,7 +12,6 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const DeFi_Pool = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const VANKR_DeFi = "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362";
-const VBIFI_DeFi = "0xC718c51958d3fd44f5F9580c9fFAC2F89815C909";
 const VBSW_DeFi = "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379";
 const VALPACA_DeFi = "0x02c5Fb0F26761093D297165e902e96D08576D344";
 const VUSDT_DeFi = "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854";
@@ -64,7 +63,6 @@ forking(29870474, () => {
   let StableCoin_Pool_Comptroller: ethers.Contract;
   let Tron_Pool_Comptroller: ethers.Contract;
 
-  let vBIFI_DeFi: ethers.Contract;
   let vBSW_DeFi: ethers.Contract;
   let vALPACA_DeFi: ethers.Contract;
   let vUSDT_DeFi: ethers.Contract;
@@ -100,7 +98,6 @@ forking(29870474, () => {
     StableCoin_Pool_Comptroller = new ethers.Contract(StableCoin_Pool, COMPTROLLER_ABI, provider);
     Tron_Pool_Comptroller = new ethers.Contract(Tron_Pool, COMPTROLLER_ABI, provider);
 
-    vBIFI_DeFi = new ethers.Contract(VBIFI_DeFi, VTOKEN_ABI, ethers.provider);
     vBSW_DeFi = new ethers.Contract(VBSW_DeFi, VTOKEN_ABI, ethers.provider);
     vALPACA_DeFi = new ethers.Contract(VALPACA_DeFi, VTOKEN_ABI, ethers.provider);
     vUSDT_DeFi = new ethers.Contract(VUSDT_DeFi, VTOKEN_ABI, ethers.provider);
@@ -120,13 +117,6 @@ forking(29870474, () => {
     vTRX_Tron = new ethers.Contract(VTRX_Tron, VTOKEN_ABI, ethers.provider);
     vUSDT_Tron = new ethers.Contract(VUSDT_Tron, VTOKEN_ABI, ethers.provider);
     vUSDD_Tron = new ethers.Contract(VUSDD_Tron, VTOKEN_ABI, ethers.provider);
-
-    await setMaxStalePeriodInChainlinkOracle(
-      CHAINLINK_ORACLE,
-      await vBIFI_DeFi.underlying(),
-      "0xaB827b69daCd586A37E80A7d552a4395d576e645",
-      NORMAL_TIMELOCK,
-    );
 
     await setMaxStalePeriodInChainlinkOracle(
       CHAINLINK_ORACLE,
@@ -192,11 +182,6 @@ forking(29870474, () => {
         expect(oldCap).to.equal(parseUnits("9508802", 18));
       });
 
-      it("supply cap of BIFI equals 379", async () => {
-        const oldCap = await DeFi_Pool_Comptroller.supplyCaps(VBIFI_DeFi);
-        expect(oldCap).to.equal(parseUnits("379", 18));
-      });
-
       it("supply cap of BSW equals 15,000,000", async () => {
         const oldCap = await DeFi_Pool_Comptroller.supplyCaps(VBSW_DeFi);
         expect(oldCap).to.equal(parseUnits("15000000", 18));
@@ -220,11 +205,6 @@ forking(29870474, () => {
       it("borrow cap of ANKR equals 6,656,161", async () => {
         const oldCap = await DeFi_Pool_Comptroller.borrowCaps(VANKR_DeFi);
         expect(oldCap).to.equal(parseUnits("6656161", 18));
-      });
-
-      it("borrow cap of BIFI equals 266", async () => {
-        const oldCap = await DeFi_Pool_Comptroller.borrowCaps(VBIFI_DeFi);
-        expect(oldCap).to.equal(parseUnits("266", 18));
       });
 
       it("borrow cap of BSW equals 10,500,000", async () => {
@@ -252,11 +232,6 @@ forking(29870474, () => {
         expect(collateralFactor).to.equal(parseUnits("0.25", 18));
       });
 
-      it("collateral factor of BIFI equals 25%", async () => {
-        const collateralFactor = (await DeFi_Pool_Comptroller.markets(VBIFI_DeFi)).collateralFactorMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.25", 18));
-      });
-
       it("collateral factor of BSW equals 25%", async () => {
         const collateralFactor = (await DeFi_Pool_Comptroller.markets(VBSW_DeFi)).collateralFactorMantissa;
         expect(collateralFactor).to.equal(parseUnits("0.25", 18));
@@ -273,8 +248,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of USDT equals 88%", async () => {
-        const collateralFactor = (await DeFi_Pool_Comptroller.markets(VUSDT_DeFi)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.88", 18));
+        const liquidationThreshold = (await DeFi_Pool_Comptroller.markets(VUSDT_DeFi)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.88", 18));
       });
     });
 
@@ -330,8 +305,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of RACA equals 30%", async () => {
-        const collateralFactor = (await GameFi_Pool_Comptroller.markets(VRACA_GameFi)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.30", 18));
+        const liquidationThreshold = (await GameFi_Pool_Comptroller.markets(VRACA_GameFi)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.30", 18));
       });
 
       it("collateral factor of USDT equals 80%", async () => {
@@ -340,8 +315,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of USDT equals 88%", async () => {
-        const collateralFactor = (await GameFi_Pool_Comptroller.markets(VUSDT_GameFi)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.88", 18));
+        const liquidationThreshold = (await GameFi_Pool_Comptroller.markets(VUSDT_GameFi)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.88", 18));
       });
     });
 
@@ -388,9 +363,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of ankrBNB equals 0.4%", async () => {
-        const collateralFactor = (await LiquidStakedBNB_Pool_Comptroller.markets(VankrBNB_LiquidStakedBNB))
+        const liquidationThreshold = (await LiquidStakedBNB_Pool_Comptroller.markets(VankrBNB_LiquidStakedBNB))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.4", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.4", 18));
       });
 
       it("collateral factor of BNBx equals 35%", async () => {
@@ -400,9 +375,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of BNBx equals 40%", async () => {
-        const collateralFactor = (await LiquidStakedBNB_Pool_Comptroller.markets(VBNBx_LiquidStakedBNB))
+        const liquidationThreshold = (await LiquidStakedBNB_Pool_Comptroller.markets(VBNBx_LiquidStakedBNB))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.40", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.40", 18));
       });
 
       it("collateral factor of stkBNB equals 35%", async () => {
@@ -412,9 +387,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of stkBNB equals 40%", async () => {
-        const collateralFactor = (await LiquidStakedBNB_Pool_Comptroller.markets(VstkBNB_LiquidStakedBNB))
+        const liquidationThreshold = (await LiquidStakedBNB_Pool_Comptroller.markets(VstkBNB_LiquidStakedBNB))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.40", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.40", 18));
       });
 
       it("collateral factor of WBNB equals 45%", async () => {
@@ -424,9 +399,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of WBNB equals 50%", async () => {
-        const collateralFactor = (await LiquidStakedBNB_Pool_Comptroller.markets(VWBNB_LiquidStakedBNB))
+        const liquidationThreshold = (await LiquidStakedBNB_Pool_Comptroller.markets(VWBNB_LiquidStakedBNB))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.50", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.50", 18));
       });
     });
 
@@ -467,9 +442,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of HAY equals 70%", async () => {
-        const collateralFactor = (await StableCoin_Pool_Comptroller.markets(VHAY_Stablecoins))
+        const liquidationThreshold = (await StableCoin_Pool_Comptroller.markets(VHAY_Stablecoins))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.70", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.70", 18));
       });
 
       it("collateral factor of USDT equals 80%", async () => {
@@ -479,9 +454,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of USDT equals 88%", async () => {
-        const collateralFactor = (await StableCoin_Pool_Comptroller.markets(VUSDT_Stablecoins))
+        const liquidationThreshold = (await StableCoin_Pool_Comptroller.markets(VUSDT_Stablecoins))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.88", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.88", 18));
       });
 
       it("collateral factor of USDD equals 65%", async () => {
@@ -491,9 +466,9 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of USDD equals 70%", async () => {
-        const collateralFactor = (await StableCoin_Pool_Comptroller.markets(VUSDD_Stablecoins))
+        const liquidationThreshold = (await StableCoin_Pool_Comptroller.markets(VUSDD_Stablecoins))
           .liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.70", 18));
+        expect(liquidationThreshold).to.equal(parseUnits("0.70", 18));
       });
     });
 
@@ -554,8 +529,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of BTT equals 30%", async () => {
-        const collateralFactor = (await Tron_Pool_Comptroller.markets(VBTT_Tron)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.30", 18));
+        const liquidationThreshold = (await Tron_Pool_Comptroller.markets(VBTT_Tron)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.30", 18));
       });
 
       it("collateral factor of WIN equals 25%", async () => {
@@ -564,8 +539,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of WIN equals 30%", async () => {
-        const collateralFactor = (await Tron_Pool_Comptroller.markets(VWIN_Tron)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.30", 18));
+        const liquidationThreshold = (await Tron_Pool_Comptroller.markets(VWIN_Tron)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.30", 18));
       });
 
       it("collateral factor of TRX equals 25%", async () => {
@@ -574,8 +549,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of TRX equals 30%", async () => {
-        const collateralFactor = (await Tron_Pool_Comptroller.markets(VTRX_Tron)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.30", 18));
+        const liquidationThreshold = (await Tron_Pool_Comptroller.markets(VTRX_Tron)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.30", 18));
       });
 
       it("collateral factor of USDT equals 80%", async () => {
@@ -584,8 +559,8 @@ forking(29870474, () => {
       });
 
       it("liquidation threshold of USDT equals 88%", async () => {
-        const collateralFactor = (await Tron_Pool_Comptroller.markets(VUSDT_Tron)).liquidationThresholdMantissa;
-        expect(collateralFactor).to.equal(parseUnits("0.88", 18));
+        const liquidationThreshold = (await Tron_Pool_Comptroller.markets(VUSDT_Tron)).liquidationThresholdMantissa;
+        expect(liquidationThreshold).to.equal(parseUnits("0.88", 18));
       });
     });
   });
@@ -603,7 +578,7 @@ forking(29870474, () => {
           "NewReserveFactor",
           "NewMarketInterestRateModel",
         ],
-        [19, 15, 20, 22, 1, 10],
+        [18, 15, 19, 21, 1, 10],
       );
     },
   });
@@ -616,11 +591,6 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("17700000", 18));
         });
 
-        it("supply cap of BIFI equals 600", async () => {
-          const newCap = await DeFi_Pool_Comptroller.supplyCaps(VBIFI_DeFi);
-          expect(newCap).to.equal(parseUnits("600", 18));
-        });
-
         it("supply cap of BSW equals 11,600,000", async () => {
           const newCap = await DeFi_Pool_Comptroller.supplyCaps(VBSW_DeFi);
           expect(newCap).to.equal(parseUnits("11600000", 18));
@@ -631,24 +601,19 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("1500000", 18));
         });
 
-        it("supply cap of USDT equals 1,150,000", async () => {
+        it("supply cap of USDT equals 1,387,500", async () => {
           const newCap = await DeFi_Pool_Comptroller.supplyCaps(VUSDT_DeFi);
-          expect(newCap).to.equal(parseUnits("1150000", 18));
+          expect(newCap).to.equal(parseUnits("1387500", 18));
         });
 
-        it("supply cap of USDD equals 350,000", async () => {
+        it("supply cap of USDD equals 450,000", async () => {
           const newCap = await DeFi_Pool_Comptroller.supplyCaps(VUSDD_DeFi);
-          expect(newCap).to.equal(parseUnits("350000", 18));
+          expect(newCap).to.equal(parseUnits("450000", 18));
         });
 
         it("borrow cap of ANKR equals 8,850,000", async () => {
           const newCap = await DeFi_Pool_Comptroller.borrowCaps(VANKR_DeFi);
           expect(newCap).to.equal(parseUnits("8850000", 18));
-        });
-
-        it("borrow cap of BIFI equals 300", async () => {
-          const newCap = await DeFi_Pool_Comptroller.borrowCaps(VBIFI_DeFi);
-          expect(newCap).to.equal(parseUnits("300", 18));
         });
 
         it("borrow cap of BSW equals 5,800,000", async () => {
@@ -661,23 +626,18 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("750000", 18));
         });
 
-        it("borrow cap of USDT equals 920,000", async () => {
+        it("borrow cap of USDT equals 925,000", async () => {
           const newCap = await DeFi_Pool_Comptroller.borrowCaps(VUSDT_DeFi);
-          expect(newCap).to.equal(parseUnits("920000", 18));
+          expect(newCap).to.equal(parseUnits("925000", 18));
         });
 
-        it("borrow cap of USDD equals 280,000", async () => {
+        it("borrow cap of USDD equals 300,000", async () => {
           const newCap = await DeFi_Pool_Comptroller.borrowCaps(VUSDD_DeFi);
-          expect(newCap).to.equal(parseUnits("280000", 18));
+          expect(newCap).to.equal(parseUnits("300000", 18));
         });
 
         it("collateral factor of ANKR equals 20%", async () => {
           const collateralFactor = (await DeFi_Pool_Comptroller.markets(VANKR_DeFi)).collateralFactorMantissa;
-          expect(collateralFactor).to.equal(parseUnits("0.20", 18));
-        });
-
-        it("collateral factor of BIFI equals 20%", async () => {
-          const collateralFactor = (await DeFi_Pool_Comptroller.markets(VBIFI_DeFi)).collateralFactorMantissa;
           expect(collateralFactor).to.equal(parseUnits("0.20", 18));
         });
 
@@ -741,14 +701,14 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("4200000000", 18));
         });
 
-        it("supply cap of USDT equals 1,000,000", async () => {
+        it("supply cap of USDT equals 1,200,000", async () => {
           const newCap = await GameFi_Pool_Comptroller.supplyCaps(VUSDT_GameFi);
-          expect(newCap).to.equal(parseUnits("1000000", 18));
+          expect(newCap).to.equal(parseUnits("1200000", 18));
         });
 
-        it("supply cap of USDD equals 250,000", async () => {
+        it("supply cap of USDD equals 450,000", async () => {
           const newCap = await GameFi_Pool_Comptroller.supplyCaps(VUSDD_GameFi);
-          expect(newCap).to.equal(parseUnits("250000", 18));
+          expect(newCap).to.equal(parseUnits("450000", 18));
         });
 
         it("borrow cap of FLOKI equals 11,000,000,000", async () => {
@@ -766,9 +726,9 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("800000", 18));
         });
 
-        it("borrow cap of USDD equals 200,000", async () => {
+        it("borrow cap of USDD equals 300,000", async () => {
           const newCap = await GameFi_Pool_Comptroller.borrowCaps(VUSDD_GameFi);
-          expect(newCap).to.equal(parseUnits("200000", 18));
+          expect(newCap).to.equal(parseUnits("300000", 18));
         });
 
         it("collateral factor of FLOKI equals 40%", async () => {
@@ -932,14 +892,14 @@ forking(29870474, () => {
 
     describe("StableCoins Pool", async () => {
       describe("Caps Check", async () => {
-        it("supply cap of USDT equals 800,000", async () => {
+        it("supply cap of USDT equals 960,000", async () => {
           const newCap = await StableCoin_Pool_Comptroller.supplyCaps(VUSDT_Stablecoins);
-          expect(newCap).to.equal(parseUnits("800000", 18));
+          expect(newCap).to.equal(parseUnits("960000", 18));
         });
 
-        it("supply cap of USDD equals 200,000", async () => {
+        it("supply cap of USDD equals 240,000", async () => {
           const newCap = await StableCoin_Pool_Comptroller.supplyCaps(VUSDD_Stablecoins);
-          expect(newCap).to.equal(parseUnits("200000", 18));
+          expect(newCap).to.equal(parseUnits("240000", 18));
         });
 
         it("borrow cap of HAY equals 250,000", async () => {
@@ -1054,14 +1014,14 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("6300000", 6));
         });
 
-        it("supply cap of USDT equals 910,000", async () => {
+        it("supply cap of USDT equals 1,380,000", async () => {
           const newCap = await Tron_Pool_Comptroller.supplyCaps(VUSDT_Tron);
-          expect(newCap).to.equal(parseUnits("910000", 18));
+          expect(newCap).to.equal(parseUnits("1380000", 18));
         });
 
-        it("supply cap of USDD equals 225,000", async () => {
+        it("supply cap of USDD equals 1,950,000", async () => {
           const newCap = await Tron_Pool_Comptroller.supplyCaps(VUSDD_Tron);
-          expect(newCap).to.equal(parseUnits("225000", 18));
+          expect(newCap).to.equal(parseUnits("1950000", 18));
         });
 
         it("borrow cap of BTT equals 565,000,000,000", async () => {
@@ -1079,14 +1039,14 @@ forking(29870474, () => {
           expect(newCap).to.equal(parseUnits("3150000", 6));
         });
 
-        it("borrow cap of USDT equals 730,000", async () => {
+        it("borrow cap of USDT equals 920,000", async () => {
           const newCap = await Tron_Pool_Comptroller.borrowCaps(VUSDT_Tron);
-          expect(newCap).to.equal(parseUnits("730000", 18));
+          expect(newCap).to.equal(parseUnits("920000", 18));
         });
 
-        it("borrow cap of USDD equals 180,000", async () => {
+        it("borrow cap of USDD equals 1,300,000", async () => {
           const newCap = await Tron_Pool_Comptroller.borrowCaps(VUSDD_Tron);
-          expect(newCap).to.equal(parseUnits("180000", 18));
+          expect(newCap).to.equal(parseUnits("1300000", 18));
         });
 
         it("collateral factor of BTT equals 40%", async () => {
