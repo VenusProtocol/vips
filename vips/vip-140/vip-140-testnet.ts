@@ -9,7 +9,7 @@ const RESILIENT_ORACLE_IMPL = "0xF53cFE89b4c3eFCbdd9aF712e94017454d43c181";
 const BOUND_VALIDATOR_IMPL = "0x4915F67a57FDcbA22535F0F021D64b66b095d026";
 const PYTH_ORACLE_IMPL = "0xb8a450101DF8ab770c8F8521E189a4B39e7Cf5f5";
 const TWAP_ORACLE_IMPL = "0x572ec272B4Ae3a50B99905AFd78671F84474ffd1";
-const BINANCE_ORACLE_IMPL = "0xf015ac791B812b2564d975b8D78671eA4Bc1e2e5";
+const BINANCE_ORACLE_IMPL = "0xCd64844CD0E8E34782cd0d1bF3E537bf7b474FAe";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
@@ -91,6 +91,21 @@ export const vip140Testnet = () => {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [BINANCE_ORACLE,BINANCE_ORACLE_IMPL],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BINANCE_ORACLE, "setSymbolOverride(string,string)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BINANCE_ORACLE, "setSymbolOverride(string,string)", NORMAL_TIMELOCK],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setSymbolOverride(string,string)",
+        params: ["WBNB","BNB"],
       },
     ],
     meta,
