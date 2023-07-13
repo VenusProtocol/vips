@@ -8,10 +8,10 @@ const OLD_VTUSD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
 const VXVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
 const VBETH = "0x972207A639CC1B374B893cc33Fa251b55CEB7c07";
 
-export const vip138 = () => {
+export const vip141 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-138 Risk Parameters Update",
+    title: "VIP-141 Risk Parameters Update",
     description: `
     XVS: 
       Increase collateral factor to 0.60 from 0.55
