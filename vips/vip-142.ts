@@ -45,10 +45,10 @@ const vUSDD_Stablecoins_Rate_Model = "0x12d290de159341d36bb1a5a58904ad95053bdb20
 const vUSDT_Tron_Rate_Model = "0x009cdfb248e021f58a34b50dc2a7601ea72d14ac";
 const vUSDD_Tron_Rate_Model = "0xd9d10f63d736dc2d5271ce7e94c4b07e114d7c76";
 
-export const vip141 = () => {
+export const vip142 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-141 Risk Parameters Update",
+    title: "VIP-142 Risk Parameters Update",
     description: `
 
   Changes to do
