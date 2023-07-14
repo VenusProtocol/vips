@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip140Testnet } from "../../../vips/vip-140/vip-140-testnet";
 
@@ -55,22 +54,22 @@ const ilPoolTokens: ILVTokenConfig[] = [
   {
     assetName: "FLOKI",
     assetAddress: "0xb22cF15FBc089d470f8e532aeAd2baB76bE87c88",
-    price: "0.00003253",
+    price: "0.00002483",
   },
   {
     assetName: "HAY",
     assetAddress: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
-    price: "1.00060712",
+    price: "1.00079564",
   },
   {
     assetName: "BTT",
     assetAddress: "0xE98344A7c691B200EF47c9b8829110087D832C64",
-    price: "0.0000006",
+    price: "0.00000046",
   },
   {
     assetName: "WBETH",
-    assetAddress: "0xccBB1b1Be3663D22530aAB798e90DE29e2cbC8EE",
-    price: "0"
+    assetAddress: "0xf9F98365566F4D55234f24b99caA1AfBE6428D44",
+    price: "1897.64221232"
   }
 ];
 
@@ -131,14 +130,15 @@ forking(31522791, () => {
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
       await impersonateAccount(NORMAL_TIMELOCK);
-      timelockSigner = await ethers.getSigner(PROXY_ADMIN)
+      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK)
+      const signer = await ethers.getSigner(PROXY_ADMIN)
 
-      resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, provider);
-      chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, provider);
-      boundValidatorProxy = new ethers.Contract(BOUND_VALIDATOR, PROXY_ABI, provider);
-      binanceOracleProxy = new ethers.Contract(BINANCE_ORACLE, PROXY_ABI, provider);
-      twapOracleProxy = new ethers.Contract(TWAP_ORACLE, PROXY_ABI, provider);
-      pythOracleProxy = new ethers.Contract(PYTH_ORACLE, PROXY_ABI, provider);
+      resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, signer);
+      chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, signer);
+      boundValidatorProxy = new ethers.Contract(BOUND_VALIDATOR, PROXY_ABI, signer);
+      binanceOracleProxy = new ethers.Contract(BINANCE_ORACLE, PROXY_ABI, signer);
+      twapOracleProxy = new ethers.Contract(TWAP_ORACLE, PROXY_ABI, signer);
+      pythOracleProxy = new ethers.Contract(PYTH_ORACLE, PROXY_ABI, signer);
 
       comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
       resilientOracle = new ethers.Contract(await comptroller.oracle(), RESILIENT_ORACLE_ABI, provider);
@@ -163,8 +163,7 @@ forking(31522791, () => {
         await binanceOracle.setMaxStalePeriod(vToken.assetName, 7 * 24 * 60 * 60);
         await mockVToken.setUnderlyingAsset(vToken.assetAddress);
         const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
-        console.log(price)
-        // expect(price).to.be.equal(parseUnits(vToken.price, "18"));
+        expect(price).to.be.equal(parseUnits(vToken.price, "18"));
       }
     });
   });
