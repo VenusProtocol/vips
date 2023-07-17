@@ -139,8 +139,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
 
     it("should be executed successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
-      // const blockchainProposal = await governorProxy.proposals(proposalId);
-      // await time.increaseTo(blockchainProposal.eta.toNumber());
+      const blockchainProposal = await governorProxy.proposals(proposalId);
+      await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
       const txResponse = await tx.wait();
 
