@@ -33,7 +33,7 @@ const MOCK_VTOKEN_ABI = [
   },
 ];
 
-forking(29131121, () => {
+forking(30075405, () => {
   let comptroller: ethers.Contract;
   let sd: ethers.Contract;
   let oracle: ethers.Contract;
@@ -63,7 +63,7 @@ forking(29131121, () => {
     it("get correct price from oracle ", async () => {
       await mockVToken.setUnderlyingAsset(SD);
       const price = await oracle.getUnderlyingPrice(mockVToken.address);
-      expect(price).to.equal(parseUnits("1676.320518890000000000", 18));
+      expect(price).to.equal(parseUnits("0.92013604", 18));
     });
   })
   
