@@ -13,29 +13,34 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const ankrBNB = "0x167F1F9EF531b3576201aa3146b13c57dbEda514";
 const USDD = "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const VTOKEN_RECEIVER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-const vankrBNB_DeFi = "0x4AA3c85832084764a2B4DE812FA34B309f051610";
+const vankrBNB_DeFi = "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6";
 const vUSDD_DeFi = "0xa109DE0abaeefC521Ec29D89eA42E64F37A6882E";
 const COMPTROLLER_DeFi = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
 const BINANCE_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const REWARD_DISTRIBUTOR = "0x4be90041D1e082EfE3613099aA3b987D9045d718";
+const ANKR = "0xe4a90EB942CF2DA7238e8F6cC9EF510c49FC8B4B";
 
-forking(31544685, () => {
+forking(31655347, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vankrBNB: Contract;
   let oracle: Contract;
+  let rewardsDistributor: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
     vankrBNB = await ethers.getContractAt(VTOKEN_ABI, vankrBNB_DeFi);
     oracle = await ethers.getContractAt(ORACLE_ABI, BINANCE_ORACLE);
+    rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
     const siger = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
     await oracle.connect(siger).setDirectPrice(USDD, "10000000000");
     await oracle.connect(siger).setDirectPrice(ankrBNB, "10000000000");
@@ -210,6 +215,34 @@ forking(31544685, () => {
 
           it("should set vankrBNB_DeFi borrow cap to 200,000", async () => {
             expect(await comptroller.borrowCaps(vankrBNB_DeFi)).to.equal(parseUnits("4000", 18));
+          });
+        });
+
+        describe("Reward Distributor", () => {
+          it("should have 2 rewards distributor in DeFi pool", async () => {
+            const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
+            expect(await comptroller.getRewardDistributors()).to.have.lengthOf(2);
+          });
+
+          it("should have rewardToken ANKR", async () => {
+            expect(await rewardsDistributor.rewardToken()).to.equal(ANKR);
+          });
+
+          it(`should have owner = Normal Timelock`, async () => {
+            expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
+          });
+
+          it("should have borrowSpeed  = 289351851851851851", async () => {
+            expect(await rewardsDistributor.rewardTokenBorrowSpeeds(vankrBNB_DeFi)).to.equal("289351851851851851");
+          });
+
+          it("should have supplySpeed = 289351851851851851", async () => {
+            expect(await rewardsDistributor.rewardTokenSupplySpeeds(vankrBNB_DeFi)).to.equal("289351851851851851");
+          });
+
+          it("should have balance = 500,000 ANKR", async () => {
+            const token = await ethers.getContractAt(ERC20_ABI, ANKR);
+            expect(await token.balanceOf(rewardsDistributor.address)).to.equal(parseUnits("500000", 18));
           });
         });
       });
