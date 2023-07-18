@@ -16,7 +16,7 @@ const SD = "0xac7d6b77ebd1db8c5a9f0896e5eb5d485cb677b3";
 const DUMMY_SIGNER = "0xF474Cf03ccEfF28aBc65C9cbaE594F725c80e12d";
 const MOCK_VTOKEN = "0x65d77756974d3DA088F75DA527009c286F0228EE";
 
-forking(30720569, () => {
+forking(31667666, () => {
   let comptroller: ethers.Contract;
   let sd: ethers.Contract;
   let oracle: ethers.Contract;
@@ -32,7 +32,7 @@ forking(30720569, () => {
     mockVToken = new ethers.Contract(MOCK_VTOKEN, MOCK_VTOKEN_ABI, await ethers.getSigner(DUMMY_SIGNER));
   });
 
-  testVip("VIP-128-testnet Add SD Price Feed", vip141Testnet(24 * 60 * 60 * 3), {
+  testVip("VIP-128-testnet Add SD Price Feed", vip141Testnet(), {
     callbackAfterExecution: async txResponse => {},
   });
 
@@ -40,7 +40,7 @@ forking(30720569, () => {
     it("get correct price from oracle ", async () => {
       await mockVToken.setUnderlyingAsset(SD);
       const price = await oracle.getUnderlyingPrice(mockVToken.address);
-      expect(price).to.equal(parseUnits("1649.670295770000000000", 18));
+      expect(price).to.equal(parseUnits("0.92013604", 18));
     });
   });
 });
