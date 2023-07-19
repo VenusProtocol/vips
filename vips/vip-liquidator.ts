@@ -129,6 +129,18 @@ export const vipLiquidator = () => {
       //   signature: "upgrade(address,address)",
       //   params: [LIQUIDATOR, "NEW_IMPLEMENTATION_ADDRESS"],
       // },
+
+      {
+        target: LIQUIDATOR,
+        signature: "setPendingRedeemChunkLength(uint256)",
+        params: [10],
+      },
+
+      {
+        target: LIQUIDATOR,
+        signature: "resumeForceVAILiquidate()",
+        params: [],
+      },
     ],
     meta,
     ProposalType.REGULAR,
