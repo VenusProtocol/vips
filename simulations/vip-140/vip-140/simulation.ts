@@ -40,6 +40,8 @@ const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343"
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
+const SD = "0x3bc5ac0dfdc871b365d159f728dd1b9a0b5481e8";
+
 const DUMMY_SIGNER = "0xF474Cf03ccEfF28aBc65C9cbaE594F725c80e12d";
 const MOCK_VTOKEN_CODE =
   "608060405234801561001057600080fd5b506101c3806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806325671dcb1461003b5780636f307dc314610057575b600080fd5b610055600480360381019061005091906100f1565b610075565b005b61005f6100b8565b60405161006c9190610129565b60405180910390f35b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555050565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000813590506100eb81610176565b92915050565b60006020828403121561010357600080fd5b6000610111848285016100dc565b91505092915050565b61012381610144565b82525050565b600060208201905061013e600083018461011a565b92915050565b600061014f82610156565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b61017f81610144565b811461018a57600080fd5b5056fea264697066735822122072c165598ea94093a05d15ef83a4a5cf715c200381a4687389a3455431698e7564736f6c63430008000033";
@@ -70,27 +72,27 @@ const ilPoolTokens: ILVTokenConfig[] = [
   {
     name: "RACA",
     assetAddress: "0x12BB890508c125661E03b09EC06E404bc9289040",
-    price: "0.00011397",
+    price: "0.00011653",
   },
   {
     name: "stkBNB",
     assetAddress: "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16",
-    price: "246.12408473",
+    price: "246.49764474",
   },
   {
     name: "USDD",
     assetAddress: "0xd17479997F34dd9156Deef8F95A52D81D265be9c",
-    price: "0.99951394",
+    price: "0.99979993",
   },
   {
     name: "WBETH",
     assetAddress: "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
-    price: "1906.3847959",
+    price: "1926.05167554",
   },
 ];
 
 
-forking(30049205, () => {
+forking(30098228, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -125,7 +127,7 @@ forking(30049205, () => {
     
   });
 
-  testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140(), {
+  testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {},
   });
 
@@ -186,6 +188,12 @@ forking(30049205, () => {
         const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, "18"));
       }
+    });
+
+    it("get correct SD price from oracle ", async () => {
+      await mockVToken.setUnderlyingAsset(SD);
+      const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
+      expect(price).to.equal(parseUnits("0.92596664", 18));
     });
   });
 });

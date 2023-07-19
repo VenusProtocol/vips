@@ -21,7 +21,11 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
 const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343"
 
-export const vip140 = () => {
+const SD = "0x3bc5ac0dfdc871b365d159f728dd1b9a0b5481e8";
+
+const MAX_STALE_PERIOD = 60 * 15;
+
+export const vip140 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-140 Get price Upgrade",
@@ -80,6 +84,26 @@ export const vip140 = () => {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
         params: ["wBETH","WBETH"],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["SD", maxStalePeriod || MAX_STALE_PERIOD],
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            SD,
+            [
+              BINANCE_ORACLE,
+              "0x0000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000",
+            ],
+            [true, false, false],
+          ],
+        ],
       },
     ],
     meta,
