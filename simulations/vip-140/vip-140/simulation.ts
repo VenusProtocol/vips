@@ -90,6 +90,31 @@ const ilPoolTokens: ILVTokenConfig[] = [
     assetAddress: "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
     price: "1926.05167554",
   },
+  {
+    name: "ANKR",
+    assetAddress: "0xf307910A4c7bbc79691fD374889b36d8531B08e3",
+    price: "0.02498495",
+  },
+  {
+    name: "ankrBNB",
+    assetAddress: "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827",
+    price: "257.34608032",
+  },
+  {
+    name: "BTT",
+    assetAddress: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B",
+    price: "0.00000047",
+  },
+  {
+    name: "FLOKI",
+    assetAddress: "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E",
+    price: "24070",
+  },
+  {
+    name: "HAY",
+    assetAddress: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
+    price: "1.0010748",
+  },
 ];
 
 
