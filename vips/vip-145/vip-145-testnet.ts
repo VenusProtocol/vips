@@ -74,6 +74,11 @@ const commands = [
     // "setLastRewardingBlock" (without "s") is how the access control check is coded in the contract
     params: [ANY_TARGET_CONTRACT, "setLastRewardingBlock(address[],uint32[],uint32[])", NORMAL_TIMELOCK],
   },
+  {
+    target: rewardsDistributors30Days.RewardsDistributor_SD_LiquidStakedBNB.address,
+    signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+    params: [[rewardsDistributors30Days.RewardsDistributor_SD_LiquidStakedBNB.vToken], ["7407407407407407"], ["0"]],
+  },
   ...Object.values(rewardsDistributors30Days).flatMap(setLastRewardingBlock(REWARDS_END_BLOCK_30_DAYS)),
   ...Object.values(rewardsDistributors28Days).flatMap(setLastRewardingBlock(REWARDS_END_BLOCK_28_DAYS)),
 ];

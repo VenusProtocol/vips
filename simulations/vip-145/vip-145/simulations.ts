@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
@@ -130,5 +131,28 @@ forking(30043000, () => {
         checkLastRewardingBlock(id, REWARDS_END_BLOCK_30_DAYS);
       }
     }
+  });
+
+  describe("BNBx rewards distributor configuration", () => {
+    let rewardsDistributor: Contract;
+    const vBNBxAddress = rewardsDistributors.RewardsDistributor_SD_LiquidStakedBNB.vToken;
+
+    before(async () => {
+      rewardsDistributor = await ethers.getContractAt(
+        REWARDS_DISTRIBUTOR_ABI,
+        rewardsDistributors.RewardsDistributor_SD_LiquidStakedBNB.address,
+      );
+    });
+
+    it("should set borrow-side SD rewards for BNBx_LiquidStakedBNB to 0", async () => {
+      expect(await rewardsDistributor.rewardTokenBorrowSpeeds(vBNBxAddress)).to.equal(0);
+    });
+
+    // We check for 30 days even though the remaining time is lower
+    it("should set supply-side SD rewards for BNBx_LiquidStakedBNB to 6400 SD / 30 days", async () => {
+      const BLOCKS_PER_30_DAYS = 864000;
+      const expectedRewardPerBlock = parseUnits("6400", 18).div(BLOCKS_PER_30_DAYS);
+      expect(await rewardsDistributor.rewardTokenSupplySpeeds(vBNBxAddress)).to.equal(expectedRewardPerBlock);
+    });
   });
 });

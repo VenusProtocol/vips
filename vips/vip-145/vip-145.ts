@@ -46,7 +46,7 @@ const rewardsDistributors30Days = {
     address: "0x79397BAc982718347406Ebb7A6a8845896fdD8dE",
     vToken: "0xcc5D9e502574cda17215E70bC0B4546663785227",
   },
-  RewardsDistributor_ST_LiquidStakedBNB: {
+  RewardsDistributor_SD_LiquidStakedBNB: {
     address: "0x6a7b50EccC721f0Fa9FD7879A7dF082cdA60Db78",
     vToken: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791", // vBNBx
   },
@@ -73,6 +73,11 @@ const commands = [
     signature: "giveCallPermission(address,string,address)",
     // "setLastRewardingBlock" (without "s") is how the access control check is coded in the contract
     params: [ANY_TARGET_CONTRACT, "setLastRewardingBlock(address[],uint32[],uint32[])", NORMAL_TIMELOCK],
+  },
+  {
+    target: rewardsDistributors30Days.RewardsDistributor_SD_LiquidStakedBNB.address,
+    signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+    params: [[rewardsDistributors30Days.RewardsDistributor_SD_LiquidStakedBNB.vToken], ["7407407407407407"], ["0"]],
   },
   ...Object.values(rewardsDistributors30Days).map(setLastRewardingBlock(REWARDS_END_BLOCK_30_DAYS)),
   ...Object.values(rewardsDistributors28Days).map(setLastRewardingBlock(REWARDS_END_BLOCK_28_DAYS)),
