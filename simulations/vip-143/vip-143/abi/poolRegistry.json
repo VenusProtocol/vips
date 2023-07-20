@@ -1,37 +1,26 @@
 [
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "inputs": [
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "address", "name": "calledContract", "type": "address" },
+      { "internalType": "string", "name": "methodSignature", "type": "string" }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
   },
+  { "inputs": [], "name": "ZeroAddressNotAllowed", "type": "error" },
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint8",
-        "name": "version",
-        "type": "uint8"
-      }
-    ],
+    "inputs": [{ "indexed": false, "internalType": "uint8", "name": "version", "type": "uint8" }],
     "name": "Initialized",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "vTokenAddress",
-        "type": "address"
-      }
+      { "indexed": true, "internalType": "address", "name": "comptroller", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "vTokenAddress", "type": "address" }
     ],
     "name": "MarketAdded",
     "type": "event"
@@ -39,18 +28,17 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+      { "indexed": false, "internalType": "address", "name": "oldAccessControlManager", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newAccessControlManager", "type": "address" }
+    ],
+    "name": "NewAccessControlManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "OwnershipTransferStarted",
     "type": "event"
@@ -58,18 +46,8 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "OwnershipTransferred",
     "type": "event"
@@ -77,34 +55,12 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
+      { "indexed": true, "internalType": "address", "name": "comptroller", "type": "address" },
       {
         "components": [
-          {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "logoURL",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          }
+          { "internalType": "string", "name": "category", "type": "string" },
+          { "internalType": "string", "name": "logoURL", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" }
         ],
         "indexed": false,
         "internalType": "struct PoolRegistryInterface.VenusPoolMetaData",
@@ -113,26 +69,9 @@
       },
       {
         "components": [
-          {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "logoURL",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          }
+          { "internalType": "string", "name": "category", "type": "string" },
+          { "internalType": "string", "name": "logoURL", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" }
         ],
         "indexed": false,
         "internalType": "struct PoolRegistryInterface.VenusPoolMetaData",
@@ -146,24 +85,9 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "oldName",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "newName",
-        "type": "string"
-      }
+      { "indexed": true, "internalType": "address", "name": "comptroller", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "oldName", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "newName", "type": "string" }
     ],
     "name": "PoolNameSet",
     "type": "event"
@@ -171,39 +95,14 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
+      { "indexed": true, "internalType": "address", "name": "comptroller", "type": "address" },
       {
         "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "comptroller",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockPosted",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestampPosted",
-            "type": "uint256"
-          }
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "address", "name": "creator", "type": "address" },
+          { "internalType": "address", "name": "comptroller", "type": "address" },
+          { "internalType": "uint256", "name": "blockPosted", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestampPosted", "type": "uint256" }
         ],
         "indexed": false,
         "internalType": "struct PoolRegistryInterface.VenusPool",
@@ -214,107 +113,25 @@
     "name": "PoolRegistered",
     "type": "event"
   },
+  { "inputs": [], "name": "acceptOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
     "inputs": [],
-    "name": "acceptOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "name": "accessControlManager",
+    "outputs": [{ "internalType": "contract IAccessControlManagerV8", "name": "", "type": "address" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
         "components": [
-          {
-            "internalType": "address",
-            "name": "comptroller",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "asset",
-            "type": "address"
-          },
-          {
-            "internalType": "uint8",
-            "name": "decimals",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "symbol",
-            "type": "string"
-          },
-          {
-            "internalType": "enum PoolRegistry.InterestRateModels",
-            "name": "rateModel",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "baseRatePerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "multiplierPerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "jumpMultiplierPerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "kink_",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "collateralFactor",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "liquidationThreshold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "contract AccessControlManager",
-            "name": "accessControlManager",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "vTokenProxyAdmin",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "beaconAddress",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "initialSupply",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "supplyCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "borrowCap",
-            "type": "uint256"
-          }
+          { "internalType": "contract VToken", "name": "vToken", "type": "address" },
+          { "internalType": "uint256", "name": "collateralFactor", "type": "uint256" },
+          { "internalType": "uint256", "name": "liquidationThreshold", "type": "uint256" },
+          { "internalType": "uint256", "name": "initialSupply", "type": "uint256" },
+          { "internalType": "address", "name": "vTokenReceiver", "type": "address" },
+          { "internalType": "uint256", "name": "supplyCap", "type": "uint256" },
+          { "internalType": "uint256", "name": "borrowCap", "type": "uint256" }
         ],
         "internalType": "struct PoolRegistry.AddMarketInput",
         "name": "input",
@@ -328,50 +145,14 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "beaconAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "closeFactor",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "liquidationIncentive",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minLiquidatableCollateral",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "priceOracle",
-        "type": "address"
-      }
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "contract Comptroller", "name": "comptroller", "type": "address" },
+      { "internalType": "uint256", "name": "closeFactor", "type": "uint256" },
+      { "internalType": "uint256", "name": "liquidationIncentive", "type": "uint256" },
+      { "internalType": "uint256", "name": "minLiquidatableCollateral", "type": "uint256" }
     ],
-    "name": "createRegistryPool",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "proxyAddress",
-        "type": "address"
-      }
-    ],
+    "name": "addPool",
+    "outputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
     "stateMutability": "nonpayable",
     "type": "function"
   },
@@ -381,31 +162,11 @@
     "outputs": [
       {
         "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "comptroller",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockPosted",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestampPosted",
-            "type": "uint256"
-          }
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "address", "name": "creator", "type": "address" },
+          { "internalType": "address", "name": "comptroller", "type": "address" },
+          { "internalType": "uint256", "name": "blockPosted", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestampPosted", "type": "uint256" }
         ],
         "internalType": "struct PoolRegistryInterface.VenusPool[]",
         "name": "",
@@ -416,42 +177,16 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "comptroller", "type": "address" }],
     "name": "getPoolByComptroller",
     "outputs": [
       {
         "components": [
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "comptroller",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "blockPosted",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestampPosted",
-            "type": "uint256"
-          }
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "address", "name": "creator", "type": "address" },
+          { "internalType": "address", "name": "comptroller", "type": "address" },
+          { "internalType": "uint256", "name": "blockPosted", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestampPosted", "type": "uint256" }
         ],
         "internalType": "struct PoolRegistryInterface.VenusPool",
         "name": "",
@@ -462,80 +197,31 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "asset", "type": "address" }],
     "name": "getPoolsSupportedByAsset",
-    "outputs": [
-      {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
+    "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      }
+      { "internalType": "address", "name": "comptroller", "type": "address" },
+      { "internalType": "address", "name": "asset", "type": "address" }
     ],
     "name": "getVTokenForAsset",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "comptroller", "type": "address" }],
     "name": "getVenusPoolMetadata",
     "outputs": [
       {
         "components": [
-          {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "logoURL",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          }
+          { "internalType": "string", "name": "category", "type": "string" },
+          { "internalType": "string", "name": "logoURL", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" }
         ],
         "internalType": "struct PoolRegistryInterface.VenusPoolMetaData",
         "name": "",
@@ -546,73 +232,19 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "contract VTokenProxyFactory",
-        "name": "_vTokenFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract JumpRateModelFactory",
-        "name": "_jumpRateFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract WhitePaperInterestRateModelFactory",
-        "name": "_whitePaperFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract Shortfall",
-        "name": "_shortfall",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "riskFund_",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "protocolShareReserve_",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "metadata",
     "outputs": [
-      {
-        "internalType": "enum PoolRegistryInterface.RiskRating",
-        "name": "riskRating",
-        "type": "uint8"
-      },
-      {
-        "internalType": "string",
-        "name": "category",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "logoURL",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "description",
-        "type": "string"
-      }
+      { "internalType": "string", "name": "category", "type": "string" },
+      { "internalType": "string", "name": "logoURL", "type": "string" },
+      { "internalType": "string", "name": "description", "type": "string" }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -620,48 +252,29 @@
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "pendingOwner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
+    "name": "setAccessControlManager",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      }
+      { "internalType": "address", "name": "comptroller", "type": "address" },
+      { "internalType": "string", "name": "name", "type": "string" }
     ],
     "name": "setPoolName",
     "outputs": [],
@@ -669,13 +282,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -683,36 +290,15 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
+      { "internalType": "address", "name": "comptroller", "type": "address" },
       {
         "components": [
-          {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "category",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "logoURL",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "description",
-            "type": "string"
-          }
+          { "internalType": "string", "name": "category", "type": "string" },
+          { "internalType": "string", "name": "logoURL", "type": "string" },
+          { "internalType": "string", "name": "description", "type": "string" }
         ],
         "internalType": "struct PoolRegistryInterface.VenusPoolMetaData",
-        "name": "_metadata",
+        "name": "metadata_",
         "type": "tuple"
       }
     ],

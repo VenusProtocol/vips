@@ -5,7 +5,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip143 } from "../../../vips/vip-143/vip-143";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -13,6 +13,7 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
+import TREASURY_ABI from "./abi/treasury.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const USDD = "0xd17479997F34dd9156Deef8F95A52D81D265be9c";
@@ -23,7 +24,7 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const ankrBNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
 const ANKR = "0xf307910A4c7bbc79691fD374889b36d8531B08e3";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const VTOKEN_RECEIVER = "AE1c38847Fb90A13a2a1D7E5552cCD80c62C6508";
+const VTOKEN_RECEIVER = "0xAE1c38847Fb90A13a2a1D7E5552cCD80c62C6508";
 const vankrBNB_DeFi = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
 const REWARD_DISTRIBUTOR = "0x14d9A428D0f35f81A30ca8D8b2F3974D3CccB98B";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -102,7 +103,24 @@ forking(30066043, () => {
     });
   });
 
-  testVip("VIP-143 Add Market", vip143());
+  testVip("VIP-143 Add Market", vip143(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI, POOL_REGISTRY_ABI, REWARD_DISTRIBUTOR_ABI, ERC20_ABI, TREASURY_ABI],
+        [
+          "WithdrawTreasuryBEP20",
+          "Approval",
+          "MarketAdded",
+          "NewRewardsDistributor",
+          "RewardTokenSupplySpeedUpdated",
+          "RewardTokenBorrowSpeedUpdated",
+          "OwnershipTransferred",
+        ],
+        [2, 6, 1, 1, 1, 1, 4],
+      );
+    },
+  });
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {
@@ -119,7 +137,7 @@ forking(30066043, () => {
     });
 
     describe("Ownership", () => {
-      it("should transfer ownership of vUSDD_Stablecoins to Timelock", async () => {
+      it("should transfer ownership of vankrBNB_DeFi to Timelock", async () => {
         expect(await vankrBNB.owner()).to.equal(NORMAL_TIMELOCK);
       });
     });
