@@ -8,6 +8,7 @@ import PROXY_ABI from "./abi/proxy.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
+import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import { Signer, ethers } from "ethers";
 import { vip140 } from "../../../vips/vip-140/vip-140";
 import { parseUnits } from "ethers/lib/utils";
@@ -63,13 +64,13 @@ const MOCK_VTOKEN_ABI = [
   },
 ];
 
-interface ILVTokenConfig {
+interface TokenConfig {
   name: string;
   assetAddress: string;
   price: string;
 }
 
-const ilPoolTokens: ILVTokenConfig[] = [
+const tokens: TokenConfig[] = [
   {
     name: "RACA",
     assetAddress: "0x12BB890508c125661E03b09EC06E404bc9289040",
@@ -117,6 +118,169 @@ const ilPoolTokens: ILVTokenConfig[] = [
   },
 ];
 
+const chainlinkTokens: TokenConfig[] = [
+  {
+    name: "ALPACA",
+    assetAddress: "0x8f0528ce5ef7b51152a59745befdd91d97091d2f",
+    price: "0.14836879",
+  },
+  {
+    name: "BIFI",
+    assetAddress: "0xCa3F508B8e4Dd382eE878A314789373D80A5190A",
+    price: "350.06",
+  },
+  {
+    name: "BNBx",
+    assetAddress: "0x1bdd3cf7f79cfb8edbb955f20ad99211551ba275",
+    price: "258.0415293",
+  },
+  {
+    name: "BSW",
+    assetAddress: "0x965f527d9159dce6288a2219db51fc6eef120dd1",
+    price: "0.09240646",
+  },
+  {
+    name: "WBNB",
+    assetAddress: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    price: "241.5041",
+  },
+  {
+    name: "WIN",
+    assetAddress: "0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99",
+    price: "0.0000687",
+  },
+  {
+    name: "WOO",
+    assetAddress: "0x4691937a7508860f876c9c0a2a617e7d9e945d4b",
+    price: "0.21463072",
+  },
+  {
+    name: "USDC",
+    assetAddress: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    price: "0.9999",
+  },
+  {
+    name: "USDT",
+    assetAddress: "0x55d398326f99059fF775485246999027B3197955",
+    price: "1.0000924",
+  },
+  {
+    name: "BUSD",
+    assetAddress: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+    price: "1",
+  },
+  {
+    name: "SXP",
+    assetAddress: "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A",
+    price: "0.36402699",
+  },
+  {
+    name: "XVS",
+    assetAddress: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
+    price: "4.39021442",
+  },
+  {
+    name: "BTCB",
+    assetAddress: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    price: "29977.1",
+  },
+  {
+    name: "ETH",
+    assetAddress: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    price: "1908.08",
+  },
+  {
+    name: "LTC",
+    assetAddress: "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94",
+    price: "93.01",
+  },
+  {
+    name: "XRP",
+    assetAddress: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+    price: "0.7913001",
+  },
+  {
+    name: "BCH",
+    assetAddress: "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf",
+    price: "245.20634004",
+  },
+  {
+    name: "DOT",
+    assetAddress: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
+    price: "5.18647167",
+  },
+  {
+    name: "LINK",
+    assetAddress: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+    price: "6.82403989",
+  },
+  {
+    name: "DAI",
+    assetAddress: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+    price: "0.9999",
+  },
+  {
+    name: "FIL",
+    assetAddress: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
+    price: "4.3010138",
+  },
+  {
+    name: "BETH",
+    assetAddress: "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B",
+    price: "1908.01573169",
+  },
+  {
+    name: "ADA",
+    assetAddress: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+    price: "0.3157",
+  },
+  {
+    name: "DOGE",
+    assetAddress: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
+    price: "690547400",
+  },
+  {
+    name: "MATIC",
+    assetAddress: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD",
+    price: "0.7407",
+  },
+  {
+    name: "CAKE",
+    assetAddress: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    price: "1.51107843",
+  },
+  {
+    name: "AAVE",
+    assetAddress: "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+    price: "72.22214758",
+  },
+  {
+    name: "TUSD",
+    assetAddress: "0x14016E85a25aeb13065688cAFB43044C2ef86784",
+    price: "0.99974863",
+  },
+  {
+    name: "TRX",
+    assetAddress: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
+    price: "0.07992692",
+  },
+  {
+    name: "TRX",
+    assetAddress: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+    price: "79926920000",
+  },
+  {
+    name: "BNB",
+    assetAddress: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    price: "241.5041",
+  },
+  {
+    name: "VAI",
+    assetAddress: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
+    price: "0.97223236",
+  },
+]
+
 
 forking(30098228, () => {
   const provider = ethers.provider;
@@ -149,8 +313,6 @@ forking(30098228, () => {
       expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL_OLD)
       expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL_OLD)
     });
-
-    
   });
 
   testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140(24 * 60 * 60 * 3), {
@@ -174,6 +336,7 @@ forking(30098228, () => {
     let comptroller: ethers.Contract;
     let binanceOracle: ethers.Contract;
     let timelockSigner: Signer
+    let chainlinkOracle: ethers.Contract;
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
@@ -191,6 +354,7 @@ forking(30098228, () => {
       comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
       resilientOracle = new ethers.Contract(await comptroller.oracle(), RESILIENT_ORACLE_ABI, provider);
       binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, timelockSigner);
+      chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelockSigner);
 
       await impersonateAccount(DUMMY_SIGNER);
       const factory = new ethers.ContractFactory(
@@ -210,10 +374,25 @@ forking(30098228, () => {
       expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL)
     });
 
-    it("validate IL vToken prices", async () => {
-      for (let i = 0; i < ilPoolTokens.length; i++) {
-        const vToken = ilPoolTokens[i];
+    it("validate binance vToken prices", async () => {
+      for (let i = 0; i < tokens.length; i++) {
+        const vToken = tokens[i];
         await binanceOracle.setMaxStalePeriod(vToken.name, 7 * 24 * 60 * 60);
+        await mockVToken.setUnderlyingAsset(vToken.assetAddress);
+        const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
+        expect(price).to.be.equal(parseUnits(vToken.price, "18"));
+      }
+    });
+
+    it("validate chainlink vToken prices", async () => {
+      for (let i = 0; i < chainlinkTokens.length; i++) {
+        const vToken = chainlinkTokens[i];
+        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress)
+        await chainlinkOracle.setTokenConfig({
+          asset: config.asset,
+          feed: config.feed,
+          maxStalePeriod: (7 * 24 * 60 * 60)
+        });
         await mockVToken.setUnderlyingAsset(vToken.assetAddress);
         const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
         expect(price).to.be.equal(parseUnits(vToken.price, "18"));
