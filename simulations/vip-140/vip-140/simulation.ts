@@ -384,6 +384,15 @@ forking(30098228, () => {
       }
     });
 
+    it("validate binance vToken prices (getPrice)", async () => {
+      for (let i = 0; i < tokens.length; i++) {
+        const vToken = tokens[i];
+        await binanceOracle.setMaxStalePeriod(vToken.name, 7 * 24 * 60 * 60);
+        const price = await resilientOracle.getPrice(vToken.assetAddress);
+        expect(price).to.be.equal(parseUnits(vToken.price, "18"));
+      }
+    });
+
     it("validate chainlink vToken prices", async () => {
       for (let i = 0; i < chainlinkTokens.length; i++) {
         const vToken = chainlinkTokens[i];
@@ -399,9 +408,25 @@ forking(30098228, () => {
       }
     });
 
+    it("validate chainlink vToken prices (getPrice)", async () => {
+      for (let i = 0; i < chainlinkTokens.length; i++) {
+        const vToken = chainlinkTokens[i];
+        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress)
+        await chainlinkOracle.setTokenConfig({
+          asset: config.asset,
+          feed: config.feed,
+          maxStalePeriod: (7 * 24 * 60 * 60)
+        });
+        const price = await resilientOracle.getPrice(vToken.assetAddress);
+        expect(price).to.be.equal(parseUnits(vToken.price, "18"));
+      }
+    });
+
     it("get correct SD price from oracle ", async () => {
       await mockVToken.setUnderlyingAsset(SD);
-      const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
+      let price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
+      expect(price).to.equal(parseUnits("0.92596664", 18));
+      price = await resilientOracle.getPrice(SD);
       expect(price).to.equal(parseUnits("0.92596664", 18));
     });
   });
