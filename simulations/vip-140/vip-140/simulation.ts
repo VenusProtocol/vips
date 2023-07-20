@@ -11,6 +11,7 @@ import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import { Signer, ethers } from "ethers";
 import { vip140 } from "../../../vips/vip-140/vip-140";
 import { parseUnits } from "ethers/lib/utils";
+import { expectEvents } from "../../../src/utils";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const RESILIENT_ORACLE_IMPL_OLD = "0xfE872ddeAe0A53486c25ed882786D592e302d80C";
@@ -128,7 +129,11 @@ forking(30098228, () => {
   });
 
   testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140(24 * 60 * 60 * 3), {
-    callbackAfterExecution: async txResponse => {},
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [2]);
+      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
+    },
   });
 
   describe("Post-VIP behavior", async () => {
