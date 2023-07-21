@@ -105,9 +105,7 @@ forking(31522791, () => {
     });
   });
 
-  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet(), {
-    callbackAfterExecution: async txResponse => {},
-  });
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet());
 
   describe("Post-VIP behavior", async () => {
     let resilientOracleProxy: ethers.Contract;
