@@ -23,7 +23,7 @@ const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 
 const SD = "0x3bc5ac0dfdc871b365d159f728dd1b9a0b5481e8";
 
-const MAX_STALE_PERIOD = 60 * 15;
+const MAX_STALE_PERIOD = 60 * 25;
 
 export const vip145 = (maxStalePeriod?: number) => {
   const meta = {
