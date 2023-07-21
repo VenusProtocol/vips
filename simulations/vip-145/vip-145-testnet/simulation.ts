@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip140Testnet } from "../../../vips/vip-140/vip-140-testnet";
+import { vip145Testnet } from "../../../vips/vip-145/vip-145-testnet";
 
 import PROXY_ABI from "./abi/proxy.json";
 import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
@@ -109,7 +109,7 @@ forking(31522791, () => {
     
   });
 
-  testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140Testnet(), {
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet(), {
     callbackAfterExecution: async txResponse => {},
   });
 

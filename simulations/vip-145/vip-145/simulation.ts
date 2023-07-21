@@ -10,7 +10,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import { Signer, ethers } from "ethers";
-import { vip140 } from "../../../vips/vip-140/vip-140";
+import { vip145 } from "../../../vips/vip-145/vip-145";
 import { parseUnits } from "ethers/lib/utils";
 import { expectEvents } from "../../../src/utils";
 
@@ -315,7 +315,7 @@ forking(30098228, () => {
     });
   });
 
-  testVip("VIP-140 Change Oracle and Configure Resilient Oracle", vip140(24 * 60 * 60 * 3), {
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [2]);
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
