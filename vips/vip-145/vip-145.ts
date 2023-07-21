@@ -19,7 +19,7 @@ const PYTH_ORACLE = "0xb893E38162f55fb80B18Aa44da76FaDf8E9B2262";
 const TWAP_ORACLE = "0xea2f042e1A4f057EF8A5220e57733AD747ea8867";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
-const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343"
+const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 
 const SD = "0x3bc5ac0dfdc871b365d159f728dd1b9a0b5481e8";
 
@@ -39,36 +39,35 @@ export const vip145 = (maxStalePeriod?: number) => {
 
   return makeProposal(
     [
-      
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE,RESILIENT_ORACLE_IMPL],
+        params: [RESILIENT_ORACLE, RESILIENT_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE,CHAINLINK_ORACLE_IMPL],
+        params: [CHAINLINK_ORACLE, CHAINLINK_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR,BOUND_VALIDATOR_IMPL],
+        params: [BOUND_VALIDATOR, BOUND_VALIDATOR_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [PYTH_ORACLE,PYTH_ORACLE_IMPL],
+        params: [PYTH_ORACLE, PYTH_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [TWAP_ORACLE,TWAP_ORACLE_IMPL],
+        params: [TWAP_ORACLE, TWAP_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [BINANCE_ORACLE,BINANCE_ORACLE_IMPL],
+        params: [BINANCE_ORACLE, BINANCE_ORACLE_IMPL],
       },
       {
         target: ACM,
@@ -78,12 +77,12 @@ export const vip145 = (maxStalePeriod?: number) => {
       {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
-        params: ["WBNB","BNB"],
+        params: ["WBNB", "BNB"],
       },
       {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
-        params: ["wBETH","WBETH"],
+        params: ["wBETH", "WBETH"],
       },
       {
         target: BINANCE_ORACLE,

@@ -1,18 +1,17 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Signer } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-
-import PROXY_ABI from "./abi/proxy.json";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import { vip145 } from "../../../vips/vip-145/vip-145";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
-import { Signer, ethers } from "ethers";
-import { vip145 } from "../../../vips/vip-145/vip-145";
-import { parseUnits } from "ethers/lib/utils";
-import { expectEvents } from "../../../src/utils";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
+import PROXY_ABI from "./abi/proxy.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const RESILIENT_ORACLE_IMPL_OLD = "0xfE872ddeAe0A53486c25ed882786D592e302d80C";
@@ -38,7 +37,7 @@ const PYTH_ORACLE = "0xb893E38162f55fb80B18Aa44da76FaDf8E9B2262";
 const PYTH_ORACLE_IMPL_OLD = "0x01e12AFa8D016D11dFBBde48e1a51038072b2129";
 const PYTH_ORACLE_IMPL = "0x1b8dE8fe17735B80E30e1bAbcD78A20F573a3e9e";
 
-const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343"
+const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
@@ -279,8 +278,7 @@ const chainlinkTokens: TokenConfig[] = [
     assetAddress: "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7",
     price: "0.97223236",
   },
-]
-
+];
 
 forking(30098228, () => {
   const provider = ethers.provider;
@@ -295,7 +293,7 @@ forking(30098228, () => {
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
-      const signer = await ethers.getSigner(PROXY_ADMIN)
+      const signer = await ethers.getSigner(PROXY_ADMIN);
 
       resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, signer);
       chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, signer);
@@ -306,12 +304,12 @@ forking(30098228, () => {
     });
 
     it("validate implementation address", async () => {
-      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL_OLD)
-      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL_OLD)
-      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL_OLD)
-      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL_OLD)
-      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL_OLD)
-      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL_OLD)
+      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL_OLD);
+      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL_OLD);
+      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL_OLD);
+      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL_OLD);
+      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL_OLD);
+      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL_OLD);
     });
   });
 
@@ -324,7 +322,6 @@ forking(30098228, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    
     let resilientOracleProxy: ethers.Contract;
     let chainlinkOracleProxy: ethers.Contract;
     let boundValidatorProxy: ethers.Contract;
@@ -335,14 +332,14 @@ forking(30098228, () => {
     let resilientOracle: ethers.Contract;
     let comptroller: ethers.Contract;
     let binanceOracle: ethers.Contract;
-    let timelockSigner: Signer
+    let timelockSigner: Signer;
     let chainlinkOracle: ethers.Contract;
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
       await impersonateAccount(NORMAL_TIMELOCK);
-      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK)
-      const signer = await ethers.getSigner(PROXY_ADMIN)
+      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
+      const signer = await ethers.getSigner(PROXY_ADMIN);
 
       resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, signer);
       chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, signer);
@@ -366,12 +363,12 @@ forking(30098228, () => {
     });
 
     it("validate implementation address", async () => {
-      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL)
-      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL)
-      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL)
-      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL)
-      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL)
-      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL)
+      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL);
+      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL);
+      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL);
+      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL);
+      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL);
+      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL);
     });
 
     it("validate binance vToken prices", async () => {
@@ -396,11 +393,11 @@ forking(30098228, () => {
     it("validate chainlink vToken prices", async () => {
       for (let i = 0; i < chainlinkTokens.length; i++) {
         const vToken = chainlinkTokens[i];
-        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress)
+        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress);
         await chainlinkOracle.setTokenConfig({
           asset: config.asset,
           feed: config.feed,
-          maxStalePeriod: (7 * 24 * 60 * 60)
+          maxStalePeriod: 7 * 24 * 60 * 60,
         });
         await mockVToken.setUnderlyingAsset(vToken.assetAddress);
         const price = await resilientOracle.getUnderlyingPrice(mockVToken.address);
@@ -411,11 +408,11 @@ forking(30098228, () => {
     it("validate chainlink vToken prices (getPrice)", async () => {
       for (let i = 0; i < chainlinkTokens.length; i++) {
         const vToken = chainlinkTokens[i];
-        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress)
+        const config = await chainlinkOracle.tokenConfigs(vToken.assetAddress);
         await chainlinkOracle.setTokenConfig({
           asset: config.asset,
           feed: config.feed,
-          maxStalePeriod: (7 * 24 * 60 * 60)
+          maxStalePeriod: 7 * 24 * 60 * 60,
         });
         const price = await resilientOracle.getPrice(vToken.assetAddress);
         expect(price).to.be.equal(parseUnits(vToken.price, "18"));

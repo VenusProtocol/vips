@@ -1,17 +1,16 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip145Testnet } from "../../../vips/vip-145/vip-145-testnet";
-
-import PROXY_ABI from "./abi/proxy.json";
-import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
-import { Signer, ethers } from "ethers";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
+import MOCK_VTOKEN_ABI from "./abi/mockVToken.json";
+import PROXY_ABI from "./abi/proxy.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const RESILIENT_ORACLE_IMPL_OLD = "0x360506E086d6E4788b0970CD576307CCEccECbe6";
@@ -37,7 +36,7 @@ const PYTH_ORACLE = "0x94E1534c14e0736BB24decA625f2F5364B198E0C";
 const PYTH_ORACLE_IMPL_OLD = "0xb830C5F05334a364a80957dDACF5A336dc55Bab2";
 const PYTH_ORACLE_IMPL = "0xb8a450101DF8ab770c8F8521E189a4B39e7Cf5f5";
 
-const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6"
+const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
@@ -69,10 +68,9 @@ const ilPoolTokens: ILVTokenConfig[] = [
   {
     assetName: "WBETH",
     assetAddress: "0xf9F98365566F4D55234f24b99caA1AfBE6428D44",
-    price: "1897.64221232"
-  }
+    price: "1897.64221232",
+  },
 ];
-
 
 forking(31522791, () => {
   const provider = ethers.provider;
@@ -87,7 +85,7 @@ forking(31522791, () => {
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
-      const signer = await ethers.getSigner(PROXY_ADMIN)
+      const signer = await ethers.getSigner(PROXY_ADMIN);
 
       resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, signer);
       chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, signer);
@@ -98,15 +96,13 @@ forking(31522791, () => {
     });
 
     it("validate implementation address", async () => {
-      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL_OLD)
-      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL_OLD)
-      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL_OLD)
-      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL_OLD)
-      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL_OLD)
-      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL_OLD)
+      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL_OLD);
+      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL_OLD);
+      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL_OLD);
+      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL_OLD);
+      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL_OLD);
+      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL_OLD);
     });
-
-    
   });
 
   testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet(), {
@@ -114,7 +110,6 @@ forking(31522791, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    
     let resilientOracleProxy: ethers.Contract;
     let chainlinkOracleProxy: ethers.Contract;
     let boundValidatorProxy: ethers.Contract;
@@ -125,13 +120,13 @@ forking(31522791, () => {
     let resilientOracle: ethers.Contract;
     let comptroller: ethers.Contract;
     let binanceOracle: ethers.Contract;
-    let timelockSigner: Signer
+    let timelockSigner: Signer;
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
       await impersonateAccount(NORMAL_TIMELOCK);
-      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK)
-      const signer = await ethers.getSigner(PROXY_ADMIN)
+      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
+      const signer = await ethers.getSigner(PROXY_ADMIN);
 
       resilientOracleProxy = new ethers.Contract(RESILIENT_ORACLE, PROXY_ABI, signer);
       chainlinkOracleProxy = new ethers.Contract(CHAINLINK_ORACLE, PROXY_ABI, signer);
@@ -149,12 +144,12 @@ forking(31522791, () => {
     });
 
     it("validate implementation address", async () => {
-      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL)
-      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL)
-      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL)
-      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL)
-      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL)
-      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL)
+      expect(await resilientOracleProxy.callStatic.implementation()).to.be.equal(RESILIENT_ORACLE_IMPL);
+      expect(await chainlinkOracleProxy.callStatic.implementation()).to.be.equal(CHAINLINK_ORACLE_IMPL);
+      expect(await boundValidatorProxy.callStatic.implementation()).to.be.equal(BOUND_VALIDATOR_IMPL);
+      expect(await binanceOracleProxy.callStatic.implementation()).to.be.equal(BINANCE_ORACLE_IMPL);
+      expect(await twapOracleProxy.callStatic.implementation()).to.be.equal(TWAP_ORACLE_IMPL);
+      expect(await pythOracleProxy.callStatic.implementation()).to.be.equal(PYTH_ORACLE_IMPL);
     });
 
     it("validate IL vToken prices", async () => {

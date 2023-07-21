@@ -19,7 +19,7 @@ const PYTH_ORACLE = "0x94E1534c14e0736BB24decA625f2F5364B198E0C";
 const TWAP_ORACLE = "0x3eeE05d929D1E9816185B1b6d8c470eC192b4432";
 const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 
-const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6"
+const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 
 export const vip145Testnet = () => {
   const meta = {
@@ -35,36 +35,35 @@ export const vip145Testnet = () => {
 
   return makeProposal(
     [
-      
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE,RESILIENT_ORACLE_IMPL],
+        params: [RESILIENT_ORACLE, RESILIENT_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE,CHAINLINK_ORACLE_IMPL],
+        params: [CHAINLINK_ORACLE, CHAINLINK_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR,BOUND_VALIDATOR_IMPL],
+        params: [BOUND_VALIDATOR, BOUND_VALIDATOR_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [PYTH_ORACLE,PYTH_ORACLE_IMPL],
+        params: [PYTH_ORACLE, PYTH_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [TWAP_ORACLE,TWAP_ORACLE_IMPL],
+        params: [TWAP_ORACLE, TWAP_ORACLE_IMPL],
       },
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
-        params: [BINANCE_ORACLE,BINANCE_ORACLE_IMPL],
+        params: [BINANCE_ORACLE, BINANCE_ORACLE_IMPL],
       },
       {
         target: ACM,
@@ -74,12 +73,12 @@ export const vip145Testnet = () => {
       {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
-        params: ["WBNB","BNB"],
+        params: ["WBNB", "BNB"],
       },
       {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
-        params: ["wBETH","WBETH"],
+        params: ["wBETH", "WBETH"],
       },
     ],
     meta,
