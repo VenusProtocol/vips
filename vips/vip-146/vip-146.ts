@@ -3,14 +3,17 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const ankrBNB = "0x167F1F9EF531b3576201aa3146b13c57dbEda514";
-const ANKR = "0xe4a90EB942CF2DA7238e8F6cC9EF510c49FC8B4B";
-const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const VTOKEN_RECEIVER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-const vankrBNB_DeFi = "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6";
-const REWARD_DISTRIBUTOR = "0x4be90041D1e082EfE3613099aA3b987D9045d718";
+const ankrBNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
+const ANKR = "0xf307910A4c7bbc79691fD374889b36d8531B08e3";
+const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+const VTOKEN_RECEIVER = "0xAE1c38847Fb90A13a2a1D7E5552cCD80c62C6508";
+const vankrBNB_DeFi = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
+const REWARD_DISTRIBUTOR = "0x14d9A428D0f35f81A30ca8D8b2F3974D3CccB98B";
+const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const COMPTROLLER_DeFi = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 
-export const vip143 = () => {
+export const vip146 = () => {
   const meta = {
     version: "v2",
     title: "Add ankrBNB market to DeFi Pool",
@@ -23,14 +26,14 @@ export const vip143 = () => {
   return makeProposal(
     [
       {
-        target: ankrBNB,
-        signature: "faucet(uint256)",
-        params: [parseUnits("39", 18)],
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [ankrBNB, parseUnits("39", 18), NORMAL_TIMELOCK],
       },
       {
         target: ankrBNB,
         signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, "0"],
+        params: [POOL_REGISTRY, 0],
       },
       {
         target: ankrBNB,
@@ -53,17 +56,12 @@ export const vip143 = () => {
         ],
       },
       {
-        target: ANKR,
-        signature: "faucet(uint256)",
-        params: [parseUnits("500000", 18)],
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [ANKR, parseUnits("500000", 18), REWARD_DISTRIBUTOR],
       },
       {
-        target: ANKR,
-        signature: "transfer(address,uint256)",
-        params: [REWARD_DISTRIBUTOR, parseUnits("500000", 18)],
-      },
-      {
-        target: "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD",
+        target: COMPTROLLER_DeFi,
         signature: "addRewardsDistributor(address)",
         params: [REWARD_DISTRIBUTOR],
       },

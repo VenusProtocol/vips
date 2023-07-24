@@ -1,3 +1,4 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
@@ -7,7 +8,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip143 } from "../../../vips/vip-143/vip-143";
+import { vip146 } from "../../../vips/vip-146/vip-146";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -103,8 +104,8 @@ forking(30066043, () => {
     });
   });
 
-  testVip("VIP-143 Add Market", vip143(), {
-    callbackAfterExecution: async txResponse => {
+  testVip("VIP-146 Add Market", vip146(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI, POOL_REGISTRY_ABI, REWARD_DISTRIBUTOR_ABI, ERC20_ABI, TREASURY_ABI],

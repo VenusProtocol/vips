@@ -7,7 +7,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip143 } from "../../../vips/vip-143/vip-143-testnet";
+import { vip146 } from "../../../vips/vip-146/vip-146-testnet";
 import ORACLE_ABI from "./abi/binanceOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -105,7 +105,7 @@ forking(31655347, () => {
     });
   });
 
-  testVip("VIP-143 Add Market", vip143());
+  testVip("VIP-146 Add Market", vip146());
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {
