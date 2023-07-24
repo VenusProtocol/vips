@@ -209,12 +209,12 @@ forking(30066043, () => {
 
           it("should set vankrBNB_DeFi collateral factor to 0", async () => {
             const market = await comptroller.markets(vankrBNB_DeFi);
-            expect(market.collateralFactorMantissa).to.equal(parseUnits("0", 18));
+            expect(market.collateralFactorMantissa).to.equal(0);
           });
 
           it("should set vankrBNB_DeFi liquidation threshold to 0", async () => {
             const market = await comptroller.markets(vankrBNB_DeFi);
-            expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0", 18));
+            expect(market.liquidationThresholdMantissa).to.equal(0);
           });
 
           it("should set vankrBNB_DeFi protocolSeizeShareMantissa to 5%", async () => {
@@ -234,8 +234,11 @@ forking(30066043, () => {
         });
 
         describe("Reward Distributor", () => {
+          it("should be added to DeFi pool", async () => {
+            expect(await comptroller.getRewardDistributors()).to.include(REWARD_DISTRIBUTOR);
+          });
+
           it("should have 2 rewards distributor in DeFi pool", async () => {
-            const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
             expect(await comptroller.getRewardDistributors()).to.have.lengthOf(2);
           });
 
