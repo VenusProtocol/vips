@@ -98,7 +98,7 @@ const rewardsDistributors: { [key in RewardsDistributorId]: { address: string; v
   },
 };
 
-forking(30043000, () => {
+forking(30298000, () => {
   testVip("VIP-148", vip148());
 
   describe("Rewards distributors configuration", () => {
