@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip145 } from "../../../vips/vip-145/vip-145";
+import { vip148 } from "../../../vips/vip-148/vip-148";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 
 const REWARDS_START_BLOCK = 29964632;
@@ -99,7 +99,7 @@ const rewardsDistributors: { [key in RewardsDistributorId]: { address: string; v
 };
 
 forking(30043000, () => {
-  testVip("VIP-145", vip145());
+  testVip("VIP-148", vip148());
 
   describe("Rewards distributors configuration", () => {
     const checkLastRewardingBlock = (id: RewardsDistributorId, lastRewardingBlock: number) => {

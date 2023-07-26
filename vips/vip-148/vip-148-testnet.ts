@@ -83,7 +83,7 @@ const commands = [
   ...Object.values(rewardsDistributors28Days).flatMap(setLastRewardingBlock(REWARDS_END_BLOCK_28_DAYS)),
 ];
 
-export const vip145Testnet = () => {
+export const vip148Testnet = () => {
   const meta = {
     version: "v2",
     title: "IL Rewards, last rewarding block",
