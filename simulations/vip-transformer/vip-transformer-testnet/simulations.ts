@@ -48,8 +48,6 @@ forking(31887727, () => {
       expect(await ProtocolShareReserve.owner()).to.equal(NORMAL_TIMELOCK);
     });
 
-
-
     it("check for state variables in riskfund new implementation", async () => {
       expect(await RiskFund.convertibleBaseAsset()).to.equal(CONVERTIBLE_BASE_ASSET_USD);
       expect(await RiskFund.accessControlManager()).to.equal(ACM);
