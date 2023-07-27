@@ -43,6 +43,11 @@ export const vip144Testnet = () => {
         signature: "upgradeTo(address)",
         params: [OLD_IMPL],
       },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [COMPTROLLER_DEFI, "removeMarket(address)", NORMAL_TIMELOCK],
+      },
     ],
     meta,
     ProposalType.REGULAR,

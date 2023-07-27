@@ -22,7 +22,7 @@ forking(31685191, () => {
   async function fetchStorage() {
     const acm = await comptroller.accessControlManager();
     const accountAssets = await comptroller.accountAssets(VBSW_USER, 0);
-    const actionPaused = await comptroller.actionPaused(VBIFI, 0);
+    const actionPaused = await comptroller.actionPaused(VBSW, 0);
     const borrowCaps = await comptroller.borrowCaps(VBSW);
     const checkMemebership = await comptroller.checkMembership(VBSW_USER, VBSW);
     const closeFactorMantissa = await comptroller.closeFactorMantissa();
