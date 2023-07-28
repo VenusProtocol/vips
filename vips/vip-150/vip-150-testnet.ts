@@ -9,7 +9,7 @@ const vankrBNB_DeFi = "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6";
 const REWARDS_START_BLOCK = 31839459;
 const REWARDS_END_BLOCK_30_DAYS = REWARDS_START_BLOCK + 864000;
 
-export const vip146Testnet = () => {
+export const vip150Testnet = () => {
   const meta = {
     version: "v2",
     title: "ankrBNB-DeFi, last rewarding block",
