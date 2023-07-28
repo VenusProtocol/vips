@@ -9,9 +9,9 @@ import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 const REWARD_DISTRIBUTOR = "0x14d9A428D0f35f81A30ca8D8b2F3974D3CccB98B";
 const vankrBNB_DeFi = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
 
-const REWARDS_START_BLOCK = 30249069;
+const REWARDS_START_BLOCK = 30336476;
 const REWARDS_END_BLOCK_30_DAYS = REWARDS_START_BLOCK + 864000;
-forking(30239044, () => {
+forking(30349453, () => {
   testVip("VIP-146", vip146());
 
   describe("Rewards distributors configuration", () => {
