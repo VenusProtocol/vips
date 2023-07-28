@@ -1,25 +1,29 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip144Testnet } from "../../../vips/vip-144/vip-144-testnet";
+import { vip144 } from "../../../vips/vip-144/vip-144";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 
-const VBIFI = "0xEF949287834Be010C1A5EDd757c385FB9b644E4A";
-const BIFI = "0x5B662703775171c4212F2FBAdb7F92e64116c154";
-const VBSW = "0x5e68913fbbfb91af30366ab1B21324410b49a308";
-const BSW = "0x7FCC76fc1F573d8Eb445c236Cc282246bC562bCE";
-const VBSW_USER = "0x03862dFa5D0be8F64509C001cb8C6188194469DF";
-const COMPTROLLER_DEFI = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
-const BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
-const OLD_IMPL_COMPTROLLER = "0x80691DaD6dAb8a028FFE68bb8045f2547d210f9D";
-const POOL_REGISTRY_PROXY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const POOL_REGISTRY_OLD_IMPL = "0xed659A02c5f63f299C28F6A246143326b922e3d9";
-const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
+const VBSW = "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379";
+const BSW = "0x965F527D9159dCe6288a2219DB51fc6Eef120dD1";
+const VBSW_USER = "0x5a6747b3089d72ecfa211c7e2fb315c7f3ab0565";
+const OLD_IMPL_COMPTROLLER = "0x939C05e2E694db68cE54d80bf29926b09190aA0F";
+const BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
+const COMPTROLLER_DEFI = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
+const VBIFI = "0xC718c51958d3fd44f5F9580c9fFAC2F89815C909";
+const BIFI = "0xCa3F508B8e4Dd382eE878A314789373D80A5190A";
+const POOL_REGISTRY_PROXY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+const POOL_REGISTRY_OLD_IMPL = "0xc4953e157D057941A9a71273B0aF4d4477ED2770";
+const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+const BSW_FEED = "0x08E70777b982a58D23D05E3D7714f44837c06A21";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(31917221, () => {
+forking(30362200, () => {
   let comptroller: ethers.Contract;
   let poolRegistry: ethers.Contract;
   let beacon: ethers.Contract;
@@ -93,16 +97,17 @@ forking(31917221, () => {
     beacon = new ethers.Contract(BEACON, BEACON_ABI, provider);
     expectedComptrollerStorage = await fetchComptrollerStorage();
     expectedPoolStorage = await fetchPoolRegistryStorage();
+    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, BSW, BSW_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-144 Remove BIFI Market", vip144Testnet());
+  testVip("VIP-144 Remove BIFI Market", vip144());
 
   describe("Post-VIP behavior", async () => {
-    it("Comptroller Implementation should be = 0x80691DaD6dAb8a028FFE68bb8045f2547d210f9D", async () => {
+    it("Comptroller Implementation should be = 0x939C05e2E694db68cE54d80bf29926b09190aA0F", async () => {
       expect(await beacon.implementation()).equals(OLD_IMPL_COMPTROLLER);
     });
 
-    it("Pool Registry Implementation should be = 0xed659A02c5f63f299C28F6A246143326b922e3d9", async () => {
+    it("Pool Registry Implementation should be = 0xc4953e157D057941A9a71273B0aF4d4477ED2770", async () => {
       const ProxyAdminInterface = [`function getProxyImplementation(address) view returns (address)`];
       const proxyAdmin = new ethers.Contract(PROXY_ADMIN, ProxyAdminInterface, provider);
       const result = await proxyAdmin.getProxyImplementation(POOL_REGISTRY_PROXY);
