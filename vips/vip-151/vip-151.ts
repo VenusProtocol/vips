@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const LIQUIDATOR = "0x0870793286aada55d39ce7f82fb2766e8004cf43";
@@ -7,7 +7,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
-export const vipLiquidator = () => {
+export const vip151 = () => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",

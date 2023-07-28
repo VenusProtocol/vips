@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { vipLiquidator } from "../../vips/vip-liquidator";
+import { initMainnetUser } from "../../../src/utils";
+import { forking, testVip } from "../../../src/vip-framework";
+import { vip151 } from "../../../vips/vip-151/vip-151";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
@@ -22,7 +22,7 @@ forking(29490000, () => {
     impersonatedLiquidator = await initMainnetUser(LIQUIDATOR, ethers.utils.parseEther("1"));
   });
 
-  testVip("VIP-Liquidator Liquidator Update", vipLiquidator());
+  testVip("VIP-Liquidator Liquidator Update", vip151());
 
   describe("Post-VIP behavior", async () => {
     it("Permissions restrictLiquidation", async () => {
