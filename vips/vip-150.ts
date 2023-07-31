@@ -17,10 +17,10 @@ const VUSDD_TRON = "0xf1da185CCe5BeD1BeBbb3007Ef738Ea4224025F7";
 const CORE_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 
-export const vip149 = () => {
+export const vip150 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-149 Risk Parameters Update",
+    title: "VIP-150 Risk Parameters Update",
     description: `
 
   Changes to do
