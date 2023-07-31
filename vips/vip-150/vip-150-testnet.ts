@@ -21,12 +21,6 @@ export const vip150Testnet = () => {
   return makeProposal(
     [
       {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [REWARD_DISTRIBUTOR, "setLastRewardingBlock(address[],uint32[],uint32[])", NORMAL_TIMELOCK],
-      },
-
-      {
         target: REWARD_DISTRIBUTOR,
         signature: "setLastRewardingBlocks(address[],uint32[],uint32[])",
         params: [[vankrBNB_DeFi], [REWARDS_END_BLOCK_30_DAYS], [REWARDS_END_BLOCK_30_DAYS]],
