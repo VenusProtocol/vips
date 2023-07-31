@@ -118,7 +118,7 @@ forking(30354172, () => {
       rateModel = new ethers.Contract(VSXP_RATE_MODEL, RATE_MODEL_ABI, ethers.provider);
     });
 
-    it("has base=5%", async () => {
+    it("has base=50%", async () => {
       expect(await rateModel.baseRatePerBlock()).to.equal(toBlockRate(parseUnits("0.5", 18)));
     });
 
