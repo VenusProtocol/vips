@@ -7,7 +7,7 @@ import { makeProposal } from "../src/utils";
 export const GameFi_Comptroller = "0x1b43ea8622e76627B81665B1eCeBB4867566B963";
 export const GameFi_VFLOKI = "0xc353B7a1E13dDba393B5E120D4169Da7185aA2cb";
 
-const supplyCapFloki: number = 65_000_000_000;
+const supplyCapFloki: number = 68_000_000_000;
 export const NEW_SUPPLY_CAP_FLOKI = parseUnits(supplyCapFloki.toString(), 9); // scaled
 
 const borrowCapFloki: number = 22_000_000_000;
