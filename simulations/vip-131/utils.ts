@@ -32,7 +32,6 @@ export async function swapStableForVAIAndValidate(
 
 export async function swapVAIForStableAndValidate(
   psm: ethers.Contract,
-  stableTokenName: string,
   stableTokenPrice: BigNumber,
   VAI: ethers.Contract,
   vaiSigner: Signer,
@@ -44,7 +43,6 @@ export async function swapVAIForStableAndValidate(
   const feeOutTokenPrice = stableTokenPrice.gt(MANTISSA_ONE) ? stableTokenPrice : MANTISSA_ONE;
   const tokenAmountUsd: BigNumber = tokenAmount.mul(feeOutTokenPrice).div(MANTISSA_ONE); // vai to burn
   const fee = tokenAmountUsd.mul(feeIn).div(BASIS_POINT_DIVISOR);
-  formatConsoleLog(`${stableTokenName} Price: ` + stableTokenPrice.toString());
   await VAI.connect(vaiSigner).approve(psm.address, tokenAmountUsd);
   const vaiSignerAddress = await vaiSigner.getAddress();
   const tokenBalanceBefore = await stableToken.balanceOf(vaiSignerAddress);
@@ -53,15 +51,4 @@ export async function swapVAIForStableAndValidate(
   const tokenBalance = tokenBalanceAfter.sub(tokenBalanceBefore);
   expect(tokenBalance).to.equal(tokenAmount);
   await expect(tx).to.emit(psm, "VAIForStableSwapped").withArgs(tokenAmountUsd, tokenAmount, fee);
-}
-
-// ****************************
-// ***** Helper Functions *****
-// ****************************
-
-function formatConsoleLog(message: string) {
-  const indentation = " ".repeat(10); // Adjust the number of spaces for indentation
-  // Format the message using ANSI escape codes
-  const formattedMessage = `\x1b[90m${message}\x1b[0m`; // Set gray color (90) and reset color (0)
-  console.log(`${indentation}${formattedMessage}`);
 }
