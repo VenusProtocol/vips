@@ -95,21 +95,45 @@ forking(32091802, () => {
       expect(await psm.feeIn()).to.equal(FEE_IN);
       expect(await psm.feeOut()).to.equal(FEE_OUT);
     });
-    it("Verify swapStableForVAI works", async () => {
-      const stableTokenPrice: BigNumber = await resilientOracle.getPrice(USDT);
-      swapStableForVAIAndValidate(
-        psm,
-        usdt,
-        stableTokenPrice,
-        tokenHolder,
-        STABLE_TOKEN_HOLDER,
-        vai,
-        BigNumber.from(FEE_IN),
-      );
+    it("Verify ONE_DOLLAR value", async () => {
+      const tokenDecimals = await usdt.decimals();
+      const expectedValue = parseUnits("1", 36 - tokenDecimals);
+      expect(await psm.ONE_DOLLAR()).to.equal(expectedValue);
     });
-    it("Verify swapVAIForStable works", async () => {
-      const stableTokenPrice: BigNumber = await resilientOracle.getPrice(USDT);
-      swapVAIForStableAndValidate(psm, stableTokenPrice, vai, vaiHolder, BigNumber.from(FEE_IN), usdt);
+    describe("Swaps test: ", () => {
+      let stableTokenPrice: BigNumber;
+      let oneDollar: BigNumber;
+      let tokenDecimals: number;
+      before(async () => {
+        stableTokenPrice = await resilientOracle.getPrice(USDT);
+        tokenDecimals = await usdt.decimals();
+        oneDollar = await psm.ONE_DOLLAR();
+      });
+      it("Verify swapStableForVAI works", async () => {
+        await swapStableForVAIAndValidate(
+          psm,
+          usdt,
+          stableTokenPrice,
+          tokenHolder,
+          STABLE_TOKEN_HOLDER,
+          vai,
+          BigNumber.from(FEE_IN),
+          tokenDecimals,
+          oneDollar,
+        );
+      });
+      it("Verify swapVAIForStable works", async () => {
+        await swapVAIForStableAndValidate(
+          psm,
+          stableTokenPrice,
+          vai,
+          vaiHolder,
+          BigNumber.from(FEE_OUT),
+          usdt,
+          tokenDecimals,
+          oneDollar,
+        );
+      });
     });
   });
 });
