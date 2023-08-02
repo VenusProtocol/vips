@@ -3,13 +3,15 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+export const FEE_OUT = 100; // 10bps
+export const FEE_IN = 0;
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-const PSM_USDT = "0x93dB3f46e1DC91c2b9D8Bc7443790bB4699c0E81";
+const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
 const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 
 export const vip131 = () => {
@@ -92,6 +94,18 @@ export const vip131 = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "resume()", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: PSM_USDT,
+        signature: "setFeeIn(uint256)",
+        params: [FEE_IN],
+      },
+
+      {
+        target: PSM_USDT,
+        signature: "setFeeOut(uint256)",
+        params: [FEE_OUT],
       },
 
       {
