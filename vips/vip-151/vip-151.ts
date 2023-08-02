@@ -1,3 +1,5 @@
+import { parseUnits } from "ethers/lib/utils";
+
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -8,7 +10,7 @@ const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
 
-export const vip151 = () => {
+export const vip151 = (data?: string) => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",
@@ -124,11 +126,11 @@ export const vip151 = () => {
         params: [LIQUIDATOR, "setPendingRedeemChunkLength(uint256)", NORMAL_TIMELOCK],
       },
 
-      // {
-      //   target: PROXY_ADMIN,
-      //   signature: "upgrade(address,address)",
-      //   params: [LIQUIDATOR, "NEW_IMPLEMENTATION_ADDRESS"],
-      // },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgradeAndCall(address,address,bytes)",
+        params: [LIQUIDATOR, "0xe5F94a22fa1085F7d3FD01DFb36bfD5E79B75c39", data],
+      },
 
       {
         target: LIQUIDATOR,
@@ -140,6 +142,12 @@ export const vip151 = () => {
         target: LIQUIDATOR,
         signature: "resumeForceVAILiquidate()",
         params: [],
+      },
+
+      {
+        target: LIQUIDATOR,
+        signature: "setMinLiquidatableVAI(uint256)",
+        params: [parseUnits("100", 18)],
       },
     ],
     meta,
