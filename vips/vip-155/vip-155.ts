@@ -10,7 +10,7 @@ const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
 
-export const vip151 = (data?: string) => {
+export const vip155 = (data?: string) => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",
