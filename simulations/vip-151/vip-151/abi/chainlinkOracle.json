@@ -1,69 +1,25 @@
 [
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "vBnbAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "vaiAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "calledContract",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "methodSignature",
-        "type": "string"
-      }
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "address", "name": "calledContract", "type": "address" },
+      { "internalType": "string", "name": "methodSignature", "type": "string" }
     ],
     "name": "Unauthorized",
     "type": "error"
   },
   {
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint8",
-        "name": "version",
-        "type": "uint8"
-      }
-    ],
+    "inputs": [{ "indexed": false, "internalType": "uint8", "name": "version", "type": "uint8" }],
     "name": "Initialized",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldAccessControlManager",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newAccessControlManager",
-        "type": "address"
-      }
+      { "indexed": false, "internalType": "address", "name": "oldAccessControlManager", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newAccessControlManager", "type": "address" }
     ],
     "name": "NewAccessControlManager",
     "type": "event"
@@ -71,18 +27,8 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "OwnershipTransferStarted",
     "type": "event"
@@ -90,18 +36,8 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
     ],
     "name": "OwnershipTransferred",
     "type": "event"
@@ -109,30 +45,9 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "previousPriceMantissa",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "requestedPriceMantissa",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newPriceMantissa",
-        "type": "uint256"
-      }
+      { "indexed": true, "internalType": "address", "name": "asset", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "previousPriceMantissa", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "newPriceMantissa", "type": "uint256" }
     ],
     "name": "PricePosted",
     "type": "event"
@@ -140,24 +55,9 @@
   {
     "anonymous": false,
     "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "feed",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "maxStalePeriod",
-        "type": "uint256"
-      }
+      { "indexed": true, "internalType": "address", "name": "asset", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "feed", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "maxStalePeriod", "type": "uint256" }
     ],
     "name": "TokenConfigAdded",
     "type": "event"
@@ -165,63 +65,27 @@
   {
     "inputs": [],
     "name": "BNB_ADDR",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
-  {
-    "inputs": [],
-    "name": "acceptOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
+  { "inputs": [], "name": "acceptOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
     "inputs": [],
     "name": "accessControlManager",
-    "outputs": [
-      {
-        "internalType": "contract IAccessControlManager",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "contract IAccessControlManagerV8", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vToken",
-        "type": "address"
-      }
-    ],
-    "name": "getUnderlyingPrice",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "asset", "type": "address" }],
+    "name": "getPrice",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "accessControlManager_",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -230,63 +94,27 @@
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "pendingOwner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "prices",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "accessControlManager_",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
     "name": "setAccessControlManager",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -294,16 +122,8 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
+      { "internalType": "address", "name": "asset", "type": "address" },
+      { "internalType": "uint256", "name": "price", "type": "uint256" }
     ],
     "name": "setDirectPrice",
     "outputs": [],
@@ -314,23 +134,11 @@
     "inputs": [
       {
         "components": [
-          {
-            "internalType": "address",
-            "name": "asset",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "feed",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxStalePeriod",
-            "type": "uint256"
-          }
+          { "internalType": "address", "name": "asset", "type": "address" },
+          { "internalType": "address", "name": "feed", "type": "address" },
+          { "internalType": "uint256", "name": "maxStalePeriod", "type": "uint256" }
         ],
-        "internalType": "struct TokenConfig",
+        "internalType": "struct ChainlinkOracle.TokenConfig",
         "name": "tokenConfig",
         "type": "tuple"
       }
@@ -344,23 +152,11 @@
     "inputs": [
       {
         "components": [
-          {
-            "internalType": "address",
-            "name": "asset",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "feed",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maxStalePeriod",
-            "type": "uint256"
-          }
+          { "internalType": "address", "name": "asset", "type": "address" },
+          { "internalType": "address", "name": "feed", "type": "address" },
+          { "internalType": "uint256", "name": "maxStalePeriod", "type": "uint256" }
         ],
-        "internalType": "struct TokenConfig[]",
+        "internalType": "struct ChainlinkOracle.TokenConfig[]",
         "name": "tokenConfigs_",
         "type": "tuple[]"
       }
@@ -371,89 +167,21 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "contract VBep20Interface",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "underlyingPriceMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "setUnderlyingPrice",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "name": "tokenConfigs",
     "outputs": [
-      {
-        "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "feed",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxStalePeriod",
-        "type": "uint256"
-      }
+      { "internalType": "address", "name": "asset", "type": "address" },
+      { "internalType": "address", "name": "feed", "type": "address" },
+      { "internalType": "uint256", "name": "maxStalePeriod", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vBnb",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vai",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ]
