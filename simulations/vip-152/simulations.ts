@@ -13,7 +13,6 @@ import {
   NEW_SUPPLY_CAP_FLOKI,
   vip152,
 } from "../../vips/vip-152";
-import VBEP20_ABI from "./abi/VBep20Abi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(30505308, () => {
@@ -30,7 +29,7 @@ forking(30505308, () => {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [COMPTROLLER_ABI, VBEP20_ABI], ["NewBorrowCap", "NewSupplyCap"], [2, 1]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap"], [2, 1]);
     },
   });
 
