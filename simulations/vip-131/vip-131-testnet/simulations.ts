@@ -6,13 +6,13 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { FEE_IN, FEE_OUT, vip131Testnet } from "../../../vips/vip-131/vip-131-testnet";
+import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
+import PSM_ABI from "./abi/PSM_ABI.json";
+import ResilientOracle_ABI from "./abi/ResilientOracle_ABI.json";
+import USDT_ABI from "./abi/USDT_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
-import PSM_ABI from "./abi/PSM_ABI.json";
-import USDT_ABI from "./abi/USDT_ABI.json";
-import ResilientOracle_ABI from "./abi/ResilientOracle_ABI.json";
-import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -91,17 +91,25 @@ forking(32091802, () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
       expect(currentBaseRate).equals(BASE_RATE_MANTISSA);
     });
-    it("Verify feeIn and feeOut",async () => {
+    it("Verify feeIn and feeOut", async () => {
       expect(await psm.feeIn()).to.equal(FEE_IN);
       expect(await psm.feeOut()).to.equal(FEE_OUT);
-    })
+    });
     it("Verify swapStableForVAI works", async () => {
       const stableTokenPrice: BigNumber = await resilientOracle.getPrice(USDT);
-      swapStableForVAIAndValidate(psm,usdt,stableTokenPrice,tokenHolder,STABLE_TOKEN_HOLDER,vai,BigNumber.from(FEE_IN));
+      swapStableForVAIAndValidate(
+        psm,
+        usdt,
+        stableTokenPrice,
+        tokenHolder,
+        STABLE_TOKEN_HOLDER,
+        vai,
+        BigNumber.from(FEE_IN),
+      );
     });
     it("Verify swapVAIForStable works", async () => {
       const stableTokenPrice: BigNumber = await resilientOracle.getPrice(USDT);
-      swapVAIForStableAndValidate(psm,stableTokenPrice,vai,vaiHolder,BigNumber.from(FEE_IN),usdt);
+      swapVAIForStableAndValidate(psm, stableTokenPrice, vai, vaiHolder, BigNumber.from(FEE_IN), usdt);
     });
   });
 });
