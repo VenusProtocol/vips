@@ -215,7 +215,7 @@ forking(30478951, () => {
     });
 
     it("Tusd Liquidation and reduce liquidation reserves", async () => {
-      // Reserves reduced to treasury as redeem action is ative
+      // Reserves reduced to treasury as redeem action is active
       const protocolBalBefore = await usdc.balanceOf(TREASURY);
       await oracle.connect(impersonatedTimelock).setDirectPrice(BTCB, parseUnits("1", 5));
       await tusd.connect(liquidatorSigner).approve(liquidator.address, "6156967120");
@@ -225,7 +225,7 @@ forking(30478951, () => {
     });
 
     it("Tusd Liquidation and reduce reserves fails; action paused", async () => {
-      // Reserves reduced to treasury as redeem action is ative
+      // Reserves reduced to treasury as redeem action is active
       await comptroller.connect(impersonatedTimelock)._setActionsPaused([VUSDC], [1], true);
       const protocolBalBefore = await usdc.balanceOf(TREASURY);
       await oracle.connect(impersonatedTimelock).setDirectPrice(BTCB, parseUnits("1", 5));
