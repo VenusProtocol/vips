@@ -14,16 +14,25 @@ const POOL_REGISTRY_NEW_IMPL = "0xA5501fEDb2C265091123C6EF8Ed5897A020B5590";
 const POOL_REGISTRY_OLD_IMPL = "0xc4953e157D057941A9a71273B0aF4d4477ED2770";
 const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 
-export const vip144 = () => {
+export const vip152 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-144 remove BIFI market from DeFi Pool",
-    description: `upgrade the implementation of the DeFi Comptroller contract, with a new version adding the feature to remove a market from the Comptroller
-    execute the new function on the Comptroller contract associated with the DeFi pool, to remove the vBIFI market.`,
-    forDescription: "I agree that Venus Protocol should proceed with remove BIFI market from DeFi Pool",
-    againstDescription: "I do not think that Venus Protocol should proceed with remove BIFI market from DeFi Pool",
-    abstainDescription:
-      "I am indifferent to whether Venus Protocol proceeds with remove BIFI market from DeFi Pool or not",
+    title: "VIP-152 Unlink BIFI market from DeFi pool",
+    description: `#### Summary
+
+If passed, this VIP will remove every record of the BIFI market from the DeFi pool
+
+#### Description
+
+In the [VIP-139](https://app.venus.io/governance/proposal/139) the BIFI market was paused and at the same time it was removed from the [Venus UI](https://app.venus.io). The only liquidity provided was the bootstrap liquidity, and the BIFI project has already withdrawn it. There isn’t any loan in that market. So, now it’s safe to remove this market from the list of markets in the DeFi Comptroller.
+
+VIP execution on testnet: [https://testnet.venus.io/governance/proposal/266](https://testnet.venus.io/governance/proposal/266) 
+
+Simulation of the VIP: [https://github.com/VenusProtocol/vips/pull/45](https://github.com/VenusProtocol/vips/pull/45)
+`,
+    forDescription: "Process to remove BIFI from the DeFi pool",
+    againstDescription: "Defer removing BIFI from the DeFi pool",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(

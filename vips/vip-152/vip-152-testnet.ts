@@ -14,10 +14,10 @@ const POOL_REGISTRY_NEW_IMPL = "0x77c580e90D425e650A90b01473E0bA0604fc1926";
 const POOL_REGISTRY_OLD_IMPL = "0xed659A02c5f63f299C28F6A246143326b922e3d9";
 const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 
-export const vip144Testnet = () => {
+export const vip152Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-144 remove BIFI market from DeFi Pool",
+    title: "VIP-152 remove BIFI market from DeFi Pool",
     description: `upgrade the implementation of the DeFi Comptroller contract, with a new version adding the feature to remove a market from the Comptroller
     execute the new function on the Comptroller contract associated with the DeFi pool, to remove the vBIFI market.`,
     forDescription: "I agree that Venus Protocol should proceed with remove BIFI market from DeFi Pool",
