@@ -187,6 +187,7 @@ forking(30560338, () => {
     let vaiController: ethers.Contract;
     let vai: ethers.Contract;
     let usdt: ethers.Contract;
+    let vtusd: ethers.Contract;
 
     const USER = "0xbdc8f6ad3a729d8c1abe908939668ce3f92886a0";
     const LIQUIDATOR_USER = "0xf977814e90da44bfa03b6295a0616a897441acec";
@@ -234,7 +235,7 @@ forking(30560338, () => {
     });
 
     it("Tusd Liquidation and reduce reserves fails; action paused", async () => {
-      // Reserves will not reduce to treasury as redeem action is active
+      // Reserves will not reduce to treasury as redeem action is paused
       await comptroller.connect(impersonatedTimelock)._setActionsPaused([VUSDC], [1], true);
       const protocolBalBefore = await usdc.balanceOf(TREASURY);
       await oracle.connect(impersonatedTimelock).setDirectPrice(BTCB, parseUnits("1", 5));
@@ -249,6 +250,8 @@ forking(30560338, () => {
     it("Usdt Liquidation and reduce reserves fails not enough liquidity", async () => {
       // Reserves not reduced to treasury as redeem fails
       const protocolBalBefore = await tusd.balanceOf(TREASURY);
+      const liquidatorBalanceBefore = await vtusd.balanceOf(USDT_HOLDER);
+      const protocolVTokenBalBefore = await vtusd.balanceOf(LIQUIDATOR);
 
       // Setting fake price and incentives to redeem more then available liquidity
       await oracle.connect(impersonatedTimelock).setDirectPrice(TUSD, parseUnits("1"));
@@ -260,6 +263,12 @@ forking(30560338, () => {
       await liquidator.connect(usdtHolderSigner).liquidateBorrow(VUSDT, USER2, "10000000000", VTUSD);
 
       const protocolBalAfter = await tusd.balanceOf(TREASURY);
+      const liquidatorBalanceAfter = await vtusd.balanceOf(USDT_HOLDER);
+      const protocolVTokenBalAfter = await vtusd.balanceOf(LIQUIDATOR);
+
+      expect(liquidatorBalanceAfter).greaterThan(liquidatorBalanceBefore);
+      // Due to redeem fails liquidator VToken balance should Increase
+      expect(protocolVTokenBalAfter).greaterThan(protocolVTokenBalBefore);
       // As not enough liquidity
       expect(protocolBalAfter).equals(protocolBalBefore);
       expect(await liquidator.pendingRedeem(1)).equals(VTUSD);
