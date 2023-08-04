@@ -42,8 +42,8 @@ forking(30478951, () => {
       await expectEvents(
         txResponse,
         [ACCESS_CONTROL_ABI, LIQUIDATOR_ABI],
-        ["RoleGranted", "NewPendingRedeemChunkLength", "ForceVAILiquidationResumed"],
-        [17, 1, 1],
+        ["RoleGranted", "NewPendingRedeemChunkLength"],
+        [17, 1],
       );
     },
   });
@@ -169,10 +169,6 @@ forking(30478951, () => {
       ).equals(true);
     });
 
-    it("Should set forceVAILiquidate = true", async () => {
-      expect(await liquidator.forceVAILiquidate()).equals(true);
-    });
-
     it("Address Checks", async () => {
       expect(await liquidator.protocolShareReserve()).equals(TREASURY);
       expect(await liquidator.accessControlManager()).equals(ACM);
@@ -215,6 +211,7 @@ forking(30478951, () => {
       vaiController = new ethers.Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, provider);
       vai = new ethers.Contract(VAI, IERC20_ABI, provider);
       await setMaxStaleCoreAssets(CHAINLINK, NORMAL_TIMELOCK);
+      await liquidator.connect(impersonatedTimelock).resumeForceVAILiquidate();
     });
 
     it("Tusd Liquidation and reduce liquidation reserves", async () => {

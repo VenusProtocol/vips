@@ -140,12 +140,6 @@ export const vip155 = (data?: string) => {
 
       {
         target: LIQUIDATOR,
-        signature: "resumeForceVAILiquidate()",
-        params: [],
-      },
-
-      {
-        target: LIQUIDATOR,
         signature: "setMinLiquidatableVAI(uint256)",
         params: [parseUnits("100", 18)],
       },
