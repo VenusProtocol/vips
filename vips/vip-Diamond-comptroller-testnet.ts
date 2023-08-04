@@ -4,6 +4,8 @@ import { makeProposal } from "../src/utils";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const DIAMOND = "0x52B88fc3F47f607DdcE4048c243050B7576e9cbD";
+const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const cutParams = params;
 
 export const vipDiamondTestnet = () => {
@@ -33,6 +35,16 @@ export const vipDiamondTestnet = () => {
         target: UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [cutParams],
+      },
+      {
+        target: ACM,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [UNITROLLER, "_setActionsPaused(address[],uint256[],bool)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "_setActionsPaused(address[],uint8[],bool)", NORMAL_TIMELOCK],
       },
     ],
     meta,
