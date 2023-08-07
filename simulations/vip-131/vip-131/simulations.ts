@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+
 import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { FEE_IN, vip131 } from "../../../vips/vip-131/vip-131";
@@ -68,9 +69,7 @@ forking(30501836, () => {
 
     it("Verify access control setup", async () => {
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "pause()")).equals(true);
-      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "resume()")).equals(
-        true,
-      );
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "resume()")).equals(true);
 
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "pause()")).equals(true);
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "resume()")).equals(true);
