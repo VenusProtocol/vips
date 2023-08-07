@@ -63,13 +63,19 @@ export const vip131Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PSM_USDT, "setComptroller(address)", NORMAL_TIMELOCK],
+        params: [PSM_USDT, "setOracle(address)", NORMAL_TIMELOCK],
       },
 
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "setVenusTreasury(address)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "pause()", NORMAL_TIMELOCK],
       },
 
       {
@@ -82,6 +88,12 @@ export const vip131Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "pause()", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "resume()", NORMAL_TIMELOCK],
       },
 
       {

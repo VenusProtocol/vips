@@ -67,6 +67,11 @@ forking(30501836, () => {
     });
 
     it("Verify access control setup", async () => {
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "pause()")).equals(true);
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "resume()")).equals(
+        true,
+      );
+
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "pause()")).equals(true);
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "resume()")).equals(true);
 
@@ -87,7 +92,7 @@ forking(30501836, () => {
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVaiMintCap(uint256)"),
       ).equals(true);
       expect(
-        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setComptroller(address)"),
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setOracle(address)"),
       ).equals(true);
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVenusTreasury(address)"),
