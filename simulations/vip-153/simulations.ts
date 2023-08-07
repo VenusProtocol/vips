@@ -11,8 +11,8 @@ import {
   NEW_BORROW_CAP_FLOKI,
   NEW_BORROW_CAP_stkBNB,
   NEW_SUPPLY_CAP_FLOKI,
-  vip152,
-} from "../../vips/vip-152";
+  vip153,
+} from "../../vips/vip-153";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(30505308, () => {
@@ -25,7 +25,7 @@ forking(30505308, () => {
     lstComptroller = new ethers.Contract(LiquidStakedBNB_Comptroller, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-152 Risk Parameters Update", vip152(), {
+  testVip("VIP-153 Risk Parameters Update", vip153(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {

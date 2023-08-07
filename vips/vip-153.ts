@@ -18,10 +18,10 @@ export const LiquidStakedBNB_Comptroller = "0xd933909A4a2b7A4638903028f44D1d38ce
 export const LiquidStakedBNB_VstkBNB = "0xcc5D9e502574cda17215E70bC0B4546663785227";
 export const NEW_BORROW_CAP_stkBNB = parseUnits("580", 18); // scaled
 
-export const vip152 = () => {
+export const vip153 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-152 Risk Parameters Update",
+    title: "VIP-153 Risk Parameters Update",
     description: `Chaos labs recommendations for parameter updates
     FLOKI:
       Supply cap: from 44,000,000,000 to 68,000,000,000
