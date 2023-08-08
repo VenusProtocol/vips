@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { FEE_IN, vip131 } from "../../../vips/vip-131/vip-131";
+import { BASE_RATE_MANTISSA, FEE_IN, USDT_FUNDING_AMOUNT, VAI_MINT_CAP, vip131 } from "../../../vips/vip-131/vip-131";
 import { FEE_OUT } from "../../../vips/vip-131/vip-131";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
@@ -22,7 +22,6 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
-const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -88,7 +87,7 @@ forking(30501836, () => {
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeOut(uint256)"),
       ).equals(true);
       expect(
-        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVaiMintCap(uint256)"),
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVAIMintCap(uint256)"),
       ).equals(true);
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setOracle(address)"),
@@ -98,9 +97,17 @@ forking(30501836, () => {
       ).equals(true);
     });
 
-    it("Verify new VAI base rate is 2.72%", async () => {
+    it("Verify new VAI base rate is 4.00%", async () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
       expect(currentBaseRate).equals(BASE_RATE_MANTISSA);
+    });
+    it("Verify VAI mint cap in PSM is 5,000,000", async () => {
+      const currentMintCap = await psm.vaiMintCap();
+      expect(currentMintCap).equals(VAI_MINT_CAP);
+    });
+    it("Verify PSM USDT balance is 219,000 USDT", async () => {
+      const psmUSDTBalance = await usdt.balanceOf(PSM_USDT);
+      expect(psmUSDTBalance).equals(USDT_FUNDING_AMOUNT);
     });
     it("Verify feeIn and feeOut", async () => {
       expect(await psm.feeIn()).to.equal(FEE_IN);
