@@ -19,6 +19,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
 forking(30560338, () => {
   let accessControlManager: ethers.Contract;
@@ -43,7 +44,7 @@ forking(30560338, () => {
         txResponse,
         [ACCESS_CONTROL_ABI, LIQUIDATOR_ABI],
         ["RoleGranted", "NewPendingRedeemChunkLength"],
-        [21, 1],
+        [27, 1],
       );
     },
   });
@@ -67,6 +68,12 @@ forking(30560338, () => {
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "restrictLiquidation(address)"),
       ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "restrictLiquidation(address)"),
+      ).equals(true);
     });
 
     it("Permissions addToAllowlist", async () => {
@@ -86,6 +93,12 @@ forking(30560338, () => {
         await accessControlManager
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "addToAllowlist(address,address)"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "addToAllowlist(address,address)"),
       ).equals(true);
     });
 
@@ -107,6 +120,12 @@ forking(30560338, () => {
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "unrestrictLiquidation(address)"),
       ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "unrestrictLiquidation(address)"),
+      ).equals(true);
     });
 
     it("Permissions removeFromAllowlist", async () => {
@@ -126,6 +145,12 @@ forking(30560338, () => {
         await accessControlManager
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "removeFromAllowlist(address,address)"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "removeFromAllowlist(address,address)"),
       ).equals(true);
     });
 
@@ -155,6 +180,12 @@ forking(30560338, () => {
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "pauseForceVAILiquidate()"),
       ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "pauseForceVAILiquidate()"),
+      ).equals(true);
     });
 
     it("Permissions resumeForceVAILiquidate()", async () => {
@@ -174,6 +205,12 @@ forking(30560338, () => {
         await accessControlManager
           .connect(impersonatedLiquidator)
           .isAllowedToCall(CRITICAL_TIMELOCK, "resumeForceVAILiquidate()"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(VENUS_GUARDIAN, "resumeForceVAILiquidate()"),
       ).equals(true);
     });
 

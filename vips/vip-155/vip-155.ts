@@ -9,6 +9,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
+const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
 export const vip155 = (data?: string) => {
   const meta = {
@@ -45,6 +46,12 @@ export const vip155 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "restrictLiquidation(address)", VENUS_GUARDIAN],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "unrestrictLiquidation(address)", NORMAL_TIMELOCK],
       },
 
@@ -58,6 +65,12 @@ export const vip155 = (data?: string) => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "unrestrictLiquidation(address)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "unrestrictLiquidation(address)", VENUS_GUARDIAN],
       },
 
       {
@@ -81,6 +94,12 @@ export const vip155 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "addToAllowlist(address,address)", VENUS_GUARDIAN],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "removeFromAllowlist(address,address)", NORMAL_TIMELOCK],
       },
 
@@ -94,6 +113,12 @@ export const vip155 = (data?: string) => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "removeFromAllowlist(address,address)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", VENUS_GUARDIAN],
       },
 
       {
@@ -129,6 +154,12 @@ export const vip155 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "pauseForceVAILiquidate()", VENUS_GUARDIAN],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "resumeForceVAILiquidate()", NORMAL_TIMELOCK],
       },
 
@@ -142,6 +173,12 @@ export const vip155 = (data?: string) => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "resumeForceVAILiquidate()", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "resumeForceVAILiquidate()", VENUS_GUARDIAN],
       },
 
       {
