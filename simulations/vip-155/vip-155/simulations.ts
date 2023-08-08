@@ -43,7 +43,7 @@ forking(30560338, () => {
         txResponse,
         [ACCESS_CONTROL_ABI, LIQUIDATOR_ABI],
         ["RoleGranted", "NewPendingRedeemChunkLength"],
-        [17, 1],
+        [21, 1],
       );
     },
   });
@@ -95,13 +95,17 @@ forking(30560338, () => {
           .connect(impersonatedLiquidator)
           .isAllowedToCall(NORMAL_TIMELOCK, "unrestrictLiquidation(address)"),
       ).equals(true);
-    });
 
-    it("Permissions addToAllowlist", async () => {
       expect(
         await accessControlManager
           .connect(impersonatedLiquidator)
-          .isAllowedToCall(NORMAL_TIMELOCK, "addToAllowlist(address,address)"),
+          .isAllowedToCall(FAST_TRACK_TIMELOCK, "unrestrictLiquidation(address)"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(CRITICAL_TIMELOCK, "unrestrictLiquidation(address)"),
       ).equals(true);
     });
 
@@ -110,6 +114,18 @@ forking(30560338, () => {
         await accessControlManager
           .connect(impersonatedLiquidator)
           .isAllowedToCall(NORMAL_TIMELOCK, "removeFromAllowlist(address,address)"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(FAST_TRACK_TIMELOCK, "removeFromAllowlist(address,address)"),
+      ).equals(true);
+
+      expect(
+        await accessControlManager
+          .connect(impersonatedLiquidator)
+          .isAllowedToCall(CRITICAL_TIMELOCK, "removeFromAllowlist(address,address)"),
       ).equals(true);
     });
 
@@ -222,6 +238,7 @@ forking(30560338, () => {
       vai = new ethers.Contract(VAI, IERC20_ABI, provider);
       await setMaxStaleCoreAssets(CHAINLINK, NORMAL_TIMELOCK);
       await liquidator.connect(impersonatedTimelock).resumeForceVAILiquidate();
+      await liquidator.connect(impersonatedTimelock).setMinLiquidatableVAI(parseUnits("100", 18));
     });
 
     it("Tusd Liquidation and reduce liquidation reserves", async () => {

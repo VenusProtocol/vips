@@ -51,6 +51,18 @@ export const vip155 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "unrestrictLiquidation(address)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "unrestrictLiquidation(address)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "addToAllowlist(address,address)", NORMAL_TIMELOCK],
       },
 
@@ -70,6 +82,18 @@ export const vip155 = (data?: string) => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "removeFromAllowlist(address,address)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", CRITICAL_TIMELOCK],
       },
 
       {
@@ -141,7 +165,7 @@ export const vip155 = (data?: string) => {
       {
         target: LIQUIDATOR,
         signature: "setMinLiquidatableVAI(uint256)",
-        params: [parseUnits("100", 18)],
+        params: [parseUnits("1000", 18)],
       },
     ],
     meta,
