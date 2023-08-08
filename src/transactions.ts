@@ -6,6 +6,7 @@ const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
 
 export const loadProposal = async (num: string) => {
   const x = await import(`../vips/vip-${num}.ts`);
+  num = num.replace('-testnet', 'Testnet');
   return x[`vip${num}`]();
 };
 

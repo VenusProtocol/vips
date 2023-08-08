@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip152Testnet } from "../../../vips/vip-152/vip-152-testnet";
+import { vip152Testnet } from "../../../vips/vip-152-testnet";
 import vBNB_ABI from "./abi/vBNB.json"
 
 const COMPTROLLER_ADDRESS = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";

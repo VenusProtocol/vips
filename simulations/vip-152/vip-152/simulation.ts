@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
 import vBNB_ABI from "./abi/vBNB.json"
-import { vip152 } from "../../../vips/vip-152/vip-152";
+import { vip152 } from "../../../vips/vip-152";
 
 const COMPTROLLER_ADDRESS = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
