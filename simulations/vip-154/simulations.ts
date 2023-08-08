@@ -14,7 +14,7 @@ forking(30669350, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-153 Risk Parameters Update", vip154(), {
+  testVip("VIP-154 Risk Parameters Update", vip154(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },
