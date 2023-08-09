@@ -15,6 +15,7 @@ import USDT_ABI from "./abi/USDT_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
 import VTreasury_ABI from "./abi/VTreasury_ABI.json";
+import { TransactionResponse } from "@ethersproject/providers";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -67,7 +68,7 @@ forking(30501836, () => {
   });
 
   testVip("VIP-130 Add Peg Stability (USDT)", vip131(), {
-    callbackAfterExecution: async (txResponse: any) => {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
         [PSM_ABI, VAI_CONTROLLER_ABI,ACM_ABI,VTreasury_ABI],
