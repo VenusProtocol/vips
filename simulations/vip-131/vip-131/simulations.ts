@@ -1,3 +1,4 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -15,7 +16,6 @@ import USDT_ABI from "./abi/USDT_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
 import VTreasury_ABI from "./abi/VTreasury_ABI.json";
-import { TransactionResponse } from "@ethersproject/providers";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -30,7 +30,7 @@ const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDT_PRICE_FEED = "0xb97ad0e74fa7d920791e90258a6e2085088b4320"; // Chainlink Oracle
 const STABLE_TOKEN_HOLDER = "0x6a0b3611214d5001fa5efae91b7222a316c12b52";
 const VAI_HOLDER = "0x29aa70f8f3f2aa241b0ba9eaa744c97808d032c9";
-const BASE_RATE_BEFORE_VIP = parseUnits('0.01',18);
+const BASE_RATE_BEFORE_VIP = parseUnits("0.01", 18);
 
 forking(30501836, () => {
   const provider = ethers.provider;
@@ -71,9 +71,17 @@ forking(30501836, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
-        [PSM_ABI, VAI_CONTROLLER_ABI,ACM_ABI,VTreasury_ABI],
-        ["OwnershipTransferred","RoleGranted","FeeInChanged","FeeOutChanged","VAIMintCapChanged","NewVAIBaseRate","WithdrawTreasuryBEP20"],
-        [2,11,1,1,1,1,1],
+        [PSM_ABI, VAI_CONTROLLER_ABI, ACM_ABI, VTreasury_ABI],
+        [
+          "OwnershipTransferred",
+          "RoleGranted",
+          "FeeInChanged",
+          "FeeOutChanged",
+          "VAIMintCapChanged",
+          "NewVAIBaseRate",
+          "WithdrawTreasuryBEP20",
+        ],
+        [2, 11, 1, 1, 1, 1, 1],
       );
     },
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
