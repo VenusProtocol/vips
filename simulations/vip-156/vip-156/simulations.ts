@@ -8,11 +8,11 @@ import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } fro
 import { forking, testVip } from "../../../src/vip-framework";
 import {
   BASE_RATE_MANTISSA,
+  FEE_IN,
+  FEE_OUT,
   GUARDIAN_WALLET,
   USDT_FUNDING_AMOUNT,
   VAI_MINT_CAP,
-  FEE_IN,
-  FEE_OUT,
   vip156,
 } from "../../../vips/vip-156/vip-156";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
