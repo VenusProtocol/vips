@@ -5,7 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 export const FEE_OUT = 100; // 10bps
 export const FEE_IN = 0;
-export const BASE_RATE_MANTISSA = parseUnits("4", 18); // 4%
+export const BASE_RATE_MANTISSA = parseUnits("0.04", 18); // 4%
 export const VAI_MINT_CAP = parseUnits("5000000", 18);
 export const USDT_FUNDING_AMOUNT = parseUnits("219000", 18);
 
