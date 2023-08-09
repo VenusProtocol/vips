@@ -3,7 +3,7 @@ import { BigNumber, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { BASE_RATE_MANTISSA, FEE_IN, USDT_FUNDING_AMOUNT, VAI_MINT_CAP, vip131 } from "../../../vips/vip-131/vip-131";
 import { FEE_OUT } from "../../../vips/vip-131/vip-131";
@@ -14,6 +14,7 @@ import ResilientOracle_ABI from "./abi/ResilientOracle_ABI.json";
 import USDT_ABI from "./abi/USDT_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
+import VTreasury_ABI from "./abi/VTreasury_ABI.json";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -28,6 +29,7 @@ const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDT_PRICE_FEED = "0xb97ad0e74fa7d920791e90258a6e2085088b4320"; // Chainlink Oracle
 const STABLE_TOKEN_HOLDER = "0x6a0b3611214d5001fa5efae91b7222a316c12b52";
 const VAI_HOLDER = "0x29aa70f8f3f2aa241b0ba9eaa744c97808d032c9";
+const BASE_RATE_BEFORE_VIP = parseUnits('0.01',18);
 
 forking(30501836, () => {
   const provider = ethers.provider;
@@ -56,7 +58,23 @@ forking(30501836, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, USDT, USDT_PRICE_FEED, NORMAL_TIMELOCK);
   });
 
+  describe("Pre-VIP behavior", () => {
+    it("Verify VAI base rate is 1%", async () => {
+      const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
+      console.log(currentBaseRate.toString());
+      expect(currentBaseRate).equals(BASE_RATE_BEFORE_VIP);
+    });
+  });
+
   testVip("VIP-130 Add Peg Stability (USDT)", vip131(), {
+    callbackAfterExecution: async (txResponse: any) => {
+      await expectEvents(
+        txResponse,
+        [PSM_ABI, VAI_CONTROLLER_ABI,ACM_ABI,VTreasury_ABI],
+        ["OwnershipTransferred","RoleGranted","FeeInChanged","FeeOutChanged","VAIMintCapChanged","NewVAIBaseRate","WithdrawTreasuryBEP20"],
+        [2,11,1,1,1,1,1],
+      );
+    },
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });
