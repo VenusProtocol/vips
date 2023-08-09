@@ -62,7 +62,6 @@ forking(30501836, () => {
   describe("Pre-VIP behavior", () => {
     it("Verify VAI base rate is 1%", async () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
-      console.log(currentBaseRate.toString());
       expect(currentBaseRate).equals(BASE_RATE_BEFORE_VIP);
     });
   });
