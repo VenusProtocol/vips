@@ -8,6 +8,7 @@ export const FEE_IN = 0;
 export const BASE_RATE_MANTISSA = parseUnits("0.04", 18); // 4%
 export const VAI_MINT_CAP = parseUnits("5000000", 18);
 export const USDT_FUNDING_AMOUNT = parseUnits("219000", 18);
+export const GUARDIAN_WALLET = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -59,13 +60,49 @@ export const vip131 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setFeeIn(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setFeeIn(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "setFeeOut(uint256)", NORMAL_TIMELOCK],
       },
 
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setFeeOut(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setFeeOut(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "setVAIMintCap(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setVAIMintCap(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "setVAIMintCap(uint256)", CRITICAL_TIMELOCK],
       },
 
       {
@@ -101,6 +138,12 @@ export const vip131 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "pause()", GUARDIAN_WALLET],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "resume()", NORMAL_TIMELOCK],
       },
 
@@ -114,6 +157,12 @@ export const vip131 = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [PSM_USDT, "resume()", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSM_USDT, "resume()", GUARDIAN_WALLET],
       },
 
       {

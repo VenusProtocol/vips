@@ -6,8 +6,14 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { BASE_RATE_MANTISSA, FEE_IN, USDT_FUNDING_AMOUNT, VAI_MINT_CAP, vip131 } from "../../../vips/vip-131/vip-131";
-import { FEE_OUT } from "../../../vips/vip-131/vip-131";
+import {
+  BASE_RATE_MANTISSA,
+  GUARDIAN_WALLET,
+  USDT_FUNDING_AMOUNT,
+  VAI_MINT_CAP,
+  vip131,
+} from "../../../vips/vip-156/vip-156";
+import { FEE_IN, FEE_OUT } from "../../../vips/vip-156/vip-156-testnet";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import PSM_ABI from "./abi/PSM_ABI.json";
@@ -80,7 +86,7 @@ forking(30501836, () => {
           "NewVAIBaseRate",
           "WithdrawTreasuryBEP20",
         ],
-        [2, 11, 1, 1, 1, 1, 1],
+        [2, 19, 1, 1, 1, 1, 1],
       );
     },
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
@@ -93,6 +99,7 @@ forking(30501836, () => {
     });
 
     it("Verify access control setup", async () => {
+      // PAUSE & RESUME
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "pause()")).equals(true);
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "resume()")).equals(true);
 
@@ -106,18 +113,48 @@ forking(30501836, () => {
         true,
       );
 
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(GUARDIAN_WALLET, "pause()")).equals(true);
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(GUARDIAN_WALLET, "resume()")).equals(true);
+
+      // FEE IN
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeIn(uint256)"),
       ).equals(true);
       expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setFeeIn(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setFeeIn(uint256)"),
+      ).equals(true);
+
+      // FEE OUT
+      expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeOut(uint256)"),
       ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setFeeOut(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setFeeOut(uint256)"),
+      ).equals(true);
+
+      // VAI MINT CAP
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVAIMintCap(uint256)"),
       ).equals(true);
       expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setVAIMintCap(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setVAIMintCap(uint256)"),
+      ).equals(true);
+
+      // ORACLE
+      expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setOracle(address)"),
       ).equals(true);
+
+      // VENUS TREASURY
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVenusTreasury(address)"),
       ).equals(true);
