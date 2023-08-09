@@ -13,7 +13,7 @@ import {
   VAI_MINT_CAP,
   FEE_IN,
   FEE_OUT,
-  vip56,
+  vip156,
 } from "../../../vips/vip-156/vip-156";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
