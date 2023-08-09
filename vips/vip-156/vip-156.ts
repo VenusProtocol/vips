@@ -20,10 +20,10 @@ const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
-export const vip131 = () => {
+export const vip156 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-131 Add Peg Stability (USDT)",
+    title: "VIP-156 Add Peg Stability (USDT)",
     description: `
        Add the Peg Stability Contract as an admin in the VAI contract: VAI.rely(pegStabilityAddress)
        Setting fee OUT to 10bps.

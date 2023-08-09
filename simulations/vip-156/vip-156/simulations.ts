@@ -11,9 +11,10 @@ import {
   GUARDIAN_WALLET,
   USDT_FUNDING_AMOUNT,
   VAI_MINT_CAP,
-  vip131,
+  FEE_IN,
+  FEE_OUT,
+  vip56,
 } from "../../../vips/vip-156/vip-156";
-import { FEE_IN, FEE_OUT } from "../../../vips/vip-156/vip-156-testnet";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import PSM_ABI from "./abi/PSM_ABI.json";
@@ -72,7 +73,7 @@ forking(30501836, () => {
     });
   });
 
-  testVip("VIP-130 Add Peg Stability (USDT)", vip131(), {
+  testVip("VIP-130 Add Peg Stability (USDT)", vip156(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
