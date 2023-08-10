@@ -9,6 +9,7 @@ export const BASE_RATE_MANTISSA = parseUnits("0.04", 18); // 4%
 export const VAI_MINT_CAP = parseUnits("5000000", 18);
 export const USDT_FUNDING_AMOUNT = parseUnits("219000", 18);
 export const GUARDIAN_WALLET = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -18,7 +19,6 @@ const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
-const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 export const vip156 = () => {
   const meta = {
@@ -192,7 +192,19 @@ export const vip156 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_FUNDING_AMOUNT, PSM_USDT],
+        params: [USDT, USDT_FUNDING_AMOUNT, NORMAL_TIMELOCK],
+      },
+
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [PSM_USDT, USDT_FUNDING_AMOUNT],
+      },
+
+      {
+        target: PSM_USDT,
+        signature: "swapStableForVAI(address,uint256)",
+        params: [TREASURY, USDT_FUNDING_AMOUNT],
       },
     ],
     meta,

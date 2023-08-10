@@ -11,6 +11,7 @@ import {
   FEE_IN,
   FEE_OUT,
   GUARDIAN_WALLET,
+  TREASURY,
   USDT_FUNDING_AMOUNT,
   VAI_MINT_CAP,
   vip156,
@@ -50,9 +51,11 @@ forking(30501836, () => {
   let psmSigner: Signer;
   let tokenHolder: Signer;
   let vaiHolder: Signer;
+  let treasuryVAIBalanceBefore: BigNumber;
 
   before(async () => {
     vai = new ethers.Contract(VAI, VAI_ABI, provider);
+    treasuryVAIBalanceBefore = await vai.balanceOf(TREASURY);
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);
     accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
     psm = new ethers.Contract(PSM_USDT, PSM_ABI, provider);
@@ -86,8 +89,9 @@ forking(30501836, () => {
           "VAIMintCapChanged",
           "NewVAIBaseRate",
           "WithdrawTreasuryBEP20",
+          "StableForVAISwapped",
         ],
-        [2, 19, 1, 1, 1, 1, 1],
+        [2, 19, 1, 1, 1, 1, 1, 1],
       );
     },
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
@@ -172,6 +176,13 @@ forking(30501836, () => {
     it("Verify PSM USDT balance is 219,000 USDT", async () => {
       const psmUSDTBalance = await usdt.balanceOf(PSM_USDT);
       expect(psmUSDTBalance).equals(USDT_FUNDING_AMOUNT);
+    });
+    it("Verify treasury VAI balance", async () => {
+      const VAIBalance: BigNumber = await vai.balanceOf(TREASURY);
+      const usdtPrice = await resilientOracle.getPrice(USDT); // get USDT USD Price
+      const mantissaOne = parseUnits("1", 18);
+      const expectedVAIBalance = USDT_FUNDING_AMOUNT.mul(usdtPrice).div(mantissaOne); // calculate USD Value of VAI
+      expect(VAIBalance.sub(treasuryVAIBalanceBefore)).to.equal(expectedVAIBalance);
     });
     it("Verify feeIn and feeOut", async () => {
       expect(await psm.feeIn()).to.equal(FEE_IN);
