@@ -17,7 +17,7 @@ const VBNBAdmin_IMPLEMENTATION = "0x1Fc2687B20333FaC095C4091179D798B664aBb0f";
 const VBNBAdmin_ADDRESS = "0x4C2AEc2606ac6e5d73Cc58f112fcB3AC4607631e"
 const CURRENT_ADMIN = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(32356124, () => {
+forking(32356229, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
