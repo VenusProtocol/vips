@@ -14,8 +14,8 @@ import {
   TREASURY,
   USDT_FUNDING_AMOUNT,
   VAI_MINT_CAP,
-  vip156,
-} from "../../../vips/vip-156/vip-156";
+  vip157,
+} from "../../../vips/vip-157/vip-157";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import PSM_ABI from "./abi/PSM_ABI.json";
@@ -76,7 +76,7 @@ forking(30501836, () => {
     });
   });
 
-  testVip("VIP-130 Add Peg Stability (USDT)", vip156(), {
+  testVip("VIP-157 Add Peg Stability (USDT)", vip157(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -97,6 +97,7 @@ forking(30501836, () => {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });
+
   describe("Post-VIP behavior", async () => {
     it("Verify PSM_USDT is admin of VAI contract", async () => {
       const check = await vai.wards(PSM_USDT);
