@@ -1,15 +1,13 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
 export const FEE_OUT = 10; // 10bps
 export const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
 
-export const vip158 = () => {
+export const vip159 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-158 PSM risk parameters",
+    title: "VIP-159 PSM risk parameters",
     description: `
     Fee out: 10bps
       `,

@@ -1,15 +1,16 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { FEE_OUT, PSM_USDT, vip158 } from "../../vips/vip-158";
+import { FEE_OUT, PSM_USDT, vip159 } from "../../vips/vip-159";
 import PSM_ABI from "./abi/PSM_ABI.json";
 
 console.log({ FEE_OUT, PSM_USDT });
 
 forking(30851821, () => {
-  let psm: ethers.Contract;
+  let psm: Contract;
   const provider = ethers.provider;
 
   before(async () => {
@@ -22,7 +23,7 @@ forking(30851821, () => {
     });
   });
 
-  testVip("VIP-158 Risk Parameters Update", vip158(), {
+  testVip("VIP-159 Risk Parameters Update", vip159(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSM_ABI], ["FeeOutChanged"], [1]);
     },
