@@ -1,12 +1,21 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { FEE_IN, vip131 } from "../../../vips/vip-131/vip-131";
-import { FEE_OUT } from "../../../vips/vip-131/vip-131";
+import {
+  BASE_RATE_MANTISSA,
+  FEE_IN,
+  FEE_OUT,
+  GUARDIAN_WALLET,
+  TREASURY,
+  USDT_FUNDING_AMOUNT,
+  VAI_MINT_CAP,
+  vip157,
+} from "../../../vips/vip-157/vip-157";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import PSM_ABI from "./abi/PSM_ABI.json";
@@ -14,6 +23,7 @@ import ResilientOracle_ABI from "./abi/ResilientOracle_ABI.json";
 import USDT_ABI from "./abi/USDT_ABI.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
+import VTreasury_ABI from "./abi/VTreasury_ABI.json";
 
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -22,13 +32,13 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PSM_USDT = "0xC138aa4E424D1A8539e8F38Af5a754a2B7c3Cc36";
-const BASE_RATE_MANTISSA = parseUnits("2.72", 18);
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDT_PRICE_FEED = "0xb97ad0e74fa7d920791e90258a6e2085088b4320"; // Chainlink Oracle
 const STABLE_TOKEN_HOLDER = "0x6a0b3611214d5001fa5efae91b7222a316c12b52";
 const VAI_HOLDER = "0x29aa70f8f3f2aa241b0ba9eaa744c97808d032c9";
+const BASE_RATE_BEFORE_VIP = parseUnits("0.01", 18);
 
 forking(30501836, () => {
   const provider = ethers.provider;
@@ -41,9 +51,11 @@ forking(30501836, () => {
   let psmSigner: Signer;
   let tokenHolder: Signer;
   let vaiHolder: Signer;
+  let treasuryVAIBalanceBefore: BigNumber;
 
   before(async () => {
     vai = new ethers.Contract(VAI, VAI_ABI, provider);
+    treasuryVAIBalanceBefore = await vai.balanceOf(TREASURY);
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);
     accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
     psm = new ethers.Contract(PSM_USDT, PSM_ABI, provider);
@@ -57,10 +69,35 @@ forking(30501836, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, USDT, USDT_PRICE_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-130 Add Peg Stability (USDT)", vip131(), {
+  describe("Pre-VIP behavior", () => {
+    it("Verify VAI base rate is 1%", async () => {
+      const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
+      expect(currentBaseRate).equals(BASE_RATE_BEFORE_VIP);
+    });
+  });
+
+  testVip("VIP-157 Add Peg Stability (USDT)", vip157(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      await expectEvents(
+        txResponse,
+        [PSM_ABI, VAI_CONTROLLER_ABI, ACM_ABI, VTreasury_ABI],
+        [
+          "OwnershipTransferred",
+          "RoleGranted",
+          "FeeInChanged",
+          "FeeOutChanged",
+          "VAIMintCapChanged",
+          "NewVAIBaseRate",
+          "WithdrawTreasuryBEP20",
+          "StableForVAISwapped",
+        ],
+        [2, 19, 1, 1, 1, 1, 1, 1],
+      );
+    },
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });
+
   describe("Post-VIP behavior", async () => {
     it("Verify PSM_USDT is admin of VAI contract", async () => {
       const check = await vai.wards(PSM_USDT);
@@ -68,6 +105,7 @@ forking(30501836, () => {
     });
 
     it("Verify access control setup", async () => {
+      // PAUSE & RESUME
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "pause()")).equals(true);
       expect(await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "resume()")).equals(true);
 
@@ -81,26 +119,71 @@ forking(30501836, () => {
         true,
       );
 
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(GUARDIAN_WALLET, "pause()")).equals(true);
+      expect(await accessControlManager.connect(psmSigner).isAllowedToCall(GUARDIAN_WALLET, "resume()")).equals(true);
+
+      // FEE IN
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeIn(uint256)"),
       ).equals(true);
       expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setFeeIn(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setFeeIn(uint256)"),
+      ).equals(true);
+
+      // FEE OUT
+      expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setFeeOut(uint256)"),
       ).equals(true);
       expect(
-        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVaiMintCap(uint256)"),
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setFeeOut(uint256)"),
       ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setFeeOut(uint256)"),
+      ).equals(true);
+
+      // VAI MINT CAP
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVAIMintCap(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(FAST_TRACK_TIMELOCK, "setVAIMintCap(uint256)"),
+      ).equals(true);
+      expect(
+        await accessControlManager.connect(psmSigner).isAllowedToCall(CRITICAL_TIMELOCK, "setVAIMintCap(uint256)"),
+      ).equals(true);
+
+      // ORACLE
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setOracle(address)"),
       ).equals(true);
+
+      // VENUS TREASURY
       expect(
         await accessControlManager.connect(psmSigner).isAllowedToCall(NORMAL_TIMELOCK, "setVenusTreasury(address)"),
       ).equals(true);
     });
 
-    it("Verify new VAI base rate is 2.72%", async () => {
+    it("Verify new VAI base rate is 4.00%", async () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
       expect(currentBaseRate).equals(BASE_RATE_MANTISSA);
+    });
+    it("Verify VAI mint cap in PSM is 5,000,000", async () => {
+      const currentMintCap = await psm.vaiMintCap();
+      expect(currentMintCap).equals(VAI_MINT_CAP);
+    });
+    it("Verify PSM USDT balance is 219,000 USDT", async () => {
+      const psmUSDTBalance = await usdt.balanceOf(PSM_USDT);
+      expect(psmUSDTBalance).equals(USDT_FUNDING_AMOUNT);
+    });
+    it("Verify treasury VAI balance", async () => {
+      const VAIBalance: BigNumber = await vai.balanceOf(TREASURY);
+      const usdtPrice = await resilientOracle.getPrice(USDT); // get USDT USD Price
+      const mantissaOne = parseUnits("1", 18);
+      const expectedVAIBalance = USDT_FUNDING_AMOUNT.mul(usdtPrice).div(mantissaOne); // calculate USD Value of VAI
+      expect(VAIBalance.sub(treasuryVAIBalanceBefore)).to.equal(expectedVAIBalance);
     });
     it("Verify feeIn and feeOut", async () => {
       expect(await psm.feeIn()).to.equal(FEE_IN);
