@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { Actions, vip160 } from "../../../vips/vip-161/vip-161";
+import { Actions, vip161 } from "../../../vips/vip-161/vip-161";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 import INTEREST_RATE_MODEL_ABI from "./abi/INTEREST_RATE_MODEL_ABI.json";
 import VBEP20_ABI from "./abi/VBEP20_ABI.json";
@@ -88,7 +88,7 @@ forking(31110871, () => {
     });
   });
 
-  testVip("VIP-160 Risk Parameters Update", vip160(), {
+  testVip("VIP-161 Risk Parameters Update", vip161(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

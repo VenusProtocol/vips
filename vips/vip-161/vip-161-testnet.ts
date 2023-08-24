@@ -16,10 +16,10 @@ export const Actions = {
   ENTER_MARKETS: 7,
 };
 
-export const vip160Testnet = () => {
+export const vip161Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-160 Risk Parameters Update ",
+    title: "VIP-161 Risk Parameters Update ",
     description: `
         VIP
           Set supply caps in BUSD market to 0
