@@ -14,6 +14,8 @@ const VTHE_DeFi = "";
 const VTWT_DeFi = "";
 const REWARD_DISTRIBUTOR_THE = "";
 const DEFI_COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
+const USDT = "0x55d398326f99059ff775485246999027b3197955";
+const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const vip160 = () => {
   const meta = {
@@ -26,7 +28,13 @@ export const vip160 = () => {
   };
 
   return makeProposal(
+    // Tranfer From Tresury to community wallet
     [
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("6000", 18), COMMUNITY_WALLET],
+      },
       // ================ THE Market ========================
       {
         target: TREASURY,
