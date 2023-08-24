@@ -71,7 +71,7 @@ export const vip160Testnet = () => {
       {
         target: THE,
         signature: "faucet(uint256)",
-        params: [parseUnits("58823.5", 18)],
+        params: [parseUnits("117647", 18)], // 50/50 for initial supply and rewards
       },
       {
         target: THE,
@@ -131,11 +131,6 @@ export const vip160Testnet = () => {
       },
 
       // =============REWARDS_THE_MARKET================
-      {
-        target: THE,
-        signature: "faucet(uint256)",
-        params: [parseUnits("58823.5", 18)],
-      },
       {
         target: THE,
         signature: "transfer(address,uint256)",
