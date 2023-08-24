@@ -124,8 +124,8 @@ export const vip160Testnet = () => {
             parseUnits("0.6", 18),
             parseUnits("58823.5", 18), // To be revised
             VTOKEN_RECEIVER_TWT, // To be revised
-            parseUnits("500000", 18),
             parseUnits("1000000", 18),
+            parseUnits("500000", 18),
           ],
         ],
       },
