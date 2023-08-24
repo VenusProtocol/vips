@@ -15,7 +15,7 @@ const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
 const VTUSDOLD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
 const DEFI_POOL = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const VANKRBNB_DEFI = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
-const VTUSDOLD_INTEREST_RATE_MODEL = "0x574f056c1751ed5f3aa30ba04e550f4e6090c992";
+const VTUSDOLD_INTEREST_RATE_MODEL = "0x574f056c1751Ed5F3aa30ba04e550f4E6090c992";
 const OLD_VTUSDOLD_INTEREST_RATE_MODEL = "0x84645E886E6e8192921C2d9bFf9882B55c6E7830";
 
 forking(31110871, () => {
@@ -162,7 +162,7 @@ forking(31110871, () => {
       });
 
       it("set new interestRateModel", async () => {
-        expect(await vtusdold.interestRateModel()).to.equal("0x574f056c1751Ed5F3aa30ba04e550f4E6090c992");
+        expect(await vtusdold.interestRateModel()).to.equal(VTUSDOLD_INTEREST_RATE_MODEL);
       });
     });
 
