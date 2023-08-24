@@ -2,6 +2,11 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -17,7 +22,7 @@
   },
   {
     "inputs": [],
-    "name": "InvalidRiskFundTransformer",
+    "name": "InvalidRiskFundConverter",
     "type": "error"
   },
   {
@@ -144,9 +149,15 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
         "type": "address"
       },
       {
@@ -165,17 +176,17 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "oldRiskFundTransformer",
+        "name": "oldRiskFundConverter",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "newRiskFundTransformer",
+        "name": "newRiskFundConverter",
         "type": "address"
       }
     ],
-    "name": "RiskFundTransformerUpdated",
+    "name": "RiskFundConverterUpdated",
     "type": "event"
   },
   {
@@ -195,6 +206,31 @@
       }
     ],
     "name": "ShortfallContractUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "SweepToken",
     "type": "event"
   },
   {
@@ -294,6 +330,30 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "poolAssetsFunds",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "name": "poolReserves",
@@ -316,7 +376,7 @@
   },
   {
     "inputs": [],
-    "name": "riskFundTransformer",
+    "name": "riskFundConverter",
     "outputs": [
       {
         "internalType": "address",
@@ -357,11 +417,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "riskFundTransformer_",
+        "name": "riskFundConverter_",
         "type": "address"
       }
     ],
-    "name": "setRiskFundTransformer",
+    "name": "setRiskFundConverter",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -390,6 +450,29 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "sweepToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -439,6 +522,11 @@
       {
         "internalType": "address",
         "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
         "type": "address"
       },
       {
