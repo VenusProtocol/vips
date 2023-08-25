@@ -12,7 +12,7 @@ const VTHE_DeFi = "0x5Ec06c9dD9654d42B69A8EdBBa99b1e8Afa0D4C0";
 const VTWT_DeFi = "0x4C94e67d239aD585275Fdd3246Ab82c8a2668564";
 const REWARD_DISTRIBUTOR_THE = "0x5cBf86e076b3F36a85dD73A730a3567FdCA0D21E";
 const DEFI_COMPTROLLER = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
-const BINANCE_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
+const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 
 export const vip160Testnet = () => {
@@ -28,12 +28,12 @@ export const vip160Testnet = () => {
   return makeProposal(
     [
       {
-        target: BINANCE_ORACLE,
+        target: CHAINLINK_ORACLE,
         signature: "setDirectPrice(address,uint256)",
         params: [THE, parseUnits("0.11470", 18)],
       },
       {
-        target: BINANCE_ORACLE,
+        target: CHAINLINK_ORACLE,
         signature: "setDirectPrice(address,uint256)",
         params: [TWT, parseUnits("0.85120", 18)],
       },
@@ -44,7 +44,7 @@ export const vip160Testnet = () => {
           [
             THE,
             [
-              BINANCE_ORACLE,
+              CHAINLINK_ORACLE,
               "0x0000000000000000000000000000000000000000",
               "0x0000000000000000000000000000000000000000",
             ],
@@ -59,7 +59,7 @@ export const vip160Testnet = () => {
           [
             TWT,
             [
-              BINANCE_ORACLE,
+              CHAINLINK_ORACLE,
               "0x0000000000000000000000000000000000000000",
               "0x0000000000000000000000000000000000000000",
             ],
@@ -93,8 +93,8 @@ export const vip160Testnet = () => {
             parseUnits("0.3", 18),
             parseUnits("58823.5", 18),
             VTOKEN_RECEIVER_THE,
-            parseUnits("1400000", 18),
             parseUnits("2600000", 18),
+            parseUnits("1400000", 18),
           ],
         ],
       },

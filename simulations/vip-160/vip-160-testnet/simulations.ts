@@ -273,12 +273,12 @@ forking(32725445, () => {
         });
 
         describe("Caps", () => {
-          it("should set vTHE_DeFi supply cap to 1,400,000", async () => {
-            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("1400000", 18));
+          it("should set vTHE_DeFi borrow cap to 1,400,000", async () => {
+            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("1400000", 18));
           });
 
-          it("should set vTHE_DeFi borrow cap to 2,600,000", async () => {
-            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("2600000", 18));
+          it("should set vTHE_DeFi supply cap to 2,600,000", async () => {
+            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("2600000", 18));
           });
 
           it("should set vTWT_DeFi supply cap to 1,000,000", async () => {
