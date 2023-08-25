@@ -1,21 +1,19 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testVip } from "../../../src/vip-framework";
 
 import COMPTROLLER_BEACON_ABI from "./abi/COMPTROLLER_BEACON.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/REWARDS_DISTRIBUTOR.json";
-import { vip162 } from "../../../vips/vip-162/vip-162";
+import { vip162Testnet } from "../../../vips/vip-162/vip-162-testnet";
 
-const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
-const OLD_IMPL = "0x939C05e2E694db68cE54d80bf29926b09190aA0F";
-const NEW_IMPL = "0x17a6ac4f7f01387303deB1D78f01aC0A0C1a75b0";
-const HAY_REWARDS_DISTRIBUTOR = "0xA31185D804BF9209347698128984a43A67Ce6d11";
-const SD_REWARDS_DISTRIBUTOR = "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
+const OLD_IMPL = "0x80691DaD6dAb8a028FFE68bb8045f2547d210f9D";
+const NEW_IMPL = "0x069705246364d60c5503bF19b4A714ab412521a0";
+const HAY_REWARDS_DISTRIBUTOR = "0xFFfC3fC29AFdc14408F1461d9AD4Ba976E25dcDc";
+const SD_REWARDS_DISTRIBUTOR = "0x37fA1e5613455223F09e179DFAEBba61d7505C97";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(31166657, () => {
+forking(32763372, () => {
   let comptrollerBeacon: ethers.Contract;
   let hayRewardsDistributor: ethers.Contract;
   let sdRewardsDistributor: ethers.Contract;
@@ -38,7 +36,7 @@ forking(31166657, () => {
     });
   });
 
-  testVip("VIP-162 HAY and SD Rewards", vip162(), {
+  testVip("VIP-162 HAY and SD Rewards", vip162Testnet(), {
     callbackAfterExecution: async txResponse => {},
   });
 
