@@ -21,15 +21,15 @@ const vUSDD_DeFi = "0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0";
 const COMPTROLLER_DeFi = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
-const TWT = "0x4b0f1812e5df2a09796481ff14017e6005508003";
+const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const VTOKEN_RECEIVER_TWT = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTWT_DeFi = "";
+const VTWT_DeFi = "0x736bf1d21a28b5dc19a1ac8ca71fc2856c23c03f";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(30066043, () => {
+forking(31162125, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTWT: Contract;
@@ -108,16 +108,9 @@ forking(30066043, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, POOL_REGISTRY_ABI, REWARD_DISTRIBUTOR_ABI, ERC20_ABI, TREASURY_ABI],
-        [
-          "WithdrawTreasuryBEP20",
-          "Approval",
-          "MarketAdded",
-          "RewardTokenSupplySpeedUpdated",
-          "RewardTokenBorrowSpeedUpdated",
-          "OwnershipTransferred",
-        ],
-        [2, 6, 1, 1, 1, 4],
+        [COMPTROLLER_ABI, POOL_REGISTRY_ABI, ERC20_ABI, TREASURY_ABI],
+        ["WithdrawTreasuryBEP20", "Approval", "MarketAdded"],
+        [2, 6, 1],
       );
     },
   });
