@@ -56,7 +56,7 @@ export const vip162 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [TWT, parseUnits("58823.5", 18), NORMAL_TIMELOCK],
+        params: [TWT, parseUnits("10000", 18), NORMAL_TIMELOCK],
       },
       {
         target: TWT,
@@ -66,7 +66,7 @@ export const vip162 = () => {
       {
         target: TWT,
         signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, parseUnits("58823.5", 18)],
+        params: [POOL_REGISTRY, parseUnits("10000", 18)],
       },
       {
         target: POOL_REGISTRY,
@@ -76,8 +76,8 @@ export const vip162 = () => {
             VTWT_DeFi,
             parseUnits("0.5", 18),
             parseUnits("0.6", 18),
-            parseUnits("58823.5", 18), // To be revised
-            VTOKEN_RECEIVER_TWT, // To be revised
+            parseUnits("10000", 18),
+            VTOKEN_RECEIVER_TWT,
             parseUnits("1000000", 18),
             parseUnits("500000", 18),
           ],

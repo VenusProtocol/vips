@@ -13,7 +13,6 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
-import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const TWT = "0xb99C6B26Fdf3678c6e2aff8466E3625a0e7182f8";
@@ -104,7 +103,7 @@ forking(32725445, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, POOL_REGISTRY_ABI, REWARD_DISTRIBUTOR_ABI, ERC20_ABI],
+        [COMPTROLLER_ABI, POOL_REGISTRY_ABI, ERC20_ABI],
         ["Approval", "MarketAdded"],
         [6, 1],
       );
@@ -132,8 +131,8 @@ forking(32725445, () => {
     });
 
     describe("Initial supply", () => {
-      it(`should mint 5882350000000 vTWT to ${VTOKEN_RECEIVER_TWT}`, async () => {
-        expect(await vTWT.balanceOf(VTOKEN_RECEIVER_TWT)).to.equal(parseUnits("58823.5", 8));
+      it(`should mint 1000000000000 vTWT to ${VTOKEN_RECEIVER_TWT}`, async () => {
+        expect(await vTWT.balanceOf(VTOKEN_RECEIVER_TWT)).to.equal(parseUnits("10000", 8));
       });
     });
 

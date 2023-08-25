@@ -13,7 +13,6 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
-import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -151,8 +150,8 @@ forking(30066043, () => {
     });
 
     describe("Initial supply", () => {
-      it(`should mint 5882350000000 vTWT to ${VTOKEN_RECEIVER_TWT}`, async () => {
-        expect(await vTWT.balanceOf(VTOKEN_RECEIVER_TWT)).to.equal(parseUnits("58823.5", 8));
+      it(`should mint 1000000000000 vTWT to ${VTOKEN_RECEIVER_TWT}`, async () => {
+        expect(await vTWT.balanceOf(VTOKEN_RECEIVER_TWT)).to.equal(parseUnits("10000", 8));
       });
     });
 

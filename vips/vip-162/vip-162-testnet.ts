@@ -5,7 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 const TWT = "0xb99C6B26Fdf3678c6e2aff8466E3625a0e7182f8";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const VTOKEN_RECEIVER_TWT = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
+const VTOKEN_RECEIVER_TWT = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b"; // To be revised
 const VTWT_DeFi = "0x4C94e67d239aD585275Fdd3246Ab82c8a2668564";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
@@ -47,7 +47,7 @@ export const vip162Testnet = () => {
       {
         target: TWT,
         signature: "faucet(uint256)",
-        params: [parseUnits("58823.5", 18)],
+        params: [parseUnits("10000", 18)],
       },
       {
         target: TWT,
@@ -57,7 +57,7 @@ export const vip162Testnet = () => {
       {
         target: TWT,
         signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, parseUnits("58823.5", 18)],
+        params: [POOL_REGISTRY, parseUnits("10000", 18)],
       },
       {
         target: POOL_REGISTRY,
@@ -67,8 +67,8 @@ export const vip162Testnet = () => {
             VTWT_DeFi,
             parseUnits("0.5", 18),
             parseUnits("0.6", 18),
-            parseUnits("58823.5", 18), // To be revised
-            VTOKEN_RECEIVER_TWT, // To be revised
+            parseUnits("10000", 18),
+            VTOKEN_RECEIVER_TWT,
             parseUnits("1000000", 18),
             parseUnits("500000", 18),
           ],
