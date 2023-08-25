@@ -15,7 +15,7 @@ const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip162 = () => {
+export const vip162 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-162 Add TWT market to DeFi Pool",
@@ -36,7 +36,7 @@ export const vip162 = () => {
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["TWT", MAX_STALE_PERIOD],
+        params: ["TWT", maxStalePeriod || MAX_STALE_PERIOD],
       },
       {
         target: RESILIENT_ORACLE,

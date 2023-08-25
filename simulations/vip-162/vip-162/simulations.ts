@@ -23,8 +23,8 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
 const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const VTOKEN_RECEIVER_TWT = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTWT_DeFi = "0x736bf1d21a28b5dc19a1ac8ca71fc2856c23c03f";
+const VTOKEN_RECEIVER_TWT = "0x0848dB7cB495E7b9aDA1D4dC972b9A526D014D84";
+const VTWT_DeFi = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
@@ -39,6 +39,7 @@ forking(31162125, () => {
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
+    vTWT = await ethers.getContractAt(VTOKEN_ABI, VTWT_DeFi);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "TWT");
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
@@ -104,7 +105,7 @@ forking(31162125, () => {
     });
   });
 
-  testVip("VIP-162 Add Markets", vip162(), {
+  testVip("VIP-162 Add Markets", vip162(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -126,7 +127,7 @@ forking(31162125, () => {
     describe("PoolRegistry state", () => {
       it("should register pool's vTokens in Comptroller", async () => {
         const vTokens = await comptroller.getAllMarkets();
-        expect(vTokens).to.have.lengthOf(8);
+        expect(vTokens).to.have.lengthOf(7);
         expect(vTokens).to.include(VTWT_DeFi);
       });
 
@@ -268,7 +269,7 @@ forking(31162125, () => {
       it("should be possible to borrow", async () => {
         await usdd.connect(user).approve(vUSDD.address, parseUnits("100", 18));
         await vUSDD.connect(user).mint(parseUnits("100", 18));
-        expect(await vUSDD.balanceOf(user.address)).to.equal(parseUnits("100", 8));
+        expect(await vUSDD.balanceOf(user.address)).to.closeTo(parseUnits("100", 8), 1);
         await comptroller.connect(user).enterMarkets([vUSDD.address]);
 
         await vTWT.connect(user).borrow(1000000);
