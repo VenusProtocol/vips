@@ -1,10 +1,10 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const RISK_FUND_CONVERTER = "0x5292f6caceb084B940b288e0cF6c0fd972ab7EC9";
+const RISK_FUND_CONVERTER = "0x93520Fa75b569eB67232Bd43d3655E85E75F6C2A";
 const RISK_FUND_PROXY_ADMIN = "0x7Ba118F162B7A248ef34A1934148e7e77561Ab27";
 const RISK_FUND_PROXY = "0x27481F538C36eb366FAB4752a8dd5a03ed04a3cF";
-const RISK_FUNDV2 = "0x0d8C55db1C0778A094B0283ed9e6bA2680B5C823";
+const RISK_FUNDV2 = "0x9Ea638B93b9cb591fbB28EA66085591B3B511bf1";
 
 export const vipConverter = () => {
   const meta = {

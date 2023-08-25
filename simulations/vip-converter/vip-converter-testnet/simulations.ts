@@ -9,14 +9,14 @@ import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 import RISK_FUND_CONVERTER_ABI from "./abi/RiskFundConverter.json";
 import RISK_FUND_ABI from "./abi/RiskFundV2.json";
 
-const RISK_FUND_CONVERTER_PROXY = "0x5292f6caceb084B940b288e0cF6c0fd972ab7EC9";
-const RISK_FUND_PROXY = "0x27481F538C36eb366FAB4752a8dd5a03ed04a3cF";
+const RISK_FUND_CONVERTER_PROXY = "0x93520Fa75b569eB67232Bd43d3655E85E75F6C2A";
+const RISK_FUND_PROXY = "0xa8433F284795aE7f8652127af47482578b58673d";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const AddressZero = "0x0000000000000000000000000000000000000000";
 const MAX_LOOP_LIMIT = 5;
 
-forking(32704484, () => {
+forking(32752213, () => {
   const provider = ethers.provider;
   let RiskFundConverter: Contract;
   let RiskFund: Contract;
