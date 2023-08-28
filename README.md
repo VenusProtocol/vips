@@ -45,3 +45,21 @@ In .env, replace VIP_NUMBER with the number of vip to propose.
 ```
 npx hardhat test scripts/proposeVIP.ts
 ```
+
+### Execute Sepolia VIP (via Multisig)
+
+Script to execute a VIP through the Gnosis Safe Multisig in Sepolia netowrk only
+
+Procedure for Execute VIP on Sepolia
+
+In .env, make sure that `DEPLOYER_PRIVATE_KEY` is the one of the multisig owner on sepolia  `0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C`
+
+Proceed by executing the following command:
+```
+npx hardhat run scripts/executeVIPSepolia.ts --network sepolia
+```
+
+After executing the commant, provide the VIP number to be executed and press enter:
+```
+Number of the VIP to execute =>
+```
