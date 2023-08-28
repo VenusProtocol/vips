@@ -28,18 +28,23 @@ const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
 const VTHE_DeFi = "";
 const REWARD_DISTRIBUTOR = "";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const USDT = "0x55d398326f99059ff775485246999027b3197955";
+const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 forking(30066043, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTHE: Contract;
   let rewardsDistributor: Contract;
+  let communityWalletBalanceBefore: BigNumberish;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
     vTHE = await ethers.getContractAt(VTOKEN_ABI, VTHE_DeFi);
     rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
+    communityWalletBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
+
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "THE");
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
   });
@@ -122,6 +127,14 @@ forking(30066043, () => {
   });
 
   describe("Post-VIP state", () => {
+    describe("Balance Checks", () => {
+      it("should transfer funds to community wallet from treasury", async () => {
+        const communityWalletBalanceAfter = await usdt.balanceOf(COMMUNITY_WALLET);
+        const differenceInBalance = communityWalletBalanceAfter.sub(communityWalletBalanceBefore);
+        expect(differenceInBalance).equals(parseUnits("6000", 18));
+      });
+    });
+
     describe("PoolRegistry state", () => {
       it("should register pool's vTokens in Comptroller", async () => {
         const vTokens = await comptroller.getAllMarkets();
