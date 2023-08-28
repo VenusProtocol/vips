@@ -19,10 +19,61 @@ export const vip162 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-162 Add TWT market to DeFi Pool",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with add market",
-    againstDescription: "I do not think that Venus Protocol should proceed with add market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with add market",
+    description: `**Summary**
+
+If passed, this VIP will add a new market for [TWT](https://bscscan.com/address/0x4b0f1812e5df2a09796481ff14017e6005508003) into the Isolated Lending DeFi pool.
+
+**Description**
+
+Related to [VIP-134](https://app.venus.io/governance/proposal/134) and [VIP-136](https://app.venus.io/governance/proposal/136), this VIP will add a market for TWT to the already existing DeFi pool.
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-risk-parameter-updates-08-14-2023/3700), the risk parameters for the new market are:
+
+* Underlying token: [TWT](https://bscscan.com/address/0x4b0f1812e5df2a09796481ff14017e6005508003)
+* Borrow cap: 500,000 TWT
+* Supply cap: 1,000,000 TWT
+* Collateral factor: 0.5
+* Liquidation threshold: 0.6
+* Reserve factor: 0.25
+
+Bootstrap liquidity: 10,000 TWT - provided by the Trust Wallet Community.
+
+Interest rate curve for the new market:
+
+* kink: 0.5
+* base (yearly): 0.02
+* multiplier (yearly): 0.2
+* jump multiplier (yearly): 3
+
+**Security and additional considerations**
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+* **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the DeFi pool with the right parameters and the expected bootstrap liquidity
+* **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Contracts on mainnet**
+
+New market vTWT_DeFi: [0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F](https://bscscan.com/address/0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F)
+
+**Contracts on testnet**
+
+New market vankBNB_DeFi: [0x4C94e67d239aD585275Fdd3246Ab82c8a2668564](https://testnet.bscscan.com/address/0x4C94e67d239aD585275Fdd3246Ab82c8a2668564)
+
+**References**
+
+* [Repository](https://github.com/VenusProtocol/isolated-pools)
+* [Fork tests of main operations](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork)
+* [VIP simulation](https://github.com/VenusProtocol/vips/pull/62)
+* [Forum proposal to add TWT market to Venus](https://community.venus.io/t/add-support-for-a-new-market-for-trust-wallet-twt-on-venus-core-pool/3691)
+* [Community post about Venus V4, introducing Isolated Pools](https://community.venus.io/t/proposing-venus-v4)
+* [Documentation](https://docs-v4.venus.io/whats-new/isolated-pools)
+`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
