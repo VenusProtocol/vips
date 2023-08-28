@@ -36,6 +36,7 @@ forking(30066043, () => {
   let comptroller: Contract;
   let vTHE: Contract;
   let rewardsDistributor: Contract;
+  let usdt: Contract;
   let communityWalletBalanceBefore: BigNumberish;
 
   before(async () => {
@@ -43,6 +44,7 @@ forking(30066043, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
     vTHE = await ethers.getContractAt(VTOKEN_ABI, VTHE_DeFi);
     rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     communityWalletBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
 
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "THE");
@@ -120,8 +122,9 @@ forking(30066043, () => {
           "RewardTokenSupplySpeedUpdated",
           "RewardTokenBorrowSpeedUpdated",
           "OwnershipTransferred",
+          "WithdrawTreasuryBEP20",
         ],
-        [3, 1, 1, 1, 1, 4],
+        [3, 1, 1, 1, 1, 4, 3],
       );
     },
   });
