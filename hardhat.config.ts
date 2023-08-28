@@ -67,8 +67,8 @@ const config: HardhatUserConfig = {
     sepolia: {
       url: "https://gateway.tenderly.co/public/sepolia",
       chainId: 11155111,
-      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : []
-    }
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
   },
   paths: {
     tests: "./tests",
