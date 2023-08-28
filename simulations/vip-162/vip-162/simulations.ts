@@ -26,24 +26,18 @@ const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const VTOKEN_RECEIVER_TWT = "0x0848dB7cB495E7b9aDA1D4dC972b9A526D014D84";
 const VTWT_DeFi = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const USDT = "0x55d398326f99059ff775485246999027b3197955";
-const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 forking(31162125, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTWT: Contract;
-  let usdt: Contract;
-  let communityWalletBalanceBefore: BigNumberish;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
     vTWT = await ethers.getContractAt(VTOKEN_ABI, VTWT_DeFi);
-    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "TWT");
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
-    communityWalletBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
   describe("Contracts setup", () => {
@@ -111,19 +105,12 @@ forking(31162125, () => {
         txResponse,
         [COMPTROLLER_ABI, POOL_REGISTRY_ABI, ERC20_ABI, TREASURY_ABI],
         ["WithdrawTreasuryBEP20", "Approval", "MarketAdded"],
-        [2, 6, 1],
+        [1, 6, 1],
       );
     },
   });
 
   describe("Post-VIP state", () => {
-    describe("Balance Checks", () => {
-      it("should transfer funds to community wallet from treasury", async () => {
-        const communityWalletBalanceAfter = await usdt.balanceOf(COMMUNITY_WALLET);
-        const differenceInBalance = communityWalletBalanceAfter.sub(communityWalletBalanceBefore);
-        expect(differenceInBalance).equals(parseUnits("6000", 18));
-      });
-    });
     describe("PoolRegistry state", () => {
       it("should register pool's vTokens in Comptroller", async () => {
         const vTokens = await comptroller.getAllMarkets();

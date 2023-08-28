@@ -9,8 +9,6 @@ const VTOKEN_RECEIVER_TWT = "0x0848dB7cB495E7b9aDA1D4dC972b9A526D014D84";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VTWT_DeFi = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
-const USDT = "0x55d398326f99059ff775485246999027b3197955";
-const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const MAX_STALE_PERIOD = 60 * 25;
@@ -78,12 +76,6 @@ New market vankBNB_DeFi: [0x4C94e67d239aD585275Fdd3246Ab82c8a2668564](https://te
 
   return makeProposal(
     [
-      // Tranfer From Treasury to community wallet
-      {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("6000", 18), COMMUNITY_WALLET],
-      },
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
