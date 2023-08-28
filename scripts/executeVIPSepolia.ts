@@ -1,4 +1,4 @@
-import Safe, { ContractNetworksConfig, EthersAdapter, SafeAccountConfig, SafeFactory } from "@safe-global/protocol-kit";
+import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
@@ -56,10 +56,10 @@ const executeVIPSepolia = async () => {
 
 const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransactionData[]> => {
   const { signatures, targets, params, values } = proposal;
-  let safeTransactionData: MetaTransactionData[] = [];
+  const safeTransactionData: MetaTransactionData[] = [];
   for (let i = 0; i < signatures.length; ++i) {
-    let abi = new ethers.utils.Interface([`function ${signatures[i]}`]);
-    let safeTxData: MetaTransactionData = {
+    const abi = new ethers.utils.Interface([`function ${signatures[i]}`]);
+    const safeTxData: MetaTransactionData = {
       to: targets[i],
       data: abi.encodeFunctionData(signatures[i], params[i]),
       value: values[i].toString(),
