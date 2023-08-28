@@ -22,12 +22,12 @@ export const vip160 = () => {
       {
         target: STORAGE_UINT_CONTRACT,
         signature: "store(uint256)",
-        params: [1],
+        params: [10],
       },
       {
         target: STORAGE_MAPPING_COTNRACT,
         signature: "store(address,uint256)",
-        params: [VENUS_DEPLOYER_ADDRESS,2],
+        params: [VENUS_DEPLOYER_ADDRESS,11],
       },
     ],
     meta,
