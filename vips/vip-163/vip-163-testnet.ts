@@ -1,24 +1,24 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
-const COMPTROLLER_NEW_IMPLEMENTATION = "0x17a6ac4f7f01387303deB1D78f01aC0A0C1a75b0";
-const HAY_REWARDS_DISTRIBUTOR = "0xA31185D804BF9209347698128984a43A67Ce6d11";
-const SD_REWARDS_DISTRIBUTOR = "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478";
-const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const STABLE_COINS_POOL = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
-const LIQUID_STAKED_BNB_POOL = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
-const HAY_TOKEN = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
-const SD_TOKEN = "0x3BC5AC0dFdC871B365d159f728dd1B9A0B5481E8";
+const COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
+const COMPTROLLER_NEW_IMPLEMENTATION = "0x069705246364d60c5503bF19b4A714ab412521a0";
+const HAY_REWARDS_DISTRIBUTOR = "0x2aBEf3602B688493fe698EF11D27DCa43a0CE4BE";
+const SD_REWARDS_DISTRIBUTOR = "0x37fA1e5613455223F09e179DFAEBba61d7505C97";
+const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const STABLE_COINS_POOL = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
+const LIQUID_STAKED_BNB_POOL = "0x596B11acAACF03217287939f88d63b51d3771704";
+const HAY_TOKEN = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
+const SD_TOKEN = "0xac7D6B77EBD1DB8C5a9f0896e5eB5d485CB677b3";
 const HAY_AMOUNT = "2000000000000000000000";
 const SD_AMOUNT = "2000000000000000000000";
-const MARKET_BNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
-const MARKET_HAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
+const MARKET_BNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
+const MARKET_HAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
 
-export const vip162 = () => {
+export const vip163Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-162 HAY and SD Rewards",
+    title: "VIP-163 HAY and SD Rewards",
     description: `Uppgrade comptroller to support rewards distribution for duplicate reward tokens`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -70,7 +70,7 @@ export const vip162 = () => {
       {
         target: SD_REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [[MARKET_BNBx], ["2314814814814814"], ["0"]],
+        params: [[MARKET_BNBx], ["1157407407407407"], ["1157407407407407"]],
       },
     ],
     meta,

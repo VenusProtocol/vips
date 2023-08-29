@@ -9,26 +9,26 @@ import {
   checkRewardsDistributor,
   checkRewardsDistributorPool,
 } from "../../../src/vip-framework/checks/rewardsDistributor";
-import { vip162Testnet } from "../../../vips/vip-162/vip-162-testnet";
+import { vip163 } from "../../../vips/vip-163/vip-163";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import COMPTROLLER_BEACON_ABI from "./abi/COMPTROLLER_BEACON.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/REWARDS_DISTRIBUTOR.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
-const COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
-const OLD_IMPL = "0x80691DaD6dAb8a028FFE68bb8045f2547d210f9D";
-const NEW_IMPL = "0x069705246364d60c5503bF19b4A714ab412521a0";
-const HAY_REWARDS_DISTRIBUTOR = "0x2aBEf3602B688493fe698EF11D27DCa43a0CE4BE";
-const SD_REWARDS_DISTRIBUTOR = "0x37fA1e5613455223F09e179DFAEBba61d7505C97";
-const STABLE_COINS_POOL = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
-const LIQUID_STAKED_BNB_POOL = "0x596B11acAACF03217287939f88d63b51d3771704";
-const HAY_TOKEN = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
-const SD_TOKEN = "0xac7D6B77EBD1DB8C5a9f0896e5eB5d485CB677b3";
+const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
+const OLD_IMPL = "0x939C05e2E694db68cE54d80bf29926b09190aA0F";
+const NEW_IMPL = "0x17a6ac4f7f01387303deB1D78f01aC0A0C1a75b0";
+const HAY_REWARDS_DISTRIBUTOR = "0xA31185D804BF9209347698128984a43A67Ce6d11";
+const SD_REWARDS_DISTRIBUTOR = "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478";
+const STABLE_COINS_POOL = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+const LIQUID_STAKED_BNB_POOL = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
+const HAY_TOKEN = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
+const SD_TOKEN = "0x3BC5AC0dFdC871B365d159f728dd1B9A0B5481E8";
 const HAY_AMOUNT = "2000000000000000000000";
 const SD_AMOUNT = "2000000000000000000000";
-const MARKET_BNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
-const MARKET_HAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const MARKET_BNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
+const MARKET_HAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 const hayRewardsDistributorConfig: RewardsDistributorConfig = {
   pool: STABLE_COINS_POOL,
@@ -45,12 +45,12 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
   address: SD_REWARDS_DISTRIBUTOR,
   token: SD_TOKEN,
   vToken: MARKET_BNBx,
-  borrowSpeed: parseUnits("2000", 18).div(2).div(864000),
-  supplySpeed: parseUnits("2000", 18).div(2).div(864000),
+  borrowSpeed: 0,
+  supplySpeed: parseUnits("2000", 18).div(864000),
   totalRewardsToDistribute: parseUnits("2000", 18),
 };
 
-forking(32763372, () => {
+forking(31166657, () => {
   let comptrollerBeacon: ethers.Contract;
   let hayRewardsDistributor: ethers.Contract;
   let sdRewardsDistributor: ethers.Contract;
@@ -72,7 +72,7 @@ forking(32763372, () => {
     });
   });
 
-  testVip("VIP-162 HAY and SD Rewards", vip162Testnet(), {
+  testVip("VIP-163 HAY and SD Rewards", vip163(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -84,7 +84,7 @@ forking(32763372, () => {
           "RewardTokenSupplySpeedUpdated",
           "RewardTokenBorrowSpeedUpdated",
         ],
-        [1, 2, 2, 2, 2],
+        [1, 2, 2, 2, 1],
       );
     },
   });
