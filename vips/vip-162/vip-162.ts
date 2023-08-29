@@ -70,7 +70,7 @@ export const vip162 = () => {
       {
         target: SD_REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [[MARKET_BNBx], ["1157407407407407"], ["1157407407407407"]],
+        params: [[MARKET_BNBx], ["2314814814814814"], ["0"]],
       },
     ],
     meta,

@@ -45,8 +45,8 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
   address: SD_REWARDS_DISTRIBUTOR,
   token: SD_TOKEN,
   vToken: MARKET_BNBx,
-  borrowSpeed: parseUnits("2000", 18).div(2).div(864000),
-  supplySpeed: parseUnits("2000", 18).div(2).div(864000),
+  borrowSpeed: 0,
+  supplySpeed: parseUnits("2000", 18).div(864000),
   totalRewardsToDistribute: parseUnits("2000", 18),
 };
 
@@ -84,7 +84,7 @@ forking(31166657, () => {
           "RewardTokenSupplySpeedUpdated",
           "RewardTokenBorrowSpeedUpdated",
         ],
-        [1, 2, 2, 2, 2],
+        [1, 2, 2, 2, 1],
       );
     },
   });
