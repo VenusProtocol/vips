@@ -1,5 +1,3 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -47,20 +45,12 @@ export const vip162Testnet = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [
-          HAY_TOKEN,
-          HAY_AMOUNT,
-          HAY_REWARDS_DISTRIBUTOR
-        ],
+        params: [HAY_TOKEN, HAY_AMOUNT, HAY_REWARDS_DISTRIBUTOR],
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [
-          SD_TOKEN,
-          SD_AMOUNT,
-          SD_REWARDS_DISTRIBUTOR
-        ],
+        params: [SD_TOKEN, SD_AMOUNT, SD_REWARDS_DISTRIBUTOR],
       },
       {
         target: STABLE_COINS_POOL,
@@ -75,20 +65,12 @@ export const vip162Testnet = () => {
       {
         target: HAY_REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [MARKET_HAY],
-          ["1240079365079365"],
-          ["1240079365079365"]
-        ],
+        params: [[MARKET_HAY], ["1240079365079365"], ["1240079365079365"]],
       },
       {
         target: SD_REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [MARKET_BNBx],
-          ["1157407407407407"],
-          ["1157407407407407"]
-        ],
+        params: [[MARKET_BNBx], ["1157407407407407"], ["1157407407407407"]],
       },
     ],
     meta,
