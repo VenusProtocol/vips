@@ -249,12 +249,12 @@ forking(32725445, () => {
             expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
           });
 
-          it("should have borrowSpeed  = 68082754629629629", async () => {
-            expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VTHE_DeFi)).to.equal("68082754629629629");
+          it("should have borrowSpeed  = 17020688657407407", async () => {
+            expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VTHE_DeFi)).to.equal("17020688657407407");
           });
 
-          it("should have supplySpeed = 68082754629629629", async () => {
-            expect(await rewardsDistributor.rewardTokenSupplySpeeds(VTHE_DeFi)).to.equal("68082754629629629");
+          it("should have supplySpeed = 17020688657407407", async () => {
+            expect(await rewardsDistributor.rewardTokenSupplySpeeds(VTHE_DeFi)).to.equal("17020688657407407");
           });
 
           it("should have balance = 58823.5 THE", async () => {

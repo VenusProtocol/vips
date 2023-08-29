@@ -25,13 +25,13 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTHE_DeFi = "";
-const REWARD_DISTRIBUTOR = "";
+const VTHE_DeFi = "0x241375752e06fe76Ba41d2f4B03C4331fDdB239B";
+const REWARD_DISTRIBUTOR = "0x493f6Cc4B22441AE84c58aAE44211Efe899720a2";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(30066043, () => {
+forking(31269310, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTHE: Contract;
@@ -110,7 +110,7 @@ forking(30066043, () => {
     });
   });
 
-  testVip("VIP-163 Add Markets", vip163(), {
+  testVip("VIP-163 Add Markets", vip163(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -272,12 +272,12 @@ forking(30066043, () => {
             expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
           });
 
-          it("should have borrowSpeed  = 68082754629629629", async () => {
-            expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VTHE_DeFi)).to.equal("68082754629629629");
+          it("should have borrowSpeed  = 17020688657407407", async () => {
+            expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VTHE_DeFi)).to.equal("17020688657407407");
           });
 
-          it("should have supplySpeed = 68082754629629629", async () => {
-            expect(await rewardsDistributor.rewardTokenSupplySpeeds(VTHE_DeFi)).to.equal("68082754629629629");
+          it("should have supplySpeed = 17020688657407407", async () => {
+            expect(await rewardsDistributor.rewardTokenSupplySpeeds(VTHE_DeFi)).to.equal("17020688657407407");
           });
 
           it("should have balance = 58823.5 THE", async () => {

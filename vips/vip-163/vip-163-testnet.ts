@@ -93,7 +93,7 @@ export const vip163Testnet = () => {
       {
         target: REWARD_DISTRIBUTOR_THE,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [[VTHE_DeFi], ["68082754629629629"], ["68082754629629629"]],
+        params: [[VTHE_DeFi], ["17020688657407407"], ["17020688657407407"]],
       },
     ],
     meta,
