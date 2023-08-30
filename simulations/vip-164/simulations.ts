@@ -1,8 +1,10 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   CERTIK_RECEIVER,
@@ -14,6 +16,7 @@ import {
   vip164,
 } from "../../vips/vip-164";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const QUANTSTAMP_VENUS_PRIME_AMOUNT = parseUnits("45000", 18);
 const QUANTSTAMP_INCOME_ALLOCATION_AMOUNT = parseUnits("30000", 18);
@@ -41,6 +44,9 @@ forking(31298100, () => {
   testVip("VIP-164 Security audits payments", vip164(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [5]);
+    },
   });
 
   describe("Post-VIP behavior", async () => {
