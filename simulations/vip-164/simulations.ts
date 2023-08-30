@@ -33,9 +33,9 @@ forking(31298100, () => {
     usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
     usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
     prevBalanceQuantStamp = await usdc.balanceOf(QUANTSTAMP_RECEIVER);
-    prevBalanceFairyproof = await usdc.balanceOf(FAIRYPROOF_RECEIVER);
+    prevBalanceFairyproof = await usdt.balanceOf(FAIRYPROOF_RECEIVER);
     prevBalancePeckShield = await usdc.balanceOf(PECKSHIELD_RECEIVER);
-    prevBalanceCertik = await usdc.balanceOf(CERTIK_RECEIVER);
+    prevBalanceCertik = await usdt.balanceOf(CERTIK_RECEIVER);
   });
 
   testVip("VIP-164 Security audits payments", vip164(), {
