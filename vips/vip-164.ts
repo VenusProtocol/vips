@@ -14,7 +14,7 @@ export const QUANTSTAMP_RECEIVER = "0xf6323183A6537CAC30b95f4fAd2a236e0CbED2E2";
 export const vip164 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-165 Payments Issuance for performed Audits",
+    title: "VIP-164 Payments Issuance for performed Audits",
     description: `**Description**
 
 If passed this VIP will perform the following actions:
