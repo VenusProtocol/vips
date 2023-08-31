@@ -38,7 +38,7 @@ Quantstamp - Venus Prime
 
 * Auditor: Quantstamp ([https://quantstamp.com](https://quantstamp.com/))
 * Payload: Venus Prime. [https://github.com/VenusProtocol/venus-protocol/pull/196](https://github.com/VenusProtocol/venus-protocol/pull/196)
-* Status: audit starts on September 13th, 2023. ETA: September 22nd, 2023
+* Status: audit starts on September 27th, 2023. ETA: October 6th, 2023
 * Cost: 30,000 USDC, to be sent to the BEP20 address 0xf6323183A6537CAC30b95f4fAd2a236e0CbED2E2
 
 Fairyproof - Token converter
