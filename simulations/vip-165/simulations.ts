@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip164 } from "../../vips/vip-164";
+import { vip165 } from "../../vips/vip-165";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -76,7 +76,7 @@ forking(31358000, () => {
     });
   });
 
-  testVip("VIP-164 Risk Parameters Update", vip164(), {
+  testVip("VIP-165 Risk Parameters Update", vip165(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewSupplyCap", "Failure"], [8, 1, 0]);
     },

@@ -14,26 +14,27 @@ const VDOT = "0x1610bc33319e9398de5f57B33a5b184c806aD217";
 const VTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
 const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 
-export const vip164 = () => {
+export const vip165 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-164 Risk Parameters Updates",
-    description: `
+    title: "VIP-165 Risk Parameters Adjustments",
+    description: `**Summary**
 
-If passed this VIP will perform the following actions as per the latest Chaos Labs [recommendations](https://community.venus.io/t/chaos-labs-risk-parameter-updates-08-28-2023/3720):
+This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication: [Risk Parameter Updates 08/28/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-08-28-2023/3720)
 
-* Increase Collateral Factor of MATIC by 5% from 60% to 65%.
-* Increase Collateral Factor of DOGE by 3% from 40% to 43%.
-* Increase Collateral Factor of LTC by 2% from 60% to 62%.
-* Increase Collateral Factor of FIL by 1% from 60% to 61%.
-* Increase Collateral Factor of DAI by 15% from 60% to 75%.
-* Increase Collateral Factor of LINK by 3% from 60% to 63%.
-* Increase Collateral Factor of DOT by 5% from 60% to 65%.
-* Set Collateral Factor of TUSD  by 75% from 0 to 75%.
-* Increase supply cap of WBETH to 27,000.
+* Increase Collateral Factor of **MATIC** by 5% from 60% to 65%
+* Increase Collateral Factor of **DOGE** by 3% from 40% to 43%
+* Increase Collateral Factor of **LTC** by 2% from 60% to 62%
+* Increase Collateral Factor of **FIL** by 1% from 60% to 61%
+* Increase Collateral Factor of **DAI** by 15% from 60% to 75%
+* Increase Collateral Factor of **LINK** by 3% from 60% to 63%
+* Increase Collateral Factor of **DOT** by 5% from 60% to 65%
+* Set Collateral Factor of **TUSD** by 75% from 0 to 75%
+* Increase supply cap of **WBETH** to 27,000
 
-Following each update, Chaos Labs will continue to monitor of the market and the impact of the parameter updates on usage. Based on the observed effects and future market conditions, they will continue to supply recommendations as necessary.
-        `,
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/66](https://github.com/VenusProtocol/vips/pull/66)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
