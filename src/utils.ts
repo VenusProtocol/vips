@@ -170,7 +170,7 @@ interface AssetConfig {
   feed: string;
 }
 
-const ASSETS: AssetConfig[] = [
+const BNB_MAINNET_ASSETS: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
@@ -316,7 +316,7 @@ const ASSETS: AssetConfig[] = [
 ];
 
 export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: string) => {
-  for (const asset of ASSETS) {
+  for (const asset of BNB_MAINNET_ASSETS) {
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
 };
