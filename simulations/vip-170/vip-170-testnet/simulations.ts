@@ -56,7 +56,10 @@ forking(33043237, () => {
           comptroller,
         );
         const state = await fetchStorage(vToken, user.address);
+
         delete state.protocolShareReserve;
+        delete state.totalReserves;
+
         preVipStorage.push(state);
       });
     }
@@ -98,7 +101,10 @@ forking(33043237, () => {
           comptroller,
         );
         const state = await fetchStorage(vToken, user.address);
+
         delete state.protocolShareReserve;
+        delete state.totalReserves;
+
         expect(await vToken.protocolShareReserve()).equals(TREASURY);
         postVipStorage.push(state);
       });

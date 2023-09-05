@@ -14,6 +14,7 @@ export interface storageLayout {
   borrowIndex: BigNumber;
   totalBorrows: BigNumber;
   totalSupply: BigNumber;
+  totalReserves: BigNumber;
   underlying: string;
   accountBalance: BigNumber;
   borrowBalance: BigNumber;
@@ -36,6 +37,7 @@ export const fetchStorage = async (vToken: ethers.Contract, user: string) => {
   const borrowIndex = await vToken.borrowIndex();
   const totalBorrows = await vToken.totalBorrows();
   const totalSupply = await vToken.totalSupply();
+  const totalReserves = await vToken.totalReserves();
   const underlying = await vToken.underlying();
   const accountBalance = await vToken.callStatic.balanceOf(user);
   const borrowBalance = await vToken.callStatic.borrowBalanceStored(user);
@@ -57,6 +59,7 @@ export const fetchStorage = async (vToken: ethers.Contract, user: string) => {
     borrowIndex,
     totalBorrows,
     totalSupply,
+    totalReserves,
     underlying,
     accountBalance,
     borrowBalance,
