@@ -7,6 +7,7 @@ const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0x37130dd8181477Be3dDe8b22A32FE302ca602BA7";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
 interface AssetConfig {
   name: string;
@@ -14,7 +15,22 @@ interface AssetConfig {
   reduceReservesBlockDelta: number;
 }
 
-export const IL_ASSETS: AssetConfig[] = [
+export const IL_MARKETS: AssetConfig[] = [
+  {
+    name: "vHAY",
+    address: "0x170d3b2da05cc2124334240fB34ad1359e34C562",
+    reduceReservesBlockDelta: 8640000,
+  },
+  {
+    name: "vUSDD",
+    address: "0x899dDf81DfbbF5889a16D075c352F2b959Dd24A4",
+    reduceReservesBlockDelta: 8640000,
+  },
+  {
+    name: "vUSDT",
+    address: "0x3338988d0beb4419Acb8fE624218754053362D06",
+    reduceReservesBlockDelta: 8640000,
+  },
   {
     name: "vWIN_Tron",
     address: "0xEe543D5de2Dbb5b07675Fc72831A2f1812428393",
@@ -36,13 +52,13 @@ export const IL_ASSETS: AssetConfig[] = [
     reduceReservesBlockDelta: 8640000,
   },
   {
-    name: "vWBNB_LiquidStakedBNB",
-    address: "0x231dED0Dfc99634e52EE1a1329586bc970d773b3",
+    name: "vBTT_Tron",
+    address: "0x47793540757c6E6D84155B33cd8D9535CFdb9334",
     reduceReservesBlockDelta: 8640000,
   },
   {
-    name: "vBTT_Tron",
-    address: "0x47793540757c6E6D84155B33cd8D9535CFdb9334",
+    name: "vWBNB_LiquidStakedBNB",
+    address: "0x231dED0Dfc99634e52EE1a1329586bc970d773b3",
     reduceReservesBlockDelta: 8640000,
   },
   {
@@ -76,6 +92,16 @@ export const IL_ASSETS: AssetConfig[] = [
     reduceReservesBlockDelta: 8640000,
   },
   {
+    name: "vUSDT_GameFi",
+    address: "0x0bFE4e0B8A2a096A27e5B18b078d25be57C08634",
+    reduceReservesBlockDelta: 8640000,
+  },
+  {
+    name: "vUSDT_DeFi",
+    address: "0x80CC30811e362aC9aB857C3d7875CbcCc0b65750",
+    reduceReservesBlockDelta: 8640000,
+  },
+  {
     name: "vankrBNB_DeFi",
     address: "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6",
     reduceReservesBlockDelta: 8640000,
@@ -98,31 +124,6 @@ export const IL_ASSETS: AssetConfig[] = [
   {
     name: "vALPACA_DeFi",
     address: "0xb7caC5Ef82cb7f9197ee184779bdc52c5490C02a",
-    reduceReservesBlockDelta: 8640000,
-  },
-  {
-    name: "vHAY",
-    address: "0x170d3b2da05cc2124334240fB34ad1359e34C562",
-    reduceReservesBlockDelta: 8640000,
-  },
-  {
-    name: "vUSDD",
-    address: "0x899dDf81DfbbF5889a16D075c352F2b959Dd24A4",
-    reduceReservesBlockDelta: 8640000,
-  },
-  {
-    name: "vUSDT",
-    address: "0x3338988d0beb4419Acb8fE624218754053362D06",
-    reduceReservesBlockDelta: 8640000,
-  },
-  {
-    name: "vUSDT_DeFi",
-    address: "0x80CC30811e362aC9aB857C3d7875CbcCc0b65750",
-    reduceReservesBlockDelta: 8640000,
-  },
-  {
-    name: "vUSDT_GameFi",
-    address: "0x0bFE4e0B8A2a096A27e5B18b078d25be57C08634",
     reduceReservesBlockDelta: 8640000,
   },
 ];
@@ -150,11 +151,18 @@ export const vip170Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
       },
-      ...IL_ASSETS.map(asset => {
+      ...IL_MARKETS.map(asset => {
         return {
           target: asset.address,
           signature: "setReduceReservesBlockDelta(uint256)",
           params: [asset.reduceReservesBlockDelta],
+        };
+      }),
+      ...IL_MARKETS.map(asset => {
+        return {
+          target: asset.address,
+          signature: "setProtocolShareReserve(address)",
+          params: [TREASURY],
         };
       }),
     ],
