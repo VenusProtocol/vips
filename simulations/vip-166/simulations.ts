@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { COMPTROLLER, VADA, VFIL, VTUSD, VWBETH, VXRP, vip166 } from "../../vips/vip-166";
+import { COMPTROLLER, VADA, VFIL, VLTC, VTUSD, VWBETH, VXRP, vip166 } from "../../vips/vip-166";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 const CHAINLINKADDRESS = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
@@ -36,6 +36,11 @@ forking(31505400, () => {
       expect(oldCollateralFactor).to.equal(parseUnits("0.60", 18));
     });
 
+    it("collateral factor of LTC equals 62%", async () => {
+      const oldCollateralFactor = (await comptroller.markets(VLTC)).collateralFactorMantissa;
+      expect(oldCollateralFactor).to.equal(parseUnits("0.62", 18));
+    });
+
     it("Supply cap of TUSD equals 1,500,000", async () => {
       const oldSupplyCap = await comptroller.supplyCaps(VTUSD);
       expect(oldSupplyCap).to.equal(parseUnits("1500000", 18));
@@ -53,7 +58,7 @@ forking(31505400, () => {
         txResponse,
         [COMPTROLLER_ABI],
         ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "Failure"],
-        [3, 1, 1, 0],
+        [4, 1, 1, 0],
       );
     },
   });
@@ -71,6 +76,11 @@ forking(31505400, () => {
 
     it("collateral factor of ADA equals 63%", async () => {
       const newCollateralFactor = (await comptroller.markets(VADA)).collateralFactorMantissa;
+      expect(newCollateralFactor).to.equal(parseUnits("0.63", 18));
+    });
+
+    it("collateral factor of LTC equals 63%", async () => {
+      const newCollateralFactor = (await comptroller.markets(VLTC)).collateralFactorMantissa;
       expect(newCollateralFactor).to.equal(parseUnits("0.63", 18));
     });
 
