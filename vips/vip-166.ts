@@ -21,14 +21,15 @@ This VIP will perform the following Risk Parameters actions as per Chaos Labs la
 
 * Increase Collateral Factor of **XRP** by 5% from 60% to 65%
 * Increase Collateral Factor of **FIL** by 2% from 61% to 63%
-* Increase Collateral Factor of **ADA** by 3% from 60% to 63%
 * Increase Collateral Factor of **LTC** by 1% from 62% to 63%
-* Increase supply cap of **TUSD** to 3,000,000
-* Increase borrow cap of **WBETH** to 2,200
+* Increase Collateral Factor of **ADA** by 3% from 60% to 63%
+* Increase supply cap of **TUSD** to 3,000,000 TUSD
+* Increase borrow cap of **WBETH** to 2,200 WBETH
 
 Complete analysis and details of these recommendations are available in the above publication.
 
-VIP simulation: [https://github.com/VenusProtocol/vips/pull/66](https://github.com/VenusProtocol/vips/pull/66)`,
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/68](https://github.com/VenusProtocol/vips/pull/68)
+`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
