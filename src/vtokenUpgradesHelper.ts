@@ -1,5 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
 export interface storageLayout {
@@ -25,7 +25,7 @@ export interface storageLayout {
   supplyRatePerBlock: BigNumber;
 }
 
-export const fetchStorage = async (vToken: ethers.Contract, user: string) => {
+export const fetchVTokenStorageIL = async (vToken: ethers.Contract, user: string) => {
   const name = await vToken.name();
   const symbol = await vToken.symbol();
   const decimals = await vToken.decimals();
@@ -71,26 +71,60 @@ export const fetchStorage = async (vToken: ethers.Contract, user: string) => {
   };
 };
 
+export const fetchVTokenStorageCore = async (vToken: ethers.Contract, user: string) => {
+  const name = await vToken.name();
+  const symbol = await vToken.symbol();
+  const decimals = await vToken.decimals();
+  const owner = await vToken.admin();
+  const comptroller = await vToken.comptroller();
+  const interestRateModel = await vToken.interestRateModel();
+  const reserveFactorMantissa = await vToken.reserveFactorMantissa();
+  const accrualBlockNumber = await vToken.accrualBlockNumber();
+  const borrowIndex = await vToken.borrowIndex();
+  const totalBorrows = await vToken.totalBorrows();
+  const totalSupply = await vToken.totalSupply();
+  const totalReserves = await vToken.totalReserves();
+  const underlying = await vToken.underlying();
+  const accountBalance = await vToken.callStatic.balanceOf(user);
+  const borrowBalance = await vToken.callStatic.borrowBalanceStored(user);
+  const borrowRatePerBlock = await vToken.borrowRatePerBlock();
+  const pendingOwner = await vToken.pendingAdmin();
+  const supplyRatePerBlock = await vToken.supplyRatePerBlock();
+
+  return {
+    name,
+    symbol,
+    decimals,
+    owner,
+    comptroller,
+    interestRateModel,
+    reserveFactorMantissa,
+    accrualBlockNumber,
+    borrowIndex,
+    totalBorrows,
+    totalSupply,
+    totalReserves,
+    underlying,
+    accountBalance,
+    borrowBalance,
+    borrowRatePerBlock,
+    pendingOwner,
+    supplyRatePerBlock,
+  };
+};
+
 export const performVTokenBasicActions = async (
   marketAddress: string,
   user: SignerWithAddress,
-  impersonatedTimelock: Signer,
   mintAmount: BigNumber,
   borrowAmount: BigNumber,
   repayAmount: BigNumber,
   redeemAmount: BigNumber,
   vToken: ethers.Contract,
   underlying: ethers.Contract,
-  comptroller: ethers.Contract,
 ) => {
-  await comptroller
-    .connect(impersonatedTimelock)
-    .setCollateralFactor(marketAddress, parseUnits("0.8", 18), parseUnits("0.9", 18));
   const underlyingDecimals = await underlying.decimals();
   const symbol = await underlying.symbol();
-
-  await comptroller.connect(impersonatedTimelock).setMarketBorrowCaps([marketAddress], [parseUnits("2", 38)]);
-  await comptroller.connect(impersonatedTimelock).setMarketSupplyCaps([marketAddress], [parseUnits("2", 38)]);
 
   if (symbol === "WBNB") {
     mintAmount = parseUnits("1", 18);
@@ -98,15 +132,21 @@ export const performVTokenBasicActions = async (
     repayAmount = parseUnits("0.25", 18);
     redeemAmount = parseUnits("0.5", 18);
     await underlying.connect(user).deposit({ value: mintAmount });
-  } else if (underlyingDecimals === 18) {
-    await underlying.connect(user).faucet(mintAmount.add(repayAmount));
-  } else {
+  }
+  if (underlyingDecimals == 6) {
     mintAmount = parseUnits("200", 6);
     borrowAmount = parseUnits("50", 6);
     repayAmount = parseUnits("25", 6);
     redeemAmount = parseUnits("50", 6);
-    await underlying.connect(user).allocateTo(user.address, mintAmount.add(repayAmount));
   }
+  if (process.env.FORK_TESTNET === "true") {
+    try {
+      await underlying.connect(user).faucet(mintAmount.add(repayAmount));
+    } catch (error) {
+      await underlying.connect(user).allocateTo(user.address, mintAmount.add(repayAmount));
+    }
+  }
+
   await underlying.connect(user).approve(marketAddress, mintAmount.add(repayAmount));
 
   await vToken.connect(user).mint(mintAmount);
