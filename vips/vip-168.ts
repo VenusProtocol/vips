@@ -11,10 +11,10 @@ export const VLTC = "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B";
 export const VTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
 export const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 
-export const vip166 = () => {
+export const vip168 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-166 Risk Parameters Adjustments",
+    title: "VIP-168 Risk Parameters Adjustments",
     description: `**Summary**
 
 This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication: [Risk Parameter Updates 09/05/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-09-05-2023/3749)

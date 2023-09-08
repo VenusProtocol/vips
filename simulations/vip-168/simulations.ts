@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { COMPTROLLER, VADA, VFIL, VLTC, VTUSD, VWBETH, VXRP, vip166 } from "../../vips/vip-166";
+import { COMPTROLLER, VADA, VFIL, VLTC, VTUSD, VWBETH, VXRP, vip168 } from "../../vips/vip-168";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 const CHAINLINKADDRESS = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
@@ -52,7 +52,7 @@ forking(31505400, () => {
     });
   });
 
-  testVip("VIP-166 Risk Parameters Update", vip166(), {
+  testVip("VIP-168 Risk Parameters Update", vip168(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
