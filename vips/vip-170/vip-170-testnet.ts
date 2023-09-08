@@ -132,8 +132,7 @@ export const vip170Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-170 VToken Upgrade of AIA",
-    description: `upgrade the implementation of the DeFi Comptroller contract, with a new version adding the feature to remove a market from the Comptroller
-    execute the new function on the Comptroller contract associated with the DeFi pool, to remove the vBIFI market.`,
+    description: `upgrade the implementation of the Vtoken core supportimg Automatic income allocation feature.`,
     forDescription: "I agree that Venus Protocol should proceed with VToken Upgrade of AIA",
     againstDescription: "I do not think that Venus Protocol should proceed with VToken Upgrade of AIA",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with VToken Upgrade of AIA or not",
