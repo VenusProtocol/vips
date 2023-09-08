@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { fetchStorage, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
+import { fetchVTokenStorageIL, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
 import { IL_MARKETS, vip170Testnet } from "../../../vips/vip-170/vip-170-testnet";
 import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
@@ -43,19 +43,23 @@ forking(33043237, () => {
         const comptroller = new ethers.Contract(await vToken.comptroller(), COMPTROLLER_ABI, provider);
         underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
+        await comptroller.connect(impersonatedTimelock).setMarketBorrowCaps([market.address], [parseUnits("2", 38)]);
+        await comptroller.connect(impersonatedTimelock).setMarketSupplyCaps([market.address], [parseUnits("2", 38)]);
+        await comptroller
+          .connect(impersonatedTimelock)
+          .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
+
         await performVTokenBasicActions(
           market.address,
           user,
-          impersonatedTimelock,
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
           vToken,
           underlying,
-          comptroller,
         );
-        const state = await fetchStorage(vToken, user.address);
+        const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;
         delete state.totalReserves;
@@ -67,7 +71,7 @@ forking(33043237, () => {
 });
 
 forking(33043237, () => {
-  testVip("VIP-170 VToken Upgrade of AIA", vip170Testnet(), {
+  testVip("VIP-170 IL VToken Upgrade of AIA", vip170Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [1, 22]);
     },
@@ -88,19 +92,23 @@ forking(33043237, () => {
         const comptroller = new ethers.Contract(await vToken.comptroller(), COMPTROLLER_ABI, provider);
         underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
+        await comptroller.connect(impersonatedTimelock).setMarketBorrowCaps([market.address], [parseUnits("2", 38)]);
+        await comptroller.connect(impersonatedTimelock).setMarketSupplyCaps([market.address], [parseUnits("2", 38)]);
+        await comptroller
+          .connect(impersonatedTimelock)
+          .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
+
         await performVTokenBasicActions(
           market.address,
           user,
-          impersonatedTimelock,
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
           vToken,
           underlying,
-          comptroller,
         );
-        const state = await fetchStorage(vToken, user.address);
+        const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;
         delete state.totalReserves;
