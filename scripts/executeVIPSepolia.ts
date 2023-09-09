@@ -2,21 +2,21 @@ import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protoc
 import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
-import { loadProposal } from "../src/transactions";
+import { loadMultisigTx } from "../src/transactions";
 import { Proposal } from "../src/types";
 
 const readline = require("readline-sync");
 
 const DEFAULT_OPERATION = 0; // Call
 const safeAddress = "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb";
-let vipNumber: string;
+let txName: string;
 
 const executeVIPSepolia = async () => {
   if (network.name !== "sepolia") {
     throw Error("Please switch to Sepolia network");
   }
   const safeOwner = ethers.provider.getSigner(0);
-  vipNumber = readline.question("Number of the VIP to execute => ");
+  txName = readline.question("Name of tx file (from ./multisig/sepolia/ dir) to execute => ");
 
   const ethAdapter = new EthersAdapter({
     ethers,
@@ -39,7 +39,7 @@ const executeVIPSepolia = async () => {
 
   const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
 
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await loadMultisigTx(txName, network.name);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 

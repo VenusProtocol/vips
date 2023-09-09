@@ -65,7 +65,7 @@ const config: HardhatUserConfig = {
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
     sepolia: {
-      url: "https://gateway.tenderly.co/public/sepolia",
+      url: "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
       chainId: 11155111,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },

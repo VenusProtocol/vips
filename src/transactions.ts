@@ -27,3 +27,8 @@ export const proposeVIP = async (vipNumber: string, governorProxyAddress?: strin
     calldata: new ethers.utils.Interface([functionSignature]).encodeFunctionData("propose", params),
   };
 };
+
+export const loadMultisigTx = async (txName: string, networkName: string) => {
+  const x = await import(`../multisig/${networkName}/${txName}.ts`);
+  return x[txName]();
+};
