@@ -14,8 +14,8 @@ export const vip168Testnet = () => {
     version: "v2",
     title: "VIP-168",
     description: ``,
-    forDescription: "Process to configure Liquidity Mining",
-    againstDescription: "Defer configuration of Liquidity Mining",
+    forDescription: "Process to upgrade Comptroller to new implementation",
+    againstDescription: "Defer upgrade",
     abstainDescription: "No opinion on the matter",
   };
 
