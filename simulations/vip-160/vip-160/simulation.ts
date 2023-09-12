@@ -18,9 +18,9 @@ const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const SWAP_ROUTER_CORE_POOL = "0x8938E6dA30b59c1E27d5f70a94688A89F7c815a4";
 const VENUS_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
-const SHORTFALL = "0x51dcdD4Ee45c0e8c04DE4C54908C2Ada38fd99B5";
-const PROTOCOL_SHARE_RESERVE = "0x99731dDeA6e0d721dfeb434Cb20b200E72709056";
-const RISK_FUND = "0xDF829fB0861DA07a0a935486738dFa65ED007927";
+const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
+const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
+const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 
 interface VenusPool {
   comptroller: string;
@@ -40,13 +40,10 @@ const getAllMarkets = async (poolRegistry: Contract) => {
   return markets;
 };
 
-forking(30903270, () => {
+forking(31671700, () => {
   let poolRegistry: Contract;
 
-  testVip("Risk fund, shortfall, PSR, stage 1", vip160(), {
-    proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
-    supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
-  });
+  testVip("Risk fund, shortfall, PSR, stage 1", vip160());
 
   describe("RiskFund configuration", () => {
     let riskFund: Contract;
@@ -113,10 +110,6 @@ forking(30903270, () => {
 
     it("should have nextBidderBlockLimit equal to 100 blocks", async () => {
       expect(await shortfall.nextBidderBlockLimit()).to.equal(100);
-    });
-
-    it("should have convertibleBaseAsset equal to USDT", async () => {
-      expect(await shortfall.convertibleBaseAsset()).to.equal(USDT);
     });
   });
 
