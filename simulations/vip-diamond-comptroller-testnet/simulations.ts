@@ -58,8 +58,6 @@ forking(33272635, async () => {
   const markets: any = {};
 
   let BUSD: Contract;
-  let USDT: Contract;
-  let usdtHolder: Signer;
   let busdHolder: Signer;
   let vBUSD: Contract;
   let vUSDT: Contract;
@@ -81,15 +79,13 @@ forking(33272635, async () => {
 
     busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888");
 
-    usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE");
-
     [vBUSD, vUSDT] = await Promise.all(
       [VBUSD, VUSDT].map((address: string) => {
         return new ethers.Contract(address, VBEP20_DELEGATE_ABI, ethers.provider);
       }),
     );
 
-    [BUSD, USDT] = await Promise.all(
+    [BUSD] = await Promise.all(
       [vBUSD].map(async (vToken: any) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
@@ -357,11 +353,8 @@ forking(33272635, async () => {
 
 forking(33272635, async () => {
   let owner, unitroller;
-  let BUSD: Contract;
   let USDT: Contract;
-  let busdHolder: Signer;
   let usdtHolder: Signer;
-  let vBUSD: Contract;
   let vUSDT: Contract;
   let diamondUnitroller: Contract;
 
@@ -380,17 +373,15 @@ forking(33272635, async () => {
       data: undefined,
     });
 
-    busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888");
-
     usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE");
 
-    [vBUSD, vUSDT] = await Promise.all(
-      [VBUSD, VUSDT].map((address: string) => {
+    [vUSDT] = await Promise.all(
+      [VUSDT].map((address: string) => {
         return new ethers.Contract(address, VBEP20_DELEGATE_ABI, ethers.provider);
       }),
     );
-    [BUSD, USDT] = await Promise.all(
-      [vBUSD, vUSDT].map(async (vToken: any) => {
+    [USDT] = await Promise.all(
+      [vUSDT].map(async (vToken: any) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
