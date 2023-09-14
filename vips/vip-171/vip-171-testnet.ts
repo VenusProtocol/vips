@@ -93,6 +93,13 @@ export const CORE_MARKETS: AssetConfig[] = [
     acceptAdmin: false,
     isMock: true,
   },
+  {
+    name: "vXVS",
+    address: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E",
+    reduceReservesBlockDelta: 840000,
+    acceptAdmin: true,
+    isMock: false,
+  },
 ];
 
 function filterAssets(assets: AssetConfig[]) {

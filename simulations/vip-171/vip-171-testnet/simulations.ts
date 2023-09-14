@@ -104,7 +104,7 @@ forking(33155924, () => {
         txResponse,
         [VTOKEN_ABI, ProxyAdminInterface],
         ["NewImplementation", "NewProtocolShareReserve", "NewReduceReservesBlockDelta", "NewAccessControlManager"],
-        [10, 10, 10, 10],
+        [11, 11, 11, 11],
       );
     },
   });
