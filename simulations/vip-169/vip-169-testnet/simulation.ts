@@ -32,7 +32,7 @@ forking(33312614, () => {
     });
   });
 
-  testVip("VIP-163 Stop HAY and SD Rewards", vip169Testnet(), {
+  testVip("VIP-169 Stop HAY and SD Rewards", vip169Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
