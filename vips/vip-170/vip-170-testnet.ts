@@ -159,43 +159,6 @@ export const vip170Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", CRITICAL_TIMELOCK],
       },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", CRITICAL_TIMELOCK],
-      },
-
       {
         target: VTOKEN_BEACON,
         signature: "upgradeTo(address)",
