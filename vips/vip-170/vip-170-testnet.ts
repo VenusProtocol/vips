@@ -7,6 +7,8 @@ const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0x37130dd8181477Be3dDe8b22A32FE302ca602BA7";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const PROTOCOL_SHARE_RESERVE = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
 interface AssetConfig {
@@ -141,14 +143,63 @@ export const vip170Testnet = () => {
   return makeProposal(
     [
       {
-        target: VTOKEN_BEACON,
-        signature: "upgradeTo(address)",
-        params: [NEW_IMPL_VTOKEN],
-      },
-      {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_IMPL_VTOKEN],
       },
       ...IL_MARKETS.map(asset => {
         return {

@@ -6,7 +6,10 @@ import { makeProposal } from "../../src/utils";
 const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const PROTOCOL_SHARE_RESERVE = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
 interface AssetConfig {
   name: string;
@@ -110,6 +113,138 @@ export const vip171Testnet = () => {
 
   return makeProposal(
     [
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setReserveFactor(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setReserveFactor(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setReserveFactor(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setInterestRateModel(address)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setInterestRateModel(address)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setInterestRateModel(address)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_reduceReserves(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_reduceReserves(uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_reduceReserves(uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setCollateralFactor(address,uint256)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setCollateralFactor(address,uint256)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setProtocolPaused(bool)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setProtocolPaused(bool)", CRITICAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setActionsPaused(address[],uint256[],bool)", FAST_TRACK_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "_setActionsPaused(address[],uint256[],bool)", CRITICAL_TIMELOCK],
+      },
+
       ...MARKETS_WITH_ACCEPT_ADMIN.map(asset => {
         return {
           target: asset.address,
@@ -132,12 +267,6 @@ export const vip171Testnet = () => {
           params: [ACCESS_CONTROL_MANAGER],
         };
       }),
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
-      },
 
       ...CORE_MARKETS.map(asset => {
         return {
