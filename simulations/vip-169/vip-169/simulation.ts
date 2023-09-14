@@ -3,8 +3,8 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import REWARDS_DISTRIBUTOR_ABI from "./abi/REWARDS_DISTRIBUTOR.json";
 import { vip169 } from "../../../vips/vip-169/vip-169";
+import REWARDS_DISTRIBUTOR_ABI from "./abi/REWARDS_DISTRIBUTOR.json";
 
 const HAY_REWARDS_DISTRIBUTOR = "0xA31185D804BF9209347698128984a43A67Ce6d11";
 const SD_REWARDS_DISTRIBUTOR = "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478";
@@ -37,10 +37,7 @@ forking(31715160, () => {
       await expectEvents(
         txResponse,
         [REWARDS_DISTRIBUTOR_ABI],
-        [
-          "SupplyLastRewardingBlockUpdated",
-          "BorrowLastRewardingBlockUpdated",
-        ],
+        ["SupplyLastRewardingBlockUpdated", "BorrowLastRewardingBlockUpdated"],
         [2, 2],
       );
     },
