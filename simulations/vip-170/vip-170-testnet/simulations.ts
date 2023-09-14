@@ -58,6 +58,7 @@ forking(33043237, () => {
           redeemAmount,
           vToken,
           underlying,
+          true,
         );
         const state = await fetchVTokenStorageIL(vToken, user.address);
 
@@ -107,6 +108,7 @@ forking(33043237, () => {
           redeemAmount,
           vToken,
           underlying,
+          true,
         );
         const state = await fetchVTokenStorageIL(vToken, user.address);
 

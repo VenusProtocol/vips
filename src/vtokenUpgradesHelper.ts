@@ -122,6 +122,7 @@ export const performVTokenBasicActions = async (
   redeemAmount: BigNumber,
   vToken: ethers.Contract,
   underlying: ethers.Contract,
+  isUnderlyingMock: boolean,
 ) => {
   const underlyingDecimals = await underlying.decimals();
   const symbol = await underlying.symbol();
@@ -139,7 +140,7 @@ export const performVTokenBasicActions = async (
     repayAmount = parseUnits("25", 6);
     redeemAmount = parseUnits("50", 6);
   }
-  if (process.env.FORK_TESTNET === "true") {
+  if (process.env.FORK_TESTNET === "true" && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
     } catch (error) {

@@ -13,44 +13,82 @@ interface AssetConfig {
   address: string;
   reduceReservesBlockDelta: number;
   acceptAdmin: boolean;
+  isMock: boolean; // Defines underlying is MockToken
 }
 
 export const CORE_MARKETS: AssetConfig[] = [
+  {
+    name: "vETH",
+    address: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
+    reduceReservesBlockDelta: 840000,
+    acceptAdmin: true,
+    isMock: false,
+  },
+
+  {
+    name: "vLTC",
+    address: "0xAfc13BC065ABeE838540823431055D2ea52eBA52",
+    reduceReservesBlockDelta: 840000,
+    acceptAdmin: true,
+    isMock: false,
+  },
+
+  {
+    name: "VBTC",
+    address: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
+    reduceReservesBlockDelta: 840000,
+    acceptAdmin: true,
+    isMock: false,
+  },
+
+  {
+    name: "vXRP",
+    address: "0x488aB2826a154da01CC4CC16A8C83d4720D3cA2C",
+    reduceReservesBlockDelta: 840000,
+    acceptAdmin: true,
+    isMock: false,
+  },
   {
     name: "vSXP",
     address: "0x74469281310195A04840Daf6EdF576F559a3dE80",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: true,
+    isMock: true,
   },
   {
     name: "vTRX",
     address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: false,
+    isMock: true,
   },
   {
     name: "vTUSD",
     address: "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: false,
+    isMock: true,
   },
   {
     name: "vUSDC",
     address: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: true,
+    isMock: true,
   },
   {
     name: "vUSDT",
     address: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: false,
+    isMock: true,
   },
   {
     name: "vWBETH",
     address: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
     reduceReservesBlockDelta: 840000,
     acceptAdmin: false,
+    isMock: true,
   },
 ];
 
