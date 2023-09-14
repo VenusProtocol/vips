@@ -6,7 +6,7 @@ import { makeProposal } from "../../src/utils";
 const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
 interface AssetConfig {
   name: string;
@@ -101,12 +101,6 @@ export const vip171Testnet = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
       },
 
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setProtocolShareReserve(address)", NORMAL_TIMELOCK],
-      },
-
       ...CORE_MARKETS.map(asset => {
         return {
           target: asset.address,
@@ -119,7 +113,7 @@ export const vip171Testnet = () => {
         return {
           target: asset.address,
           signature: "setProtocolShareReserve(address)",
-          params: [TREASURY],
+          params: [PROTOCOL_SHARE_RESERVE],
         };
       }),
     ],

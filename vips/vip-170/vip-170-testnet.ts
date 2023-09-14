@@ -7,7 +7,7 @@ const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0x37130dd8181477Be3dDe8b22A32FE302ca602BA7";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
 interface AssetConfig {
   name: string;
@@ -161,7 +161,7 @@ export const vip170Testnet = () => {
         return {
           target: asset.address,
           signature: "setProtocolShareReserve(address)",
-          params: [TREASURY],
+          params: [PROTOCOL_SHARE_RESERVE],
         };
       }),
     ],

@@ -16,7 +16,7 @@ import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0x37130dd8181477Be3dDe8b22A32FE302ca602BA7";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 
 let vToken: ethers.Contract;
 let underlying: ethers.Contract;
@@ -113,7 +113,7 @@ forking(33043237, () => {
         delete state.protocolShareReserve;
         delete state.totalReserves;
 
-        expect(await vToken.protocolShareReserve()).equals(TREASURY);
+        expect(await vToken.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
         postVipStorage.push(state);
       });
     }

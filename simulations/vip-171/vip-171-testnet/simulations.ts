@@ -14,7 +14,7 @@ import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
 const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 let vToken: ethers.Contract;
@@ -34,7 +34,7 @@ forking(33155924, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 4); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 3); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -138,7 +138,7 @@ forking(33155924, () => {
         delete state.owner;
 
         expect(await vToken.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
-        expect(await vToken.protocolShareReserve()).equals(TREASURY);
+        expect(await vToken.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
         expect(await vToken.accessControlManager()).equals(ACCESS_CONTROL_MANAGER);
         expect(await vToken.admin()).equals(NORMAL_TIMELOCK);
 
