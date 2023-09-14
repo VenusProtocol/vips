@@ -21,12 +21,12 @@ export const vip169 = () => {
       {
         target: HAY_REWARDS_DISTRIBUTOR,
         signature: "setLastRewardingBlocks(address[],uint32[],uint32[])",
-        params: [[MARKET_HAY], ["32713205"], ["32713205"]],
+        params: [[MARKET_HAY], ["32200789"], ["32200789"]],
       },
       {
         target: SD_REWARDS_DISTRIBUTOR,
         signature: "setLastRewardingBlocks(address[],uint32[],uint32[])",
-        params: [[MARKET_BNBx], ["32713205"], ["32713205"]],
+        params: [[MARKET_BNBx], ["32258389"], ["32258389"]],
       },
     ],
     meta,

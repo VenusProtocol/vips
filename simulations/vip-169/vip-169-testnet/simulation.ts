@@ -49,10 +49,10 @@ forking(33312614, () => {
   describe("Post-VIP behavior", async () => {
     describe("Rewards Distributor", async () => {
       it("Validate last rewarding block", async () => {
-        expect((await hayRewardsDistributor.rewardTokenSupplyState(MARKET_HAY)).lastRewardingBlock).to.equal(33410731);
-        expect((await sdRewardsDistributor.rewardTokenSupplyState(MARKET_BNBx)).lastRewardingBlock).to.equal(33410731);
-        expect((await hayRewardsDistributor.rewardTokenBorrowState(MARKET_HAY)).lastRewardingBlock).to.equal(33410731);
-        expect((await sdRewardsDistributor.rewardTokenBorrowState(MARKET_BNBx)).lastRewardingBlock).to.equal(33410731);
+        expect((await hayRewardsDistributor.rewardTokenSupplyState(MARKET_HAY)).lastRewardingBlock).to.equal(33677478);
+        expect((await sdRewardsDistributor.rewardTokenSupplyState(MARKET_BNBx)).lastRewardingBlock).to.equal(33735078);
+        expect((await hayRewardsDistributor.rewardTokenBorrowState(MARKET_HAY)).lastRewardingBlock).to.equal(33677478);
+        expect((await sdRewardsDistributor.rewardTokenBorrowState(MARKET_BNBx)).lastRewardingBlock).to.equal(33735078);
       });
     });
   });
