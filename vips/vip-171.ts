@@ -136,11 +136,35 @@ const newSpeeds: SpeedRecord[] = [
 export const vip171 = () => {
   const meta = {
     version: "v2",
-    title: "Reduce XVS emissions by 75%",
-    description: `.`,
-    forDescription: "I agree that Venus Protocol should reduce XVS emissions by 75%",
-    againstDescription: "I do not think that Venus Protocol should reduce XVS emissions by 75%",
-    abstainDescription: "I am indifferent to whether Venus Protocol reduces XVS emissions by 75% or not",
+    title: "VIP-171 XVS Emission Reduction",
+    description: `#### Summary
+
+After the successful passing of the [snapshot vote](https://snapshot.org/#/venus-xvs.eth/proposal/0x031cec704a0b3cf3163fa03b8f04bca2b3d7299f0b53962d595a252952a1cc9a) to reduce XVS emissions earlier this week, this VIP is now being issued for the changes to be implemented and take effect immediately after its execution. If approved by the majority of XVS Holders, this VIP will reduce the amount of daily XVS emission on Venus Core pool markets.
+
+The current emission on the core pool markets is 1,449.55 XVS/day, and after the change the daily emission of XVS in the markets will be 362.38625 XVS/day.
+
+#### Reasoning
+
+With the upcoming launch of the Venus Prime program and current market trends, this proposal aims to further reduce XVS emissions on Venus Core markets by 75%. The new organic reward system for this program will help offset the effects. The goal is to keep reducing token inflation and with it, support protocol growth and reinvestment.
+
+#### Venus Prime Program Overview
+
+Venus Prime stands as a strategic shift in the Venus Protocol’s reward mechanism. Diverging from the traditional token emission method, Venus Prime is engineered to distribute rewards based on protocol performance. This organic reward system is expected to drive user engagement and loyalty, while simultaneously reducing dependency on regular emissions which can contribute to token inflation and associated market pressures.
+
+#### Mitigating Impact of Emission Reduction with Venus Prime
+
+Organic Rewards: Venus Prime eliminates the need for frequent token emissions, thus reducing the inflationary pressures on the XVS token.
+
+Incentivizing Long-Term Engagement: With Venus Prime, users are not just rewarded for mere participation but for their loyalty and consistent engagement with the protocol. This ensures that while emissions are cut, user retention and attraction remain high.
+
+The shift towards a sustainable rewards model ensures that the Venus Protocol remains financially robust, aligning the interests of users with the protocol’s long-term viability.
+
+#### Conclusion
+
+The Venus Prime program offers a sustainable and innovative solution to the challenges posed by regular token emissions. By harnessing the protocol’s own revenues for user rewards and fostering an environment of long-term engagement, Venus Prime ensures that the proposed emission reductions not only maintain but enhance the protocol’s market position and user appeal.`,
+    forDescription: "I agree, Venus should reduce daily XVS emissions",
+    againstDescription: "I disagree, Venus should not reduce daily XVS emissions",
+    abstainDescription: "I am indifferent to whether Venus proceeds or not",
   };
 
   return makeProposal(
