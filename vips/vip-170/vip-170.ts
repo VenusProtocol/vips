@@ -93,11 +93,72 @@ const configureAccessControls = () => [
 export const vip170 = () => {
   const meta = {
     version: "v2",
-    title: "Configure shortfall, PSR, risk fund",
-    description: ``,
-    forDescription: "y",
-    againstDescription: "n",
-    abstainDescription: "idk",
+    title: "VIP-170 Risk fund foundation",
+    description: `#### Summary
+
+If passed, this VIP will set the ProtocolShareReserve and Shortfall contracts to be used on each market of the Isolated Pools. It also configures the RiskFund contract, that will provide to the Shortfall contract the funds to be auctioned, to cover any future bad debt (in case any are generated) in the markets of the Isolated Pools.
+
+This VIP enables the Stage 1 described in the following [community post](https://community.venus.io/t/risk-fund-and-shortfall-handling-module-deployment/3748).
+
+#### Description
+
+This VIP sets the **ProtocolShareReserve** and **Shortfall** contracts in every current market in Isolated Pools. The ProtocolShareReserve contract is the contract where the reserves are sent from a market when they are withdrawn. Until now, the configured target of the reserves of Isolated Pools was the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+The new ProtocolShareReserve contract will distribute the received reserves following the [Venus Tokenomics](https://docs-v4.venus.io/governance/tokenomics); 50% of the reserves withdrawn from the markets in the Isolated Pools will be sent to the **RiskFund** contract. Remaining funds will be sent to the Venus Treasury.
+
+If the conditions to perform an auction of the bad debt in any of the Isolated Pools are satisfied, the funds held by the RiskFund contract will be used by the Shortfall contract to auction them, getting tokens to reduce the associated bad debt. These auctions can be initiated and participated in a permissionless fashion.
+
+Main parameters in the Shortfall contract and the values initially set:
+
+* Minimum USD bad debt in the pool to allow the initiation of an auction. Initial value: 1,000 USD
+* Blocks to wait for the first bidder. Initial value: 100 blocks
+* Time to wait for the next bidder. Initial value: 100 blocks
+* Incentive to auction participants. Initial value: 1000 bps (or 10%)
+
+Expected operational tasks:
+
+* Funds will be sent from the markets to the ProtocolShareReserve contract, invoking the _reduceReserves_ function on each market. Anyone can do this, at any moment.
+* Funds will be distributed from the ProtocolShareReserve, sending part of it to the RiskFund contract, invoking the _releaseFunds_ function on the ProtocolShareReserve contract. Anyone can do this, at any moment.
+* The manager address will swap the tokens received in the RiskFund contract for USDT
+
+There will be more VIPs in the future to enable the rest of the stages described in this [community post](https://community.venus.io/t/risk-fund-and-shortfall-handling-module-deployment/3748). The allocation of the income generated in the Core pool is more complex. As soon as the “Automatic income allocation” release is ready, a VIP will be proposed to upgrade the ProtocolShareReserve contract and link the markets from the Core pool, so the risk fund will automatically be fed with the right amount of funds from all the Venus markets (Isolated Pools and Core pool).
+
+Finally, this VIP will authorize Normal, Fast-track and Critical timelocks to configure the risk parameters of the Shortfall and RiskFund contracts. The guardian address is also authorized to pause and resume auctions in the Shortfall contract. The manager address is authorized to swap the tokens received in the RiskFund for USDT, using PancakeSwap V2 for it.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+* **Configuration post upgrade**: in a simulation environment, validating every contract is properly set after the VIP
+* **Fork tests**: in a simulation environment, validating the RiskFund, ProtocolShareReserve and Shortfall contracts work as expected
+* **Deployment on testnet**: the same configuration has been [deployed to testnet](https://testnet.bscscan.com/tx/0x5b4f35529ccabfedeac5db1eea9385ab63a804c14f68c5e99a47ba96b6281f76), and used in the Venus Protocol testnet deployment
+* **Audit:** the deployed and configured contracts were in the scope of the audits done before the launch of Isolated Pools in the [VIP-134](https://app.venus.io/#/governance/proposal/134). Apart from those audits, the following specific audits have been done
+    * [Certik audit report (2023/August/24)](https://github.com/VenusProtocol/isolated-pools/blob/1116c02c253e82cb0483afc47fb1fa104152601e/audits/061_riskFundShortfall_certik_20230824.pdf)
+    * [Peckshield audit report (2023/August/25)](https://github.com/VenusProtocol/isolated-pools/blob/1116c02c253e82cb0483afc47fb1fa104152601e/audits/062_riskFundShortfall_peckshield_20230825.pdf)
+
+#### Deployed contracts to mainnet
+
+* [ProtocolShareReserve](https://bscscan.com/address/0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4)
+* [Shortfall](https://bscscan.com/address/0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209)
+* [RiskFund](https://bscscan.com/address/0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42)
+
+#### Deployed contracts to testnet
+
+* [ProtocolShareReserve](https://testnet.bscscan.com/address/0xc987a03ab6C2A5891Fc0919f021cc693B5E55278)
+* [Shortfall](https://testnet.bscscan.com/address/0x503574a82fE2A9f968d355C8AAc1Ba0481859369)
+* [RiskFund](https://testnet.bscscan.com/address/0x487CeF72dacABD7E12e633bb3B63815a386f7012)
+
+#### References
+
+* [Repository](https://github.com/VenusProtocol/isolated-pools)
+* [Simulation post upgrade](https://github.com/VenusProtocol/vips/pull/59)
+* [Documentation](https://docs-v4.venus.io/risk/risk-fund-and-shortfall-handling)
+* Fork tests: [Shortfall](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork/Shortfall.ts), [RiskFund](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork/RiskFund.ts), [RiskFund swaps](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork/RiskFundSwap.ts), [reduce reserves](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork/reduceReservesTest.ts)
+* Community post: [Risk Fund and Shortfall Handling Module Deployment](https://community.venus.io/t/risk-fund-and-shortfall-handling-module-deployment/3748)
+`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
