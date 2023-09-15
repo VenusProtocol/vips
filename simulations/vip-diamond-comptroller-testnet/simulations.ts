@@ -1,9 +1,10 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { initMainnetUser } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vipDiamondTestnet } from "../../vips/vip-Diamond-comptroller-testnet";
 import Comptroller from "./abi/Comptroller.json";
@@ -14,42 +15,37 @@ const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const DIAMOND = "0xB2243Da976F2cbAAa4dd1a76BF7F6EFbe22c4CFc";
 
 const Owner = "0xce10739590001705F7FF231611ba4A48B2820327";
-const zeroAddr = "0x0000000000000000000000000000000000000000";
+const zeroAddr = ethers.constants.AddressZero;
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
-const initMainnetUser = async (user: string) => {
-  await impersonateAccount(user);
-  return ethers.getSigner(user);
-};
-
 forking(33272635, async () => {
-  let owner: any,
+  let owner: Signer,
     unitroller: Contract,
     // layout variables
-    oracle: any,
-    maxAssets: any,
-    closeFactorMantissa: any,
-    liquidationIncentiveMantissa: any,
-    allMarkets: any,
+    oracle: Contract,
+    maxAssets: BigNumberish,
+    closeFactorMantissa: BigNumberish,
+    liquidationIncentiveMantissa: BigNumberish,
+    allMarkets: Array<object>,
     venusSupplyState: any,
     venusBorrowState: any,
-    venusAccrued: any,
-    vaiMintRate: any,
-    vaiController: any,
-    mintedVAIs: any,
-    mintVAIGuardianPaused: any,
-    repayVAIGuardianPaused: any,
-    protocolPaused: any,
-    venusVAIVaultRate: any,
-    vaiVaultAddress: any,
-    releaseStartBlock: any,
-    minReleaseAmount: any,
-    treasuryGuardian: any,
-    treasuryAddress: any,
-    treasuryPercent: any,
-    liquidatorContract: any,
-    comptrollerLens: any;
+    venusAccrued: BigNumberish,
+    vaiMintRate: BigNumberish,
+    vaiController: Contract,
+    mintedVAIs: BigNumberish,
+    mintVAIGuardianPaused: boolean,
+    repayVAIGuardianPaused: boolean,
+    protocolPaused: boolean,
+    venusVAIVaultRate: BigNumberish,
+    vaiVaultAddress: string,
+    releaseStartBlock: BigNumberish,
+    minReleaseAmount: BigNumberish,
+    treasuryGuardian: boolean,
+    treasuryAddress: string,
+    treasuryPercent: BigNumberish,
+    liquidatorContract: Contract,
+    comptrollerLens: Contract;
 
   const borrowSpeeds: any = {};
   const supplySpeeds: any = {};
@@ -72,12 +68,12 @@ forking(33272635, async () => {
     owner = await ethers.getSigner(Owner);
     const [signer] = await ethers.getSigners();
     await signer.sendTransaction({
-      to: owner.address,
+      to: await owner.getAddress(),
       value: ethers.BigNumber.from("10000000000000000000"),
       data: undefined,
     });
 
-    busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888");
+    busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888", parseUnits("1000", 18));
 
     [vBUSD, vUSDT] = await Promise.all(
       [VBUSD, VUSDT].map((address: string) => {
@@ -86,7 +82,7 @@ forking(33272635, async () => {
     );
 
     [BUSD] = await Promise.all(
-      [vBUSD].map(async (vToken: any) => {
+      [vBUSD].map(async (vToken: Contract) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
@@ -133,7 +129,7 @@ forking(33272635, async () => {
 
         vaiController = await unitroller.vaiController();
 
-        mintedVAIs = await unitroller.mintedVAIs(busdHolder.address);
+        mintedVAIs = await unitroller.mintedVAIs(await busdHolder.getAddress());
 
         mintVAIGuardianPaused = await unitroller.mintVAIGuardianPaused();
 
@@ -169,8 +165,14 @@ forking(33272635, async () => {
           supplySpeeds[marketAddress] = await unitroller.venusSupplySpeeds(marketAddress);
           markets[marketAddress] = await unitroller.markets(marketAddress);
 
-          userBorrowIndexes[marketAddress] = await unitroller.venusBorrowerIndex(marketAddress, busdHolder.address);
-          userSupplyIndexes[marketAddress] = await unitroller.venusSupplierIndex(marketAddress, busdHolder.address);
+          userBorrowIndexes[marketAddress] = await unitroller.venusBorrowerIndex(
+            marketAddress,
+            await busdHolder.getAddress(),
+          );
+          userSupplyIndexes[marketAddress] = await unitroller.venusSupplierIndex(
+            marketAddress,
+            await busdHolder.getAddress(),
+          );
         }
       });
     });
@@ -225,7 +227,7 @@ forking(33272635, async () => {
         const vaiControllerUpgrade = await diamondUnitroller.vaiController();
         expect(vaiControllerUpgrade).to.equal(vaiController);
 
-        const mintedVAIsUpgrade = await diamondUnitroller.mintedVAIs(busdHolder.address);
+        const mintedVAIsUpgrade = await diamondUnitroller.mintedVAIs(await busdHolder.getAddress());
         expect(mintedVAIsUpgrade).to.equal(mintedVAIs);
 
         const mintVAIGuardianPausedUpgrade = await diamondUnitroller.mintVAIGuardianPaused();
@@ -278,8 +280,14 @@ forking(33272635, async () => {
           expect(borrowSpeeds[marketAddress]).to.equal(venusBorrowSpeed);
           expect(supplySpeeds[marketAddress]).to.equal(venusSupplySpeed);
 
-          const userBorrowIndex = await diamondUnitroller.venusBorrowerIndex(marketAddress, busdHolder.address);
-          const userSupplyIndex = await diamondUnitroller.venusSupplierIndex(marketAddress, busdHolder.address);
+          const userBorrowIndex = await diamondUnitroller.venusBorrowerIndex(
+            marketAddress,
+            await busdHolder.getAddress(),
+          );
+          const userSupplyIndex = await diamondUnitroller.venusSupplierIndex(
+            marketAddress,
+            await busdHolder.getAddress(),
+          );
           expect(userBorrowIndexes[marketAddress]).to.equal(userBorrowIndex);
           expect(userSupplyIndexes[marketAddress]).to.equal(userSupplyIndex);
         }
@@ -316,8 +324,8 @@ forking(33272635, async () => {
       it("setting Pause Guardian", async () => {
         const currentPauseGuardia = (await diamondUnitroller.pauseGuardian()).toString();
 
-        await diamondUnitroller.connect(owner)._setPauseGuardian(owner.address);
-        expect(await diamondUnitroller.pauseGuardian()).to.equal(owner.address);
+        await diamondUnitroller.connect(owner)._setPauseGuardian(await owner.getAddress());
+        expect(await diamondUnitroller.pauseGuardian()).to.equal(await owner.getAddress());
 
         await diamondUnitroller.connect(owner)._setPauseGuardian(currentPauseGuardia);
         expect(await diamondUnitroller.pauseGuardian()).to.equal(currentPauseGuardia);
@@ -334,12 +342,8 @@ forking(33272635, async () => {
 
       it("pausing mint action in vBUSD", async () => {
         const isActionPaused = await diamondUnitroller.actionPaused(VBUSD, 0);
-        await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], false);
 
-        expect(await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], !isActionPaused)).to.emit(
-          vBUSD,
-          "ActionPausedMarket",
-        );
+        await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], !isActionPaused);
 
         await expect(await diamondUnitroller.actionPaused(VBUSD, 0)).to.be.equal(!isActionPaused);
 
@@ -373,7 +377,7 @@ forking(33272635, async () => {
       data: undefined,
     });
 
-    usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE");
+    usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE", parseUnits("1000", 18));
 
     [vUSDT] = await Promise.all(
       [VUSDT].map((address: string) => {
@@ -381,7 +385,7 @@ forking(33272635, async () => {
       }),
     );
     [USDT] = await Promise.all(
-      [vUSDT].map(async (vToken: any) => {
+      [vUSDT].map(async (vToken: Contract) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
@@ -398,13 +402,13 @@ forking(33272635, async () => {
     });
     it("mint vToken vUSDT", async () => {
       const vBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const busdHolerBalance = await USDT.balanceOf(usdtHolder.address);
+      const busdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
       await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
 
       const newvBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const newBusdHolerBalance = await USDT.balanceOf(usdtHolder.address);
+      const newBusdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       expect(newvBUSDBalance).greaterThan(vBUSDBalance);
       expect(newBusdHolerBalance).lessThan(busdHolerBalance);
@@ -414,32 +418,32 @@ forking(33272635, async () => {
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
       await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
 
-      const vUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(usdtHolder.address);
+      const vUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
       await expect(vUSDT.connect(usdtHolder).redeem(2000)).to.emit(vUSDT, "Redeem");
-      const newVUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(usdtHolder.address);
+      const newVUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
 
       expect(newVUSDTUserBal).to.equal(vUSDTUserBal.sub(2000));
     });
 
     it("borrow vToken", async () => {
-      const busdUserBal = await USDT.balanceOf(usdtHolder.address);
+      const busdUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
 
       await expect(vUSDT.connect(usdtHolder).borrow(1000)).to.emit(vUSDT, "Borrow");
 
-      expect((await USDT.balanceOf(usdtHolder.address)).toString()).to.equal(busdUserBal.add(1000));
+      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.equal(busdUserBal.add(1000));
     });
 
     it("Repay vToken", async () => {
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
 
-      const busdUserBal = await USDT.balanceOf(usdtHolder.address);
+      const busdUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
       await vUSDT.connect(usdtHolder).borrow(1000);
 
-      expect((await USDT.balanceOf(usdtHolder.address)).toString()).to.greaterThan(busdUserBal);
+      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.greaterThan(busdUserBal);
 
       await vUSDT.connect(usdtHolder).repayBorrow(1000);
 
-      const balanceAfterRepay = await USDT.balanceOf(usdtHolder.address);
+      const balanceAfterRepay = await USDT.balanceOf(await usdtHolder.getAddress());
       expect(balanceAfterRepay).to.equal(busdUserBal);
     });
   });
