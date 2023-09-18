@@ -1,6 +1,6 @@
-import { cutParams as params } from "../simulations/vip-diamond-comptroller-testnet/utils/cut-params-testnet.json";
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { cutParams as params } from "../../simulations/vip-diamond-comptroller/vip-diamond-comptroller-testnet/utils/cut-params-testnet.json";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const DIAMOND = "0xB2243Da976F2cbAAa4dd1a76BF7F6EFbe22c4CFc";

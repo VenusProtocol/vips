@@ -4,9 +4,9 @@ import { BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { vipDiamondTestnet } from "../../vips/vip-Diamond-comptroller-testnet";
+import { initMainnetUser } from "../../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
+import { vipDiamondTestnet } from "../../../vips/vip-diamond-comptroller/vip-Diamond-comptroller-testnet";
 import Comptroller from "./abi/Comptroller.json";
 import IERC20Upgradeable from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
