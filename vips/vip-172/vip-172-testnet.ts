@@ -9,10 +9,10 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 
-export const vip168Testnet = () => {
+export const vip172Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-168",
+    title: "VIP-172",
     description: ``,
     forDescription: "Process to upgrade Comptroller to new implementation",
     againstDescription: "Defer upgrade",

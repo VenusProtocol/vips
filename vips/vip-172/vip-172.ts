@@ -9,10 +9,10 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
-export const vip168 = () => {
+export const vip172 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-168",
+    title: "VIP-172",
     description: ``,
     forDescription: "Process to configure Liquidity Mining",
     againstDescription: "Defer configuration of Liquidity Mining",
