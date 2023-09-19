@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
+import { initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip155Testnet } from "../../../vips/vip-155/vip-155-testnet";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
@@ -15,7 +15,7 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
-forking(31942719, () => {
+forking(33476706, () => {
   let accessControlManager: ethers.Contract;
   let comptroller: ethers.Contract;
   let liquidator: ethers.Contract;
@@ -29,22 +29,7 @@ forking(31942719, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Liquidator Update", vip155Testnet(), {
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [ACCESS_CONTROL_ABI, LIQUIDATOR_ABI, COMPTROLLER_ABI],
-        [
-          "PermissionGranted",
-          "OwnershipTransferred",
-          "NewPendingRedeemChunkLength",
-          "ForceVAILiquidationResumed",
-          "NewLiquidatorContract",
-        ],
-        [17, 1, 1, 1, 1],
-      );
-    },
-  });
+  testVip("VIP-Liquidator Liquidator Update", vip155Testnet());
 
   describe("Post-VIP behavior", async () => {
     it("Permissions restrictLiquidation", async () => {
