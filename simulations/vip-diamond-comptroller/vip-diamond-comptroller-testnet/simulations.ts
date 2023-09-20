@@ -7,9 +7,9 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vipDiamondTestnet } from "../../../vips/vip-diamond-comptroller/vip-Diamond-comptroller-testnet";
-import Comptroller from "./abi/Comptroller.json";
-import IERC20Upgradeable from "./abi/IERC20UpgradableAbi.json";
-import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
+import Comptroller from "../abi/Comptroller.json";
+import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
+import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const DIAMOND = "0x7e0298880224B8116F3462c50917249E94b3DC53";
@@ -19,7 +19,7 @@ const zeroAddr = ethers.constants.AddressZero;
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
-forking(33479987, async () => {
+forking(33497000, async () => {
   let owner: Signer,
     unitroller: Contract,
     // layout variables
@@ -99,7 +99,7 @@ forking(33479987, async () => {
         expect(pendingAdmin.toLowerCase()).to.equal(zeroAddr);
       });
 
-      it("Diamond Unitroller Implementation (comptroller) should match the diamond Proxy Address", async () => {
+      it("Diamond Unitroller Implementation (comptroller) should match the old comptroller address", async () => {
         const comptrollerImplementation = await unitroller.comptrollerImplementation();
         const pendingComptrollerImplementation = await unitroller.pendingComptrollerImplementation();
         expect(comptrollerImplementation.toLowerCase()).to.equal(
@@ -355,7 +355,7 @@ forking(33479987, async () => {
   });
 });
 
-forking(33480500, async () => {
+forking(33497000, async () => {
   let owner, unitroller;
   let USDT: Contract;
   let usdtHolder: Signer;
@@ -393,7 +393,7 @@ forking(33480500, async () => {
     await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], false);
   });
 
-  describe.only("Diamond Hooks", () => {
+  describe("Diamond Hooks", () => {
     it("Diamond Unitroller Implementation (comptroller) should match the diamond Proxy Address", async () => {
       const comptrollerImplementation = await diamondUnitroller.comptrollerImplementation();
       const pendingComptrollerImplementation = await diamondUnitroller.pendingComptrollerImplementation();

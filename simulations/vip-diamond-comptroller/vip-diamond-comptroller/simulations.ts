@@ -7,9 +7,9 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vipDiamondComptroller } from "../../../vips/vip-diamond-comptroller/vip-Diamond-comptroller";
-import Comptroller from "./abi/Comptroller.json";
-import IERC20Upgradeable from "./abi/IERC20UpgradableAbi.json";
-import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
+import Comptroller from "../abi/Comptroller.json";
+import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
+import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const DIAMOND = "";
@@ -99,7 +99,7 @@ forking(33272635, async () => {
         expect(pendingAdmin.toLowerCase()).to.equal(zeroAddr);
       });
 
-      it("Diamond Unitroller Implementation (comptroller) should match the diamond Proxy Address", async () => {
+      it("Diamond Unitroller Implementation (comptroller) should match the old comptroller address", async () => {
         const comptrollerImplementation = await unitroller.comptrollerImplementation();
         const pendingComptrollerImplementation = await unitroller.pendingComptrollerImplementation();
         expect(comptrollerImplementation.toLowerCase()).to.equal(
@@ -402,16 +402,16 @@ forking(33272635, async () => {
     });
     it("mint vToken vUSDT", async () => {
       const vBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const busdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
+      const busdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
       await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
 
       const newvBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const newBusdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
+      const newBusdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       expect(newvBUSDBalance).greaterThan(vBUSDBalance);
-      expect(newBusdHolerBalance).lessThan(busdHolerBalance);
+      expect(newBusdHolderBalance).lessThan(busdHolderBalance);
     });
 
     it("redeem vToken", async () => {
