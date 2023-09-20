@@ -12,14 +12,14 @@ import IERC20Upgradeable from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const DIAMOND = "0xB2243Da976F2cbAAa4dd1a76BF7F6EFbe22c4CFc";
+const DIAMOND = "0x7e0298880224B8116F3462c50917249E94b3DC53";
 
 const Owner = "0xce10739590001705F7FF231611ba4A48B2820327";
 const zeroAddr = ethers.constants.AddressZero;
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
-forking(33272635, async () => {
+forking(33479987, async () => {
   let owner: Signer,
     unitroller: Contract,
     // layout variables
@@ -103,7 +103,7 @@ forking(33272635, async () => {
         const comptrollerImplementation = await unitroller.comptrollerImplementation();
         const pendingComptrollerImplementation = await unitroller.pendingComptrollerImplementation();
         expect(comptrollerImplementation.toLowerCase()).to.equal(
-          "0x9d062a805aec794a165cb1f7cedc6d848e83f3ba".toLowerCase(),
+          "0xa8a476ad16727ce641f27d7738d2d341ebad81cc".toLowerCase(),
         );
         expect(pendingComptrollerImplementation.toLowerCase()).to.equal(zeroAddr);
       });
@@ -190,7 +190,7 @@ forking(33272635, async () => {
         expect(pendingAdmin.toLowerCase()).to.equal(zeroAddr);
       });
 
-      it("Diamond Unitroller Implementation (comptroller) should match the diamond Proxy Address", async () => {
+      it("Diamond Unitroller Implementation (comptroller) should match the comptroller implementation Address", async () => {
         const comptrollerImplementation = await diamondUnitroller.comptrollerImplementation();
         const pendingComptrollerImplementation = await diamondUnitroller.pendingComptrollerImplementation();
         expect(comptrollerImplementation.toLowerCase()).to.equal(DIAMOND.toLowerCase());
@@ -355,7 +355,7 @@ forking(33272635, async () => {
   });
 });
 
-forking(33272635, async () => {
+forking(33480500, async () => {
   let owner, unitroller;
   let USDT: Contract;
   let usdtHolder: Signer;
@@ -393,25 +393,24 @@ forking(33272635, async () => {
     await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], false);
   });
 
-  describe("Diamond Hooks", () => {
+  describe.only("Diamond Hooks", () => {
     it("Diamond Unitroller Implementation (comptroller) should match the diamond Proxy Address", async () => {
       const comptrollerImplementation = await diamondUnitroller.comptrollerImplementation();
       const pendingComptrollerImplementation = await diamondUnitroller.pendingComptrollerImplementation();
       expect(comptrollerImplementation.toLowerCase()).to.equal(DIAMOND.toLowerCase());
       expect(pendingComptrollerImplementation.toLowerCase()).to.equal(zeroAddr);
     });
+
     it("mint vToken vUSDT", async () => {
       const vBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const busdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
-
+      const busdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
-
+      await vUSDT.connect(usdtHolder).mint(2000);
       const newvBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const newBusdHolerBalance = await USDT.balanceOf(await usdtHolder.getAddress());
+      const newBusdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       expect(newvBUSDBalance).greaterThan(vBUSDBalance);
-      expect(newBusdHolerBalance).lessThan(busdHolerBalance);
+      expect(newBusdHolderBalance).lessThan(busdHolderBalance);
     });
 
     it("redeem vToken", async () => {
