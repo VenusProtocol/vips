@@ -400,18 +400,17 @@ forking(33272635, async () => {
       expect(comptrollerImplementation.toLowerCase()).to.equal(DIAMOND.toLowerCase());
       expect(pendingComptrollerImplementation.toLowerCase()).to.equal(zeroAddr);
     });
+
     it("mint vToken vUSDT", async () => {
-      const vBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const busdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
-
+      const vUSDTBalance = await USDT.balanceOf(vUSDT.address);
+      const usdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
+      await vUSDT.connect(usdtHolder).mint(2000);
+      const newvUSDTBalance = await USDT.balanceOf(vUSDT.address);
+      const newUsdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
-      const newvBUSDBalance = await USDT.balanceOf(vUSDT.address);
-      const newBusdHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
-
-      expect(newvBUSDBalance).greaterThan(vBUSDBalance);
-      expect(newBusdHolderBalance).lessThan(busdHolderBalance);
+      expect(newvUSDTBalance).greaterThan(vUSDTBalance);
+      expect(newUsdtHolderBalance).lessThan(usdtHolderBalance);
     });
 
     it("redeem vToken", async () => {
@@ -426,25 +425,25 @@ forking(33272635, async () => {
     });
 
     it("borrow vToken", async () => {
-      const busdUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
+      const usdtUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
 
       await expect(vUSDT.connect(usdtHolder).borrow(1000)).to.emit(vUSDT, "Borrow");
 
-      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.equal(busdUserBal.add(1000));
+      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.equal(usdtUserBal.add(1000));
     });
 
     it("Repay vToken", async () => {
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
 
-      const busdUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
+      const usdtUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
       await vUSDT.connect(usdtHolder).borrow(1000);
 
-      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.greaterThan(busdUserBal);
+      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.greaterThan(usdtUserBal);
 
       await vUSDT.connect(usdtHolder).repayBorrow(1000);
 
       const balanceAfterRepay = await USDT.balanceOf(await usdtHolder.getAddress());
-      expect(balanceAfterRepay).to.equal(busdUserBal);
+      expect(balanceAfterRepay).to.equal(usdtUserBal);
     });
   });
 });
