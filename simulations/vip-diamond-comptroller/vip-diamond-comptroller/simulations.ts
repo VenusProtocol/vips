@@ -12,14 +12,14 @@ import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const DIAMOND = "0xc3CE70d9bBE8f63510f3C6dBf1C025113C79B40c";
+const DIAMOND = "0xAd69AA3811fE0EE7dBd4e25C4bae40e6422c76C8";
 
 const Owner = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const zeroAddr = ethers.constants.AddressZero;
 const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
-forking(33272635, async () => {
+forking(31933620, async () => {
   let owner: Signer,
     unitroller: Contract,
     // layout variables
@@ -73,7 +73,7 @@ forking(33272635, async () => {
       data: undefined,
     });
 
-    busdHolder = await initMainnetUser("0xC825AD791A6046991e3706b6342970f6d87e4888", parseUnits("1000", 18));
+    busdHolder = await initMainnetUser("0x8894E0a0c962CB723c1976a4421c95949bE2D4E3", parseUnits("1000", 18));
 
     [vBUSD, vUSDT] = await Promise.all(
       [VBUSD, VUSDT].map((address: string) => {
@@ -355,7 +355,7 @@ forking(33272635, async () => {
   });
 });
 
-forking(33272635, async () => {
+forking(31933620, async () => {
   let owner, unitroller;
   let USDT: Contract;
   let usdtHolder: Signer;
@@ -377,7 +377,7 @@ forking(33272635, async () => {
       data: undefined,
     });
 
-    usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE", parseUnits("1000", 18));
+    usdtHolder = await initMainnetUser("0x8894E0a0c962CB723c1976a4421c95949bE2D4E3", parseUnits("1000", 18));
 
     [vUSDT] = await Promise.all(
       [VUSDT].map((address: string) => {
@@ -404,8 +404,8 @@ forking(33272635, async () => {
     it("mint vToken vUSDT", async () => {
       const vUSDTBalance = await USDT.balanceOf(vUSDT.address);
       const usdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
-      await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await vUSDT.connect(usdtHolder).mint(2000);
+      await USDT.connect(usdtHolder).approve(vUSDT.address, parseUnits("1", 18));
+      await vUSDT.connect(usdtHolder).mint(parseUnits("1", 18));
       const newvUSDTBalance = await USDT.balanceOf(vUSDT.address);
       const newUsdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
@@ -414,33 +414,37 @@ forking(33272635, async () => {
     });
 
     it("redeem vToken", async () => {
-      await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
+      await USDT.connect(usdtHolder).approve(vUSDT.address, parseUnits("1", 18));
+      await expect(vUSDT.connect(usdtHolder).mint(parseUnits("1", 18))).to.emit(vUSDT, "Mint");
 
       const vUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
-      await expect(vUSDT.connect(usdtHolder).redeem(2000)).to.emit(vUSDT, "Redeem");
+      await expect(vUSDT.connect(usdtHolder).redeem(parseUnits("1", 8))).to.emit(vUSDT, "Redeem");
       const newVUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
 
-      expect(newVUSDTUserBal).to.equal(vUSDTUserBal.sub(2000));
+      expect(newVUSDTUserBal).to.equal(vUSDTUserBal.sub(parseUnits("1", 8)));
     });
 
     it("borrow vToken", async () => {
       const usdtUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
 
-      await expect(vUSDT.connect(usdtHolder).borrow(1000)).to.emit(vUSDT, "Borrow");
+      await expect(vUSDT.connect(usdtHolder).borrow(parseUnits("1", 18))).to.emit(vUSDT, "Borrow");
 
-      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.equal(usdtUserBal.add(1000));
+      expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.equal(
+        usdtUserBal.add(parseUnits("1", 18)),
+      );
     });
 
     it("Repay vToken", async () => {
-      await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
+      await USDT.connect(usdtHolder).approve(vUSDT.address, parseUnits("1", 18));
+      await expect(vUSDT.connect(usdtHolder).mint(parseUnits("1", 18))).to.emit(vUSDT, "Mint");
 
       const usdtUserBal = await USDT.balanceOf(await usdtHolder.getAddress());
-      await vUSDT.connect(usdtHolder).borrow(1000);
+      await vUSDT.connect(usdtHolder).borrow(parseUnits("0.5", 18));
 
       expect((await USDT.balanceOf(await usdtHolder.getAddress())).toString()).to.greaterThan(usdtUserBal);
 
-      await vUSDT.connect(usdtHolder).repayBorrow(1000);
+      await USDT.connect(usdtHolder).approve(vUSDT.address, parseUnits("0.5", 18));
+      await vUSDT.connect(usdtHolder).repayBorrow(parseUnits("0.5", 18));
 
       const balanceAfterRepay = await USDT.balanceOf(await usdtHolder.getAddress());
       expect(balanceAfterRepay).to.equal(usdtUserBal);
