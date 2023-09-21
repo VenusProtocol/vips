@@ -12,7 +12,7 @@ import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const DIAMOND = "";
+const DIAMOND = "0xc3CE70d9bBE8f63510f3C6dBf1C025113C79B40c";
 
 const Owner = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const zeroAddr = ethers.constants.AddressZero;
@@ -103,7 +103,7 @@ forking(33272635, async () => {
         const comptrollerImplementation = await unitroller.comptrollerImplementation();
         const pendingComptrollerImplementation = await unitroller.pendingComptrollerImplementation();
         expect(comptrollerImplementation.toLowerCase()).to.equal(
-          "0x9d062a805aec794a165cb1f7cedc6d848e83f3ba".toLowerCase(),
+          "0x909dd16b24CEf96c7be13065a9a0EAF8A126FFa5".toLowerCase(),
         );
         expect(pendingComptrollerImplementation.toLowerCase()).to.equal(zeroAddr);
       });

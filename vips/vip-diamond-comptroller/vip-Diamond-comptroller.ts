@@ -3,7 +3,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const DIAMOND = "";
+const DIAMOND = "0xAd69AA3811fE0EE7dBd4e25C4bae40e6422c76C8";
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
