@@ -1,6 +1,6 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
-import { ADDRESSES, ZERO_ADDRESS } from "../helper/config";
+import { ProposalType } from "../../../src/types";
+import { makeProposal } from "../../../src/utils";
+import { ADDRESSES, ZERO_ADDRESS } from "../../helpers/config";
 
 const { sepoliaContracts } = ADDRESSES;
 export const oracleAclOwnership = () => {

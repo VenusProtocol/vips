@@ -1,6 +1,6 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
-import { ADDRESSES, ZERO_ADDRESS } from "../helper/config";
+import { ProposalType } from "../../../src/types";
+import { makeProposal } from "../../../src/utils";
+import { ADDRESSES, ZERO_ADDRESS } from "../../helpers/config";
 
 const { sepoliaContracts } = ADDRESSES;
 
@@ -217,7 +217,7 @@ export const vtokenConfiguration = () => {
         params: [
           [
             sepoliaContracts.VUSDT,
-            "825000000000000000",
+            "800000000000000000",
             "850000000000000000",
             "10000000000",
             sepoliaContracts.VTREASURY,

@@ -1,6 +1,6 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
-import { ADDRESSES, ZERO_ADDRESS } from "../helper/config";
+import { ProposalType } from "../../../src/types";
+import { makeProposal } from "../../../src/utils";
+import { ADDRESSES, ZERO_ADDRESS } from "../../helpers/config";
 
 const { sepoliaContracts } = ADDRESSES;
 const WBTC_CHAINLINK_FEED = "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43";
