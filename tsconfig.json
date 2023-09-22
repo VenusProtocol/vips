@@ -18,5 +18,5 @@
   },
   "exclude": ["node_modules"],
   "files": ["./hardhat.config.ts"],
-  "include": ["./tests", "./scripts", "./src", "./vips", "./simulations", "./multisig/sepolia/"]
+  "include": ["./tests", "./scripts", "./src", "./vips", "./simulations", "multisig/proposals/sepolia"]
 }

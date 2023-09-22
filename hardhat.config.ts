@@ -85,7 +85,6 @@ function isFork() {
         loggingEnabled: false,
         forking: {
           url: `${process.env.BSC_ARCHIVE_NODE}`,
-          blockNumber: 21068448,
         },
         accounts: {
           accountsBalance: "1000000000000000000",
