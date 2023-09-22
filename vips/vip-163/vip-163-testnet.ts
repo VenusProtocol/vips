@@ -6,7 +6,7 @@ import { makeProposal } from "../../src/utils";
 const THE = "0xB1cbD28Cb101c87b5F94a14A8EF081EA7F985593";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTHE_DeFi = "0x5Ec06c9dD9654d42B69A8EdBBa99b1e8Afa0D4C0";
+const VTHE_DeFi = "0xc934C824a2d2b79e4Beae8bf4131d36966459892";
 const REWARD_DISTRIBUTOR_THE = "0x5cBf86e076b3F36a85dD73A730a3567FdCA0D21E";
 const DEFI_COMPTROLLER = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
@@ -66,12 +66,12 @@ export const vip163Testnet = () => {
         params: [
           [
             VTHE_DeFi,
-            parseUnits("0.2", 18),
-            parseUnits("0.3", 18),
+            0,
+            parseUnits("1", 18),
             parseUnits("58823.5", 18),
             VTOKEN_RECEIVER_THE,
-            parseUnits("2600000", 18),
-            parseUnits("1400000", 18),
+            parseUnits("2000000", 18),
+            parseUnits("1000000", 18),
           ],
         ],
       },

@@ -19,7 +19,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const THE = "0xB1cbD28Cb101c87b5F94a14A8EF081EA7F985593";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTHE_DeFi = "0x5Ec06c9dD9654d42B69A8EdBBa99b1e8Afa0D4C0";
+const VTHE_DeFi = "0xc934C824a2d2b79e4Beae8bf4131d36966459892";
 const REWARD_DISTRIBUTOR = "0x5cBf86e076b3F36a85dD73A730a3567FdCA0D21E";
 const DEFI_COMPTROLLER = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
 const BINANCE_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
@@ -27,7 +27,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const USDD = "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382";
 const vUSDD_DeFi = "0xa109DE0abaeefC521Ec29D89eA42E64F37A6882E";
 
-forking(32725445, () => {
+forking(33564537, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTHE: Contract;
@@ -125,7 +125,7 @@ forking(32725445, () => {
     describe("PoolRegistry state", () => {
       it("should register pool's vTokens in Comptroller", async () => {
         const vTokens = await comptroller.getAllMarkets();
-        expect(vTokens).to.have.lengthOf(7);
+        expect(vTokens).to.have.lengthOf(8);
         expect(vTokens).to.include(VTHE_DeFi);
       });
 
@@ -206,14 +206,14 @@ forking(32725445, () => {
             expect(await vTHE.reserveFactorMantissa()).to.equal(parseUnits("0.25", 18));
           });
 
-          it("should set vTHE_DeFi collateral factor to 20%", async () => {
+          it("should set vTHE_DeFi collateral factor to 0", async () => {
             const market = await comptroller.markets(VTHE_DeFi);
-            expect(market.collateralFactorMantissa).to.equal(parseUnits("0.2", 18));
+            expect(market.collateralFactorMantissa).to.equal(0);
           });
 
-          it("should set vTHE_DeFi liquidation threshold to 30%", async () => {
+          it("should set vTHE_DeFi liquidation threshold to 100%", async () => {
             const market = await comptroller.markets(VTHE_DeFi);
-            expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.3", 18));
+            expect(market.liquidationThresholdMantissa).to.equal(parseUnits("1", 18));
           });
 
           it("should set vTHE_DeFi protocolSeizeShareMantissa to 5%", async () => {
@@ -223,12 +223,12 @@ forking(32725445, () => {
         });
 
         describe("Caps", () => {
-          it("should set vTHE_DeFi borrow cap to 1,400,000", async () => {
-            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("1400000", 18));
+          it("should set vTHE_DeFi borrow cap to 1,000,000", async () => {
+            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("1000000", 18));
           });
 
-          it("should set vTHE_DeFi supply cap to 2,600,000", async () => {
-            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("2600000", 18));
+          it("should set vTHE_DeFi supply cap to 2,000,000", async () => {
+            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("2000000", 18));
           });
         });
 
@@ -237,7 +237,7 @@ forking(32725445, () => {
             expect(await comptroller.getRewardDistributors()).to.include(REWARD_DISTRIBUTOR);
           });
 
-          it("should have 2 rewards distributor in DeFi pool", async () => {
+          it("should have 3 rewards distributor in DeFi pool", async () => {
             expect(await comptroller.getRewardDistributors()).to.have.lengthOf(3);
           });
 

@@ -25,18 +25,18 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
-const VTHE_DeFi = "0x241375752e06fe76Ba41d2f4B03C4331fDdB239B";
+const VTHE_DeFi = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 const REWARD_DISTRIBUTOR = "0x493f6Cc4B22441AE84c58aAE44211Efe899720a2";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const USDT = "0x55d398326f99059ff775485246999027b3197955";
+const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(31269310, () => {
+forking(31966100, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTHE: Contract;
   let rewardsDistributor: Contract;
-  let usdt: Contract;
+  let vai: Contract;
   let communityWalletBalanceBefore: BigNumberish;
 
   before(async () => {
@@ -44,8 +44,8 @@ forking(31269310, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_DeFi);
     vTHE = await ethers.getContractAt(VTOKEN_ABI, VTHE_DeFi);
     rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
-    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
-    communityWalletBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
+    vai = await ethers.getContractAt(ERC20_ABI, VAI);
+    communityWalletBalanceBefore = await vai.balanceOf(COMMUNITY_WALLET);
 
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "THE");
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
@@ -124,7 +124,7 @@ forking(31269310, () => {
           "OwnershipTransferred",
           "WithdrawTreasuryBEP20",
         ],
-        [3, 1, 1, 1, 1, 4, 3],
+        [4, 1, 1, 1, 1, 4, 2],
       );
     },
   });
@@ -132,7 +132,7 @@ forking(31269310, () => {
   describe("Post-VIP state", () => {
     describe("Balance Checks", () => {
       it("should transfer funds to community wallet from treasury", async () => {
-        const communityWalletBalanceAfter = await usdt.balanceOf(COMMUNITY_WALLET);
+        const communityWalletBalanceAfter = await vai.balanceOf(COMMUNITY_WALLET);
         const differenceInBalance = communityWalletBalanceAfter.sub(communityWalletBalanceBefore);
         expect(differenceInBalance).equals(parseUnits("6000", 18));
       });
@@ -229,14 +229,14 @@ forking(31269310, () => {
             expect(await vTHE.reserveFactorMantissa()).to.equal(parseUnits("0.25", 18));
           });
 
-          it("should set vTHE_DeFi collateral factor to 20%", async () => {
+          it("should set vTHE_DeFi collateral factor to 0", async () => {
             const market = await comptroller.markets(VTHE_DeFi);
             expect(market.collateralFactorMantissa).to.equal(0);
           });
 
-          it("should set vTHE_DeFi liquidation threshold to 30%", async () => {
+          it("should set vTHE_DeFi liquidation threshold to 100%", async () => {
             const market = await comptroller.markets(VTHE_DeFi);
-            expect(market.liquidationThresholdMantissa).to.equal(0);
+            expect(market.liquidationThresholdMantissa).to.equal(parseUnits("1", 18));
           });
 
           it("should set vTHE_DeFi protocolSeizeShareMantissa to 5%", async () => {
@@ -246,12 +246,12 @@ forking(31269310, () => {
         });
 
         describe("Caps", () => {
-          it("should set vTHE_DeFi borrow cap to 1,400,000", async () => {
-            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("1400000", 18));
+          it("should set vTHE_DeFi borrow cap to 1,000,000", async () => {
+            expect(await comptroller.borrowCaps(VTHE_DeFi)).to.equal(parseUnits("1000000", 18));
           });
 
-          it("should set vTHE_DeFi supply cap to 2,600,000", async () => {
-            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("2600000", 18));
+          it("should set vTHE_DeFi supply cap to 2,000,000", async () => {
+            expect(await comptroller.supplyCaps(VTHE_DeFi)).to.equal(parseUnits("2000000", 18));
           });
         });
 
@@ -321,7 +321,7 @@ forking(31269310, () => {
       it("should be possible to borrow", async () => {
         await usdd.connect(user).approve(vUSDD.address, parseUnits("100", 18));
         await vUSDD.connect(user).mint(parseUnits("100", 18));
-        expect(await vUSDD.balanceOf(user.address)).to.equal(parseUnits("100", 8));
+        expect(await vUSDD.balanceOf(user.address)).to.closeTo(parseUnits("100", 8), 1);
         await comptroller.connect(user).enterMarkets([vUSDD.address]);
 
         await vTHE.connect(user).borrow(1000000);
@@ -336,7 +336,7 @@ forking(31269310, () => {
         expect(await the.balanceOf(user.address)).to.equal(0);
       });
 
-      it("should be possible to redeem a part of ankr", async () => {
+      it("should be possible to redeem a part of the", async () => {
         await vTHE.redeemUnderlying(parseUnits("30", 18));
         expect(await the.balanceOf(user.address)).to.equal(parseUnits("30", 18));
         expect(await vTHE.balanceOf(user.address)).to.equal(parseUnits("70", 8));

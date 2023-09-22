@@ -8,9 +8,9 @@ const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 const VTOKEN_RECEIVER_THE = "0x1c6C2498854662FDeadbC4F14eA2f30ca305104b";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VTHE_DeFi = "0x241375752e06fe76Ba41d2f4B03C4331fDdB239B";
+const VTHE_DeFi = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 const REWARD_DISTRIBUTOR = "0x493f6Cc4B22441AE84c58aAE44211Efe899720a2";
-const USDT = "0x55d398326f99059ff775485246999027b3197955";
+const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const DEFI_COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
@@ -33,7 +33,7 @@ export const vip163 = (maxStalePeriod?: number) => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("6000", 18), COMMUNITY_WALLET],
+        params: [VAI, parseUnits("6000", 18), COMMUNITY_WALLET],
       },
       {
         target: BINANCE_ORACLE,
@@ -58,7 +58,7 @@ export const vip163 = (maxStalePeriod?: number) => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [THE, parseUnits("58823.5", 18), NORMAL_TIMELOCK],
+        params: [THE, parseUnits("117647", 18), NORMAL_TIMELOCK],
       },
       {
         target: THE,
@@ -76,19 +76,14 @@ export const vip163 = (maxStalePeriod?: number) => {
         params: [
           [
             VTHE_DeFi,
-            parseUnits("0.2", 18),
-            parseUnits("0.3", 18),
+            0,
+            parseUnits("1", 18),
             parseUnits("58823.5", 18),
             VTOKEN_RECEIVER_THE,
-            parseUnits("2600000", 18),
-            parseUnits("1400000", 18),
+            parseUnits("2000000", 18),
+            parseUnits("1000000", 18),
           ],
         ],
-      },
-      {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [THE, parseUnits("58823.5", 18), NORMAL_TIMELOCK],
       },
       {
         target: THE,
