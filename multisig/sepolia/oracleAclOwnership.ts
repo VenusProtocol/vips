@@ -1,6 +1,8 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
+import { ADDRESSES, ZERO_ADDRESS } from "../helper/config";
 
+const { sepoliaContracts } = ADDRESSES;
 export const oracleAclOwnership = () => {
   const meta = {
     version: "v2",
@@ -18,94 +20,58 @@ export const oracleAclOwnership = () => {
   return makeProposal(
     [
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: ["0x0000000000000000000000000000000000000000", "pause()", "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb"],
+        params: [ZERO_ADDRESS, "pause()", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "unpause()",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "unpause()", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setOracle(address,address,uint8)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setOracle(address,address,uint8)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "enableOracle(address,uint8,bool)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "enableOracle(address,uint8,bool)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setTokenConfig(TokenConfig)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setTokenConfig(TokenConfig)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setDirectPrice(address,uint256)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setDirectPrice(address,uint256)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setValidateConfig(ValidateConfig)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setValidateConfig(ValidateConfig)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setMaxStalePeriod(string,uint256)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setMaxStalePeriod(string,uint256)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setSymbolOverride(string,string)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setSymbolOverride(string,string)", sepoliaContracts.TIMELOCK],
       },
       {
-        target: "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96",
+        target: sepoliaContracts.ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          "0x0000000000000000000000000000000000000000",
-          "setUnderlyingPythOracle(address)",
-          "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-        ],
+        params: [ZERO_ADDRESS, "setUnderlyingPythOracle(address)", sepoliaContracts.TIMELOCK],
       },
-      { target: "0x9005091f2E0b20bEf6AaF2bD7F21dfd45DA8Af07", signature: "acceptOwnership()", params: [] },
-      { target: "0x0a16c96EB3E767147DB477196aA8E9774945CDf7", signature: "acceptOwnership()", params: [] },
-      { target: "0x8305fF2eEAE00bc0C19746851c1c8643Ebd68193", signature: "acceptOwnership()", params: [] },
+      { target: sepoliaContracts.RESILIENT_ORACLE, signature: "acceptOwnership()", params: [] },
+      { target: sepoliaContracts.CHAINLINK_ORACLE, signature: "acceptOwnership()", params: [] },
+      { target: sepoliaContracts.BOUND_VALIDATOR, signature: "acceptOwnership()", params: [] },
     ],
     meta,
     ProposalType.REGULAR,
