@@ -31,6 +31,10 @@ if (process.env.FORK_TESTNET === "true") {
   };
 }
 
+if (process.env.MULTISIG === "true" && process.env.NETWORK === "sepolia") {
+  NORMAL_TIMELOCK = "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb";
+}
+
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
     before(async () => {
@@ -67,6 +71,7 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 export const pretendExecutingVip = async (proposal: Proposal) => {
   const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
+    console.log(`Executing ${proposal.signatures[i]}`);
     await executeCommand(impersonatedTimelock, proposal, i);
   }
 };

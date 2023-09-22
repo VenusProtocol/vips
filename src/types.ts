@@ -20,7 +20,7 @@ export interface Proposal {
   values: BigNumberish[];
   signatures: string[];
   params: any[][];
-  meta: ProposalMeta;
+  meta?: ProposalMeta;
   type?: ProposalType;
 }
 
