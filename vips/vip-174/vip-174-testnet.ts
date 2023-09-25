@@ -1,4 +1,4 @@
-import { cutParams as params } from "../../simulations/vip-diamond-comptroller/vip-diamond-comptroller-testnet/utils/cut-params-testnet.json";
+import { cutParams as params } from "../../simulations/vip-174/vip-174-testnet/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -35,7 +35,7 @@ const grantAccessControl = () => {
   return accessProposals;
 };
 
-export const vipDiamondTestnet = () => {
+export const vip174Testnet = () => {
   const meta = {
     version: "v1",
     title: "VIP Comptroller Diamond proxy",

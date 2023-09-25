@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { vipDiamondComptroller } from "../../../vips/vip-diamond-comptroller/vip-Diamond-comptroller";
+import { vip174 } from "../../../vips/vip-174/vip-174";
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
@@ -178,7 +178,7 @@ forking(31933620, async () => {
     });
   });
 
-  testVip("VIP-Diamond Contract Migration", vipDiamondComptroller());
+  testVip("VIP-Diamond Contract Migration", vip174());
 
   describe("Verify Storage slots after VIP execution", async () => {
     // These tests checks the storage collision of comptroller while updating it via diamond.
@@ -363,7 +363,7 @@ forking(31933620, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(vipDiamondComptroller());
+    await pretendExecutingVip(vip174());
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);
