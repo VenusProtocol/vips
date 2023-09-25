@@ -38,11 +38,11 @@ const grantAccessControl = () => {
 export const vip174 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-174 Core pool Comptroller upgrade - Diamond Comptroller",
+    title: "VIP-174 Core pool Comptroller upgrade – Diamond Comptroller",
 
     description: `#### Summary
 
-If passed this VIP will upgrade the implementation of the Comptroller contract in the Core pool. It will set a re-architectured Comptroller following the [Diamond pattern](https://eips.ethereum.org/EIPS/eip-2535), not adding new features now for the regular users. This upgrade will allow Venus to add new features in the Core pool in the future, unlocking the Ethereum limitation on the size of the contracts (maximum 24KB) added in the [EIP-170](https://eips.ethereum.org/EIPS/eip-170).
+If passed this VIP will upgrade the implementation of the Comptroller contract in the Core pool. It will set a re-architectured Comptroller following the [Diamond pattern](https://eips.ethereum.org/EIPS/eip-2535), not adding new features now for the regular users. This upgrade will allow Venus to add new features in the Core pool in the future, unlocking the EVM limitation on the size of the contracts (maximum 24KB) added in the [EIP-170](https://eips.ethereum.org/EIPS/eip-170).
 
 #### Description
 
