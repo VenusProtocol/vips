@@ -13,6 +13,25 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
+interface GrantAccess {
+  target: string;
+  signature: string;
+  params: Array<string>;
+}
+
+const grantAccessControl = (contract: string) => {
+  const accessProposals: Array<GrantAccess> = [];
+  [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map(target => {
+    accessProposals.push({
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [contract, "_setForcedLiquidation(address,bool)", target],
+    });
+  });
+
+  return accessProposals;
+};
+
 export const vipComptrollerBeaconUpgradeTestnet = () => {
   const meta = {
     version: "v2",
@@ -33,96 +52,11 @@ export const vipComptrollerBeaconUpgradeTestnet = () => {
         signature: "upgradeTo(address)",
         params: [NEW_COMPTROLLER_IMPLEMENTATION],
       },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_STABLECOIN, "_setForcedLiquidation(address,bool)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_STABLECOIN, "_setForcedLiquidation(address,bool)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_STABLECOIN, "_setForcedLiquidation(address,bool)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_DEFI, "_setForcedLiquidation(address,bool)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_DEFI, "_setForcedLiquidation(address,bool)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_DEFI, "_setForcedLiquidation(address,bool)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_GAMEFI, "_setForcedLiquidation(address,bool)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_GAMEFI, "_setForcedLiquidation(address,bool)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_GAMEFI, "_setForcedLiquidation(address,bool)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_LIQUID_STAKED_BNB, "_setForcedLiquidation(address,bool)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_LIQUID_STAKED_BNB, "_setForcedLiquidation(address,bool)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_LIQUID_STAKED_BNB, "_setForcedLiquidation(address,bool)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_TRON, "_setForcedLiquidation(address,bool)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_TRON, "_setForcedLiquidation(address,bool)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [POOL_TRON, "_setForcedLiquidation(address,bool)", CRITICAL_TIMELOCK],
-      },
+      ...grantAccessControl(POOL_STABLECOIN),
+      ...grantAccessControl(POOL_DEFI),
+      ...grantAccessControl(POOL_GAMEFI),
+      ...grantAccessControl(POOL_LIQUID_STAKED_BNB),
+      ...grantAccessControl(POOL_TRON),
     ],
     meta,
     ProposalType.REGULAR,

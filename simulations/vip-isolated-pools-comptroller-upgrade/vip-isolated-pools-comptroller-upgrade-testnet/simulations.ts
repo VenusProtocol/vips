@@ -28,6 +28,22 @@ function matchValues(array1: string[], array2: string[]) {
   }
 }
 
+async function verifyAccessControlPermissions(
+  accessControlManager: ethers.Contract,
+  comptrollerTronSigner: ethers.Signer,
+  values: string[],
+) {
+  const returnValues = [];
+  for (let i = 0; i < values.length; i++) {
+    returnValues.push(
+      await accessControlManager
+        .connect(comptrollerTronSigner)
+        .isAllowedToCall(values[i], "_setForcedLiquidation(address,bool)"),
+    );
+  }
+  return returnValues;
+}
+
 forking(33504900, () => {
   const provider = ethers.provider;
   let comptrollerBeacon: ethers.Contract;
@@ -71,6 +87,8 @@ forking(33504900, () => {
   });
 
   describe("Post-VIP behavior", () => {
+    const timeLockArray: string[] = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
+    const boolArray: bool[] = [true, true, true];
     let accessControlManager: ethers.Contract;
     let comptrollerStableCoinSigner: ethers.Signer;
     let comptrollerDefiSigner: ethers.Signer;
@@ -112,93 +130,38 @@ forking(33504900, () => {
     });
 
     it("Pool StableCoin permissions", async () => {
-      expect(
-        await accessControlManager
-          .connect(comptrollerStableCoinSigner)
-          .isAllowedToCall(CRITICAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerStableCoinSigner)
-          .isAllowedToCall(FAST_TRACK_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerStableCoinSigner)
-          .isAllowedToCall(NORMAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
+      matchValues(
+        boolArray,
+        await verifyAccessControlPermissions(accessControlManager, comptrollerStableCoinSigner, timeLockArray),
+      );
     });
 
     it("Pool Defi permissions", async () => {
-      expect(
-        await accessControlManager
-          .connect(comptrollerDefiSigner)
-          .isAllowedToCall(CRITICAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerDefiSigner)
-          .isAllowedToCall(FAST_TRACK_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerDefiSigner)
-          .isAllowedToCall(NORMAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
+      matchValues(
+        boolArray,
+        await verifyAccessControlPermissions(accessControlManager, comptrollerDefiSigner, timeLockArray),
+      );
     });
 
     it("Pool GameFi permissions", async () => {
-      expect(
-        await accessControlManager
-          .connect(comptrollerGameFiSigner)
-          .isAllowedToCall(CRITICAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerGameFiSigner)
-          .isAllowedToCall(FAST_TRACK_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerGameFiSigner)
-          .isAllowedToCall(NORMAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
+      matchValues(
+        boolArray,
+        await verifyAccessControlPermissions(accessControlManager, comptrollerGameFiSigner, timeLockArray),
+      );
     });
 
     it("Pool Liquied Staked Bnb permissions", async () => {
-      expect(
-        await accessControlManager
-          .connect(comptrollerLiquidStakedBnbSigner)
-          .isAllowedToCall(CRITICAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerLiquidStakedBnbSigner)
-          .isAllowedToCall(FAST_TRACK_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerLiquidStakedBnbSigner)
-          .isAllowedToCall(NORMAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
+      matchValues(
+        boolArray,
+        await verifyAccessControlPermissions(accessControlManager, comptrollerLiquidStakedBnbSigner, timeLockArray),
+      );
     });
 
     it("Pool Tron permissions", async () => {
-      expect(
-        await accessControlManager
-          .connect(comptrollerTronSigner)
-          .isAllowedToCall(CRITICAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerTronSigner)
-          .isAllowedToCall(FAST_TRACK_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
-      expect(
-        await accessControlManager
-          .connect(comptrollerTronSigner)
-          .isAllowedToCall(NORMAL_TIMELOCK, "_setForcedLiquidation(address,bool)"),
-      ).equals(true);
+      matchValues(
+        boolArray,
+        await verifyAccessControlPermissions(accessControlManager, comptrollerTronSigner, timeLockArray),
+      );
     });
   });
 });
