@@ -142,10 +142,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
-      const txResponse = await tx.wait();
 
       if (options.callbackAfterExecution) {
-        await options.callbackAfterExecution(txResponse);
+        await options.callbackAfterExecution(tx);
       }
     });
   });

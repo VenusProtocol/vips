@@ -1,8 +1,9 @@
 import { defaultAbiCoder } from "@ethersproject/abi";
+import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { ContractInterface, TransactionResponse } from "ethers";
+import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
@@ -104,9 +105,10 @@ export const expectEvents = async (
   expectedEvents: string[],
   expectedCounts: number[],
 ) => {
+  const receipt = await txResponse.wait();
   const getNamedEvents = (abi: ContractInterface) => {
     const iface = new ethers.utils.Interface(abi);
-    return txResponse.events
+    return receipt.events
       .map(it => {
         try {
           return iface.parseLog(it).name;
