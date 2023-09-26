@@ -190,7 +190,7 @@ export const vip155 = (data?: string) => {
       {
         target: PROXY_ADMIN,
         signature: "upgradeAndCall(address,address,bytes)",
-        params: [LIQUIDATOR, "0xe5F94a22fa1085F7d3FD01DFb36bfD5E79B75c39", data],
+        params: [LIQUIDATOR, "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96", data],
       },
 
       {

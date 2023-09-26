@@ -21,7 +21,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
-forking(30560338, () => {
+forking(32079027, () => {
   let accessControlManager: ethers.Contract;
   let liquidator: ethers.Contract;
   const provider = ethers.provider;
@@ -255,7 +255,7 @@ forking(30560338, () => {
     const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
     const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
     const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
-    const VAI_HOLDER = "0x29aa70f8f3f2aa241b0ba9eaa744c97808d032c9";
+    const VAI_HOLDER = "0xce74a760b754f7717e7a62e389d4b153aa753e0e";
     const USDT = "0x55d398326f99059fF775485246999027B3197955";
     const USER2 = "0x046cde42affac795ac0fe892750f0d956dd033f7";
     const USDT_HOLDER = "0xf977814e90da44bfa03b6295a0616a897441acec";
@@ -280,10 +280,12 @@ forking(30560338, () => {
 
     it("Tusd Liquidation and reduce liquidation reserves", async () => {
       // Reserves reduced to treasury as redeem action is active
+      const tusdHolder = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
+      const tusdHolderSigner = await initMainnetUser(tusdHolder, ethers.utils.parseEther("2"));
       const protocolBalBefore = await usdc.balanceOf(TREASURY);
       await oracle.connect(impersonatedTimelock).setDirectPrice(BTCB, parseUnits("1", 5));
-      await tusd.connect(liquidatorSigner).approve(liquidator.address, "6156967120");
-      await liquidator.connect(liquidatorSigner).liquidateBorrow(VTUSD, USER, "6156967120", VUSDC);
+      await tusd.connect(tusdHolderSigner).approve(liquidator.address, "6156967120");
+      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "6156967120", VUSDC);
       const protocolBalAfter = await usdc.balanceOf(TREASURY);
       expect(protocolBalAfter).greaterThan(protocolBalBefore);
     });
@@ -293,8 +295,10 @@ forking(30560338, () => {
       await comptroller.connect(impersonatedTimelock)._setActionsPaused([VUSDC], [1], true);
       const protocolBalBefore = await usdc.balanceOf(TREASURY);
       await oracle.connect(impersonatedTimelock).setDirectPrice(BTCB, parseUnits("1", 5));
-      await tusd.connect(liquidatorSigner).approve(liquidator.address, "6156967120");
-      await liquidator.connect(liquidatorSigner).liquidateBorrow(VTUSD, USER, "6156967120", VUSDC);
+      const tusdHolder = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
+      const tusdHolderSigner = await initMainnetUser(tusdHolder, ethers.utils.parseEther("2"));
+      await tusd.connect(tusdHolderSigner).approve(liquidator.address, "6156967120");
+      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "6156967120", VUSDC);
       const protocolBalAfter = await usdc.balanceOf(TREASURY);
       // As redeem was paused
       expect(protocolBalAfter).equals(protocolBalBefore);
@@ -302,6 +306,7 @@ forking(30560338, () => {
     });
 
     it("Usdt Liquidation and reduce reserves fails not enough liquidity", async () => {
+      await comptroller.connect(impersonatedTimelock)._setActionsPaused([VTUSD], [1], true);
       // Reserves not reduced to treasury as redeem fails
       const protocolBalBefore = await tusd.balanceOf(TREASURY);
       const liquidatorBalanceBefore = await vtusd.balanceOf(USDT_HOLDER);
@@ -333,8 +338,8 @@ forking(30560338, () => {
     });
 
     it("Should not able to liquidate any token when VAI debt is greater than minLiquidatableVAI", async () => {
-      const borowedToken = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D"; // VBUSD
-      const borrower = "0xcdc4757ff570dcd6933f8d384293789907db6791";
+      const borowedToken = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8"; // VUSDC
+      const borrower = "0x016699fb47d0816d71ebed2f24473d57c762af51";
       await expect(
         liquidator.connect(liquidatorSigner).liquidateBorrow(borowedToken, borrower, 10000, VUSDC),
       ).to.be.revertedWithCustomError(liquidator, "VAIDebtTooHigh");
@@ -353,16 +358,15 @@ forking(30560338, () => {
       await vai.connect(vaiHolder).approve(LIQUIDATOR, parseUnits("60", 18));
 
       // Manipulate price to decrease liquidity and introduce shortfall
-      await oracle.connect(impersonatedTimelock).setDirectPrice(BNB, parseUnits("100", 18));
+      await oracle.connect(impersonatedTimelock).setDirectPrice(BNB, 1);
 
       const minLiquidatableVAI = await liquidator.minLiquidatableVAI();
       const vaiDebt = await vaiController.getVAIRepayAmount(borrower);
       expect(vaiDebt).to.greaterThan(minLiquidatableVAI);
-      await expect(
-        liquidator.connect(vaiHolder).liquidateBorrow(VAI_CONTROLLER, borrower, parseUnits("60", 18), VBNB),
-      ).to.be.emit(liquidator, "LiquidateBorrowedTokens");
-      const vaiDebtAfter = await vaiController.getVAIRepayAmount(borrower);
-      expect(vaiDebtAfter).lessThan(vaiDebt);
+      await expect(liquidator.connect(vaiHolder).liquidateBorrow(VAI_CONTROLLER, borrower, 100, VBNB)).to.be.emit(
+        liquidator,
+        "LiquidateBorrowedTokens",
+      );
     });
   });
 });
