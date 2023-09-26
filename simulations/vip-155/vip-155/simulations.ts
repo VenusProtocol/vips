@@ -21,7 +21,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
-forking(32079027, () => {
+forking(32084738, () => {
   let accessControlManager: ethers.Contract;
   let liquidator: ethers.Contract;
   const provider = ethers.provider;
