@@ -33,7 +33,7 @@ forking(32052800, () => {
     });
   });
 
-  testVip("VIP-157 Add Peg Stability (USDT)", vip176(), {
+  testVip("VIP-176 Set VAI risk parameters", vip176(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewVAIBaseRate", "NewVAIFloatRate"], [1, 1]);
     },
