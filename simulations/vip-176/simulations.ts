@@ -23,7 +23,7 @@ forking(32052800, () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("Verify VAI base rate is 3%", async () => {
+    it("Verify VAI base rate is 4%", async () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
       expect(currentBaseRate).equals(OLD_BASE_RATE_MANTISSA);
     });
@@ -42,7 +42,7 @@ forking(32052800, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Verify new VAI base rate is 4.00%", async () => {
+    it("Verify new VAI base rate is 3.00%", async () => {
       const currentBaseRate = await vaiControllerProxy.baseRateMantissa();
       expect(currentBaseRate).equals(NEW_BASE_RATE_MANTISSA);
     });
