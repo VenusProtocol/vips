@@ -57,6 +57,21 @@ export const vip153Testnet = () => {
         params: [PSR, "removeDistributionConfig(Schema,address)", NORMAL_TIMELOCK],
       },
       {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSR, "addOrRemoveAssetFromPrime(address,bool)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSR, "addOrRemoveAssetFromPrime(address,bool)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PSR, "addOrRemoveAssetFromPrime(address,bool)", NORMAL_TIMELOCK],
+      },
+      {
         target: PSR,
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
         params: [[
