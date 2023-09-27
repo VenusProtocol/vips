@@ -43,7 +43,8 @@ forking(33711562, () => {
     });
 
     it("ownership check", async () => {
-      expect((await psr.pendingOwner())).to.be.equal(NORMAL_TIMELOCK);
+      expect((await psr.pendingOwner())).to.be.equal("0x0000000000000000000000000000000000000000");
+      expect((await psr.owner())).to.be.equal(NORMAL_TIMELOCK);
     });
   });
 });
