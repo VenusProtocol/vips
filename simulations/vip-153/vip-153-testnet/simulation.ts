@@ -3,15 +3,14 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip152Testnet } from "../../../vips/vip-152-testnet";
 import PSR_ABI from "./abi/PSR.json"
 import { vip153Testnet } from "../../../vips/vip-153-testnet";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-const PSR = "0xf5606e1112fb9b7EC270B45C11a6975FdFDa5D68";
+const PSR = "0x24b63EA72aFC326deFA526Ed031aedb6a5E0fA4A";
 
 
-forking(33686556, () => {
+forking(33711562, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
