@@ -6,6 +6,8 @@ const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
+const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 
 export const vip153Testnet = () => {
   const meta = {
@@ -58,7 +60,10 @@ export const vip153Testnet = () => {
         target: PSR,
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
         params: [[
-          [0, 100, "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f"],
+          [0, 50, RISK_FUND],
+          [0, 50, TREASURY],
+          [1, 40, RISK_FUND],
+          [1, 60, TREASURY],
         ]],
       },
     ],
