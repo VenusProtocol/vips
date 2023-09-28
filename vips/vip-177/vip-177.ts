@@ -21,11 +21,59 @@ const MAX_STALE_PERIOD = 60 * 25;
 export const vip177 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-177 Add SnBnb market to Liquid Staked BNB Pool",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with add market",
-    againstDescription: "I do not think that Venus Protocol should proceed with add market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with add market",
+    title: "VIP-177 Add support for SnBNB market in the Liquid Staked BNB pool",
+    description: `#### Summary
+
+If passed, this VIP will add a new market for [SnBNB](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B) into the Isolated Lending Liquid Staked BNB pool.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-risk-parameter-updates-09-18-2023/3808), the risk parameters for the new market are:
+
+- Underlying token: [SnBNB](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B)
+- Borrow cap: 100 SnBNB
+- Supply cap: 1,000 SnBNB
+- Collateral factor: 0.87
+- Liquidation threshold: 0.9
+- Reserve factor: 0.25
+
+Bootstrap liquidity: 47 SnBNB - provided by the Helio Protocol Treasury.
+
+Interest rate curve for the new market:
+
+- kink: 0.5
+- base (yearly): 0.02
+- multiplier (yearly): 0.2
+- jump multiplier (yearly): 3
+
+**Security and additional considerations**
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Liquid Staked BNB pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Contracts on mainnet**
+
+New market vSnBNB_LiquidStakedBNB: [0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A](https://bscscan.com/address/0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A)
+
+**Contracts on testnet**
+
+New market vSnBNB_LiquidStakedBNB: [0xeffE7874C345aE877c1D893cd5160DDD359b24dA](https://testnet.bscscan.com/address/0xeffE7874C345aE877c1D893cd5160DDD359b24dA)
+
+**References**
+
+- [Repository](https://github.com/VenusProtocol/isolated-pools)
+- [Fork tests of main operations](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/78)
+- [Forum proposal to add SnBNB market to Venus](https://community.venus.io/t/isolated-lending-market-for-snbnb-on-venus/3716)
+- [Community post about Venus V4, introducing Isolated Pools](https://community.venus.io/t/proposing-venus-v4)
+- [Documentation](https://docs-v4.venus.io/whats-new/isolated-pools)`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
