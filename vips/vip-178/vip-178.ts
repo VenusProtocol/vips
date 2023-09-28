@@ -11,7 +11,10 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const MAX_STALE_PERIOD = 60 * 25;
+const REWARD_DISTRIBUTOR = "0x177ED4625F57cEa2804EA3A396c8Ff78f314F1CA";
+const ANGLE = "0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f";
+const STABLECOIN_COMPTROLLER = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+const MAX_STALE_PERIOD = 60 * 100;
 
 export const vip178 = (maxStalePeriod?: number) => {
   const meta = {
@@ -52,6 +55,27 @@ export const vip178 = (maxStalePeriod?: number) => {
       },
 
       {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["ANGLE", maxStalePeriod || MAX_STALE_PERIOD],
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            ANGLE,
+            [
+              BINANCE_ORACLE,
+              "0x0000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000",
+            ],
+            [true, false, false],
+          ],
+        ],
+      },
+
+      {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [agEUR, parseUnits("10000", 18), NORMAL_TIMELOCK],
@@ -80,6 +104,32 @@ export const vip178 = (maxStalePeriod?: number) => {
             parseUnits("50000", 18),
           ],
         ],
+      },
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [agEUR, parseUnits("17650", 18), NORMAL_TIMELOCK],
+      },
+
+      {
+        target: REWARD_DISTRIBUTOR,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: ANGLE,
+        signature: "transfer(address,uint256)",
+        params: [REWARD_DISTRIBUTOR, parseUnits("17650", 18)],
+      },
+      {
+        target: STABLECOIN_COMPTROLLER,
+        signature: "addRewardsDistributor(address)",
+        params: [REWARD_DISTRIBUTOR],
+      },
+      {
+        target: REWARD_DISTRIBUTOR,
+        signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+        params: [[vagEUR_StableCoin], ["0"], ["87549603174603174"]],
       },
     ],
     meta,

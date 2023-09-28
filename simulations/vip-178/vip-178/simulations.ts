@@ -12,6 +12,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const agEUR = "0x12f31b73d812c6bb0d735a218c086d44d5fe5f89";
@@ -20,16 +21,20 @@ const VTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const VagEUR_Stablecoins = "0x1a9D2862028F6f5E6C299A7AC3C285508942b15E";
 const STABLECOIN_COMPTROLLER = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const REWARD_DISTRIBUTOR = "0x177ED4625F57cEa2804EA3A396c8Ff78f314F1CA";
+const ANGLE = "0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f";
 
-forking(32130712, () => {
+forking(32136210, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vagEUR: Contract;
+  let rewardsDistributor: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, STABLECOIN_COMPTROLLER);
     vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
+    rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
   });
 
   describe("Contracts setup", () => {
@@ -96,8 +101,15 @@ forking(32130712, () => {
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI, POOL_REGISTRY_ABI, ERC20_ABI],
-        ["Approval", "MarketAdded"],
-        [6, 1],
+        [
+          "Approval",
+          "MarketAdded",
+          "NewRewardsDistributor",
+          "RewardTokenSupplySpeedUpdated",
+          "RewardTokenBorrowSpeedUpdated",
+          "OwnershipTransferred",
+        ],
+        [6, 1, 1, 0, 1, 3],
       );
     },
   });
@@ -212,6 +224,37 @@ forking(32130712, () => {
             expect(await comptroller.supplyCaps(VagEUR_Stablecoins)).to.equal(parseUnits("100000", 18));
           });
         });
+      });
+    });
+
+    describe("Reward Distributor", () => {
+      it("should be added to Stable coins Pool", async () => {
+        expect(await comptroller.getRewardDistributors()).to.include(REWARD_DISTRIBUTOR);
+      });
+
+      it("should have 5 rewards distributor in Stable coins Pool", async () => {
+        expect(await comptroller.getRewardDistributors()).to.have.lengthOf(2);
+      });
+
+      it("should have rewardToken ANGLE", async () => {
+        expect(await rewardsDistributor.rewardToken()).to.equal(ANGLE);
+      });
+
+      it(`should have owner = Normal Timelock`, async () => {
+        expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
+      });
+
+      it("should have borrowSpeed  = 87,549,603,174,603,174", async () => {
+        expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VagEUR_Stablecoins)).to.equal("87549603174603174");
+      });
+
+      it("should have supplySpeed = 0", async () => {
+        expect(await rewardsDistributor.rewardTokenSupplySpeeds(VagEUR_Stablecoins)).to.equal("0");
+      });
+
+      it("should have balance = 17,650 ANGLE", async () => {
+        const token = await ethers.getContractAt(ERC20_ABI, ANGLE);
+        expect(await token.balanceOf(rewardsDistributor.address)).to.equal(parseUnits("17650", 18));
       });
     });
 

@@ -9,6 +9,9 @@ const VTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const vagEUR_StableCoins = "0xa0571e758a00C586DbD53fb431d0f48eff9d0F15";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
+const REWARD_DISTRIBUTOR = "0x78d32FC46e5025c29e3BA03Fcf2840323351F26a";
+const STABLECOIN_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
+const ANGLE = "0xD1Bc731d188ACc3f52a6226B328a89056B0Ec71a";
 
 export const vip178Testnet = () => {
   const meta = {
@@ -72,6 +75,33 @@ export const vip178Testnet = () => {
             parseUnits("50000", 18),
           ],
         ],
+      },
+
+      {
+        target: ANGLE,
+        signature: "faucet(uint256)",
+        params: [parseUnits("17650", 18)],
+      },
+
+      {
+        target: REWARD_DISTRIBUTOR,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: ANGLE,
+        signature: "transfer(address,uint256)",
+        params: [REWARD_DISTRIBUTOR, parseUnits("17650", 18)],
+      },
+      {
+        target: STABLECOIN_COMPTROLLER,
+        signature: "addRewardsDistributor(address)",
+        params: [REWARD_DISTRIBUTOR],
+      },
+      {
+        target: REWARD_DISTRIBUTOR,
+        signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+        params: [[vagEUR_StableCoins], ["0"], ["87549603174603174"]],
       },
     ],
     meta,
