@@ -31,6 +31,11 @@ export const vip178Testnet = () => {
         params: [agEUR, parseUnits("1.06", 18)],
       },
       {
+        target: CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [ANGLE, parseUnits(".032", 18)],
+      },
+      {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
@@ -49,7 +54,7 @@ export const vip178Testnet = () => {
       {
         target: agEUR,
         signature: "faucet(uint256)",
-        params: [parseUnits("10000", 18)],
+        params: [parseUnits("9000", 18)],
       },
       {
         target: agEUR,
@@ -59,7 +64,7 @@ export const vip178Testnet = () => {
       {
         target: agEUR,
         signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, parseUnits("10000", 18)],
+        params: [POOL_REGISTRY, parseUnits("9000", 18)],
       },
       {
         target: POOL_REGISTRY,

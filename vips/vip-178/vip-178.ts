@@ -14,7 +14,8 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const REWARD_DISTRIBUTOR = "0x177ED4625F57cEa2804EA3A396c8Ff78f314F1CA";
 const ANGLE = "0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f";
 const STABLECOIN_COMPTROLLER = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
-const MAX_STALE_PERIOD = 60 * 100;
+const MAX_STALE_PERIOD_AGEUR = 60 * 100;
+const MAX_STALE_PERIOD_ANGLE = 60 * 25;
 
 export const vip178 = (maxStalePeriod?: number) => {
   const meta = {
@@ -36,7 +37,7 @@ export const vip178 = (maxStalePeriod?: number) => {
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["AGEUR", maxStalePeriod || MAX_STALE_PERIOD],
+        params: ["AGEUR", maxStalePeriod || MAX_STALE_PERIOD_AGEUR],
       },
       {
         target: RESILIENT_ORACLE,
@@ -57,7 +58,7 @@ export const vip178 = (maxStalePeriod?: number) => {
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["ANGLE", maxStalePeriod || MAX_STALE_PERIOD],
+        params: ["ANGLE", maxStalePeriod || MAX_STALE_PERIOD_ANGLE],
       },
       {
         target: RESILIENT_ORACLE,
@@ -78,7 +79,7 @@ export const vip178 = (maxStalePeriod?: number) => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [agEUR, parseUnits("10000", 18), NORMAL_TIMELOCK],
+        params: [agEUR, parseUnits("9000", 18), NORMAL_TIMELOCK],
       },
       {
         target: agEUR,
@@ -88,7 +89,7 @@ export const vip178 = (maxStalePeriod?: number) => {
       {
         target: agEUR,
         signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, parseUnits("10000", 18)],
+        params: [POOL_REGISTRY, parseUnits("9000", 18)],
       },
       {
         target: POOL_REGISTRY,
@@ -108,7 +109,7 @@ export const vip178 = (maxStalePeriod?: number) => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [agEUR, parseUnits("17650", 18), NORMAL_TIMELOCK],
+        params: [ANGLE, parseUnits("17650", 18), NORMAL_TIMELOCK],
       },
 
       {
