@@ -18,13 +18,15 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const agEUR = "0x63061de4A25f24279AAab80400040684F92Ee319";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const vTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const VagEUR_Stablecoins = "0xa0571e758a00C586DbD53fb431d0f48eff9d0F15";
+const VagEUR_Stablecoins = "0x4E1D35166776825402d50AfE4286c500027211D1";
 const STABLECOIN_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const REWARD_DISTRIBUTOR = "0x78d32FC46e5025c29e3BA03Fcf2840323351F26a";
 const ANGLE = "0xD1Bc731d188ACc3f52a6226B328a89056B0Ec71a";
+const PROTOCOL_SHARE_RESERVE = "0xc987a03ab6C2A5891Fc0919f021cc693B5E55278";
+const SHORTFALL = "0x503574a82fE2A9f968d355C8AAc1Ba0481859369";
 
-forking(33734613, () => {
+forking(33737831, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vagEUR: Contract;
@@ -257,47 +259,58 @@ forking(33734613, () => {
         expect(await token.balanceOf(rewardsDistributor.address)).to.equal(parseUnits("17650", 18));
       });
     });
+    describe("VToken", () => {
+      describe("Basic supply/borrow/repay/redeem scenario", () => {
+        let agEURUnderlying: Contract;
+        let vagEUR: Contract;
+        let user: SignerWithAddress;
 
-    describe("Basic supply/borrow/repay/redeem scenario", () => {
-      let agEURUnderlying: Contract;
-      let vagEUR: Contract;
-      let user: SignerWithAddress;
+        before(async () => {
+          [user] = await ethers.getSigners();
+          agEURUnderlying = await ethers.getContractAt(ERC20_ABI, agEUR);
+          vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
+          await agEURUnderlying.faucet(parseUnits("100", 18));
+        });
 
-      before(async () => {
-        [user] = await ethers.getSigners();
-        agEURUnderlying = await ethers.getContractAt(ERC20_ABI, agEUR);
-        vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
-        await agEURUnderlying.faucet(parseUnits("100", 18));
-      });
+        it("should be possible to supply", async () => {
+          await agEURUnderlying.approve(vagEUR.address, parseUnits("100", 18));
+          await vagEUR.mint(parseUnits("100", 18));
+          expect(await vagEUR.balanceOf(user.address)).to.equal(parseUnits("100", 8));
+        });
 
-      it("should be possible to supply", async () => {
-        await agEURUnderlying.approve(vagEUR.address, parseUnits("100", 18));
-        await vagEUR.mint(parseUnits("100", 18));
-        expect(await vagEUR.balanceOf(user.address)).to.equal(parseUnits("100", 8));
-      });
+        it("should be possible to enable agEUR as collateral", async () => {
+          await comptroller.connect(user).enterMarkets([VagEUR_Stablecoins]);
+          expect(await comptroller.getAssetsIn(user.address)).to.deep.equal([VagEUR_Stablecoins]);
+        });
 
-      it("should be possible to enable the as collateral", async () => {
-        await comptroller.connect(user).enterMarkets([VagEUR_Stablecoins]);
-        expect(await comptroller.getAssetsIn(user.address)).to.deep.equal([VagEUR_Stablecoins]);
-      });
+        it("should be possible to borrow agEUR", async () => {
+          await vagEUR.connect(user).borrow(1000000);
+          expect(await vagEUR.borrowBalanceStored(user.address)).to.equal(1000000);
+          expect(await agEURUnderlying.balanceOf(user.address)).to.equal(1000000);
+        });
 
-      it("should be possible to borrow agEUR", async () => {
-        await vagEUR.connect(user).borrow(1000000);
-        expect(await vagEUR.borrowBalanceStored(user.address)).to.equal(1000000);
-        expect(await agEURUnderlying.balanceOf(user.address)).to.equal(1000000);
-      });
+        it("should be possible to repay agEUR", async () => {
+          await agEURUnderlying.approve(vagEUR.address, 1000000);
+          await vagEUR.repayBorrow(1000000);
+          expect(await vagEUR.borrowBalanceStored(user.address)).to.be.lessThan(parseUnits("0.01", 18));
+          expect(await agEURUnderlying.balanceOf(user.address)).to.equal(0);
+        });
 
-      it("should be possible to repay agEUR", async () => {
-        await agEURUnderlying.approve(vagEUR.address, 1000000);
-        await vagEUR.repayBorrow(1000000);
-        expect(await vagEUR.borrowBalanceStored(user.address)).to.be.lessThan(parseUnits("0.01", 18));
-        expect(await agEURUnderlying.balanceOf(user.address)).to.equal(0);
-      });
+        it("should be possible to redeem a part of total", async () => {
+          await vagEUR.redeemUnderlying(parseUnits("30", 18));
+          expect(await agEURUnderlying.balanceOf(user.address)).to.equal(parseUnits("30", 18));
+          expect(await vagEUR.balanceOf(user.address)).to.equal(parseUnits("70", 8));
+        });
 
-      it("should be possible to redeem a part of total", async () => {
-        await vagEUR.redeemUnderlying(parseUnits("30", 18));
-        expect(await agEURUnderlying.balanceOf(user.address)).to.equal(parseUnits("30", 18));
-        expect(await vagEUR.balanceOf(user.address)).to.equal(parseUnits("70", 8));
+        describe("Risk Management", () => {
+          it("should set correct address of protocol share reserve", async () => {
+            expect(await vagEUR.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+          });
+
+          it("should set correct address of shortfall", async () => {
+            expect(await vagEUR.shortfall()).equals(SHORTFALL);
+          });
+        });
       });
     });
   });
