@@ -16,7 +16,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const agEUR = "0x63061de4A25f24279AAab80400040684F92Ee319";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const vTOKEN_RECEIVER_agEUR = "0xDC2D855A95Ee70d7282BebD35c96f905CDE31f55";
+const vTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const VagEUR_Stablecoins = "0xa0571e758a00C586DbD53fb431d0f48eff9d0F15";
 const STABLECOIN_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -123,8 +123,8 @@ forking(33728751, () => {
     });
 
     describe("Initial supply", () => {
-      it(`should mint 10,000 vagEUR to ${vTOKEN_RECEIVER_agEUR}`, async () => {
-        expect(await vagEUR.balanceOf(vTOKEN_RECEIVER_agEUR)).to.equal(parseUnits("10000", 8));
+      it(`should mint 9,000 vagEUR to ${vTOKEN_RECEIVER_agEUR}`, async () => {
+        expect(await vagEUR.balanceOf(vTOKEN_RECEIVER_agEUR)).to.equal(parseUnits("9000", 8));
       });
     });
 

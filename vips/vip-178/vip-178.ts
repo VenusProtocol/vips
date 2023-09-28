@@ -5,7 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 const agEUR = "0x12f31b73d812c6bb0d735a218c086d44d5fe5f89";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const VTOKEN_RECEIVER_agEUR = "0xDC2D855A95Ee70d7282BebD35c96f905CDE31f55"; // To be revised
+const VTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const vagEUR_StableCoin = "0x1a9D2862028F6f5E6C299A7AC3C285508942b15E";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
@@ -74,7 +74,7 @@ export const vip178 = (maxStalePeriod?: number) => {
             vagEUR_StableCoin,
             parseUnits("0.75", 18),
             parseUnits("0.8", 18),
-            parseUnits("10000", 18), // To be revised
+            parseUnits("9000", 18),
             VTOKEN_RECEIVER_agEUR,
             parseUnits("100000", 18),
             parseUnits("50000", 18),

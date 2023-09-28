@@ -5,7 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 const agEUR = "0x63061de4A25f24279AAab80400040684F92Ee319";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const VTOKEN_RECEIVER_agEUR = "0xDC2D855A95Ee70d7282BebD35c96f905CDE31f55"; // To be revised
+const VTOKEN_RECEIVER_agEUR = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const vagEUR_StableCoins = "0xa0571e758a00C586DbD53fb431d0f48eff9d0F15";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
@@ -66,7 +66,7 @@ export const vip178Testnet = () => {
             vagEUR_StableCoins,
             parseUnits("0.75", 18),
             parseUnits("0.8", 18),
-            parseUnits("10000", 18), // To be revised
+            parseUnits("9000", 18),
             VTOKEN_RECEIVER_agEUR,
             parseUnits("100000", 18),
             parseUnits("50000", 18),
