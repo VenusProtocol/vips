@@ -23,6 +23,8 @@ const REWARD_DISTRIBUTOR_SnBNB = "0x888E317606b4c590BBAD88653863e8B345702633";
 const Liquid_Staked_BNB_Comptroller = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
+const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
+const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
 
 forking(32084538, () => {
   let poolRegistry: Contract;
@@ -259,6 +261,20 @@ forking(32084538, () => {
             expect(await token.balanceOf(rewardsDistributor.address)).to.equal(parseUnits("3000", 18));
           });
         });
+      });
+    });
+
+    describe("ProtocolShareReserve and Shortfall", () => {
+      before(async () => {
+        vSnBNB = await ethers.getContractAt(VTOKEN_ABI, vSnBNB_LiquidStakedBNB);
+      });
+
+      it("sets ProtocolShareReserve address", async () => {
+        expect(await vSnBNB.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
+      });
+
+      it("sets Shortfall contract address", async () => {
+        expect(await vSnBNB.shortfall()).to.equal(SHORTFALL);
       });
     });
 

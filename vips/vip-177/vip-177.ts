@@ -14,6 +14,8 @@ const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
+const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
+const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
 const MAX_STALE_PERIOD = 60 * 25;
 
 export const vip177 = (maxStalePeriod?: number) => {
@@ -104,6 +106,16 @@ export const vip177 = (maxStalePeriod?: number) => {
         target: REWARD_DISTRIBUTOR_SnBNB,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
         params: [[vSnBNB_LiquidStakedBNB], ["930059523809523"], ["930059523809523"]],
+      },
+      {
+        target: vSnBNB_LiquidStakedBNB,
+        signature: "setShortfallContract(address)",
+        params: [SHORTFALL],
+      },
+      {
+        target: vSnBNB_LiquidStakedBNB,
+        signature: "setProtocolShareReserve(address)",
+        params: [PROTOCOL_SHARE_RESERVE],
       },
     ],
     meta,
