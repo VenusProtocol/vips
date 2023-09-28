@@ -21,6 +21,11 @@ const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const VHAY_STABLE_COIN = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
+const VBSW_DEFI = "0x5e68913fbbfb91af30366ab1B21324410b49a308";
+const VRACA_GAMEFI = "0x1958035231E125830bA5d17D168cEa07Bb42184a";
+const VANKRBNB_LIQUIDSTAKEDBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
+const VBTT_TRON = "0x47793540757c6E6D84155B33cd8D9535CFdb9334";
 
 function matchValues(array1: string[], array2: string[]) {
   for (let i = 0; i < array1.length; i++) {
@@ -30,24 +35,35 @@ function matchValues(array1: string[], array2: string[]) {
 
 async function verifyAccessControlPermissions(
   accessControlManager: ethers.Contract,
-  comptrollerTronSigner: ethers.Signer,
+  comptrollerSigner: ethers.Signer,
   values: string[],
 ) {
   const returnValues = [];
   for (let i = 0; i < values.length; i++) {
     returnValues.push(
       await accessControlManager
-        .connect(comptrollerTronSigner)
-        .isAllowedToCall(values[i], "_setForcedLiquidation(address,bool)"),
+        .connect(comptrollerSigner)
+        .isAllowedToCall(values[i], "setForcedLiquidation(address,bool)"),
     );
   }
   return returnValues;
+}
+
+async function verifySetForcedLiquidation(signers: ethers.Signer[], comptroller: ethers.Contract, vToken: string) {
+  for (let i = 0; i < signers.length; i++) {
+    await comptroller.connect(signers[i]).setForcedLiquidation(vToken, true);
+    expect(await comptroller.isForcedLiquidationEnabled(vToken)).to.be.equal(true);
+  }
 }
 
 forking(33504900, () => {
   const provider = ethers.provider;
   let comptrollerBeacon: ethers.Contract;
   let comptrollerStableCoin: ethers.Contract;
+  let comptrollerDefi: ethers.Contract;
+  let comptrollerGameFi: ethers.Contract;
+  let comptrollerLiquidStakedBnb: ethers.Contract;
+  let comptrollerTron: ethers.Contract;
   let closeFactorMantissa: BigNumber;
   let markets: string[];
   let isComptroller: boolean;
@@ -95,14 +111,28 @@ forking(33504900, () => {
     let comptrollerGameFiSigner: ethers.Signer;
     let comptrollerLiquidStakedBnbSigner: ethers.Signer;
     let comptrollerTronSigner: ethers.Signer;
+    let normalTimeLockSigner: ethers.Signer;
+    let fastTrackTimeLockSigner: ethers.Signer;
+    let criticalTimeLockSigner: ethers.Signer;
+    let timeLockSignersArray: ethers.Signer[];
 
     before(async () => {
       accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
+      comptrollerDefi = new ethers.Contract(POOL_DEFI, COMPTROLLER_ABI, provider);
+      comptrollerGameFi = new ethers.Contract(POOL_GAMEFI, COMPTROLLER_ABI, provider);
+      comptrollerLiquidStakedBnb = new ethers.Contract(POOL_LIQUID_STAKED_BNB, COMPTROLLER_ABI, provider);
+      comptrollerTron = new ethers.Contract(POOL_TRON, COMPTROLLER_ABI, provider);
+
       comptrollerStableCoinSigner = await initMainnetUser(POOL_STABLECOIN, ethers.utils.parseEther("1"));
       comptrollerDefiSigner = await initMainnetUser(POOL_DEFI, ethers.utils.parseEther("1"));
       comptrollerGameFiSigner = await initMainnetUser(POOL_GAMEFI, ethers.utils.parseEther("1"));
       comptrollerLiquidStakedBnbSigner = await initMainnetUser(POOL_LIQUID_STAKED_BNB, ethers.utils.parseEther("1"));
       comptrollerTronSigner = await initMainnetUser(POOL_TRON, ethers.utils.parseEther("1"));
+
+      normalTimeLockSigner = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      fastTrackTimeLockSigner = await initMainnetUser(FAST_TRACK_TIMELOCK, ethers.utils.parseEther("1"));
+      criticalTimeLockSigner = await initMainnetUser(CRITICAL_TIMELOCK, ethers.utils.parseEther("1"));
+      timeLockSignersArray = [normalTimeLockSigner, fastTrackTimeLockSigner, criticalTimeLockSigner];
     });
 
     it("Comptroller beacon implementation should be upgraded", async () => {
@@ -162,6 +192,26 @@ forking(33504900, () => {
         boolArray,
         await verifyAccessControlPermissions(accessControlManager, comptrollerTronSigner, timeLockArray),
       );
+    });
+
+    it("SetForcedLiquidation should work properly for stable coin pool", async () => {
+      await verifySetForcedLiquidation(timeLockSignersArray, comptrollerStableCoin, VHAY_STABLE_COIN);
+    });
+
+    it("SetForcedLiquidation should work properly for defi pool", async () => {
+      await verifySetForcedLiquidation(timeLockSignersArray, comptrollerDefi, VBSW_DEFI);
+    });
+
+    it("SetForcedLiquidation should work properly for gamefi pool", async () => {
+      await verifySetForcedLiquidation(timeLockSignersArray, comptrollerGameFi, VRACA_GAMEFI);
+    });
+
+    it("SetForcedLiquidation should work properly for liquid staked bnb pool", async () => {
+      await verifySetForcedLiquidation(timeLockSignersArray, comptrollerLiquidStakedBnb, VANKRBNB_LIQUIDSTAKEDBNB);
+    });
+
+    it("SetForcedLiquidation should work properly for tron pool", async () => {
+      await verifySetForcedLiquidation(timeLockSignersArray, comptrollerTron, VBTT_TRON);
     });
   });
 });

@@ -25,7 +25,7 @@ const grantAccessControl = (contract: string) => {
     accessProposals.push({
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [contract, "_setForcedLiquidation(address,bool)", target],
+      params: [contract, "setForcedLiquidation(address,bool)", target],
     });
   });
 
