@@ -20,11 +20,63 @@ const MAX_STALE_PERIOD_ANGLE = 60 * 25;
 export const vip178 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-178 Add agEUR market to Stablecoin Pool",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with add market",
-    againstDescription: "I do not think that Venus Protocol should proceed with add market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with add market",
+    title: "VIP-178 Add support for agEUR market in the Stablecoins pool",
+    description: `#### Summary
+
+If passed, this VIP will add a new market for [agEUR](https://bscscan.com/address/0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89) into the Isolated Lending Stablecoins pool.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-risk-parameter-updates-08-28-2023/3720), the risk parameters for the new market are:
+
+- Underlying token: [agEUR](https://bscscan.com/address/0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89)
+- Borrow cap: 50,000 agEUR
+- Supply cap: 100,000 agEUR
+- Collateral factor: 0.75
+- Liquidation threshold: 0.8
+- Reserve factor: 0.1
+
+Bootstrap liquidity: 9,000 agEUR - provided by the Venus Community.
+
+Interest rate curve for the new market:
+
+- kink: 0.5
+- base (yearly): 0.02
+- multiplier (yearly): 0.1
+- jump multiplier (yearly): 2.5
+
+**Rewards**
+
+- 17,650 [ANGLE](https://bscscan.com/token/0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f), for 7 days, only for borrowers in the new agEUR market
+
+**Security and additional considerations**
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Stablecoins pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Contracts on mainnet**
+
+New market vagEUR_Stablecoins: [0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F](https://bscscan.com/address/0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F)
+
+**Contracts on testnet**
+
+New market vagEUR_Stablecoins: [0x4E1D35166776825402d50AfE4286c500027211D1](https://testnet.bscscan.com/address/0x4E1D35166776825402d50AfE4286c500027211D1)
+
+**References**
+
+- [Repository](https://github.com/VenusProtocol/isolated-pools)
+- [Fork tests of main operations](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/79)
+- [Forum proposal to add agEUR market to Venus](https://community.venus.io/t/isolated-market-for-ageur-on-venus/3709)
+- [Community post about Venus V4, introducing Isolated Pools](https://community.venus.io/t/proposing-venus-v4)
+- [Documentation](https://docs-v4.venus.io/whats-new/isolated-pools)`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
