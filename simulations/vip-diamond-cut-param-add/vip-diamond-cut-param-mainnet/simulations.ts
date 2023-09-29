@@ -10,24 +10,33 @@ import { vipCutParamAdd } from "../../../vips/vip-diamond-cut-param-add/vip-para
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
+import VENUS_LENS_ABI from "../abi/VenusLens.json";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+const VENUS_LENS = "0xfB0f09dB330dC842a6637BfB959209424BbFE8C7";
 const Owner = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+const USER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 
 // Added function signature for venusInitialIndex to market facet as cut param to diamond proxy
 // This fork block contains tests for venusInitialIndex only.
 forking(32159070, async () => {
   let diamondUnitroller: ethers.Contract;
+  let venusLens: ethers.Contract;
 
   before(async () => {
     diamondUnitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
+    venusLens = new ethers.Contract(VENUS_LENS, VENUS_LENS_ABI, ethers.provider);
   });
 
   describe("Before execution of VIP", async () => {
     it("Fetching of VenusInitialIndex should revert", async () => {
       await expect(diamondUnitroller.venusInitialIndex()).to.be.reverted;
+    });
+
+    it("Calculation of pending rewards should revert", async () => {
+      await expect(venusLens.pendingRewards(USER, UNITROLLER)).to.be.reverted;
     });
   });
 
@@ -36,6 +45,12 @@ forking(32159070, async () => {
   describe("After execution of vip", async () => {
     it("Fetching of VenusInitialIndex should return value", async () => {
       expect(await diamondUnitroller.venusInitialIndex()).to.be.equal(parseUnits("1", 36));
+    });
+
+    it("Calculation of pending rewards should return value", async () => {
+      const rewards = await venusLens.pendingRewards(USER, UNITROLLER);
+      expect(rewards.length).to.be.greaterThan(0);
+      expect(rewards[3][0].amount).to.be.equal(0);
     });
   });
 });

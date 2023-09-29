@@ -10,24 +10,33 @@ import { vipCutParamAdd } from "../../../vips/vip-diamond-cut-param-add/vip-para
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
+import VENUS_LENS_ABI from "../abi/VenusLens.json";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+const VENUS_LENS = "0x36B434654bD5fb010f8A68e190428dc4789E1b24";
 const Owner = "0xce10739590001705F7FF231611ba4A48B2820327";
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
+const USER = "0xC825AD791A6046991e3706b6342970f6d87e4888";
 
 // Added function signature for venusInitialIndex to market facet as cut param to diamond proxy
 // This fork block contains tests for venusInitialIndex only.
-forking(33757000, async () => {
+forking(33763885, async () => {
   let diamondUnitroller: ethers.Contract;
+  let venusLens: ethers.Contract;
 
   before(async () => {
     diamondUnitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
+    venusLens = new ethers.Contract(VENUS_LENS, VENUS_LENS_ABI, ethers.provider);
   });
 
   describe("Before execution of VIP", async () => {
     it("Fetching of VenusInitialIndex should revert", async () => {
       await expect(diamondUnitroller.venusInitialIndex()).to.be.reverted;
+    });
+
+    it("Calculation of pending rewards should revert", async () => {
+      await expect(venusLens.pendingRewards(USER, UNITROLLER)).to.be.reverted;
     });
   });
 
@@ -37,13 +46,19 @@ forking(33757000, async () => {
     it("Fetching of VenusInitialIndex should return value", async () => {
       expect(await diamondUnitroller.venusInitialIndex()).to.be.equal(parseUnits("1", 36));
     });
+
+    it("Calculation of pending rewards should return value", async () => {
+      const rewards = await venusLens.pendingRewards(USER, UNITROLLER);
+      expect(rewards.length).to.be.greaterThan(0);
+      expect(rewards[3][0].amount).to.be.equal(0);
+    });
   });
 });
 
 // As this vip is updating diamond proxy for the first time after it's implementation,
 // therefore adding additional tests to verify all storage values before and after executing this vip,
 // setter functions and core functionalities are working properly
-forking(33757000, async () => {
+forking(33763885, async () => {
   let owner: Signer,
     unitroller: Contract,
     // layout variables
@@ -345,7 +360,7 @@ forking(33757000, async () => {
   });
 });
 
-forking(33757000, async () => {
+forking(33763885, async () => {
   let owner, unitroller;
   let USDT: Contract;
   let usdtHolder: Signer;
