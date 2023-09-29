@@ -12,6 +12,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -314,6 +315,24 @@ forking(32162545, () => {
             expect(await vagEUR.shortfall()).equals(SHORTFALL);
           });
         });
+      });
+    });
+
+    describe("Token prices", () => {
+      let resilientOracle: ethers.Contract;
+
+      before(async () => {
+        resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, await comptroller.oracle());
+      });
+
+      it("agEUR price", async () => {
+        const price = await resilientOracle.getPrice(agEUR);
+        expect(price).to.be.equal("1059294300000000000");
+      });
+
+      it("ANGLE price", async () => {
+        const price = await resilientOracle.getPrice(ANGLE);
+        expect(price).to.be.equal("31221950000000000");
       });
     });
   });
