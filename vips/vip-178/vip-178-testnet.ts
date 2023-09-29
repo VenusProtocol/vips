@@ -31,11 +31,6 @@ export const vip178Testnet = () => {
         params: [agEUR, parseUnits("1.06", 18)],
       },
       {
-        target: CHAINLINK_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [ANGLE, parseUnits(".032", 18)],
-      },
-      {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
@@ -51,6 +46,26 @@ export const vip178Testnet = () => {
         ],
       },
 
+      {
+        target: CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [ANGLE, parseUnits(".032", 18)],
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            ANGLE,
+            [
+              CHAINLINK_ORACLE,
+              "0x0000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000",
+            ],
+            [true, false, false],
+          ],
+        ],
+      },
       {
         target: agEUR,
         signature: "faucet(uint256)",

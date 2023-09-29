@@ -26,7 +26,7 @@ const ANGLE = "0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f";
 const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
 const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
 
-forking(32139104, () => {
+forking(32162545, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vagEUR: Contract;
