@@ -1,4 +1,3 @@
-import { JsonRpcSigner } from "@ethersproject/providers";
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";

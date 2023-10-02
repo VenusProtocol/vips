@@ -1,17 +1,10 @@
 import { TxBuilder } from "@morpho-labs/gnosis-tx-builder";
-import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import Ajv from "ajv";
 import { BigNumber } from "ethers";
 import fs from "fs/promises";
-import { ethers, network } from "hardhat";
+import { network } from "hardhat";
 
-import {
-  buildMultiSigTx,
-  createGnosisTx,
-  getContractNetworks,
-  getSafeAddress,
-  loadMultisigTx,
-} from "../multisig/helpers/utils";
+import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../multisig/helpers/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
 import { getCalldatas, proposalSchema } from "../src/utils";
 

@@ -1,17 +1,7 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { ethers, network } from "hardhat";
 
-import {
-  buildMultiSigTx,
-  createGnosisTx,
-  getContractNetworks,
-  getSafeAddress,
-  loadMultisigTx,
-} from "../multisig/helpers/utils";
-
-const readline = require("readline-sync");
-
-let txName: string;
+import { createGnosisTx, getContractNetworks, getSafeAddress } from "../multisig/helpers/utils";
 
 const executeMultiSigTx = async () => {
   const safeOwner = ethers.provider.getSigner(0);
