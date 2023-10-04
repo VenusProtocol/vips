@@ -13,10 +13,10 @@ export const VMATIC = "0x5c9476fcd6a4f9a3654139721c949c2233bbbbc8";
 export const MATIC_NEW_SUPPLY_CAP = parseUnits("8000000", 18);
 export const MATIC_NEW_BORROW_CAP = parseUnits("3000000", 18);
 
-export const vip181 = () => {
+export const vip180 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-181 Risk Parameters Adjustments",
+    title: "VIP-180 Risk Parameters Adjustments",
     description: `This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication: [Risk Parameter Updates 10/02/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-10-02-2023/3831)
 
 - **SnBNB** (Liquid Staked BNB pool)

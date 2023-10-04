@@ -14,8 +14,8 @@ import {
   SNBNB_NEW_SUPPLY_CAP,
   VMATIC,
   VSNBNB,
-  vip181,
-} from "../../vips/vip-181";
+  vip180,
+} from "../../vips/vip-180";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 forking(32305000, () => {
@@ -51,7 +51,7 @@ forking(32305000, () => {
     });
   });
 
-  testVip("VIP-181 Risk Parameters Update", vip181(), {
+  testVip("VIP-180 Risk Parameters Update", vip180(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [2, 2, 0]);
     },
