@@ -17,14 +17,18 @@ export const vip181 = () => {
   const meta = {
     version: "v2",
     title: "VIP-181 Risk Parameters Adjustments",
-    description: `#### Summary
+    description: `This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication: [Risk Parameter Updates 10/02/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-10-02-2023/3831)
 
-This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication
+- **SnBNB** (Liquid Staked BNB pool)
+    - Increase supply cap to 2,000 SnBNB
+    - Increase borrow cap to 400 SnBNB
+- **MATIC** (Core pool)
+    - Increase supply cap to 8,000,000 MATIC
+    - Increase borrow cap to 3,000,000 MATIC
 
-- Increase supply cap of **snBNB** to 2,000 snBNB
-- Increase borrow cap of **snBNB** to 400 snBNB
-- Increase supply cap of **MATIC** to 8,000,000 MATIC
-- Increase borrow cap of **MATIC** to 3,000,000 MATIC
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: https://github.com/VenusProtocol/vips/pull/84
 `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
