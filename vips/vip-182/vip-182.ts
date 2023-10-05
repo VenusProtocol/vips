@@ -37,14 +37,26 @@ const commands = [
   },
 ];
 
-export const vip179 = () => {
+export const vip182 = () => {
   const meta = {
     version: "v2",
-    title: "IL Rewards, last rewarding block for snBNB and agEUR markets",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with setting last rewarding block",
-    againstDescription: "I do not think that Venus Protocol should proceed with setting last rewarding block",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with setting last rewarding block",
+    title: "VIP-182 Isolated Lending Pools: Configure Liquidity Mining (SnBNB and agEUR)",
+    description: `#### Summary
+
+If passed, this VIP will set the last block with rewards for the SnBNB market in the Liquid Staked BNB pool, and the agEUR market in the Stablecoins pool.
+
+#### Description
+
+This VIP sets the last block with rewards for the SnBNB market in the Liquid Staked BNB pool, and the agEUR market in the Stablecoins pool.
+
+In [vSnBNB_LiquidStakedBNB](https://app.venus.io/#/isolated-pools/pool/0xd933909A4a2b7A4638903028f44D1d38ce27c352/market/0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A), the last block with rewards will be 33840956. That means around 56 days (1,612,800 blocks) after [being enabled](https://app.venus.io/#/governance/proposal/177).
+
+In [vagEUR_Stablecoins](https://app.venus.io/#/isolated-pools/pool/0x94c1495cD4c557f1560Cbd68EAB0d197e6291571), the last block with rewards will be 32539950. That means around 7 days (201,600 blocks) after [being enabled](https://app.venus.io/#/governance/proposal/178).
+
+Simulation of the VIP: https://github.com/VenusProtocol/vips/pull/82`,
+    forDescription: "Process to configure Liquidity Mining",
+    againstDescription: "Defer configuration of Liquidity Mining",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(commands, meta, ProposalType.REGULAR);
