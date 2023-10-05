@@ -1,7 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const BLOCKS_56_DAYS = 1_440_000;
+export const BLOCKS_56_DAYS = 1_612_800;
 export const BLOCKS_7_DAYS = 201_600;
 
 export const RewardsDistributor_HAY_LiquidStakedBNB = {
@@ -13,7 +13,7 @@ export const RewardsDistributor_HAY_LiquidStakedBNB = {
 export const RewardsDistributor_ANGLE_Stablecoin = {
   address: "0x177ED4625F57cEa2804EA3A396c8Ff78f314F1CA",
   vToken: "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F", // vagEUR
-  rewardStartBlock: 32290292, // TODO: when VIP is executed on mainnet adjust the rewardStartBlock
+  rewardStartBlock: 32338350,
 };
 
 const commands = [
