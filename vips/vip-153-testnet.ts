@@ -1,7 +1,7 @@
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-const PSR = "0xa7D2A407A40A071681CeeEaa9C6C59259eaF0597";
+const PSR = "0xB46BDd025F8FB78eD5174155F74Cb452DF15d6D4";
 const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
