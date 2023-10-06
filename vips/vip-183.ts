@@ -17,17 +17,12 @@ interface ReservesRecord {
   reservesMantissa: BigNumberish;
 }
 
-interface ILIncomeRecord {
-  tokenName: string;
-  underlying: string;
-  totalIncome: BigNumberish;
-}
-
 // All vTokens except:
 //   * vXVS (the amount is too small)
 //   * vCAN, vLUNA, vUST (all three are deprecated),
 //   * vBUSD (the reserves for this token will be used to repay the shortfall),
 //   * vTUSDOLD (not enough liquidity)
+//   * IL pool assets
 // Snapshot taken at block 32208206 (2023-09-30 23:59:59 UTC)
 const RESERVES = [
   {
@@ -147,87 +142,97 @@ const RESERVES = [
   },
 ];
 
-const IL_INCOME: ILIncomeRecord[] = [
-  {
-    tokenName: "HAY_Stablecoins",
-    underlying: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
-    totalIncome: "227841726404150047770",
-  },
-  {
-    tokenName: "BSW_DeFi",
-    underlying: "0x965F527D9159dCe6288a2219DB51fc6Eef120dD1",
-    totalIncome: "3742976395258453300631",
-  },
-  {
-    tokenName: "TWT_DeFi",
-    underlying: "0x4B0F1812e5Df2A09796481Ff14017e6005508003",
-    totalIncome: "39190899156773316",
-  },
-  {
-    tokenName: "RACA_GameFi",
-    underlying: "0x12BB890508c125661E03b09EC06E404bc9289040",
-    totalIncome: "633448752331009233640759",
-  },
-  {
-    tokenName: "FLOKI_GameFi",
-    underlying: "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E",
-    totalIncome: "354165365111570367",
-  },
-  {
-    tokenName: "BNBx_LiquidStakedBNB",
-    underlying: "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275",
-    totalIncome: "1172620649237200345",
-  },
-  {
-    tokenName: "stkBNB_LiquidStakedBNB",
-    underlying: "0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16",
-    totalIncome: "416834061143724483",
-  },
-  {
-    tokenName: "WBNB_LiquidStakedBNB",
-    underlying: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-    totalIncome: "1187200301778226534",
-  },
-  {
-    tokenName: "BTT_Tron",
-    underlying: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B",
-    totalIncome: "2785014424758029079102709203",
-  },
-  {
-    tokenName: "TRX_Tron",
-    underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
-    totalIncome: "3667377278",
-  },
-  {
-    tokenName: "WIN_Tron",
-    underlying: "0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99",
-    totalIncome: "2824821053197039938432999",
-  },
-  {
-    tokenName: "USDD",
-    underlying: "0xd17479997F34dd9156Deef8F95A52D81D265be9c",
-    totalIncome: "784927868707361292702",
-  },
-  {
-    tokenName: "USDT",
-    underlying: "0x55d398326f99059fF775485246999027B3197955",
-    totalIncome: "747650370762189142817",
-  },
-  {
-    tokenName: "ankrBNB",
-    underlying: "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827",
-    totalIncome: "5792194256144213293",
-  },
-];
-
 export const vip183 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-183 Reserves withdrawal",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should withdraw the reserves",
-    againstDescription: "I do not think that Venus Protocol should proceed with withdrawing the reserves",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with withdrawing the reserves or not",
+    title: "VIP-183 Quarterly XVS Buyback and Funds Allocation",
+    description: `#### Description
+
+VIP-183 relates to the Quarterly Venus Protocol XVS Buyback & Funds allocation as indicated in our Tokenomics.
+
+#### Specifications
+
+As per our Tokenomics v.3.1, this VIP will proceed to withdraw funds for our Quarterly Buyback and distributions. The complete details on our latest tokenomics are available here: [Revision of Venus Tokenomics](https://community.venus.io/t/proposal-for-revision-of-venus-protocol-tokenomics/3599)
+
+Exceptionally for this quarter, we are proposing sending the BNB exploiter liquidation fees to the risk fund to be used towards active shortfalls repayment which will greatly benefit Venus in the long term.
+
+Due to the depreciation of BUSD and TUSD (OLD), we will not be able to withdraw those reserves as there is no available liquidity. They will be withdrawn at a later date and we can proceed to adjust the distributions then.
+
+Q3 Revenues Denominated in USD Were as Follows:
+
+1 Liquidation Fee Revenue:
+
+- vUSDC: $1,894.17
+- vUSDT: $29,912.92
+- vBUSD: $2,359.87
+- vSXP: $1.19
+- vXVS: $5,226.87
+- vBNB: $23,566.01
+- vBTC: $111,688.80
+- vETH: $27,118.88
+- vLTC: $4,887.78
+- vXRP: $13,857.77
+- vBCH: $166.37
+- vDOT: $1,141.84
+- vLINK: $1,491.03
+- vDAI: $0.76
+- vFIL: $250.98
+- vBETH: $320.29
+- vADA: $413.54
+- vDOGE: $154.68
+- vMATIC: $203.79
+- vCAKE: $2,659.70
+- vAAVE: $206.47
+- vTUSDOLD: $267.97
+- vTRXOLD: $114.49
+- vTRX: $30.11
+
+**Total: $227,936.29**
+
+2 Reserve Revenue:
+
+- USDC: $98,497.51
+- USDT: $184,479.76
+- SXP: $2,589.48
+- BNB: $1,289,916.01
+- BTCB: $42,098.59
+- ETH: $67,272.47
+- LTC: $474.64
+- XRP: $491.37
+- BCH: $3,141.49
+- DOT: $4,935.95
+- LINK: $413.64
+- DAI: $5,845.55
+- FIL: $334.99
+- BETH: $6.14
+- ADA: $2,066.92
+- DOGE: $201.89
+- MATIC: $587.02
+- Cake: $6,568.77
+- AAVE: $210.09
+- TRXOLD: $1,317.43
+- TRX: $1,127.14
+- wBETH: $690.96
+- TUSD: $2,177.59
+
+**Total: $1,715,445.40**
+
+**Total Protocol Revenues: 1,2 : $1,943,381.69**
+
+- *Considering USD token prices from October 1, 2023*
+
+**Estimated buyback values:**
+
+- $194,338 USD for approximately 38k XVS
+- 96K XVS from legacy rewards
+
+Total: 135k XVS for Vault rewards
+
+**Estimated Q4 2023 XVS Vault APR: 1480 XVS per day or 8.2% APR**`,
+    forDescription: "I agree that Venus Protocol should proceed with the Buyback & Tokenomics Distribution",
+    againstDescription: "I do not think that Venus Protocol should proceed with the Buyback & Tokenomics Distribution",
+    abstainDescription:
+      "I am indifferent to whether Venus Protocol proceeds with the Buyback & Tokenomics Distribution",
   };
 
   const transferBNB = (target: string, amount: BigNumberish): Command => {
@@ -280,15 +285,6 @@ export const vip183 = () => {
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDT, USDT_FOR_BUYBACK, BUYBACK_WALLET],
       },
-
-      ...IL_INCOME.map(({ underlying, totalIncome }: ILIncomeRecord) => {
-        const buybackShare = BigNumber.from(totalIncome).mul(PERCENT_OF_RESERVES_FOR_BUYBACK).div(100);
-        return {
-          target: TREASURY,
-          signature: "withdrawTreasuryBEP20(address,uint256,address)",
-          params: [underlying, buybackShare, BUYBACK_WALLET],
-        };
-      }),
     ],
     meta,
     ProposalType.REGULAR,
