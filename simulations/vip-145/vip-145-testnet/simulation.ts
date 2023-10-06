@@ -72,7 +72,7 @@ const ilPoolTokens: ILVTokenConfig[] = [
   },
 ];
 
-forking(31522791, () => {
+forking(33950193, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {

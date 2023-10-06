@@ -4,8 +4,8 @@ import { makeProposal } from "../src/utils";
 const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const VBNBAdmin_ADDRESS = "0x027a815a6825eE98F3dFe57e10B7f354038DEa67"
-const PSR = "0xd405300699D91ED1D87544a3237713fAe642EE95";
+const VBNBAdmin_ADDRESS = "0xBC612ec01bB52349De615112F65A3DA66fb02648"
+const PSR = "0x4382Da07e0fFba15CbB3F1013EcD56285542d27f";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
@@ -42,6 +42,11 @@ export const vip152 = () => {
         target: PSR,
         signature: "acceptOwnership()",
         params: [],
+      },
+      {
+        target: VBNBAdmin_ADDRESS,
+        signature: "setProtocolShareReserve(address)",
+        params: [PSR],
       },
       {
         target: ACM,

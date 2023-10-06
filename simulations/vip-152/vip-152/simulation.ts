@@ -5,16 +5,17 @@ import { ethers } from "hardhat";
 import { forking, testVip } from "../../../src/vip-framework";
 import vBNB_ABI from "./abi/vBNB.json"
 import PSR_ABI from "./abi/PSR.json"
+import vBNBAdmin_ABI from "./abi/vBNBAdmin.json"
 import { vip152 } from "../../../vips/vip-152";
 
-const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
+const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VBNBAdmin_ADDRESS = "0x027a815a6825eE98F3dFe57e10B7f354038DEa67"
+const VBNBAdmin_ADDRESS = "0xBC612ec01bB52349De615112F65A3DA66fb02648"
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const PSR = "0xd405300699D91ED1D87544a3237713fAe642EE95";
+const PSR = "0x4382Da07e0fFba15CbB3F1013EcD56285542d27f";
 
-forking(32114884, () => {
+forking(32364859, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -44,14 +45,20 @@ forking(32114884, () => {
   describe("Post-VIP behavior", async () => {
     let vBNB: ethers.Contract;
     let psr: ethers.Contract;
+    let vBNBAdmin: ethers.Contract;
 
     before(async () => {
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
       psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      vBNBAdmin = new ethers.Contract(VBNBAdmin_ADDRESS, vBNBAdmin_ABI, provider);
     });
 
     it("validate admin", async () => {
       expect(await vBNB.admin()).to.be.equal(VBNBAdmin_ADDRESS);
+    });
+
+    it("validate PSR", async () => {
+      expect(await vBNBAdmin.protocolShareReserve()).to.be.equal(PSR);
     });
 
     it("config check", async () => {

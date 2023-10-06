@@ -4,21 +4,27 @@ import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
 import PSR_ABI from "./abi/PSR.json"
+import vBNB_ABI from "./abi/vBNB.json"
+import vBNBAdmin_ABI from "./abi/vBNBAdmin.json"
 import { vip153Testnet } from "../../../vips/vip-153-testnet";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
-const PSR = "0x24b63EA72aFC326deFA526Ed031aedb6a5E0fA4A";
+const PSR = "0xa7D2A407A40A071681CeeEaa9C6C59259eaF0597";
+const PROXY_ADMIN = "0xce10739590001705F7FF231611ba4A48B2820327";
+const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
+const VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114"
 
-
-forking(33711562, () => {
+forking(33950199, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
     let psr: ethers.Contract;
 
     before(async () => {
+      await impersonateAccount(PROXY_ADMIN);
       psr = new ethers.Contract(PSR, PSR_ABI, provider);
     });
 
@@ -31,13 +37,17 @@ forking(33711562, () => {
     });
   });
 
-  testVip("VIP-152", vip153Testnet());
+  testVip("VIP-153", vip153Testnet());
 
   describe("Post-VIP behavior", async () => {
     let psr: ethers.Contract;
+    let vBNB: ethers.Contract;
+    let vBNBAdmin: ethers.Contract;
 
     before(async () => {
       psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
+      vBNBAdmin = new ethers.Contract(VBNBAdmin, vBNBAdmin_ABI, provider);
     });
 
     it("config check", async () => {
@@ -69,6 +79,14 @@ forking(33711562, () => {
       expect(config.schema).to.be.equal(1);
       expect(config.percentage).to.be.equal(60);
       expect(config.destination).to.be.equal(TREASURY);
+    });
+
+    it("validate admin", async () => {
+      expect(await vBNB.admin()).to.be.equal(VBNBAdmin);
+    });
+
+    it("validate PSR", async () => {
+      expect(await vBNBAdmin.protocolShareReserve()).to.be.equal(PSR);
     });
   });
 });
