@@ -4,7 +4,7 @@ import { makeProposal } from "../src/utils";
 const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const VBNBAdmin_ADDRESS = "0xBC612ec01bB52349De615112F65A3DA66fb02648"
+const VBNBAdmin_ADDRESS = "0xBC612ec01bB52349De615112F65A3DA66fb02648";
 const PSR = "0x4382Da07e0fFba15CbB3F1013EcD56285542d27f";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
@@ -17,8 +17,10 @@ export const vip152 = () => {
     title: "Change vBNB admin to vBNBAdmin and Setup Protocol Share Reserve",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with setting the vBNB admin and setting up PSR",
-    againstDescription: "I do not think that Venus Protocol should proceed with setting the vBNB admin and setting up PSR",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with setting the vBNB admin and setting up PSR",
+    againstDescription:
+      "I do not think that Venus Protocol should proceed with setting the vBNB admin and setting up PSR",
+    abstainDescription:
+      "I am indifferent to whether Venus Protocol proceeds with setting the vBNB admin and setting up PSR",
   };
 
   return makeProposal(
@@ -96,12 +98,14 @@ export const vip152 = () => {
       {
         target: PSR,
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
-        params: [[
-          [0, 50, RISK_FUND],
-          [0, 50, TREASURY],
-          [1, 40, RISK_FUND],
-          [1, 60, TREASURY],
-        ]],
+        params: [
+          [
+            [0, 50, RISK_FUND],
+            [0, 50, TREASURY],
+            [1, 40, RISK_FUND],
+            [1, 60, TREASURY],
+          ],
+        ],
       },
     ],
     meta,

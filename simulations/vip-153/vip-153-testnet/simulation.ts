@@ -1,13 +1,12 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../../src/vip-framework";
-import PSR_ABI from "./abi/PSR.json"
-import vBNB_ABI from "./abi/vBNB.json"
-import vBNBAdmin_ABI from "./abi/vBNBAdmin.json"
 import { vip153Testnet } from "../../../vips/vip-153-testnet";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import PSR_ABI from "./abi/PSR.json";
+import vBNB_ABI from "./abi/vBNB.json";
+import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
@@ -15,7 +14,7 @@ const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PSR = "0xa7D2A407A40A071681CeeEaa9C6C59259eaF0597";
 const PROXY_ADMIN = "0xce10739590001705F7FF231611ba4A48B2820327";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
-const VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114"
+const VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114";
 
 forking(33950199, () => {
   const provider = ethers.provider;
@@ -29,11 +28,11 @@ forking(33950199, () => {
     });
 
     it("config check", async () => {
-      expect((await psr.totalDistributions())).to.be.equal(0);
+      expect(await psr.totalDistributions()).to.be.equal(0);
     });
 
     it("ownership check", async () => {
-      expect((await psr.pendingOwner())).to.be.equal(NORMAL_TIMELOCK);
+      expect(await psr.pendingOwner()).to.be.equal(NORMAL_TIMELOCK);
     });
   });
 
@@ -51,31 +50,31 @@ forking(33950199, () => {
     });
 
     it("config check", async () => {
-      expect((await psr.totalDistributions())).to.be.equal(4);
+      expect(await psr.totalDistributions()).to.be.equal(4);
     });
 
     it("ownership check", async () => {
-      expect((await psr.pendingOwner())).to.be.equal("0x0000000000000000000000000000000000000000");
-      expect((await psr.owner())).to.be.equal(NORMAL_TIMELOCK);
+      expect(await psr.pendingOwner()).to.be.equal("0x0000000000000000000000000000000000000000");
+      expect(await psr.owner()).to.be.equal(NORMAL_TIMELOCK);
     });
 
     it("configurations", async () => {
-      let config = await psr.distributionTargets(0);  
+      let config = await psr.distributionTargets(0);
       expect(config.schema).to.be.equal(0);
       expect(config.percentage).to.be.equal(50);
       expect(config.destination).to.be.equal(RISK_FUND);
 
-      config = await psr.distributionTargets(1);  
+      config = await psr.distributionTargets(1);
       expect(config.schema).to.be.equal(0);
       expect(config.percentage).to.be.equal(50);
       expect(config.destination).to.be.equal(TREASURY);
 
-      config = await psr.distributionTargets(2);  
+      config = await psr.distributionTargets(2);
       expect(config.schema).to.be.equal(1);
       expect(config.percentage).to.be.equal(40);
       expect(config.destination).to.be.equal(RISK_FUND);
 
-      config = await psr.distributionTargets(3);  
+      config = await psr.distributionTargets(3);
       expect(config.schema).to.be.equal(1);
       expect(config.percentage).to.be.equal(60);
       expect(config.destination).to.be.equal(TREASURY);
