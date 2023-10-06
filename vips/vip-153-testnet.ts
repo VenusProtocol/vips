@@ -8,8 +8,9 @@ const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
-const VBNBAdmin = "0x7575D142AAb97229e5928f94c03da39b34Bb0E96";
-const NEW_VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114";
+const VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114";
+const NEW_VBNBAdmin = "0x78459C0a0Fe91d382322D09FF4F86A10dbAF78a4";
+const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 
 export const vip153Testnet = () => {
   const meta = {
@@ -104,6 +105,11 @@ export const vip153Testnet = () => {
             [1, 60, TREASURY],
           ],
         ],
+      },
+      {
+        target: PSR,
+        signature: "setPoolRegistry(address)",
+        params: [POOL_REGISTRY],
       },
     ],
     meta,

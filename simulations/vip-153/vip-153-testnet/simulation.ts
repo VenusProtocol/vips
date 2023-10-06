@@ -14,9 +14,9 @@ const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PSR = "0xB46BDd025F8FB78eD5174155F74Cb452DF15d6D4";
 const PROXY_ADMIN = "0xce10739590001705F7FF231611ba4A48B2820327";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
-const VBNBAdmin = "0x7Ef464ac0BE8A0dC1e90185bf92a20e769f3B114";
+const VBNBAdmin = "0x78459C0a0Fe91d382322D09FF4F86A10dbAF78a4";
 
-forking(33969555, () => {
+forking(33974057, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {

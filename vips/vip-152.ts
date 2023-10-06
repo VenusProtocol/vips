@@ -112,7 +112,7 @@ export const vip152 = () => {
         target: PSR,
         signature: "setPoolRegistry(address)",
         params: [POOL_REGISTRY],
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,
