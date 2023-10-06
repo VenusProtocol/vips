@@ -14,7 +14,7 @@ const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const PSR = "0x4382Da07e0fFba15CbB3F1013EcD56285542d27f";
 
-forking(32364859, () => {
+forking(32368819, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
