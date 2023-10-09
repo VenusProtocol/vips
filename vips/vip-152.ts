@@ -11,6 +11,7 @@ const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+const NEW_RISK_FUND_IMPLEMENTATION = "0x470443271a416214841a617cbFB8b2f060dDb830";
 
 export const vip152 = () => {
   const meta = {
@@ -26,6 +27,11 @@ export const vip152 = () => {
 
   return makeProposal(
     [
+      {
+        target: RISK_FUND,
+        signature: "upgradeTo(address)",
+        params: [NEW_RISK_FUND_IMPLEMENTATION],
+      },
       {
         target: VBNBAdmin_ADDRESS,
         signature: "acceptOwnership()",

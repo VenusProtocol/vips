@@ -18,7 +18,7 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const PSR = "0x4E5A49Ce81993504327a848167d76212b7a341E2";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
-forking(32374397, () => {
+forking(32457987, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -112,7 +112,7 @@ forking(32374397, () => {
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
       await vBNBAdmin.reduceReserves(ethers.utils.parseEther("1"));
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
-      // await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS])
+      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS])
     });
   });
 });
