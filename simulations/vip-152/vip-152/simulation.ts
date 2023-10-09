@@ -17,8 +17,9 @@ const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const PSR = "0x4E5A49Ce81993504327a848167d76212b7a341E2";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-forking(32457987, () => {
+forking(32459234, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -112,7 +113,15 @@ forking(32457987, () => {
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
       await vBNBAdmin.reduceReserves(ethers.utils.parseEther("1"));
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
-      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS])
+      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS]);
+      expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113267");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113267");
+      await vBNBAdmin.reduceReserves("100");
+      expect(await WBNB.balanceOf(PSR)).to.be.equal(100);
+      await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS]);
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113317");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113317");
     });
   });
 });
