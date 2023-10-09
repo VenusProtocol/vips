@@ -13,12 +13,12 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PSR = "0xB46BDd025F8FB78eD5174155F74Cb452DF15d6D4";
-const PROXY_ADMIN = "0xce10739590001705F7FF231611ba4A48B2820327";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 const VBNBAdmin = "0x78459C0a0Fe91d382322D09FF4F86A10dbAF78a4";
 const WBNB_ADDRESS = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
+const CORE_POOL_COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
-forking(33974057, () => {
+forking(34058573, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {});
@@ -37,15 +37,19 @@ forking(33974057, () => {
 
       psr = new ethers.Contract(PSR, PSR_ABI, signer);
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, signer);
-      vBNBAdmin = new ethers.Contract(VBNBAdmin, vBNBAdmin_ABI, provider);
-      WBNB = new ethers.Contract(WBNB_ADDRESS, ERC20_ABI, provider);
+      vBNBAdmin = new ethers.Contract(VBNBAdmin, vBNBAdmin_ABI, signer);
+      WBNB = new ethers.Contract(WBNB_ADDRESS, ERC20_ABI, signer);
     });
 
     it("reduce reserves", async () => {
-      expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
-      await vBNBAdmin.reduceReserves(ethers.utils.parseEther("1"));
-      expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
-      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS])
+      expect(await WBNB.balanceOf(PSR)).to.be.equal("100000");
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("0");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("100000000000000000");
+      await vBNBAdmin.reduceReserves("100");
+      expect(await WBNB.balanceOf(PSR)).to.be.equal("100100");
+      await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS])
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("50050");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("100000000000050050");
     });
   });
 });
