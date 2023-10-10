@@ -4,24 +4,24 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { vip152Testnet } from "../../../vips/vip-152-testnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import PSR_ABI from "./abi/PSR.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
-import { vip152Testnet } from "../../../vips/vip-152-testnet";
 
-const VBNBAdmin_ADDRESS = "0x2b11a94DA41a5cAcAa6e1E3F23139cED805808b5";
-const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+const VBNBAdmin_ADDRESS = "0x78459C0a0Fe91d382322D09FF4F86A10dbAF78a4";
+const WBNB_ADDRESS = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
+const CORE_POOL_COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 const PSR = "0x9B34c7aDCEa239b83Ef364627071Be7665bcb2E9";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-forking(32482549, () => {
+forking(34086327, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -115,17 +115,14 @@ forking(32482549, () => {
 
     it("reduce reserves", async () => {
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
-      await vBNBAdmin.reduceReserves(ethers.utils.parseEther("1"));
-      expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
-      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS]);
-      expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
-      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113267");
-      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113267");
-      await vBNBAdmin.reduceReserves("100");
+      await vBNBAdmin.reduceReserves(100);
       expect(await WBNB.balanceOf(PSR)).to.be.equal(100);
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("0");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("100000000000000000");
       await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS]);
-      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113317");
-      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113317");
+      expect(await WBNB.balanceOf(PSR)).to.be.equal(0);
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("50");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("100000000000000050");
     });
 
     it("validate proxy admin", async () => {
@@ -134,6 +131,6 @@ forking(32482549, () => {
       expect(await proxyAdmin.getProxyAdmin(RISK_FUND)).to.be.equal(PROXY_ADMIN);
 
       expect(await proxyAdmin.owner()).to.be.equal(NORMAL_TIMELOCK);
-    })
+    });
   });
 });

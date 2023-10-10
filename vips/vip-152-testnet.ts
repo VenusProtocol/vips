@@ -36,11 +36,6 @@ export const vip152Testnet = () => {
         params: [RISK_FUND, NEW_RISK_FUND_IMPLEMENTATION],
       },
       {
-        target: VBNBAdmin,
-        signature: "acceptOwnership()",
-        params: [],
-      },
-      {
         target: vBNB_ADDRESS,
         signature: "_setPendingAdmin(address)",
         params: [VBNBAdmin],

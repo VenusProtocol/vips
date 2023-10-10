@@ -7,9 +7,9 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { vip152 } from "../../../vips/vip-152";
 import ERC20_ABI from "./abi/ERC20.json";
 import PSR_ABI from "./abi/PSR.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 
 const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
@@ -134,6 +134,6 @@ forking(32482549, () => {
       expect(await proxyAdmin.getProxyAdmin(RISK_FUND)).to.be.equal(PROXY_ADMIN);
 
       expect(await proxyAdmin.owner()).to.be.equal(NORMAL_TIMELOCK);
-    })
+    });
   });
 });
