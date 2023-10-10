@@ -9,17 +9,19 @@ import ERC20_ABI from "./abi/ERC20.json";
 import PSR_ABI from "./abi/PSR.json";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 
+const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VBNBAdmin_ADDRESS = "0x2b11a94DA41a5cAcAa6e1E3F23139cED805808b5";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const PSR = "0x4E5A49Ce81993504327a848167d76212b7a341E2";
+const PSR = "0x99C0a8b68fAA4F1245Cd007E16CE4c5Eb2dB2415";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-forking(32459234, () => {
+forking(32481975, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -59,6 +61,7 @@ forking(32459234, () => {
     let psr: ethers.Contract;
     let vBNBAdmin: ethers.Contract;
     let WBNB: ethers.Contract;
+    let proxyAdmin: ethers.Contract;
 
     before(async () => {
       impersonateAccount(NORMAL_TIMELOCK);
@@ -68,6 +71,7 @@ forking(32459234, () => {
       psr = new ethers.Contract(PSR, PSR_ABI, signer);
       vBNBAdmin = new ethers.Contract(VBNBAdmin_ADDRESS, vBNBAdmin_ABI, signer);
       WBNB = new ethers.Contract(WBNB_ADDRESS, ERC20_ABI, provider);
+      proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
     });
 
     it("validate admin", async () => {
@@ -123,5 +127,13 @@ forking(32459234, () => {
       expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113317");
       expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113317");
     });
+
+    it("validate proxy admin", async () => {
+      expect(await proxyAdmin.getProxyAdmin(VBNBAdmin_ADDRESS)).to.be.equal(PROXY_ADMIN);
+      expect(await proxyAdmin.getProxyAdmin(PSR)).to.be.equal(PROXY_ADMIN);
+      expect(await proxyAdmin.getProxyAdmin(RISK_FUND)).to.be.equal(PROXY_ADMIN);
+
+      expect(await proxyAdmin.owner()).to.be.equal(NORMAL_TIMELOCK);
+    })
   });
 });
