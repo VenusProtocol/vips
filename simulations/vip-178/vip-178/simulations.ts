@@ -1,17 +1,22 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
+import {
+  RewardsDistributorConfig,
+  checkRewardsDistributor,
+  checkRewardsDistributorPool,
+} from "../../../src/vip-framework/checks/rewardsDistributor";
 import { vip178 } from "../../../vips/vip-178/vip-178";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
-import RATE_MODEL_ABI from "./abi/rateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
@@ -31,65 +36,14 @@ forking(32162545, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vagEUR: Contract;
-  let rewardsDistributor: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, STABLECOIN_COMPTROLLER);
     vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
-    rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR);
   });
 
   describe("Contracts setup", () => {
-    const checkVToken = (
-      vTokenAddress: string,
-      {
-        name,
-        symbol,
-        decimals,
-        underlying,
-        exchangeRate,
-      }: {
-        name: string;
-        symbol: string;
-        decimals: BigNumberish;
-        underlying: string;
-        exchangeRate: BigNumberish;
-      },
-    ) => {
-      describe(symbol, () => {
-        let vToken: Contract;
-
-        before(async () => {
-          vToken = await ethers.getContractAt(VTOKEN_ABI, vTokenAddress);
-        });
-
-        it(`should have name = "${name}"`, async () => {
-          expect(await vToken.name()).to.equal(name);
-        });
-
-        it(`should have symbol = "${symbol}"`, async () => {
-          expect(await vToken.symbol()).to.equal(symbol);
-        });
-
-        it(`should have ${decimals.toString()} decimals`, async () => {
-          expect(await vToken.decimals()).to.equal(decimals);
-        });
-
-        it(`should have underlying = "${underlying}"`, async () => {
-          expect(await vToken.underlying()).to.equal(underlying);
-        });
-
-        it(`should have initial exchange rate of ${exchangeRate.toString()}`, async () => {
-          expect(await vToken.exchangeRateStored()).to.equal(exchangeRate);
-        });
-
-        it("should have the correct Comptroller", async () => {
-          expect(await vToken.exchangeRateStored()).to.equal(exchangeRate);
-        });
-      });
-    };
-
     checkVToken(VagEUR_Stablecoins, {
       name: "Venus agEUR (Stablecoins)",
       symbol: "vagEUR_Stablecoins",
@@ -134,7 +88,6 @@ forking(32162545, () => {
     describe("Ownership", () => {
       it("should transfer ownership to Timelock", async () => {
         expect(await vagEUR.owner()).to.equal(NORMAL_TIMELOCK);
-        expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
       });
     });
 
@@ -145,51 +98,6 @@ forking(32162545, () => {
     });
 
     describe("Market and risk parameters", () => {
-      const checkInterestRate = (
-        vTokenAddress: string,
-        symbol: string,
-        {
-          base,
-          multiplier,
-          jump,
-          kink,
-        }: {
-          base: string;
-          multiplier: string;
-          jump: string;
-          kink: string;
-        },
-      ) => {
-        describe(`${symbol} interest rate model`, () => {
-          const BLOCKS_PER_YEAR = 10512000;
-          let rateModel: Contract;
-
-          before(async () => {
-            const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokenAddress);
-            rateModel = await ethers.getContractAt(RATE_MODEL_ABI, await vToken.interestRateModel());
-          });
-
-          it(`should have base = ${base}`, async () => {
-            const basePerBlock = parseUnits(base, 18).div(BLOCKS_PER_YEAR);
-            expect(await rateModel.baseRatePerBlock()).to.equal(basePerBlock);
-          });
-
-          it(`should have jump = ${jump}`, async () => {
-            const jumpPerBlock = parseUnits(jump, 18).div(BLOCKS_PER_YEAR);
-            expect(await rateModel.jumpMultiplierPerBlock()).to.equal(jumpPerBlock);
-          });
-
-          it(`should have multiplier = ${multiplier}`, async () => {
-            const multiplierPerBlock = parseUnits(multiplier, 18).div(BLOCKS_PER_YEAR);
-            expect(await rateModel.multiplierPerBlock()).to.equal(multiplierPerBlock);
-          });
-
-          it(`should have kink = ${kink}`, async () => {
-            expect(await rateModel.kink()).to.equal(parseUnits(kink, 18));
-          });
-        });
-      };
-
       describe("Interest rate models", () => {
         checkInterestRate(VagEUR_Stablecoins, "VagEUR_Stablecoins", {
           base: "0.02",
@@ -232,34 +140,17 @@ forking(32162545, () => {
     });
 
     describe("Reward Distributor", () => {
-      it("should be added to Stable coins Pool", async () => {
-        expect(await comptroller.getRewardDistributors()).to.include(REWARD_DISTRIBUTOR);
-      });
-
-      it("should have 3 rewards distributor in Stable coins Pool", async () => {
-        expect(await comptroller.getRewardDistributors()).to.have.lengthOf(3);
-      });
-
-      it("should have rewardToken ANGLE", async () => {
-        expect(await rewardsDistributor.rewardToken()).to.equal(ANGLE);
-      });
-
-      it(`should have owner = Normal Timelock`, async () => {
-        expect(await rewardsDistributor.owner()).to.equal(NORMAL_TIMELOCK);
-      });
-
-      it("should have borrowSpeed  = 87,549,603,174,603,174", async () => {
-        expect(await rewardsDistributor.rewardTokenBorrowSpeeds(VagEUR_Stablecoins)).to.equal("87549603174603174");
-      });
-
-      it("should have supplySpeed = 0", async () => {
-        expect(await rewardsDistributor.rewardTokenSupplySpeeds(VagEUR_Stablecoins)).to.equal("0");
-      });
-
-      it("should have balance = 17,650 ANGLE", async () => {
-        const token = await ethers.getContractAt(ERC20_ABI, ANGLE);
-        expect(await token.balanceOf(rewardsDistributor.address)).to.equal(parseUnits("17650", 18));
-      });
+      const agEURRewardsDistributorConfig: RewardsDistributorConfig = {
+        pool: STABLECOIN_COMPTROLLER,
+        address: REWARD_DISTRIBUTOR,
+        token: ANGLE,
+        vToken: VagEUR_Stablecoins,
+        borrowSpeed: parseUnits("17650", 18).div(201600),
+        supplySpeed: 0,
+        totalRewardsToDistribute: parseUnits("17650", 18),
+      };
+      checkRewardsDistributor("RewardsDistributor_agEUR_Stablecoins", agEURRewardsDistributorConfig);
+      checkRewardsDistributorPool(STABLECOIN_COMPTROLLER, 3);
     });
     describe("VToken", () => {
       describe("Basic supply/borrow/repay/redeem scenario", () => {
