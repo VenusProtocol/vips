@@ -21,7 +21,7 @@ const PSR = "0x99C0a8b68fAA4F1245Cd007E16CE4c5Eb2dB2415";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-forking(32481975, () => {
+forking(32482549, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
