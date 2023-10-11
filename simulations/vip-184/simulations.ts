@@ -16,8 +16,8 @@ import {
   USDC,
   USDT,
   VAI,
-  vip180,
-} from "../../vips/vip-180";
+  vip184,
+} from "../../vips/vip-184";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
@@ -28,7 +28,7 @@ const OZ_AMOUNT = parseUnits("277200", 18);
 const CHAOSLABS_AMOUNT = parseUnits("200000", 18);
 const STEAKHOUSE_AMOUNT = parseUnits("50000", 18);
 
-forking(32280000, () => {
+forking(32516199, () => {
   let usdc: ethers.Contract;
   let usdt: ethers.Contract;
   let vai: ethers.Contract;
@@ -53,7 +53,7 @@ forking(32280000, () => {
     prevBalanceSteakHouse = await vai.balanceOf(STEAKHOUSE_RECEIVER);
   });
 
-  testVip("VIP-180 Security audits payments", vip180(), {
+  testVip("VIP-184 Security audits payments", vip184(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [7]);
     },
