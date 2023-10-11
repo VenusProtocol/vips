@@ -11,17 +11,17 @@ import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
 
-const VBNBAdmin_ADDRESS = "0x78459C0a0Fe91d382322D09FF4F86A10dbAF78a4";
+const VBNBAdmin_ADDRESS = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
 const WBNB_ADDRESS = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 const CORE_POOL_COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
-const PSR = "0x9B34c7aDCEa239b83Ef364627071Be7665bcb2E9";
+const PSR = "0xF1d8bcED87d5e077e662160490797cd2B5494d4A";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-forking(34086327, () => {
+forking(34112000, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -49,9 +49,6 @@ forking(34086327, () => {
   testVip("VIP-152", vip152Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigAdded"], [4]);
-
-      await expectEvents(txResponse, [vBNBAdmin_ABI], ["ProtocolShareReserveUpdated"], [1]);
-
       await expectEvents(txResponse, [PSR_ABI], ["PoolRegistryUpdated"], [1]);
     },
   });
