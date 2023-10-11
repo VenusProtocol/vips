@@ -14,14 +14,14 @@ import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
 const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VBNBAdmin_ADDRESS = "0x2b11a94DA41a5cAcAa6e1E3F23139cED805808b5";
+const VBNBAdmin_ADDRESS = "0x1b73Be3D91d3E32AE617234C0118f47eA1d44Ed1";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const PSR = "0x99C0a8b68fAA4F1245Cd007E16CE4c5Eb2dB2415";
+const PSR = "0x09272ee826C5293bde7dA3C6767176994653E94C";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-forking(32482549, () => {
+forking(32512704, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -49,9 +49,6 @@ forking(32482549, () => {
   testVip("VIP-152", vip152(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigAdded"], [4]);
-
-      await expectEvents(txResponse, [vBNBAdmin_ABI], ["ProtocolShareReserveUpdated"], [1]);
-
       await expectEvents(txResponse, [PSR_ABI], ["PoolRegistryUpdated"], [1]);
     },
   });
@@ -117,7 +114,7 @@ forking(32482549, () => {
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
       await vBNBAdmin.reduceReserves(ethers.utils.parseEther("1"));
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
-      await psr.releaseFunds("0xfD36E2c2a6789Db23113685031d7F16329158384", [WBNB_ADDRESS]);
+      await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS]);
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
       expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113267");
       expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113267");
