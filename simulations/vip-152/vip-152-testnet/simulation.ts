@@ -61,7 +61,7 @@ forking(34112000, () => {
     let proxyAdmin: ethers.Contract;
 
     before(async () => {
-      impersonateAccount(NORMAL_TIMELOCK);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(NORMAL_TIMELOCK);
 
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
