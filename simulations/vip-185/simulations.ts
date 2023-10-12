@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, vip183 } from "../../vips/vip-183";
+import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, vip185 } from "../../vips/vip-185";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 forking(32403700, () => {
@@ -30,32 +30,32 @@ forking(32403700, () => {
       expect(oldBorrowCap).to.equal(parseUnits("50000", 18));
     });
 
-    it("Supply cap of snBNB equals 2000", async () => {
+    it("Supply cap of snBNB equals 2,000", async () => {
       const oldSupplyCap = await liquidStakeBnbComptroller.supplyCaps(VSNBNB);
       expect(oldSupplyCap).to.equal(parseUnits("2000", 18));
     });
 
-    it("Borrow cap of snBNB equals 100", async () => {
+    it("Borrow cap of snBNB equals 400", async () => {
       const oldBorrowCap = await liquidStakeBnbComptroller.borrowCaps(VSNBNB);
       expect(oldBorrowCap).to.equal(parseUnits("400", 18));
     });
   });
 
-  testVip("VIP-180 Risk Parameters Update", vip183(), {
+  testVip("VIP-185 Risk Parameters Update", vip185(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [2, 2, 0]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Supply cap of agEUR equals 8,000,000", async () => {
+    it("Supply cap of agEUR equals 250,000", async () => {
       const newSupplyCap = await stableCoinComptroller.supplyCaps(VAGEUR);
-      expect(newSupplyCap).to.equal(parseUnits("8000000", 18));
+      expect(newSupplyCap).to.equal(parseUnits("250000", 18));
     });
 
-    it("Borrow cap of agEUR equals 3,000,000", async () => {
+    it("Borrow cap of agEUR equals 200,000", async () => {
       const newBorrowCap = await stableCoinComptroller.borrowCaps(VAGEUR);
-      expect(newBorrowCap).to.equal(parseUnits("3000000", 18));
+      expect(newBorrowCap).to.equal(parseUnits("200000", 18));
     });
 
     it("Supply cap of snBNB equals 3,000", async () => {
