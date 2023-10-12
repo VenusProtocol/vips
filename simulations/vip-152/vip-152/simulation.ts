@@ -20,6 +20,7 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const PSR = "0x09272ee826C5293bde7dA3C6767176994653E94C";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+const RANDOM_ADDRESS = "0x0BAC492386862aD3dF4B666Bc096b0505BB694Da"
 
 forking(32512704, () => {
   const provider = ethers.provider;
@@ -61,8 +62,8 @@ forking(32512704, () => {
     let proxyAdmin: ethers.Contract;
 
     before(async () => {
-      await impersonateAccount(NORMAL_TIMELOCK);
-      const signer = await ethers.getSigner(NORMAL_TIMELOCK);
+      await impersonateAccount(RANDOM_ADDRESS);
+      const signer = await ethers.getSigner(RANDOM_ADDRESS);
 
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
       psr = new ethers.Contract(PSR, PSR_ABI, signer);
