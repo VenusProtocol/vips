@@ -5,7 +5,6 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip180 } from "../../vips/vip-180";
 import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, vip183 } from "../../vips/vip-183";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
