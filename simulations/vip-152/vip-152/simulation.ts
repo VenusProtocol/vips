@@ -8,6 +8,7 @@ import { vip152 } from "../../../vips/vip-152";
 import ERC20_ABI from "./abi/ERC20.json";
 import PSR_ABI from "./abi/PSR.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import RISK_FUND_ABI from "./abi/RiskFund.json";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
 
@@ -20,7 +21,24 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const PSR = "0x09272ee826C5293bde7dA3C6767176994653E94C";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const RANDOM_ADDRESS = "0x0BAC492386862aD3dF4B666Bc096b0505BB694Da"
+const RANDOM_ADDRESS = "0x0BAC492386862aD3dF4B666Bc096b0505BB694Da";
+
+const reserves = {
+  "0x0782b6d8c4551b9760e74c0545a9bcd90bdc41e5": "113920863202075023885",
+  "0xd17479997f34dd9156deef8f95a52d81d265be9c": "392463934353680646351",
+  "0x55d398326f99059ff775485246999027b3197955": "373825185381094571409",
+  "0x52f24a5e03aee338da5fd9df68d2b6fae1178827": "2896097128072106647",
+  "0x965f527d9159dce6288a2219db51fc6eef120dd1": "1871488197629226650316",
+  "0x4b0f1812e5df2a09796481ff14017e6005508003": "19595449578386658",
+  "0x12bb890508c125661e03b09ec06e404bc9289040": "316724376165504616820380",
+  "0xfb5b838b6cfeedc2873ab27866079ac55363d37e": "177082682555785184",
+  "0x1bdd3cf7f79cfb8edbb955f20ad99211551ba275": "586310324618600173",
+  "0xc2e9d07f66a89c44062459a47a0d2dc038e4fb16": "208417030571862242",
+  "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c": "593600150889113267",
+  "0x352cb5e19b12fc216548a2677bd0fce83bae434b": "1392507212379014539551354602",
+  "0xce7de646e7208a4ef112cb6ed5038fa6cc6b12e3": "1833688639",
+  "0xaef0d72a118ce24fee3cd1d43d383897d05b4e99": "1412410526598519969216500",
+};
 
 forking(32512704, () => {
   const provider = ethers.provider;
@@ -28,10 +46,12 @@ forking(32512704, () => {
   describe("Pre-VIP behavior", async () => {
     let vBNB: ethers.Contract;
     let psr: ethers.Contract;
+    let riskFund: ethers.Contract;
 
     before(async () => {
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
       psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      riskFund = new ethers.Contract(RISK_FUND, RISK_FUND_ABI, provider);
     });
 
     it("validate admin", async () => {
@@ -44,6 +64,12 @@ forking(32512704, () => {
 
     it("ownership check", async () => {
       expect(await psr.pendingOwner()).to.be.equal(NORMAL_TIMELOCK);
+    });
+
+    it("risk fund reserve", async () => {
+      for (const [token, amount] of Object.entries(reserves)) {
+        expect(await riskFund.assetsReserves(token)).to.be.equal(amount);
+      }
     });
   });
 
@@ -60,6 +86,7 @@ forking(32512704, () => {
     let vBNBAdmin: ethers.Contract;
     let WBNB: ethers.Contract;
     let proxyAdmin: ethers.Contract;
+    let riskFund: ethers.Contract;
 
     before(async () => {
       await impersonateAccount(RANDOM_ADDRESS);
@@ -70,6 +97,7 @@ forking(32512704, () => {
       vBNBAdmin = new ethers.Contract(VBNBAdmin_ADDRESS, vBNBAdmin_ABI, signer);
       WBNB = new ethers.Contract(WBNB_ADDRESS, ERC20_ABI, provider);
       proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
+      riskFund = new ethers.Contract(RISK_FUND, RISK_FUND_ABI, provider);
     });
 
     it("validate admin", async () => {
@@ -109,6 +137,12 @@ forking(32512704, () => {
       expect(config.schema).to.be.equal(1);
       expect(config.percentage).to.be.equal(60);
       expect(config.destination).to.be.equal(TREASURY);
+    });
+
+    it("risk fund reserve", async () => {
+      for (const [token, amount] of Object.entries(reserves)) {
+        expect(await riskFund.assetsReserves(token)).to.be.equal(amount);
+      }
     });
 
     it("reduce reserves", async () => {
