@@ -4,7 +4,7 @@ import { makeProposal } from "../src/utils";
 const ACCOUNT = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
 const PRIME = "0x4e446d6Fe16c4e95eEAd7f963C9312Cf4c280270"
-
+const PLP = "0x2B8e226a462138250df2551bb499ad71218c4353";
 
 export const vip153Testnet = () => {
   const meta = {
@@ -58,17 +58,17 @@ export const vip153Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PRIME, "pauseFundsTransfer()", ACCOUNT],
+        params: [PLP, "pauseFundsTransfer()", ACCOUNT],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PRIME, "resumeFundsTransfer()", ACCOUNT],
+        params: [PLP, "resumeFundsTransfer()", ACCOUNT],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PRIME, "setTokensDistributionSpeed(address[],uint256[])", ACCOUNT],
+        params: [PLP, "setTokensDistributionSpeed(address[],uint256[])", ACCOUNT],
       },
     ],
     meta,
