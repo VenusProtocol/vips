@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vipComptrollerBeaconUpgradeTestnet } from "../../../vips/vip-isolated-pools-comptroller-upgrade/vip-comptroller-upgrade-testnet";
+import { vip185Testnet } from "../../../vips/vip-185/vip-185-testnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "./abi/comptroller-beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -95,7 +95,7 @@ forking(34165908, () => {
     });
   });
 
-  testVip("VIPComptrollerBeaconUpgradeTestnet", vipComptrollerBeaconUpgradeTestnet(), {
+  testVip("vip185Testnet", vip185Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [15]);

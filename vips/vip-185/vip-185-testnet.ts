@@ -32,7 +32,7 @@ const grantAccessControl = (contract: string) => {
   return accessProposals;
 };
 
-export const vipComptrollerBeaconUpgradeTestnet = () => {
+export const vip185Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP comptroller beacon upgrade",
