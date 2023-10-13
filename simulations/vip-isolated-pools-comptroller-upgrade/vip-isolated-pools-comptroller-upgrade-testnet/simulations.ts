@@ -10,7 +10,7 @@ import COMPTROLLER_BEACON_ABI from "./abi/comptroller-beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0x069705246364d60c5503bF19b4A714ab412521a0";
-const NEW_COMPTROLLER_IMPLEMENTATION = "0xa764a2eAc5C59DFb23E43850cBA89117f1c9f5AB";
+const NEW_COMPTROLLER_IMPLEMENTATION = "0x11a92852fA7D70C220Dada69969b2f1C4e18e663";
 const COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
 const POOL_STABLECOIN = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 const POOL_DEFI = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
@@ -56,7 +56,7 @@ async function verifySetForcedLiquidation(signers: ethers.Signer[], comptroller:
   }
 }
 
-forking(33504900, () => {
+forking(34165908, () => {
   const provider = ethers.provider;
   let comptrollerBeacon: ethers.Contract;
   let comptrollerStableCoin: ethers.Contract;
