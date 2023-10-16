@@ -4,29 +4,28 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip185 } from "../../../vips/vip-185/vip-185";
+import { vip186Testnet } from "../../../vips/vip-186/vip-186-testnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "./abi/comptroller-beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-const OLD_COMPTROLLER_IMPLEMENTATION = "0x17a6ac4f7f01387303deB1D78f01aC0A0C1a75b0";
-const NEW_COMPTROLLER_IMPLEMENTATION = "0x69Ca940186C29b6a9D64e1Be1C59fb7A466354E2";
-const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
-const POOL_STABLECOIN = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
-const POOL_DEFI = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
-const POOL_GAMEFI = "0x1b43ea8622e76627B81665B1eCeBB4867566B963";
-const POOL_LIQUID_STAKED_BNB = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
-const POOL_TRON = "0x23b4404E4E5eC5FF5a6FFb70B7d14E3FabF237B0";
-const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
-const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-
-const VHAY_STABLE_COIN = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
-const VBSW_DEFI = "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379";
-const VRACA_GAMEFI = "0xE5FE5527A5b76C75eedE77FdFA6B80D52444A465";
-const VANKRBNB_LIQUIDSTAKEDBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
-const VBTT_TRON = "0x49c26e12959345472E2Fd95E5f79F8381058d3Ee";
+const OLD_COMPTROLLER_IMPLEMENTATION = "0x069705246364d60c5503bF19b4A714ab412521a0";
+const NEW_COMPTROLLER_IMPLEMENTATION = "0x11a92852fA7D70C220Dada69969b2f1C4e18e663";
+const COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
+const POOL_STABLECOIN = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
+const POOL_DEFI = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
+const POOL_GAMEFI = "0x1F4f0989C51f12DAcacD4025018176711f3Bf289";
+const POOL_LIQUID_STAKED_BNB = "0x596B11acAACF03217287939f88d63b51d3771704";
+const POOL_TRON = "0x11537D023f489E4EF0C7157cc729C7B69CbE0c97";
+const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const VHAY_STABLE_COIN = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
+const VBSW_DEFI = "0x5e68913fbbfb91af30366ab1B21324410b49a308";
+const VRACA_GAMEFI = "0x1958035231E125830bA5d17D168cEa07Bb42184a";
+const VANKRBNB_LIQUIDSTAKEDBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
+const VBTT_TRON = "0x47793540757c6E6D84155B33cd8D9535CFdb9334";
 
 function matchValues(array1: string[], array2: string[]) {
   for (let i = 0; i < array1.length; i++) {
@@ -57,7 +56,7 @@ async function verifySetForcedLiquidation(signers: ethers.Signer[], comptroller:
   }
 }
 
-forking(32567583, () => {
+forking(34165908, () => {
   const provider = ethers.provider;
   let comptrollerBeacon: ethers.Contract;
   let comptrollerStableCoin: ethers.Contract;
@@ -96,7 +95,7 @@ forking(32567583, () => {
     });
   });
 
-  testVip("vip185", vip185(), {
+  testVip("vip186Testnet", vip186Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [15]);
