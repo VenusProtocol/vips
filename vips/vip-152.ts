@@ -4,8 +4,8 @@ import { makeProposal } from "../src/utils";
 const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const VBNBAdmin_ADDRESS = "0x45cc62b15478F7D0461d7aD5071c51aAdEdB616D";
-const PSR = "0x3DA3619EE1FE1031051c3d0dfFe252a145F2630D";
+const VBNBAdmin_ADDRESS = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
+const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
@@ -103,10 +103,10 @@ export const vip152 = () => {
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
         params: [
           [
-            [0, 50, RISK_FUND],
-            [0, 50, TREASURY],
-            [1, 40, RISK_FUND],
-            [1, 60, TREASURY],
+            [0, 40, RISK_FUND],
+            [0, 60, TREASURY],
+            [1, 50, RISK_FUND],
+            [1, 50, TREASURY],
           ],
         ],
       },

@@ -15,13 +15,13 @@ import vBNBAdmin_ABI from "./abi/vBNBAdmin.json";
 const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const VBNBAdmin_ADDRESS = "0x45cc62b15478F7D0461d7aD5071c51aAdEdB616D";
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const PSR = "0x3DA3619EE1FE1031051c3d0dfFe252a145F2630D";
 const WBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const RANDOM_ADDRESS = "0x0BAC492386862aD3dF4B666Bc096b0505BB694Da";
+const VBNBAdmin_ADDRESS = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
+const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
 const reserves = {
   "0x0782b6d8c4551b9760e74c0545a9bcd90bdc41e5": "113920863202075023885",
@@ -40,7 +40,7 @@ const reserves = {
   "0xaef0d72a118ce24fee3cd1d43d383897d05b4e99": "1412410526598519969216500",
 };
 
-forking(32565560, () => {
+forking(32659660, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -120,22 +120,22 @@ forking(32565560, () => {
     it("configurations", async () => {
       let config = await psr.distributionTargets(0);
       expect(config.schema).to.be.equal(0);
-      expect(config.percentage).to.be.equal(50);
+      expect(config.percentage).to.be.equal(40);
       expect(config.destination).to.be.equal(RISK_FUND);
 
       config = await psr.distributionTargets(1);
       expect(config.schema).to.be.equal(0);
-      expect(config.percentage).to.be.equal(50);
+      expect(config.percentage).to.be.equal(60);
       expect(config.destination).to.be.equal(TREASURY);
 
       config = await psr.distributionTargets(2);
       expect(config.schema).to.be.equal(1);
-      expect(config.percentage).to.be.equal(40);
+      expect(config.percentage).to.be.equal(50);
       expect(config.destination).to.be.equal(RISK_FUND);
 
       config = await psr.distributionTargets(3);
       expect(config.schema).to.be.equal(1);
-      expect(config.percentage).to.be.equal(60);
+      expect(config.percentage).to.be.equal(50);
       expect(config.destination).to.be.equal(TREASURY);
     });
 
@@ -151,13 +151,13 @@ forking(32565560, () => {
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("1"));
       await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS]);
       expect(await WBNB.balanceOf(PSR)).to.be.equal(ethers.utils.parseEther("0"));
-      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113267");
-      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113267");
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("993600150889113267");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1193600150889113267");
       await vBNBAdmin.reduceReserves("100");
       expect(await WBNB.balanceOf(PSR)).to.be.equal(100);
       await psr.releaseFunds(CORE_POOL_COMPTROLLER, [WBNB_ADDRESS]);
-      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("1093600150889113317");
-      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1093600150889113317");
+      expect(await WBNB.balanceOf(RISK_FUND)).to.be.equal("993600150889113307");
+      expect(await WBNB.balanceOf(TREASURY)).to.be.equal("1193600150889113327");
     });
 
     it("validate proxy admin", async () => {
