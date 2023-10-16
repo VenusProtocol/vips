@@ -37,7 +37,7 @@ export const vip185 = () => {
     version: "v2",
     title: "VIP-185 Add forced liquidations feature into the Isolated Pools",
     description: `
-        Upgardes the implementation contract for comptroller beacon for isolated pools
+        Upgrades the implementation contract for comptroller beacon for isolated pools
         Gives call permissions to all three timelocks for setting forced liquidation`,
 
     forDescription: "I agree that Venus Protocol should proceed with upgrading comptroller beacon",
