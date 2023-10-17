@@ -88,10 +88,10 @@ export const vip152Testnet = () => {
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
         params: [
           [
-            [0, 50, RISK_FUND],
-            [0, 50, TREASURY],
-            [1, 40, RISK_FUND],
-            [1, 60, TREASURY],
+            [0, 40, RISK_FUND],
+            [0, 60, TREASURY],
+            [1, 50, RISK_FUND],
+            [1, 50, TREASURY],
           ],
         ],
       },
