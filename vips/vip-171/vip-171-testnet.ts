@@ -243,13 +243,13 @@ export const vip171Testnet = () => {
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setActionsPaused(address[],uint256[],bool)", FAST_TRACK_TIMELOCK],
+        params: [COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", FAST_TRACK_TIMELOCK],
       },
 
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setActionsPaused(address[],uint256[],bool)", CRITICAL_TIMELOCK],
+        params: [COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", CRITICAL_TIMELOCK],
       },
 
       ...MARKETS_WITH_ACCEPT_ADMIN.map(asset => {
