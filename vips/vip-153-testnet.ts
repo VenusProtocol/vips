@@ -28,6 +28,11 @@ export const vip153Testnet = () => {
       },
       {
         target: PSR,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: PSR,
         signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
         params: [
           [
