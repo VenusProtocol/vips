@@ -9,12 +9,13 @@ export const vip187Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP ResilientOracle Implementation Upgrade",
-    description: `
-        Upgardes the implementation contract for resilient oracle in order to fix a wrong BoundValidator immutable variable`,
-
+    description:
+      " Upgardes the implementation contract for resilient oracle in order to fix a wrong BoundValidator immutable variable",
     forDescription: "I agree that Venus Protocol should proceed with upgrading Resilient Oracle implementation",
-    againstDescription: "I do not think that Venus Protocol should proceed with upgrading Resilient Oracle implementation",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with upgrading Resilient Oracle implementation",
+    againstDescription:
+      "I do not think that Venus Protocol should proceed with upgrading Resilient Oracle implementation",
+    abstainDescription:
+      "I am indifferent to whether Venus Protocol proceeds with upgrading Resilient Oracle implementation",
   };
 
   return makeProposal(
