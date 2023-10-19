@@ -14,7 +14,7 @@ import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
 const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const PROTOCOL_SHARE_RESERVE = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
@@ -30,7 +30,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(33155924, () => {
+forking(34259644, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -51,7 +51,7 @@ forking(33155924, () => {
 
         await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.8", 18));
+        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.9", 18));
 
         await performVTokenBasicActions(
           market.address,
@@ -76,7 +76,7 @@ forking(33155924, () => {
   });
 });
 
-forking(33155924, () => {
+forking(34259644, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -110,7 +110,7 @@ forking(33155924, () => {
   });
 });
 
-forking(33155924, () => {
+forking(34259644, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip171Testnet());
@@ -131,7 +131,7 @@ forking(33155924, () => {
 
         await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.8", 18));
+        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.9", 18));
 
         await performVTokenBasicActions(
           market.address,

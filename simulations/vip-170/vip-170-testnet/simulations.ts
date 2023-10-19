@@ -16,7 +16,7 @@ import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0x37130dd8181477Be3dDe8b22A32FE302ca602BA7";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const PROTOCOL_SHARE_RESERVE = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
+const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 
 let vToken: ethers.Contract;
 let underlying: ethers.Contract;
@@ -29,7 +29,7 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
-forking(33043237, () => {
+forking(34334626, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -71,7 +71,7 @@ forking(33043237, () => {
   });
 });
 
-forking(33043237, () => {
+forking(34334626, () => {
   testVip("VIP-170 IL VToken Upgrade of AIA", vip170Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [1, 22]);
@@ -79,7 +79,7 @@ forking(33043237, () => {
   });
 });
 
-forking(33043237, () => {
+forking(34334626, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip170Testnet());
