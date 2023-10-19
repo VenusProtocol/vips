@@ -56,16 +56,16 @@ export const VTOKEN_SNAPSHOT: AssetConfig[] = [
     underlyingDecimals: 18,
     underlyingAmount: "4743980668892061139746",
   },
-  // {
-  //   symbol: "vBNB",
-  //   vTokenAddress: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
-  //   vTokenBalance: "628469.4449",
-  //   vTokenBalanceMantissa: "62846944490450",
-  //   exchangeRateStored: "227452267946942758035857335",
-  //   underlyingAddress: "0x0",
-  //   underlyingDecimals: 18,
-  //   underlyingAmount: "14294680057888471300063",
-  // },
+  {
+    symbol: "vBNB",
+    vTokenAddress: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
+    vTokenBalance: "628469.4449",
+    vTokenBalanceMantissa: "62846944490450",
+    exchangeRateStored: "227452267946942758035857335",
+    underlyingAddress: "0x0",
+    underlyingDecimals: 18,
+    underlyingAmount: "14294680057888471300063",
+  },
   {
     symbol: "vBTC",
     vTokenAddress: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
@@ -272,19 +272,11 @@ export const vip188 = () => {
   return makeProposal(
     [
       ...VTOKEN_SNAPSHOT.map(object => {
-        if (object.symbol === "vBNB") {
-          return {
-            target: VTREASURY,
-            signature: "withdrawTreasuryBNB(uint256,address)",
-            params: [object.vTokenBalanceMantissa, NORMAL_TIMELOCK],
-          };
-        } else {
-          return {
-            target: VTREASURY,
-            signature: "withdrawTreasuryBEP20(address,uint256,address)",
-            params: [object.vTokenAddress, object.vTokenBalanceMantissa, NORMAL_TIMELOCK],
-          };
-        }
+        return {
+          target: VTREASURY,
+          signature: "withdrawTreasuryBEP20(address,uint256,address)",
+          params: [object.vTokenAddress, object.vTokenBalanceMantissa, NORMAL_TIMELOCK],
+        };
       }),
 
       ...VTOKEN_SNAPSHOT.map(object => {
@@ -301,7 +293,7 @@ export const vip188 = () => {
             target: VTREASURY,
             signature: "",
             params: [],
-            val: object.underlyingAmount,
+            value: object.underlyingAmount,
           };
         } else {
           return {

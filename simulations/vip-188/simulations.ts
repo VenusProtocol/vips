@@ -15,30 +15,32 @@ forking(32735916, () => {
   const prevBal = [];
   before(async () => {
     VTOKEN_SNAPSHOT.forEach(async object => {
-      if (object.symbol === "vBNB") {
+      if (object.symbol == "vBNB") {
         prevBnbBal = await provider.getBalance(VTREASURY);
-        return;
+      } else {
+        underlying = new ethers.Contract(object.underlyingAddress, IERC20, provider);
+        prevBal.push(await underlying.balanceOf(VTREASURY));
       }
-      underlying = new ethers.Contract(object.underlyingAddress, IERC20, provider);
-      prevBal.push(await underlying.balanceOf(VTREASURY));
     });
   });
 
   testVip("VIP-188 Redeem VTokens in the Treasury", vip188());
 
   describe("Post-VIP", async () => {
-    VTOKEN_SNAPSHOT.forEach(async (object, index) => {
-      if (object.symbol === "vBNB") {
-        const balNow = await provider.getBalance(VTREASURY);
-        const delta = balNow.sub(prevBnbBal);
-        expect(delta).equals(object.underlyingAmount);
-        return;
-      }
-      it(`should match ${object.symbol} balance of vTreasury`, async () => {
-        underlying = new ethers.Contract(object.underlyingAddress, IERC20, provider);
-        const balNow = await underlying.balanceOf(VTREASURY);
-        const delta = balNow.sub(prevBal[index]);
-        expect(delta).equals(object.underlyingAmount);
+    let index = 0;
+    VTOKEN_SNAPSHOT.forEach(async object => {
+      it(`should match ${object.symbol} underlying balance of vTreasury`, async () => {
+        if (object.symbol == "vBNB") {
+          const balNow = await provider.getBalance(VTREASURY);
+          const delta = balNow.sub(prevBnbBal);
+          expect(delta).equals(object.underlyingAmount);
+        } else {
+          underlying = new ethers.Contract(object.underlyingAddress, IERC20, provider);
+          const balNow = await underlying.balanceOf(VTREASURY);
+          const delta = balNow.sub(prevBal[index]);
+          expect(delta).equals(object.underlyingAmount);
+          index++;
+        }
       });
     });
   });
