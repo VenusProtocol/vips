@@ -1,20 +1,20 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
-const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const VBNBAdmin_ADDRESS = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
-const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
-const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
-const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
-const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
-const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const NEW_RISK_FUND_IMPLEMENTATION = "0x0E8Ef0EC1e0C109c5B5249CcefB703A414835eaC";
-const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
+const NEW_RISK_FUND_IMPLEMENTATION = "0x1E7DEC93C77740c2bB46daf87ef42056E388dA14";
+const PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
+const PSR = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
+const TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+const VBNBAdmin = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
+const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-export const vip152 = () => {
+export const vip189Testnet = () => {
   const meta = {
     version: "v2",
     title: "Change vBNB admin to vBNBAdmin and Setup Protocol Share Reserve",
@@ -34,17 +34,17 @@ export const vip152 = () => {
         params: [RISK_FUND, NEW_RISK_FUND_IMPLEMENTATION],
       },
       {
-        target: VBNBAdmin_ADDRESS,
+        target: VBNBAdmin,
         signature: "acceptOwnership()",
         params: [],
       },
       {
         target: vBNB_ADDRESS,
         signature: "_setPendingAdmin(address)",
-        params: [VBNBAdmin_ADDRESS],
+        params: [VBNBAdmin],
       },
       {
-        target: VBNBAdmin_ADDRESS,
+        target: VBNBAdmin,
         signature: "_acceptAdmin()",
         params: [],
       },
