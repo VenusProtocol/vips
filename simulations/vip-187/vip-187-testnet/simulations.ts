@@ -12,6 +12,7 @@ const NEW_RESILIENT_ORACLE_IMPLEMENTATION = "0x35cC3b99985F9d970aEcc9BD83d5Ac78a
 const OLD_RESILIENT_ORACLE_IMPLEMENTATION = "0xF53cFE89b4c3eFCbdd9aF712e94017454d43c181";
 const DEFAULT_PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 const BOUND_VALIDATOR_PROXY = "0x2842140e4Ad3a92e9af30e27e290300dd785076d";
+const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const VBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 const VAI_ADDRESS = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 const TRX = "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B";
@@ -49,6 +50,7 @@ forking(34311500, () => {
       expect(await resilientOracle.boundValidator()).to.equal(BOUND_VALIDATOR_PROXY);
       expect(await resilientOracle.vBnb()).to.equal(VBNB_ADDRESS);
       expect(await resilientOracle.vai()).to.equal(VAI_ADDRESS);
+      expect(await resilientOracle.accessControlManager()).to.equal(ACM);
     });
 
     it("Should return a valid price", async () => {
