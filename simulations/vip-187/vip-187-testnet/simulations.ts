@@ -1,9 +1,12 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip187Testnet } from "../../../vips/vip-187/vip-187-testnet";
+import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -16,14 +19,21 @@ const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const VBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 const VAI_ADDRESS = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 const TRX = "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 
 forking(34311500, () => {
   const provider = ethers.provider;
   let resilientOracle: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
+  let boundValidator: ethers.Contract;
 
   before(async () => {
-    resilientOracle = new ethers.Contract(RESILIENT_ORACLE_PROXY, RESILIENT_ORACLE_ABI, provider);
+    await impersonateAccount(NORMAL_TIMELOCK);
+    const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
+
+    resilientOracle = new ethers.Contract(RESILIENT_ORACLE_PROXY, RESILIENT_ORACLE_ABI, timelock);
+    boundValidator = new ethers.Contract(BOUND_VALIDATOR_PROXY, BOUND_VALIDATOR_ABI, timelock);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
   });
 
@@ -56,6 +66,33 @@ forking(34311500, () => {
     it("Should return a valid price", async () => {
       expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
       expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+    });
+
+    describe("BoundValidator behavior", () => {
+      before(async () => {
+        await resilientOracle.setOracle(TRX, CHAINLINK_ORACLE, 1); // Set Chainlink as the Pivot oracle for TRX
+        await resilientOracle.enableOracle(TRX, 1, true); // Enable the Pivot Oracle for TRX
+      });
+
+      it("Inside the limits", async () => {
+        await boundValidator.setValidateConfig({
+          asset: TRX,
+          upperBoundRatio: parseUnits("1.1", 18),
+          lowerBoundRatio: parseUnits("0.9", 18),
+        });
+
+        expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
+      });
+
+      it("Outside the limits", async () => {
+        await boundValidator.setValidateConfig({
+          asset: TRX,
+          upperBoundRatio: parseUnits("2", 18),
+          lowerBoundRatio: parseUnits("1.1", 18),
+        });
+
+        await expect(resilientOracle.getPrice(TRX)).to.be.reverted;
+      });
     });
   });
 });
