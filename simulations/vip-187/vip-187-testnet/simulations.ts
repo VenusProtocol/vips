@@ -22,12 +22,12 @@ forking(34311500, () => {
   let resilientOracle: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
 
-  beforeEach(async () => {
+  before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE_PROXY, RESILIENT_ORACLE_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
   });
 
-  describe("Pre-VIP behavior", async () => {
+  describe("Pre-VIP behavior", () => {
     it("ResilientOracle proxy should have old implementation", async () => {
       const implementation = await defaultProxyAdmin.getProxyImplementation(RESILIENT_ORACLE_PROXY);
       expect(implementation).to.equal(OLD_RESILIENT_ORACLE_IMPLEMENTATION);
