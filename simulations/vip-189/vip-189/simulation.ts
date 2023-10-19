@@ -87,12 +87,16 @@ forking(32659660, () => {
     let WBNB: ethers.Contract;
     let proxyAdmin: ethers.Contract;
     let riskFund: ethers.Contract;
+    let vBNBFallback: ethers.Contract;
 
     before(async () => {
       await impersonateAccount(RANDOM_ADDRESS);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(RANDOM_ADDRESS);
+      const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
 
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
+      vBNBFallback = new ethers.Contract(VBNBAdmin_ADDRESS, vBNB_ABI, timelock);
       psr = new ethers.Contract(PSR, PSR_ABI, signer);
       vBNBAdmin = new ethers.Contract(VBNBAdmin_ADDRESS, vBNBAdmin_ABI, signer);
       WBNB = new ethers.Contract(WBNB_ADDRESS, ERC20_ABI, provider);
@@ -166,6 +170,17 @@ forking(32659660, () => {
       expect(await proxyAdmin.getProxyAdmin(RISK_FUND)).to.be.equal(PROXY_ADMIN);
 
       expect(await proxyAdmin.owner()).to.be.equal(NORMAL_TIMELOCK);
+    });
+
+    it("check permissions", async () => {
+      expect(await vBNB.reserveFactorMantissa()).to.be.equal("250000000000000000");
+      expect(await vBNB.pendingAdmin()).to.be.equal("0x0000000000000000000000000000000000000000");
+
+      await vBNBFallback._setReserveFactor(100);
+      await vBNBFallback._setPendingAdmin(NORMAL_TIMELOCK);
+
+      expect(await vBNB.reserveFactorMantissa()).to.be.equal(100);
+      expect(await vBNB.pendingAdmin()).to.be.equal(NORMAL_TIMELOCK);
     });
   });
 });
