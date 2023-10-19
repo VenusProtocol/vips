@@ -8,9 +8,9 @@ const DEFAULT_PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 export const vip187 = () => {
   const meta = {
     version: "v2",
-    title: "VIP ResilientOracle Implementation Upgrade",
+    title: "ResilientOracle Implementation Upgrade",
     description:
-      "Upgardes the implementation contract for resilient oracle in order to fix a wrong BoundValidator immutable variable",
+      "Upgrades the implementation contract for resilient oracle in order to fix a wrong BoundValidator immutable variable",
     forDescription: "I agree that Venus Protocol should proceed with upgrading Resilient Oracle implementation",
     againstDescription:
       "I do not think that Venus Protocol should proceed with upgrading Resilient Oracle implementation",
