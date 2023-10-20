@@ -7,12 +7,12 @@ import { vip190 } from "../../../vips/vip-190/vip-190-testnet";
 import AccessControlManager_ABI from "./abi/AccessControlManager.json";
 import OmnichainProposalSender_ABI from "./abi/OmnichainProposalSender.json";
 
-const OmnichainProposalSender = "0x07ac4365fb887d3c7829f0a5424bccec4a33e13a";
-const OmnichainGovernanceExecutor = "0x4fed114b31b1033707eeccd8367ee6095453e0d9";
+const OmnichainProposalSender = "0xf83769f8babf47a4a0a64cae0efb72aecd773ae5";
+const OmnichainGovernanceExecutor = "0xbaaddb276acc9d1b5e1b09254b45cb0ccdddf748";
 const remoteChainId = 10161;
 const NormalTimelock = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(34358570, async () => {
+forking(34369040, async () => {
   let omnichainProposalSender: ethers.Contract;
   const provider = ethers.provider;
   let impersonatedTimelock: any;
