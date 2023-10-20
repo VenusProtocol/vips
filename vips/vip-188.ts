@@ -207,7 +207,7 @@ export const vip188 = () => {
       ...VTOKEN_SNAPSHOT.map(object => {
         return {
           target: object.vTokenAddress,
-          signature: "redeem(uint)",
+          signature: "redeem(uint256)",
           params: [object.vTokenBalanceMantissa],
         };
       }),
