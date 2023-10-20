@@ -167,31 +167,39 @@ export const VTOKEN_SNAPSHOT: AssetConfig[] = [
     underlyingAddress: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
     underlyingAmount: "3602188613",
   },
-  {
-    symbol: "vWBETH",
-    vTokenAddress: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
-    vTokenBalanceMantissa: "0",
-    underlyingAddress: "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
-    underlyingAmount: "0",
-  },
-  {
-    symbol: "vTUSD",
-    vTokenAddress: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E",
-    vTokenBalanceMantissa: "0",
-    underlyingAddress: "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9",
-    underlyingAmount: "0",
-  },
 ];
 
-export const vip188 = () => {
+export const vip190 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-188 VIP to redeem VTokens in the Treasury",
-    description: `upgrade the implementation of the Vtoken core supportimg Automatic income allocation feature.`,
-    forDescription: "I agree that Venus Protocol should proceed with VIP to redeem VTokens in the Treasury",
-    againstDescription: "I do not think that Venus Protocol should proceed with VIP to redeem VTokens in the Treasury",
-    abstainDescription:
-      "I am indifferent to whether Venus Protocol proceeds with VIP to redeem VTokens in the Treasury or not",
+    title: "VIP-190 Protocol Liquidation Revenue Withdrawal",
+    description: `#### Summary
+
+If passed, this VIP will redeem every VToken that was in the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on October 1st, 2023, and it will transfer the associated underlying tokens to the Venus Treasury.
+
+#### Description
+
+This VIP will redeem Venus Protocol liquidation fee revenues accumulated over the first three quarters (Q1, Q2, Q3) of 2023. Presently, these assets are held as VTokens in the Venus Treasury and need to be accessed for purposes dictated by the [Venus tokenomics](https://docs-v4.venus.io/governance/tokenomics). Subsequently, an additional VIP will be introduced to allocate the risk fund toward repaying a portion of the protocol’s shortfall. Additionally, the plan is to withdraw the remaining amount to be converted into BTC, ETH, USDC, and USDT, ensuring alignment with the Venus tokenomics — specifically applying Tokenomics V3 for Q1 revenues and Tokenomics V4 for revenues from Q2 onwards.
+
+This process will be divided into three parts:
+
+1. Redeem all VTokens accrued from liquidation fees to their underlying asset.
+2. Repay a portion of the protocol’s shortfall.
+3. Withdraw all underlying assets and convert them into BTC, ETH, USDC and USDT
+
+This VIP will focus on the first part of the process: Redeem all VTokens accrued from liquidation fees to their underlying asset.
+
+Only the VTokens of the Venus Core pool will be considered in this VIP, except vBUSD and vTUSDOLD, due to the lack of liquidity.
+
+This VIP doesn’t imply any changes in the code of the smart contracts. The VIP has been simulated [here](https://github.com/VenusProtocol/vips/pull/92).
+
+**References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/92)
+- [Venus tokenomics](https://docs-v4.venus.io/governance/tokenomics)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
