@@ -322,3 +322,22 @@ export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: str
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
 };
+
+export const makePayload = async (
+  targets: any,
+  values: any,
+  signatures: any,
+  calldatas: any,
+  proposalId: number,
+  proposalType: number,
+) => {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint256", "uint8"],
+    [targets, values, signatures, calldatas, proposalId, proposalType],
+  );
+  return payload;
+};
+export const adapterParams = async (version: number, value: number) => {
+  const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [version, value]);
+  return adapterParam;
+};
