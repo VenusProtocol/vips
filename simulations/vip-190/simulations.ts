@@ -8,7 +8,7 @@ import IERC20 from "./abi/IERC20UpgradableAbi.json";
 
 const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 
-forking(32735916, () => {
+forking(32774106, () => {
   let underlying: Contract;
   let prevBnbBal: BigNumberish;
   const provider = ethers.provider;

@@ -32,7 +32,7 @@ export const VTOKEN_SNAPSHOT: AssetConfig[] = [
     vTokenAddress: "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0",
     vTokenBalanceMantissa: "119659870814202",
     underlyingAddress: "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A",
-    underlyingAmount: "24136813572896693578350", // considering the exchange rate at 32208206, it should be 24136813572896694332318
+    underlyingAmount: "24135813572896693578350", // -1 SXP to avoid issues with rounding errors
   },
   {
     symbol: "vXVS",
@@ -116,7 +116,7 @@ export const VTOKEN_SNAPSHOT: AssetConfig[] = [
     vTokenAddress: "0x972207A639CC1B374B893cc33Fa251b55CEB7c07",
     vTokenBalanceMantissa: "1355242648",
     underlyingAddress: "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B",
-    underlyingAmount: "278016975436269725", // considering the exchange rate at 32208206, it should be 278016975436438605
+    underlyingAmount: "277016975436269725", // -0.001 BETH to avoid issues with rounding errors
   },
   {
     symbol: "vADA",
@@ -158,7 +158,7 @@ export const VTOKEN_SNAPSHOT: AssetConfig[] = [
     vTokenAddress: "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93",
     vTokenBalanceMantissa: "28901561446948",
     underlyingAddress: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
-    underlyingAmount: "6081553607465818470202", // considering the exchange rate at 32208206, it should be 6081553607465818470203
+    underlyingAmount: "6080553607465818470202", // -1 TRXOLD to avoid issues with rounding errors
   },
   {
     symbol: "vTRX",
