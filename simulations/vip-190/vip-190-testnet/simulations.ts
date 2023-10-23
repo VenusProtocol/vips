@@ -49,7 +49,7 @@ forking(34366000, () => {
     });
   });
 
-  testVip("VIP-123 Change Oracle and Configure Resilient Oracle", vip190Testnet(), {
+  testVip("VIP-190 Enable RedStone oracle as the Pivot oracle for TRX", vip190Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [2]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [2]);
