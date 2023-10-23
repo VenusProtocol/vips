@@ -34,7 +34,7 @@ forking(34455768, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(IL_MARKETS.length * 2 + 4); // Number of Vip steps
+      await mine(IL_MARKETS.length * 2 + 5); // Number of Vip steps
     });
     for (const market of IL_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -74,7 +74,7 @@ forking(34455768, () => {
 forking(34455768, () => {
   testVip("VIP-170 IL VToken Upgrade of AIA", vip191Testnet(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [1, 22]);
+      await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [2, 27]);
     },
   });
 });

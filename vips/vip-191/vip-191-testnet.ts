@@ -10,6 +10,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+const SN_BNB_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 
 interface AssetConfig {
   name: string;
@@ -150,7 +151,7 @@ export const IL_MARKETS: AssetConfig[] = [
   },
   {
     name: "vTWT_DeFi",
-    address: "0xb677e080148368EeeE70fA3865d07E92c6500174",
+    address: "0x4C94e67d239aD585275Fdd3246Ab82c8a2668564",
     reduceReservesBlockDelta: 100,
   },
 ];
@@ -186,6 +187,11 @@ export const vip191Testnet = () => {
       },
       {
         target: VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_IMPL_VTOKEN],
+      },
+      {
+        target: SN_BNB_BEACON,
         signature: "upgradeTo(address)",
         params: [NEW_IMPL_VTOKEN],
       },

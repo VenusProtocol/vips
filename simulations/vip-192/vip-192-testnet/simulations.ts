@@ -35,7 +35,7 @@ forking(34452659, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 29); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 32); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -134,7 +134,7 @@ forking(34452659, () => {
 
         await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.9", 18));
+        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
         if (market.name != "vBUSD") {
           // Several actions are paused in vBUSD
