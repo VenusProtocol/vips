@@ -154,10 +154,10 @@ function filterAssets(assets: AssetConfig[]) {
 
 const MARKETS_WITH_ACCEPT_ADMIN = filterAssets(CORE_MARKETS);
 
-export const vip171Testnet = () => {
+export const vip192Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-171 VToken Upgrade of AIA",
+    title: "VIP-192 VToken Upgrade of AIA",
     description: `upgrade the implementation of the Vtoken core supportimg Automatic income allocation feature.`,
     forDescription: "I agree that Venus Protocol should proceed with VToken Upgrade of AIA",
     againstDescription: "I do not think that Venus Protocol should proceed with VToken Upgrade of AIA",

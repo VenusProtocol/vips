@@ -7,7 +7,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { fetchVTokenStorageCore, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
-import { CORE_MARKETS, vip171Testnet } from "../../../vips/vip-171/vip-171-testnet";
+import { CORE_MARKETS, vip192Testnet } from "../../../vips/vip-192/vip-192-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
@@ -101,7 +101,7 @@ forking(34452659, () => {
       type: "event",
     },
   ];
-  testVip("VIP-171 Core  VToken Upgrade of AIA", vip171Testnet(), {
+  testVip("VIP-171 Core  VToken Upgrade of AIA", vip192Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -116,7 +116,7 @@ forking(34452659, () => {
 forking(34452659, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip171Testnet());
+      await pretendExecutingVip(vip192Testnet());
       [user] = await ethers.getSigners();
     });
 

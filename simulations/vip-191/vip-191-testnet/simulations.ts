@@ -7,7 +7,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { fetchVTokenStorageIL, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
-import { IL_MARKETS, vip170Testnet } from "../../../vips/vip-170/vip-170-testnet";
+import { IL_MARKETS, vip191Testnet } from "../../../vips/vip-191/vip-191-testnet";
 import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
@@ -72,7 +72,7 @@ forking(34455768, () => {
 });
 
 forking(34455768, () => {
-  testVip("VIP-170 IL VToken Upgrade of AIA", vip170Testnet(), {
+  testVip("VIP-170 IL VToken Upgrade of AIA", vip191Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [1, 22]);
     },
@@ -82,7 +82,7 @@ forking(34455768, () => {
 forking(34455768, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip170Testnet());
+      await pretendExecutingVip(vip191Testnet());
       [user] = await ethers.getSigners();
     });
 
