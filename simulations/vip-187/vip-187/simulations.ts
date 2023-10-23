@@ -1,9 +1,12 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip187 } from "../../../vips/vip-187/vip-187";
+import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -26,9 +29,14 @@ forking(32739800, () => {
   const provider = ethers.provider;
   let resilientOracle: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
+  let boundValidator: ethers.Contract;
 
   before(async () => {
-    resilientOracle = new ethers.Contract(RESILIENT_ORACLE_PROXY, RESILIENT_ORACLE_ABI, provider);
+    await impersonateAccount(NORMAL_TIMELOCK);
+    const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
+
+    resilientOracle = new ethers.Contract(RESILIENT_ORACLE_PROXY, RESILIENT_ORACLE_ABI, timelock);
+    boundValidator = new ethers.Contract(BOUND_VALIDATOR_PROXY, BOUND_VALIDATOR_ABI, timelock);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, TRX, TRX_PRICE_FEED, NORMAL_TIMELOCK);
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, VBNB_UNDERLYING, BNB_PRICE_FEED, NORMAL_TIMELOCK);
@@ -41,7 +49,7 @@ forking(32739800, () => {
     });
   });
 
-  testVip("vip187", vip187(), {
+  testVip("vip187Testnet", vip187(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["Upgraded"], [1]);
     },
@@ -63,6 +71,33 @@ forking(32739800, () => {
     it("Should return a valid price", async () => {
       expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
       expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+    });
+
+    describe("BoundValidator behavior", () => {
+      before(async () => {
+        await resilientOracle.setOracle(TRX, CHAINLINK_ORACLE, 1); // Set Chainlink as the Pivot oracle for TRX
+        await resilientOracle.enableOracle(TRX, 1, true); // Enable the Pivot Oracle for TRX
+      });
+
+      it("Inside the limits", async () => {
+        await boundValidator.setValidateConfig({
+          asset: TRX,
+          upperBoundRatio: parseUnits("1.1", 18),
+          lowerBoundRatio: parseUnits("0.9", 18),
+        });
+
+        expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
+      });
+
+      it("Outside the limits", async () => {
+        await boundValidator.setValidateConfig({
+          asset: TRX,
+          upperBoundRatio: parseUnits("2", 18),
+          lowerBoundRatio: parseUnits("1.1", 18),
+        });
+
+        await expect(resilientOracle.getPrice(TRX)).to.be.reverted;
+      });
     });
   });
 });

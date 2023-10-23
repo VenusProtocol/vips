@@ -5,7 +5,7 @@ const RESILIENT_ORACLE_PROXY = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const NEW_RESILIENT_ORACLE_IMPLEMENTATION = "0x35cC3b99985F9d970aEcc9BD83d5Ac78a074a896";
 const DEFAULT_PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 
-export const vip187Testnet = () => {
+export const vip187 = () => {
   const meta = {
     version: "v2",
     title: "ResilientOracle Implementation Upgrade",
