@@ -4,10 +4,10 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { vip190 } from "../../../vips/vip-190/vip-190-testnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import { vip190 } from "../../../vips/vip-190/vip-190-testnet";
 
 const REDSTONE_ORACLE = "0x0Af51d1504ac5B711A9EAFe2fAC11A51d32029Ad";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
