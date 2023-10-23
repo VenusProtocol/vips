@@ -23,7 +23,7 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 const PIVOT_ORACLE_ROLE = 1;
 const MAX_STALE_PERIOD = 60 * 60 * 24; // 1 day
 
-export const vip190Testnet = () => {
+export const vip190 = () => {
   const meta = {
     version: "v2",
     title: "VIP-190 Setup RedStone oracle",
