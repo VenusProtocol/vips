@@ -1,4 +1,5 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
@@ -148,10 +149,27 @@ export const performVTokenBasicActions = async (
     }
   }
 
+  let previousBalance = await vToken.balanceOf(user.address);
+  let previousBorrowBalance = await vToken.borrowBalanceStored(user.address);
+
+  // Approve market
   await underlying.connect(user).approve(marketAddress, mintAmount.add(repayAmount));
 
+  // Mint tokens
   await vToken.connect(user).mint(mintAmount);
+  expect(await vToken.balanceOf(user.address)).to.be.greaterThan(previousBalance);
+  previousBalance = await vToken.balanceOf(user.address);
+
+  // Borrow tokens
   await vToken.connect(user).borrow(borrowAmount);
+  expect(await vToken.borrowBalanceStored(user.address)).to.be.greaterThan(previousBorrowBalance);
+  previousBorrowBalance = await vToken.borrowBalanceStored(user.address);
+
+  // Repay borrowed tokens
   await vToken.connect(user).repayBorrow(repayAmount);
+  expect(await vToken.borrowBalanceStored(user.address)).to.be.lessThan(previousBorrowBalance);
+
+  // Redeem tokens
   await vToken.connect(user).redeemUnderlying(redeemAmount);
+  expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
 };

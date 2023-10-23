@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
+const NEW_VBEP20_DELEGATE_IMPL = "0x55b1b22C3E3814644B1C777896b20aBfb618ad6a";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
@@ -23,82 +23,128 @@ export const CORE_MARKETS: AssetConfig[] = [
   {
     name: "vETH",
     address: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: false,
   },
-
   {
     name: "vLTC",
     address: "0xAfc13BC065ABeE838540823431055D2ea52eBA52",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: false,
   },
-
   {
     name: "VBTC",
     address: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: false,
   },
-
   {
     name: "vXRP",
     address: "0x488aB2826a154da01CC4CC16A8C83d4720D3cA2C",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: false,
   },
   {
     name: "vSXP",
     address: "0x74469281310195A04840Daf6EdF576F559a3dE80",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: true,
   },
   {
     name: "vTRX",
     address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: false,
     isMock: true,
   },
   {
     name: "vTUSD",
     address: "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: false,
     isMock: true,
   },
   {
     name: "vUSDC",
     address: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: true,
   },
   {
     name: "vUSDT",
     address: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: false,
     isMock: true,
   },
   {
     name: "vWBETH",
     address: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: false,
     isMock: true,
   },
   {
     name: "vXVS",
     address: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E",
-    reduceReservesBlockDelta: 840000,
+    reduceReservesBlockDelta: 100,
     acceptAdmin: true,
     isMock: false,
+  },
+  {
+    name: "vBUSD",
+    address: "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: false,
+    isMock: true,
+  },
+  {
+    name: "vTRXOLD",
+    address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: false,
+    isMock: true,
+  },
+  {
+    name: "vDOGE",
+    address: "0xF912d3001CAf6DC4ADD366A62Cc9115B4303c9A9",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: true,
+    isMock: true,
+  },
+  {
+    name: "vMATIC",
+    address: "0x3619bdDc61189F33365CC572DF3a68FB3b316516",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: true,
+    isMock: true,
+  },
+  {
+    name: "vCAKE",
+    address: "0xeDaC03D29ff74b5fDc0CC936F6288312e1459BC6",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: true,
+    isMock: true,
+  },
+  {
+    name: "vADA",
+    address: "0x37C28DE42bA3d22217995D146FC684B2326Ede64",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: false,
+    isMock: true,
+  },
+  {
+    name: "vAAVE",
+    address: "0x714db6c38A17883964B68a07d56cE331501d9eb6",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: false,
+    isMock: true,
   },
 ];
 

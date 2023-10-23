@@ -12,7 +12,7 @@ import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
-const NEW_VBEP20_DELEGATE_IMPL = "0xAC5CFaC96871f35f7ce4eD2b46484Db34B548b40";
+const NEW_VBEP20_DELEGATE_IMPL = "0x55b1b22C3E3814644B1C777896b20aBfb618ad6a";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
@@ -30,7 +30,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34259644, () => {
+forking(34452659, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -51,19 +51,22 @@ forking(34259644, () => {
 
         await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.9", 18));
+        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
-          mintAmount,
-          borrowAmount,
-          repayAmount,
-          redeemAmount,
-          vToken,
-          underlying,
-          market.isMock,
-        );
+        if (market.name != "vBUSD") {
+          // Several actions are paused in vBUSD
+          await performVTokenBasicActions(
+            market.address,
+            user,
+            mintAmount,
+            borrowAmount,
+            repayAmount,
+            redeemAmount,
+            vToken,
+            underlying,
+            market.isMock,
+          );
+        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
@@ -76,7 +79,7 @@ forking(34259644, () => {
   });
 });
 
-forking(34259644, () => {
+forking(34452659, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -110,7 +113,7 @@ forking(34259644, () => {
   });
 });
 
-forking(34259644, () => {
+forking(34452659, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip171Testnet());
@@ -133,17 +136,20 @@ forking(34259644, () => {
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.9", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
-          mintAmount,
-          borrowAmount,
-          repayAmount,
-          redeemAmount,
-          vToken,
-          underlying,
-          market.isMock,
-        );
+        if (market.name != "vBUSD") {
+          // Several actions are paused in vBUSD
+          await performVTokenBasicActions(
+            market.address,
+            user,
+            mintAmount,
+            borrowAmount,
+            repayAmount,
+            redeemAmount,
+            vToken,
+            underlying,
+            market.isMock,
+          );
+        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
