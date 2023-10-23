@@ -15,6 +15,8 @@ const TRX_OLD = "0x19E7215abF8B2716EE807c9f4b83Af0e7f92653F";
 const REDSTONE_TRX_FEED = "0x50db815d3c4b869f89925690e936ed85b0b76075";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 
 const PRICE_LOWER_BOUND = parseUnits("0.99", 18);
 const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
@@ -38,22 +40,32 @@ export const vip190Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [REDSTONE_ORACLE, "setUnderlyingPrice(address,uint256)", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [REDSTONE_ORACLE, "setDirectPrice(address,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [REDSTONE_ORACLE, "setTokenConfigs(TokenConfig[])", NORMAL_TIMELOCK],
+        params: [REDSTONE_ORACLE, "setDirectPrice(address,uint256)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [REDSTONE_ORACLE, "setDirectPrice(address,uint256)", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", CRITICAL_TIMELOCK],
       },
       {
         target: REDSTONE_ORACLE,

@@ -83,5 +83,9 @@ forking(34366000, () => {
       expect(validateConfig.upperBoundRatio).to.equal(PRICE_UPPER_BOUND);
       expect(validateConfig.lowerBoundRatio).to.equal(PRICE_LOWER_BOUND);
     });
+    it("Should return prices for TRX and TRX_OLD", async () => {
+      expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
+      expect(await resilientOracle.getPrice(TRX_OLD)).to.not.equal(0);
+    });
   });
 });
