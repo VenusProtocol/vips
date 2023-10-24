@@ -8,7 +8,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import { vip189 } from "../../vips/vip-189";
+import { vip191 } from "../../vips/vip-191";
 import BUSD_LIQUIDATOR_ABI from "./abi/BUSDLiquidator.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -53,7 +53,7 @@ forking(32738700, () => {
     });
   });
 
-  testVip("VIP-189 BUSD Liquidator", vip189(), {
+  testVip("VIP-191 BUSD Liquidator", vip191(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_CORE_ABI], ["NewMarketInterestRateModel", "Failure"], [1, 0]);
     },
