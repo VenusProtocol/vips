@@ -53,6 +53,10 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
       return "0x";
     }
     const iface = new ethers.utils.Interface([`function ${signature}`]);
+    const canonicalSignature = iface.fragments[0].format();
+    if (signature !== canonicalSignature) {
+      throw new Error(`Signature "${signature}" should be in the canonical form: "${canonicalSignature}"`);
+    }
     return iface.encodeFunctionData(signature, params);
   };
 
