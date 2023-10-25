@@ -7,17 +7,21 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { expectEvents } from "../../../src/utils";
 import { expect } from "chai";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
-const PRIME = "0x78d72e8078878B6259ffA48B1035F927Ff43F0b4";
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
+const PRIME = "0xDd83Ed95672bDFdcbF6124f17554D1C37523de72";
+const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(34514247, () => {
+forking(34524479, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider =  Contract;
 
     before(async () => {
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      impersonateAccount(STAKED_USER);
+      const signer = await ethers.getSigner(STAKED_USER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
     });
 
@@ -27,6 +31,10 @@ forking(34514247, () => {
 
     it("prime address", async () => {
       expect(await primeLiquidityProvider.prime()).to.equal("0x0000000000000000000000000000000000000000");
+    });
+
+    it("claim prime token", async () => {
+      await expect(prime.claim()).to.be.reverted;
     });
   });
 
@@ -41,7 +49,9 @@ forking(34514247, () => {
     let primeLiquidityProvider =  Contract;
 
     before(async () => {
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      impersonateAccount(STAKED_USER);
+      const signer = await ethers.getSigner(STAKED_USER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
     });
 
@@ -51,6 +61,10 @@ forking(34514247, () => {
 
     it("prime address", async () => {
       expect(await primeLiquidityProvider.prime()).to.equal(PRIME);
+    });
+
+    it("claim prime token", async () => {
+      await expect(prime.claim()).to.be.not.be.reverted;
     });
   });
 });
