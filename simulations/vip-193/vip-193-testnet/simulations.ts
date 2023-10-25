@@ -7,7 +7,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { fetchVTokenStorageCore, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
-import { CORE_MARKETS, vip192Testnet } from "../../../vips/vip-192/vip-192-testnet";
+import { CORE_MARKETS, vip193Testnet } from "../../../vips/vip-193/vip-193-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
@@ -35,7 +35,7 @@ forking(34452659, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 14); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 19); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -101,13 +101,13 @@ forking(34452659, () => {
       type: "event",
     },
   ];
-  testVip("VIP-192 Core  VToken Upgrade of AIA", vip192Testnet(), {
+  testVip("VIP-193 Core  VToken Upgrade of AIA", vip193Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [VTOKEN_ABI, ProxyAdminInterface],
         ["NewImplementation", "NewProtocolShareReserve", "NewReduceReservesBlockDelta", "NewAccessControlManager"],
-        [16, 16, 16, 16],
+        [2, 2, 2, 2],
       );
     },
   });
@@ -116,7 +116,7 @@ forking(34452659, () => {
 forking(34452659, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip192Testnet());
+      await pretendExecutingVip(vip193Testnet());
       [user] = await ethers.getSigners();
     });
 
