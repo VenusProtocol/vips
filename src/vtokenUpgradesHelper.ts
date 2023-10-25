@@ -141,6 +141,13 @@ export const performVTokenBasicActions = async (
     repayAmount = parseUnits("25", 6);
     redeemAmount = parseUnits("50", 6);
   }
+
+  if (underlyingDecimals == 8) {
+    mintAmount = parseUnits("200", 8);
+    borrowAmount = parseUnits("50", 8);
+    repayAmount = parseUnits("25", 8);
+    redeemAmount = parseUnits("50", 8);
+  }
   if (process.env.FORK_TESTNET === "true" && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
