@@ -12,7 +12,7 @@ import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
-const NEW_VBEP20_DELEGATE_IMPL = "0x55b1b22C3E3814644B1C777896b20aBfb618ad6a";
+const NEW_VBEP20_DELEGATE_IMPL = "0x8d79C8f4400fE68Fd17040539FE5e1706c1f2850";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
@@ -30,7 +30,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34452659, () => {
+forking(34517682, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -77,7 +77,7 @@ forking(34452659, () => {
   });
 });
 
-forking(34452659, () => {
+forking(34517682, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -111,7 +111,7 @@ forking(34452659, () => {
   });
 });
 
-forking(34452659, () => {
+forking(34517682, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip192Testnet());

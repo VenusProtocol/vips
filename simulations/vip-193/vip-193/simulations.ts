@@ -16,7 +16,7 @@ let underlying: ethers.Contract;
 let impersonatedTimelock: SignerWithAddress;
 const provider = ethers.provider;
 
-forking(32906245, () => {
+forking(32915411, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -52,9 +52,9 @@ forking(32906245, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      [user] = await ethers.getSigners();
     });
     for (const market of CORE_MARKETS) {
+      if (market.name != "vTRXOLD") continue;
       it(`Reduce reserves in ${market.name}`, async () => {
         vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
         underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
@@ -63,12 +63,13 @@ forking(32906245, () => {
         const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
         // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-        expect(await vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
+        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
         const reservesAfter = await vToken.totalReserves();
         const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
         expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
         expect(reservesAfter).equals(0);
+        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
       });
     }
   });

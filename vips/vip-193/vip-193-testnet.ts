@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const NEW_VBEP20_DELEGATE_IMPL = "0x55b1b22C3E3814644B1C777896b20aBfb618ad6a";
+const NEW_VBEP20_DELEGATE_IMPL = "0x8d79C8f4400fE68Fd17040539FE5e1706c1f2850";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
@@ -28,6 +28,12 @@ export const CORE_MARKETS: AssetConfig[] = [
   {
     name: "vTRXOLD",
     address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
+    reduceReservesBlockDelta: 100,
+    isMock: true,
+  },
+  {
+    name: "vTUSDOLD",
+    address: "0x3A00d9B02781f47d033BAd62edc55fBF8D083Fb0",
     reduceReservesBlockDelta: 100,
     isMock: true,
   },

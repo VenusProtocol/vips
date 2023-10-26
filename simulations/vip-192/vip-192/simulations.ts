@@ -29,7 +29,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(32906245, () => {
+forking(32915411, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -74,7 +74,7 @@ forking(32906245, () => {
   });
 });
 
-forking(32906245, () => {
+forking(32915411, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -108,7 +108,7 @@ forking(32906245, () => {
   });
 });
 
-forking(32906245, () => {
+forking(32915411, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip192());
@@ -165,11 +165,10 @@ forking(32906245, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(32906245, () => {
+forking(32915411, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip192());
-      [user] = await ethers.getSigners();
     });
 
     for (const market of CORE_MARKETS) {
@@ -179,12 +178,13 @@ forking(32906245, () => {
 
         const reservesPrior = await vToken.totalReserves();
         const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
-        expect(await vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
+        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
         const reservesAfter = await vToken.totalReserves();
         const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
         expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
         expect(reservesAfter).equals(0);
+        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
       });
     }
   });
