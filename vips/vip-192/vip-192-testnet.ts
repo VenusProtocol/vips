@@ -20,12 +20,6 @@ interface AssetConfig {
 
 export const CORE_MARKETS: AssetConfig[] = [
   {
-    name: "vBUSD",
-    address: "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4",
-    reduceReservesBlockDelta: 100,
-    isMock: true,
-  },
-  {
     name: "vTRXOLD",
     address: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
     reduceReservesBlockDelta: 100,

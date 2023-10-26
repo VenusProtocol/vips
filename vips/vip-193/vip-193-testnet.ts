@@ -129,6 +129,13 @@ export const CORE_MARKETS: AssetConfig[] = [
     acceptAdmin: false,
     isMock: true,
   },
+  {
+    name: "vBUSD",
+    address: "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4",
+    reduceReservesBlockDelta: 100,
+    acceptAdmin: false,
+    isMock: true,
+  },
 ];
 
 function filterAssets(assets: AssetConfig[]) {

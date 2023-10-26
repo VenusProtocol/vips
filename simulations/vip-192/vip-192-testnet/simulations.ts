@@ -107,7 +107,7 @@ forking(34517682, () => {
         txResponse,
         [VTOKEN_ABI, ProxyAdminInterface],
         ["NewImplementation", "NewProtocolShareReserve", "NewReduceReservesBlockDelta", "NewAccessControlManager"],
-        [3, 3, 3, 3],
+        [2, 2, 2, 2],
       );
     },
   });
@@ -171,5 +171,40 @@ forking(34517682, () => {
         expect(preVipStorage[i]).to.deep.equal(postVipStorage[i]);
       }
     });
+  });
+});
+
+// In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
+forking(34517682, () => {
+  describe("Post VIP simulations", async () => {
+    before(async () => {
+      await pretendExecutingVip(vip192Testnet());
+    });
+
+    for (const market of CORE_MARKETS) {
+      it(`Reduce reserves in ${market.name}`, async () => {
+        vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
+        underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
+
+        const cashPrior = await vToken.getCash();
+        const reservesPrior = await vToken.totalReserves();
+        const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+        if (Number(cashPrior) > Number(reservesPrior)) {
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
+          const reservesAfter = await vToken.totalReserves();
+          const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
+          expect(reservesAfter).equals(0);
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+        } else {
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+          const reservesAfter = await vToken.totalReserves();
+          const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+          expect(psrBalAfter).equals(psrBalPrior);
+          expect(reservesAfter).greaterThan(reservesPrior);
+        }
+      });
+    }
   });
 });
