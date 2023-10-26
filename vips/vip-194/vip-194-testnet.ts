@@ -156,10 +156,10 @@ export const IL_MARKETS: AssetConfig[] = [
   },
 ];
 
-export const vip191Testnet = () => {
+export const vip194Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-191 VToken Upgrade of AIA",
+    title: "VIP-194 VToken Upgrade of AIA",
     description: `upgrade the implementation of the Vtoken core supportimg Automatic income allocation feature.`,
     forDescription: "I agree that Venus Protocol should proceed with VToken Upgrade of AIA",
     againstDescription: "I do not think that Venus Protocol should proceed with VToken Upgrade of AIA",

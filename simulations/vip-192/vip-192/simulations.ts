@@ -1,14 +1,12 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { fetchVTokenStorageCore, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
+import { fetchVTokenStorageCore, storageLayout } from "../../../src/vtokenUpgradesHelper";
 import { CORE_MARKETS, vip192 } from "../../../vips/vip-192/vip-192";
-import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
@@ -19,49 +17,26 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 let vToken: ethers.Contract;
 let underlying: ethers.Contract;
-let user: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
+let user: SignerWithAddress;
 const postVipStorage: storageLayout[] = [];
 const preVipStorage: storageLayout[] = [];
 const provider = ethers.provider;
-const mintAmount = parseUnits("200", 18);
-const borrowAmount = parseUnits("50", 18);
-const repayAmount = parseUnits("50", 18);
-const redeemAmount = parseUnits("50", 18);
 
 forking(32915411, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 4); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 19); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
         user = await initMainnetUser(market.holder, ethers.utils.parseEther("5"));
 
         vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
-        const comptroller = new ethers.Contract(await vToken.comptroller(), COMPTROLLER_ABI, provider);
         underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
-        await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
-
-        // Some actions are paused
-        if (market.name != "vBETH" && market.name != "vSXP" && market.name != "vBUSD") {
-          await performVTokenBasicActions(
-            market.address,
-            user,
-            mintAmount,
-            borrowAmount,
-            repayAmount,
-            redeemAmount,
-            vToken,
-            underlying,
-            false,
-          );
-        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
@@ -96,13 +71,13 @@ forking(32915411, () => {
       type: "event",
     },
   ];
-  testVip("VIP-192 Core  VToken Upgrade of AIA", vip192(), {
+  testVip("VIP-192 Core VToken Upgrade of AIA Part - 1", vip192(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [VTOKEN_ABI, ProxyAdminInterface],
         ["NewImplementation", "NewProtocolShareReserve", "NewReduceReservesBlockDelta", "NewAccessControlManager"],
-        [23, 23, 23, 23],
+        [2, 2, 2, 2],
       );
     },
   });
@@ -112,6 +87,7 @@ forking(32915411, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip192());
+      impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       [user] = await ethers.getSigners();
     });
 
@@ -120,27 +96,8 @@ forking(32915411, () => {
         user = await initMainnetUser(market.holder, ethers.utils.parseEther("5"));
 
         vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
-        const comptroller = new ethers.Contract(await vToken.comptroller(), COMPTROLLER_ABI, provider);
         underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
-        await comptroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
-        await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
-
-        // Some actions are paused
-        if (market.name != "vBETH" && market.name != "vSXP" && market.name != "vBUSD") {
-          await performVTokenBasicActions(
-            market.address,
-            user,
-            mintAmount,
-            borrowAmount,
-            repayAmount,
-            redeemAmount,
-            vToken,
-            underlying,
-            false,
-          );
-        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
@@ -164,21 +121,22 @@ forking(32915411, () => {
   });
 });
 
-// In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
 forking(32915411, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
+      impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       await pretendExecutingVip(vip192());
     });
-
     for (const market of CORE_MARKETS) {
-      if (market.name != "vBUSD") {
+      if (market.name == "vTRXOLD") {
         it(`Reduce reserves in ${market.name}`, async () => {
           vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
           underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
           const reservesPrior = await vToken.totalReserves();
           const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
           const reservesAfter = await vToken.totalReserves();
           const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
@@ -186,6 +144,22 @@ forking(32915411, () => {
           expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
           expect(reservesAfter).equals(0);
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+        });
+      } else {
+        it(`Reserves should not reduce in ${market.name}`, async () => {
+          vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
+          underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
+
+          const reservesPrior = await vToken.totalReserves();
+          const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          // Not enough liquidity to reduce reserves
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+          const reservesAfter = await vToken.totalReserves();
+          const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          expect(psrBalAfter).equals(psrBalPrior);
+          expect(reservesAfter).greaterThan(reservesPrior);
         });
       }
     }

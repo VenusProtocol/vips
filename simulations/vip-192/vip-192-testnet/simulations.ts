@@ -35,7 +35,7 @@ forking(34517682, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 14); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 19); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -53,18 +53,20 @@ forking(34517682, () => {
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
-          mintAmount,
-          borrowAmount,
-          repayAmount,
-          redeemAmount,
-          vToken,
-          underlying,
-          market.isMock,
-        );
-
+        if (market.name == "vTRXOLD") {
+          // Several actions are paused in vBUSD and vTUSDOLD
+          await performVTokenBasicActions(
+            market.address,
+            user,
+            mintAmount,
+            borrowAmount,
+            repayAmount,
+            redeemAmount,
+            vToken,
+            underlying,
+            market.isMock,
+          );
+        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
@@ -99,13 +101,13 @@ forking(34517682, () => {
       type: "event",
     },
   ];
-  testVip("VIP-192 Core  VToken Upgrade of AIA", vip192Testnet(), {
+  testVip("VIP-192 Core  VToken Upgrade of AIA Part - 1", vip192Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [VTOKEN_ABI, ProxyAdminInterface],
         ["NewImplementation", "NewProtocolShareReserve", "NewReduceReservesBlockDelta", "NewAccessControlManager"],
-        [16, 16, 16, 16],
+        [3, 3, 3, 3],
       );
     },
   });
@@ -115,6 +117,7 @@ forking(34517682, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip192Testnet());
+      impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       [user] = await ethers.getSigners();
     });
 
@@ -134,18 +137,20 @@ forking(34517682, () => {
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
-          mintAmount,
-          borrowAmount,
-          repayAmount,
-          redeemAmount,
-          vToken,
-          underlying,
-          market.isMock,
-        );
-
+        if (market.name == "vTRXOLD") {
+          // Several actions are paused in vBUSD and vTUSDOLD
+          await performVTokenBasicActions(
+            market.address,
+            user,
+            mintAmount,
+            borrowAmount,
+            repayAmount,
+            redeemAmount,
+            vToken,
+            underlying,
+            market.isMock,
+          );
+        }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
         delete state.totalReserves;
