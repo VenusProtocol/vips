@@ -1,11 +1,8 @@
-import { ethers } from "hardhat";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const NEW_VBEP20_DELEGATE_IMPL = "0x8d79C8f4400fE68Fd17040539FE5e1706c1f2850";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 
 interface AssetConfig {
