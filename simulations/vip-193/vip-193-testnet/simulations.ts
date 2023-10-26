@@ -30,12 +30,12 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34534467, () => {
+forking(34541821, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(CORE_MARKETS.length * 4 + 11); // Number of Vip steps
+      await mine(CORE_MARKETS.length * 4 + 10); // Number of Vip steps
     });
     for (const market of CORE_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
@@ -78,7 +78,7 @@ forking(34534467, () => {
   });
 });
 
-forking(34534467, () => {
+forking(34541821, () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -112,7 +112,7 @@ forking(34534467, () => {
   });
 });
 
-forking(34534467, () => {
+forking(34541821, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip193Testnet());
@@ -171,7 +171,7 @@ forking(34534467, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(34534467, () => {
+forking(34541821, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip193Testnet());

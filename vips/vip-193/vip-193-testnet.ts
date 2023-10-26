@@ -156,12 +156,6 @@ export const vip193Testnet = () => {
 
   return makeProposal(
     [
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
-      },
-
       ...MARKETS_WITH_ACCEPT_ADMIN.map(asset => {
         return {
           target: asset.address,
