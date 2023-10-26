@@ -54,23 +54,40 @@ forking(32915411, () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
     for (const market of CORE_MARKETS) {
-      if (market.name != "vTRXOLD") continue;
-      it(`Reduce reserves in ${market.name}`, async () => {
-        vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
-        underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
+      if (market.name == "vTRXOLD") {
+        it(`Reduce reserves in ${market.name}`, async () => {
+          vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
+          underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
 
-        const reservesPrior = await vToken.totalReserves();
-        const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+          const reservesPrior = await vToken.totalReserves();
+          const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
-        // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
-        const reservesAfter = await vToken.totalReserves();
-        const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+          // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
+          const reservesAfter = await vToken.totalReserves();
+          const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
-        expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
-        expect(reservesAfter).equals(0);
-        await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
-      });
+          expect(psrBalAfter).greaterThan(psrBalPrior + reservesPrior);
+          expect(reservesAfter).equals(0);
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+        });
+      } else {
+        it(`Reserves should not reduce in ${market.name}`, async () => {
+          vToken = new ethers.Contract(market.address, VTOKEN_ABI, provider);
+          underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
+
+          const reservesPrior = await vToken.totalReserves();
+          const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          // Not enough liquidity to reduce reserves
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
+          const reservesAfter = await vToken.totalReserves();
+          const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
+
+          expect(psrBalAfter).equals(psrBalPrior);
+          expect(reservesAfter).greaterThan(reservesPrior);
+        });
+      }
     }
   });
 });
