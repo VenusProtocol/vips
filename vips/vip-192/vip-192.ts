@@ -48,8 +48,27 @@ export const vip192 = () => {
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK], // Permission to success vip simulations (remove later)
+        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
       },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setReserveFactor(uint256)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setInterestRateModel(address)", NORMAL_TIMELOCK],
+      },
+
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_reduceReserves(uint256)", NORMAL_TIMELOCK],
+      },
+
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
