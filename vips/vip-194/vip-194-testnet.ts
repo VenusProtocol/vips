@@ -171,12 +171,6 @@ export const vip194Testnet = () => {
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", FAST_TRACK_TIMELOCK],
       },
 
