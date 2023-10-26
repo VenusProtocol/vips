@@ -8,15 +8,16 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { expectEvents } from "../../../src/utils";
 import { expect } from "chai";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { TransactionResponse } from "@ethersproject/providers";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
-const PRIME = "0xDd83Ed95672bDFdcbF6124f17554D1C37523de72";
+const PRIME = "0x3BE88819113535177af7E87203bC48416098b160";
 const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(34524479, () => {
+forking(34544154, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
-    let primeLiquidityProvider =  Contract;
+    let primeLiquidityProvider: Contract;
 
     before(async () => {
       impersonateAccount(STAKED_USER);
@@ -46,7 +47,7 @@ forking(34524479, () => {
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
-    let primeLiquidityProvider =  Contract;
+    let primeLiquidityProvider:  Contract;
 
     before(async () => {
       impersonateAccount(STAKED_USER);
