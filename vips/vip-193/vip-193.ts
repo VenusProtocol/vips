@@ -15,16 +15,10 @@ interface AssetConfig {
   name: string;
   address: string;
   reduceReservesBlockDelta: number;
-  holder: string;
+  holder: string; // Used by the simulation
 }
 
 export const CORE_MARKETS: AssetConfig[] = [
-  {
-    name: "vBUSD",
-    address: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D",
-    reduceReservesBlockDelta: 105120000,
-    holder: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
-  },
   {
     name: "vTRXOLD",
     address: "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93",

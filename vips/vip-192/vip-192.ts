@@ -12,7 +12,7 @@ interface AssetConfig {
   name: string;
   address: string;
   reduceReservesBlockDelta: number;
-  holder: string; // Defines underlying is MockToken
+  holder: string; // Used by the simulation
 }
 
 export const CORE_MARKETS: AssetConfig[] = [
@@ -146,6 +146,12 @@ export const CORE_MARKETS: AssetConfig[] = [
     name: "vXVS",
     address: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
     reduceReservesBlockDelta: 28800,
+    holder: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+  },
+  {
+    name: "vBUSD",
+    address: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D",
+    reduceReservesBlockDelta: 105120000,
     holder: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
   },
 ];
