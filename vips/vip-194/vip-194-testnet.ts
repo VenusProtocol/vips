@@ -1,14 +1,8 @@
-import { ethers } from "hardhat";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0xca408d716011169645aa94ddc5665043c33df814";
-const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
-const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const SN_BNB_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 
@@ -168,17 +162,6 @@ export const vip194Testnet = () => {
 
   return makeProposal(
     [
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", CRITICAL_TIMELOCK],
-      },
       {
         target: VTOKEN_BEACON,
         signature: "upgradeTo(address)",

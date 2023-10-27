@@ -34,7 +34,7 @@ forking(34543167, () => {
     before(async () => {
       [user] = await ethers.getSigners();
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await mine(IL_MARKETS.length * 2 + 4); // Number of Vip steps
+      await mine(IL_MARKETS.length * 2 + 2); // Number of Vip steps
     });
     for (const market of IL_MARKETS) {
       it(`Save pre VIP storage snapshot of ${market.name}`, async () => {
