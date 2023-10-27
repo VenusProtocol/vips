@@ -159,11 +159,54 @@ export const CORE_MARKETS: AssetConfig[] = [
 export const vip193 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-193 VToken Upgrade of AIA Part - 2",
-    description: `upgrade the implementation of the Vtoken core supportimg Automatic income allocation feature.`,
-    forDescription: "I agree that Venus Protocol should proceed with VToken Upgrade of AIA",
-    againstDescription: "I do not think that Venus Protocol should proceed with VToken Upgrade of AIA",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with VToken Upgrade of AIA or not",
+    title: "VIP-193 Automatic income allocation: deployment stage 2 - Core pool",
+    description: `#### Summary
+
+If passed, this VIP will upgrade the implementation of every market in the Core pool - except vTRXOLD and vTUSDOLD (already upgraded at [VIP-192](https://app.venus.io/#/governance/proposal/192)), vBNB (non upgradable), vLUNA and vUST (deprecated) - enabling the [Automatic Income Allocation](https://docs-v4.venus.io/technical-reference/reference-technical-articles/automatic-income-allocation) in those markets.
+
+#### Description
+
+This VIP is part of the proposal [Automatic Income Allocation & Token Converter](https://community.venus.io/t/automatic-income-allocation-token-converter/3702), published in the Venus community forum. It’s part of the deployment plan started with the [VIP-189](https://app.venus.io/#/governance/proposal/189) and continued with [VIP-191](https://app.venus.io/#/governance/proposal/191).
+
+The new implementation pushes market reserves of the affected markets automatically to the [ProtocolShareReserve](https://bscscan.com/address/0xCa01D5A9A248a830E9D93231e791B1afFed7c446) contract after 28,800 blocks (24 hours on BNB chain). These reserves are distributed following the [protocol tokenomics](https://docs-v4.venus.io/governance/tokenomics):
+
+- 40% to the RiskFund contract
+- 40% to the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) contract
+- 10% to the Venus Prime Program. This 10% will be sent temporarily to the Venus Treasury, until the Venus Prime contract is ready.
+- 10% for the XVS Vault rewards. This 10% will be sent temporarily to the Venus Treasury, until the [Token Converter contracts](https://community.venus.io/t/automatic-income-allocation-token-converter/3702) are ready.
+
+There will be one more VIP for this second stage of the Automatic Income Allocation deployment, proposed in the following days. In that VIP, the markets of the Isolated pools will be upgraded to enable the Automatic Income Allocation.
+
+**Security and additional considerations**
+
+We applied the following security procedures for this upgrade:
+
+- **Markets behavior post upgrade**: in a simulation environment, validating in the upgraded contracts the main operations (supply, borrow, repay and redeem) and the storage layout after the VIP
+- **Automatic reduction of the reserves**: in a simulation environment, validating the market reserves are sent as expected to the ProtocolShareReserve
+- **Deployment on testnet**: the same VIP was proposed and executed on testnet, and the upgraded contracts are used in the Venus Protocol testnet deployment
+- **Audit: Quantstamp, Certik, Peckshield and Fairyproof have audited the deployed code**
+
+**Audit reports**
+
+- [Quantstamp audit report (2023/09/13)](https://github.com/VenusProtocol/venus-protocol/blob/9ef8901dfef84a11338751881fd10a2d36c576ad/audits/058_automatic_income_allocation_quantstamp_20230913.pdf)
+- [Certik audit audit report (2023/09/12)](https://github.com/VenusProtocol/venus-protocol/blob/90f913fd345c24c60efa613ab5ab7e633b7aa07a/audits/059_automatic_income_allocation_certik_20230912.pdf)
+- [Peckshield audit report (2023/08/12)](https://github.com/VenusProtocol/venus-protocol/blob/90f913fd345c24c60efa613ab5ab7e633b7aa07a/audits/054_automatic_income_allocation_peckshield_20230812.pdf)
+- [Fairyproof audit report (2023/08/03)](https://github.com/VenusProtocol/venus-protocol/blob/90f913fd345c24c60efa613ab5ab7e633b7aa07a/audits/050_automatic_income_allocation_fairyproof_20230803.pdf)
+
+**Deployed contracts**
+
+- Mainnet: ****[new VToken implementations](https://bscscan.com/address/0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775)
+- Testnet: ****[new VToken implementations](https://testnet.bscscan.com/address/0x8d79C8f4400fE68Fd17040539FE5e1706c1f2850)
+
+**References**
+
+- [Pull request with the new VToken contracts](https://github.com/VenusProtocol/venus-protocol/pull/262)
+- [Simulation post upgrade](https://github.com/VenusProtocol/vips/pull/67)
+- [Testnet deployment](https://testnet.bscscan.com/tx/0x01fd5a980e9b2c3d627aaba81c5f08d9c8539355201f48597cdb9cf796cef4e1)
+- [Documentation](https://docs-v4.venus.io/technical-reference/reference-technical-articles/automatic-income-allocation)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this proposal or not",
   };
 
   return makeProposal(
