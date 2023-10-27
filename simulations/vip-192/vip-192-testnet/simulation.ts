@@ -11,15 +11,13 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { TransactionResponse } from "@ethersproject/providers";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
-const PRIME = "0x3BE88819113535177af7E87203bC48416098b160";
+const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
 const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 interface vTokenConfig {
   name: string;
-  address: string;
-  price: string;
   assetAddress: string;
   feed: string;
 }
@@ -47,7 +45,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34544154, () => {
+forking(34572506, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
