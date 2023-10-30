@@ -186,13 +186,7 @@ export const vip195 = (maxStalePeriod?: number) => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("10000", 18), NORMAL_TIMELOCK],
-      },
-
-      {
-        target: USDT,
-        signature: "transfer(address,uint256)",
-        params: [COMMUNITY_WALLET, parseUnits("10000", 18)],
+        params: [USDT, parseUnits("10000", 18), COMMUNITY_WALLET],
       },
     ],
     meta,
