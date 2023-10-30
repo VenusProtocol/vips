@@ -317,8 +317,8 @@ export const vip192Testnet = () => {
         target: PRIME,
         signature: "setLimit(uint256,uint256)",
         params: [
-          100,
-          100
+          0, // irrevocable
+          500 // revocable
         ]
       },
       {
