@@ -102,12 +102,12 @@ forking(33050757, () => {
       expect(borrowSpeed).to.equal("81250000000000");
     });
 
-    it("does not leave UNI on the balance of the governance", async () => {
+    it("does not leave UNI balance on the address of the timelock", async () => {
       const timelockBalance = await uni.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
 
-    it("does not leave vUNI on the balance of the governance", async () => {
+    it("does not leave vUNI balance on the address of the timelock", async () => {
       const timelockBalance = await vUni.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
@@ -117,7 +117,7 @@ forking(33050757, () => {
       expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
     });
 
-    it("sets the admin to governance", async () => {
+    it("sets the admin to normal timelock", async () => {
       expect(await vUni.admin()).to.equal(NORMAL_TIMELOCK);
     });
 

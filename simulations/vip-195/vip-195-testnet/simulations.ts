@@ -19,7 +19,7 @@ const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const RATE_MODEL = "0x0FA6E7E2e978eF0B184a02E2A7870A5beac12024";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const VTOKEN_RECEIVER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
+const VENUS_TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 
@@ -94,19 +94,19 @@ forking(34650257, () => {
       expect(supplySpeed).to.equal("81250000000000");
       expect(borrowSpeed).to.equal("81250000000000");
     });
-    it("does not leave UNI on the balance of the governance", async () => {
+    it("does not leave UNI balance on the address of the timelock", async () => {
       const timelockBalance = await uni.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
-    it("does not leave vUNI on the balance of the governance", async () => {
+    it("does not leave vUNI balance on the address of the timelock", async () => {
       const timelockBalance = await vUni.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
-    it("moves INITIAL_VTOKENS vUNI to VTOKEN_RECEIVER", async () => {
-      const vTokenReceiverBalance = await vUni.balanceOf(VTOKEN_RECEIVER);
+    it("moves INITIAL_VTOKENS vUNI to VENUS_TREASURY", async () => {
+      const vTokenReceiverBalance = await vUni.balanceOf(VENUS_TREASURY);
       expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
     });
-    it("sets the admin to governance", async () => {
+    it("sets the admin to normal timelock", async () => {
       expect(await vUni.admin()).to.equal(NORMAL_TIMELOCK);
     });
     it("get correct price from oracle ", async () => {
