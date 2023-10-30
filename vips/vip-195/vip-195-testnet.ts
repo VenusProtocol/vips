@@ -5,13 +5,17 @@ import { makeProposal } from "../../src/utils";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const UNI = "0x8D2f061C75780d8D91c10A7230B907411aCBC8fC";
-const VUNI = "0x48ef03b6E6A8984cA0D561EE9c85407653EE6107";
+const VUNI = "0x171B468b52d7027F12cEF90cd065d6776a25E24e";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 const UNI_HOLDER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
-const INITIAL_FUNDING = parseUnits("1", 18); // to be revised
-const INITIAL_VTOKENS = parseUnits("1", 8);
-
+const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const INITIAL_FUNDING = parseUnits("2454.88864000100000002", 18);
+const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 export const vip195Testnet = () => {
   const meta = {
     version: "v2",
@@ -83,7 +87,26 @@ export const vip195Testnet = () => {
         signature: "_setCollateralFactor(address,uint256)",
         params: [VUNI, parseUnits("0.55", 18)],
       },
-
+      {
+        target: VUNI,
+        signature: "setAccessControlManager(address)",
+        params: [ACCESS_CONTROL_MANAGER],
+      },
+      {
+        target: VUNI,
+        signature: "setProtocolShareReserve(address)",
+        params: [PROTOCOL_SHARE_RESERVE],
+      },
+      {
+        target: VUNI,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: [100],
+      },
+      {
+        target: VUNI,
+        signature: "_setReserveFactor(uint256)",
+        params: ["250000000000000000"],
+      },
       {
         target: UNI,
         signature: "faucet(uint256)",
@@ -114,9 +137,14 @@ export const vip195Testnet = () => {
       },
 
       {
-        target: VUNI,
-        signature: "_setReserveFactor(uint256)",
-        params: ["250000000000000000"],
+        target: USDT,
+        signature: "allocateTo(address,uint256)",
+        params: [NORMAL_TIMELOCK, parseUnits("10000", 18)],
+      },
+      {
+        target: USDT,
+        signature: "transfer(address,uint256)",
+        params: [COMMUNITY_WALLET, parseUnits("10000", 18)],
       },
     ],
     meta,

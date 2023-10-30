@@ -7,23 +7,29 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
 import { vip195Testnet } from "../../../vips/vip-195/vip-195-testnet";
 import UNI_ABI from "./abi/UNI_ABI.json";
+import USDT_ABI from "./abi/USDT_ABI.json";
 import VUNI_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const UNI = "0x8D2f061C75780d8D91c10A7230B907411aCBC8fC";
-const VUNI = "0x48ef03b6E6A8984cA0D561EE9c85407653EE6107";
+const VUNI = "0x171B468b52d7027F12cEF90cd065d6776a25E24e";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const RATE_MODEL = "0x0FA6E7E2e978eF0B184a02E2A7870A5beac12024";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const VTOKEN_RECEIVER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
-const INITIAL_VTOKENS = parseUnits("1", 8);
+const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 
-forking(34515794, () => {
+forking(34650257, () => {
   let comptroller: ethers.Contract;
   let uni: ethers.Contract;
   let vUni: ethers.Contract;
   let oracle: ethers.Contract;
+  let usdt: ethers.Contract;
+  let communityBalanceBefore: any;
   const provider = ethers.provider;
 
   before(async () => {
@@ -31,6 +37,8 @@ forking(34515794, () => {
     uni = new ethers.Contract(UNI, UNI_ABI, provider);
     vUni = new ethers.Contract(VUNI, VUNI_ABI, provider);
     oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
+    usdt = new ethers.Contract(USDT, USDT_ABI, provider);
+    communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
   testVip("VIP-195-testnet Add UNI Market", vip195Testnet(), {
@@ -43,13 +51,15 @@ forking(34515794, () => {
           "NewSupplyCap",
           "NewBorrowCap",
           "NewReserveFactor",
+          "NewProtocolShareReserve",
+          "NewReduceReservesBlockDelta",
           "VenusSupplySpeedUpdated",
           "VenusBorrowSpeedUpdated",
           "NewCollateralFactor",
           "Mint",
           "Failure",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
       );
     },
   });
@@ -63,6 +73,12 @@ forking(34515794, () => {
     it("reserves factor equals 25%", async () => {
       const reserveFactor = await vUni.reserveFactorMantissa();
       expect(reserveFactor).to.equal(parseUnits("0.25", 18));
+    });
+    it("sets protocol share reserve", async () => {
+      expect(await vUni.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
+    });
+    it("sets Reduce Reserves Block Delta to 100", async () => {
+      expect(await vUni.reduceReservesBlockDelta()).to.equal(100);
     });
     it("sets the supply cap to 50,000 UNI", async () => {
       const newCap = await comptroller.supplyCaps(VUNI);
@@ -96,6 +112,9 @@ forking(34515794, () => {
     it("get correct price from oracle ", async () => {
       const price = await oracle.getUnderlyingPrice(VUNI);
       expect(price).to.equal(parseUnits("4.10", 18));
+    });
+    it("Community wallet balance should be increased by 10,000 USDT", async () => {
+      expect(await usdt.balanceOf(COMMUNITY_WALLET)).to.equal(communityBalanceBefore.add(parseUnits("10000", 18)));
     });
     await checkInterestRate(RATE_MODEL, "UNI", { base: "0", kink: "0.5", multiplier: "0.20", jump: "3" });
   });

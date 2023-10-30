@@ -59,7 +59,8 @@
     "inputs": [
       { "indexed": false, "internalType": "address", "name": "minter", "type": "address" },
       { "indexed": false, "internalType": "uint256", "name": "mintAmount", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "mintTokens", "type": "uint256" }
+      { "indexed": false, "internalType": "uint256", "name": "mintTokens", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "totalSupply", "type": "uint256" }
     ],
     "name": "Mint",
     "type": "event"
@@ -70,9 +71,19 @@
       { "indexed": false, "internalType": "address", "name": "payer", "type": "address" },
       { "indexed": false, "internalType": "address", "name": "receiver", "type": "address" },
       { "indexed": false, "internalType": "uint256", "name": "mintAmount", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "mintTokens", "type": "uint256" }
+      { "indexed": false, "internalType": "uint256", "name": "mintTokens", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "totalSupply", "type": "uint256" }
     ],
     "name": "MintBehalf",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "oldAccessControlAddress", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newAccessControlAddress", "type": "address" }
+    ],
+    "name": "NewAccessControlManager",
     "type": "event"
   },
   {
@@ -129,6 +140,24 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldProtocolShareReserve", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newProtocolShareReserve", "type": "address" }
+    ],
+    "name": "NewProtocolShareReserve",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "oldReduceReservesBlockDelta", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "newReduceReservesBlockDelta", "type": "uint256" }
+    ],
+    "name": "NewReduceReservesBlockDelta",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": false, "internalType": "uint256", "name": "oldReserveFactorMantissa", "type": "uint256" },
       { "indexed": false, "internalType": "uint256", "name": "newReserveFactorMantissa", "type": "uint256" }
     ],
@@ -140,7 +169,8 @@
     "inputs": [
       { "indexed": false, "internalType": "address", "name": "redeemer", "type": "address" },
       { "indexed": false, "internalType": "uint256", "name": "redeemAmount", "type": "uint256" },
-      { "indexed": false, "internalType": "uint256", "name": "redeemTokens", "type": "uint256" }
+      { "indexed": false, "internalType": "uint256", "name": "redeemTokens", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "totalSupply", "type": "uint256" }
     ],
     "name": "Redeem",
     "type": "event"
@@ -180,7 +210,7 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "address", "name": "admin", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "protocolShareReserve", "type": "address" },
       { "indexed": false, "internalType": "uint256", "name": "reduceAmount", "type": "uint256" },
       { "indexed": false, "internalType": "uint256", "name": "newTotalReserves", "type": "uint256" }
     ],
@@ -226,7 +256,7 @@
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "uint256", "name": "reduceAmount", "type": "uint256" }],
+    "inputs": [{ "internalType": "uint256", "name": "reduceAmount_", "type": "uint256" }],
     "name": "_reduceReserves",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -253,7 +283,7 @@
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "contract InterestRateModel", "name": "newInterestRateModel", "type": "address" }],
+    "inputs": [{ "internalType": "contract InterestRateModel", "name": "newInterestRateModel_", "type": "address" }],
     "name": "_setInterestRateModel",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
@@ -271,11 +301,20 @@
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "uint256", "name": "newReserveFactorMantissa", "type": "uint256" }],
+    "inputs": [{ "internalType": "uint256", "name": "newReserveFactorMantissa_", "type": "uint256" }],
     "name": "_setReserveFactor",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -372,6 +411,18 @@
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "borrower", "type": "address" },
+      { "internalType": "uint256", "name": "borrowAmount", "type": "uint256" }
+    ],
+    "name": "borrowBehalf",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -564,6 +615,15 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "protocolShareReserve",
+    "outputs": [{ "internalType": "address payable", "name": "", "type": "address" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [{ "internalType": "uint256", "name": "redeemTokens", "type": "uint256" }],
     "name": "redeem",
@@ -579,6 +639,24 @@
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "reduceReservesBlockDelta",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "reduceReservesBlockNumber",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -619,6 +697,33 @@
       { "internalType": "uint256", "name": "seizeTokens", "type": "uint256" }
     ],
     "name": "seize",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address", "name": "newAccessControlManagerAddress", "type": "address" }],
+    "name": "setAccessControlManager",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "address payable", "name": "protcolShareReserve_", "type": "address" }],
+    "name": "setProtocolShareReserve",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "uint256", "name": "newReduceReservesBlockDelta_", "type": "uint256" }],
+    "name": "setReduceReservesBlockDelta",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "nonpayable",
