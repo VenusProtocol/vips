@@ -22,47 +22,52 @@ const MAX_STALE_PERIOD = 60 * 25;
 export const vip195 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-195 Add UNI Market to the Venus Core pool",
-    description: `
-    #### Summary
+    title: "VIP-195 Add support for UNI on Venus Core Pool",
+    description: `#### Summary
 
-    As a result of this VIP 
-    * Add a new market in the Core pool for the token UNI(Uniswap) 
-    * Refund the community wallet with 10,000 USDT.
+If passed, this VIP will add a new market for the [UNI token](https://bscscan.com/address/0xBf5140A22578168FD562DCcF235E5D43A02ce9B1) on Venus Core Pool.
 
-    #### Description
+#### Description
 
-    A new market for UNI will be added to the Core pool. 
+**Risk parameters**
 
-    The risk parameters of the new market are:
-    * Collateral factor: 55%
-    * Supply cap: 50,000 UNI
-    * Borrow cap: 30,000 UNI
-    * Reserve factor: 25%  
-    * XVS Distributions: 4.68 XVS/day
-    
-    #### Security and additional considerations
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-add-support-for-mkr-and-uni-on-venus-core-pool/3847), the risk parameters for the new markets are:
 
-    We applied the following security procedures for this upgrade:
+- Underlying token: [UNI](https://bscscan.com/address/0xBf5140A22578168FD562DCcF235E5D43A02ce9B1)
+- Borrow cap: 30,000 UNI
+- Supply cap: 50,000 UNI
+- Collateral factor: 55%
+- Reserve factor: 25%
 
-    * **Add UNI in a simulation environment**: we added the new market to the Core pool, and we verified everything works as expected
-    * **Deployment on testnet**: the same market for UNI has been deployed to testnet, and used in the Venus Protocol testnet deployment
+Bootstrap liquidity: 2454.88 UNI - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
 
-    0.000000001000000023 WBETH will be initially provided, as bootstrap liquidity for this market.
-    These parameters will be monitored and adjusted if needed in the future.
+Interest rate curve for the new market:
 
-    #### Deployed contracts on main net
-    * vUNI(new market): [0x13582f709bb097c221BB2EA078c98901f739A7ba](https://bscscan.com/address/0x13582f709bb097c221BB2EA078c98901f739A7ba)
+- kink: 50%
+- base (yearly): 0
+- multiplier (yearly): 20%
+- jump multiplier (yearly): 300%
 
-    #### References
+**Security and additional considerations**
 
-    * [Repository](https://github.com/VenusProtocol/venus-protocol)
-    * [UNI token in BNB chain](https://bscscan.com/address/0xBf5140A22578168FD562DCcF235E5D43A02ce9B1)
-    * vUNI (new market) on testnet: [0x48ef03b6E6A8984cA0D561EE9c85407653EE6107](https://testnet.bscscan.com/address/0x48ef03b6E6A8984cA0D561EE9c85407653EE6107)
-    `,
-    forDescription: "I agree that Venus Protocol should proceed with the Add UNI Market",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Add UNI Market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Add UNI Market or not",
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the core pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Deployed contracts:**
+
+- **Mainnet UNI market (vUNI): [0x27FF564707786720C71A2e5c1490A63266683612](https://bscscan.com/address/0x27FF564707786720C71A2e5c1490A63266683612)**
+- Testnet UNI market (vUNI): ****[0x171B468b52d7027F12cEF90cd065d6776a25E24e](https://testnet.bscscan.com/address/0x171B468b52d7027F12cEF90cd065d6776a25E24e)
+
+**References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/97)
+- [Testnet deployment](https://testnet.bscscan.com/tx/0x33d1c69dea454c5b0325161a249aef76510d2132edcde547a3cbaf086b6f62a9)
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
