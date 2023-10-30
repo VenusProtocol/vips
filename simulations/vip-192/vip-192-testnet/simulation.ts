@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip192Testnet } from "../../../vips/vip-192/vip-192-tetsnet";
+import { vip192Testnet } from "../../../vips/vip-192/vip-192-testnet";
 import SETTER_FACET_ABI from "./abis/SetterFacet.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
