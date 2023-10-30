@@ -271,10 +271,7 @@ export const vip192Testnet = () => {
           USDC,
           USDT
         ], [
-          100,
-          10,
-          10,
-          10
+          0,0,0,0
         ]],
       },
       {
@@ -327,6 +324,11 @@ export const vip192Testnet = () => {
         params: [
           [PREVIOUSLY_STAKED_USER], [STAKED_AT]
         ]
+      },
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "pauseFundsTransfer()",
+        params: []
       }
     ],
     meta,
