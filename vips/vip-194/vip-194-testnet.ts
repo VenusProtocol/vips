@@ -25,7 +25,7 @@ export const vip194Testnet = () => {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "resumeFundsTransfer()",
         params: []
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,
