@@ -42,7 +42,7 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta: ProposalMeta, type: ProposalType): Proposal => {
+export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
   return {
     signatures: commands.map(cmd => cmd.signature),
     targets: commands.map(cmd => cmd.target),

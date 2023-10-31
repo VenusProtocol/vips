@@ -64,6 +64,11 @@ const config: HardhatUserConfig = {
       url: `https://bsc-dataseed.binance.org/`,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
+    sepolia: {
+      url: "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
+      chainId: 11155111,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
   },
   paths: {
     tests: "./tests",
@@ -80,7 +85,6 @@ function isFork() {
         loggingEnabled: false,
         forking: {
           url: `${process.env.BSC_ARCHIVE_NODE}`,
-          blockNumber: 21068448,
         },
         accounts: {
           accountsBalance: "100000000000000000000000",
