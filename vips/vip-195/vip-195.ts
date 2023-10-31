@@ -2,7 +2,6 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import { TREASURY } from "../vip-173";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const UNI = "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1";
@@ -189,7 +188,7 @@ No changes in the code are involved in this VIP. We applied the following securi
       },
 
       {
-        target: TREASURY,
+        target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDT, parseUnits("10000", 18), COMMUNITY_WALLET],
       },
