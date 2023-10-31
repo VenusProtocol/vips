@@ -26,7 +26,7 @@ const STAKED_AT = "1698270716";
 
 const cutParams = params;
 
-export default  [
+export default [
   {
     target: UNITROLLER,
     signature: "diamondCut((address,uint8,bytes4[])[])",
@@ -44,11 +44,6 @@ export default  [
   },
   {
     target: PRIME_LIQUIDITY_PROVIDER,
-    signature: "acceptOwnership()",
-    params: [],
-  },
-  {
-    target: PRIME,
     signature: "acceptOwnership()",
     params: [],
   },
@@ -269,8 +264,8 @@ export default  [
     signature: "addMarket(address,uint256,uint256)",
     params: [
       vETH,
-      ethers.utils.parseEther("1"),
-      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("2"),
+      ethers.utils.parseEther("4"),
     ]
   },
   {
@@ -278,8 +273,8 @@ export default  [
     signature: "addMarket(address,uint256,uint256)",
     params: [
       vBTC,
-      ethers.utils.parseEther("1"),
-      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("2"),
+      ethers.utils.parseEther("4"),
     ]
   },
   {
@@ -287,8 +282,8 @@ export default  [
     signature: "addMarket(address,uint256,uint256)",
     params: [
       vUSDC,
-      ethers.utils.parseEther("1"),
-      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("2"),
+      ethers.utils.parseEther("4"),
     ]
   },
   {
@@ -296,8 +291,8 @@ export default  [
     signature: "addMarket(address,uint256,uint256)",
     params: [
       vUSDT,
-      ethers.utils.parseEther("1"),
-      ethers.utils.parseEther("1"),
+      ethers.utils.parseEther("2"),
+      ethers.utils.parseEther("4"),
     ]
   },
   {
