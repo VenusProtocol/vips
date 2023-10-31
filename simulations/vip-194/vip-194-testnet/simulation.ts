@@ -9,6 +9,7 @@ import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/u
 import { expect } from "chai";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { TransactionResponse } from "@ethersproject/providers";
+import { vip194Testnet } from "../../../vips/vip-194/vip-194-testnet";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
 const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
@@ -70,7 +71,7 @@ forking(34696892, () => {
     });
   });
 
-  testVip("VIP-192 Prime Program", vip192Testnet(), {
+  testVip("VIP-192 Prime Program", vip194Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewPrimeToken"], [1]);
     },
