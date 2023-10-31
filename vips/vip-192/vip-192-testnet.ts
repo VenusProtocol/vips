@@ -288,8 +288,8 @@ export const vip192Testnet = () => {
         signature: "addMarket(address,uint256,uint256)",
         params: [
           vBTC,
-          ethers.utils.parseEther("1"),
-          ethers.utils.parseEther("1"),
+          ethers.utils.parseEther("2"),
+          ethers.utils.parseEther("4"),
         ]
       },
       {
