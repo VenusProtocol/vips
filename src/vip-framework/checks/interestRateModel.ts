@@ -3,12 +3,11 @@ import { BigNumber, Contract, utils } from "ethers";
 import { ethers } from "hardhat";
 
 import RATE_MODEL_ABI from "../abi/il_rateModel.json";
-import VTOKEN_ABI from "../abi/il_vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
 export async function checkInterestRate(
-  vTokenAddress: string,
+  rateModelAddress: string,
   symbol: string,
   {
     base,
@@ -22,8 +21,7 @@ export async function checkInterestRate(
     kink?: string;
   },
 ) {
-  const vToken: Contract = await ethers.getContractAt(VTOKEN_ABI, vTokenAddress);
-  const rateModel: Contract = await ethers.getContractAt(RATE_MODEL_ABI, await vToken.interestRateModel());
+  const rateModel: Contract = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
 
   describe(`${symbol} interest rate model`, () => {
     it(`should have base = ${base}`, async () => {
