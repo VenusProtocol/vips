@@ -7,7 +7,7 @@ import RATE_MODEL_ABI from "../abi/il_rateModel.json";
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
 export async function checkInterestRate(
-  RATE_MODEL: string,
+  rateModelAddress: string,
   symbol: string,
   {
     base,
@@ -21,7 +21,7 @@ export async function checkInterestRate(
     kink: string;
   },
 ) {
-  const rateModel: Contract = await ethers.getContractAt(RATE_MODEL_ABI, RATE_MODEL);
+  const rateModel: Contract = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
 
   describe(`${symbol} interest rate model`, () => {
     it(`should have base = ${base}`, async () => {
