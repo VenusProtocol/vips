@@ -12,6 +12,16 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
+const BSCTESTNET_OMICHANNEL_SENDER = "";
+const BSCMAINNET_OMNICHANNEL_SENDER = "";
+
+const LZ_VIRTUAL_CHIAN_ID = {
+  bscmainnet: 102,
+  bsctestnet: 10102,
+  ethereum: 101,
+  sepolia: 10161,
+};
+
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
@@ -43,14 +53,43 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
 };
 
 export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
-  return {
-    signatures: commands.map(cmd => cmd.signature),
-    targets: commands.map(cmd => cmd.target),
-    params: commands.map(cmd => cmd.params),
-    values: commands.map(cmd => cmd.value ?? "0"),
-    meta,
-    type,
-  };
+  let returnObject: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+
+  let map = new Map<number, Command[]>();
+  for (const command of commands) {
+    const { chainId } = command;
+    if (chainId) {
+      let currentChainCommands = map.get(chainId) || [];
+      currentChainCommands.push(command);
+      map.set(chainId, currentChainCommands);
+    }
+  }
+
+  for (let key of map.keys()) {
+    const chainCommands = map.get(key);
+    if (chainCommands) {
+      if (key != LZ_VIRTUAL_CHIAN_ID.bsctestnet || key != LZ_VIRTUAL_CHIAN_ID.bscmainnet) {
+        const remoteParam = createRemotePayload(
+          chainCommands.map(cmd => cmd.target),
+          chainCommands.map(cmd => cmd.signature),
+          chainCommands.map(cmd => cmd.params),
+          chainCommands.map(cmd => cmd.value),
+        );
+        returnObject.signatures.push("execute(uint16,bytes,bytes)");
+        returnObject.targets.push(key == 102 ? BSCMAINNET_OMNICHANNEL_SENDER : BSCTESTNET_OMICHANNEL_SENDER);
+        returnObject.values.push(getEstimateFeesForBridge(chainCommands.map(cmd => cmd.target)).length, remoteParam);
+        returnObject.params.push(remoteParam);
+      } else {
+        returnObject.signatures.push(...chainCommands.map(cmd => cmd.signature));
+        returnObject.targets.push(...chainCommands.map(cmd => cmd.target));
+        returnObject.params.push(...chainCommands.map(cmd => cmd.params));
+        returnObject.values.push(...chainCommands.map(cmd => cmd.value ?? "0"));
+      }
+    } else {
+      throw "Chain ID is not supported";
+    }
+  }
+  return returnObject;
 };
 
 export const setMaxStalePeriodInOracle = async (
