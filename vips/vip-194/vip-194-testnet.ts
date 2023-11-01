@@ -1,6 +1,6 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import commands192 from "../vip-192/commands";
+import commands192 from "../vip-192/commands-testnet";
 import commands193 from "../vip-193/commands";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
