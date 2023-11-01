@@ -1,14 +1,13 @@
 import { ethers } from "hardhat";
 
-const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
-const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
+const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
 
-const ETH ="0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
-const BTC = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const ETH ="0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
-const VTreasury = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
+const VTreasury = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 
 export default [
   {
@@ -20,30 +19,30 @@ export default [
       USDC,
       USDT
     ], [
-      100,
-      10,
-      10,
-      10
+      "24438657407407",
+      "1261574074074",
+      "36881637731481481",
+      "87191261574074074"
     ]],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [ETH, ethers.utils.parseEther("2"), PRIME_LIQUIDITY_PROVIDER],
+    params: [ETH, "42230000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [BTC, ethers.utils.parseEther("1"), PRIME_LIQUIDITY_PROVIDER],
+    params: [BTC, "2180000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDC, ethers.utils.parseEther("1"), PRIME_LIQUIDITY_PROVIDER],
+    params: [USDC, "63731470000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDT, ethers.utils.parseEther("1"), PRIME_LIQUIDITY_PROVIDER],
+    params: [USDT, "150666500000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
 ]

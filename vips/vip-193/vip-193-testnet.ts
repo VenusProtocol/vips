@@ -1,7 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands192 from "../vip-192/commands-testnet";
-import commands from "./commands";
+import commands from "./commands-testnet";
 
 export const vip193Testnet = () => {
   const meta = {
