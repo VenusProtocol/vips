@@ -1,5 +1,6 @@
 import { cutParams as params } from "../../simulations/vip-192/vip-192/utils/cut-params.json";
 import { ethers } from "hardhat";
+import staked from "./staked-users";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
@@ -20,9 +21,6 @@ const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 const vBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
 const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-
-const PREVIOUSLY_STAKED_USER = "0x2e7a15e186cc81f7efc4bf7df12dbd5e3db4fefb";
-const STAKED_AT = "1651635300";
 
 const cutParams = params;
 
@@ -303,13 +301,7 @@ export default [
       500 // revocable
     ]
   },
-  {
-    target: PRIME,
-    signature: "setStakedAt(address[],uint256[])",
-    params: [
-      [PREVIOUSLY_STAKED_USER], [STAKED_AT]
-    ]
-  },
+  staked,
   {
     target: PRIME_LIQUIDITY_PROVIDER,
     signature: "pauseFundsTransfer()",

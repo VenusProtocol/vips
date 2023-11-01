@@ -2,7 +2,6 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands from "./commands";
 
-
 export const vip192 = () => {
   const meta = {
     version: "v2",
