@@ -43,6 +43,11 @@ const vTokens: vTokenConfig[] = [
     assetAddress: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
     feed: "0x264990fbd0a4796a3e3d8e37c4d5f87a3aca5ebf",
   },
+  {
+    name: "vXVS",
+    assetAddress: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
+    feed: "0xbf63f430a79d4036a5900c19818aff1fa710f206",
+  },
 ];
 
 forking(33118003, () => {
