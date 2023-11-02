@@ -10,7 +10,7 @@ export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 export const CERTIK_RECEIVER = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
 export const UQUID_RECEIVER = "0x03e3ff995863828554282e80870b489cc31dc8bc";
 export const VRTUHub_RECEIVER = "0x07bF87ac31cD2EA296F53CF35d9028aF7287C2ff";
-export const MESSARI_RECEIVER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const vip196 = () => {
   const meta = {
@@ -56,12 +56,12 @@ If passed this VIP will perform the following actions:
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, parseUnits("95000", 18), MESSARI_RECEIVER],
+        params: [USDC, parseUnits("95000", 18), COMMUNITY_WALLET],
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("25000", 18), MESSARI_RECEIVER],
+        params: [USDT, parseUnits("25000", 18), COMMUNITY_WALLET],
       },
     ],
     meta,

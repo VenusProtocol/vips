@@ -8,7 +8,7 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   CERTIK_RECEIVER,
-  MESSARI_RECEIVER,
+  COMMUNITY_WALLET,
   UQUID_RECEIVER,
   USDC,
   USDT,
@@ -44,8 +44,8 @@ forking(33135500, () => {
     prevBalanceCertik = await usdt.balanceOf(CERTIK_RECEIVER);
     prevBalanceUquid = await vai.balanceOf(UQUID_RECEIVER);
     prevBalanceVrtHub = await vai.balanceOf(VRTUHub_RECEIVER);
-    prevBalanceMessari = await usdc.balanceOf(MESSARI_RECEIVER);
-    prevBalanceGalxeCampaign = await usdt.balanceOf(MESSARI_RECEIVER);
+    prevBalanceMessari = await usdc.balanceOf(COMMUNITY_WALLET);
+    prevBalanceGalxeCampaign = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
   testVip("VIP-196 Payments", vip196(), {
@@ -76,13 +76,13 @@ forking(33135500, () => {
     });
 
     it("Should increase balances of Messari receiver", async () => {
-      const currentBalance = await usdc.balanceOf(MESSARI_RECEIVER);
+      const currentBalance = await usdc.balanceOf(COMMUNITY_WALLET);
       const delta = currentBalance.sub(prevBalanceMessari);
       expect(delta).equals(MESSARI_AMOUNT);
     });
 
     it("Should increase balances of Messari (GALXE Campaign) receiver", async () => {
-      const currentBalance = await usdt.balanceOf(MESSARI_RECEIVER);
+      const currentBalance = await usdt.balanceOf(COMMUNITY_WALLET);
       const delta = currentBalance.sub(prevBalanceGalxeCampaign);
       expect(delta).equals(GALXE_CAMPAIGN_AMOUNT);
     });
