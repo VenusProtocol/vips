@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip196 } from "../../vips/vip-196";
+import { vip197 } from "../../vips/vip-197";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -37,7 +37,7 @@ forking(33133129, () => {
       expect(oldCap).to.equal(parseUnits("7000000", 18));
     });
   });
-  testVip("VIP-196 Chaos labs recommendations for the week October 31st, 2023", vip196());
+  testVip("VIP-197 Chaos labs recommendations for the week October 31st, 2023", vip197());
 
   describe("Post-VIP behavior", async () => {
     it("Increase WBETH collateral factor to 80%", async () => {

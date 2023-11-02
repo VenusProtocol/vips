@@ -7,7 +7,7 @@ const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VCAKE = "0x86aC3974e2BD0d60825230fa6F355fF11409df5c";
 const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 
-export const vip196 = () => {
+export const vip197 = () => {
   const meta = {
     version: "v2",
     title: "VIP-197 Risk Parameters Adjustments (CAKE and WBETH)",
