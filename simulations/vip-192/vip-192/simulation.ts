@@ -1,14 +1,15 @@
-import { ethers } from "hardhat";
+import { TransactionResponse } from "@ethersproject/providers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { expect } from "chai";
 import { Contract } from "ethers";
+import { ethers } from "hardhat";
+
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import SETTER_FACET_ABI from "./abis/SetterFacet.json";
+import { vip192 } from "../../../vips/vip-192/vip-192";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { expect } from "chai";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import { TransactionResponse } from "@ethersproject/providers";
-import { vip192 } from "../../../vips/vip-192/vip-192";
+import SETTER_FACET_ABI from "./abis/SetterFacet.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
 const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
@@ -83,7 +84,7 @@ forking(33118003, () => {
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
-    let primeLiquidityProvider:  Contract;
+    let primeLiquidityProvider: Contract;
 
     before(async () => {
       impersonateAccount(STAKED_USER);

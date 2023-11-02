@@ -1,6 +1,6 @@
-import { cutParams as params } from "../../simulations/vip-192/vip-192/utils/cut-params.json";
 import { ethers } from "hardhat";
-import staked from "./staked-users";
+
+import { cutParams as params } from "../../simulations/vip-192/vip-192/utils/cut-params.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
@@ -12,7 +12,7 @@ const XVS_VAULT_IMPL = "0x3091E347e89Ffb5Ffd8C1998D676f82cB82E34c4";
 const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
 const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
 
-const ETH ="0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -238,73 +238,47 @@ export default [
   {
     target: PRIME_LIQUIDITY_PROVIDER,
     signature: "initializeTokens(address[])",
-    params: [[
-      ETH,
-      BTC,
-      USDC,
-      USDT
-    ]],
+    params: [[ETH, BTC, USDC, USDT]],
   },
   {
     target: PRIME_LIQUIDITY_PROVIDER,
     signature: "setTokensDistributionSpeed(address[],uint256[])",
-    params: [[
-      ETH,
-      BTC,
-      USDC,
-      USDT
-    ], [
-      0,0,0,0
-    ]],
+    params: [
+      [ETH, BTC, USDC, USDT],
+      [0, 0, 0, 0],
+    ],
   },
   {
     target: PRIME,
     signature: "addMarket(address,uint256,uint256)",
-    params: [
-      vETH,
-      ethers.utils.parseEther("2"),
-      ethers.utils.parseEther("4"),
-    ]
+    params: [vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
   },
   {
     target: PRIME,
     signature: "addMarket(address,uint256,uint256)",
-    params: [
-      vBTC,
-      ethers.utils.parseEther("2"),
-      ethers.utils.parseEther("4"),
-    ]
+    params: [vBTC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
   },
   {
     target: PRIME,
     signature: "addMarket(address,uint256,uint256)",
-    params: [
-      vUSDC,
-      ethers.utils.parseEther("2"),
-      ethers.utils.parseEther("4"),
-    ]
+    params: [vUSDC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
   },
   {
     target: PRIME,
     signature: "addMarket(address,uint256,uint256)",
-    params: [
-      vUSDT,
-      ethers.utils.parseEther("2"),
-      ethers.utils.parseEther("4"),
-    ]
+    params: [vUSDT, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
   },
   {
     target: PRIME,
     signature: "setLimit(uint256,uint256)",
     params: [
       0, // irrevocable
-      500 // revocable
-    ]
+      500, // revocable
+    ],
   },
-  staked,
   {
     target: PRIME_LIQUIDITY_PROVIDER,
     signature: "pauseFundsTransfer()",
-    params: []
-  }
-]
+    params: [],
+  },
+];
