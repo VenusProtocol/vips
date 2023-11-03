@@ -19,11 +19,59 @@ const MAX_STALE_PERIOD = 60 * 25;
 export const vip197 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "Add PLANET market to DeFi Pool",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with add market",
-    againstDescription: "I do not think that Venus Protocol should proceed with add market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with add market",
+    title: "VIP-198 Add support for PLANET market in the DeFi pool",
+    description: `#### Summary
+
+If passed, this VIP will add a new market for [PLANET](https://bscscan.com/address/0xca6d678e74f553f0e59cccc03ae644a3c2c5ee7d) into the Isolated Lending DeFi pool.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-to-list-planet-on-venus/3866/2), the risk parameters for the new market are:
+
+- Underlying token: [PLANET](https://bscscan.com/address/0xca6d678e74f553f0e59cccc03ae644a3c2c5ee7d)
+- Borrow cap: 500,000,000 PLANET
+- Supply cap: 1,000,000,000 PLANET
+- Collateral factor: 0.2
+- Liquidation threshold: 0.3
+- Reserve factor: 0.25
+
+Bootstrap liquidity: 174,983,000 PLANET - provided by the [Planet ReFi project](https://planetrefi.com/)
+
+Interest rate curve for the new market:
+
+- kink: 0.45
+- base (yearly): 0.02
+- multiplier (yearly): 0.2
+- jump multiplier (yearly): 3
+
+**Security and additional considerations**
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the DeFi pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Contracts on mainnet**
+
+New market vPLANET_DeFi: [0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be](https://bscscan.com/address/0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be)
+
+**Contracts on testnet**
+
+New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://testnet.bscscan.com/address/0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1)
+
+**References**
+
+- [Repository](https://github.com/VenusProtocol/isolated-pools)
+- [Fork tests of main operations](https://github.com/VenusProtocol/isolated-pools/tree/develop/tests/hardhat/Fork)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/102)
+- [Forum proposal to add PLANET market to Venus](https://community.venus.io/t/proposal-to-list-planet-on-venus/3866/1)
+- [Community post about Venus V4, introducing Isolated Pools](https://community.venus.io/t/proposing-venus-v4)
+- [Documentation](https://docs-v4.venus.io/whats-new/isolated-pools)`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
