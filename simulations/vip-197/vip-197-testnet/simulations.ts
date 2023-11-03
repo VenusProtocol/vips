@@ -25,8 +25,8 @@ const vUSDD_DeFi = "0xa109DE0abaeefC521Ec29D89eA42E64F37A6882E";
 const PLANET = "0x52b4E1A2ba407813F829B4b3943A1e57768669A9";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
-const VTOKEN_RECEIVER = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
-const VPLANET_DEFI = "0x890bb304488c9ba15D7388BD755Ae871B55612b8";
+const VTOKEN_RECEIVER = "0x0554d6079eBc222AD12405E52b264Bdb5B65D1cf";
+const VPLANET_DEFI = "0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1";
 const REWARD_DISTRIBUTOR = "0x9372F0d88988B2cC0a2bf8700a5B3f04B0b81b8C";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const COMPTROLLER = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
@@ -34,7 +34,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PLANET_RATE_MODEL = "0xb7C5A751CCa00b11AF3CA4A35e9e992f0f9c9c9c";
 const PSR = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 
-forking(34737730, () => {
+forking(34765100, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vPLANET_DeFi: Contract;
@@ -76,7 +76,7 @@ forking(34737730, () => {
     });
 
     describe("Ownership", () => {
-      it("should transfer ownership of vUSDD_Stablecoins to Timelock", async () => {
+      it("should transfer ownership of vPLANET_DeFi to Timelock", async () => {
         expect(await vPLANET_DeFi.owner()).to.equal(NORMAL_TIMELOCK);
       });
     });
@@ -128,8 +128,8 @@ forking(34737730, () => {
         });
 
         describe("Caps", () => {
-          it("should set vPLANET_DeFi supply cap to 500,000,000", async () => {
-            expect(await comptroller.supplyCaps(VPLANET_DEFI)).to.equal(parseUnits("500000000", 18));
+          it("should set vPLANET_DeFi supply cap to 1,000,000,000", async () => {
+            expect(await comptroller.supplyCaps(VPLANET_DEFI)).to.equal(parseUnits("1000000000", 18));
           });
 
           it("should set vPLANET_DeFi borrow cap to 500,000,000", async () => {

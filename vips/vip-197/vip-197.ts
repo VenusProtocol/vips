@@ -6,13 +6,12 @@ import { makeProposal } from "../../src/utils";
 const PLANET = "0xca6d678e74f553f0e59cccc03ae644a3c2c5ee7d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const VTOKEN_RECEIVER = "0xF322942f644A996A617BD29c16bd7d231d9F35E9"; //  To be revised
+const VTOKEN_RECEIVER = "0x0554d6079eBc222AD12405E52b264Bdb5B65D1cf";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const VPLANET_DEFI = "0x9A525D02A06C054484c5e0eC7A5E0c70AC4D36B4";
+const VPLANET_DEFI = "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be";
 const REWARD_DISTRIBUTOR = "0xD86FCff6CCF5C4E277E49e1dC01Ed4bcAb8260ba";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
-const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const MAX_STALE_PERIOD = 60 * 25;
@@ -61,12 +60,6 @@ export const vip197 = (maxStalePeriod?: number) => {
         params: [28800],
       },
       {
-        target: VPLANET_DEFI,
-        signature: "setProtocolShareReserve(address)",
-        params: [PSR],
-      },
-
-      {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [PLANET, parseUnits("174983000", 18), NORMAL_TIMELOCK],
@@ -91,7 +84,7 @@ export const vip197 = (maxStalePeriod?: number) => {
             parseUnits("0.3", 18),
             parseUnits("174983000", 18),
             VTOKEN_RECEIVER,
-            parseUnits("500000000", 18),
+            parseUnits("1000000000", 18),
             parseUnits("500000000", 18),
           ],
         ],

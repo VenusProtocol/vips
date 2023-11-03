@@ -24,8 +24,8 @@ const vUSDD_DeFi = "0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0";
 const PLANET = "0xCa6d678e74f553f0E59cccC03ae644a3c2c5EE7d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
-const VTOKEN_RECEIVER = "0xF322942f644A996A617BD29c16bd7d231d9F35E9"; //  To be revised
-const VPLANET_DEFI = "0x9A525D02A06C054484c5e0eC7A5E0c70AC4D36B4";
+const VTOKEN_RECEIVER = "0x0554d6079eBc222AD12405E52b264Bdb5B65D1cf";
+const VPLANET_DEFI = "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be";
 const REWARD_DISTRIBUTOR = "0xD86FCff6CCF5C4E277E49e1dC01Ed4bcAb8260ba";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
@@ -33,7 +33,7 @@ const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const PLANET_RATE_MODEL = "0x53DbE3c0d1Bd439E4F600ad36791C41d02906E6b";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
-forking(33137116, () => {
+forking(33162955, () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vPLANET_DeFi: Contract;
@@ -72,7 +72,7 @@ forking(33137116, () => {
     });
 
     describe("Ownership", () => {
-      it("should transfer ownership of vUSDD_Stablecoins to Timelock", async () => {
+      it("should transfer ownership of vPLANET_DeFi to Timelock", async () => {
         expect(await vPLANET_DeFi.owner()).to.equal(NORMAL_TIMELOCK);
       });
     });
@@ -124,8 +124,8 @@ forking(33137116, () => {
         });
 
         describe("Caps", () => {
-          it("should set vPLANET_DeFi supply cap to 500,000,000", async () => {
-            expect(await comptroller.supplyCaps(VPLANET_DEFI)).to.equal(parseUnits("500000000", 18));
+          it("should set vPLANET_DeFi supply cap to 1,000,000,000", async () => {
+            expect(await comptroller.supplyCaps(VPLANET_DEFI)).to.equal(parseUnits("1000000000", 18));
           });
 
           it("should set vPLANET_DeFi borrow cap to 500,000,000", async () => {
