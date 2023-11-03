@@ -42,6 +42,10 @@ Interest rate curve for the new market:
 - multiplier (yearly): 0.2
 - jump multiplier (yearly): 3
 
+**Rewards**
+
+- 3,000 [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955), for 28 days, for borrowers and suppliers (50/50) in the new PLANET market
+
 **Security and additional considerations**
 
 No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
