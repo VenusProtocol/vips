@@ -56,6 +56,16 @@ export default [
   {
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxTokensDistributionSpeed(address[],uint256[])", NORMAL_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxLoopsLimit(uint256)", NORMAL_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
     params: [PRIME_LIQUIDITY_PROVIDER, "pauseFundsTransfer()", NORMAL_TIMELOCK],
   },
   {
@@ -71,6 +81,16 @@ export default [
   {
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxTokensDistributionSpeed(address[],uint256[])", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxLoopsLimit(uint256)", FAST_TRACK_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
     params: [PRIME_LIQUIDITY_PROVIDER, "pauseFundsTransfer()", FAST_TRACK_TIMELOCK],
   },
   {
@@ -82,6 +102,16 @@ export default [
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
     params: [PRIME_LIQUIDITY_PROVIDER, "setTokensDistributionSpeed(address[],uint256[])", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxTokensDistributionSpeed(address[],uint256[])", CRITICAL_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "setMaxLoopsLimit(uint256)", CRITICAL_TIMELOCK],
   },
   {
     target: ACM,
