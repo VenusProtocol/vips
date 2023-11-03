@@ -47,6 +47,11 @@ export default [
     params: [],
   },
   {
+    target: PRIME,
+    signature: "acceptOwnership()",
+    params: [],
+  },
+  {
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
     params: [PRIME_LIQUIDITY_PROVIDER, "setTokensDistributionSpeed(address[],uint256[])", NORMAL_TIMELOCK],
