@@ -7,20 +7,19 @@ import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMICHANNEL_SENDER = "";
+const BSCTESTNET_OMICHANNEL_SENDER = "0x972166BdE240c71828d1e8c39a0fA8F3Ed6c8d38";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
-const LZ_VIRTUAL_CHIAN_ID = {
-  bscmainnet: 102,
-  bsctestnet: 10102,
-  ethereum: 101,
-  sepolia: 10161,
-};
+const gasUsedPerCommand = {
+  101: 0,
+  10161: 300000,
+} as { [key: number]: number };
 
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
@@ -35,6 +34,14 @@ export async function setForkBlock(blockNumber: number) {
     ],
   });
 }
+
+export const makePayload = (targets: any, values: any, signatures: any, calldatas: any, proposalType: ProposalType) => {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+    [targets, values, signatures, calldatas, proposalType],
+  );
+  return payload;
+};
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
@@ -52,39 +59,81 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
-  let returnObject: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+export const makeProposal = (commands: Command[], meta: ProposalMeta, type: ProposalType): Proposal => {
+  return {
+    signatures: commands.map(cmd => cmd.signature),
+    targets: commands.map(cmd => cmd.target),
+    params: commands.map(cmd => cmd.params),
+    values: commands.map(cmd => cmd.value ?? "0"),
+    meta,
+    type,
+  };
+};
 
-  let map = new Map<number, Command[]>();
+const getAdapterParam = (chainId: number, noOfCommands: number): string => {
+  const requiredGas = 600000 + gasUsedPerCommand[chainId] * noOfCommands;
+  const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
+  return adapterParam;
+};
+const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
+  const provider = ethers.provider;
+  const OmnichainProposalSender = new ethers.Contract(
+    BSCTESTNET_OMICHANNEL_SENDER,
+    OmnichainProposalSender_ABI,
+    provider,
+  );
+  const fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+  return fee;
+};
+
+export const makeRemoteAndLocalProposal = async (
+  commands: Command[],
+  meta?: ProposalMeta,
+  type: ProposalType,
+): Promise<Proposal> => {
+  const returnObject: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const map = new Map<number, Command[]>();
+  const localCommands = [];
   for (const command of commands) {
-    const { chainId } = command;
-    if (chainId) {
-      let currentChainCommands = map.get(chainId) || [];
+    const { dstChainId } = command;
+    if (dstChainId) {
+      const currentChainCommands = map.get(dstChainId) || [];
       currentChainCommands.push(command);
-      map.set(chainId, currentChainCommands);
+      map.set(dstChainId, currentChainCommands);
+    } else {
+      localCommands.push(command);
     }
   }
-
-  for (let key of map.keys()) {
+  if (localCommands.length != 0) {
+    returnObject.targets.push(...localCommands.map(cmd => cmd.target));
+    returnObject.values.push(...localCommands.map(cmd => cmd.value ?? "0"));
+    returnObject.signatures.push(...localCommands.map(cmd => cmd.signature));
+    returnObject.params.push(...localCommands.map(cmd => cmd.params));
+  }
+  for (const key of map.keys()) {
     const chainCommands = map.get(key);
     if (chainCommands) {
-      if (key != LZ_VIRTUAL_CHIAN_ID.bsctestnet || key != LZ_VIRTUAL_CHIAN_ID.bscmainnet) {
-        const remoteParam = createRemotePayload(
-          chainCommands.map(cmd => cmd.target),
-          chainCommands.map(cmd => cmd.signature),
-          chainCommands.map(cmd => cmd.params),
-          chainCommands.map(cmd => cmd.value),
-        );
-        returnObject.signatures.push("execute(uint16,bytes,bytes)");
-        returnObject.targets.push(key == 102 ? BSCMAINNET_OMNICHANNEL_SENDER : BSCTESTNET_OMICHANNEL_SENDER);
-        returnObject.values.push(getEstimateFeesForBridge(chainCommands.map(cmd => cmd.target)).length, remoteParam);
-        returnObject.params.push(remoteParam);
-      } else {
-        returnObject.signatures.push(...chainCommands.map(cmd => cmd.signature));
-        returnObject.targets.push(...chainCommands.map(cmd => cmd.target));
-        returnObject.params.push(...chainCommands.map(cmd => cmd.params));
-        returnObject.values.push(...chainCommands.map(cmd => cmd.value ?? "0"));
-      }
+      const remoteParam = makePayload(
+        chainCommands.map(cmd => cmd.target),
+        chainCommands.map(cmd => cmd.value ?? "0"),
+        chainCommands.map(cmd => cmd.signature),
+        getCalldatas({
+          signatures: chainCommands.map(cmd => cmd.signature),
+          params: chainCommands.map(cmd => cmd.params),
+        }),
+        type,
+      );
+
+      const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
+
+      returnObject.targets.push(
+        process.env.FORK_TESTNET ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
+      );
+      const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
+
+      returnObject.values.push(Math.ceil(value * 1.1));
+      returnObject.signatures.push("execute(uint16,bytes,bytes)");
+      returnObject.params.push([key, remoteParam, remoteAdapterParam]);
     } else {
       throw "Chain ID is not supported";
     }

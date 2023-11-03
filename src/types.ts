@@ -29,5 +29,5 @@ export interface Command {
   signature: string;
   params: any[];
   value?: string;
-  chainId?: number;
+  dstChainId?: number;
 }
