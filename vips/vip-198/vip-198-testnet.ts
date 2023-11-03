@@ -3,20 +3,16 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const PLANET = "0xca6d678e74f553f0e59cccc03ae644a3c2c5ee7d";
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+const PLANET = "0x52b4E1A2ba407813F829B4b3943A1e57768669A9";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const VTOKEN_RECEIVER = "0x0554d6079eBc222AD12405E52b264Bdb5B65D1cf";
-const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const VPLANET_DEFI = "0xFf1112ba7f88a53D4D23ED4e14A117A2aE17C6be";
-const REWARD_DISTRIBUTOR = "0xD86FCff6CCF5C4E277E49e1dC01Ed4bcAb8260ba";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
-const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
-const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
-const MAX_STALE_PERIOD = 60 * 25;
-
-export const vip197 = (maxStalePeriod?: number) => {
+const VPLANET_DEFI = "0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1";
+const REWARD_DISTRIBUTOR = "0x9372F0d88988B2cC0a2bf8700a5B3f04B0b81b8C";
+const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
+const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
+const COMPTROLLER = "0x23a73971A6B9f6580c048B9CB188869B2A2aA2aD";
+export const vip198 = () => {
   const meta = {
     version: "v2",
     title: "VIP-198 Add support for PLANET market in the DeFi pool",
@@ -77,9 +73,9 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
   return makeProposal(
     [
       {
-        target: BINANCE_ORACLE,
-        signature: "setMaxStalePeriod(string,uint256)",
-        params: ["PLANET", maxStalePeriod || MAX_STALE_PERIOD],
+        target: CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [PLANET, parseUnits("0.00005117", 18)],
       },
       {
         target: RESILIENT_ORACLE,
@@ -88,7 +84,7 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
           [
             PLANET,
             [
-              BINANCE_ORACLE,
+              CHAINLINK_ORACLE,
               "0x0000000000000000000000000000000000000000",
               "0x0000000000000000000000000000000000000000",
             ],
@@ -97,20 +93,14 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
         ],
       },
       {
-        target: "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4",
-        signature: "upgradeTo(address)",
-        params: ["0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B"],
-      },
-
-      {
         target: VPLANET_DEFI,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: [28800],
+        params: [100],
       },
       {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [PLANET, parseUnits("174983000", 18), NORMAL_TIMELOCK],
+        target: PLANET,
+        signature: "faucet(uint256)",
+        params: [parseUnits("174983000", 18)],
       },
       {
         target: PLANET,
@@ -138,9 +128,9 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
         ],
       },
       {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("3000", 18), REWARD_DISTRIBUTOR],
+        target: USDT,
+        signature: "allocateTo(address,uint256)",
+        params: [REWARD_DISTRIBUTOR, parseUnits("3000", 6)],
       },
       {
         target: COMPTROLLER,
@@ -155,7 +145,7 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
       {
         target: REWARD_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [[VPLANET_DEFI], ["1860119047619047"], ["1860119047619047"]],
+        params: [[VPLANET_DEFI], ["1860"], ["1860"]],
       },
     ],
     meta,

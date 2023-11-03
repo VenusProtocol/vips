@@ -13,7 +13,7 @@ import {
   checkRewardsDistributor,
   checkRewardsDistributorPool,
 } from "../../../src/vip-framework/checks/rewardsDistributor";
-import { vip197 } from "../../../vips/vip-197/vip-197";
+import { vip198 } from "../../../vips/vip-198/vip-198";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -55,7 +55,7 @@ forking(33162955, () => {
     });
   });
 
-  testVip("VIP-197 Add PLANET Market to DeFi Pool", vip197(3 * 24 * 60 * 60));
+  testVip("VIP-198 Add PLANET Market to DeFi Pool", vip198(3 * 24 * 60 * 60));
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {
