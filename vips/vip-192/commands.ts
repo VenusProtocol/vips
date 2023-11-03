@@ -11,6 +11,7 @@ const XVS_VAULT_PROXY = "0x051100480289e704d20e9DB4804837068f3f9204";
 const XVS_VAULT_IMPL = "0x3091E347e89Ffb5Ffd8C1998D676f82cB82E34c4";
 const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
 const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
+const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B"
 
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
@@ -68,7 +69,17 @@ export default [
   {
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "pauseFundsTransfer()", GUARDIAN],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
     params: [PRIME_LIQUIDITY_PROVIDER, "resumeFundsTransfer()", NORMAL_TIMELOCK],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [PRIME_LIQUIDITY_PROVIDER, "resumeFundsTransfer()", GUARDIAN],
   },
   {
     target: ACM,
