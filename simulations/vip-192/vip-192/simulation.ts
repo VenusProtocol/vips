@@ -74,6 +74,10 @@ forking(33118003, () => {
     it("claim prime token", async () => {
       await expect(prime.claim()).to.be.reverted;
     });
+
+    it("is paused", async () => {
+      expect(await prime.paused()).to.be.equal(true);
+    });
   });
 
   testVip("VIP-192 Prime Program", vip192(), {
@@ -108,6 +112,10 @@ forking(33118003, () => {
 
     it("claim prime token", async () => {
       await expect(prime.claim()).to.be.not.be.reverted;
+    });
+
+    it("is paused", async () => {
+      expect(await prime.paused()).to.be.equal(true);
     });
   });
 });
