@@ -4,6 +4,7 @@ import commands192 from "../vip-192/commands-testnet";
 import commands193 from "../vip-194/commands-testnet";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
+const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
 
 export const vip195Testnet = () => {
   const meta = {
@@ -24,6 +25,11 @@ export const vip195Testnet = () => {
         signature: "resumeFundsTransfer()",
         params: [],
       },
+      {
+        target: PRIME,
+        signature: "togglePause()",
+        params: [],
+      }
     ],
     meta,
     ProposalType.REGULAR,
