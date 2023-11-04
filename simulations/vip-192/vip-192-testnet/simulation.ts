@@ -1,5 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -21,6 +21,7 @@ interface vTokenConfig {
   name: string;
   assetAddress: string;
   feed: string;
+  marketAddress: string;
 }
 
 const vTokens: vTokenConfig[] = [
@@ -28,21 +29,25 @@ const vTokens: vTokenConfig[] = [
     name: "vUSDC",
     assetAddress: "0x16227D60f7a0e586C66B005219dfc887D13C9531",
     feed: "0x90c069C4538adAc136E051052E14c1cD799C41B7",
+    marketAddress: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
   },
   {
     name: "vUSDT",
     assetAddress: "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c",
     feed: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
+    marketAddress: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
   },
   {
     name: "vETH",
     assetAddress: "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7",
     feed: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
+    marketAddress: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
   },
   {
     name: "vBTC",
     assetAddress: "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4",
     feed: "0x5741306c21795FdCBb9b265Ea0255F499DFe515C",
+    marketAddress: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
   },
 ];
 
@@ -107,6 +112,19 @@ forking(34696892, () => {
 
     it("claim prime token", async () => {
       await expect(prime.claim()).to.be.not.be.reverted;
+
+      await mine(100);
+      let interestAccrued = await prime.callStatic.getInterestAccrued(vTokens[0].marketAddress, STAKED_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(vTokens[1].marketAddress, STAKED_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(vTokens[2].marketAddress, STAKED_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(vTokens[3].marketAddress, STAKED_USER);
+      expect(interestAccrued).to.be.equal(0);
     });
 
     it("is paused", async () => {
