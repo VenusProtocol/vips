@@ -57,16 +57,16 @@ forking(34696892, () => {
 
     it("speeds", async () => {
       let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
-      expect(speed).to.deep.equal(100);
+      expect(speed).to.deep.equal("24438657407407");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
-      expect(speed).to.deep.equal(10);
+      expect(speed).to.deep.equal("1261574074074");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
-      expect(speed).to.deep.equal(10);
+      expect(speed).to.deep.equal("36881637731481481");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
-      expect(speed).to.deep.equal(10);
+      expect(speed).to.deep.equal("87191261574074074");
     });
 
     it("paused", async () => {
