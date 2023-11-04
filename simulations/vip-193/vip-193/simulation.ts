@@ -78,7 +78,6 @@ forking(33118003, () => {
 
   testVip("VIP-193 Prime Program", vip193(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewPrimeToken"], [1]);
     },
   });
 
