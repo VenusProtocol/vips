@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip195Testnet } from "../../../vips/vip-195/vip-195-testnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
+const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
 
