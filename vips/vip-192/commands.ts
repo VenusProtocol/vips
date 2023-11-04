@@ -12,6 +12,7 @@ const XVS_VAULT_IMPL = "0x3091E347e89Ffb5Ffd8C1998D676f82cB82E34c4";
 const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
 const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
 const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B"
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
@@ -22,6 +23,8 @@ const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 const vBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
 const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+
+const PRIME_POOL_ID = 0;
 
 const cutParams = params;
 
@@ -327,4 +330,9 @@ export default [
     signature: "pauseFundsTransfer()",
     params: [],
   },
+  {
+    target: XVS_VAULT_PROXY,
+    signature: "setPrimeToken(address,address,uint256)",
+    params: [PRIME, XVS, PRIME_POOL_ID],
+  }
 ];
