@@ -10,11 +10,11 @@ import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import ERC20_ABI from "./abis/ERC20.json";
 
-const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
+const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
+const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
 
 const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 const BTC = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
@@ -49,7 +49,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34696892, () => {
+forking(34866937, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 

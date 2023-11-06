@@ -3,8 +3,8 @@ import { makeProposal } from "../../src/utils";
 import commands192 from "../vip-192/commands-testnet";
 import commands193 from "../vip-194/commands-testnet";
 
-const PRIME_LIQUIDITY_PROVIDER = "0xce20cACeF98DC03b2e30cD63b7B56B018d171E9c";
-const PRIME = "0xb13Ea8C39594449B2AB5555769580BDB23f5E2Cf";
+const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
+const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 
 export const vip195Testnet = () => {
   const meta = {
