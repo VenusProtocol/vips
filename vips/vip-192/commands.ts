@@ -187,6 +187,11 @@ export default [
   {
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
+    params: [PRIME, "togglePause()", GUARDIAN],
+  },
+  {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
     params: [PRIME, "updateAlpha(uint128,uint128)", FAST_TRACK_TIMELOCK],
   },
   {
