@@ -51,7 +51,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34866937, () => {
+forking(34867069, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;

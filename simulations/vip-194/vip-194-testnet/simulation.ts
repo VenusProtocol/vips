@@ -48,7 +48,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34866937, () => {
+forking(34867069, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
@@ -117,7 +117,7 @@ forking(34866937, () => {
       await prime.claim();
       await mine(1000)
       let rewards = await prime.callStatic.getInterestAccrued(vBTC, STAKED_USER);
-      expect(rewards).to.be.equal("1261574074073998");
+      expect(rewards).to.be.equal("1261574074071416");
     });
   });
 });
