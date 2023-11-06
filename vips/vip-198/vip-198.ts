@@ -101,12 +101,6 @@ New market vPLANET_DeFi: [0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1](https://te
         ],
       },
       {
-        target: "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4",
-        signature: "upgradeTo(address)",
-        params: ["0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B"],
-      },
-
-      {
         target: VPLANET_DEFI,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: [28800],
