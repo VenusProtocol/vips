@@ -11,8 +11,8 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import SETTER_FACET_ABI from "./abis/SetterFacet.json";
 
-const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
-const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
+const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 const STAKED_USER = "0xb70d7b0cebb570e9007039b9cfd6034822f81758";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -51,7 +51,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33118003, () => {
+forking(33264865, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;

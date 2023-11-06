@@ -9,8 +9,8 @@ import PRIME_ABI from "./abis/Prime.json";
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 
-const PRIME_LIQUIDITY_PROVIDER = "0x103Af40c4C30A564A2158D7Db6c57a0802b9217A";
-const PRIME = "0x78d8dD5b0003723826E1FDb2031e9466000469Fe";
+const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 const STAKED_USER = "0x07cf6eb791b038ecc157a81738b865154579c911";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -54,7 +54,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33118003, () => {
+forking(33264865, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
@@ -125,7 +125,7 @@ forking(33118003, () => {
       await mine(1000)
 
       let rewards = await prime.callStatic.getInterestAccrued(vETH, STAKED_USER);
-      expect(rewards).to.be.equal("24438657407406861");
+      expect(rewards).to.be.equal("24438657407406925");
     });
   });
 });
