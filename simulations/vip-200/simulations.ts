@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -23,7 +22,7 @@ forking(33276563, () => {
   describe("Post-VIP behavior", async () => {
     it("Should increase receiver BNB balance", async () => {
       const postBalance = await ethers.provider.getBalance(RECEIVER);
-      expect(BNB_AMOUNT).to.closeTo(postBalance.sub(preBalance), parseUnits("0.0012", 18));
+      expect(BNB_AMOUNT).to.be.equal(postBalance.sub(preBalance));
     });
   });
 });

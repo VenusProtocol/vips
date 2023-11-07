@@ -5,7 +5,7 @@ import { makeProposal } from "../src/utils";
 
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const RECEIVER = "0x6657911f7411765979da0794840d671be55ba273";
-export const BNB_AMOUNT = parseUnits("26438.87", 18);
+export const BNB_AMOUNT = parseUnits("26438.868831443265017372", 18);
 
 export const vip200 = () => {
   const meta = {
