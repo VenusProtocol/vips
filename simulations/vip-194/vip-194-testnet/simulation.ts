@@ -48,7 +48,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34867069, () => {
+forking(34891729, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
@@ -72,7 +72,7 @@ forking(34867069, () => {
 
     it("paused", async () => {
       const paused = await primeLiquidityProvider.paused();
-      expect(paused).to.be.equal(false);
+      expect(paused).to.be.equal(true);
     });
   });
 
