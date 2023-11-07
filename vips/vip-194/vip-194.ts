@@ -1,8 +1,8 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands192 from "../vip-192/commands";
-import commands from "./commands";
 import staked from "../vip-192/staked-users";
+import commands from "./commands";
 
 export const vip194 = () => {
   const meta = {

@@ -1,15 +1,13 @@
-import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip193 } from "../../../vips/vip-193/vip-193";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import SETTER_FACET_ABI from "./abis/SetterFacet.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -76,10 +74,7 @@ forking(33264865, () => {
     });
   });
 
-  testVip("VIP-193 Prime Program", vip193(), {
-    callbackAfterExecution: async (txResponse: TransactionResponse) => {
-    },
-  });
+  testVip("VIP-193 Prime Program", vip193(), {});
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;

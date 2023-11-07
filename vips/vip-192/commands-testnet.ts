@@ -346,5 +346,5 @@ export default [
     target: XVS_VAULT_PROXY,
     signature: "setPrimeToken(address,address,uint256)",
     params: [PRIME, XVS, PRIME_POOL_ID],
-  }
+  },
 ];

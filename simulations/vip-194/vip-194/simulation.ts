@@ -1,13 +1,13 @@
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
+import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip194 } from "../../../vips/vip-194/vip-194";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import PRIME_ABI from "./abis/Prime.json";
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -26,31 +26,31 @@ const vTokens: vTokenConfig[] = [
     name: "vUSDC",
     assetAddress: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
     feed: "0x51597f405303c4377e36123cbc172b13269ea163",
-    marketAddress: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8"
+    marketAddress: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
   },
   {
     name: "vUSDT",
     assetAddress: "0x55d398326f99059fF775485246999027B3197955",
     feed: "0xb97ad0e74fa7d920791e90258a6e2085088b4320",
-    marketAddress: "0xfD5840Cd36d94D7229439859C0112a4185BC0255"
+    marketAddress: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
   },
   {
     name: "vETH",
     assetAddress: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
     feed: "0x9ef1b8c0e4f7dc8bf5719ea496883dc6401d5b2e",
-    marketAddress: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8"
+    marketAddress: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
   },
   {
     name: "vBTC",
     assetAddress: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
     feed: "0x264990fbd0a4796a3e3d8e37c4d5f87a3aca5ebf",
-    marketAddress: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B"
+    marketAddress: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
   },
   {
     name: "vXVS",
     assetAddress: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
     feed: "0xbf63f430a79d4036a5900c19818aff1fa710f206",
-    marketAddress: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D"
+    marketAddress: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
   },
 ];
 
@@ -122,9 +122,9 @@ forking(33264865, () => {
 
     it("rewards", async () => {
       await prime.claim();
-      await mine(1000)
+      await mine(1000);
 
-      let rewards = await prime.callStatic.getInterestAccrued(vETH, STAKED_USER);
+      const rewards = await prime.callStatic.getInterestAccrued(vETH, STAKED_USER);
       expect(rewards).to.be.equal("24438657407406925");
     });
   });

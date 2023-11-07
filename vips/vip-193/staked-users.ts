@@ -180,7 +180,6 @@ const users = {
   "0x579435914e1d9fc5eac3ab6c15cf6eb7cbc09669": 1661742496,
   "0x57ce4ddde86c115ccfa7414f5aa2ca391f28329c": 1663581596,
   "0x58b3f5f7174d59b47349e5773aa3553565481ea7": 1638131671,
-  
 };
 
 const addresses: any = [];

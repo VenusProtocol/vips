@@ -1,13 +1,13 @@
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
+import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip194Testnet } from "../../../vips/vip-194/vip-194-testnet";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import PRIME_ABI from "./abis/Prime.json";
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
 const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
@@ -19,7 +19,7 @@ const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 const BTC = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
 const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe"
+const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
 
 const vTokens: vTokenConfig[] = [
   {
@@ -115,8 +115,8 @@ forking(34867069, () => {
 
     it("rewards", async () => {
       await prime.claim();
-      await mine(1000)
-      let rewards = await prime.callStatic.getInterestAccrued(vBTC, STAKED_USER);
+      await mine(1000);
+      const rewards = await prime.callStatic.getInterestAccrued(vBTC, STAKED_USER);
       expect(rewards).to.be.equal("1261574074071416");
     });
   });

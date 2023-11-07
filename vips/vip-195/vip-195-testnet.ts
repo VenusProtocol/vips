@@ -29,7 +29,7 @@ export const vip195Testnet = () => {
         target: PRIME,
         signature: "togglePause()",
         params: [],
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,
