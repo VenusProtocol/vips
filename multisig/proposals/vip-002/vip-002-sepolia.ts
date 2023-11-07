@@ -3,7 +3,7 @@ import { ADDRESSES, ZERO_ADDRESS } from "../../helpers/config";
 
 const { sepoliaContracts } = ADDRESSES;
 
-export const vtokenConfiguration = () => {
+export const vip002 = () => {
   return makeProposal([
     {
       target: sepoliaContracts.ACM,

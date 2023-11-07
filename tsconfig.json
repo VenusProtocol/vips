@@ -18,5 +18,13 @@
   },
   "exclude": ["node_modules"],
   "files": ["./hardhat.config.ts"],
-  "include": ["./tests", "./scripts", "./src", "./vips", "./simulations", "multisig/proposals/sepolia"]
+  "include": [
+    "./tests",
+    "./scripts",
+    "./src",
+    "./vips",
+    "./simulations",
+    "multisig/proposals/sepolia",
+    "multisig/proposals/vip-000/vip000.ts"
+  ]
 }

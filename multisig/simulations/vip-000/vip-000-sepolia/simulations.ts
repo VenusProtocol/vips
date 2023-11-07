@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index.ts";
 import { ADDRESSES } from "../../../helpers/config.ts";
-import { acceptTreasuryOwnership } from "../../../proposals/sepolia/acceptTreasuryOwnership.ts";
+import { vip000 } from "../../../proposals/vip-000/vip-000-sepolia.ts";
 import TREASURY_ABI from "./abi/treasury.json";
 
 const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
@@ -16,7 +16,7 @@ forking(4646931, () => {
 
   before(async () => {
     treasury = await ethers.getContractAt(TREASURY_ABI, TREASURY);
-    await pretendExecutingVip(acceptTreasuryOwnership());
+    await pretendExecutingVip(vip000());
   });
 
   describe("Post tx checks", () => {

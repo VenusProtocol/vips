@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { ADDRESSES } from "../../../helpers/config";
-import { vtokenConfiguration } from "../../../proposals/sepolia/vtokenConfiguration";
+import { vip002 } from "../../../proposals/vip-002/vip-002-sepolia";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -206,7 +206,7 @@ forking(4333890, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vtokenConfiguration());
+      await pretendExecutingVip(vip002());
     });
     describe("PoolRegistry state", () => {
       let registeredPools: { name: string; creator: string; comptroller: string }[];

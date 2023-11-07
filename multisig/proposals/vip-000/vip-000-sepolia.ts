@@ -2,7 +2,7 @@ import { makeProposal } from "../../../src/utils";
 
 const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 
-export const acceptTreasuryOwnership = () => {
+export const vip000 = () => {
   return makeProposal([
     {
       target: TREASURY,
