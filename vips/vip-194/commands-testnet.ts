@@ -29,11 +29,11 @@ export default [
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDC, "6373147000000", PRIME_LIQUIDITY_PROVIDER],
+    params: [USDC, "63731470000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDT, "15066650000000", PRIME_LIQUIDITY_PROVIDER],
+    params: [USDT, "150666500000000000000000", PRIME_LIQUIDITY_PROVIDER],
   },
 ];

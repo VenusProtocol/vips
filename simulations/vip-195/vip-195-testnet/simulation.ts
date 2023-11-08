@@ -46,18 +46,25 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34867069, () => {
+forking(34920008, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
+    let prime: Contract;
 
     before(async () => {
+      impersonateAccount(STAKED_USER);
+      const signer = await ethers.getSigner(STAKED_USER);
+
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
     });
 
     it("paused", async () => {
       const paused = await primeLiquidityProvider.paused();
-      // should be true after previous VIPs are executed
-      expect(paused).to.be.equal(false);
+      expect(paused).to.be.equal(true);
+
+      const primePaused = await prime.paused();
+      expect(primePaused).to.be.equal(true);
     });
   });
 
@@ -91,12 +98,12 @@ forking(34867069, () => {
     });
 
     it("rewards", async () => {
-      await prime.claim();
+      // await prime.claim();
       await mine(1000);
 
-      expect(await btc.balanceOf(STAKED_USER)).to.be.equal("99898346512817043568857");
+      expect(await btc.balanceOf(STAKED_USER)).to.be.equal("99898393363273664551870");
       await prime["claimInterest(address)"](vBTC);
-      expect(await btc.balanceOf(STAKED_USER)).to.be.equal("99898347775652691714331");
+      expect(await btc.balanceOf(STAKED_USER)).to.be.equal("99898466257023664542220");
     });
   });
 });

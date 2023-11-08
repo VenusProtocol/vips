@@ -1,7 +1,5 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import commands192 from "../vip-192/commands-testnet";
-import commands193 from "../vip-194/commands-testnet";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
 const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
@@ -18,8 +16,6 @@ export const vip195Testnet = () => {
 
   return makeProposal(
     [
-      ...commands192,
-      ...commands193,
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "resumeFundsTransfer()",
