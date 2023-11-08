@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BNB_AMOUNT, RECEIVER, vip200 } from "../../vips/vip-200";
+import { BNB_AMOUNT, RECEIVER, vip199 } from "../../vips/vip-199";
 import TREASURY_ABI from "./abi/VTreasury.json";
 
 forking(33276563, () => {
@@ -13,7 +13,7 @@ forking(33276563, () => {
     preBalance = await ethers.provider.getBalance(RECEIVER);
   });
 
-  testVip("VIP-200 Transfer BNB reserves to swap them", vip200(), {
+  testVip("VIP-200 Transfer BNB reserves to swap them", vip199(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [TREASURY_ABI], ["WithdrawTreasuryBNB"], [1]);
     },
