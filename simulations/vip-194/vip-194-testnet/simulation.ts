@@ -102,10 +102,10 @@ forking(34891729, () => {
       expect(speed).to.deep.equal("1261574074074");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
-      expect(speed).to.deep.equal("36881637731481481");
+      expect(speed).to.deep.equal("36881");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
-      expect(speed).to.deep.equal("87191261574074074");
+      expect(speed).to.deep.equal("87191");
     });
 
     it("paused", async () => {

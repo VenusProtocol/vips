@@ -13,7 +13,7 @@ export default [
     signature: "setTokensDistributionSpeed(address[],uint256[])",
     params: [
       [ETH, BTC, USDC, USDT],
-      ["24438657407407", "1261574074074", "36881637731481481", "87191261574074074"],
+      ["24438657407407", "1261574074074", "36881", "87191"],
     ],
   },
   {
@@ -29,11 +29,11 @@ export default [
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDC, "63731470000000000000000", PRIME_LIQUIDITY_PROVIDER],
+    params: [USDC, "6373147000000", PRIME_LIQUIDITY_PROVIDER],
   },
   {
     target: VTreasury,
     signature: "withdrawTreasuryBEP20(address,uint256,address)",
-    params: [USDT, "150666500000000000000000", PRIME_LIQUIDITY_PROVIDER],
+    params: [USDT, "15066650000000", PRIME_LIQUIDITY_PROVIDER],
   },
 ];
