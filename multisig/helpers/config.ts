@@ -26,4 +26,8 @@ export const ADDRESSES: NetworkAddress = {
     VUSDC: "0x6f1089e90C6a14397C20348eE704d596819DFEd4",
     VTREASURY: "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8",
   },
+  ethereum: {
+    TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67", // Ethereum Multisig
+    VTREASURY: "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa",
+  },
 };
