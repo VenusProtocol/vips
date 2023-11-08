@@ -10,10 +10,10 @@ export const BNB_AMOUNT = parseUnits("26438.868831443265017372", 18);
 export const vip199 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-199 BUSD shortfall repayment",
+    title: "VIP-199 BUSD shortfall repayment preparation",
     description: `#### Summary
 
-If approved, this VIP will initiate the necessary steps to repay an estimated $6,486,776 of the $13,521,179 total shortfall in the BUSD market. This repayment will be financed by the treasury's BNB funds, 26,438.87 BNB, valued at approximately $6,486,776. This value closely matches the risk fund accrued for 2023 according to our tokenomics. The required preparatory steps are as follows:
+If approved, this VIP will initiate the necessary steps to repay an estimated $6,486,776 of the $13,521,179 total shortfall in the BUSD market. This repayment will be financed by the treasury's BNB funds, 26,438.87 BNB, valued at approximately $6,486,776. This value closely matches the risk fund accrued for 2023 according to our tokenomics. The required steps are as follows:
 
 1. Transfer 26,438.87 BNB from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to [Binance](https://bscscan.com/address/0x6657911F7411765979Da0794840D671Be55bA273) for the conversion to BUSD.
 2. Transfer the funds from Binance to the protocol’s treasury.
