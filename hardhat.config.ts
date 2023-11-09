@@ -68,6 +68,7 @@ const config: HardhatUserConfig = {
       url: "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
       chainId: 11155111,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      gas: 50000000,
     },
   },
   paths: {
@@ -79,7 +80,7 @@ const config: HardhatUserConfig = {
 };
 
 function isFork() {
-  return process.env.FORK_MAINNET === "true" || process.env.FORK_TESTNET === "true"
+  return process.env.FORK_MAINNET === "true" || process.env.FORK_TESTNET === "true" //|| process.env.NETWORK === "sepolia"
     ? {
         allowUnlimitedContractSize: false,
         loggingEnabled: false,

@@ -82,17 +82,24 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
     OmnichainProposalSender_ABI,
     provider,
   );
-  const fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+  let fee;
+  if (process.env.FORK_TESTNET === "true" && process.env.NETWORK === "bsctestnet") {
+    console.log(await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams));
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+  } else {
+    fee = ethers.BigNumber.from("1");
+  }
   return fee;
 };
 
-export const makeRemoteAndLocalProposal = async (
+export const makeProposalV2 = async (
   commands: Command[],
   meta?: ProposalMeta,
   type: ProposalType,
-): Promise<Proposal> => {
-  const returnObject: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+): Promise<{ localProposal: any; payloads: any }> => {
+  const localProposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
   const map = new Map<number, Command[]>();
+  const payloads = new Map<number, string>();
   const localCommands = [];
   for (const command of commands) {
     const { dstChainId } = command;
@@ -105,10 +112,10 @@ export const makeRemoteAndLocalProposal = async (
     }
   }
   if (localCommands.length != 0) {
-    returnObject.targets.push(...localCommands.map(cmd => cmd.target));
-    returnObject.values.push(...localCommands.map(cmd => cmd.value ?? "0"));
-    returnObject.signatures.push(...localCommands.map(cmd => cmd.signature));
-    returnObject.params.push(...localCommands.map(cmd => cmd.params));
+    localProposal.targets.push(...localCommands.map(cmd => cmd.target));
+    localProposal.values.push(...localCommands.map(cmd => cmd.value ?? "0"));
+    localProposal.signatures.push(...localCommands.map(cmd => cmd.signature));
+    localProposal.params.push(...localCommands.map(cmd => cmd.params));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);
@@ -124,21 +131,23 @@ export const makeRemoteAndLocalProposal = async (
         type,
       );
 
+      payloads.set(key, remoteParam);
+
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
-      returnObject.targets.push(
+      localProposal.targets.push(
         process.env.FORK_TESTNET ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
 
-      returnObject.values.push(Math.ceil(value * 1.1));
-      returnObject.signatures.push("execute(uint16,bytes,bytes)");
-      returnObject.params.push([key, remoteParam, remoteAdapterParam]);
+      localProposal.values.push(Math.ceil(value * 1.1));
+      localProposal.signatures.push("execute(uint16,bytes,bytes)");
+      localProposal.params.push([key, remoteParam, remoteAdapterParam]);
     } else {
       throw "Chain ID is not supported";
     }
   }
-  return returnObject;
+  return { localProposal, payloads };
 };
 
 export const setMaxStalePeriodInOracle = async (
@@ -212,7 +221,7 @@ export const expectEvents = async (
   for (let i = 0; i < expectedEvents.length; ++i) {
     expect(
       namedEvents.filter(it => it === expectedEvents[i]),
-      `expected a differnt number of ${expectedEvents[i]} events`,
+      `expected a different number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
 };

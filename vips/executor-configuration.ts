@@ -1,13 +1,13 @@
 import { ProposalType } from "../src/types";
-import { makeRemoteAndLocalProposal } from "../src/utils";
+import { makeProposalV2 } from "../src/utils";
 
-const REMOTE_NORMAL_TIMELOCK = "0x73595df97ed491475bbcA4fd0D15b047c2f65191";
-const REMOTE_ACCESS_CONTROL_MANAGER = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const REMOTE_FASTTRACK_TIMELOCK = "0xf6BA63893355E0b8690CA2c5D6252a542f8CC754";
-const REMOTE_CRITICAL_TIMELOCK = "0xD011c53e5470EAA819Dbdfa3596DA17d720CCF08";
-const OMNICHAIN_PROPOSAL_SENDER = "0x972166BdE240c71828d1e8c39a0fA8F3Ed6c8d38";
-const OMNICHAIN_EXECUTOR_OWNER = "0xF1Aae92e97f7A0700983b512d7Eb5B509db43Bc5";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0x171B468b52d7027F12cEF90cd065d6776a25E24e";
+const REMOTE_NORMAL_TIMELOCK = "0x3961EDAfe1d1d3AB446f1b2fc10bde476058448B";
+const REMOTE_ACCESS_CONTROL_MANAGER = "0x982e066294532CDC1631Bf7c587f41976dEA9B62";
+const REMOTE_FASTTRACK_TIMELOCK = "0x02A66bfB5De5c6b969cB81F00AC433bC8EeeDd4c";
+const REMOTE_CRITICAL_TIMELOCK = "0xa82173F08CDFCD6fDB5505dcd37E5c6403a26DE6";
+const OMNICHAIN_PROPOSAL_SENDER = "0x0852b6D4C4745A8bFEB54476A2A167DF68866c00";
+const OMNICHAIN_EXECUTOR_OWNER = "0x21Faad4b28256E5C56f54fbAaceda919E707549f";
+const OMNICHAIN_GOVERNANCE_EXECUTOR = "0x9B0786cD8F841D1C7B8A08a5aE6a246aEd556a42";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
@@ -27,7 +27,7 @@ export const executor_configuration = async () => {
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
-  return await makeRemoteAndLocalProposal(
+  return await makeProposalV2(
     [
       {
         target: ACCESS_CONTROL_MANAGER,
@@ -141,7 +141,7 @@ export const executor_configuration = async () => {
       {
         target: REMOTE_ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(TimelockInterface[])", REMOTE_NORMAL_TIMELOCK],
+        params: [OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", REMOTE_NORMAL_TIMELOCK],
         dstChainId: remoteChainId,
       },
       {
