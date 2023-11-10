@@ -3,29 +3,19 @@ import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
 import { Proposal } from "../../src/types";
+import { NETWORK_ADDRESSES } from "../networkAddresses";
 
 const readline = require("readline-sync");
 
 const DEFAULT_OPERATION = 0; // Call
 
-export const loadMultisigTx = async (txName: string, networkName: string) => {
-  const x = await import(`../proposals/${networkName}/${txName}.ts`);
-  return x[txName]();
+export const loadMultisigTx = async (txID: string, networkName: string) => {
+  const x = await import(`../../multisig/proposals/vip-${txID}/vip-${txID}-${networkName}.ts`);
+  return x[`vip${txID}`]();
 };
 
 export const getSafeAddress = (networkName: string): string => {
-  // Define Safe addresses for different networks here
-  const safeAddresses: Record<string, string> = {
-    // Sepolia network
-    sepolia: "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb",
-    // Add more networks and their corresponding Safe addresses as needed
-  };
-
-  if (networkName in safeAddresses) {
-    return safeAddresses[networkName];
-  } else {
-    throw new Error(`Safe address for network ${networkName} is not defined.`);
-  }
+  return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 
 export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransactionData[]> => {
@@ -46,9 +36,9 @@ export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransacti
 };
 
 export const createGnosisTx = async (ethAdapter: EthersAdapter, safeSdk: Safe): Promise<SafeTransaction> => {
-  const txName = readline.question("Name of tx file (from ./multisig/network(available)/ dir) to execute => ");
+  const txID = readline.question("Multisig VIP ID to execute => ");
 
-  const proposal = await loadMultisigTx(txName, network.name);
+  const proposal = await loadMultisigTx(txID, network.name);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 

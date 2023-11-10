@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import fs from "fs/promises";
 import { network } from "hardhat";
 
-import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../multisig/helpers/utils";
+import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../src/multisig/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
 import { getCalldatas, proposalSchema } from "../src/utils";
 
@@ -61,9 +61,9 @@ const processTxBuilder = async () => {
 const processGnosisTxBuilder = async () => {
   const safeAddress = getSafeAddress(network.name);
 
-  const txName = readline.question("Name of tx file (from ./multisig/network(available)/ dir) to execute => ");
+  const txID = readline.question("Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => ");
 
-  const proposal = await loadMultisigTx(txName, network.name);
+  const proposal = await loadMultisigTx(txID, network.name);
   const multisigTx = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
 
