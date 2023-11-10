@@ -2,7 +2,9 @@ import { TxBuilder } from "@morpho-labs/gnosis-tx-builder";
 import Ajv from "ajv";
 import { BigNumber } from "ethers";
 import fs from "fs/promises";
+import { network } from "hardhat";
 
+import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../multisig/helpers/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
 import { getCalldatas, proposalSchema } from "../src/utils";
 
@@ -16,8 +18,8 @@ let transactionType: string;
 
 function processInputs(): Promise<void> {
   return new Promise(resolve => {
-    vipNumber = readline.question("Number of the VIP to propose => ");
-    transactionType = readline.question("Type of the proposal txBuilder/venusApp/bsc => ");
+    vipNumber = readline.question("Number of the VIP to propose (if using gnosisTXBuilder press enter to skip ) => ");
+    transactionType = readline.question("Type of the proposal txBuilder/venusApp/bsc/gnosisTXBuilder => ");
     governorAddress = readline.question("Address of the governance contract (optional, press enter to skip) => ");
     if (!governorAddress) {
       governorAddress = null;
@@ -56,6 +58,18 @@ const processTxBuilder = async () => {
   return processJson(batchJson);
 };
 
+const processGnosisTxBuilder = async () => {
+  const safeAddress = getSafeAddress(network.name);
+
+  const txName = readline.question("Name of tx file (from ./multisig/network(available)/ dir) to execute => ");
+
+  const proposal = await loadMultisigTx(txName, network.name);
+  const multisigTx = await buildMultiSigTx(proposal);
+  const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
+
+  return processJson(batchJson);
+};
+
 const processVenusAppProposal = async () => {
   const proposal = await loadProposal(vipNumber);
   const validate = new Ajv().compile(proposalSchema);
@@ -89,6 +103,8 @@ const createProposal = async () => {
     result = await processTxBuilder();
   } else if (transactionType === "venusApp") {
     result = await processVenusAppProposal();
+  } else if (transactionType === "gnosisTXBuilder") {
+    result = await processGnosisTxBuilder();
   } else {
     result = await processBscProposal();
   }
