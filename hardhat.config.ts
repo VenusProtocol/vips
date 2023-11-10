@@ -80,7 +80,7 @@ const config: HardhatUserConfig = {
 };
 
 function isFork() {
-  return process.env.FORK_MAINNET === "true" || process.env.FORK_TESTNET === "true" //|| process.env.NETWORK === "sepolia"
+  return process.env.FORK_MAINNET === "true" || process.env.FORK_TESTNET === "true"
     ? {
         allowUnlimitedContractSize: false,
         loggingEnabled: false,
