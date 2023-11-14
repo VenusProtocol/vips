@@ -52,7 +52,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33264865, () => {
+forking(33490463, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
@@ -107,7 +107,7 @@ forking(33264865, () => {
 
       expect(await eth.balanceOf(STAKED_USER)).to.be.equal("0");
       await prime["claimInterest(address)"](vETH);
-      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("24463096064814232");
+      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("24463096064814263");
     });
   });
 });

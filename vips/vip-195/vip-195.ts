@@ -1,7 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands192 from "../vip-192/commands";
-import staked from "../vip-192/staked-users";
+import staked from "../vip-194/staked-users";
 import commands193 from "../vip-194/commands";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
