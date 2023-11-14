@@ -38,7 +38,6 @@ Specifically, in this VIP the following actions will be performed:
 6. Set the prime attribute in the XVSVault
 7. Add Prime markets (USDT, USDC, ETH, BTC) into the Prime contract
 8. Set distribution speeds in the PrimeLiquidityProvider equal to zero, disabling the rewards
-9. Set (partially) stakedAt attribute, to allow eligible XVS stakers to claim their Prime token
 
 **Prime parameters**
 
