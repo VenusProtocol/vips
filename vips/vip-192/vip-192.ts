@@ -68,7 +68,7 @@ We applied the following security procedures for this upgrade:
 - [Fairyproof audit report (2023/09/10)](https://github.com/VenusProtocol/venus-protocol/blob/e02832bb2716bc0a178d910f6698877bf1b191e1/audits/056_prime_fairyproof_20230910.pdf)
 - [Code4rena contest (2023/09/28)](https://code4rena.com/contests/2023-09-venus-prime)
 
-**Deployed contracts on main net**
+**Deployed contracts on mainnet**
 
 - [Prime](https://bscscan.com/address/0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC)
 - [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2)
