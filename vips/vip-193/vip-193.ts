@@ -6,10 +6,10 @@ import staked from "./staked-users";
 export const vip193 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-202 Venus Prime: deployment stage 2/4",
+    title: "VIP-202 Venus Prime: deployment stage 2/5",
     description: `#### Description
 
-If passed, this VIP will set the rest of the timestamps when users staked more than 1,000 XVS on the XVSVault. The qualified users will be able to claim their Prime tokens.
+If passed, this VIP will set a batch of timestamps when users staked more than 1,000 XVS on the XVSVault. The qualified users will be able to claim their Prime tokens.
 
 This VIP is the second one to enable Venus Prime. The first VIP was [VIP-201](https://app.venus.io/#/governance/proposal/201).
 

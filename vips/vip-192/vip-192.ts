@@ -6,7 +6,7 @@ import staked from "./staked-users";
 export const vip192 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-201 Venus Prime: deployment stage 1/4",
+    title: "VIP-201 Venus Prime: deployment stage 1/5",
     description: `#### Summary
 
 If passed, this VIP will enable Prime tokens, allowing users to claim theirs.
@@ -15,18 +15,18 @@ If passed, this VIP will enable Prime tokens, allowing users to claim theirs.
 
 [Check the updated Venus public documentation](https://docs-v4.venus.io/whats-new/prime-yield) to review the details of the deployed Venus Prime program. This VIP is part of the proposal [Venus Tokenomics Upgrade v3.0 Proposal](https://community.venus.io/t/venus-tokenomics-upgrade-v3-0-proposal/2782), published in the Venus community forum. The Venus Prime finally released has several differences with the original program proposed.
 
-The full deployment of Venus Prime will need 4 VIP’s. This is the first one. These are the details of the full deployment plan:
+The full deployment of Venus Prime needs 5 VIP’s. This is the first one. These are the details of the full deployment plan:
 
 1. Enable Prime token, and allow users to claim them
-2. Set the rest of the timestamps when users staked more than 1,000 XVS on the XVSVault
-3. Configure the PrimeLiquidityProvider contract, starting accruing rewards for Prime holders
-4. Resume Prime
+2&3. Set the timestamps when users staked more than 1,000 XVS on the XVSVault
+4. Configure the PrimeLiquidityProvider contract, starting accruing rewards for Prime holders
+5. Resume Prime
 
 The rationale behind this deployment plan is:
 
-- Between VIP 1/2 and VIP 3 users will be able to claim their Prime tokens
-- When VIP 3 is executed, there will already be Prime users that will start accruing rewards from the PrimeLiquidityProvider. Otherwise, rewards would be distributed among a reduced amount of Prime holder
-- Between VIP 3 and VIP 4, users will be able to see in the [Venus UI](https://app.venus.io/) how their rewards are increasing. Everything will be reviewed, and if some issue is detected then the Venus community will be able to rollback and fix it, because the funds will be still in the PrimeLiquidityProvider contract
+- After VIP's 2&3 users will be able to claim their Prime tokens
+- When VIP 4 is executed, there will already be Prime users that will start accruing rewards from the PrimeLiquidityProvider. Otherwise, rewards would be distributed among a reduced amount of Prime holder
+- Between VIP 4 and VIP 5, users will be able to see in the [Venus UI](https://app.venus.io/) how their rewards are increasing. Everything will be reviewed, and if some issue is detected then the Venus community will be able to rollback and fix it, because the funds will be still in the PrimeLiquidityProvider contract
 
 Specifically, in this VIP the following actions will be performed:
 
