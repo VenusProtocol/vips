@@ -24,26 +24,25 @@ The full deployment of Venus Prime will need 4 VIP’s. This is the first one. T
 
 The rationale behind this deployment plan is:
 
-- VIP 1 and VIP 2 will be proposed together
 - Between VIP 1/2 and VIP 3 users will be able to claim their Prime tokens
 - When VIP 3 is executed, there will already be Prime users that will start accruing rewards from the PrimeLiquidityProvider. Otherwise, rewards would be distributed among a reduced amount of Prime holder
 - Between VIP 3 and VIP 4, users will be able to see in the [Venus UI](https://app.venus.io/) how their rewards are increasing. Everything will be reviewed, and if some issue is detected then the Venus community will be able to rollback and fix it, because the funds will be still in the PrimeLiquidityProvider contract
 
 Specifically, in this VIP the following actions will be performed:
 
-1. Upgrade the implementation of the PolicyFacet and SetterFacet facets. This way the user Prime score will be updated every time the user interacts with the market
-2. Set the prime attribute in the Core pool comptroller. Related to the previous step.
-3. Accept ownership of the Prime contract, and PrimeLiquidityProvider. Governance will be the owner of these new contracts
-4. Grant permissions on the Prime and PrimeLiquidityProvider contracts, to allow Governance to adjust the different configurable parameters in the future via VIP
-5. Upgrade implementation of the [XVSVault](https://bscscan.com/address/0x051100480289e704d20e9DB4804837068f3f9204). This way the user Prime score will be updated every time user stakes/unstake XVS to/from the vault
-6. Set the prime attribute in the XVSVault. Related to the previous step
-7. Add Prime markets ([USDT](https://bscscan.com/address/0xfD5840Cd36d94D7229439859C0112a4185BC0255), [USDC](https://bscscan.com/address/0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8), [ETH](https://bscscan.com/address/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8), [BTC](https://bscscan.com/address/0x882C173bC7Ff3b7786CA16DfeD3DFFfb9Ee7847B)) into the Prime contract
+1. Upgrade the implementation of the PolicyFacet and SetterFacet facets
+2. Set the prime attribute in the Core pool comptroller
+3. Accept ownership of the Prime contract, and PrimeLiquidityProvider
+4. Grant permissions on the Prime and PrimeLiquidityProvider contracts
+5. Upgrade implementation of the [XVSVault](https://bscscan.com/address/0x051100480289e704d20e9DB4804837068f3f9204)
+6. Set the prime attribute in the XVSVault
+7. Add Prime markets (USDT, USDC, ETH, BTC) into the Prime contract
 8. Set distribution speeds in the PrimeLiquidityProvider equal to zero, disabling the rewards
 9. Set (partially) stakedAt attribute, to allow eligible XVS stakers to claim their Prime token
 
 **Prime parameters**
 
-- Markets: [USDT](https://bscscan.com/address/0xfD5840Cd36d94D7229439859C0112a4185BC0255), [USDC](https://bscscan.com/address/0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8), [ETH](https://bscscan.com/address/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8), [BTC](https://bscscan.com/address/0x882C173bC7Ff3b7786CA16DfeD3DFFfb9Ee7847B)
+- Markets: USDT, USDC, ETH, BTC
 - Minimum XVS to qualify: 1,000 XVS
 - Maximum XVS cap: 100,000 XVS
 - Number of days staking XVS to qualify: 90
