@@ -1,9 +1,10 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip195 } from "../../../vips/vip-195/vip-195";
 import PRIME_ABI from "./abis/Prime.json";
@@ -82,7 +83,11 @@ forking(33490463, () => {
     });
   });
 
-  testVip("VIP-195 Prime Program", vip195(), {});
+  testVip("VIP-195 Prime Program", vip195(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [4]);
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;

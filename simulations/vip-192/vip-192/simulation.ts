@@ -10,6 +10,7 @@ import { vip192 } from "../../../vips/vip-192/vip-192";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import SETTER_FACET_ABI from "./abis/SetterFacet.json";
+import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -89,6 +90,11 @@ forking(33490463, () => {
   testVip("VIP-192 Prime Program", vip192(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewPrimeToken"], [1]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["PrimeTokenUpdated"], [1]);
+      await expectEvents(txResponse, [PRIME_ABI], ["MarketAdded"], [4]);
+      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated"], [1]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["Paused"], [1]);
+      await expectEvents(txResponse, [XVS_VAULT_ABI], ["NewPrimeToken"], [1]);
     },
   });
 
