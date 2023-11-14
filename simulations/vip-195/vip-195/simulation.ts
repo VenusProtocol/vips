@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip195 } from "../../../vips/vip-195/vip-195";
-import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
@@ -17,6 +16,9 @@ const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 
 const vTokens: vTokenConfig[] = [
@@ -55,20 +57,28 @@ const vTokens: vTokenConfig[] = [
 forking(33490463, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
-    let prime: Contract;
 
     before(async () => {
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+    });
+
+    it("speeds", async () => {
+      let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
+      expect(speed).to.deep.equal(0);
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
+      expect(speed).to.deep.equal(0);
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
+      expect(speed).to.deep.equal(0);
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
+      expect(speed).to.deep.equal(0);
     });
 
     it("paused", async () => {
       const paused = await primeLiquidityProvider.paused();
-      // should be true after previous VIPs are executed
       expect(paused).to.be.equal(false);
-
-      const primePaused = await prime.paused();
-      expect(primePaused).to.be.equal(true);
     });
   });
 
@@ -77,7 +87,6 @@ forking(33490463, () => {
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
-    let eth: Contract;
 
     before(async () => {
       impersonateAccount(STAKED_USER);
@@ -85,7 +94,6 @@ forking(33490463, () => {
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
-      eth = await ethers.getContractAt(ERC20_ABI, ETH);
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
@@ -93,21 +101,31 @@ forking(33490463, () => {
       }
     });
 
+    it("speeds", async () => {
+      let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
+      expect(speed).to.deep.equal("24438657407407");
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
+      expect(speed).to.deep.equal("1261574074074");
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
+      expect(speed).to.deep.equal("36881637731481481");
+
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
+      expect(speed).to.deep.equal("87191261574074074");
+    });
+
     it("paused", async () => {
       const paused = await primeLiquidityProvider.paused();
-      expect(paused).to.be.equal(false);
-
-      const primePaused = await prime.paused();
-      expect(primePaused).to.be.equal(false);
+      expect(paused).to.be.equal(true);
     });
 
     it("rewards", async () => {
       await prime.claim();
       await mine(1000);
 
-      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("0");
-      await prime["claimInterest(address)"](vETH);
-      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("24463096064814263");
+      const rewards = await prime.callStatic.getInterestAccrued(vETH, STAKED_USER);
+      expect(rewards).to.be.equal("24438657407406963");
     });
   });
 });

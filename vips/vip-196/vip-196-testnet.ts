@@ -1,8 +1,10 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import commands from "./commands-testnet";
 
-export const vip194Testnet = () => {
+const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
+const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
+
+export const vip196Testnet = () => {
   const meta = {
     version: "v2",
     title: "Prime Program Setup",
@@ -12,5 +14,20 @@ export const vip194Testnet = () => {
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with setting the prime program",
   };
 
-  return makeProposal([...commands], meta, ProposalType.REGULAR);
+  return makeProposal(
+    [
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "resumeFundsTransfer()",
+        params: [],
+      },
+      {
+        target: PRIME,
+        signature: "togglePause()",
+        params: [],
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
 };
