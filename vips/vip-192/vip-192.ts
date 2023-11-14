@@ -17,10 +17,10 @@ If passed, this VIP will enable Prime tokens, allowing users to claim theirs.
 
 The full deployment of Venus Prime needs 5 VIP’s. This is the first one. These are the details of the full deployment plan:
 
-1. Enable Prime token, and allow users to claim them
-2&3. Set the timestamps when users staked more than 1,000 XVS on the XVSVault
-4. Configure the PrimeLiquidityProvider contract, starting accruing rewards for Prime holders
-5. Resume Prime
+- VIP 1. Enable Prime token, and allow users to claim them
+- VIPs 2&3. Set the timestamps when users staked more than 1,000 XVS on the XVSVault
+- VIP 4. Configure the PrimeLiquidityProvider contract, starting accruing rewards for Prime holders
+- VIP 5. Resume Prime
 
 The rationale behind this deployment plan is:
 
