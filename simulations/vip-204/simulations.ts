@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip201 } from "../../vips/vip-201";
+import { vip204 } from "../../vips/vip-204";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
@@ -21,7 +21,7 @@ forking(33508800, () => {
     prevBalance = await vToken.callStatic.borrowBalanceCurrent(BORROWER);
   });
 
-  testVip("VIP-118 Repay ETH debt on behalf debt", vip201(), {
+  testVip("VIP-204 Repay BUSD debt on behalf debt", vip204(), {
     proposer: "0x97a32d4506f6a35de68e0680859cdf41d077a9a9",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {
