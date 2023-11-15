@@ -64,8 +64,9 @@ export const checkComptroller = () => {
       await comptroller.enterMarkets([vusdt.address, veth.address]);
 
       expect(await vusdt.balanceOf(ACCOUNT)).to.equal(0);
+      const usdtBalance = await usdt.balanceOf(ACCOUNT);
       await vusdt.borrow(parseUnits("100", 18));
-      expect(await vusdt.balanceOf(ACCOUNT)).to.equal(0);
+      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", 18)));
 
       expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
     });
