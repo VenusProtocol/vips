@@ -14,7 +14,6 @@ const XVS_VAULT_PROXY = "0x051100480289e704d20e9DB4804837068f3f9204";
 
 export const checkXVSVault = () => {
   describe("generic XVS Vault checks", () => {
-    let timelockSigner: Signer;
     let xvs : Contract;
     let xvsVault : Contract;
 
@@ -22,7 +21,6 @@ export const checkXVSVault = () => {
       impersonateAccount(ACCOUNT);
       impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(ACCOUNT);
-      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
       xvsVault = await ethers.getContractAt(XVSVault_ABI, XVS_VAULT_PROXY, signer);
