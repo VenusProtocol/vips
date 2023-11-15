@@ -5,7 +5,7 @@ import { Contract, ContractInterface } from "ethers";
 import { ethers } from "hardhat";
 
 import { Proposal, ProposalType } from "../types";
-import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
+import { getCalldatas, getPayload, initMainnetUser, setForkBlock } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
@@ -61,6 +61,19 @@ if (process.env.FORK_TESTNET === "true" && process.env.NETWORK === "sepolia") {
   };
 }
 
+if (process.env.FORK_TESTNET === "true" && process.env.NETWORK === "arbitrum_goerli") {
+  NORMAL_TIMELOCK = "0x54E8C036A5f63Ad5e3B28Fa610cdBdbC00613446";
+  ENDPOINT = "0x6aB5Ae6822647046626e83ee6dB8187151E1d5ab";
+  OMNICHAIN_PROPOSAL_SENDER = "0x0852b6D4C4745A8bFEB54476A2A167DF68866c00";
+  OMNICHAIN_GOVERNANCE_EXECUTOR = "0xDC267eac30C9f73E6779554F89119e975a5D4F18";
+  LZ_LIBRARY = "0x3acaaf60502791d199a5a5f0b173d78229ebfe32";
+  DELAY_BLOCKS = {
+    [ProposalType.REGULAR]: 200,
+    [ProposalType.FAST_TRACK]: 100,
+    [ProposalType.CRITICAL]: 34,
+  };
+}
+
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, async () => {
     before(async () => {
@@ -106,8 +119,9 @@ export const pretendExecutingVip = async (proposal: Proposal) => {
   }
 };
 
-export const testVipV2 = (description: string, payload: string, options: TestingOptions = {}) => {
+export const testVipV2 = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let executor: Contract;
+  const payload = getPayload(proposal);
 
   const governanceFixture = async (): Promise<void> => {
     // Iniitalize impl via Proxy
@@ -117,13 +131,12 @@ export const testVipV2 = (description: string, payload: string, options: Testing
   describe(`${description} execution`, () => {
     let proposalId: number;
 
-    const decodedProposal = ethers.utils.defaultAbiCoder.decode(
+    const [, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
       ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
       payload,
     );
-    const [, , , , proposalType] = decodedProposal;
+
     before(async () => {
-      await setForkBlock(4658671);
       await loadFixture(governanceFixture);
       proposalId = await executor.lastProposalReceived();
       proposalId++;

@@ -16,9 +16,28 @@ import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 const BSCTESTNET_OMICHANNEL_SENDER = "0x972166BdE240c71828d1e8c39a0fA8F3Ed6c8d38";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
+const networkChainIds = {
+  ethereum: 101,
+  sepolia: 10161,
+  arbitrum_goerli: 10143,
+};
+
+const currentChainId = () => {
+  return networkChainIds[process.env.NETWORK];
+};
+
+export const getPayload = (proposal: Proposal) => {
+  for (let j = proposal.targets.length - 1; j > 0; j--) {
+    if (proposal.params[j][0] === currentChainId() && proposal.signatures[j] === "execute(uint16,bytes,bytes)") {
+      return proposal.params[j][1];
+    }
+  }
+};
+
 const gasUsedPerCommand = {
   101: 0,
   10161: 300000,
+  10143: 300000,
 } as { [key: number]: number };
 
 export async function setForkBlock(blockNumber: number) {
@@ -84,7 +103,6 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   );
   let fee;
   if (process.env.FORK_TESTNET === "true" && process.env.NETWORK === "bsctestnet") {
-    console.log(await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams));
     fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
   } else {
     fee = ethers.BigNumber.from("1");
@@ -96,11 +114,10 @@ export const makeProposalV2 = async (
   commands: Command[],
   meta?: ProposalMeta,
   type: ProposalType,
-): Promise<{ localProposal: any; payloads: any }> => {
-  const localProposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+): Promise<Proposal> => {
+  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
   const map = new Map<number, Command[]>();
-  const payloads = new Map<number, string>();
-  const localCommands = [];
+  const _commands = [];
   for (const command of commands) {
     const { dstChainId } = command;
     if (dstChainId) {
@@ -108,14 +125,14 @@ export const makeProposalV2 = async (
       currentChainCommands.push(command);
       map.set(dstChainId, currentChainCommands);
     } else {
-      localCommands.push(command);
+      _commands.push(command);
     }
   }
-  if (localCommands.length != 0) {
-    localProposal.targets.push(...localCommands.map(cmd => cmd.target));
-    localProposal.values.push(...localCommands.map(cmd => cmd.value ?? "0"));
-    localProposal.signatures.push(...localCommands.map(cmd => cmd.signature));
-    localProposal.params.push(...localCommands.map(cmd => cmd.params));
+  if (_commands.length != 0) {
+    proposal.targets.push(..._commands.map(cmd => cmd.target));
+    proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
+    proposal.signatures.push(..._commands.map(cmd => cmd.signature));
+    proposal.params.push(..._commands.map(cmd => cmd.params));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);
@@ -130,24 +147,19 @@ export const makeProposalV2 = async (
         }),
         type,
       );
-
-      payloads.set(key, remoteParam);
-
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
-      localProposal.targets.push(
-        process.env.FORK_TESTNET ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
-      );
+      proposal.targets.push(process.env.FORK_TESTNET ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER);
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
 
-      localProposal.values.push(Math.ceil(value * 1.1));
-      localProposal.signatures.push("execute(uint16,bytes,bytes)");
-      localProposal.params.push([key, remoteParam, remoteAdapterParam]);
+      proposal.values.push(Math.ceil(value * 1.1));
+      proposal.signatures.push("execute(uint16,bytes,bytes)");
+      proposal.params.push([key, remoteParam, remoteAdapterParam]);
     } else {
-      throw "Chain ID is not supported";
+      throw "Chain Id is not supported";
     }
   }
-  return { localProposal, payloads };
+  return proposal;
 };
 
 export const setMaxStalePeriodInOracle = async (

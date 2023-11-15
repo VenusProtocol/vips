@@ -1,8 +1,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
+import { expectEvents } from "../../src/utils";
 import { forking, testVipV2 } from "../../src/vip-framework";
 import { executor_configuration } from "../../vips/executor-configuration";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const REMOTE_NORMAL_TIMELOCK = "0x3961EDAfe1d1d3AB446f1b2fc10bde476058448B";
@@ -15,14 +17,23 @@ forking(4658671, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: number;
   let executor: ethers.Contract;
-  const result = await executor_configuration();
-  const payloads = result.payloads;
+  await executor_configuration();
+
   before(async () => {
     executor = new ethers.Contract(OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
   });
 
-  testVipV2("executor_configuration give permissions to timelock", payloads.get(10161));
+  testVipV2("executor_configuration give permissions to timelock", await executor_configuration(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI],
+        ["PermissionGranted", "SetTrustedRemoteAddress", "TimelockAdded"],
+        [13, 1, 3],
+      );
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     it("Proposal id should be incremented", async () => {
