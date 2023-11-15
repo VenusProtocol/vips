@@ -1,25 +1,44 @@
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
+import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json"
+import testnet from "@venusprotocol/venus-protocol/networks/testnet.json"
 
 import COMPTROLLER_ABI from "../abi/comptroller.json";
-import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 import { parseUnits } from "ethers/lib/utils";
 
-const vETH_ADDRESS = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8"
-const vUSDT_ADDRESS = "0xfd5840cd36d94d7229439859c0112a4185bc0255"
-const ACCOUNT = "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb";
-const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const USDT_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
-const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const ETH_FEED = "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e";
-const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+let vETH_ADDRESS = mainnet.Contracts.vETH
+let vUSDT_ADDRESS = mainnet.Contracts.vUSDT
+let USDT = mainnet.Contracts.USDT;
+let ETH = mainnet.Contracts.ETH;
+let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
+let XVS = mainnet.Contracts.XVS;
+let COMPTROLLER = mainnet.Contracts.Unitroller;
+let LENS = mainnet.Contracts.ComptrollerLens;
+let ETH_FEED = "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e";
+let USDT_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
+let ACCOUNT = "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb";
+let CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+
+if (process.env.FORK_TESTNET === "true") {
+  vETH_ADDRESS = testnet.Contracts.vETH
+  vUSDT_ADDRESS = testnet.Contracts.vUSDT
+  USDT = testnet.Contracts.USDT;
+  ETH = testnet.Contracts.ETH;
+  NORMAL_TIMELOCK = testnet.Contracts.Timelock;
+  XVS = testnet.Contracts.XVS;
+  COMPTROLLER = testnet.Contracts.Unitroller;
+
+  LENS = "0x350d56985A269C148648207E4Cea9f87656E762a";
+  CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
+  USDT_FEED = "0xEca2605f0BCF2BA5966372C99837b1F182d3D620"
+  ETH_FEED = "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7"
+  ACCOUNT = "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa"
+}
 
 export const checkCorePoolComptroller = () => {
   describe("generic comptroller checks", () => {
@@ -65,17 +84,18 @@ export const checkCorePoolComptroller = () => {
 
       expect(await vusdt.balanceOf(ACCOUNT)).to.equal(0);
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
-      await vusdt.borrow(parseUnits("100", 18));
-      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", 18)));
+      let usdtDecimals = await usdt.decimals()
+      await vusdt.borrow(parseUnits("100", usdtDecimals));
+      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", usdtDecimals)));
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT)
       expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
       expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance)
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
-      await usdt.approve(vusdt.address, parseUnits("100", 18));
-      await vusdt.repayBorrow(parseUnits("100", 18));
-      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.sub(parseUnits("100", 18)));
+      await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));
+      await vusdt.repayBorrow(parseUnits("100", usdtDecimals));
+      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.sub(parseUnits("100", usdtDecimals)));
 
       let ethBalance = await eth.balanceOf(ACCOUNT);
       await veth.redeemUnderlying(parseUnits("0.1", 18));
@@ -83,7 +103,7 @@ export const checkCorePoolComptroller = () => {
     });
 
     it(`read storage`, async () => {
-      expect (await comptroller.comptrollerLens()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")
+      expect (await comptroller.comptrollerLens()).to.be.equal(LENS)
     })
 
     it(`set storage`, async () => {

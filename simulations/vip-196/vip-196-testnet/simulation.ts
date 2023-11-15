@@ -9,6 +9,8 @@ import { vip196Testnet } from "../../../vips/vip-196/vip-196-testnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 
 const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
@@ -105,5 +107,10 @@ forking(34920008, () => {
       await prime["claimInterest(address)"](vBTC);
       expect(await btc.balanceOf(STAKED_USER)).to.be.equal("99898466257023664542220");
     });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller()
+      checkXVSVault()
+    })
   });
 });
