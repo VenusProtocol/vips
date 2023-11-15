@@ -9,7 +9,8 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { vip195 } from "../../../vips/vip-195/vip-195";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { checkComptroller } from "../../../src/vip-framework/checks/checkComptroller";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -135,7 +136,8 @@ forking(33490463, () => {
     });
 
     describe("generic tests", async () => {
-      checkComptroller()
+      checkCorePoolComptroller()
+      checkXVSVault()
     })
   });
 });

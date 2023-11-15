@@ -18,10 +18,10 @@ const USDT_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ETH_FEED = "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e";
-const XVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-export const checkComptroller = () => {
+export const checkCorePoolComptroller = () => {
   describe("generic comptroller checks", () => {
     let comptroller: Contract;
     let usdt: Contract;
@@ -68,7 +68,9 @@ export const checkComptroller = () => {
       await vusdt.borrow(parseUnits("100", 18));
       expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", 18)));
 
+      const originalXVSBalance = await xvs.balanceOf(ACCOUNT)
       expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance)
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", 18));
