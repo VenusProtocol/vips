@@ -38,7 +38,7 @@ export const checkComptroller = () => {
       timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER, signer);
-      usdt = await ethers.getContractAt(ERC20_ABI, USDT);
+      usdt = await ethers.getContractAt(ERC20_ABI, USDT, signer);
       eth = await ethers.getContractAt(ERC20_ABI, ETH, signer);
       veth = await ethers.getContractAt(VTOKEN_ABI, vETH_ADDRESS, signer);
       vusdt = await ethers.getContractAt(VTOKEN_ABI, vUSDT_ADDRESS, signer);
@@ -53,7 +53,7 @@ export const checkComptroller = () => {
       expect(await comptroller.isComptroller()).to.equal(true);
     });
 
-    it(`mint, borrow and rewards`, async () => {
+    it(`operations`, async () => {
       expect(await veth.balanceOf(ACCOUNT)).to.equal(0);
 
       await eth.approve(veth.address, parseUnits("1", 18));
@@ -64,11 +64,20 @@ export const checkComptroller = () => {
       await comptroller.enterMarkets([vusdt.address, veth.address]);
 
       expect(await vusdt.balanceOf(ACCOUNT)).to.equal(0);
-      const usdtBalance = await usdt.balanceOf(ACCOUNT);
+      let usdtBalance = await usdt.balanceOf(ACCOUNT);
       await vusdt.borrow(parseUnits("100", 18));
       expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", 18)));
 
       expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
+
+      usdtBalance = await usdt.balanceOf(ACCOUNT);
+      await usdt.approve(vusdt.address, parseUnits("100", 18));
+      await vusdt.repayBorrow(parseUnits("100", 18));
+      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.sub(parseUnits("100", 18)));
+
+      let ethBalance = await eth.balanceOf(ACCOUNT);
+      await veth.redeemUnderlying(parseUnits("0.1", 18));
+      expect(await eth.balanceOf(ACCOUNT)).to.equal(ethBalance.add(parseUnits("0.1", 18)));
     });
 
     it(`read storage`, async () => {
@@ -76,7 +85,11 @@ export const checkComptroller = () => {
     })
 
     it(`set storage`, async () => {
-      expect (await comptroller.connect(timelockSigner)._setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")).to.be.not.reverted
+      const originalOracle = await comptroller.oracle();
+
+      await comptroller.connect(timelockSigner)._setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")
+      expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")
+      await comptroller.connect(timelockSigner)._setPriceOracle(originalOracle)
     })
   });
 };
