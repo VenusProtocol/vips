@@ -9,6 +9,7 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { vip195 } from "../../../vips/vip-195/vip-195";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
+import { checkComptroller } from "../../../src/vip-framework/checks/checkComptroller";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -132,5 +133,9 @@ forking(33490463, () => {
       const rewards = await prime.callStatic.getInterestAccrued(vETH, STAKED_USER);
       expect(rewards).to.be.equal("24438657407406963");
     });
+
+    describe("generic tests", async () => {
+      checkComptroller()
+    })
   });
 });

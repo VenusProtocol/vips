@@ -11,12 +11,14 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import SETTER_FACET_ABI from "./abis/SetterFacet.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
+import { checkComptroller } from "../../../src/vip-framework/checks/checkComptroller";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 const STAKED_USER = "0x2e7a15e186cc81f7efc4bf7df12dbd5e3db4fefb";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
 interface vTokenConfig {
   name: string;
@@ -142,5 +144,9 @@ forking(33490463, () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
     });
+
+    describe("generic tests", async () => {
+      checkComptroller()
+    })
   });
 });
