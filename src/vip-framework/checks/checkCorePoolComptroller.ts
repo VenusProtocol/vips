@@ -24,7 +24,7 @@ let USDT_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
 let ACCOUNT = "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb";
 let CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 
-if (process.env.FORK_TESTNET === "true") {
+if (process.env.FORKED_NETWORK === "bsctestnet") {
   vETH_ADDRESS = testnet.Contracts.vETH
   vUSDT_ADDRESS = testnet.Contracts.vUSDT
   USDT = testnet.Contracts.USDT;

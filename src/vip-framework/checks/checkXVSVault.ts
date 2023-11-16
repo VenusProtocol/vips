@@ -15,7 +15,7 @@ let XVS_VAULT_PROXY = mainnet.Contracts.XVSVaultProxy;
 let ACCOUNT = "0x7f34ca8735F31a1b6e342F3480cF9b20EAA9F2d1";
 let POOL_ID = 0
 
-if (process.env.FORK_TESTNET === "true") {
+if (process.env.FORKED_NETWORK === "bsctestnet") {
   NORMAL_TIMELOCK = testnet.Contracts.Timelock;
   XVS = testnet.Contracts.XVS;
   XVS_VAULT_PROXY = testnet.Contracts.XVSVaultProxy;
