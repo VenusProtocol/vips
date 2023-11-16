@@ -88,6 +88,10 @@ forking(33490463, () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
     });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller()
+    })
   });
 
   testVip("VIP-201 Prime Program", vip201(), {

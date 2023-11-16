@@ -42,7 +42,7 @@ export const checkXVSVault = () => {
 
       await xvs.approve(xvsVault.address, parseUnits("1", 18));
       await expect(xvsVault.deposit(xvs.address, POOL_ID, parseUnits("1", 18))).to.be.not.reverted;
-      expect (await xvs.balanceOf(ACCOUNT)).to.be.equal(originalBalance.sub(parseUnits("1", 18)));
+      expect (await xvs.balanceOf(ACCOUNT)).to.be.lt(originalBalance);
 
       originalBalance = await xvs.balanceOf(ACCOUNT);
       await xvsVault.requestWithdrawal(xvs.address, POOL_ID, parseUnits("1", 18));

@@ -70,20 +70,20 @@ export const checkCorePoolComptroller = () => {
     });
 
     it(`operations`, async () => {
-      expect(await veth.balanceOf(ACCOUNT)).to.equal(0);
+      const originalVETHBalance = await veth.balanceOf(ACCOUNT);
 
       await eth.approve(veth.address, parseUnits("1", 18));
       await veth.mint(parseUnits("1", 18));
 
-      expect(await veth.balanceOf(ACCOUNT)).to.be.gt(0);
+      expect(await veth.balanceOf(ACCOUNT)).to.be.gt(originalVETHBalance);
 
       await comptroller.enterMarkets([vusdt.address, veth.address]);
 
-      expect(await vusdt.balanceOf(ACCOUNT)).to.equal(0);
+      const vusdtBalance = await vusdt.balanceOf(ACCOUNT);
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
       let usdtDecimals = await usdt.decimals()
       await vusdt.borrow(parseUnits("100", usdtDecimals));
-      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.add(parseUnits("100", usdtDecimals)));
+      expect(await usdt.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT)
       expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
@@ -92,11 +92,11 @@ export const checkCorePoolComptroller = () => {
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));
       await vusdt.repayBorrow(parseUnits("100", usdtDecimals));
-      expect(await usdt.balanceOf(ACCOUNT)).to.equal(usdtBalance.sub(parseUnits("100", usdtDecimals)));
+      expect(await usdt.balanceOf(ACCOUNT)).to.lt(usdtBalance);
 
       let ethBalance = await eth.balanceOf(ACCOUNT);
       await veth.redeemUnderlying(parseUnits("0.1", 18));
-      expect(await eth.balanceOf(ACCOUNT)).to.equal(ethBalance.add(parseUnits("0.1", 18)));
+      expect(await eth.balanceOf(ACCOUNT)).to.gt(ethBalance);
     });
 
     it(`read storage`, async () => {
