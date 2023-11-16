@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip187 } from "../../../vips/vip-187/vip-187";
+import { vip205 } from "../../../vips/vip-205/vip-205";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
@@ -72,7 +72,7 @@ forking(33486800, () => {
     });
   });
 
-  testVip("vip187", vip187(), {
+  testVip("vip205", vip205(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {
@@ -127,9 +127,16 @@ forking(33486800, () => {
       expect(validateConfig.lowerBoundRatio).to.equal(PRICE_LOWER_BOUND);
     });
 
-    it("Should return a valid price", async () => {
-      expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
-      expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+    describe("Prices", () => {
+      it("ResilientOracle should return a valid price", async () => {
+        expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
+        expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+      });
+
+      it("RedStone should return a valid price", async () => {
+        expect(await redStoneOracle.getPrice(TRX)).to.not.equal(0);
+        // expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+      });
     });
 
     describe("BoundValidator behavior", () => {

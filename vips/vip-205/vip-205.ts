@@ -24,7 +24,7 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 const PIVOT_ORACLE_ROLE = 1;
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip187 = () => {
+export const vip205 = () => {
   const meta = {
     version: "v2",
     title: "ResilientOracle Implementation Upgrade, and configuration for Redstone Oracle as Pivot for TRX and TRX_OLD",

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip187 } from "../../../vips/vip-187/vip-187-testnet";
+import { vip205 } from "../../../vips/vip-205/vip-205-testnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -44,7 +44,7 @@ forking(34311500, () => {
     });
   });
 
-  testVip("vip187Testnet", vip187(), {
+  testVip("vip205Testnet", vip205(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["Upgraded"], [1]);
     },
