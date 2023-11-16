@@ -38,6 +38,9 @@ forking(33486800, () => {
   let redStoneOracle: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
   let boundValidator: ethers.Contract;
+  let preTRXPrice: BigNumber;
+  let preTRX_OLDPrice: BigNumber;
+  let preBNBPrice: BigNumber;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
@@ -47,7 +50,8 @@ forking(33486800, () => {
     redStoneOracle = new ethers.Contract(REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR_PROXY, BOUND_VALIDATOR_ABI, timelock);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
-    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, TRX, CHAINLINK_TRX_FEED, NORMAL_TIMELOCK);
+    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, TRX, REDSTONE_TRX_FEED, NORMAL_TIMELOCK);
+    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, TRX_OLD, REDSTONE_TRX_FEED, NORMAL_TIMELOCK);
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, VBNB_UNDERLYING, BNB_PRICE_FEED, NORMAL_TIMELOCK);
   });
 
@@ -70,9 +74,26 @@ forking(33486800, () => {
       const pendingOwner = await redStoneOracle.pendingOwner();
       expect(pendingOwner).to.equal(NORMAL_TIMELOCK);
     });
+
+    describe("Prices", () => {
+      it("ResilientOracle should return a valid price for TRX", async () => {
+        preTRXPrice = await resilientOracle.getPrice(TRX);
+        expect(preTRXPrice).to.not.equal(0);
+      });
+
+      it("ResilientOracle should return a valid price for TRX_OLD", async () => {
+        preTRX_OLDPrice = await resilientOracle.getPrice(TRX_OLD);
+        expect(preTRX_OLDPrice).to.not.equal(0);
+      });
+
+      it("ResilientOracle should return a valid price for BNB", async () => {
+        preBNBPrice = await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS);
+        expect(preBNBPrice).to.not.equal(0);
+      });
+    });
   });
 
-  testVip("vip205", vip205(), {
+  testVip("vip205", vip205(24 * 60 * 60 * 365), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {
@@ -85,11 +106,6 @@ forking(33486800, () => {
   });
 
   describe("Post-VIP behavior", () => {
-    before(async () => {
-      //NEED TO SET STALE PRICE AFTER VIP EXECUTION BECAUSE WE ARE ACCEPTION OWNERSHIP THERE FROM TIMELOCK
-      await setMaxStalePeriodInChainlinkOracle(REDSTONE_ORACLE, TRX, REDSTONE_TRX_FEED, NORMAL_TIMELOCK);
-    });
-
     it("ResilientOracle proxy should have new implementation", async () => {
       const implementation = await defaultProxyAdmin.getProxyImplementation(RESILIENT_ORACLE_PROXY);
       expect(implementation).to.equal(NEW_RESILIENT_ORACLE_IMPLEMENTATION);
@@ -128,14 +144,24 @@ forking(33486800, () => {
     });
 
     describe("Prices", () => {
-      it("ResilientOracle should return a valid price", async () => {
-        expect(await resilientOracle.getPrice(TRX)).to.not.equal(0);
-        expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+      it("ResilientOracle should return a valid price for BNB", async () => {
+        expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.equal(preBNBPrice);
+      });
+      
+      it("ResilientOracle should return a valid price for TRX", async () => {
+        expect(await resilientOracle.getPrice(TRX)).to.equal(preTRXPrice);
       });
 
-      it("RedStone should return a valid price", async () => {
+      it("ResilientOracle should return a valid price for TRX_OLD", async () => {
+        expect(await resilientOracle.getPrice(TRX_OLD)).to.equal(preTRX_OLDPrice);
+      });
+
+      it("RedStone should return a valid price for TRX", async () => {
         expect(await redStoneOracle.getPrice(TRX)).to.not.equal(0);
-        // expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.not.equal(0);
+      });
+
+      it("RedStone should return a valid price for TRX_OLD", async () => {
+        expect(await redStoneOracle.getPrice(TRX_OLD)).to.not.equal(0);
       });
     });
 

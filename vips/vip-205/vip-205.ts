@@ -24,7 +24,7 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 const PIVOT_ORACLE_ROLE = 1;
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip205 = () => {
+export const vip205 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "ResilientOracle Implementation Upgrade, and configuration for Redstone Oracle as Pivot for TRX and TRX_OLD",
@@ -83,12 +83,12 @@ export const vip205 = () => {
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[TRX, REDSTONE_TRX_FEED, MAX_STALE_PERIOD]],
+        params: [[TRX, REDSTONE_TRX_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
       },
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[TRX_OLD, REDSTONE_TRX_FEED, MAX_STALE_PERIOD]],
+        params: [[TRX_OLD, REDSTONE_TRX_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
       },
       {
         target: BOUND_VALIDATOR,
