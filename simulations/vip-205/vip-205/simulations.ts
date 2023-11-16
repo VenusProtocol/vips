@@ -147,7 +147,7 @@ forking(33486800, () => {
       it("ResilientOracle should return a valid price for BNB", async () => {
         expect(await resilientOracle.getUnderlyingPrice(VBNB_ADDRESS)).to.equal(preBNBPrice);
       });
-      
+
       it("ResilientOracle should return a valid price for TRX", async () => {
         expect(await resilientOracle.getPrice(TRX)).to.equal(preTRXPrice);
       });
