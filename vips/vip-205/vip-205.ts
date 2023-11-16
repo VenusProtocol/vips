@@ -27,15 +27,43 @@ const MAX_STALE_PERIOD = 60 * 25;
 export const vip205 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "ResilientOracle Implementation Upgrade, and configuration for Redstone Oracle as Pivot for TRX and TRX_OLD",
-    description:
-      "Upgrades the implementation contract for resilient oracle in order to fix a wrong BoundValidator immutable variable. Also this VIP will Setup RedStone as a pivot oracle for TRX and TRX_OLD markets",
-    forDescription:
-      "I agree that Venus Protocol should proceed with upgrading Resilient Oracle implementation and Redstone oracle configuration for TRX and TRX_OLD",
-    againstDescription:
-      "I do not think that Venus Protocol should proceed with upgrading Resilient Oracle implementation  and Redstone oracle configuration for TRX and TRX_OLD",
-    abstainDescription:
-      "I am indifferent to whether Venus Protocol proceeds with upgrading Resilient Oracle implementation  and Redstone oracle configuration for TRX and TRX_OLD",
+    title: "VIP-205 Set RedStone as the PIVOT oracle for TRX and TRX_OLD",
+    description: `#### Summary
+
+If passed, this VIP will perform the following actions:
+
+- Configure [RedStone](https://redstone.finance/) as the PIVOT oracle of the [TRX](https://app.venus.io/#/core-pool/market/0xC5D3466aA484B040eE977073fcF337f2c00071c1) and [TRX_OLD](https://app.venus.io/#/core-pool/market/0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93) tokens
+- Upgrade the address of the BoundValidator contract used by the ResilientOracle contract
+
+#### Description
+
+Enabled at [VIP-123](https://app.venus.io/#/governance/proposal/123), Resilient Price Feeds is the logic used by the Venus Protocol to eliminate a single point of failure while fetching asset prices from on-chain sources. Read more about it in the [published documentation](https://docs-v4.venus.io/risk/resilient-price-oracle).
+
+This VIP configures the price feed provided by [RedStone](https://redstone.finance/) as the PIVOT oracle of [TRX](https://app.venus.io/#/core-pool/market/0xC5D3466aA484B040eE977073fcF337f2c00071c1) and [TRX_OLD](https://app.venus.io/#/core-pool/market/0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93) tokens. The price obtained from the MAIN oracle of these tokens (currently Chainlink) will be compared with the PIVOT price, and it will be discarded if the difference is too large.
+
+The difference in the prices will be considered too large if the ratio “pivot_price / main_price” is not between 0.99 and 1.01. These thresholds have been calculated analysing historical data of both (RedStone and Chainlink) price feeds. It can be modified in the future via VIP.
+
+**Security and additional considerations**
+
+There were not any changes in the deployed codebase. We applied the following security procedures for this upgrade:
+
+- **Prices pre/post upgrade**: in a simulation environment, validating the asset prices pre-upgrade are the same as post-upgrade
+- **Deployment on testnet**: the same setup has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+**Deployed contracts on main net**
+
+- [New ResilientOracle implementation](https://bscscan.com/address/0xB5d7A073d77102ad56B7482b18E7204c1a71C8B9)
+
+**References**
+
+- [Repository](https://github.com/VenusProtocol/oracle)
+- [Simulation pre/post upgrade](https://github.com/VenusProtocol/vips/pull/93)
+- [Deployment on testnet](https://testnet.bscscan.com/tx/0x38481a7f28d9ffb3bde1f32b4d78fd064c0496e8686619ff3d714808bf551486)
+- [Snapshot with the RedStone proposal](https://snapshot.org/#/venus-xvs.eth/proposal/0xa9cb9de5934ef245bbbdfde5badfd2f5128879417ffada1278e96231e3f09818)
+- [Community post with the RedStone proposal](https://community.venus.io/t/adding-redstone-oracles-to-the-venus-oracle-interface/3620)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
