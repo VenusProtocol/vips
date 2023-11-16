@@ -5,6 +5,7 @@
     "./scripts",
     "./src",
     "./vips",
-    "./simulations"
+    "./simulations",
+    "./multisig"
   ]
 }
