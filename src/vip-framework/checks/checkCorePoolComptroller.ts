@@ -10,6 +10,7 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 import { parseUnits } from "ethers/lib/utils";
+import { NETWORK_ADDRESSES } from "../../networkAddresses";
 
 let vETH_ADDRESS = mainnet.Contracts.vETH
 let vUSDT_ADDRESS = mainnet.Contracts.vUSDT
@@ -19,10 +20,10 @@ let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
 let XVS = mainnet.Contracts.XVS;
 let COMPTROLLER = mainnet.Contracts.Unitroller;
 let LENS = mainnet.Contracts.ComptrollerLens;
-let ETH_FEED = "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e";
-let USDT_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
-let ACCOUNT = "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb";
-let CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+let ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
+let USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
+let ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
+let CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
   vETH_ADDRESS = testnet.Contracts.vETH
@@ -33,11 +34,7 @@ if (process.env.FORKED_NETWORK === "bsctestnet") {
   XVS = testnet.Contracts.XVS;
   COMPTROLLER = testnet.Contracts.Unitroller;
 
-  LENS = "0x350d56985A269C148648207E4Cea9f87656E762a";
-  CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
-  USDT_FEED = "0xEca2605f0BCF2BA5966372C99837b1F182d3D620"
-  ETH_FEED = "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7"
-  ACCOUNT = "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa"
+  LENS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].COMPTROLLER_LENS;
 }
 
 export const checkCorePoolComptroller = () => {

@@ -8,19 +8,19 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import ERC20_ABI from "../abi/erc20.json";
 import XVSVault_ABI from "../abi/XVSVault.json";
 import { parseUnits } from "ethers/lib/utils";
+import { NETWORK_ADDRESSES } from "../../networkAddresses";
+import { NETWORK_CONFIG } from "../../networkConfig";
 
 let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
 let XVS = mainnet.Contracts.XVS;
 let XVS_VAULT_PROXY = mainnet.Contracts.XVSVaultProxy;
-let ACCOUNT = "0x7f34ca8735F31a1b6e342F3480cF9b20EAA9F2d1";
-let POOL_ID = 0
+let ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
+let POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
   NORMAL_TIMELOCK = testnet.Contracts.Timelock;
   XVS = testnet.Contracts.XVS;
   XVS_VAULT_PROXY = testnet.Contracts.XVSVaultProxy;
-  ACCOUNT = "0x00aa8185BED9891d5197a4c072075F5ACE726B51"
-  POOL_ID = 1
 }
 
 export const checkXVSVault = () => {
