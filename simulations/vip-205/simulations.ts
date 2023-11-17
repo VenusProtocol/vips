@@ -23,7 +23,7 @@ const VPLANET_NEW_SUPPLY_CAP = parseUnits("2000000000", 18);
 const VPLANET_NEW_BORROW_CAP = parseUnits("1000000000", 18);
 
 const RATE_MODEL_CURRENT_CORE_POOL = "0x8612b1330575d3f2f792329C5c16d55f22433c3F";
-const RATE_MODE_TUSD_OLD = "0x574f056c1751Ed5F3aa30ba04e550f4E6090c992";
+const RATE_MODEL_TUSD_OLD = "0x574f056c1751Ed5F3aa30ba04e550f4E6090c992";
 const RATE_MODEL_NEW_CORE_POOL = "0x8c2651590ECE4FFe8E722ef6F80cc7407f537bBa";
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
@@ -60,8 +60,9 @@ forking(33570600, () => {
       expect(await vUSDC.interestRateModel()).to.equal(RATE_MODEL_CURRENT_CORE_POOL);
       expect(await vDAI.interestRateModel()).to.equal(RATE_MODEL_CURRENT_CORE_POOL);
       expect(await vTUSD.interestRateModel()).to.equal(RATE_MODEL_CURRENT_CORE_POOL);
-      expect(await vTUSD_OLD.interestRateModel()).to.equal(RATE_MODE_TUSD_OLD);
+      expect(await vTUSD_OLD.interestRateModel()).to.equal(RATE_MODEL_TUSD_OLD);
     });
+
     it("Rate Model Params should match the current settings for USDT (Stablecoin)", async () => {
       // Assert current Rate model config for USDT in Stablecoin Pool
       expect(await vUSDT_Stablecoins_IR.jumpMultiplierPerBlock()).to.equal("237823439878");
@@ -75,13 +76,14 @@ forking(33570600, () => {
       const oldCap = await comptroller.supplyCaps(VPLANET_DEFI);
       expect(oldCap).to.equal(parseUnits("1000000000", 18));
     });
+
     it("borrow cap of vPLANET (DEFI) equals 500,000,000", async () => {
       const oldCap = await comptroller.borrowCaps(VPLANET_DEFI);
       expect(oldCap).to.equal(parseUnits("500000000", 18));
     });
   });
 
-  testVip("VIP-130 Risk Parameters Update", vip205(), {
+  testVip("VIP-205 Risk Parameters Update", vip205(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -92,6 +94,7 @@ forking(33570600, () => {
       await expectEventWithParams(txResponse, VBEP20_DELEGATOR_ABI, "Failure", ["14", "50", "0"]);
     },
   });
+
   describe("Post-VIP behaviour", async () => {
     it("sets new InterestRateModel", async () => {
       expect(await vUSDC.interestRateModel()).to.equal(RATE_MODEL_NEW_CORE_POOL);
@@ -128,7 +131,7 @@ forking(33570600, () => {
       kink: "0.8",
     });
 
-    checkInterestRate(RATE_MODEL_NEW_CORE_POOL, "VUSDT (CORE)", {
+    checkInterestRate(RATE_MODEL_NEW_CORE_POOL, "Stablecoins (CORE)", {
       base: "0",
       multiplier: "0.06875",
       jump: "2.5",

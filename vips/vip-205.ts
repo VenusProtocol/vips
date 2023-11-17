@@ -20,27 +20,20 @@ const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 export const vip205 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-187 Risk Parameters Adjustments (ETH and USDT Stablecoins)",
-    description: `#### Description
+    title: "VIP-205 Risk Parameters Adjustments (Stablecoins and PLANET)",
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Risk Parameter Updates 11/14/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-11-14-2023/3900).
 
-This VIP will perform the following Risk Parameters actions as per Chaos Labs latest recommendations in this Venus community forum publication: [Risk Parameter Updates 11/14/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-11-14-2023/3900).
-
-
-Stablecoin IR Curve Recommendations:
-
-  1. Multiplier Parameter Adjustment: Increase the multiplier parameter to reflect a 5.5% borrow rate at the 80% utilization kink point for:
-    - USDT, USDC, DAI, and TUSD in the Core Pool 
-    - USDT in the Stablecoins Pool (IL).
-
-  2. PLANET (DeFi Pool)
-    - Increase supply cap to 2,000,000,000
-    - Increase borrow cap to 1,000,000,000
-
-  3. TUSDOLD Borrow Rates
-    - Reduce borrow rate to 0
+- **Stablecoin IR Curve Recommendations**
+    - Multiplier Parameter Adjustment: Increase the multiplier parameter (until 6.875% yearly) to reflect a 5.5% borrow rate at the 80% utilization kink point for USDT, USDC, DAI, and TUSD in the Core Pool and USDT in the Stablecoins Pool.
+- **PLANET (DeFi Pool)**
+    - **Increase supply cap to 2,000,000,000 PLANET**
+    - **Increase borrow cap to 1,000,000,000 PLANET**
+- **TUSDOLD Borrow Rate**
+    - **Reduce borrow rate to 0**
 
 Complete analysis and details of these recommendations are available in the above publication.
-`,
+
+VIP simulation: https://github.com/VenusProtocol/vips/pull/110`,
 
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
