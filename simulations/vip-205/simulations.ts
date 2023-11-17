@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../src/utils";
+import { expectEventWithParams, expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import { vip205 } from "../../vips/vip-205";
@@ -89,6 +89,7 @@ forking(33570600, () => {
         ["NewSupplyCap", "NewBorrowCap", "NewMarketInterestRateModel", "NewInterestParams", "Failure"],
         [1, 1, 5, 1, 1], // Failure account for fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDUCE_RESERVES_CASH_NOT_AVAILABLE).
       );
+      await expectEventWithParams(txResponse, VBEP20_DELEGATOR_ABI, "Failure", ["14", "50", "0"]);
     },
   });
   describe("Post-VIP behaviour", async () => {
