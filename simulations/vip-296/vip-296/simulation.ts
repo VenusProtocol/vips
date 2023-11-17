@@ -12,6 +12,10 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
+import { vip201 } from "../../../vips/vip-201/vip-201";
+import { vip202 } from "../../../vips/vip-202/vip-202";
+import { vip204 } from "../../../vips/vip-204/vip-204";
+import { vip295 } from "../../../vips/vip-295/vip-295";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -56,6 +60,11 @@ const vTokens: vTokenConfig[] = [
 ];
 
 forking(33490463, () => {
+  testVip("VIP-201 Prime Program", vip201(), {});
+  testVip("VIP-202 Prime Program", vip202(), {});
+  testVip("VIP-204 Prime Program", vip204(), {});
+  testVip("VIP-295 Prime Program", vip295(), {});
+
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
@@ -67,8 +76,7 @@ forking(33490463, () => {
 
     it("paused", async () => {
       const paused = await primeLiquidityProvider.paused();
-      // should be true after previous VIPs are executed
-      expect(paused).to.be.equal(false);
+      expect(paused).to.be.equal(true);
 
       const primePaused = await prime.paused();
       expect(primePaused).to.be.equal(true);
@@ -77,8 +85,7 @@ forking(33490463, () => {
 
   testVip("VIP-296 Prime Program", vip296(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["Paused"], [1]);
-      await expectEvents(txResponse, [PRIME_ABI], ["Paused"], [1]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["Unpaused"], [2]);
     },
   });
 

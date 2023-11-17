@@ -1,6 +1,5 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import commands from "../vip-201/commands";
 import staked from "./staked-users";
 
 export const vip204 = () => {
@@ -19,5 +18,5 @@ Check [VIP-201](https://app.venus.io/#/governance/proposal/201) for more details
     abstainDescription: "Indifferent to execution",
   };
 
-  return makeProposal([...commands, staked], meta, ProposalType.REGULAR);
+  return makeProposal([staked], meta, ProposalType.REGULAR);
 };

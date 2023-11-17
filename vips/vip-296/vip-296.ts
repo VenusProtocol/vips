@@ -2,7 +2,6 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands192 from "../vip-201/commands";
 import commands193 from "../vip-295/commands";
-import staked from "../vip-295/staked-users";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -19,9 +18,6 @@ export const vip296 = () => {
 
   return makeProposal(
     [
-      ...commands192,
-      staked,
-      ...commands193,
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "resumeFundsTransfer()",

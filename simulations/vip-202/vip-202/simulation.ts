@@ -11,6 +11,7 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
+import { vip201 } from "../../../vips/vip-201/vip-201";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -53,6 +54,8 @@ const vTokens: vTokenConfig[] = [
 ];
 
 forking(33490463, () => {
+  testVip("VIP-201 Prime Program", vip201(), {});
+
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -65,11 +68,11 @@ forking(33490463, () => {
     });
 
     it("prime markets", async () => {
-      expect((await prime.getAllMarkets()).length).to.equal(0);
+      expect((await prime.getAllMarkets()).length).to.equal(4);
     });
 
     it("prime address", async () => {
-      expect(await primeLiquidityProvider.prime()).to.equal("0x0000000000000000000000000000000000000000");
+      expect(await primeLiquidityProvider.prime()).to.equal("0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC");
     });
 
     it("claim prime token", async () => {
