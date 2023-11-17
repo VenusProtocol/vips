@@ -87,7 +87,7 @@ forking(33570600, () => {
         txResponse,
         [COMPTROLLER_ABI, VBEP20_DELEGATOR_ABI, ILIR_ABI],
         ["NewSupplyCap", "NewBorrowCap", "NewMarketInterestRateModel", "NewInterestParams", "Failure"],
-        [1, 1, 5, 1, 0],
+        [1, 1, 5, 1, 1], // Failure account for fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.REDUCE_RESERVES_CASH_NOT_AVAILABLE).
       );
     },
   });
