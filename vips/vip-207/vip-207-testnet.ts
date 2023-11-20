@@ -2,7 +2,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import commands from "./commands-testnet";
 
-export const vip295Testnet = () => {
+export const vip207Testnet = () => {
   const meta = {
     version: "v2",
     title: "Prime Program Setup",

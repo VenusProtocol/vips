@@ -6,12 +6,12 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip295 } from "../../../vips/vip-295/vip-295";
+import { vip207 } from "../../../vips/vip-207/vip-207";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip204 } from "../../../vips/vip-204/vip-204";
+import { vip203 } from "../../../vips/vip-203/vip-203";
 import { vip202 } from "../../../vips/vip-202/vip-202";
 import { vip201 } from "../../../vips/vip-201/vip-201";
 
@@ -63,7 +63,7 @@ const vTokens: vTokenConfig[] = [
 forking(33490463, () => {
   testVip("VIP-201 Prime Program", vip201(), {});
   testVip("VIP-202 Prime Program", vip202(), {});
-  testVip("VIP-204 Prime Program", vip204(), {});
+  testVip("VIP-203 Prime Program", vip203(), {});
   
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
@@ -92,7 +92,7 @@ forking(33490463, () => {
     });
   });
 
-  testVip("VIP-295 Prime Program", vip295(), {
+  testVip("VIP-207 Prime Program", vip207(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [4]);
     },
