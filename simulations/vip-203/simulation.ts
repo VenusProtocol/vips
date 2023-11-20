@@ -4,15 +4,15 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { vip204 } from "../../../vips/vip-204/vip-204";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
+import { vip203 } from "../../vips/vip-203/vip-203";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip201 } from "../../../vips/vip-201/vip-201";
-import { vip202 } from "../../../vips/vip-202/vip-202";
+import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
+import { vip201 } from "../../vips/vip-201/vip-201";
+import { vip202 } from "../../vips/vip-202/vip-202";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -82,9 +82,9 @@ forking(33490463, () => {
     });
   });
 
-  testVip("VIP-204 Prime Program", vip204(), {
+  testVip("VIP-203 Prime Program", vip203(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [PRIME_ABI], ["StakedAtUpdated"], [1]);
+      await expectEvents(txResponse, [PRIME_ABI], ["StakedAtUpdated"], [200]);
     },
   });
 

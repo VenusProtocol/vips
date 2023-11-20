@@ -2,7 +2,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import staked from "./staked-users";
 
-export const vip204 = () => {
+export const vip203 = () => {
   const meta = {
     version: "v2",
     title: "VIP-203 Venus Prime: deployment stage 3/5",
