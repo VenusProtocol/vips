@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip207 } from "../../../vips/vip-207/vip-207";
+import { vip206 } from "../../../vips/vip-206/vip-206";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
@@ -92,7 +92,7 @@ forking(33490463, () => {
     });
   });
 
-  testVip("VIP-207 Prime Program", vip207(), {
+  testVip("VIP-206 Prime Program", vip206(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [4]);
     },

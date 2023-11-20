@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip207Testnet } from "../../../vips/vip-207/vip-207-testnet";
+import { vip206Testnet } from "../../../vips/vip-206/vip-206-testnet";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
@@ -76,7 +76,7 @@ forking(34891729, () => {
     });
   });
 
-  testVip("VIP-207 Prime Program", vip207Testnet(), {});
+  testVip("VIP-206 Prime Program", vip206Testnet(), {});
 
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;
