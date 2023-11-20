@@ -11,5 +11,5 @@ export const vip206 = () => {
     abstainDescription: "Indifferent to execution",
   };
 
-  return makeProposal([staked], meta, ProposalType.REGULAR);
+  return makeProposal([staked], meta, ProposalType.FAST_TRACK);
 };
