@@ -1,5 +1,5 @@
-import { makeProposal } from "../../../src/utils";
 import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../src/networkAddresses";
+import { makeProposal } from "../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
