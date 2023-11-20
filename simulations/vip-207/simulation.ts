@@ -1,5 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -59,15 +59,14 @@ const vTokens: vTokenConfig[] = [
 forking(33663461, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
-    let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER_1);
-      impersonateAccount(STAKED_USER_2);
-      impersonateAccount(STAKED_USER_3);
+      for (const userAddress in { ...users.stakeNoClaimableUsers, ...users.stakeClaimableUsers, ...users.unstakeUsers }) {
+        impersonateAccount(userAddress);
+        await setBalance(userAddress, ethers.utils.parseEther("5"));
+      }
 
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
-      primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
     });
 
     it("prime markets", async () => {
@@ -75,9 +74,9 @@ forking(33663461, () => {
     });
 
     it("claim prime token", async () => {
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.reverted;
+      for (const userAddress in { ...users.stakeNoClaimableUsers, ...users.stakeClaimableUsers }) {
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;  
+      }
     });
 
     it("checked staked at and claim reverted", async () => {
@@ -100,45 +99,48 @@ forking(33663461, () => {
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
-    let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER_1);
-      impersonateAccount(STAKED_USER_2);
-      impersonateAccount(STAKED_USER_3);
-
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
-      primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
         await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, NORMAL_TIMELOCK);
       }
     });
+    
+    describe("generic tests", async () => {
+      checkCorePoolComptroller()
+      checkXVSVault()
+    })
 
     it("prime markets", async () => {
       expect((await prime.getAllMarkets()).length).to.equal(4);
     });
 
-    it("claim prime token", async () => {
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.be.reverted;
-      await mine(10000000)
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.not.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.not.be.reverted;
-      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.not.be.reverted;
-    });
-
-    it("checked staked at and claim reverted", async () => {
-      for (const user in users.unstakeUsers) {
-        expect(await prime.stakedAt(user)).to.be.equal(0);
+    it("claim prime token by new users that will be eligible right after the VIP", async () => {
+      for (const userAddress in users.stakeClaimableUsers) {
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).not.to.be.reverted;
       }
     });
 
-    describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+    it("checked staked at and claim reverted", async () => {
+      for (const userAddress in users.unstakeUsers) {
+        expect(await prime.stakedAt(userAddress)).to.be.equal(0);
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;
+      }
+    });
+
+    it("claim prime token in the future by new users that will not be eligible right after the VIP", async () => {
+      for (const userAddress in users.stakeNoClaimableUsers) {
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;
+      }
+
+      await mine(10000000)
+
+      for (const userAddress in users.stakeNoClaimableUsers) {
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).not.to.be.reverted;
+      }
+    });
   });
 });

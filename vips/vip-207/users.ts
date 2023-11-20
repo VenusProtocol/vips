@@ -1,4 +1,4 @@
-const stakeUsers = {
+const stakeNoClaimableUsers = {
   "0x4b737daea71cc0e037d6f80ff80c03ea4bc03d40": 1700185522,
   "0x66f32ea3ba3f99a2fc1f99ad6cecef6ce6571f5e": 1700123066,
   "0x3b1897657d4a37ba2aabdf31e5cc7d0d70521152": 1700041659,
@@ -10,9 +10,13 @@ const stakeUsers = {
   "0x8a927f06382412a979f323b66a510162af09d532": 1698526342,
   "0x4d13142d94a831d8bf3a18c68103c5c986a8ee9f": 1696181346,
   "0xc07cda60f9537a5d468e439551efa69683bc5588": 1694930419,
+};
+
+const stakeClaimableUsers = {
   "0xdd79e9ff6f2b93df0b785b1702307851c4a80299": 1668002589,
   "0xe4740d712529e8e717d25ad88ffd5ea3977e5db8": 1668002490,
 };
+
 const unstakeUsers = {
   "0x08182bb14ca1ead603d2ebce550316b330928914": 0,
   "0x525f489d45d6eed66c5a981becf8ccfcd85e2007": 0,
@@ -60,6 +64,7 @@ const unstakeUsers = {
 };
 
 export default {
-  stakeUsers,
+  stakeNoClaimableUsers,
+  stakeClaimableUsers,
   unstakeUsers
 };
