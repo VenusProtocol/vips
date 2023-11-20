@@ -25,12 +25,12 @@ Specifically, in this VIP the following actions will be performed:
 
 1. Transfer funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) contract. These funds will be distributed among the Prime holders.
 - 150,666.50 USDT
-- 63,731.47 USDC
+- 61,329.43 USDC
 - 2.18 BTC
 - 42.23 ETH
 1. Set distribution speeds in the PrimeLiquidityProvider contract. Set to distribute the previously transferred amounts **in 60 days**: 1,728,000 blocks.
 - USDT: 87191261574074074
-- USDC: 36881637731481481
+- USDC: 35491568287037037
 - BTC: 1261574074074
 - ETH: 24438657407407
 
