@@ -11,10 +11,13 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
 import { vip206 } from "../../vips/vip-206/vip-206";
+import users from "../../vips/vip-206/users";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
-const STAKED_USER = "0x66f32ea3ba3f99a2fc1f99ad6cecef6ce6571f5e";
+const STAKED_USER_1 = "0x66f32ea3ba3f99a2fc1f99ad6cecef6ce6571f5e";
+const STAKED_USER_2 = "0x4d13142d94a831d8bf3a18c68103c5c986a8ee9f";
+const STAKED_USER_3 = "0x8a927f06382412a979f323b66a510162af09d532";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const UNSTAKED_USER = "0x0dfd2198d86eaf362bcfae45ed10323187e2847d";
@@ -59,9 +62,11 @@ forking(33663461, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
-      const signer = await ethers.getSigner(STAKED_USER);
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
+      impersonateAccount(STAKED_USER_1);
+      impersonateAccount(STAKED_USER_2);
+      impersonateAccount(STAKED_USER_3);
+
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
     });
 
@@ -70,11 +75,15 @@ forking(33663461, () => {
     });
 
     it("claim prime token", async () => {
-      await expect(prime.claim()).to.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.reverted;
     });
 
     it("checked staked at and claim reverted", async () => {
-      expect(await prime.stakedAt(UNSTAKED_USER)).to.be.equal(1698815157);
+      for (const user in users.unstakeUsers) {
+        expect(await prime.stakedAt(user)).to.be.not.equal(0);
+      }
     });
 
     describe("generic tests", async () => {
@@ -94,9 +103,11 @@ forking(33663461, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
-      const signer = await ethers.getSigner(STAKED_USER);
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
+      impersonateAccount(STAKED_USER_1);
+      impersonateAccount(STAKED_USER_2);
+      impersonateAccount(STAKED_USER_3);
+
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
 
       for (let i = 0; i < vTokens.length; i++) {
@@ -110,12 +121,19 @@ forking(33663461, () => {
     });
 
     it("claim prime token", async () => {
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.be.reverted;
       await mine(10000000)
-      await expect(prime.claim()).to.be.not.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_1)).claim()).to.be.not.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_2)).claim()).to.be.not.be.reverted;
+      await expect(prime.connect(await ethers.getSigner(STAKED_USER_3)).claim()).to.be.not.be.reverted;
     });
 
     it("checked staked at and claim reverted", async () => {
-      expect(await prime.stakedAt(UNSTAKED_USER)).to.be.equal(0);
+      for (const user in users.unstakeUsers) {
+        expect(await prime.stakedAt(user)).to.be.equal(0);
+      }
     });
 
     describe("generic tests", async () => {

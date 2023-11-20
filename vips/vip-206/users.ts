@@ -1,5 +1,4 @@
-const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
-const users = {
+const stakeUsers = {
   "0x4b737daea71cc0e037d6f80ff80c03ea4bc03d40": 1700185522,
   "0x66f32ea3ba3f99a2fc1f99ad6cecef6ce6571f5e": 1700123066,
   "0x3b1897657d4a37ba2aabdf31e5cc7d0d70521152": 1700041659,
@@ -13,6 +12,8 @@ const users = {
   "0xc07cda60f9537a5d468e439551efa69683bc5588": 1694930419,
   "0xdd79e9ff6f2b93df0b785b1702307851c4a80299": 1668002589,
   "0xe4740d712529e8e717d25ad88ffd5ea3977e5db8": 1668002490,
+};
+const unstakeUsers = {
   "0x08182bb14ca1ead603d2ebce550316b330928914": 0,
   "0x525f489d45d6eed66c5a981becf8ccfcd85e2007": 0,
   "0x4f32920458dd026781ce1b77d68cfcf486eb63d4": 0,
@@ -58,20 +59,7 @@ const users = {
   "0x5f8dee51958f7c3a8f7990db85b9f3c1d967925b": 0
 };
 
-const addresses: any = [];
-const stakedAt: any = [];
-
-const buildList = () => {
-  for (const address in users) {
-    addresses.push(address);
-    stakedAt.push(users[address]);
-  }
-};
-
-buildList();
-
 export default {
-  target: PRIME,
-  signature: "setStakedAt(address[],uint256[])",
-  params: [addresses, stakedAt],
+  stakeUsers,
+  unstakeUsers
 };

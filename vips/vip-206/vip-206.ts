@@ -1,6 +1,6 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import staked from "./staked-users";
+import staked from "./command";
 
 export const vip206 = () => {
   const meta = {
