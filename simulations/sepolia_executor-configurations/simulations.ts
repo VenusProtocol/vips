@@ -2,22 +2,23 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../src/utils";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVipV2 } from "../../src/vip-framework";
 import { executor_configuration } from "../../vips/executor-configuration";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
-const REMOTE_NORMAL_TIMELOCK = "0x3961EDAfe1d1d3AB446f1b2fc10bde476058448B";
-const REMOTE_FASTTRACK_TIMELOCK = "0x02A66bfB5De5c6b969cB81F00AC433bC8EeeDd4c";
-const REMOTE_CRITICAL_TIMELOCK = "0xa82173F08CDFCD6fDB5505dcd37E5c6403a26DE6";
-const OMNICHAIN_PROPOSAL_SENDER = "0x0852b6d4c4745a8bfeb54476a2a167df68866c00";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0x9b0786cd8f841d1c7b8a08a5ae6a246aed556a42";
+const { sepolia } = NETWORK_ADDRESSES;
 
-forking(4658671, async () => {
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+forking(4732360, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: number;
   let executor: Contract;
+  let acm: Contract;
+  let multisig: any;
 
   testVipV2("executor_configuration give permissions to timelock", await executor_configuration(), {
     callbackAfterExecution: async txResponse => {
@@ -31,26 +32,28 @@ forking(4658671, async () => {
   });
 
   before(async () => {
-    executor = new ethers.Contract(OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    acm = new ethers.Contract(sepolia.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
+    multisig = await initMainnetUser(sepolia.GUARDIAN, ethers.utils.parseEther("1"));
+    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK);
   });
-
   describe("Post-VIP behaviour", async () => {
     it("Proposal id should be incremented", async () => {
       expect(await executor.lastProposalReceived()).to.be.equals(lastProposalReceived.add(1));
     });
     it("Set normal timelock ", async () => {
-      expect(await executor.proposalTimelocks(0)).to.equals(REMOTE_NORMAL_TIMELOCK);
+      expect(await executor.proposalTimelocks(0)).to.equals(sepolia.NORMAL_TIMELOCK);
     });
     it("Set fasttrack timelock", async () => {
-      expect(await executor.proposalTimelocks(1)).to.equals(REMOTE_FASTTRACK_TIMELOCK);
+      expect(await executor.proposalTimelocks(1)).to.equals(sepolia.FASTTRACK_TIMELOCK);
     });
     it("Set critical timelock", async () => {
-      expect(await executor.proposalTimelocks(2)).to.equals(REMOTE_CRITICAL_TIMELOCK);
+      expect(await executor.proposalTimelocks(2)).to.equals(sepolia.CRITICAL_TIMELOCK);
     });
     it("Set trusted remote", async () => {
       expect(await executor.trustedRemoteLookup(10102)).to.equals(
-        OMNICHAIN_PROPOSAL_SENDER + OMNICHAIN_GOVERNANCE_EXECUTOR.slice(2),
+        sepolia.OMNICHAIN_PROPOSAL_SENDER + sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR.slice(2),
       );
     });
   });
