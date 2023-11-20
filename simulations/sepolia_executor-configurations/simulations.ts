@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -16,13 +17,7 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR = "0x9b0786cd8f841d1c7b8a08a5ae6a246aed556a4
 forking(4658671, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: number;
-  let executor: ethers.Contract;
-  await executor_configuration();
-
-  before(async () => {
-    executor = new ethers.Contract(OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
-    lastProposalReceived = await executor.lastProposalReceived();
-  });
+  let executor: Contract;
 
   testVipV2("executor_configuration give permissions to timelock", await executor_configuration(), {
     callbackAfterExecution: async txResponse => {
@@ -35,6 +30,11 @@ forking(4658671, async () => {
     },
   });
 
+  before(async () => {
+    executor = new ethers.Contract(OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    lastProposalReceived = await executor.lastProposalReceived();
+  });
+
   describe("Post-VIP behaviour", async () => {
     it("Proposal id should be incremented", async () => {
       expect(await executor.lastProposalReceived()).to.be.equals(lastProposalReceived.add(1));
@@ -42,7 +42,6 @@ forking(4658671, async () => {
     it("Set normal timelock ", async () => {
       expect(await executor.proposalTimelocks(0)).to.equals(REMOTE_NORMAL_TIMELOCK);
     });
-
     it("Set fasttrack timelock", async () => {
       expect(await executor.proposalTimelocks(1)).to.equals(REMOTE_FASTTRACK_TIMELOCK);
     });
