@@ -20,7 +20,17 @@ forking(4732360, async () => {
   let acm: Contract;
   let multisig: any;
 
-  testVipV2("executor_configuration give permissions to timelock", await executor_configuration(), {
+  const proposal = await executor_configuration();
+
+  before(async () => {
+    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    acm = new ethers.Contract(sepolia.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
+    lastProposalReceived = await executor.lastProposalReceived();
+    multisig = await initMainnetUser(sepolia.GUARDIAN, ethers.utils.parseEther("1"));
+    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK);
+  });
+
+  testVipV2("executor_configuration give permissions to timelock", proposal, {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -31,13 +41,6 @@ forking(4732360, async () => {
     },
   });
 
-  before(async () => {
-    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
-    acm = new ethers.Contract(sepolia.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
-    lastProposalReceived = await executor.lastProposalReceived();
-    multisig = await initMainnetUser(sepolia.GUARDIAN, ethers.utils.parseEther("1"));
-    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK);
-  });
   describe("Post-VIP behaviour", async () => {
     it("Proposal id should be incremented", async () => {
       expect(await executor.lastProposalReceived()).to.be.equals(lastProposalReceived.add(1));
