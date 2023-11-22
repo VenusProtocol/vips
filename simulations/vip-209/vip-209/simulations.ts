@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { vip209 } from "../../../vips/vip-209/vip-209";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import UNITROLLER_ABI from "../abi/unitroller.json";
@@ -34,6 +35,10 @@ forking(33540900, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [1]);
     },
+  });
+
+  describe("Generic tests", () => {
+    checkCorePoolComptroller();
   });
 
   describe("Post-VIP behavior", () => {
