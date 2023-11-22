@@ -5,7 +5,7 @@ const NormalTimelock = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FastTrackTimelock = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CriticalTimelock = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const AccessControlManager = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-const OmnichainProposalSender = "0xF83769F8baBF47a4a0A64cAE0efB72AeCD773ae5";
+const OmnichainProposalSender = "0xa11d68CDe7BB1Add75af209580E99B2e0566CB74";
 const OmnichainGovernanceExecutor = "0xBAaDdb276ACC9D1b5e1B09254b45Cb0ccDddF748";
 const remoteChainId = 10161;
 

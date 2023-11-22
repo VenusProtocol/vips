@@ -323,17 +323,10 @@ export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: str
   }
 };
 
-export const makePayload = async (
-  targets: any,
-  values: any,
-  signatures: any,
-  calldatas: any,
-  proposalId: number,
-  proposalType: number,
-) => {
+export const makePayload = async (targets: any, values: any, signatures: any, calldatas: any, proposalType: number) => {
   const payload = ethers.utils.defaultAbiCoder.encode(
-    ["address[]", "uint256[]", "string[]", "bytes[]", "uint256", "uint8"],
-    [targets, values, signatures, calldatas, proposalId, proposalType],
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+    [targets, values, signatures, calldatas, proposalType],
   );
   return payload;
 };
