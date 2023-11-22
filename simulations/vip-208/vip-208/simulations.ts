@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip206 } from "../../../vips/vip-206/vip-206";
+import { vip208 } from "../../../vips/vip-208/vip-208";
 import COMPTROLLER_ABI from "./abi/Comptroller_ABI.json";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -25,7 +25,7 @@ forking(33668728, () => {
       expect(await comptroller.borrowCaps(VUNI)).to.equals(parseUnits("30000", 18));
     });
   });
-  testVip("VIP-206 Update Risk Parameters", vip206(), {
+  testVip("VIP-208 Update Risk Parameters", vip208(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [1, 1, 0]);
     },
