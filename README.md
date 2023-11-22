@@ -20,6 +20,12 @@ yarn install
 npx hardhat test simulations/<simulation-path>
 ```
 
+### Run Simulations for Multisig
+
+```
+npx hardhat test multisig/simulations/<network>/<path>
+```
+
 ### Create Proposal
 
 Script to generate proposal data for multiple destinations such as venusApp bscexplorer and gnosis tx builder.
@@ -44,4 +50,24 @@ In .env, replace VIP_NUMBER with the number of vip to propose.
 
 ```
 npx hardhat test scripts/proposeVIP.ts
+```
+
+### Execute VIP (via Multisig)
+
+Script to execute a VIP through the Gnosis Safe Multisig
+
+Procedure for executing VIP
+
+In .env, make sure that `DEPLOYER_PRIVATE_KEY` is the one of the multisig owner on sepolia `0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C`
+
+Proceed by executing the following command:
+
+```
+npx hardhat run scripts/executeMultiSigTx.ts --network sepolia
+```
+
+After executing the commant, provide the proposal name to be executed and press enter:
+
+```
+Name of tx file (from ./multisig/<network>/ dir) to execute =>
 ```
