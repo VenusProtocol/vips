@@ -1,15 +1,15 @@
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
+import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
-import { ethers } from "hardhat";
-import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json"
-import testnet from "@venusprotocol/venus-protocol/networks/testnet.json"
-
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
-import ERC20_ABI from "../abi/erc20.json";
-import XVSVault_ABI from "../abi/XVSVault.json";
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { NETWORK_CONFIG } from "../../networkConfig";
+import XVSVault_ABI from "../abi/XVSVault.json";
+import ERC20_ABI from "../abi/erc20.json";
 
 let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
 let XVS = mainnet.Contracts.XVS;
@@ -25,8 +25,8 @@ if (process.env.FORKED_NETWORK === "bsctestnet") {
 
 export const checkXVSVault = () => {
   describe("generic XVS Vault checks", () => {
-    let xvs : Contract;
-    let xvsVault : Contract;
+    let xvs: Contract;
+    let xvsVault: Contract;
 
     before(async () => {
       impersonateAccount(ACCOUNT);
@@ -42,13 +42,13 @@ export const checkXVSVault = () => {
 
       await xvs.approve(xvsVault.address, parseUnits("1", 18));
       await expect(xvsVault.deposit(xvs.address, POOL_ID, parseUnits("1", 18))).to.be.not.reverted;
-      expect (await xvs.balanceOf(ACCOUNT)).to.be.lt(originalBalance);
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.lt(originalBalance);
 
       originalBalance = await xvs.balanceOf(ACCOUNT);
       await xvsVault.requestWithdrawal(xvs.address, POOL_ID, parseUnits("1", 18));
-      await mine(10000)
-      await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID)
-      expect (await xvs.balanceOf(ACCOUNT)).to.be.gt(originalBalance);
-    })
+      await mine(10000);
+      await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalBalance);
+    });
   });
 };

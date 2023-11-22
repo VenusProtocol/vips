@@ -5,12 +5,12 @@ import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip296Testnet } from "../../../vips/vip-296/vip-296-testnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 
 const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const STAKED_USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
@@ -109,8 +109,8 @@ forking(34920008, () => {
     });
 
     describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 });

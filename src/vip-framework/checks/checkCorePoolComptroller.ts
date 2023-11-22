@@ -1,19 +1,19 @@
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
+import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json"
-import testnet from "@venusprotocol/venus-protocol/networks/testnet.json"
 
-import COMPTROLLER_ABI from "../abi/comptroller.json";
+import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
-import { parseUnits } from "ethers/lib/utils";
-import { NETWORK_ADDRESSES } from "../../networkAddresses";
 
-let vETH_ADDRESS = mainnet.Contracts.vETH
-let vUSDT_ADDRESS = mainnet.Contracts.vUSDT
+let vETH_ADDRESS = mainnet.Contracts.vETH;
+let vUSDT_ADDRESS = mainnet.Contracts.vUSDT;
 let USDT = mainnet.Contracts.USDT;
 let ETH = mainnet.Contracts.ETH;
 let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
@@ -26,8 +26,8 @@ let ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_AC
 let CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
-  vETH_ADDRESS = testnet.Contracts.vETH
-  vUSDT_ADDRESS = testnet.Contracts.vUSDT
+  vETH_ADDRESS = testnet.Contracts.vETH;
+  vUSDT_ADDRESS = testnet.Contracts.vUSDT;
   USDT = testnet.Contracts.USDT;
   ETH = testnet.Contracts.ETH;
   NORMAL_TIMELOCK = testnet.Contracts.Timelock;
@@ -45,7 +45,7 @@ export const checkCorePoolComptroller = () => {
     let veth: Contract;
     let vusdt: Contract;
     let timelockSigner: Signer;
-    let xvs : Contract;
+    let xvs: Contract;
 
     before(async () => {
       impersonateAccount(ACCOUNT);
@@ -59,7 +59,6 @@ export const checkCorePoolComptroller = () => {
       veth = await ethers.getContractAt(VTOKEN_ABI, vETH_ADDRESS, signer);
       vusdt = await ethers.getContractAt(VTOKEN_ABI, vUSDT_ADDRESS, signer);
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
-
 
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, USDT, USDT_FEED, NORMAL_TIMELOCK);
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, ETH, ETH_FEED, NORMAL_TIMELOCK);
@@ -81,13 +80,13 @@ export const checkCorePoolComptroller = () => {
 
       const vusdtBalance = await vusdt.balanceOf(ACCOUNT);
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
-      let usdtDecimals = await usdt.decimals()
+      let usdtDecimals = await usdt.decimals();
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
 
-      const originalXVSBalance = await xvs.balanceOf(ACCOUNT)
-      expect (await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance)
+      const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
+      expect(await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));
@@ -100,15 +99,15 @@ export const checkCorePoolComptroller = () => {
     });
 
     it(`read storage`, async () => {
-      expect (await comptroller.comptrollerLens()).to.be.equal(LENS)
-    })
+      expect(await comptroller.comptrollerLens()).to.be.equal(LENS);
+    });
 
     it(`set storage`, async () => {
       const originalOracle = await comptroller.oracle();
 
-      await comptroller.connect(timelockSigner)._setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")
-      expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD")
-      await comptroller.connect(timelockSigner)._setPriceOracle(originalOracle)
-    })
+      await comptroller.connect(timelockSigner)._setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+      expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+      await comptroller.connect(timelockSigner)._setPriceOracle(originalOracle);
+    });
   });
 };

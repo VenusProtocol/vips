@@ -6,16 +6,16 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip296 } from "../../../vips/vip-296/vip-296";
-import ERC20_ABI from "./abis/ERC20.json";
-import PRIME_ABI from "./abis/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip201 } from "../../../vips/vip-201/vip-201";
 import { vip202 } from "../../../vips/vip-202/vip-202";
 import { vip204 } from "../../../vips/vip-204/vip-204";
 import { vip295 } from "../../../vips/vip-295/vip-295";
+import { vip296 } from "../../../vips/vip-296/vip-296";
+import ERC20_ABI from "./abis/ERC20.json";
+import PRIME_ABI from "./abis/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -126,8 +126,8 @@ forking(33490463, () => {
     });
 
     describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 });

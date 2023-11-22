@@ -8,7 +8,7 @@ const finalUsers = {
   ...users.stakeNoClaimableUsers,
   ...users.stakeClaimableUsers,
   ...users.unstakeUsers,
-}
+};
 
 const buildList = () => {
   for (const address in finalUsers) {

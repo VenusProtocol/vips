@@ -6,12 +6,12 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import PRIME_ABI from "./abis/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
-import { vip207 } from "../../vips/vip-207/vip-207";
 import users from "../../vips/vip-207/users";
+import { vip207 } from "../../vips/vip-207/vip-207";
+import PRIME_ABI from "./abis/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -61,7 +61,11 @@ forking(33663461, () => {
     let prime: Contract;
 
     before(async () => {
-      for (const userAddress in { ...users.stakeNoClaimableUsers, ...users.stakeClaimableUsers, ...users.unstakeUsers }) {
+      for (const userAddress in {
+        ...users.stakeNoClaimableUsers,
+        ...users.stakeClaimableUsers,
+        ...users.unstakeUsers,
+      }) {
         impersonateAccount(userAddress);
         await setBalance(userAddress, ethers.utils.parseEther("5"));
       }
@@ -75,7 +79,7 @@ forking(33663461, () => {
 
     it("claim prime token", async () => {
       for (const userAddress in { ...users.stakeNoClaimableUsers, ...users.stakeClaimableUsers }) {
-        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;  
+        await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;
       }
     });
 
@@ -86,9 +90,9 @@ forking(33663461, () => {
     });
 
     describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 
   testVip("VIP-207 Prime Program", vip207(), {
@@ -108,11 +112,11 @@ forking(33663461, () => {
         await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, NORMAL_TIMELOCK);
       }
     });
-    
+
     describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
 
     it("prime markets", async () => {
       expect((await prime.getAllMarkets()).length).to.equal(4);
@@ -136,7 +140,7 @@ forking(33663461, () => {
         await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).to.be.reverted;
       }
 
-      await mine(10000000)
+      await mine(10000000);
 
       for (const userAddress in users.stakeNoClaimableUsers) {
         await expect(prime.connect(await ethers.getSigner(userAddress)).claim()).not.to.be.reverted;

@@ -6,14 +6,14 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
+import { vip201 } from "../../../vips/vip-201/vip-201";
+import { vip202 } from "../../../vips/vip-202/vip-202";
+import { vip203 } from "../../../vips/vip-203/vip-203";
 import { vip206 } from "../../../vips/vip-206/vip-206";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip203 } from "../../../vips/vip-203/vip-203";
-import { vip202 } from "../../../vips/vip-202/vip-202";
-import { vip201 } from "../../../vips/vip-201/vip-201";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -64,7 +64,7 @@ forking(33490463, () => {
   testVip("VIP-201 Prime Program", vip201(), {});
   testVip("VIP-202 Prime Program", vip202(), {});
   testVip("VIP-203 Prime Program", vip203(), {});
-  
+
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
@@ -143,8 +143,8 @@ forking(33490463, () => {
     });
 
     describe("generic tests", async () => {
-      checkCorePoolComptroller()
-      checkXVSVault()
-    })
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 });

@@ -60,11 +60,11 @@ const unstakeUsers = {
   "0x45591256b05becbd33cb6694bc8688601629430a": 0,
   "0xfacccc36814841b9fa886aed4386b6294a5c0c14": 0,
   "0xedb0190e7a46e2e94feccfd2534e33314e14ce4e": 0,
-  "0x5f8dee51958f7c3a8f7990db85b9f3c1d967925b": 0
+  "0x5f8dee51958f7c3a8f7990db85b9f3c1d967925b": 0,
 };
 
 export default {
   stakeNoClaimableUsers,
   stakeClaimableUsers,
-  unstakeUsers
+  unstakeUsers,
 };
