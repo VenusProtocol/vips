@@ -9,7 +9,7 @@ const CHAINLINK_ETH_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
 const CHAINLINK_USDC_FEED = "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E";
 
 // VIP: Configures the new oracle with the ACL and configures the initial price feeds on this oracle
-export const oracleAssetConfig2 = () => {
+export const vip003 = () => {
   return makeProposal([
     {
       target: sepolia.ACM,
