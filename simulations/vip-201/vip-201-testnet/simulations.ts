@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { adapterParams, expectEvents, initMainnetUser, makePayload } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip190 } from "../../../vips/vip-190/vip-190-testnet";
+import { vip201Testnet } from "../../../vips/vip-201/vip-201-testnet";
 import AccessControlManager_ABI from "./abi/AccessControlManager.json";
 import OmnichainProposalSender_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -31,7 +31,7 @@ forking(34369040, async () => {
       expect(await omnichainProposalSender.trustedRemoteLookup(remoteChainId)).to.be.equals("0x");
     });
   });
-  testVip("VIP-190 give permissions to timelock", vip190(), {
+  testVip("vip201Testnet give permissions to timelock", vip201Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

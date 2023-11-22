@@ -9,7 +9,7 @@ const OmnichainProposalSender = "0xF83769F8baBF47a4a0A64cAE0efB72AeCD773ae5";
 const OmnichainGovernanceExecutor = "0xBAaDdb276ACC9D1b5e1B09254b45Cb0ccDddF748";
 const remoteChainId = 10161;
 
-export const vip190 = () => {
+export const vip201Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-190 give access permission and configuration of cross chain governance sender on binance chain",
