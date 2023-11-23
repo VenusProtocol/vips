@@ -1,10 +1,10 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
-const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
+const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 
-export const vip296Testnet = () => {
+export const vip210 = () => {
   const meta = {
     version: "v2",
     title: "Prime Program Setup",
