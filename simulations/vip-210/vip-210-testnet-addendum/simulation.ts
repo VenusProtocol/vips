@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip297Testnet } from "../../../vips/vip-297/vip-297-testnet";
+import { vip210TestnetAddendum } from "../../../vips/vip-210/vip-210-testnet-addendum";
 import PRIME_PROXY_ABI from "./abis/PrimeProxy.json";
 
 const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
@@ -36,7 +36,7 @@ forking(35325853, () => {
     });
   });
 
-  testVip("VIP-297 Prime Program", vip297Testnet());
+  testVip("VIP-210 Prime Program", vip210TestnetAddendum());
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
