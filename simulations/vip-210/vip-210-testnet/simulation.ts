@@ -7,7 +7,7 @@ import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip210Testnet } from "../../../vips/vip-210/vip-210-testnet";
+import { vip296Testnet } from "../../../vips/vip-296/vip-296-testnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
@@ -70,7 +70,7 @@ forking(34920008, () => {
     });
   });
 
-  testVip("VIP-210 Prime Program", vip210Testnet(), {});
+  testVip("VIP-296 Prime Program", vip296Testnet(), {});
 
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;

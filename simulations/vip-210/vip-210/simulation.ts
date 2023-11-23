@@ -8,20 +8,21 @@ import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/u
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip201 } from "../../../vips/vip-201/vip-201";
-import { vip202 } from "../../../vips/vip-202/vip-202";
 import { vip210 } from "../../../vips/vip-210/vip-210";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import { vip206 } from "../../../vips/vip-206/vip-206";
-import { vip203 } from "../../../vips/vip-203/vip-203";
+import PRIME_PROXY_ABI from "./abis/PrimeProxy.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 const STAKED_USER = "0x07cf6eb791b038ecc157a81738b865154579c911";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const OLD_PRIME_IMPL = "0xc86f1aA3cBe1F76F3335a66Db7F490e343CbeF50";
+const NEW_PRIME_IMPL = "0x371c0355CC22Ea13404F2fEAc989435DAD9b9d03";
+const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
@@ -59,17 +60,19 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33490463, () => {
-  testVip("VIP-201 Prime Program", vip201(), {});
-  testVip("VIP-202 Prime Program", vip202(), {});
-  testVip("VIP-203 Prime Program", vip203(), {});
+forking(33745732, () => {
   testVip("VIP-206 Prime Program", vip206(), {});
 
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
+    let primeProxy: Contract;
 
     before(async () => {
+      await impersonateAccount(DEFAULT_PROXY_ADMIN);
+      const signer = await ethers.getSigner(DEFAULT_PROXY_ADMIN);
+
+      primeProxy = await ethers.getContractAt(PRIME_PROXY_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
     });
@@ -80,6 +83,16 @@ forking(33490463, () => {
 
       const primePaused = await prime.paused();
       expect(primePaused).to.be.equal(true);
+    });
+
+    it("check implementation", async () => {
+      const primeImplementation = await primeProxy.callStatic.implementation();
+      expect(primeImplementation).to.be.equal(OLD_PRIME_IMPL);
+    });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkXVSVault();
     });
   });
 
@@ -93,14 +106,17 @@ forking(33490463, () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
     let eth: Contract;
+    let primeProxy: Contract;
 
     before(async () => {
       impersonateAccount(STAKED_USER);
+      await impersonateAccount(DEFAULT_PROXY_ADMIN);
       const signer = await ethers.getSigner(STAKED_USER);
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       eth = await ethers.getContractAt(ERC20_ABI, ETH);
+      primeProxy = await ethers.getContractAt(PRIME_PROXY_ABI, PRIME,await ethers.getSigner(DEFAULT_PROXY_ADMIN));
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
@@ -117,12 +133,14 @@ forking(33490463, () => {
     });
 
     it("rewards", async () => {
-      await prime.claim();
-      await mine(1000);
-
       expect(await eth.balanceOf(STAKED_USER)).to.be.equal("0");
       await prime["claimInterest(address)"](vETH);
-      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("24463096064814263");
+      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("64026707272536800");
+    });
+
+    it("check implementation", async () => {
+      const primeImplementation = await primeProxy.callStatic.implementation();
+      expect(primeImplementation).to.be.equal(NEW_PRIME_IMPL);
     });
 
     describe("generic tests", async () => {
