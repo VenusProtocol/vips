@@ -68,7 +68,7 @@ export const vip003 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[sepolia.MOCK_WBTC, CHAINLINK_BTC_FEED, 86400]],
+      params: [[sepolia.MOCK_WBTC, CHAINLINK_BTC_FEED, 144000]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
@@ -88,7 +88,7 @@ export const vip003 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[sepolia.MOCK_WETH, CHAINLINK_ETH_FEED, 86400]],
+      params: [[sepolia.MOCK_WETH, CHAINLINK_ETH_FEED, 144000]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
@@ -108,7 +108,7 @@ export const vip003 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[sepolia.MOCK_USDC, CHAINLINK_USDC_FEED, 86400]],
+      params: [[sepolia.MOCK_USDC, CHAINLINK_USDC_FEED, 144000]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
@@ -148,7 +148,7 @@ export const vip003 = () => {
     {
       target: sepolia.REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[sepolia.MOCK_XVS, REDSTONE_XVS_FEED, 86400]],
+      params: [[sepolia.MOCK_XVS, REDSTONE_XVS_FEED, 144000]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
