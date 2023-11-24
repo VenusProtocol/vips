@@ -114,7 +114,7 @@ forking(33770465, () => {
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       eth = await ethers.getContractAt(ERC20_ABI, ETH);
-      primeProxy = await ethers.getContractAt(PRIME_PROXY_ABI, PRIME,await ethers.getSigner(DEFAULT_PROXY_ADMIN));
+      primeProxy = await ethers.getContractAt(PRIME_PROXY_ABI, PRIME, await ethers.getSigner(DEFAULT_PROXY_ADMIN));
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];

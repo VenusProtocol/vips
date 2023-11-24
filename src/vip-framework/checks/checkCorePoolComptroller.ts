@@ -1,4 +1,4 @@
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
 import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
 import { expect } from "chai";
@@ -20,10 +20,10 @@ let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
 let XVS = mainnet.Contracts.XVS;
 let COMPTROLLER = mainnet.Contracts.Unitroller;
 let LENS = mainnet.Contracts.ComptrollerLens;
-let ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
-let USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
-let ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
-let CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+const ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
+const USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
+const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
+const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
   vETH_ADDRESS = testnet.Contracts.vETH;
@@ -80,7 +80,7 @@ export const checkCorePoolComptroller = () => {
 
       const vusdtBalance = await vusdt.balanceOf(ACCOUNT);
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
-      let usdtDecimals = await usdt.decimals();
+      const usdtDecimals = await usdt.decimals();
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
 
@@ -93,7 +93,7 @@ export const checkCorePoolComptroller = () => {
       await vusdt.repayBorrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.lt(usdtBalance);
 
-      let ethBalance = await eth.balanceOf(ACCOUNT);
+      const ethBalance = await eth.balanceOf(ACCOUNT);
       await veth.redeemUnderlying(parseUnits("0.1", 18));
       expect(await eth.balanceOf(ACCOUNT)).to.gt(ethBalance);
     });

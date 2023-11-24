@@ -2,7 +2,7 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
 import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -14,8 +14,8 @@ import ERC20_ABI from "../abi/erc20.json";
 let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
 let XVS = mainnet.Contracts.XVS;
 let XVS_VAULT_PROXY = mainnet.Contracts.XVSVaultProxy;
-let ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
-let POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
+const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
+const POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
   NORMAL_TIMELOCK = testnet.Contracts.Timelock;
