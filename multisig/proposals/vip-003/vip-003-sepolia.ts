@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../src/networkAddresses";
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
@@ -14,52 +14,52 @@ export const vip003 = () => {
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "pause()", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.RESILIENT_ORACLE, "pause()", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "unpause()", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.RESILIENT_ORACLE, "unpause()", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setOracle(address,address,uint8)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "enableOracle(address,uint8,bool)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setTokenConfig(TokenConfig)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setDirectPrice(address,uint256)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setValidateConfig(ValidateConfig)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMaxStalePeriod(string,uint256)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setSymbolOverride(string,string)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setUnderlyingPythOracle(address)", sepolia.NORMAL_TIMELOCK],
+      params: [sepolia.BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", sepolia.NORMAL_TIMELOCK],
     },
     { target: sepolia.RESILIENT_ORACLE, signature: "acceptOwnership()", params: [] },
     { target: sepolia.CHAINLINK_ORACLE, signature: "acceptOwnership()", params: [] },
@@ -148,14 +148,14 @@ export const vip003 = () => {
     {
       target: sepolia.REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[sepolia.MOCK_XVS, REDSTONE_XVS_FEED, 144000]],
+      params: [[sepolia.XVS, REDSTONE_XVS_FEED, 144000]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
-          sepolia.MOCK_XVS,
+          sepolia.XVS,
           [
             sepolia.REDSTONE_ORACLE,
             "0x0000000000000000000000000000000000000000",
@@ -168,14 +168,14 @@ export const vip003 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [sepolia.CRV, "500000000000000000"],
+      params: [sepolia.MOCK_CRV, "500000000000000000"],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
-          sepolia.CRV,
+          sepolia.MOCK_CRV,
           [
             sepolia.CHAINLINK_ORACLE,
             "0x0000000000000000000000000000000000000000",
@@ -188,14 +188,14 @@ export const vip003 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [sepolia.crvUSD, "1000000000000000000"],
+      params: [sepolia.MOCK_crvUSD, "1000000000000000000"],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
-          sepolia.crvUSD,
+          sepolia.MOCK_crvUSD,
           [
             sepolia.CHAINLINK_ORACLE,
             "0x0000000000000000000000000000000000000000",
