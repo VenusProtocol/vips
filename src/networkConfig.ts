@@ -15,4 +15,11 @@ export const NETWORK_CONFIG = {
       [ProposalType.CRITICAL]: 34,
     },
   },
+  sepolia: {
+    DELAY_BLOCKS: {
+      [ProposalType.REGULAR]: 200,
+      [ProposalType.FAST_TRACK]: 100,
+      [ProposalType.CRITICAL]: 34,
+    },
+  },
 };
