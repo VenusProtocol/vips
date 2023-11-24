@@ -12,7 +12,6 @@ import { vip210 } from "../../../vips/vip-210/vip-210";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import { vip206 } from "../../../vips/vip-206/vip-206";
 import PRIME_PROXY_ABI from "./abis/PrimeProxy.json";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
@@ -60,9 +59,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33745732, () => {
-  testVip("VIP-206 Prime Program", vip206(), {});
-
+forking(33770465, () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
@@ -136,7 +133,7 @@ forking(33745732, () => {
     it("rewards", async () => {
       expect(await eth.balanceOf(STAKED_USER)).to.be.equal("0");
       await prime["claimInterest(address)"](vETH);
-      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("64026707272536800");
+      expect(await eth.balanceOf(STAKED_USER)).to.be.equal("24402048965856493");
     });
 
     it("check implementation", async () => {
