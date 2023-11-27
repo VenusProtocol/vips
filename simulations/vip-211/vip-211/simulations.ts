@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip205 } from "../../../vips/vip-205/vip-205";
+import { vip211 } from "../../../vips/vip-211/vip-211";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
@@ -93,7 +93,7 @@ forking(33548990, () => {
     });
   });
 
-  testVip("vip205", vip205(24 * 60 * 60 * 365), {
+  testVip("vip211", vip211(24 * 60 * 60 * 365), {
     proposer: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {

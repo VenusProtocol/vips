@@ -24,10 +24,10 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 const PIVOT_ORACLE_ROLE = 1;
 const MAX_STALE_PERIOD = 60 * 25;
 
-export const vip205 = (maxStalePeriod?: number) => {
+export const vip211 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-205 Set RedStone as the PIVOT oracle for TRX and TRX_OLD",
+    title: "VIP-211 Set RedStone as the PIVOT oracle for TRX and TRX_OLD",
     description: `#### Summary
 
 If passed, this VIP will perform the following actions:
@@ -43,18 +43,18 @@ This VIP configures the price feed provided by [RedStone](https://redstone.finan
 
 The difference in the prices will be considered too large if the ratio “pivot_price / main_price” is not between 0.99 and 1.01. These thresholds have been calculated analysing historical data of both (RedStone and Chainlink) price feeds. It can be modified in the future via VIP.
 
-**Security and additional considerations**
+#### Security and additional considerations
 
 There were not any changes in the deployed codebase. We applied the following security procedures for this upgrade:
 
 - **Prices pre/post upgrade**: in a simulation environment, validating the asset prices pre-upgrade are the same as post-upgrade
 - **Deployment on testnet**: the same setup has been deployed to testnet, and used in the Venus Protocol testnet deployment
 
-**Deployed contracts on main net**
+#### Deployed contracts on main net
 
 - [New ResilientOracle implementation](https://bscscan.com/address/0xB5d7A073d77102ad56B7482b18E7204c1a71C8B9)
 
-**References**
+#### References
 
 - [Repository](https://github.com/VenusProtocol/oracle)
 - [Simulation pre/post upgrade](https://github.com/VenusProtocol/vips/pull/93)
