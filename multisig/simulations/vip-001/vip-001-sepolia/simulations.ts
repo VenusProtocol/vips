@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip003 } from "../../../proposals/vip-003/vip-003-sepolia";
+import { vip001 } from "../../../proposals/vip-001/vip-001-sepolia";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -117,7 +117,7 @@ forking(4744200, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(vip001());
     });
     it("correct owner", async () => {
       expect(await resilientOracle.owner()).to.equal(NORMAL_TIMELOCK);
