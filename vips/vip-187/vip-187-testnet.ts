@@ -146,11 +146,6 @@ export const vip187Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setOracle(address)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setMaxSingleTransactionLimit(uint16,uint256)", FAST_TRACK_TIMELOCK],
       },
       {
@@ -218,11 +213,6 @@ export const vip187Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "forceResumeReceive(uint16,bytes)", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setOracle(address)", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
