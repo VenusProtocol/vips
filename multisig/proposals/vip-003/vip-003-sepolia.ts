@@ -132,7 +132,7 @@ export const vip003 = () => {
     {
       target: sepoliaContracts.XVS_BRIDGE_ADMIN,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
-      params: [10102, "0x0000000000000000000000000000000000000001"],
+      params: [10102, "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3"],
     },
     {
       target: sepoliaContracts.XVS,

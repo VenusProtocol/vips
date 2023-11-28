@@ -15,7 +15,7 @@ const XVS_BRIDGE_ADMIN = sepoliaContracts.XVS_BRIDGE_ADMIN;
 const XVS_BRIDGE = sepoliaContracts.XVS_PROXY_OFT_DEST;
 const SEPOLIA_MULTISIG = sepoliaContracts.TIMELOCK;
 
-forking(4665307, () => {
+forking(4781369, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -53,7 +53,7 @@ forking(4665307, () => {
 
     it("Should set trusted remote address in bridge", async () => {
       const trustedRemote = await xvsBridge.getTrustedRemoteAddress(10102);
-      expect(trustedRemote).equals("0x0000000000000000000000000000000000000001");
+      expect(trustedRemote).equals("0x963cabdc5bb51c1479ec94df44de2ec1a49439e3");
     });
 
     it("Should set minting limit in XVS token", async () => {
@@ -78,7 +78,7 @@ forking(4665307, () => {
 
     it("Should set correct max daily receive limit", async () => {
       const token = await xvsBridge.chainIdToMaxDailyReceiveLimit(10102);
-      expect(token).equals("50000000000000000000");
+      expect(token).equals("500000000000000000000");
     });
 
     it("Should set correct max single receive limit", async () => {
