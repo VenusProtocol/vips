@@ -4,9 +4,83 @@ import { makeProposal } from "../../../src/utils";
 const { sepolia } = NETWORK_ADDRESSES;
 
 // IL configuration
-// withdraw from treasury to timelock
 export const vip002 = () => {
   return makeProposal([
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setMarketSupplyCaps(address[],uint256[])", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setMarketBorrowCaps(address[],uint256[])", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setCloseFactor(uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setMinLiquidatableCollateral(uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setActionsPaused(address[],uint256[],bool)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setPoolName(address,string)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setProtocolSeizeShare(uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setReserveFactor(uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setInterestRateModel(address)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", sepolia.NORMAL_TIMELOCK],
+    },
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
