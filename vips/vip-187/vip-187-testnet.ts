@@ -6,6 +6,7 @@ const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const GUARDIAN = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
 export const MIN_DST_GAS = "200000";
 export const SINGLE_SEND_LIMIT = "10000000000000000000";
@@ -268,6 +269,17 @@ export const vip187Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setConfig(uint16,uint16,uint256,bytes)", CRITICAL_TIMELOCK],
+      },
+      // GUARDIAN PERMISSIONS
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "pause()", GUARDIAN],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "unpause()", GUARDIAN],
       },
       { target: XVSBridgeAdmin_Proxy, signature: "acceptOwnership()", params: [] },
       {
