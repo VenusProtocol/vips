@@ -2,18 +2,18 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { ADDRESSES } from "../../../helpers/config";
 import { vip003 } from "../../../proposals/vip-003/vip-003-sepolia";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const { sepoliaContracts } = ADDRESSES;
-const XVS = sepoliaContracts.XVS;
-const XVS_BRIDGE_ADMIN = sepoliaContracts.XVS_BRIDGE_ADMIN;
-const XVS_BRIDGE = sepoliaContracts.XVS_PROXY_OFT_DEST;
-const SEPOLIA_MULTISIG = sepoliaContracts.TIMELOCK;
+const { sepolia } = NETWORK_ADDRESSES;
+const XVS = sepolia.XVS;
+const XVS_BRIDGE_ADMIN = sepolia.XVS_BRIDGE_ADMIN;
+const XVS_BRIDGE = sepolia.XVS_PROXY_OFT_DEST;
+const SEPOLIA_MULTISIG = sepolia.NORMAL_TIMELOCK;
 
 forking(4781369, () => {
   let xvs: Contract;
