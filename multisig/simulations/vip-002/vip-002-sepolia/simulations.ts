@@ -5,8 +5,8 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { NETWORK_CONFIG } from "../../../../src/networkConfig";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { vip002 } from "../../../proposals/vip-002/vip-002-sepolia";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -59,7 +59,7 @@ const tokens = {
 interface VTokenState {
   name: string;
   symbol: string;
-  decimals: BigNumberish;
+  decimals: number;
   underlying: string;
   exchangeRate: BigNumberish;
   comptroller: string;
@@ -325,43 +325,6 @@ forking(4783370, () => {
   });
 
   describe("Contracts setup", () => {
-    const checkVToken = (
-      vTokenAddress: string,
-      { name, symbol, decimals, underlying, exchangeRate, comptroller }: VTokenState,
-    ) => {
-      describe(symbol, () => {
-        let vToken: Contract;
-
-        before(async () => {
-          vToken = await ethers.getContractAt(VTOKEN_ABI, vTokenAddress);
-        });
-
-        it(`should have name = "${name}"`, async () => {
-          expect(await vToken.name()).to.equal(name);
-        });
-
-        it(`should have symbol = "${symbol}"`, async () => {
-          expect(await vToken.symbol()).to.equal(symbol);
-        });
-
-        it(`should have ${decimals.toString()} decimals`, async () => {
-          expect(await vToken.decimals()).to.equal(decimals);
-        });
-
-        it(`should have underlying = "${underlying}"`, async () => {
-          expect(await vToken.underlying()).to.equal(underlying);
-        });
-
-        it(`should have initial exchange rate of ${exchangeRate.toString()}`, async () => {
-          expect(await vToken.exchangeRateStored()).to.equal(exchangeRate);
-        });
-
-        it("should have the correct Comptroller", async () => {
-          expect(await vToken.comptroller()).to.equal(comptroller);
-        });
-      });
-    };
-
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
       checkVToken(address, vTokenState[symbol]);
     }
@@ -595,7 +558,6 @@ forking(4783370, () => {
         });
       });
     };
-
     describe("Interest rate models", () => {
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

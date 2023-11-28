@@ -1,3 +1,4 @@
+import { COMPTROLLER } from './../../../vips/vip-154';
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
@@ -52,7 +53,9 @@ forking(33253419, () => {
       decimals: 8,
       underlying: PLANET,
       exchangeRate: parseUnits("1", 28),
+      comptroller: COMPTROLLER
     });
+
   });
 
   testVip("VIP-198 Add PLANET Market to DeFi Pool", vip198(3 * 24 * 60 * 60));
