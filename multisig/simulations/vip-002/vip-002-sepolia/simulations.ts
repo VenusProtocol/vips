@@ -4,8 +4,8 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { NETWORK_CONFIG } from "../../../../src/networkConfig";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { ADDRESSES } from "../../../helpers/config";
 import { vip002 } from "../../../proposals/vip-002/vip-002-sepolia";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -13,9 +13,8 @@ import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { sepoliaContracts } = ADDRESSES;
 const RESILIENT_ORACLE = sepoliaContracts.RESILIENT_ORACLE;
-const MULTISIG = sepoliaContracts.TIMELOCK;
+const GUARDIAN = sepoliaContracts.GUARDIAN;
 const POOL_REGISTRY = sepoliaContracts.POOL_REGISTRY;
 
 type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vUSDC_Core";
@@ -222,7 +221,7 @@ forking(4333890, () => {
       it("should register Core pool in PoolRegistry", async () => {
         const pool = registeredPools[0];
         expect(pool.name).to.equal("Core");
-        expect(pool.creator).to.equal(MULTISIG);
+        expect(pool.creator).to.equal(GUARDIAN);
         expect(pool.comptroller).to.equal(sepoliaContracts.COMPTROLLER);
       });
 
@@ -245,9 +244,9 @@ forking(4333890, () => {
 
     describe("Ownership", () => {
       for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-        it(`should transfer ownership of ${symbol} to MULTISIG`, async () => {
+        it(`should transfer ownership of ${symbol} to GUARDIAN`, async () => {
           const vToken = await ethers.getContractAt(VTOKEN_ABI, address);
-          expect(await vToken.owner()).to.equal(MULTISIG);
+          expect(await vToken.owner()).to.equal(GUARDIAN);
         });
       }
     });
@@ -335,8 +334,8 @@ forking(4333890, () => {
           expect(await comptroller.minLiquidatableCollateral()).to.equal(parseUnits("100", 18));
         });
 
-        it("should have owner = NormalMULTISIG", async () => {
-          expect(await comptroller.owner()).to.equal(MULTISIG);
+        it("should have owner = GUARDIAN", async () => {
+          expect(await comptroller.owner()).to.equal(GUARDIAN);
         });
       });
     });

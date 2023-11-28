@@ -18,7 +18,7 @@ export async function setForkBlock(blockNumber: number) {
     params: [
       {
         forking: {
-          jsonRpcUrl: process.env.BSC_ARCHIVE_NODE,
+          jsonRpcUrl: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
           blockNumber: blockNumber,
         },
       },
@@ -127,6 +127,35 @@ export const expectEvents = async (
       `expected a differnt number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
+};
+
+export const expectEventWithParams = async (
+  txResponse: TransactionResponse,
+  abi: ContractInterface,
+  expectedEvent: string,
+  expectedParams: any[], // Array of expected parameters
+) => {
+  const receipt = await txResponse.wait();
+  const iface = new ethers.utils.Interface(abi);
+
+  // Extract the events that match the expected event name
+  const matchingEvents = receipt.events
+    .map(event => {
+      try {
+        return iface.parseLog(event);
+      } catch (error) {
+        return null; // Ignore events that do not match the ABI
+      }
+    })
+    .filter(parsedEvent => parsedEvent && parsedEvent.name === expectedEvent);
+
+  // Check each event's parameters
+  matchingEvents.forEach((event, index) => {
+    expect(
+      event.args[index],
+      `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
+    ).to.deep.equal(expectedParams[index]);
+  });
 };
 
 export const proposalSchema = {

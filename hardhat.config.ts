@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: isFork(),
     bsctestnet: {
-      url: process.env.BSC_TESTNET_NODE || "https://data-seed-prebsc-1-s1.binance.org:8545",
+      url: process.env.ARCHIVE_NODE_bsctestnet || "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
       accounts: {
         mnemonic: process.env.MNEMONIC || "",
@@ -59,14 +59,18 @@ const config: HardhatUserConfig = {
       gasMultiplier: 10,
       timeout: 12000000,
     },
-    // currently not used, we are still using saddle to deploy contracts
     bscmainnet: {
-      url: `https://bsc-dataseed.binance.org/`,
+      url: process.env.ARCHIVE_NODE_bscmainnet || "https://bsc-dataseed.binance.org/",
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
     sepolia: {
-      url: "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
+      url: process.env.ARCHIVE_NODE_sepolia || "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
       chainId: 11155111,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    ethereum: {
+      url: process.env.ARCHIVE_NODE_ethereum || "https://ethereum.blockpi.network/v1/rpc/public",
+      chainId: 1,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
   },
@@ -79,12 +83,12 @@ const config: HardhatUserConfig = {
 };
 
 function isFork() {
-  return process.env.FORK_MAINNET === "true" || process.env.FORK_TESTNET === "true"
+  return process.env.FORK === "true"
     ? {
         allowUnlimitedContractSize: false,
         loggingEnabled: false,
         forking: {
-          url: `${process.env.BSC_ARCHIVE_NODE}`,
+          url: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
         },
         accounts: {
           accountsBalance: "100000000000000000000000",
