@@ -19,13 +19,13 @@ import XVS_ABI from "./abi/XVS.json";
 import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
-const XVSProxyOFTSrc = "0x00E7C1cA08346f50910dB4484E29582b16eF13Db";
-const XVSBridgeAdmin_Proxy = "0x4ABaE1278ecC419c49c4362a21b231b36eeEB62C";
+const XVSProxyOFTSrc = "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3";
+const XVSBridgeAdmin_Proxy = "0x5D08D49A2e43aC4c72C60754d1550BA12e846d66";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(34308002, () => {
+forking(35486130, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
   let bridgeAdmin: ethers.Contract;
@@ -58,10 +58,10 @@ forking(34308002, () => {
           "SetMaxDailyLimit",
           "SetMaxSingleReceiveTransactionLimit",
           "SetMaxDailyReceiveLimit",
-          "SetTrustedRemote",
+          "SetTrustedRemoteAddress",
           "Failure",
         ],
-        [51, 2, 1, 1, 1, 1, 1, 1, 0],
+        [20, 2, 1, 1, 1, 1, 1, 1, 0],
       );
     },
   });
@@ -118,7 +118,7 @@ forking(34308002, () => {
     });
 
     it("Reverts if single transaction limit exceed", async function () {
-      const amount = ethers.utils.parseUnits("11", 18);
+      const amount = ethers.utils.parseUnits("2", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
       const nativeFee = (
@@ -140,15 +140,14 @@ forking(34308002, () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("110");
-      const amount = ethers.utils.parseUnits("2");
+      const amount = ethers.utils.parseUnits("1");
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      // After 4 transaction it should fail as limit of max daily transaction is 50 USD and price per full token in USD is ~4
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < 70; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
