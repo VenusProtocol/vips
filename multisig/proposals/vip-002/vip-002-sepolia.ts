@@ -84,6 +84,11 @@ export const vip002 = () => {
     {
       target: sepolia.ACM,
       signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: sepolia.ACM,
+      signature: "giveCallPermission(address,string,address)",
       params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", sepolia.POOL_REGISTRY],
     },
     {
