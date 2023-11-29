@@ -1,7 +1,7 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { ethers, network } from "hardhat";
 
-import { createGnosisTx, getContractNetworks, getSafeAddress } from "../multisig/helpers/utils";
+import { createGnosisTx, getContractNetworks, getSafeAddress } from "../src/multisig/utils";
 
 const executeMultiSigTx = async () => {
   const safeOwner = ethers.provider.getSigner(0);
@@ -21,6 +21,7 @@ const executeMultiSigTx = async () => {
   const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
 
   safeTransaction.addSignature(await safeSdk.signTransactionHash(safeTxHash));
+  console.log("Multisig tx has been signed and submitted for execution....");
   const executeTxResponse = await safeSdk.executeTransaction(safeTransaction);
   const receipt = executeTxResponse.transactionResponse && (await executeTxResponse.transactionResponse.wait());
 
