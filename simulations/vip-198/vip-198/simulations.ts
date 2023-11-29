@@ -52,6 +52,7 @@ forking(33253419, () => {
       decimals: 8,
       underlying: PLANET,
       exchangeRate: parseUnits("1", 28),
+      comptroller: COMPTROLLER,
     });
   });
 
