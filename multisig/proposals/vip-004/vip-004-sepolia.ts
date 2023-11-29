@@ -3,7 +3,7 @@ import { makeProposal } from "../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-export const vip003 = () => {
+export const vip004 = () => {
   return makeProposal([
     {
       target: sepolia.XVS_VAULT_PROXY,

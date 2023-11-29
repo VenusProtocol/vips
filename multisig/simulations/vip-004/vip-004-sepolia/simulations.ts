@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { vip003 } from "../../../proposals/vip-003/vip-003-sepolia";
+import { vip004 } from "../../../proposals/vip-004/vip-004-sepolia";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
 import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
@@ -17,7 +17,7 @@ forking(4750277, () => {
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, sepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, sepolia.XVS_STORE);
-    await pretendExecutingVip(vip003());
+    await pretendExecutingVip(vip004());
   });
 
   describe("Post tx checks", () => {
