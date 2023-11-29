@@ -56,7 +56,7 @@ export const vip003 = () => {
     {
       target: sepolia.XVS_VAULT_PROXY,
       signature: "add(address,uint256,address,uint256,uint256)",
-      params: [sepolia.XVS, 100, sepolia.XVS, "61805555555555555", 604800],
+      params: [sepolia.XVS, 100, sepolia.XVS, "0", 604800],
     },
   ]);
 };
