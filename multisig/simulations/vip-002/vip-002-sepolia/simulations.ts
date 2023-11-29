@@ -7,6 +7,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip002 } from "../../../proposals/vip-002/vip-002-sepolia";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -19,6 +20,8 @@ const { sepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = sepolia.RESILIENT_ORACLE;
 const GUARDIAN = sepolia.GUARDIAN;
 const POOL_REGISTRY = sepolia.POOL_REGISTRY;
+
+const BLOCKS_PER_YEAR = 2_252_571; // assuming a block is mined every 14 seconds
 
 type VTokenSymbol =
   | "vWBTC_Core"
@@ -317,6 +320,8 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+
 forking(4783370, () => {
   let poolRegistry: Contract;
 
@@ -333,6 +338,13 @@ forking(4783370, () => {
   describe("Post-Execution state", () => {
     before(async () => {
       await pretendExecutingVip(vip002());
+
+      for (const model of interestRateModels) {
+        for (const symbol of model.vTokens) {
+          const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);
+          interestRateModelAddresses[symbol] = await vToken.interestRateModel();
+        }
+      }
     });
     describe("PoolRegistry state", () => {
       let registeredPools: { name: string; creator: string; comptroller: string }[];
@@ -511,62 +523,21 @@ forking(4783370, () => {
       checkComptroller(sepolia.COMPTROLLER_STABLECOINS, "Stablecoins");
       checkComptroller(sepolia.COMPTROLLER_CURVE, "Curve");
     });
-  });
 
-  describe("Interest rate models", () => {
-    const checkInterestRate = (
-      vTokenAddress: string,
-      symbol: string,
-      {
-        base,
-        multiplier,
-        jump,
-        kink,
-      }: {
-        base: string;
-        multiplier: string;
-        jump: string;
-        kink: string;
-      },
-    ) => {
-      describe(`${symbol} interest rate model`, () => {
-        const BLOCKS_PER_YEAR = 2_252_571;
-        let rateModel: Contract;
-
-        before(async () => {
-          const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokenAddress);
-          rateModel = await ethers.getContractAt(RATE_MODEL_ABI, await vToken.interestRateModel());
-        });
-
-        it(`should have base = ${base}`, async () => {
-          const basePerBlock = parseUnits(base, 18).div(BLOCKS_PER_YEAR);
-          expect(await rateModel.baseRatePerBlock()).to.equal(basePerBlock);
-        });
-
-        it(`should have jump = ${jump}`, async () => {
-          const jumpPerBlock = parseUnits(jump, 18).div(BLOCKS_PER_YEAR);
-          expect(await rateModel.jumpMultiplierPerBlock()).to.equal(jumpPerBlock);
-        });
-
-        it(`should have multiplier = ${multiplier}`, async () => {
-          const multiplierPerBlock = parseUnits(multiplier, 18).div(BLOCKS_PER_YEAR);
-          expect(await rateModel.multiplierPerBlock()).to.equal(multiplierPerBlock);
-        });
-
-        it(`should have kink = ${kink}`, async () => {
-          expect(await rateModel.kink()).to.equal(parseUnits(kink, 18));
-        });
-      });
-    };
-    describe("Interest rate models", () => {
+    it("Interest rates", async () => {
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {
-          checkInterestRate(vTokens[symbol], symbol, {
-            base: model.base,
-            multiplier: model.multiplier,
-            jump: model.jump,
-            kink: model.kink,
-          });
+          checkInterestRate(
+            interestRateModelAddresses[symbol],
+            symbol,
+            {
+              base: model.base,
+              multiplier: model.multiplier,
+              jump: model.jump,
+              kink: model.kink,
+            },
+            BLOCKS_PER_YEAR,
+          );
         }
       }
     });
