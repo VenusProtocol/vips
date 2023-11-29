@@ -4,9 +4,9 @@ import { ethers } from "hardhat";
 
 import RATE_MODEL_ABI from "../abi/il_rateModel.json";
 
-const BLOCKS_PER_YEAR = BigNumber.from(10512000);
+const DEFAULT_BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
-export async function checkInterestRate(
+export function checkInterestRate(
   rateModelAddress: string,
   symbol: string,
   {
@@ -20,24 +20,29 @@ export async function checkInterestRate(
     jump?: string;
     kink?: string;
   },
+  blocksPerYear: BigNumber = DEFAULT_BLOCKS_PER_YEAR,
 ) {
-  const rateModel: Contract = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
-
   describe(`${symbol} interest rate model`, () => {
+    let rateModel: Contract;
+
+    before(async () => {
+      rateModel = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
+    });
+
     it(`should have base = ${base}`, async () => {
-      const basePerBlock = utils.parseUnits(base, 18).div(BLOCKS_PER_YEAR);
+      const basePerBlock = utils.parseUnits(base, 18).div(blocksPerYear);
       expect(await rateModel.baseRatePerBlock()).to.equal(basePerBlock);
     });
 
     if (jump !== undefined) {
       it(`should have jump = ${jump}`, async () => {
-        const jumpPerBlock = utils.parseUnits(jump, 18).div(BLOCKS_PER_YEAR);
+        const jumpPerBlock = utils.parseUnits(jump, 18).div(blocksPerYear);
         expect(await rateModel.jumpMultiplierPerBlock()).to.equal(jumpPerBlock);
       });
     }
 
     it(`should have multiplier = ${multiplier}`, async () => {
-      const multiplierPerBlock = utils.parseUnits(multiplier, 18).div(BLOCKS_PER_YEAR);
+      const multiplierPerBlock = utils.parseUnits(multiplier, 18).div(blocksPerYear);
       expect(await rateModel.multiplierPerBlock()).to.equal(multiplierPerBlock);
     });
 
