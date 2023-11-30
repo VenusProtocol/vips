@@ -23,5 +23,6 @@ export const NETWORK_CONFIG = {
       [ProposalType.FAST_TRACK]: 100,
       [ProposalType.CRITICAL]: 34,
     },
+    XVS_VAULT_POOL_ID: 0,
   },
 };

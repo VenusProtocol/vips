@@ -67,5 +67,6 @@ export const NETWORK_ADDRESSES = {
     MOCK_crvUSD: "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6",
     XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
+    GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
 };
