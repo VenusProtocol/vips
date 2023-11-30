@@ -1,6 +1,4 @@
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
-import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
-import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -11,17 +9,11 @@ import { NETWORK_CONFIG } from "../../networkConfig";
 import XVSVault_ABI from "../abi/XVSVault.json";
 import ERC20_ABI from "../abi/erc20.json";
 
-let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
-let XVS = mainnet.Contracts.XVS;
-let XVS_VAULT_PROXY = mainnet.Contracts.XVSVaultProxy;
+const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+const XVS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS;
+const XVS_VAULT_PROXY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS_VAULT_PROXY;
 const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
 const POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
-
-if (process.env.FORKED_NETWORK === "bsctestnet") {
-  NORMAL_TIMELOCK = testnet.Contracts.Timelock;
-  XVS = testnet.Contracts.XVS;
-  XVS_VAULT_PROXY = testnet.Contracts.XVSVaultProxy;
-}
 
 export const checkXVSVault = () => {
   describe("generic XVS Vault checks", () => {

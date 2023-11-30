@@ -1,6 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import mainnet from "@venusprotocol/venus-protocol/networks/mainnet.json";
-import testnet from "@venusprotocol/venus-protocol/networks/testnet.json";
+import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
+import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -12,27 +12,27 @@ import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-let vETH_ADDRESS = mainnet.Contracts.vETH;
-let vUSDT_ADDRESS = mainnet.Contracts.vUSDT;
-let USDT = mainnet.Contracts.USDT;
-let ETH = mainnet.Contracts.ETH;
-let NORMAL_TIMELOCK = mainnet.Contracts.Timelock;
-let XVS = mainnet.Contracts.XVS;
-let COMPTROLLER = mainnet.Contracts.Unitroller;
-let LENS = mainnet.Contracts.ComptrollerLens;
+let vETH_ADDRESS = mainnet.contracts.vETH.address;
+let vUSDT_ADDRESS = mainnet.contracts.vUSDT.address;
+let USDT = mainnet.contracts.USDT.address;
+let ETH = mainnet.contracts.ETH.address;
+let NORMAL_TIMELOCK = mainnet.contracts.NormalTimelock.address;
+let XVS = mainnet.contracts.XVS.address;
+let COMPTROLLER = mainnet.contracts.Unitroller.address;
+let LENS = mainnet.contracts.ComptrollerLens.address;
 const ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
 const USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
 const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
 const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
-  vETH_ADDRESS = testnet.Contracts.vETH;
-  vUSDT_ADDRESS = testnet.Contracts.vUSDT;
-  USDT = testnet.Contracts.USDT;
-  ETH = testnet.Contracts.ETH;
-  NORMAL_TIMELOCK = testnet.Contracts.Timelock;
-  XVS = testnet.Contracts.XVS;
-  COMPTROLLER = testnet.Contracts.Unitroller;
+  vETH_ADDRESS = testnet.contracts.vETH.address;
+  vUSDT_ADDRESS = testnet.contracts.vUSDT.address;
+  USDT = testnet.contracts.USDT.address;
+  ETH = testnet.contracts.ETH.address;
+  NORMAL_TIMELOCK = testnet.contracts.NormalTimelock.address;
+  XVS = testnet.contracts.XVS.address;
+  COMPTROLLER = testnet.contracts.Unitroller.address;
 
   LENS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].COMPTROLLER_LENS;
 }
