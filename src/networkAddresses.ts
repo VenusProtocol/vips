@@ -1,3 +1,6 @@
+import bscmainnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
+import bsctestnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
+import sepolia_deployed_contracts from "@venusprotocol/venus-protocol/deployments/sepolia.json";
 import { ethers } from "ethers";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;
@@ -6,21 +9,25 @@ export const NETWORK_ADDRESSES = {
   bscmainnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
     GOVERNOR_PROXY: "0x2d56dC077072B53571b8252008C60e945108c75a",
-    NORMAL_TIMELOCK: "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396",
+    NORMAL_TIMELOCK: bscmainnet_deployed_contracts.contracts.NormalTimelock.address,
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
     GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
+    XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GOVERNOR_PROXY: "0x5573422a1a59385c247ec3a66b93b7c08ec2f8f2",
-    NORMAL_TIMELOCK: "0xce10739590001705F7FF231611ba4A48B2820327",
+    NORMAL_TIMELOCK: bsctestnet_deployed_contracts.contracts.NormalTimelock.address,
     ETH_CHAINLINK_FEED: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
     USDT_CHAINLINK_FEED: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
     CHAINLINK_ORACLE: "0xCeA29f1266e880A1482c06eD656cD08C148BaA32",
     COMPTROLLER_LENS: "0x350d56985A269C148648207E4Cea9f87656E762a",
     GENERIC_TEST_USER_ACCOUNT: "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa",
+    XVS_VAULT_PROXY: bsctestnet_deployed_contracts.contracts.XVSVaultProxy.address,
+    XVS: bsctestnet_deployed_contracts.contracts.XVS.address,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
@@ -45,11 +52,11 @@ export const NETWORK_ADDRESSES = {
     VWETH: "0x195D27b4cAfcb543C9104583FA37743ad5E4cEe5",
     VUSDT: "0x2c3Cc8EED38b4d323ce97DB11f98737F3F7421A1",
     VUSDC: "0x6f1089e90C6a14397C20348eE704d596819DFEd4",
-    VTREASURY: "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8",
+    VTREASURY: sepolia_deployed_contracts.contracts.VTreasuryV8.address,
     REDSTONE_ORACLE: "0x4e6269Ef406B4CEE6e67BA5B5197c2FfD15099AE",
     MOCK_CRV: "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3",
     MOCK_crvUSD: "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6",
-    XVS_VAULT_PROXY: "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6",
-    XVS_STORE: "0x4be90041D1e082EfE3613099aA3b987D9045d718",
+    XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
+    XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
   },
 };
