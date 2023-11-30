@@ -1,5 +1,21 @@
 [
-  { "inputs": [], "payable": false, "stateMutability": "nonpayable", "type": "constructor" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "underlying_", "type": "address" },
+      { "internalType": "contract ComptrollerInterface", "name": "comptroller_", "type": "address" },
+      { "internalType": "contract InterestRateModel", "name": "interestRateModel_", "type": "address" },
+      { "internalType": "uint256", "name": "initialExchangeRateMantissa_", "type": "uint256" },
+      { "internalType": "string", "name": "name_", "type": "string" },
+      { "internalType": "string", "name": "symbol_", "type": "string" },
+      { "internalType": "uint8", "name": "decimals_", "type": "uint8" },
+      { "internalType": "address payable", "name": "admin_", "type": "address" },
+      { "internalType": "address", "name": "implementation_", "type": "address" },
+      { "internalType": "bytes", "name": "becomeImplementationData", "type": "bytes" }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -67,6 +83,17 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": false, "internalType": "address", "name": "payer", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "receiver", "type": "address" },
+      { "indexed": false, "internalType": "uint256", "name": "mintAmount", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "mintTokens", "type": "uint256" }
+    ],
+    "name": "MintBehalf",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": false, "internalType": "address", "name": "oldAdmin", "type": "address" },
       { "indexed": false, "internalType": "address", "name": "newAdmin", "type": "address" }
     ],
@@ -85,6 +112,15 @@
       { "indexed": false, "internalType": "contract ComptrollerInterface", "name": "newComptroller", "type": "address" }
     ],
     "name": "NewComptroller",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "oldImplementation", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newImplementation", "type": "address" }
+    ],
+    "name": "NewImplementation",
     "type": "event"
   },
   {
@@ -186,6 +222,7 @@
     "name": "Transfer",
     "type": "event"
   },
+  { "payable": true, "stateMutability": "payable", "type": "fallback" },
   {
     "constant": false,
     "inputs": [],
@@ -206,15 +243,6 @@
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "bytes", "name": "data", "type": "bytes" }],
-    "name": "_becomeImplementation",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [{ "internalType": "uint256", "name": "reduceAmount", "type": "uint256" }],
     "name": "_reduceReserves",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -224,18 +252,22 @@
   },
   {
     "constant": false,
-    "inputs": [],
-    "name": "_resignImplementation",
-    "outputs": [],
+    "inputs": [{ "internalType": "contract ComptrollerInterface", "name": "newComptroller", "type": "address" }],
+    "name": "_setComptroller",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "constant": false,
-    "inputs": [{ "internalType": "contract ComptrollerInterface", "name": "newComptroller", "type": "address" }],
-    "name": "_setComptroller",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "inputs": [
+      { "internalType": "address", "name": "implementation_", "type": "address" },
+      { "internalType": "bool", "name": "allowResign", "type": "bool" },
+      { "internalType": "bytes", "name": "becomeImplementationData", "type": "bytes" }
+    ],
+    "name": "_setImplementation",
+    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -401,6 +433,24 @@
   },
   {
     "constant": false,
+    "inputs": [{ "internalType": "bytes", "name": "data", "type": "bytes" }],
+    "name": "delegateToImplementation",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "internalType": "bytes", "name": "data", "type": "bytes" }],
+    "name": "delegateToViewImplementation",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
     "inputs": [],
     "name": "exchangeRateCurrent",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -450,39 +500,6 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      { "internalType": "address", "name": "underlying_", "type": "address" },
-      { "internalType": "contract ComptrollerInterface", "name": "comptroller_", "type": "address" },
-      { "internalType": "contract InterestRateModel", "name": "interestRateModel_", "type": "address" },
-      { "internalType": "uint256", "name": "initialExchangeRateMantissa_", "type": "uint256" },
-      { "internalType": "string", "name": "name_", "type": "string" },
-      { "internalType": "string", "name": "symbol_", "type": "string" },
-      { "internalType": "uint8", "name": "decimals_", "type": "uint8" }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      { "internalType": "contract ComptrollerInterface", "name": "comptroller_", "type": "address" },
-      { "internalType": "contract InterestRateModel", "name": "interestRateModel_", "type": "address" },
-      { "internalType": "uint256", "name": "initialExchangeRateMantissa_", "type": "uint256" },
-      { "internalType": "string", "name": "name_", "type": "string" },
-      { "internalType": "string", "name": "symbol_", "type": "string" },
-      { "internalType": "uint8", "name": "decimals_", "type": "uint8" }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "constant": true,
     "inputs": [],
     "name": "interestRateModel",
@@ -517,6 +534,18 @@
     "constant": false,
     "inputs": [{ "internalType": "uint256", "name": "mintAmount", "type": "uint256" }],
     "name": "mint",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      { "internalType": "address", "name": "receiver", "type": "address" },
+      { "internalType": "uint256", "name": "mintAmount", "type": "uint256" }
+    ],
+    "name": "mintBehalf",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "payable": false,
     "stateMutability": "nonpayable",

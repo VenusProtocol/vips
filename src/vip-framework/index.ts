@@ -12,8 +12,10 @@ import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
+const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+
 const VOTING_PERIOD = 28800;
-let DEFAULT_SUPPORTER_ADDRESS: string;
+
 export const {
   DEFAULT_PROPOSER_ADDRESS,
   GOVERNOR_PROXY,

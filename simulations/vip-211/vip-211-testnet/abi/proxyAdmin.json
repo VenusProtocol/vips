@@ -1,5 +1,16 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "initialOwner",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -19,56 +30,62 @@
     "type": "event"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "tokenAddress",
+        "internalType": "contract TransparentUpgradeableProxy",
+        "name": "proxy",
         "type": "address"
       },
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "withdrawAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
         "internalType": "address",
-        "name": "withdrawAddress",
+        "name": "newAdmin",
         "type": "address"
       }
     ],
-    "name": "WithdrawTreasuryBEP20",
-    "type": "event"
+    "name": "changeProxyAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "withdrawAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "withdrawAddress",
+        "internalType": "contract TransparentUpgradeableProxy",
+        "name": "proxy",
         "type": "address"
       }
     ],
-    "name": "WithdrawTreasuryBNB",
-    "type": "event"
+    "name": "getProxyAdmin",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "payable": true,
-    "stateMutability": "payable",
-    "type": "fallback"
+    "inputs": [
+      {
+        "internalType": "contract TransparentUpgradeableProxy",
+        "name": "proxy",
+        "type": "address"
+      }
+    ],
+    "name": "getProxyImplementation",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -78,21 +95,17 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -102,52 +115,47 @@
     ],
     "name": "transferOwnership",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
-        "internalType": "address",
-        "name": "tokenAddress",
+        "internalType": "contract TransparentUpgradeableProxy",
+        "name": "proxy",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "withdrawAmount",
-        "type": "uint256"
-      },
-      {
         "internalType": "address",
-        "name": "withdrawAddress",
+        "name": "implementation",
         "type": "address"
       }
     ],
-    "name": "withdrawTreasuryBEP20",
+    "name": "upgrade",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "withdrawAmount",
-        "type": "uint256"
+        "internalType": "contract TransparentUpgradeableProxy",
+        "name": "proxy",
+        "type": "address"
       },
       {
-        "internalType": "address payable",
-        "name": "withdrawAddress",
+        "internalType": "address",
+        "name": "implementation",
         "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
       }
     ],
-    "name": "withdrawTreasuryBNB",
+    "name": "upgradeAndCall",
     "outputs": [],
-    "payable": true,
     "stateMutability": "payable",
     "type": "function"
   }
