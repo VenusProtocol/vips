@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumberish } from "ethers";
+import { BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import VTOKEN_ABI from "../abi/il_vToken.json";
@@ -12,12 +12,14 @@ export async function checkVToken(
     decimals,
     underlying,
     exchangeRate,
+    comptroller,
   }: {
     name: string;
     symbol: string;
     decimals: number;
     underlying: string;
     exchangeRate: BigNumberish;
+    comptroller: string;
   },
 ) {
   describe(symbol, () => {
@@ -48,7 +50,7 @@ export async function checkVToken(
     });
 
     it("should have the correct Comptroller", async () => {
-      expect(await vToken.exchangeRateStored()).to.equal(exchangeRate);
+      expect(await vToken.comptroller()).to.equal(comptroller);
     });
   });
 }

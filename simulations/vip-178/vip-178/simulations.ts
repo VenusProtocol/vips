@@ -50,6 +50,7 @@ forking(32162545, () => {
       decimals: 8,
       underlying: agEUR,
       exchangeRate: parseUnits("1", 28),
+      comptroller: STABLECOIN_COMPTROLLER,
     });
   });
 
