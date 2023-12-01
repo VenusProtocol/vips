@@ -12,18 +12,32 @@ const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const vip212 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-212 Payments Issuance for audits",
-    description: `
-    If passed this VIP will perform the following actions:
-        - Transfer 19,000 USDT to Certik for the retainer program.
-        - Transfer 36,000 USDT to Binance oracle.
-        - Refund 15,000 USDT to community wallet BEP20 address.
+    title: "VIP-212 Payments Issuance for audits and other expenses",
+    description: `#### Description
 
-    #### Details
-    Certik - retainer program
-        - Auditor: Certik ([https://certik.com](https://certik.com/))
-        - Concept: Retainer program - monthly payment of December 2023. Scheduled audits by Certik in December: XVS bridge and Prime upgrade
-        - Cost: 19,000 USDT, to be sent to the BEP20 address 0x4cf605b238e9c3c72d0faed64d12426e4a54ee12`,
+If passed this VIP will perform the following actions:
+
+- Transfer 19,000 USDT to Certik for the retainer program
+- Transfer 15,000 USDT to the Community wallet (refund for the ProBit Listing)
+- Transfer 36,000 USDT to Binance Oracle
+
+#### Details
+
+Certik - retainer program
+
+- Auditor: Certik ([https://certik.com](https://certik.com/))
+- Concept: Retainer program - monthly payment of December 2023. Scheduled audits by Certik in December: XVS bridge and Prime upgrade
+- Cost: 19,000 USDT, to be sent to the BEP20 address 0x4cf605b238e9c3c72d0faed64d12426e4a54ee12
+
+ProBit Listing
+
+- Concept: XVS Listing and marketing fees in [Probit.com](https://www.probit.com/)
+- Cost: 15,000 USDT, to be refunded to the Community wallet. BEP20 address 0xc444949e0054A23c44Fc45789738bdF64aed2391
+
+Binance Oracle
+
+- Concept: Integration, customization and Development Fees
+- Cost: 36,000 USDT (pending official invoice), to be transferred to the BEP20 address 0x9c492e6c087b50f9191e671b6781be81579942ab`,
 
     forDescription: "I agree that Venus Protocol should proceed with these payments",
     againstDescription: "I do not think that Venus Protocol should proceed with these payments",
