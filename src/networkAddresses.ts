@@ -69,4 +69,8 @@ export const NETWORK_ADDRESSES = {
     XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
+  opbnbtestnet: {
+    NORMAL_TIMELOCK: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
+    VTREASURY: "0x3370915301E8a6A6baAe6f461af703e2498409F3",
+  },
 };
