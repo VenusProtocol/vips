@@ -6,6 +6,7 @@ import { expect } from "chai";
 import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "./networkAddresses";
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
 import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
@@ -13,10 +14,12 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMICHANNEL_SENDER = "0x972166BdE240c71828d1e8c39a0fA8F3Ed6c8d38";
+const { bsctestnet } = NETWORK_ADDRESSES;
+
+const BSCTESTNET_OMICHANNEL_SENDER = bsctestnet.OMNICHAIN_PROPOSAL_SENDER;
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
-const networkChainIds = {
+export const networkChainIds = {
   ethereum: 101,
   sepolia: 10161,
   arbitrum_goerli: 10143,
@@ -102,8 +105,10 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
     provider,
   );
   let fee;
-  if (process.env.FORK_TESTNET === "true" && process.env.NETWORK === "bsctestnet") {
-    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+  if (process.env.FORK === "true" && process.env.FORKED_NETWORK === "bsctestnet") {
+    fee = (
+      (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee / 1e18
+    ).toString();
   } else {
     fee = ethers.BigNumber.from("1");
   }
@@ -149,7 +154,9 @@ export const makeProposalV2 = async (
       );
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
-      proposal.targets.push(process.env.FORK_TESTNET ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER);
+      proposal.targets.push(
+        process.env.FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
+      );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
 
       proposal.values.push(Math.ceil(value * 1.1));
