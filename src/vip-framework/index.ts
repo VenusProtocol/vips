@@ -16,7 +16,9 @@ const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
   NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK];
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
+  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
+  : 0;
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
