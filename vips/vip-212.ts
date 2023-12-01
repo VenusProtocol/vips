@@ -6,7 +6,7 @@ import { makeProposal } from "../src/utils";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const CERTIK_RECEIVER = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
-const BEP20_RECEIVER = "0x9c492e6c087b50f9191e671b6781be81579942ab";
+const BINANCE_ORACLE_RECEIVER = "0x9c492e6c087b50f9191e671b6781be81579942ab";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const vip212 = () => {
@@ -44,7 +44,7 @@ export const vip212 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("36000", 18), BEP20_RECEIVER],
+        params: [USDT, parseUnits("36000", 18), BINANCE_ORACLE_RECEIVER],
       },
     ],
     meta,
