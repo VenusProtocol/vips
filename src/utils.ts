@@ -106,9 +106,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   );
   let fee;
   if (process.env.FORK === "true" && process.env.FORKED_NETWORK === "bsctestnet") {
-    fee = (
-      (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee / 1e18
-    ).toString();
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
   } else {
     fee = ethers.BigNumber.from("1");
   }
@@ -158,8 +156,7 @@ export const makeProposalV2 = async (
         process.env.FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
-
-      proposal.values.push(Math.ceil(value * 1.1));
+      proposal.values.push(value);
       proposal.signatures.push("execute(uint16,bytes,bytes)");
       proposal.params.push([key, remoteParam, remoteAdapterParam]);
     } else {
