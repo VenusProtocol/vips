@@ -4,15 +4,17 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { vip005 } from "../../../proposals/vip-005/vip-005-opbnbtestnet";
+import { vip000 } from "../../../proposals/vip-000/vip-000-opbnbtestnet";
 import TREASURY_ABI from "./abi/treasury.json";
+
+const VTREASURY = "0x3370915301E8a6A6baAe6f461af703e2498409F3";
 
 forking(14541763, () => {
   let treasury: Contract;
 
   before(async () => {
-    treasury = await ethers.getContractAt(TREASURY_ABI, NETWORK_ADDRESSES.opbnbtestnet.VTREASURY);
-    await pretendExecutingVip(vip005());
+    treasury = await ethers.getContractAt(TREASURY_ABI, VTREASURY);
+    await pretendExecutingVip(vip000());
   });
 
   describe("Post tx checks", () => {

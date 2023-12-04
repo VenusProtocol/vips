@@ -1,10 +1,11 @@
 import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
-export const vip005 = () => {
+const VTREASURY = "0x3370915301E8a6A6baAe6f461af703e2498409F3";
+export const vip000 = () => {
   return makeProposal([
     {
-      target: NETWORK_ADDRESSES.opbnbtestnet.VTREASURY,
+      target: VTREASURY,
       signature: "acceptOwnership()",
       params: [],
     },
