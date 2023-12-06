@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { vip005 } from "../../../proposals/vip-005/vip-000-sepolia";
+import { vip005 } from "../../../proposals/vip-005/vip-005-sepolia";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTDest.json";
 
 const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
