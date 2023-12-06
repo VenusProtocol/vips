@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vipConverter } from "../../../vips/vip-converter/vip-converter-testnet";
+import { vipConverter } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter-testnet";
 import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 import RISK_FUND_CONVERTER_ABI from "./abi/RiskFundConverter.json";
 import RISK_FUND_ABI from "./abi/RiskFundV2.json";
