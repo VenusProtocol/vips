@@ -62,22 +62,22 @@ export const vip006 = () => {
     },
     {
       target: TREASURY,
-      signature: "WithdrawTreasuryToken(address,uint256,address)",
+      signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, XVS_REWARD_AMOUNT, REWARD_DISTRIBUTOR_CORE_0],
     },
     {
       target: TREASURY,
-      signature: "WithdrawTreasuryToken(address,uint256,address)",
+      signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, XVS_REWARD_AMOUNT, REWARD_DISTRIBUTOR_CORE_1],
     },
     {
       target: TREASURY,
-      signature: "WithdrawTreasuryToken(address,uint256,address)",
+      signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, XVS_REWARD_AMOUNT, REWARD_DISTRIBUTOR_CORE_2],
     },
     {
       target: TREASURY,
-      signature: "WithdrawTreasuryToken(address,uint256,address)",
+      signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, XVS_REWARD_AMOUNT, REWARD_DISTRIBUTOR_CORE_3],
     },
     {
@@ -102,7 +102,7 @@ export const vip006 = () => {
     },
     {
       target: TREASURY,
-      signature: "WithdrawTreasuryToken(address,uint256,address)",
+      signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, XVS_REWARD_AMOUNT, XVS_STORE],
     },
     {

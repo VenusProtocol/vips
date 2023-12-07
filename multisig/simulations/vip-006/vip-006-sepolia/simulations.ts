@@ -1,5 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
@@ -21,13 +22,14 @@ const VUSDT_CORE = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
 const VWBTC_CORE = "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383";
 const VWETH_CORE = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 
-forking(4833170, () => {
+forking(4837900, () => {
   describe("Generic checks", async () => {
     before(async () => {
       await pretendExecutingVip(vip006());
     });
 
     checkRewardsDistributorPool(COMPTROLLER_CORE, 4);
+    checkXVSVault();
 
     const wbtcRewardsDistributorConfig: RewardsDistributorConfig = {
       pool: COMPTROLLER_CORE,
