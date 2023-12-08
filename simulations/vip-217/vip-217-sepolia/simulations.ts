@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents, initMainnetUser, setForkBlock } from "../../src/utils";
-import { testVipV2 } from "../../src/vip-framework";
-import { omnichain_example } from "../../vips/omnichain_example";
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
+import { expectEvents, initMainnetUser, setForkBlock } from "../../../src/utils";
+import { testVipV2 } from "../../../src/vip-framework";
+import { vip217Testnet } from "../../../vips/vip-217/vip-217-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
@@ -29,7 +29,7 @@ const DEFAULT_ADMIN_ROLE = "0x00000000000000000000000000000000000000000000000000
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK);
   });
 
-  testVipV2("omnichain_example configures bridge", await omnichain_example(), {
+  testVipV2("vip217Testnet configures bridge", await vip217Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
     },

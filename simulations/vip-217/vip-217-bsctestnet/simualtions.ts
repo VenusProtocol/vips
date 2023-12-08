@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents, networkChainIds } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { omnichain_example } from "../../vips/omnichain_example";
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
+import { expectEvents, networkChainIds } from "../../../src/utils";
+import { forking, testVip } from "../../../src/vip-framework";
+import { vip217Testnet } from "../../../vips/vip-217/vip-217-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -35,7 +35,7 @@ forking(35543710, async () => {
     });
   });
 
-  testVip("omnichain_example give permissions to timelock", await omnichain_example(), {
+  testVip("vip217Testnet give permissions to timelock", await vip217Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

@@ -1,13 +1,13 @@
-import { NETWORK_ADDRESSES } from "../src/networkAddresses";
-import { ProposalType } from "../src/types";
-import { makeProposalV2 } from "../src/utils";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { ProposalType } from "../../src/types";
+import { makeProposalV2 } from "../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 const sepoliaChainId = 10161;
 
-export const omnichain_example = () => {
+export const vip217Testnet = () => {
   const meta = {
     version: "v2",
     title: "vip215 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
