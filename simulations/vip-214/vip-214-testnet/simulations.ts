@@ -57,6 +57,7 @@ forking(35776436, () => {
 
   testVip("vip214Testnet", vip214(), {
     callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewPrime", "MintOnlyForPrimeHolder", "NewVAIBaseRate", "NewVAIMintCap"], [1, 1, 1, 1]);
     },
   });
 
