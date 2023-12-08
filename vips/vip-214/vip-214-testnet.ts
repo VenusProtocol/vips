@@ -8,6 +8,9 @@ const NEW_PRIME_IMPLEMENTATION = "0xFa32e28b54B489CB72cF4BF956600A0910CCDb81";
 const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x8B13b4c2c634731be34cbF1874dC0b36F86b9b48";
 const NEW_PLP_IMPLEMENTATION = "0x29406DD113B5E90f56Fa7E1E1Ca148DB8B4E6E7F";
 const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
+const ACM = "0x45f8a08f534f34a97187626e05d4b6648eeaa9aa";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
 export const vip214 = () => {
   const meta = {
@@ -42,6 +45,41 @@ export const vip214 = () => {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [PLP_PROXY, NEW_PLP_IMPLEMENTATION],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [VAI_CONTROLLER_PROXY, "toggleOnlyPrimeHolderMint()", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [VAI_CONTROLLER_PROXY, "setMintCap(uint256)", NORMAL_TIMELOCK],
+      },
+      {
+        target: VAI_CONTROLLER_PROXY,
+        signature: "_setPrimeToken(address)",
+        params: [PRIME_PROXY],
+      },
+      {
+        target: VAI_CONTROLLER_PROXY,
+        signature: "toggleOnlyPrimeHolderMint()",
+        params: [],
+      },
+      {
+        target: VAI_CONTROLLER_PROXY,
+        signature: "setBaseRate(uint256)",
+        params: ["70000000000000000"],
+      },
+      {
+        target: VAI_CONTROLLER_PROXY,
+        signature: "setMintCap(uint256)",
+        params: ["10000000000000000000000000"],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "_setVAIMintRate(uint256)",
+        params: ["1000000000000000000"],
       },
     ],
     meta,
