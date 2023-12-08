@@ -7,26 +7,29 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal } from "../types";
-import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
+import { getCalldatas, getPayload, initMainnetUser, setForkBlock } from "../utils";
+import ENDPOINT_ABI from "./abi/LzEndpoint.json";
+import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+const ENDPOINT = "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1";
+const OMNICHAIN_PROPOSAL_SENDER = "0xb601a67eb6a5f3f7cc8ce184a8ee38333a1f4a5e";
+const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xb0ab719aed3bc55196862337d18dc4e3ee142e30";
+const LZ_LIBRARY = "0x3acaaf60502791d199a5a5f0b173d78229ebfe32";
 
 const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
   NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  : 0;
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK];
 
 export const forking = (blockNumber: number, fn: () => void) => {
-  describe(`At block #${blockNumber}`, () => {
-    before(async () => {
-      await setForkBlock(blockNumber);
-    });
-    fn();
+  console.log(`At block #${blockNumber}`);
+  before(async () => {
+    await setForkBlock(blockNumber);
   });
+  fn();
 };
 
 export interface TestingOptions {
@@ -136,6 +139,55 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
+
+      if (options.callbackAfterExecution) {
+        await options.callbackAfterExecution(tx);
+      }
+    });
+  });
+};
+
+export const testVipV2 = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
+  let executor: Contract;
+  let payload: string;
+  let proposalId: number;
+  const provider = ethers.provider;
+
+  describe(`${description} execution`, () => {
+    before(async () => {
+      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
+      payload = getPayload(proposal);
+      proposalId = await executor.lastProposalReceived();
+      proposalId++;
+    });
+
+    it("should be queued succesfully", async () => {
+      const impersonatedLibrary = await initMainnetUser(LZ_LIBRARY, ethers.utils.parseEther("100"));
+      const impersonatedEndpoint = await initMainnetUser(ENDPOINT, ethers.utils.parseEther("100"));
+      const endpoint = new ethers.Contract(ENDPOINT, ENDPOINT_ABI, provider);
+      const srcAddress = OMNICHAIN_PROPOSAL_SENDER + OMNICHAIN_GOVERNANCE_EXECUTOR.slice(2);
+      const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(10102, srcAddress);
+
+      const tx = await executor
+        .connect(impersonatedEndpoint)
+        .lzReceive(
+          10102,
+          srcAddress,
+          inboundNonce.add(1),
+          ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
+        );
+      await tx.wait();
+    });
+
+    it("should be executed successfully", async () => {
+      const [, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
+        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+        payload,
+      );
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      const blockchainProposal = await executor.proposals(proposalId);
+      await time.increaseTo(blockchainProposal.eta.toNumber());
+      const tx = await executor.execute(proposalId);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
