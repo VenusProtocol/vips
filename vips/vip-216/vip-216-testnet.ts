@@ -27,7 +27,7 @@ export const vip216Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [DEST_CHAIN_ID, "0x636d84bEF01d88C9DC7fF3FFB1A0951cD8454f56"], // OPBNBTESTNET
+        params: [DEST_CHAIN_ID, "0x1be95611FC9A808F8794bc9164223b1Fcf49C8Bd"], // OPBNBTESTNET
       },
       {
         target: XVSBridgeAdmin_Proxy,

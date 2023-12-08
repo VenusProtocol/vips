@@ -19,7 +19,6 @@ import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
 const XVSProxyOFTSrc = "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3";
-const XVSBridgeAdmin_Proxy = "0x5D08D49A2e43aC4c72C60754d1550BA12e846d66";
 const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -27,7 +26,6 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 forking(35514503, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
-  let bridgeAdmin: ethers.Contract;
   let xvs: ethers.Contract;
   let xvsHolderSigner: SignerWithAddress;
   let receiver: SignerWithAddress;
@@ -36,7 +34,6 @@ forking(35514503, () => {
 
   beforeEach(async () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVSProxyOFTSrc_ABI, provider);
-    bridgeAdmin = new ethers.Contract(XVSBridgeAdmin_Proxy, XVSBridgeAdmin_ABI, provider);
     xvs = new ethers.Contract(XVS, XVS_ABI, provider);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
     [receiver] = await ethers.getSigners();
