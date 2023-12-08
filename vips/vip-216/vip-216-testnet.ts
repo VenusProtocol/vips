@@ -54,11 +54,6 @@ export const vip216Testnet = () => {
         signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
         params: [DEST_CHAIN_ID, "10000000000000000000"],
       },
-      {
-        target: XVSBridgeAdmin_Proxy,
-        signature: "setWhitelist(address,bool)",
-        params: [NORMAL_TIMELOCK, true],
-      },
     ],
     meta,
     ProposalType.REGULAR,

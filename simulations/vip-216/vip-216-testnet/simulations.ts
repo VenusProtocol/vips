@@ -23,7 +23,7 @@ const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(35514503, () => {
+forking(35718574, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
   let xvs: ethers.Contract;
@@ -53,10 +53,9 @@ forking(35514503, () => {
           "SetMaxSingleReceiveTransactionLimit",
           "SetMaxDailyReceiveLimit",
           "SetTrustedRemoteAddress",
-          "SetWhitelist",
           "Failure",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 0],
+        [1, 1, 1, 1, 1, 1, 0],
       );
     },
   });
@@ -88,7 +87,7 @@ forking(35514503, () => {
     });
 
     it("Should emit an event on successfull bridging of XVS", async () => {
-      const amount = parseUnits("1", 18);
+      const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
@@ -137,14 +136,13 @@ forking(35514503, () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("110");
-      const amount = ethers.utils.parseUnits("1");
-
+      const amount = parseUnits("0.9", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      for (let i = 0; i < 73; i++) {
+      for (let i = 0; i < 53; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
