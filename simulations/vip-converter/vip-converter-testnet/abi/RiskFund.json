@@ -1,38 +1,44 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "corePoolComptroller_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vbnb_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "nativeWrapped_",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "inputs": [],
-    "name": "InsufficientBalance",
+    "name": "ApproveFailed",
     "type": "error"
   },
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "comptroller",
-        "type": "address"
-      },
-      {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "loopsLimit",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "poolReserve",
+        "name": "requiredLoops",
         "type": "uint256"
       }
     ],
-    "name": "InsufficientPoolReserve",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidRiskFundConverter",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidShortfallAddress",
+    "name": "MaxLoopsLimitExceeded",
     "type": "error"
   },
   {
@@ -62,9 +68,29 @@
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "ZeroValueNotAllowed",
-    "type": "error"
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "AssetsReservesUpdated",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -96,6 +122,44 @@
       }
     ],
     "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldMaxLoopsLimit",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newmaxLoopsLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLoopsLimitUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldMinAmountToConvert",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newMinAmountToConvert",
+        "type": "uint256"
+      }
+    ],
+    "name": "MinAmountToConvertUpdated",
     "type": "event"
   },
   {
@@ -161,23 +225,17 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "comptroller",
+        "name": "oldPancakeSwapRouter",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "asset",
+        "name": "newPancakeSwapRouter",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
       }
     ],
-    "name": "PoolAssetsDecreased",
+    "name": "PancakeSwapRouterUpdated",
     "type": "event"
   },
   {
@@ -186,42 +244,17 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "comptroller",
+        "name": "oldPoolRegistry",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "asset",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "PoolAssetsIncreased",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "oldRiskFundConverter",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newRiskFundConverter",
+        "name": "newPoolRegistry",
         "type": "address"
       }
     ],
-    "name": "RiskFundConverterUpdated",
+    "name": "PoolRegistryUpdated",
     "type": "event"
   },
   {
@@ -241,6 +274,31 @@
       }
     ],
     "name": "ShortfallContractUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "markets",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256[]",
+        "name": "amountsOutMin",
+        "type": "uint256[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "SwappedPoolsAssets",
     "type": "event"
   },
   {
@@ -289,6 +347,45 @@
   },
   {
     "inputs": [],
+    "name": "CORE_POOL_COMPTROLLER",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "NATIVE_WRAPPED",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "VBNB",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "acceptOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -308,6 +405,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "assetsReserves",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "convertibleBaseAsset",
     "outputs": [
@@ -315,6 +431,30 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "comptroller",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getPoolAssetReserve",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -340,8 +480,54 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pancakeSwapRouter_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minAmountToConvert_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "convertibleBaseAsset_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "loopsLimit_",
+        "type": "uint256"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "maxLoopsLimit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minAmountToConvert",
     "outputs": [
       {
         "internalType": "uint256",
@@ -367,6 +553,19 @@
   },
   {
     "inputs": [],
+    "name": "pancakeSwapRouter",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "pendingOwner",
     "outputs": [
       {
@@ -379,24 +578,13 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "poolAssetsFunds",
+    "inputs": [],
+    "name": "poolRegistry",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "address",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -407,19 +595,6 @@
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "riskFundConverter",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -439,7 +614,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "convertibleBaseAsset_",
+        "name": "_convertibleBaseAsset",
         "type": "address"
       }
     ],
@@ -451,12 +626,51 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxLoopsLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "minAmountToConvert_",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMinAmountToConvert",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
-        "name": "riskFundConverter_",
+        "name": "pancakeSwapRouter_",
         "type": "address"
       }
     ],
-    "name": "setRiskFundConverter",
+    "name": "setPancakeSwapRouter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "poolRegistry_",
+        "type": "address"
+      }
+    ],
+    "name": "setPoolRegistry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -490,19 +704,48 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "tokenAddress",
-        "type": "address"
+        "internalType": "address[]",
+        "name": "markets",
+        "type": "address[]"
       },
       {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
+        "internalType": "uint256[]",
+        "name": "amountsOutMin",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "address[][]",
+        "name": "paths",
+        "type": "address[][]"
       },
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "deadline",
         "type": "uint256"
+      }
+    ],
+    "name": "swapPoolsAssets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
       }
     ],
     "name": "sweepToken",
@@ -558,14 +801,9 @@
         "internalType": "address",
         "name": "asset",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
       }
     ],
-    "name": "updatePoolState",
+    "name": "updateAssetsState",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

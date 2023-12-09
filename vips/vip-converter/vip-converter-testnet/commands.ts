@@ -1,13 +1,17 @@
-import { Assets, BaseAssets } from "./Assets";
-
-const converters: string[] = [
-  "0x62EC4E011983F9b8Ca943BA12DfE2a2b1E1dd865", // RiskFundConverter
-  "0x0F58902b3b2B4Ff55477f3f98b3AA2aeA76de78F", // USDTPrimeConverter
-  "0x7D8FceD094225688EDcB4eF6D8F5710EF07A1837", // USDCPrimeConverter
-  "0xc0f7157E5f0703Ab76F6DeD3B88d72F4Fb0ABC32", // BTCBPrimeConverter
-  "0x55488A4740170b71c058a406913f5C0c0d26Dc53", // ETHPrimeConverter
-  "0x1Dff591c2A40870f618A0B1f90547DB3b43BEC2a", // XVSVaultConverter
-];
+import {
+  ACM,
+  Assets,
+  BTCB_PRIME_CONVERTER,
+  BaseAssets,
+  CONVERTER_NETWORK,
+  ETH_PRIME_CONVERTER,
+  NORMAL_TIMELOCK,
+  RISK_FUND_CONVERTER,
+  USDC_PRIME_CONVERTER,
+  USDT_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
+  converters,
+} from "./Addresses";
 
 type IncentiveAndAccessibility = [number, number];
 interface ConversionConfig {
@@ -16,22 +20,41 @@ interface ConversionConfig {
   params: [string, string, IncentiveAndAccessibility];
 }
 
-function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
-  const validTokenIns = [
-    "0x16227D60f7a0e586C66B005219dfc887D13C9531",
-    "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4",
-    "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7",
-    "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff",
-  ];
+interface AcceptOwnership {
+  target: string;
+  signature: string;
+  params: [];
+}
 
-  if (validTokenIns.includes(tokenIn) && tokenOut === "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c") {
+interface AddTokenConverter {
+  target: string;
+  signature: string;
+  params: [string];
+}
+
+interface AddConverterNetwork {
+  target: string;
+  signature: string;
+  params: [string];
+}
+
+interface CallPermissionConverters {
+  target: string;
+  signature: string;
+  params: [string, string, string];
+}
+
+function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
+  const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
+
+  if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
     return [0, 2];
   } else {
     return [0, 1];
   }
 }
 
-function generateConversionConfigCommandsArray(
+export function generateConversionConfigCommandsArray(
   tokenOutArray: string[],
   tokenIn: string,
   Converter: string,
@@ -55,12 +78,129 @@ function generateConversionConfigCommandsArray(
   return conversionConfigCommandsArray;
 }
 
-export const conversionConfigArrayForAllConverters: ConversionConfig[] = [];
+function generateAcceptOwnershipCommands(ConvertersArray: string[]): AcceptOwnership[] {
+  const acceptOwnershipCommandsArray: AcceptOwnership[] = [];
 
-for (let i = 0; i < converters.length; i++) {
-  const result = generateConversionConfigCommandsArray(Assets, BaseAssets[i], converters[i]);
-  console.log(result);
-  conversionConfigArrayForAllConverters.push(...result);
+  for (const converter of ConvertersArray) {
+    const config: AcceptOwnership = {
+      target: converter,
+      signature: "acceptOwnership()",
+      params: [],
+    };
+
+    acceptOwnershipCommandsArray.push(config);
+  }
+
+  return acceptOwnershipCommandsArray;
 }
 
-console.log(conversionConfigArrayForAllConverters);
+function generateAddTokenConverterCommands(ConvertersArray: string[]): AddTokenConverter[] {
+  const addTokenConverterCommandsArray: AddTokenConverter[] = [];
+
+  for (const converter of ConvertersArray) {
+    const config: AddTokenConverter = {
+      target: CONVERTER_NETWORK,
+      signature: "addTokenConverter(address)",
+      params: [converter],
+    };
+
+    addTokenConverterCommandsArray.push(config);
+  }
+  return addTokenConverterCommandsArray;
+}
+
+function generateAddConverterNetworkCommands(ConvertersArray: string[]): AddConverterNetwork[] {
+  const addConverterNetworkCommandsArray: AddConverterNetwork[] = [];
+
+  for (const converter of ConvertersArray) {
+    const config: AddConverterNetwork = {
+      target: converter,
+      signature: "setConverterNetwork(address)",
+      params: [CONVERTER_NETWORK],
+    };
+
+    addConverterNetworkCommandsArray.push(config);
+  }
+  return addConverterNetworkCommandsArray;
+}
+
+function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissionConverters[] {
+  const callPermissionCommandsArray: CallPermissionConverters[] = [];
+
+  for (const converter of ConvertersArray) {
+    const config1: CallPermissionConverters = {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [converter, "setConversionConfig(address,address,ConversionConfig)", NORMAL_TIMELOCK],
+    };
+    const config2: CallPermissionConverters = {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [converter, "pauseConversion()", NORMAL_TIMELOCK],
+    };
+    const config3: CallPermissionConverters = {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [converter, "resumeConversion()", NORMAL_TIMELOCK],
+    };
+    const config4: CallPermissionConverters = {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [converter, "setMinAmountToConvert(uint256)", NORMAL_TIMELOCK],
+    };
+
+    callPermissionCommandsArray.push(config1);
+    callPermissionCommandsArray.push(config2);
+    callPermissionCommandsArray.push(config3);
+    callPermissionCommandsArray.push(config4);
+  }
+
+  return callPermissionCommandsArray;
+}
+
+export const conversionConfigCommandsRiskFundConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[0],
+  RISK_FUND_CONVERTER,
+);
+
+export const conversionConfigCommandsUSDTPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[1],
+  USDT_PRIME_CONVERTER,
+);
+
+export const conversionConfigCommandsUSDCPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[2],
+  USDC_PRIME_CONVERTER,
+);
+
+export const conversionConfigCommandsBTCBPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[3],
+  BTCB_PRIME_CONVERTER,
+);
+
+export const conversionConfigCommandsETHPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[4],
+  ETH_PRIME_CONVERTER,
+);
+
+export const conversionConfigCommandsXVSVaultConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
+  Assets,
+  BaseAssets[5],
+  XVS_VAULT_CONVERTER,
+);
+
+export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
+
+export const addTokenConverterCommandsAllConverters: AddTokenConverter[] =
+  generateAddTokenConverterCommands(converters);
+
+export const addConverterNetworkCommandsAllConverters: AddConverterNetwork[] =
+  generateAddConverterNetworkCommands(converters);
+
+export const callPermissionCommandsAllConverter: CallPermissionConverters[] =
+  generateCallPermissionCommands(converters);

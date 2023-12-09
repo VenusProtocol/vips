@@ -152,9 +152,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "percentage",
-        "type": "uint8"
+        "type": "uint16"
       },
       {
         "indexed": false,
@@ -177,9 +177,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "percentage",
-        "type": "uint8"
+        "type": "uint16"
       },
       {
         "indexed": false,
@@ -202,15 +202,15 @@
       },
       {
         "indexed": false,
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "oldPercentage",
-        "type": "uint8"
+        "type": "uint16"
       },
       {
         "indexed": false,
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "newPercentage",
-        "type": "uint8"
+        "type": "uint16"
       },
       {
         "indexed": false,
@@ -385,9 +385,9 @@
     "name": "MAX_PERCENT",
     "outputs": [
       {
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "",
-        "type": "uint8"
+        "type": "uint16"
       }
     ],
     "stateMutability": "view",
@@ -436,9 +436,9 @@
             "type": "uint8"
           },
           {
-            "internalType": "uint8",
+            "internalType": "uint16",
             "name": "percentage",
-            "type": "uint8"
+            "type": "uint16"
           },
           {
             "internalType": "address",
@@ -501,9 +501,9 @@
         "type": "uint8"
       },
       {
-        "internalType": "uint8",
+        "internalType": "uint16",
         "name": "percentage",
-        "type": "uint8"
+        "type": "uint16"
       },
       {
         "internalType": "address",
