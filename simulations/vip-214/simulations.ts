@@ -11,7 +11,7 @@ import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-const COMMUNITY_AMOUNT = parseUnits("275000", 18);
+const COMMUNITY_AMOUNT = parseUnits("300000", 18);
 
 forking(34241740, () => {
   let usdt: ethers.Contract;
