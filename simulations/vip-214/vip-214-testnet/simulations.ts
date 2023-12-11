@@ -9,6 +9,7 @@ import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_ABI from "./abi/prime.json";
+import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/primeLiquidityProvider.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
@@ -27,6 +28,8 @@ const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x8B13b4c2c634731be34cbF1874dC0b36F86
 const NEW_PLP_IMPLEMENTATION = "0x29406DD113B5E90f56Fa7E1E1Ca148DB8B4E6E7F";
 const OLD_PLP_IMPLEMENTATION = "0x98d73B2E246a3506686CBA62d2118D2127dfD20E";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+const USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
 
 forking(35776436, () => {
   const provider = ethers.provider;
@@ -36,12 +39,15 @@ forking(35776436, () => {
   let defaultProxyAdmin: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
   let comptroller: ethers.Contract;
+  let user: ethers.Signer;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(USER);
     const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
-
-    prime = new ethers.Contract(PRIME_PROXY, PRIME_ABI, timelock);
+    
+    user = await ethers.getSigner(USER);
+    prime = new ethers.Contract(PRIME_PROXY, OLD_PRIME_ABI, timelock);
     vaiController = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, timelock);
     plp = new ethers.Contract(PLP_PROXY, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
@@ -60,6 +66,15 @@ forking(35776436, () => {
       implementation = await vaiControllerProxy.vaiControllerImplementation();
       expect(implementation).to.equal(OLD_VAI_CONTROLLER_IMPLEMENTATION);
     });
+
+    it("apr", async () => {
+      const apr = await prime.calculateAPR(
+        vBTC, USER
+      );
+
+      expect(apr[0]).to.be.equal(998)
+      expect(apr[1]).to.be.equal(1566)
+    })
 
     describe("generic tests", async () => {
       checkCorePoolComptroller();
@@ -98,6 +113,15 @@ forking(35776436, () => {
       const mintOnlyForPrimeHolder = await vaiController.mintEnabledOnlyForPrimeHolder();
       expect(mintOnlyForPrimeHolder).to.equal(true);
     });
+
+    it("apr", async () => {
+      const apr = await prime.calculateAPR(
+        vBTC, USER
+      );
+
+      expect(apr[0]).to.be.equal(998)
+      expect(apr[1]).to.be.equal(1566)
+    })
 
     it("rates", async () => {
       const baseRate = await vaiController.baseRateMantissa();
