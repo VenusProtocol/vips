@@ -42,10 +42,10 @@ const markets: MarketInformation[] = [
   },
 ];
 
-export const vip214 = () => {
+export const vip215 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-214 ",
+    title: "VIP-215 ",
     description: ``,
 
     forDescription: "I agree that Venus Protocol should proceed with this proposal",

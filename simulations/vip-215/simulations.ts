@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { MarketInformation, vip214 } from "../../vips/vip-214";
+import { MarketInformation, vip215 } from "../../vips/vip-215";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
@@ -83,7 +83,7 @@ forking(34258500, () => {
     });
   });
 
-  testVip("VIP-214 Restore bad debt", vip214(), {
+  testVip("VIP-214 Restore bad debt", vip215(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
