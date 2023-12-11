@@ -5,16 +5,15 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import PRIME_ABI from "./abi/prime.json";
 import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/primeLiquidityProvider.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 
 const PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -39,14 +38,12 @@ forking(35776436, () => {
   let defaultProxyAdmin: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
   let comptroller: ethers.Contract;
-  let user: ethers.Signer;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
     await impersonateAccount(USER);
     const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
-    
-    user = await ethers.getSigner(USER);
+
     prime = new ethers.Contract(PRIME_PROXY, OLD_PRIME_ABI, timelock);
     vaiController = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, timelock);
     plp = new ethers.Contract(PLP_PROXY, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
@@ -68,13 +65,11 @@ forking(35776436, () => {
     });
 
     it("apr", async () => {
-      const apr = await prime.calculateAPR(
-        vBTC, USER
-      );
+      const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(998)
-      expect(apr[1]).to.be.equal(1566)
-    })
+      expect(apr[0]).to.be.equal(998);
+      expect(apr[1]).to.be.equal(1566);
+    });
 
     describe("generic tests", async () => {
       checkCorePoolComptroller();
@@ -115,13 +110,11 @@ forking(35776436, () => {
     });
 
     it("apr", async () => {
-      const apr = await prime.calculateAPR(
-        vBTC, USER
-      );
+      const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(998)
-      expect(apr[1]).to.be.equal(1566)
-    })
+      expect(apr[0]).to.be.equal(998);
+      expect(apr[1]).to.be.equal(1566);
+    });
 
     it("rates", async () => {
       const baseRate = await vaiController.baseRateMantissa();
