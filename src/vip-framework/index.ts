@@ -58,7 +58,6 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 export const pretendExecutingVip = async (proposal: Proposal) => {
   const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
-    console.log(`Executing ${proposal.signatures[i]}`);
     await executeCommand(impersonatedTimelock, proposal, i);
   }
 };
