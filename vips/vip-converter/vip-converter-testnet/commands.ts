@@ -1,24 +1,18 @@
 import {
   ACM,
-  Assets,
-  BTCB_PRIME_CONVERTER,
+  BTCBPrimeConverterTokenOuts,
   BaseAssets,
   CONVERTER_NETWORK,
-  ETH_PRIME_CONVERTER,
+  ETHPrimeConverterTokenOuts,
   NORMAL_TIMELOCK,
-  RISK_FUND_CONVERTER,
-  USDC_PRIME_CONVERTER,
-  USDT_PRIME_CONVERTER,
-  XVS_VAULT_CONVERTER,
+  RiskFundConverterTokenOuts,
+  USDCPrimeConverterTokenOuts,
+  USDTPrimeConverterTokenOuts,
+  XVSVaultConverterTokenOuts,
   converters,
 } from "./Addresses";
 
 type IncentiveAndAccessibility = [number, number];
-interface ConversionConfig {
-  target: string;
-  signature: string;
-  params: [string, string, IncentiveAndAccessibility];
-}
 
 interface AcceptOwnership {
   target: string;
@@ -52,30 +46,6 @@ function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): Incent
   } else {
     return [0, 1];
   }
-}
-
-export function generateConversionConfigCommandsArray(
-  tokenOutArray: string[],
-  tokenIn: string,
-  Converter: string,
-): ConversionConfig[] {
-  const conversionConfigCommandsArray: ConversionConfig[] = [];
-
-  for (const tokenOut of tokenOutArray) {
-    const incentiveAndAccessibility: IncentiveAndAccessibility = getIncentiveAndAccessibility(tokenIn, tokenOut);
-
-    if (tokenOut !== tokenIn) {
-      const config: ConversionConfig = {
-        target: Converter,
-        signature: "setConversionConfig(address,address,(uint256,uint8))",
-        params: [tokenIn, tokenOut, incentiveAndAccessibility],
-      };
-
-      conversionConfigCommandsArray.push(config);
-    }
-  }
-
-  return conversionConfigCommandsArray;
 }
 
 function generateAcceptOwnershipCommands(ConvertersArray: string[]): AcceptOwnership[] {
@@ -158,41 +128,33 @@ function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissi
   return callPermissionCommandsArray;
 }
 
-export const conversionConfigCommandsRiskFundConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[0],
-  RISK_FUND_CONVERTER,
-);
+export const incentiveAndAccessibilityForRiskFundConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForBTCBPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForETHPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = [];
 
-export const conversionConfigCommandsUSDTPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[1],
-  USDT_PRIME_CONVERTER,
-);
-
-export const conversionConfigCommandsUSDCPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[2],
-  USDC_PRIME_CONVERTER,
-);
-
-export const conversionConfigCommandsBTCBPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[3],
-  BTCB_PRIME_CONVERTER,
-);
-
-export const conversionConfigCommandsETHPrimeConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[4],
-  ETH_PRIME_CONVERTER,
-);
-
-export const conversionConfigCommandsXVSVaultConverter: ConversionConfig[] = generateConversionConfigCommandsArray(
-  Assets,
-  BaseAssets[5],
-  XVS_VAULT_CONVERTER,
-);
+for (let i = 0; i < RiskFundConverterTokenOuts.length; i++) {
+  incentiveAndAccessibilityForRiskFundConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[0], RiskFundConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForUSDTPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[1], USDTPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForUSDCPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[2], USDCPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForBTCBPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[3], BTCBPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForETHPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[4], ETHPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForXVSVaultConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[5], XVSVaultConverterTokenOuts[i]),
+  );
+}
 
 export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
 

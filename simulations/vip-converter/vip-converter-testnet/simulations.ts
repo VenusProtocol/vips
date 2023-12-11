@@ -6,10 +6,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { converters } from "../../../vips/vip-converter/vip-converter-testnet/Addresses";
-import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter1";
-import { vipConverter2 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter2";
-import { vipConverter3 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter3";
-import { vipConverter4 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter4";
+import { vipConverter } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -37,7 +34,7 @@ const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
 
 const CONVERTER_NETWORK = "0x594e8e11A1DfBcdFeBDDe682e4da507935DaC8E3";
-const RISK_FUND_CONVERTER = "0x4E1A8225A64C8Cd97fBE21177873756259fe5f8F";
+const RISK_FUND_CONVERTER = "0x19D5a65f3a130F0FfC9EfdA84C2427911d4C359c";
 const USDC_PRIME_CONVERTER = "0x882B399662d9608380c4E31145D31A030EB228Af";
 const XVS_VAULT_CONVERTER = "0xd44B364a28386a2aa4Df1C54EA32deF3B2b98EeC";
 
@@ -49,7 +46,7 @@ const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3
 const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x6A7FF4641F52b267102a5a0779cE7a060374d6cC";
 const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0xEdaB2b65fD3413d89b6D2a3AeB61E0c9eECA6A76";
 
-forking(35795670, () => {
+forking(35859350, () => {
   const provider = ethers.provider;
   let ProxyAdmin: Contract;
   let RiskFund: Contract;
@@ -96,7 +93,7 @@ forking(35795670, () => {
     });
   });
 
-  testVip("VIP-converter1", vipConverter1(), {
+  testVip("VIP-converter", vipConverter(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(
         txResponse,
@@ -120,22 +117,7 @@ forking(35795670, () => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [28]);
       await expectEvents(txResponse, [RISK_FUND_V2_ABI], ["RiskFundConverterUpdated"], [1]);
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [2]);
-    },
-  });
-
-  testVip("VIP-converter2", vipConverter2(), {
-    callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [70]);
-    },
-  });
-  testVip("VIP-converter3", vipConverter3(), {
-    callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [70]);
-    },
-  });
-  testVip("VIP-converter4", vipConverter4(), {
-    callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [70]);
+      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [210]);
     },
   });
 
@@ -220,7 +202,7 @@ forking(35795670, () => {
   });
 });
 
-forking(35795670, () => {
+forking(35859350, () => {
   const provider = ethers.provider;
   let RiskFundConverter: Contract;
   let USDCPrimeConverter: Contract;
@@ -232,9 +214,7 @@ forking(35795670, () => {
 
   describe("Post-VIP behavior", () => {
     before(async () => {
-      await pretendExecutingVip(vipConverter1());
-      await pretendExecutingVip(vipConverter2());
-      await pretendExecutingVip(vipConverter3());
+      await pretendExecutingVip(vipConverter());
 
       [, user1] = await ethers.getSigners();
       user1Address = await user1.getAddress();

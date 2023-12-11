@@ -2,13 +2,20 @@ import { ProposalType } from "../../../src/types";
 import { makeProposal } from "../../../src/utils";
 import {
   ACM,
+  BTCBPrimeConverterTokenOuts,
   BTCB_PRIME_CONVERTER,
+  BaseAssets,
   CONVERTER_NETWORK,
+  ETHPrimeConverterTokenOuts,
   ETH_PRIME_CONVERTER,
   NORMAL_TIMELOCK,
   RISK_FUND_CONVERTER,
+  RiskFundConverterTokenOuts,
+  USDCPrimeConverterTokenOuts,
   USDC_PRIME_CONVERTER,
+  USDTPrimeConverterTokenOuts,
   USDT_PRIME_CONVERTER,
+  XVSVaultConverterTokenOuts,
   XVS_VAULT_CONVERTER,
 } from "./Addresses";
 import {
@@ -16,6 +23,12 @@ import {
   addConverterNetworkCommandsAllConverters,
   addTokenConverterCommandsAllConverters,
   callPermissionCommandsAllConverter,
+  incentiveAndAccessibilityForBTCBPrimeConverter,
+  incentiveAndAccessibilityForETHPrimeConverter,
+  incentiveAndAccessibilityForRiskFundConverter,
+  incentiveAndAccessibilityForUSDCPrimeConverter,
+  incentiveAndAccessibilityForUSDTPrimeConverter,
+  incentiveAndAccessibilityForXVSVaultConverter,
 } from "./commands";
 
 const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
@@ -28,18 +41,25 @@ const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0xEdaB2b65fD3413d89b6D2a3AeB6
 const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
 
-export const vipConverter1 = () => {
+export const vipConverter = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-converter1 Upgrades the implementation of RiskFund and ProtocolShareReserve with Adding of converts in ConverterNetwork and vice versa",
+      "VIP-converter1 Upgrades the implementation of RiskFund and ProtocolShareReserve with Adding of converts in ConverterNetwork and vice versa. It also sets conversion configs for the converters",
     description: `
     Upgrade the implementation of riskfund to riskfund V2
     sets RiskFundConverter in RiskFundV2
     Upgrade the implementation of ProtocolShareReserve and update the distributionConfigs
     update destination address to Riskfund in RiskFundConverter
     Add Converters in ConverterNetwork
-    Add ConverterNetwork in Converters`,
+    Add ConverterNetwork in Converters
+    Sets Conversion configs for the following converters:-
+    1. RiskFundConverter
+    2. USDTPrimeConverter
+    3. USDCPrimeConverter
+    4. BTCBPrimeConverter
+    5. ETHPrimeConverter
+    6. XVSVaultConverter`,
 
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -148,6 +168,36 @@ export const vipConverter1 = () => {
       },
       ...addConverterNetworkCommandsAllConverters,
       ...addTokenConverterCommandsAllConverters,
+      {
+        target: RISK_FUND_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[0], RiskFundConverterTokenOuts, incentiveAndAccessibilityForRiskFundConverter],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[1], USDTPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDTPrimeConverter],
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[2], USDCPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDCPrimeConverter],
+      },
+      {
+        target: BTCB_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[3], BTCBPrimeConverterTokenOuts, incentiveAndAccessibilityForBTCBPrimeConverter],
+      },
+      {
+        target: ETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[4], ETHPrimeConverterTokenOuts, incentiveAndAccessibilityForETHPrimeConverter],
+      },
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[5], XVSVaultConverterTokenOuts, incentiveAndAccessibilityForXVSVaultConverter],
+      },
     ],
     meta,
     ProposalType.REGULAR,
