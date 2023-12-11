@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { checkRewardsDistributorPool } from "../../../src/vip-framework/checks/rewardsDistributor";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_ABI from "./abi/prime.json";
@@ -14,6 +13,7 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/primeLiquidityProvider.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 
 const PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -60,6 +60,11 @@ forking(35776436, () => {
       implementation = await vaiControllerProxy.vaiControllerImplementation();
       expect(implementation).to.equal(OLD_VAI_CONTROLLER_IMPLEMENTATION);
     });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 
   testVip("vip214Testnet", vip214(), {
@@ -103,6 +108,11 @@ forking(35776436, () => {
 
       const mintRate = await comptroller.vaiMintRate();
       expect(mintRate).to.equal(parseUnits("1", 18));
+    });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkXVSVault();
     });
   });
 });
