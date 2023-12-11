@@ -10,7 +10,6 @@ import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import OLD_PRIME_ABI from "./abi/oldPrime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/primeLiquidityProvider.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
@@ -34,7 +33,6 @@ forking(35776436, () => {
   const provider = ethers.provider;
   let prime: ethers.Contract;
   let vaiController: ethers.Contract;
-  let plp: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
   let comptroller: ethers.Contract;
@@ -46,7 +44,6 @@ forking(35776436, () => {
 
     prime = new ethers.Contract(PRIME_PROXY, OLD_PRIME_ABI, timelock);
     vaiController = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, timelock);
-    plp = new ethers.Contract(PLP_PROXY, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_PROXY_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
