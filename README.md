@@ -52,6 +52,26 @@ In .env, replace VIP_NUMBER with the number of vip to propose.
 npx hardhat test scripts/proposeVIP.ts
 ```
 
+### Make Proposal for multiple networks
+
+Procedure to make vip
+
+In .env `FORKED_NETWORK` must contain name of the network on which proposal needs to be executed.
+
+Make sure to update `dstChainId` field with chain Id of desired network in commands.
+
+### Simulations for multiple networks proposal
+
+In .env update `ARCHIVE_NODE_<NETWORK_NAME>` with the URL of desired network.
+
+Make different simulations for different networks.
+
+To run simulations use this command
+
+```
+npx hardhat test simulations/<desired-network-simulations>.ts
+```
+
 ### Execute VIP (via Multisig)
 
 Script to execute a VIP through the Gnosis Safe Multisig
