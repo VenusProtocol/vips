@@ -13,6 +13,7 @@ import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
+import { checkVAIController } from "../../../src/vip-framework/checks/checkVAIController";
 
 const PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -22,14 +23,14 @@ const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 const OLD_PRIME_IMPLEMENTATION = "0x72C9Bc4433C912ecd8184B3F7dda55Ee25761896";
 const OLD_VAI_CONTROLLER_IMPLEMENTATION = "0x78CDd0D792691dfBe7006ABcc2dc863938466f4A";
 const NEW_PRIME_IMPLEMENTATION = "0xFa32e28b54B489CB72cF4BF956600A0910CCDb81";
-const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x8B13b4c2c634731be34cbF1874dC0b36F86b9b48";
+const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x1A81C74Cc669172D89d0C8ed7D9Fd960fcba1A38";
 const NEW_PLP_IMPLEMENTATION = "0x29406DD113B5E90f56Fa7E1E1Ca148DB8B4E6E7F";
 const OLD_PLP_IMPLEMENTATION = "0x98d73B2E246a3506686CBA62d2118D2127dfD20E";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
 
-forking(35776436, () => {
+forking(35894318, () => {
   const provider = ethers.provider;
   let prime: ethers.Contract;
   let vaiController: ethers.Contract;
@@ -64,13 +65,14 @@ forking(35776436, () => {
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(998);
-      expect(apr[1]).to.be.equal(1566);
+      expect(apr[0]).to.be.equal(993);
+      expect(apr[1]).to.be.equal(1664);
     });
 
     describe("generic tests", async () => {
       checkCorePoolComptroller();
       checkXVSVault();
+      checkVAIController();
     });
   });
 
@@ -109,8 +111,8 @@ forking(35776436, () => {
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(998);
-      expect(apr[1]).to.be.equal(1566);
+      expect(apr[0]).to.be.equal(993);
+      expect(apr[1]).to.be.equal(1664);
     });
 
     it("rates", async () => {
@@ -118,7 +120,7 @@ forking(35776436, () => {
       expect(baseRate).to.equal(parseUnits("0.07", 18));
 
       const mintCap = await vaiController.mintCap();
-      expect(mintCap).to.equal(parseUnits("10000000", 18));
+      expect(mintCap).to.equal(parseUnits("20000000", 18));
 
       const mintRate = await comptroller.vaiMintRate();
       expect(mintRate).to.equal(parseUnits("1", 18));
@@ -127,6 +129,7 @@ forking(35776436, () => {
     describe("generic tests", async () => {
       checkCorePoolComptroller();
       checkXVSVault();
+      checkVAIController();
     });
   });
 });
