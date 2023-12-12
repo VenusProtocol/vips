@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip215 } from "../../vips/vip-215";
+import { vip216 } from "../../vips/vip-216";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
@@ -21,7 +21,7 @@ forking(34286000, () => {
     prevBalance = await busd.balanceOf(DESTINATION_ADDRESS);
   });
 
-  testVip("VIP-215", vip215(), {
+  testVip("VIP-216", vip216(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "Failure"], [1, 0]);
     },
