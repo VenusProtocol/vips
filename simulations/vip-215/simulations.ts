@@ -28,7 +28,7 @@ forking(34286000, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Should increase balance of Community wallet", async () => {
+    it("Should increase balance of the destination wallet", async () => {
       const currentBalance = await busd.balanceOf(DESTINATION_ADDRESS);
       const delta = currentBalance.sub(prevBalance);
       expect(delta).equals(WITDRAW_AMOUNT);
