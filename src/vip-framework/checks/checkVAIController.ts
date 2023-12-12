@@ -43,6 +43,12 @@ export const checkVAIController = () => {
       const balanceAfter = await vai.balanceOf(ACCOUNT);
 
       expect(balanceAfter.sub(balanceBefore)).to.be.gt(0);
+
+      await mine(5000);
+      await expect(vaiController.repayVAI(parseUnits("500", "18"))).to.not.reverted
+      const balanceAfterRepay = await vai.balanceOf(ACCOUNT);
+
+      expect(balanceAfterRepay).to.be.lt(balanceAfter);
     });
   });
 };
