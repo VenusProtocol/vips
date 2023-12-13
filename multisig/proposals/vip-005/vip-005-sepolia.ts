@@ -6,7 +6,7 @@ export interface VenusMarket {
 }
 
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const PROTOCOL_SHARE_RESERVE = "0x1c411eFdEb018D584b24e79A562aa5e062FD2c37";
+const PROTOCOL_SHARE_RESERVE = "0xCd3978f90e237b73818f32588e7E4A95e8dc058d";
 const POOL_REGISTRY = "0x758f5715d817e02857Ba40889251201A5aE3E186";
 const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 const SEPOLIA_MULTISIG = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
@@ -78,11 +78,11 @@ export const vip005 = () => {
     },
     {
       target: PROTOCOL_SHARE_RESERVE,
-      signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])",
+      signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
       params: [
         [
-          [0, 100, VTREASURY],
-          [1, 100, VTREASURY],
+          [0, 10000, VTREASURY],
+          [1, 10000, VTREASURY],
         ],
       ],
     },
