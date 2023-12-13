@@ -1,13 +1,14 @@
 import { ProposalType } from "../../../src/types";
 import { makeProposal } from "../../../src/utils";
 import {
-  ACM,
   BTCBPrimeConverterTokenOuts,
   BTCB_PRIME_CONVERTER,
   BaseAssets,
   CONVERTER_NETWORK,
+  CRITICAL_TIMELOCK,
   ETHPrimeConverterTokenOuts,
   ETH_PRIME_CONVERTER,
+  FAST_TRACK_TIMELOCK,
   NORMAL_TIMELOCK,
   RISK_FUND_CONVERTER,
   RiskFundConverterTokenOuts,
@@ -19,10 +20,9 @@ import {
   XVS_VAULT_CONVERTER,
 } from "./Addresses";
 import {
-  acceptOwnershipCommandsAllConverters,
   addConverterNetworkCommandsAllConverters,
   addTokenConverterCommandsAllConverters,
-  callPermissionCommandsAllConverter,
+  grant,
   incentiveAndAccessibilityForBTCBPrimeConverter,
   incentiveAndAccessibilityForETHPrimeConverter,
   incentiveAndAccessibilityForRiskFundConverter,
@@ -41,12 +41,13 @@ const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0xEdaB2b65fD3413d89b6D2a3AeB6
 const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
 
-export const vipConverter = () => {
+export const vipConverter2 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-converter1 Upgrades the implementation of RiskFund and ProtocolShareReserve with Adding of converts in ConverterNetwork and vice versa. It also sets conversion configs for the converters",
+      "VIP-converter2 Upgrades the implementation of RiskFund and ProtocolShareReserve with Adding of converts in ConverterNetwork and vice versa. It also sets conversion configs for the converters",
     description: `
+    Gives call permissions to timelock
     Upgrade the implementation of riskfund to riskfund V2
     sets RiskFundConverter in RiskFundV2
     Upgrade the implementation of ProtocolShareReserve and update the distributionConfigs
@@ -68,39 +69,21 @@ export const vipConverter = () => {
 
   return makeProposal(
     [
-      ...acceptOwnershipCommandsAllConverters,
-      {
-        target: XVS_VAULT_TREASURY,
-        signature: "acceptOwnership()",
-        params: [],
-      },
-      {
-        target: CONVERTER_NETWORK,
-        signature: "acceptOwnership()",
-        params: [],
-      },
+      grant(RISK_FUND_CONVERTER, "setPoolsAssetsDirectTransfer(address[],address[][],bool[][])", NORMAL_TIMELOCK),
+      grant(RISK_FUND_CONVERTER, "setPoolsAssetsDirectTransfer(address[],address[][],bool[][])", FAST_TRACK_TIMELOCK),
+      grant(RISK_FUND_CONVERTER, "setPoolsAssetsDirectTransfer(address[],address[][],bool[][])", CRITICAL_TIMELOCK),
 
-      ...callPermissionCommandsAllConverter,
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [RISK_FUND_CONVERTER, "setPoolsAssetsDirectTransfer(address[],address[][],bool[][])", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CONVERTER_NETWORK, "addTokenConverter(address)", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CONVERTER_NETWORK, "removeTokenConverter(address)", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVS_VAULT_TREASURY, "fundXVSVault(uint256)", NORMAL_TIMELOCK],
-      },
+      grant(CONVERTER_NETWORK, "addTokenConverter(address)", NORMAL_TIMELOCK),
+      grant(CONVERTER_NETWORK, "addTokenConverter(address)", FAST_TRACK_TIMELOCK),
+      grant(CONVERTER_NETWORK, "addTokenConverter(address)", CRITICAL_TIMELOCK),
+
+      grant(CONVERTER_NETWORK, "removeTokenConverter(address)", NORMAL_TIMELOCK),
+      grant(CONVERTER_NETWORK, "removeTokenConverter(address)", FAST_TRACK_TIMELOCK),
+      grant(CONVERTER_NETWORK, "removeTokenConverter(address)", CRITICAL_TIMELOCK),
+
+      grant(XVS_VAULT_TREASURY, "fundXVSVault(uint256)", NORMAL_TIMELOCK),
+      grant(XVS_VAULT_TREASURY, "fundXVSVault(uint256)", FAST_TRACK_TIMELOCK),
+      grant(XVS_VAULT_TREASURY, "fundXVSVault(uint256)", CRITICAL_TIMELOCK),
       {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",

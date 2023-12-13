@@ -105,6 +105,11 @@
   },
   {
     "inputs": [],
+    "name": "InputLengthMisMatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InsufficientBalance",
     "type": "error"
   },
@@ -1433,6 +1438,41 @@
       }
     ],
     "name": "setConversionConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddressIn",
+        "type": "address"
+      },
+      {
+        "internalType": "address[]",
+        "name": "tokenAddressesOut",
+        "type": "address[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "incentive",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum IAbstractTokenConverter.ConversionAccessibility",
+            "name": "conversionAccess",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct IAbstractTokenConverter.ConversionConfig[]",
+        "name": "conversionConfigs",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "setConversionConfigs",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -4,8 +4,9 @@ import {
   BaseAssets,
   CONVERTER_NETWORK,
   ETHPrimeConverterTokenOuts,
-  NORMAL_TIMELOCK,
+  GUARDIAN,
   RiskFundConverterTokenOuts,
+  TimelocksArray,
   USDCPrimeConverterTokenOuts,
   USDTPrimeConverterTokenOuts,
   XVSVaultConverterTokenOuts,
@@ -32,11 +33,21 @@ interface AddConverterNetwork {
   params: [string];
 }
 
-interface CallPermissionConverters {
+interface CallPermission {
   target: string;
   signature: string;
   params: [string, string, string];
 }
+
+export const grant = (target: string, signature: string, caller: string): CallPermission => {
+  const config: CallPermission = {
+    target: ACM,
+    signature: "giveCallPermission(address,string,address)",
+    params: [target, signature, caller],
+  };
+
+  return config;
+};
 
 function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
   const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
@@ -94,37 +105,25 @@ function generateAddConverterNetworkCommands(ConvertersArray: string[]): AddConv
   return addConverterNetworkCommandsArray;
 }
 
-function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissionConverters[] {
-  const callPermissionCommandsArray: CallPermissionConverters[] = [];
+function generateCallPermissionCommands(ConvertersArray: string[]): CallPermission[] {
+  const callPermissionCommandsArray: CallPermission[] = [];
 
   for (const converter of ConvertersArray) {
-    const config1: CallPermissionConverters = {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [converter, "setConversionConfig(address,address,ConversionConfig)", NORMAL_TIMELOCK],
-    };
-    const config2: CallPermissionConverters = {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [converter, "pauseConversion()", NORMAL_TIMELOCK],
-    };
-    const config3: CallPermissionConverters = {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [converter, "resumeConversion()", NORMAL_TIMELOCK],
-    };
-    const config4: CallPermissionConverters = {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [converter, "setMinAmountToConvert(uint256)", NORMAL_TIMELOCK],
-    };
+    for (let i = 0; i < 3; i++) {
+      const config1 = grant(converter, "setConversionConfig(address,address,ConversionConfig)", TimelocksArray[i]);
+      const config2 = grant(converter, "pauseConversion()", TimelocksArray[i]);
+      const config3 = grant(converter, "resumeConversion()", TimelocksArray[i]);
+      const config4 = grant(converter, "setMinAmountToConvert(uint256)", TimelocksArray[i]);
 
-    callPermissionCommandsArray.push(config1);
-    callPermissionCommandsArray.push(config2);
-    callPermissionCommandsArray.push(config3);
-    callPermissionCommandsArray.push(config4);
+      callPermissionCommandsArray.push(config1);
+      callPermissionCommandsArray.push(config2);
+      callPermissionCommandsArray.push(config3);
+      callPermissionCommandsArray.push(config4);
+    }
+
+    const config = grant(converter, "pauseConversion()", GUARDIAN);
+    callPermissionCommandsArray.push(config);
   }
-
   return callPermissionCommandsArray;
 }
 
@@ -164,5 +163,4 @@ export const addTokenConverterCommandsAllConverters: AddTokenConverter[] =
 export const addConverterNetworkCommandsAllConverters: AddConverterNetwork[] =
   generateAddConverterNetworkCommands(converters);
 
-export const callPermissionCommandsAllConverter: CallPermissionConverters[] =
-  generateCallPermissionCommands(converters);
+export const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands(converters);
