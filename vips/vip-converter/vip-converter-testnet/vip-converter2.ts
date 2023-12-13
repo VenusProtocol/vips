@@ -20,8 +20,7 @@ import {
   XVS_VAULT_CONVERTER,
 } from "./Addresses";
 import {
-  addConverterNetworkCommandsAllConverters,
-  addTokenConverterCommandsAllConverters,
+  converterCommands,
   grant,
   incentiveAndAccessibilityForBTCBPrimeConverter,
   incentiveAndAccessibilityForETHPrimeConverter,
@@ -33,10 +32,10 @@ import {
 
 const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 const RISK_FUND_PROXY = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
-const RISK_FUND_V2_IMPLEMENTATION = "0x6b925876F9e007b7CD0d7EFd100991F3eF4a4276";
+const RISK_FUND_V2_IMPLEMENTATION = "0x217a907B0c6a7Dc67a21F769a915722B98136F82";
 
 const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0xEdaB2b65fD3413d89b6D2a3AeB61E0c9eECA6A76";
+const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
 
 const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
@@ -96,7 +95,7 @@ export const vipConverter2 = () => {
       },
       {
         target: PROTOCOL_SHARE_RESERVE_PROXY,
-        signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])", // schema 0
+        signature: "addOrUpdateDistributionConfigs((uint8,uint8,address)[])", // set to 0 every percentage, to allow us to remove them in the next command
         params: [
           [
             [0, 0, RISK_FUND_PROXY],
@@ -149,8 +148,7 @@ export const vipConverter2 = () => {
           ],
         ],
       },
-      ...addConverterNetworkCommandsAllConverters,
-      ...addTokenConverterCommandsAllConverters,
+      ...converterCommands,
       {
         target: RISK_FUND_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",

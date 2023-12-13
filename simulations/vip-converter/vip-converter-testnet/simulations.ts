@@ -34,20 +34,20 @@ const XVS_VAULT = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
 
-const CONVERTER_NETWORK = "0x594e8e11A1DfBcdFeBDDe682e4da507935DaC8E3";
-const RISK_FUND_CONVERTER = "0xD6669bA6aE3411CDFFE5A826779BDA3DC1adAe8b";
-const USDC_PRIME_CONVERTER = "0x882B399662d9608380c4E31145D31A030EB228Af";
-const XVS_VAULT_CONVERTER = "0xd44B364a28386a2aa4Df1C54EA32deF3B2b98EeC";
+const CONVERTER_NETWORK = "0x650B1C775E737c439129611f068AFA3763b57Ff5";
+const RISK_FUND_CONVERTER = "0x07c10cd93d7ACE4c1EfAE0248393e96c072A69F3";
+const USDC_PRIME_CONVERTER = "0x18F2543DCCD09dEb0e28575008CD24c0700e964B";
+const XVS_VAULT_CONVERTER = "0x354B807373a9D07A08b0F6a4064B9Ef80fAD7DBf";
 
 const RISK_FUND_PROXY = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const RISK_FUND_OLD_IMPLEMENTATION = "0x1E7DEC93C77740c2bB46daf87ef42056E388dA14";
-const RISK_FUND_V2_IMPLEMENTATION = "0x6b925876F9e007b7CD0d7EFd100991F3eF4a4276";
+const RISK_FUND_V2_IMPLEMENTATION = "0x217a907B0c6a7Dc67a21F769a915722B98136F82";
 
 const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x6A7FF4641F52b267102a5a0779cE7a060374d6cC";
-const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0xEdaB2b65fD3413d89b6D2a3AeB61E0c9eECA6A76";
+const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
 
-forking(35915672, () => {
+forking(35922050, () => {
   const provider = ethers.provider;
   let ProxyAdmin: Contract;
   let RiskFund: Contract;
@@ -58,6 +58,10 @@ forking(35915672, () => {
   let riskFundConvertibleBaseAsset: string;
   let riskFundMaxLoopsLimit: number;
   let riskFundShortfall: string;
+  let poolAssetReserveUsdt: number;
+  let poolAssetReserveUsdc: number;
+  let poolAssetReserveXvs: number;
+
   let psrPoolRegistry: string;
   let psrMaxLoopsLimit: number;
   let psrTotalAssetReserve: number;
@@ -76,6 +80,9 @@ forking(35915672, () => {
     riskFundConvertibleBaseAsset = await RiskFund.convertibleBaseAsset();
     riskFundMaxLoopsLimit = await RiskFund.maxLoopsLimit();
     riskFundShortfall = await RiskFund.shortfall();
+    poolAssetReserveUsdt = await RiskFund.getPoolAssetReserve(COMPTROLLER, USDT);
+    poolAssetReserveUsdc = await RiskFund.getPoolAssetReserve(COMPTROLLER, USDC);
+    poolAssetReserveXvs = await RiskFund.getPoolAssetReserve(COMPTROLLER, XVS);
 
     psrPoolRegistry = await ProtocolShareReserve.poolRegistry();
     psrMaxLoopsLimit = await ProtocolShareReserve.maxLoopsLimit();
@@ -148,6 +155,9 @@ forking(35915672, () => {
       expect(await RiskFund.maxLoopsLimit()).to.equal(riskFundMaxLoopsLimit);
       expect(await RiskFund.owner()).to.equal(NORMAL_TIMELOCK);
       expect(await RiskFund.shortfall()).to.equal(riskFundShortfall);
+      expect(await RiskFund.poolAssetsFunds(COMPTROLLER, USDT)).to.equal(poolAssetReserveUsdt);
+      expect(await RiskFund.poolAssetsFunds(COMPTROLLER, USDC)).to.equal(poolAssetReserveUsdc);
+      expect(await RiskFund.poolAssetsFunds(COMPTROLLER, XVS)).to.equal(poolAssetReserveXvs);
     });
 
     it("RiskFund should have correct address of RiskFundConverter", async () => {
@@ -209,7 +219,7 @@ forking(35915672, () => {
   });
 });
 
-forking(35915672, () => {
+forking(35922050, () => {
   const provider = ethers.provider;
   let RiskFundConverter: Contract;
   let USDCPrimeConverter: Contract;

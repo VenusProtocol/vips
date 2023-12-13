@@ -21,13 +21,7 @@ interface AcceptOwnership {
   params: [];
 }
 
-interface AddTokenConverter {
-  target: string;
-  signature: string;
-  params: [string];
-}
-
-interface AddConverterNetwork {
+interface ConverterCommand {
   target: string;
   signature: string;
   params: [string];
@@ -53,9 +47,9 @@ function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): Incent
   const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
 
   if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
-    return [0, 2];
+    return [0, 2]; // ONLY_FOR_CONVERTERS
   } else {
-    return [0, 1];
+    return [0, 1]; // ALL
   }
 }
 
@@ -75,34 +69,29 @@ function generateAcceptOwnershipCommands(ConvertersArray: string[]): AcceptOwner
   return acceptOwnershipCommandsArray;
 }
 
-function generateAddTokenConverterCommands(ConvertersArray: string[]): AddTokenConverter[] {
-  const addTokenConverterCommandsArray: AddTokenConverter[] = [];
+function generateConverterCommands(ConvertersArray: string[]): ConverterCommand[] {
+  const commandsArray: ConverterCommand[] = [];
 
   for (const converter of ConvertersArray) {
-    const config: AddTokenConverter = {
-      target: CONVERTER_NETWORK,
-      signature: "addTokenConverter(address)",
-      params: [converter],
-    };
-
-    addTokenConverterCommandsArray.push(config);
-  }
-  return addTokenConverterCommandsArray;
-}
-
-function generateAddConverterNetworkCommands(ConvertersArray: string[]): AddConverterNetwork[] {
-  const addConverterNetworkCommandsArray: AddConverterNetwork[] = [];
-
-  for (const converter of ConvertersArray) {
-    const config: AddConverterNetwork = {
+    // Add AddConverterNetwork command
+    const addConverterNetworkConfig: ConverterCommand = {
       target: converter,
       signature: "setConverterNetwork(address)",
       params: [CONVERTER_NETWORK],
     };
 
-    addConverterNetworkCommandsArray.push(config);
+    // Add AddTokenConverter command
+    const addTokenConverterConfig: ConverterCommand = {
+      target: CONVERTER_NETWORK,
+      signature: "addTokenConverter(address)",
+      params: [converter],
+    };
+
+    commandsArray.push(addConverterNetworkConfig);
+    commandsArray.push(addTokenConverterConfig);
   }
-  return addConverterNetworkCommandsArray;
+
+  return commandsArray;
 }
 
 function generateCallPermissionCommands(ConvertersArray: string[]): CallPermission[] {
@@ -157,10 +146,6 @@ for (let i = 0; i < RiskFundConverterTokenOuts.length; i++) {
 
 export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
 
-export const addTokenConverterCommandsAllConverters: AddTokenConverter[] =
-  generateAddTokenConverterCommands(converters);
-
-export const addConverterNetworkCommandsAllConverters: AddConverterNetwork[] =
-  generateAddConverterNetworkCommands(converters);
+export const converterCommands: ConverterCommand[] = generateConverterCommands(converters);
 
 export const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands(converters);
