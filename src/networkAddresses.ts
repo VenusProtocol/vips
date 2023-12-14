@@ -71,5 +71,6 @@ export const NETWORK_ADDRESSES = {
   },
   opbnbtestnet: {
     NORMAL_TIMELOCK: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
+    GUARDIAN: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
   },
 };
