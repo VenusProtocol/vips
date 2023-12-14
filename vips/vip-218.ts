@@ -19,7 +19,7 @@ This VIP will perform the following Risk Parameters actions as per Chaos Labs la
 
 Complete analysis and details of these recommendations are available in the above publication.
 
-VIP simulation: <PR link>`,
+VIP simulation: https://github.com/VenusProtocol/vips/pull/132`,
 
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
