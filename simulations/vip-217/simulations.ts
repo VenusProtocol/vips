@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { MarketInformation, vip215 } from "../../vips/vip-215";
+import { MarketInformation, vip217 } from "../../vips/vip-217";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
@@ -11,8 +11,6 @@ import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 type UnderlyingTokenContracts = {
   [key: string]: ethers.Contract;
 };
-
-const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 const markets: MarketInformation[] = [
   {
@@ -41,36 +39,13 @@ const markets: MarketInformation[] = [
   },
 ];
 
-forking(34258500, () => {
+forking(34340570, () => {
   const underlyingTokenContracts: UnderlyingTokenContracts = {};
 
   before(async () => {
     for (const market of markets) {
       underlyingTokenContracts[market.name] = await ethers.getContractAt(IERC20_ABI, market.underlying);
     }
-
-    // Delete after Treasury has been funded with the tokens
-    const ankrBNBHolder = await initMainnetUser(
-      "0x25b21472c073095bebC681001Cbf165f849eEe5E",
-      ethers.utils.parseEther("1"),
-    );
-    const BNBxHolder = await initMainnetUser(
-      "0xFF4606bd3884554CDbDabd9B6e25E2faD4f6fc54",
-      ethers.utils.parseEther("1"),
-    );
-    const stkBNBHolder = await initMainnetUser(
-      "0x98CB81d921B8F5020983A46e96595471Ad4E60Be",
-      ethers.utils.parseEther("1"),
-    );
-    const WBNBHolder = await initMainnetUser(
-      "0x58b0BB56CFDfc5192989461dD43568bcfB2797Db",
-      ethers.utils.parseEther("1"),
-    );
-
-    await underlyingTokenContracts.ankrBNB.connect(ankrBNBHolder).transfer(TREASURY, markets[0].badDebt);
-    await underlyingTokenContracts.BNBx.connect(BNBxHolder).transfer(TREASURY, markets[1].badDebt);
-    await underlyingTokenContracts.stkBNB.connect(stkBNBHolder).transfer(TREASURY, markets[2].badDebt);
-    await underlyingTokenContracts.WBNB.connect(WBNBHolder).transfer(TREASURY, markets[3].badDebt);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -83,7 +58,7 @@ forking(34258500, () => {
     });
   });
 
-  testVip("VIP-214 Restore bad debt", vip215(), {
+  testVip("VIP-217 Restore bad debt", vip217(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
