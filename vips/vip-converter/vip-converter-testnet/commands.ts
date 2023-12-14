@@ -46,6 +46,8 @@ export const grant = (target: string, signature: string, caller: string): CallPe
 function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
   const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
 
+  // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
+  // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
   if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
     return [0, 2]; // ONLY_FOR_CONVERTERS
   } else {
@@ -98,11 +100,11 @@ function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissi
   const callPermissionCommandsArray: CallPermission[] = [];
 
   for (const converter of ConvertersArray) {
-    for (let i = 0; i < 3; i++) {
-      const config1 = grant(converter, "setConversionConfig(address,address,ConversionConfig)", TimelocksArray[i]);
-      const config2 = grant(converter, "pauseConversion()", TimelocksArray[i]);
-      const config3 = grant(converter, "resumeConversion()", TimelocksArray[i]);
-      const config4 = grant(converter, "setMinAmountToConvert(uint256)", TimelocksArray[i]);
+    for (const timelock of TimelocksArray) {
+      const config1 = grant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock);
+      const config2 = grant(converter, "pauseConversion()", timelock);
+      const config3 = grant(converter, "resumeConversion()", timelock);
+      const config4 = grant(converter, "setMinAmountToConvert(uint256)", timelock);
 
       callPermissionCommandsArray.push(config1);
       callPermissionCommandsArray.push(config2);
@@ -110,8 +112,8 @@ function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissi
       callPermissionCommandsArray.push(config4);
     }
 
-    const config = grant(converter, "pauseConversion()", GUARDIAN);
-    callPermissionCommandsArray.push(config);
+    callPermissionCommandsArray.push(grant(converter, "pauseConversion()", GUARDIAN));
+    callPermissionCommandsArray.push(grant(converter, "resumeConversion()", GUARDIAN));
   }
   return callPermissionCommandsArray;
 }
