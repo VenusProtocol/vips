@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -95,17 +96,17 @@ export const vip214 = () => {
       {
         target: VAI_CONTROLLER_PROXY,
         signature: "setBaseRate(uint256)",
-        params: ["70000000000000000"],
+        params: [parseUnits("0.07", 18).toString()],
       },
       {
         target: VAI_CONTROLLER_PROXY,
         signature: "setMintCap(uint256)",
-        params: ["20000000000000000000000000"],
+        params: [parseUnits("20000000", 18).toString()],
       },
       {
         target: COMPTROLLER,
         signature: "_setVAIMintRate(uint256)",
-        params: ["1000000000000000000"],
+        params: [parseUnits("1", 18).toString()],
       },
     ],
     meta,
