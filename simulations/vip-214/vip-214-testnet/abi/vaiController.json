@@ -314,6 +314,25 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "oldVaiToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newVaiToken",
+        "type": "address"
+      }
+    ],
+    "name": "NewVaiToken",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "payer",
         "type": "address"
       },
@@ -380,21 +399,6 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "prime_",
-        "type": "address"
-      }
-    ],
-    "name": "_setPrimeToken",
-    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -961,11 +965,41 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "prime_",
+        "type": "address"
+      }
+    ],
+    "name": "setPrimeToken",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "newReceiver",
         "type": "address"
       }
     ],
     "name": "setReceiver",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vai_",
+        "type": "address"
+      }
+    ],
+    "name": "setVAIToken",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
