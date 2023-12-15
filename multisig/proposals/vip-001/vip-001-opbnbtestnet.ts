@@ -12,6 +12,8 @@ const MOCK_ETH = "0x94680e003861D43C6c0cf18333972312B6956FF1";
 const MOCK_USDT = "0x8ac9B3801D0a8f5055428ae0bF301CA1Da976855";
 const MOCK_WBNB = "0xF9ce72611a1BE9797FdD2c995dB6fB61FD20E4eB";
 const XVS = "0x3d0e20D4caD958bc848B045e1da19Fe378f86f03";
+const DEFAULT_PROXY_ADMIN = "0xB1281ADC816fba7df64B798D7A0BC4bd2a6d42f4";
+const BINANCE_ORACLE_IMPL = "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383";
 
 export const vip001 = () => {
   return makeProposal([
@@ -54,6 +56,11 @@ export const vip001 = () => {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [BINANCE_ORACLE, "setSymbolOverride(string,string)", opbnbtestnet.NORMAL_TIMELOCK],
+    },
+    {
+      target: DEFAULT_PROXY_ADMIN,
+      signature: "upgrade(address,address)",
+      params: [BINANCE_ORACLE, BINANCE_ORACLE_IMPL],
     },
     { target: RESILIENT_ORACLE, signature: "acceptOwnership()", params: [] },
     { target: BOUND_VALIDATOR, signature: "acceptOwnership()", params: [] },
