@@ -112,6 +112,10 @@ export const setMaxStalePeriodInChainlinkOracleWithoutFeed = async (
 
   const feed = (await oracle.tokenConfigs(asset)).feed;
 
+  if (feed === ethers.constants.AddressZero) {
+    return;
+  }
+
   const tx = await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
