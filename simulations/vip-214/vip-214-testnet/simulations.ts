@@ -22,15 +22,16 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 const OLD_PRIME_IMPLEMENTATION = "0x72C9Bc4433C912ecd8184B3F7dda55Ee25761896";
 const OLD_VAI_CONTROLLER_IMPLEMENTATION = "0x78CDd0D792691dfBe7006ABcc2dc863938466f4A";
-const NEW_PRIME_IMPLEMENTATION = "0xFa32e28b54B489CB72cF4BF956600A0910CCDb81";
-const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x1A81C74Cc669172D89d0C8ed7D9Fd960fcba1A38";
-const NEW_PLP_IMPLEMENTATION = "0x29406DD113B5E90f56Fa7E1E1Ca148DB8B4E6E7F";
+const NEW_PRIME_IMPLEMENTATION = "0x1a0fd0e9FA06D1338deDfDDbB057542D8C96Fa33";
+const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0xBfBCdA434f940CaEdE18b3634E106C5ED8d1DE5c";
+const NEW_PLP_IMPLEMENTATION = "0x97656bCB9ca76A0b76D19e2b077fD23b086D1bA0";
 const OLD_PLP_IMPLEMENTATION = "0x98d73B2E246a3506686CBA62d2118D2127dfD20E";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
+const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 
-forking(35894318, () => {
+forking(35984092, () => {
   const provider = ethers.provider;
   let prime: ethers.Contract;
   let vaiController: ethers.Contract;
@@ -65,8 +66,8 @@ forking(35894318, () => {
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(993);
-      expect(apr[1]).to.be.equal(1664);
+      expect(apr[0]).to.be.equal(1000);
+      expect(apr[1]).to.be.equal(1528);
     });
 
     describe("generic tests", async () => {
@@ -111,8 +112,8 @@ forking(35894318, () => {
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(993);
-      expect(apr[1]).to.be.equal(1664);
+      expect(apr[0]).to.be.equal(1000);
+      expect(apr[1]).to.be.equal(1528);
     });
 
     it("rates", async () => {
@@ -124,6 +125,11 @@ forking(35894318, () => {
 
       const mintRate = await comptroller.vaiMintRate();
       expect(mintRate).to.equal(parseUnits("1", 18));
+    });
+
+    it("vai address", async () => {
+      const vaiAddress = await vaiController.getVAIAddress();
+      expect(vaiAddress).to.equal(VAI);
     });
 
     describe("generic tests", async () => {
