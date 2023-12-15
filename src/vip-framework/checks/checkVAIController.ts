@@ -51,7 +51,11 @@ export const checkVAIController = () => {
           continue;
         }
 
-        await setMaxStalePeriodInChainlinkOracleWithoutFeed(CHAINLINK_ORACLE, await vToken.underlying(), NORMAL_TIMELOCK);
+        await setMaxStalePeriodInChainlinkOracleWithoutFeed(
+          CHAINLINK_ORACLE,
+          await vToken.underlying(),
+          NORMAL_TIMELOCK,
+        );
       }
     });
 
