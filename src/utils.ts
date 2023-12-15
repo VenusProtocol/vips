@@ -99,6 +99,27 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   await tx.wait();
 };
 
+export const setMaxStalePeriodInChainlinkOracleWithoutFeed = async (
+  chainlinkOracleAddress: string,
+  asset: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const provider = ethers.provider;
+
+  const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  const feed = (await oracle.tokenConfigs(asset)).feed;
+
+  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
+  await tx.wait();
+};
+
 export const expectEvents = async (
   txResponse: TransactionResponse,
   abis: ContractInterface[],
