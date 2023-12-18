@@ -15,6 +15,7 @@ import VTOKEN_ABI from "../abi/vToken.json";
 import VAI_ABI from "../abi/vai.json";
 import VAI_CONTROLLER_ABI from "../abi/vaiController.json";
 
+const EXP_SCALE = parseUnits("1", "18");
 const VAI_UNITROLLER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI_UNITROLLER;
 const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI_MINT_USER_ACCOUNT;
 const UNITROLLER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].UNITROLLER;
@@ -72,14 +73,19 @@ export const checkVAIController = () => {
         return;
       }
 
+      const vaiToMint = parseUnits("1000", "18");
+
       const mintableAmount = await vaiController.getMintableVAI(ACCOUNT);
       expect(mintableAmount[1]).to.be.gt(0);
 
+      const treasuryPercent = await vaiController.treasuryPercent();
+
       const balanceBefore = await vai.balanceOf(ACCOUNT);
-      await expect(vaiController.mintVAI(parseUnits("1000", "18"))).to.not.reverted;
+      await expect(vaiController.mintVAI(vaiToMint)).to.not.reverted;
       const balanceAfter = await vai.balanceOf(ACCOUNT);
 
       expect(balanceAfter.sub(balanceBefore)).to.be.gt(0);
+      expect(balanceAfter.sub(balanceBefore)).eq(vaiToMint.mul(EXP_SCALE.sub(treasuryPercent)).div(EXP_SCALE));
 
       const repayAmount = await vaiController.getVAIRepayAmount(ACCOUNT);
       expect(repayAmount).to.be.gt(0);
@@ -90,7 +96,7 @@ export const checkVAIController = () => {
       await vaiController.accrueVAIInterest();
       const repayAmountWithInterestAfter = await vaiController.getVAICalculateRepayAmount(ACCOUNT, repayAmount);
       expect(repayAmountWithInterestAfter[1].add(repayAmountWithInterestAfter[2])).to.be.gt(
-        repayAmountWithInterestBefore[1].add(repayAmountWithInterestAfter[2]),
+        repayAmountWithInterestBefore[1].add(repayAmountWithInterestBefore[2]),
       );
 
       await expect(vaiController.repayVAI(parseUnits("500", "18"))).to.not.reverted;
