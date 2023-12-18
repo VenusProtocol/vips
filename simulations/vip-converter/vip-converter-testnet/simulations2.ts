@@ -24,7 +24,6 @@ import XVS_VAULT_CONVERTER_ABI from "./abi/XVSVaultTreasury.json";
 const allAssets = [
   ...Assets,
   "0x5fFbE5302BadED40941A403228E6AD03f93752d9", // VAI
-  "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B", // TRX
 ];
 const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -136,7 +135,7 @@ forking(35945670, () => {
         txResponse,
         [SINGLE_TOKEN_CONVERTER_ABI],
         ["ConversionConfigUpdated", "ConverterNetworkAddressUpdated"],
-        [210, 6],
+        [216, 6],
       );
     },
   });
