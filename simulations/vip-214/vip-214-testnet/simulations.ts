@@ -9,6 +9,7 @@ import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/chec
 import { checkVAIController } from "../../../src/vip-framework/checks/checkVAIController";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
+import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
@@ -30,14 +31,22 @@ const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
 const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
+const IL_COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
+const IL_VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
+const NEW_IL_COMPTROLLER_IMPLEMENTATION = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
+const OLD_IL_COMPTROLLER_IMPLEMENTATION = "0x11a92852fA7D70C220Dada69969b2f1C4e18e663";
+const NEW_IL_VTOKEN_IMPLEMENTATION = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
+const OLD_IL_VTOKEN_IMPLEMENTATION = "0xcA408D716011169645Aa94ddc5665043C33df814";
 
-forking(35984092, () => {
+forking(36064000, () => {
   const provider = ethers.provider;
   let prime: ethers.Contract;
   let vaiController: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
   let comptroller: ethers.Contract;
+  let beaconProxyComptroller: ethers.Contract;
+  let beaconProxyVtoken: ethers.Contract;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
@@ -49,6 +58,8 @@ forking(35984092, () => {
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_PROXY_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
+    beaconProxyComptroller = new ethers.Contract(IL_COMPTROLLER_BEACON, BEACON_ABI, provider);
+    beaconProxyVtoken = new ethers.Contract(IL_VTOKEN_BEACON, BEACON_ABI, provider);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -61,13 +72,19 @@ forking(35984092, () => {
 
       implementation = await vaiControllerProxy.vaiControllerImplementation();
       expect(implementation).to.equal(OLD_VAI_CONTROLLER_IMPLEMENTATION);
+
+      implementation = await beaconProxyComptroller.implementation();
+      expect(implementation).to.equal(OLD_IL_COMPTROLLER_IMPLEMENTATION);
+
+      implementation = await beaconProxyVtoken.implementation();
+      expect(implementation).to.equal(OLD_IL_VTOKEN_IMPLEMENTATION);
     });
 
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(1000);
-      expect(apr[1]).to.be.equal(1528);
+      expect(apr[0]).to.be.equal(996);
+      expect(apr[1]).to.be.equal(1605);
     });
 
     describe("generic tests", async () => {
@@ -86,6 +103,7 @@ forking(35984092, () => {
         [1, 1, 1, 1],
       );
       expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVAIMintRate"], [1]);
+      expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
     },
   });
 
@@ -99,6 +117,12 @@ forking(35984092, () => {
 
       implementation = await vaiControllerProxy.vaiControllerImplementation();
       expect(implementation).to.equal(NEW_VAI_CONTROLLER_IMPLEMENTATION);
+
+      implementation = await beaconProxyComptroller.implementation();
+      expect(implementation).to.equal(NEW_IL_COMPTROLLER_IMPLEMENTATION);
+
+      implementation = await beaconProxyVtoken.implementation();
+      expect(implementation).to.equal(NEW_IL_VTOKEN_IMPLEMENTATION);
     });
 
     it("vai prime integration", async () => {
@@ -112,8 +136,8 @@ forking(35984092, () => {
     it("apr", async () => {
       const apr = await prime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(1000);
-      expect(apr[1]).to.be.equal(1528);
+      expect(apr[0]).to.be.equal(996);
+      expect(apr[1]).to.be.equal(1605);
     });
 
     it("rates", async () => {

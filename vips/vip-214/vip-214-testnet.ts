@@ -16,6 +16,10 @@ const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
+const IL_COMPTROLLER_BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
+const IL_VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
+const NEW_IL_COMPTROLLER_IMPL = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
+const NEW_IL_VTOKEN_IMPL = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
 
 export const vip214 = () => {
   const meta = {
@@ -134,6 +138,16 @@ export const vip214 = () => {
         target: COMPTROLLER,
         signature: "_setVAIMintRate(uint256)",
         params: [parseUnits("1", 18).toString()],
+      },
+      {
+        target: IL_COMPTROLLER_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_IL_COMPTROLLER_IMPL],
+      },
+      {
+        target: IL_VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_IL_VTOKEN_IMPL],
       },
     ],
     meta,
