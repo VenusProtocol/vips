@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip218Testnet } from "../../../vips/vip-218/vip-218-testnet";
+import { vip220Testnet } from "../../../vips/vip-220/vip-220-testnet";
 import COMPTROLLER_ABI from "./abi/Comproller_ABI.json";
 
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
@@ -32,7 +32,7 @@ forking(36057801, () => {
     });
   });
 
-  testVip("VIP-218Testnet Reduce CF of BUSD market", vip218Testnet(), {
+  testVip("VIP-220Testnet Reduce CF of BUSD market", vip220Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "Failure"], [1, 0]);
     },

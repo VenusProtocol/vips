@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip218 } from "../../../vips/vip-218/vip-218";
+import { vip220 } from "../../../vips/vip-220/vip-220";
 import COMPTROLLER_ABI from "./abi/Comproller_ABI.json";
 
 const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
@@ -26,13 +26,13 @@ forking(34455610, () => {
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("BUSD collateral factor equals 80%", async () => {
+    it("BUSD collateral factor equals 82.5%", async () => {
       const market = await comptroller.markets(VBUSD);
       expect(market.collateralFactorMantissa).to.equal(OLD_COLLATERAL_FACT0R);
     });
   });
 
-  testVip("VIP-218 Reduce CF of BUSD market", vip218(), {
+  testVip("VIP-220 Reduce CF of BUSD market", vip220(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "Failure"], [1, 0]);
     },
