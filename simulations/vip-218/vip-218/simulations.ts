@@ -39,7 +39,7 @@ forking(34455610, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Increase BUSD collateral factor to 72%", async () => {
+    it("Reduces BUSD collateral factor to 72%", async () => {
       const market = await comptroller.markets(VBUSD);
       expect(market.collateralFactorMantissa).to.equal(NEW_COLLATERAL_FACTOR);
     });
