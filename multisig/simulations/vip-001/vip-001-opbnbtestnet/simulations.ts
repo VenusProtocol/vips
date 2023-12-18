@@ -28,35 +28,35 @@ const assetConfigs: AssetConfig[] = [
     name: "BTCB",
     address: "0x7Af23F9eA698E9b953D2BD70671173AaD0347f19",
     oracle: "binance",
-    price: "42341412428170000000000",
+    price: "41415982346250000000000",
   },
   {
     name: "ETH",
     address: "0x94680e003861D43C6c0cf18333972312B6956FF1",
     oracle: "binance",
-    price: "2228615490350000000000",
+    price: "2198998128410000000000",
   },
   {
     name: "USDT",
     address: "0x8ac9B3801D0a8f5055428ae0bF301CA1Da976855",
     oracle: "binance",
-    price: "1000037500000000000",
+    price: "999495000000000000",
   },
   {
     name: "WBNB",
     address: "0xF9ce72611a1BE9797FdD2c995dB6fB61FD20E4eB",
     oracle: "binance",
-    price: "231253151790000000000",
+    price: "239016864390000000000",
   },
   {
     name: "XVS",
     address: "0x3d0e20D4caD958bc848B045e1da19Fe378f86f03",
     oracle: "binance",
-    price: "8264938300000000000",
+    price: "9831545020000000000",
   },
 ];
 
-forking(15765888, () => {
+forking(16003453, () => {
   const provider = ethers.provider;
   let resilientOracle: ethers.Contract;
   let binanceOracle: ethers.Contract;
