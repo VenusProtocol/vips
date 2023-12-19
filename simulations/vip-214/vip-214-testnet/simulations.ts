@@ -15,6 +15,7 @@ import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
+import { checkIsolatedPoolsComptrollers } from "../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 const PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 const VAI_CONTROLLER_PROXY = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -160,6 +161,7 @@ forking(36064000, () => {
       checkCorePoolComptroller();
       checkXVSVault();
       checkVAIController();
+      checkIsolatedPoolsComptrollers();
     });
   });
 });

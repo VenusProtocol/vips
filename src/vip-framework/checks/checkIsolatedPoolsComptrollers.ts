@@ -1,0 +1,205 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { expect } from "chai";
+import { BigNumber, Contract, Signer } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+
+import { NETWORK_ADDRESSES } from "../../networkAddresses";
+import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import CHAINLINK_ORACLE_ABI from "../abi/chainlinkOracle.json";
+import COMPTROLLER_ABI from "../abi/comptroller.json";
+import ERC20_ABI from "../abi/erc20.json";
+import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
+import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
+import VTOKEN_ABI from "../abi/vToken.json";
+
+const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+const LENS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].COMPTROLLER_LENS;
+const ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
+const USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
+const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
+const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+const BINANCE_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+const POOL_REGISTRY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].POOL_REGISTRY;
+const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
+
+interface PoolMetadata {
+  name: string;
+  creator: string;
+  comptroller: string;
+  blockPosted: BigNumber;
+  timestampPosted: BigNumber;
+}
+
+interface MarketMetadata {
+  isListed: boolean;
+  collateralFactorMantissa: BigNumber;
+  liquidationThresholdMantissa: BigNumber;
+}
+
+interface TokenConfig {
+  asset: string;
+  oracles: string[];
+  enableFlagsForOracles: boolean[];
+}
+
+interface PriceFeedConfig {
+  asset: string;
+  feed: string;
+  maxStalePeriod: BigNumber;
+}
+
+const setMaxStalePeriod = async (resilientOracle: Contract, underlyingAsset: Contract) => {
+  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
+  if (tokenConfig.asset !== ethers.constants.AddressZero) {
+    const mainOracle = tokenConfig.oracles[0];
+    if (mainOracle === BINANCE_ORACLE) {
+      const symbol = await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, symbol);
+    } else {
+      const chainlinkOracle: Contract = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, mainOracle);
+      const feedConfig: PriceFeedConfig = await chainlinkOracle.tokenConfigs(underlyingAsset.address);
+      await setMaxStalePeriodInChainlinkOracle(mainOracle, underlyingAsset.address, feedConfig.feed, NORMAL_TIMELOCK);
+    }
+  }
+};
+
+const calculateBorrowableAmount = async (
+  comptroller: Contract,
+  resilientOracle: Contract,
+  supplyMarket: Contract,
+  borrowMarket: Contract,
+  borrowUnderlyingDecimals: BigNumber,
+  suppliedAmount: BigNumber,
+): Promise<BigNumber> => {
+  const EXP_SCALE = parseUnits("1", 18);
+  const marketData: MarketMetadata = await comptroller.markets(supplyMarket);
+  const supplyMarketCF = marketData.collateralFactorMantissa;
+  const supplyTokenPrice = await resilientOracle.getUnderlyingPrice(supplyMarket);
+  const borrowTokenPrice = await resilientOracle.getUnderlyingPrice(borrowMarket);
+  const supplyTokenUSDAmountScaled = suppliedAmount.mul(supplyTokenPrice).div(EXP_SCALE);
+
+  const borrowableAmountUSD = supplyTokenUSDAmountScaled.mul(supplyMarketCF).div(EXP_SCALE);
+  const borrowTokenPriceScaled = borrowTokenPrice.mul(parseUnits("1", borrowUnderlyingDecimals)).div(EXP_SCALE); // scaled to 18 decimals
+
+  const borrowTokenAmount = borrowableAmountUSD.div(borrowTokenPriceScaled);
+
+  return parseUnits(borrowTokenAmount.toString(), borrowUnderlyingDecimals);
+};
+
+const runPoolTests = (pool: PoolMetadata): void => {
+  describe(`generic comptroller checks for pool ${pool.name}`, () => {
+    let comptroller: Contract;
+    let supplyMarket: Contract;
+    let borrowMarket: Contract;
+    let supplyUnderlying: Contract;
+    let borrowUnderlying: Contract;
+    let resilientOracle: Contract;
+    let timelockSigner: Signer;
+
+    before(async () => {
+      impersonateAccount(ACCOUNT);
+      impersonateAccount(NORMAL_TIMELOCK);
+      const signer = await ethers.getSigner(ACCOUNT);
+      timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
+
+      comptroller = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
+      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
+
+      const markets: string[] = await comptroller.getAllMarkets();
+
+      for (const market of markets) {
+        const marketData: MarketMetadata = await comptroller.markets(market);
+        if (marketData.collateralFactorMantissa.isZero()) continue;
+        if (!supplyMarket) {
+          supplyMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
+          supplyUnderlying = await ethers.getContractAt(ERC20_ABI, await supplyMarket.underlying(), signer);
+        } else if (!borrowMarket) {
+          borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
+          borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
+          break; // Exit the loop if both supplyMarket and borrowMarket are initialized
+        }
+      }
+
+      await setMaxStalePeriod(resilientOracle, supplyUnderlying);
+      await setMaxStalePeriod(resilientOracle, borrowUnderlying);
+    });
+
+    it(`check if comptroller`, async () => {
+      expect(await comptroller.isComptroller()).to.equal(true);
+    });
+
+    it(`operations`, async () => {
+      const supplyUnderlyingDecimals = await supplyUnderlying.decimals();
+      const supplyAmountScaled = parseUnits("1", supplyUnderlyingDecimals);
+      const originalSupplyMarketBalance = await supplyMarket.balanceOf(ACCOUNT);
+
+      await supplyUnderlying.approve(supplyMarket.address, supplyAmountScaled);
+      await supplyMarket.mint(supplyAmountScaled);
+
+      expect(await supplyMarket.balanceOf(ACCOUNT)).to.be.gt(originalSupplyMarketBalance);
+
+      await comptroller.enterMarkets([borrowMarket.address, supplyMarket.address]);
+      const vusdtBalance = await borrowMarket.balanceOf(ACCOUNT);
+      let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
+      const borrowUnderlyingDecimals = await borrowUnderlying.decimals();
+      const borrowAmount = await calculateBorrowableAmount(
+        comptroller,
+        resilientOracle,
+        supplyMarket,
+        borrowMarket,
+        borrowUnderlyingDecimals,
+        supplyAmountScaled,
+      );
+      await borrowMarket.borrow(borrowAmount);
+      expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
+
+      borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
+      await borrowUnderlying.approve(borrowMarket.address, borrowAmount);
+      await borrowMarket.repayBorrow(borrowAmount);
+      expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.lt(borrowUnderlyingBalance);
+
+      const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(ACCOUNT);
+      await supplyMarket.redeemUnderlying(parseUnits("0.1", supplyUnderlyingDecimals));
+      expect(await supplyUnderlying.balanceOf(ACCOUNT)).to.gt(supplyUnderlyingBalance);
+    });
+
+    it(`read storage`, async () => {
+      expect(await comptroller.comptrollerLens()).to.be.equal(LENS);
+    });
+
+    it(`set storage`, async () => {
+      const originalOracle = await comptroller.oracle();
+
+      await comptroller.connect(timelockSigner)._setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+      expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+      await comptroller.connect(timelockSigner)._setPriceOracle(originalOracle);
+    });
+  });
+}
+
+export const checkIsolatedPoolsComptrollers = (): void => {
+  describe("Pool Registry get all pools", () => {
+    let pools: PoolMetadata[];
+
+    before(async () => {
+      const poolRegistry: Contract = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
+      pools = await poolRegistry.callStatic.getAllPools();
+    });
+
+    describe("Running tests for each pool", () => {
+      before(() => {
+        if (!pools || pools.length === 0) {
+          throw new Error("Pools not initialized or no pools available");
+        }
+      });
+
+      pools.forEach((pool) => {
+        // Dynamically creating a describe block for each pool
+        describe(`Pool ${pool.name} tests`, () => {
+          runPoolTests(pool);
+        });
+      });
+    });
+  });
+};
