@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -12,6 +13,7 @@ import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip214 } from "../../../vips/vip-214/vip-214-testnet";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import NEW_PRIME_ABI from "./abi/newPrime.json";
 import OLD_PRIME_ABI from "./abi/oldPrime.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
@@ -38,10 +40,12 @@ const NEW_IL_COMPTROLLER_IMPLEMENTATION = "0x329Bc34E6A46243d21955A4369cD66bdD52
 const OLD_IL_COMPTROLLER_IMPLEMENTATION = "0x11a92852fA7D70C220Dada69969b2f1C4e18e663";
 const NEW_IL_VTOKEN_IMPLEMENTATION = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
 const OLD_IL_VTOKEN_IMPLEMENTATION = "0xcA408D716011169645Aa94ddc5665043C33df814";
+const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 
 forking(36064000, () => {
   const provider = ethers.provider;
-  let prime: ethers.Contract;
+  let oldPrime: ethers.Contract;
+  let newPrime: ethers.Contract;
   let vaiController: ethers.Contract;
   let defaultProxyAdmin: ethers.Contract;
   let vaiControllerProxy: ethers.Contract;
@@ -54,7 +58,8 @@ forking(36064000, () => {
     await impersonateAccount(USER);
     const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
 
-    prime = new ethers.Contract(PRIME_PROXY, OLD_PRIME_ABI, timelock);
+    oldPrime = new ethers.Contract(PRIME_PROXY, OLD_PRIME_ABI, timelock);
+    newPrime = new ethers.Contract(PRIME_PROXY, NEW_PRIME_ABI, timelock);
     vaiController = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, timelock);
     defaultProxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_PROXY_ABI, provider);
@@ -82,7 +87,7 @@ forking(36064000, () => {
     });
 
     it("apr", async () => {
-      const apr = await prime.calculateAPR(vBTC, USER);
+      const apr = await oldPrime.calculateAPR(vBTC, USER);
 
       expect(apr[0]).to.be.equal(996);
       expect(apr[1]).to.be.equal(1605);
@@ -134,11 +139,32 @@ forking(36064000, () => {
       expect(mintOnlyForPrimeHolder).to.equal(true);
     });
 
-    it("apr", async () => {
-      const apr = await prime.calculateAPR(vBTC, USER);
+    it("apr (legacy)", async () => {
+      const apr = await oldPrime.calculateAPR(vBTC, USER);
 
-      expect(apr[0]).to.be.equal(996);
-      expect(apr[1]).to.be.equal(1605);
+      expect(apr.supplyAPR).to.be.equal(996);
+      expect(apr.borrowAPR).to.be.equal(1605);
+    });
+
+    it("apr (new)", async () => {
+      const apr = await newPrime.calculateAPR(vBTC, USER);
+
+      expect(apr.supplyAPR).to.be.equal(996);
+      expect(apr.borrowAPR).to.be.equal(1605);
+      expect(apr.totalScore).to.be.equal(BigNumber.from("3202493156937100961495"));
+      expect(apr.userScore).to.be.equal(BigNumber.from("2024915848628363594635"));
+      expect(apr.xvsBalanceForScore).to.be.equal(BigNumber.from("100000000000000000000000"));
+      expect(apr.capital).to.be.equal(BigNumber.from("52214401195862928372"));
+      expect(apr.cappedSupply).to.be.equal(BigNumber.from("47708882045868937252"));
+      expect(apr.cappedBorrow).to.be.equal(BigNumber.from("4505519149993991120"));
+      expect(apr.supplyCapUSD).to.be.equal(BigNumber.from("1956161490000000000000000"));
+      expect(apr.borrowCapUSD).to.be.equal(BigNumber.from("3912322980000000000000000"));
+    });
+
+    it("poolRegistry", async () => {
+      const poolRegistry = await newPrime.poolRegistry();
+
+      expect(poolRegistry).to.be.equal(POOL_REGISTRY);
     });
 
     it("rates", async () => {
