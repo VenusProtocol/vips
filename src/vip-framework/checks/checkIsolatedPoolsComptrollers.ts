@@ -5,7 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
-import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import { setMaxStalePeriod } from "../../utils";
 import CHAINLINK_ORACLE_ABI from "../abi/chainlinkOracle.json";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
@@ -15,7 +15,6 @@ import VTOKEN_ABI from "../abi/vToken.json";
 
 const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
 const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
-const BINANCE_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
 const POOL_REGISTRY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].POOL_REGISTRY;
 const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
 
@@ -32,35 +31,6 @@ interface MarketMetadata {
   collateralFactorMantissa: BigNumber;
   liquidationThresholdMantissa: BigNumber;
 }
-
-interface TokenConfig {
-  asset: string;
-  oracles: string[];
-  enableFlagsForOracles: boolean[];
-}
-
-interface PriceFeedConfig {
-  asset: string;
-  feed: string;
-  maxStalePeriod: BigNumber;
-}
-
-const setMaxStalePeriod = async (resilientOracle: Contract, underlyingAsset: Contract) => {
-  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
-  if (tokenConfig.asset !== ethers.constants.AddressZero) {
-    const mainOracle = tokenConfig.oracles[0];
-    if (mainOracle === BINANCE_ORACLE) {
-      const symbol = await underlyingAsset.symbol();
-      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, symbol);
-    } else {
-      const chainlinkOracle: Contract = await ethers.getContractAt(CHAINLINK_ORACLE_ABI, mainOracle);
-      const feedConfig: PriceFeedConfig = await chainlinkOracle.tokenConfigs(underlyingAsset.address);
-      if (feedConfig.feed !== ethers.constants.AddressZero) {
-        await setMaxStalePeriodInChainlinkOracle(mainOracle, underlyingAsset.address, feedConfig.feed, NORMAL_TIMELOCK);
-      }
-    }
-  }
-};
 
 const calculateBorrowableAmount = async (
   comptroller: Contract,
@@ -125,7 +95,11 @@ const runPoolTests = async (pool: PoolMetadata) => {
   console.log(`${pool.name} > check if comptroller`);
   expect(await comptroller.isComptroller()).to.equal(true);
 
-  console.log(`${pool.name} > operations`);
+  console.log(
+    `${
+      pool.name
+    } > operations - supplying ${await supplyUnderlying.symbol()} | borrowing ${await borrowUnderlying.symbol()}`,
+  );
   const supplyUnderlyingDecimals = await supplyUnderlying.decimals();
   const initialSupplyAmount = parseUnits("2", supplyUnderlyingDecimals);
   const balance = await supplyUnderlying.balanceOf(ACCOUNT);

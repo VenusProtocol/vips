@@ -7,7 +7,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
-import { setMaxStalePeriodInChainlinkOracleWithoutFeed } from "../../utils";
+import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 import VAI_ABI from "../abi/vai.json";
@@ -47,13 +47,19 @@ export const checkVAIController = () => {
       for (let i = 0; i < markets.length; i++) {
         const vToken = await ethers.getContractAt(VTOKEN_ABI, markets[i], signer);
         if (markets[i] === vBNB) {
-          await setMaxStalePeriodInChainlinkOracleWithoutFeed(CHAINLINK_ORACLE, WBNB, NORMAL_TIMELOCK);
+          await setMaxStalePeriodInChainlinkOracle(
+            CHAINLINK_ORACLE,
+            WBNB,
+            ethers.constants.AddressZero,
+            NORMAL_TIMELOCK,
+          );
           continue;
         }
 
-        await setMaxStalePeriodInChainlinkOracleWithoutFeed(
+        await setMaxStalePeriodInChainlinkOracle(
           CHAINLINK_ORACLE,
           await vToken.underlying(),
+          ethers.constants.AddressZero,
           NORMAL_TIMELOCK,
         );
       }

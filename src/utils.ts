@@ -6,11 +6,15 @@ import { expect } from "chai";
 import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
+
+const BINANCE_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
 
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
@@ -91,29 +95,12 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
   const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
 
-  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
-    asset,
-    feed,
-    maxStalePeriod: maxStalePeriodInSeconds,
-  });
-  await tx.wait();
-};
-
-export const setMaxStalePeriodInChainlinkOracleWithoutFeed = async (
-  chainlinkOracleAddress: string,
-  asset: string,
-  admin: string,
-  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
-) => {
-  const provider = ethers.provider;
-
-  const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
-  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
-
-  const feed = (await oracle.tokenConfigs(asset)).feed;
-
   if (feed === ethers.constants.AddressZero) {
-    return;
+    feed = (await oracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
   }
 
   const tx = await oracle.connect(oracleAdmin).setTokenConfig({
@@ -122,6 +109,29 @@ export const setMaxStalePeriodInChainlinkOracleWithoutFeed = async (
     maxStalePeriod: maxStalePeriodInSeconds,
   });
   await tx.wait();
+};
+
+export const setMaxStalePeriod = async (
+  resilientOracle: Contract,
+  underlyingAsset: Contract,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
+  if (tokenConfig.asset !== ethers.constants.AddressZero) {
+    const mainOracle = tokenConfig.oracles[0];
+    if (mainOracle === BINANCE_ORACLE) {
+      const symbol = await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, symbol, maxStalePeriodInSeconds);
+    } else {
+      await setMaxStalePeriodInChainlinkOracle(
+        mainOracle,
+        underlyingAsset.address,
+        ethers.constants.AddressZero,
+        NORMAL_TIMELOCK,
+        maxStalePeriodInSeconds,
+      );
+    }
+  }
 };
 
 export const expectEvents = async (
