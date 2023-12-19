@@ -147,7 +147,7 @@ const runPoolTests = async (pool: PoolMetadata) => {
 };
 
 export const checkIsolatedPoolsComptrollers = (): void => {
-  describe.only("generic Isolated pool comptroller checks", () => {
+  describe("generic Isolated pool comptroller checks", () => {
     let pools: PoolMetadata[];
 
     it("generic Isolated pool comptroller checks", async () => {

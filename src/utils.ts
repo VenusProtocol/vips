@@ -13,9 +13,6 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BINANCE_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
-const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
@@ -116,18 +113,21 @@ export const setMaxStalePeriod = async (
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
+  const binanceOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+  const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
-    if (mainOracle === BINANCE_ORACLE) {
+    if (mainOracle === binanceOracle) {
       const symbol = await underlyingAsset.symbol();
-      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, symbol, maxStalePeriodInSeconds);
+      await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
     } else {
       await setMaxStalePeriodInChainlinkOracle(
         mainOracle,
         underlyingAsset.address,
         ethers.constants.AddressZero,
-        NORMAL_TIMELOCK,
+        normalTimelock,
         maxStalePeriodInSeconds,
       );
     }
