@@ -45,10 +45,45 @@ export const Assets = [
 ];
 
 export const BaseAssets = [
-  "0x55d398326f99059fF775485246999027B3197955", // USDT
-  "0x55d398326f99059fF775485246999027B3197955", // USDT
-  "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // USDC
-  "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
-  "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
-  "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS
+  "0x55d398326f99059fF775485246999027B3197955", // USDT RiskFundConverter BaseAsset
+  "0x55d398326f99059fF775485246999027B3197955", // USDT USDTTokenConverter BaseAsset
+  "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // USDC USDCTokenConverter BaseAsset
+  "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB BTCBTokenConverter BaseAsset
+  "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH ETHTokenConverter BaseAsset
+  "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS XVSTokenConverter BaseAsset
 ];
+
+export const CONVERTER_NETWORK = "0xc2Eb000a98b4BB9c6Bff346Bd86C49135d13E2B6";
+export const RISK_FUND_CONVERTER = "0x9008De0F2172710c3c80BfAAB7A9A7e69C8e8353";
+export const USDT_PRIME_CONVERTER = "0x52B88fc3F47f607DdcE4048c243050B7576e9cbD";
+export const USDC_PRIME_CONVERTER = "0x981e47f3Fd5A497280Fb9adD5791F155Eb9D7c6F";
+export const BTCB_PRIME_CONVERTER = "0xD97212b66b158C3CF8E869E3cCc4d21A0193a7D6";
+export const ETH_PRIME_CONVERTER = "0x01C9caD8F9fe08397b1737F71865067dC08237d8";
+export const XVS_VAULT_CONVERTER = "0x06c98127900274eeB636B1957287D2C76C0cb476";
+
+export const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
+export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+export const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+
+export const TimelocksArray = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
+
+export const converters: string[] = [
+  RISK_FUND_CONVERTER,
+  USDT_PRIME_CONVERTER,
+  USDC_PRIME_CONVERTER,
+  BTCB_PRIME_CONVERTER,
+  ETH_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
+];
+
+// Function to filter assets based on a base asset
+const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
+
+export const RiskFundConverterTokenOuts = filterAssets(Assets, BaseAssets[0]);
+export const USDTPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
+export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
+export const BTCBPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
+export const ETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
+export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[5]);

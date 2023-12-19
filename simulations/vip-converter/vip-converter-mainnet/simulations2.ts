@@ -3,12 +3,19 @@ import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { Assets, converters } from "../../../vips/vip-converter/vip-converter-testnet/Addresses";
-import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter1";
-import { vipConverter2 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter2";
-import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
+import {
+  Assets,
+  CONVERTER_NETWORK,
+  RISK_FUND_CONVERTER,
+  USDC_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
+  converters,
+} from "../../../vips/vip-converter/vip-converter-mainnet/Addresses";
+import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-mainnet/vip-converter1";
+import { vipConverter2 } from "../../../vips/vip-converter/vip-converter-mainnet/vip-converter2";
+import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManagerMainnet.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "../abi/ERC20.json";
@@ -23,39 +30,37 @@ import XVS_VAULT_CONVERTER_ABI from "../abi/XVSVaultTreasury.json";
 
 const allAssets = [
   ...Assets,
-  "0x5fFbE5302BadED40941A403228E6AD03f93752d9", // VAI
+  "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7", // VAI
 ];
-const DEFAULT_PROXY_ADMIN = "0x7877fFd62649b6A1557B55D4c20fcBaB17344C91";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 
-const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
-const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-const XVS_VAULT = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
+const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const XVS_VAULT = "0x051100480289e704d20e9DB4804837068f3f9204";
 
-const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
-const FEED_ADDRESS_USDT = "0xEca2605f0BCF2BA5966372C99837b1F182d3D620";
-const FEED_ADDRESS_USDC = "0x90c069C4538adAc136E051052E14c1cD799C41B7";
+const USDT_HOLDER = "0x4982085C9e2F89F2eCb8131Eca71aFAD896e89CB";
+const USDC_HOLDER = "0xf89d7b9c864f589bbF53a82105107622B35EaA40";
 
-const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
-const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
+const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+const FEED_ADDRESS_USDT = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
+const FEED_ADDRESS_USDC = "0x51597f405303C4377E36123cBc172b13269EA163";
 
-const CONVERTER_NETWORK = "0x650B1C775E737c439129611f068AFA3763b57Ff5";
-const RISK_FUND_CONVERTER = "0x07c10cd93d7ACE4c1EfAE0248393e96c072A69F3";
-const USDC_PRIME_CONVERTER = "0x18F2543DCCD09dEb0e28575008CD24c0700e964B";
-const XVS_VAULT_CONVERTER = "0x354B807373a9D07A08b0F6a4064B9Ef80fAD7DBf";
+const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+const XVS_VAULT_TREASURY = "0x4D0Af9D0E15Fb36674535CDE804a9bd0aD3dd4Ac";
 
-const RISK_FUND_PROXY = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
-const RISK_FUND_OLD_IMPLEMENTATION = "0x1E7DEC93C77740c2bB46daf87ef42056E388dA14";
-const RISK_FUND_V2_IMPLEMENTATION = "0x217a907B0c6a7Dc67a21F769a915722B98136F82";
+const RISK_FUND_PROXY = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
+const RISK_FUND_OLD_IMPLEMENTATION = "0x0E8Ef0EC1e0C109c5B5249CcefB703A414835eaC";
+const RISK_FUND_V2_IMPLEMENTATION = "0x76B88ff4579B35D2722B7383b9B9ce831dc89B72";
 
-const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x6A7FF4641F52b267102a5a0779cE7a060374d6cC";
-const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
+const PROTOCOL_SHARE_RESERVE_PROXY = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x5108E5F903Ecc5e3a2dA20171527aCe96CB3c7f8";
+const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x7DcBd10E3479907e0B8C79d01D0572C8cc00227B";
 
-forking(35945670, () => {
+forking(34489200, () => {
   const provider = ethers.provider;
   let riskFund: Contract;
   let proxyAdmin: Contract;
@@ -128,14 +133,14 @@ forking(35945670, () => {
         ["DistributionConfigAdded"],
         [10],
       );
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [12]);
       await expectEvents(txResponse, [RISK_FUND_V2_ABI], ["RiskFundConverterUpdated"], [1]);
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [2]);
       await expectEvents(
         txResponse,
         [SINGLE_TOKEN_CONVERTER_ABI],
         ["ConversionConfigUpdated", "ConverterNetworkAddressUpdated"],
-        [216, 6],
+        [252, 6],
       );
     },
   });
@@ -145,6 +150,8 @@ forking(35945670, () => {
     let usdc: Contract;
     let usdcPrimeConverter: Contract;
     let user1: Signer;
+    let usdtHolder: Signer;
+    let usdcHolder: Signer;
     let user1Address: string;
 
     const amount = parseUnits("1000", 18);
@@ -167,8 +174,12 @@ forking(35945670, () => {
 
       [, user1] = await ethers.getSigners();
       user1Address = await user1.getAddress();
-      await usdt.connect(user1).allocateTo(user1Address, amount);
-      await usdc.connect(user1).allocateTo(user1Address, amount);
+
+      usdcHolder = await initMainnetUser(USDC_HOLDER, ethers.utils.parseEther("1"));
+      usdtHolder = await initMainnetUser(USDT_HOLDER, ethers.utils.parseEther("1"));
+
+      await usdt.connect(usdtHolder).transfer(user1Address, amount);
+      await usdc.connect(usdcHolder).transfer(user1Address, amount);
 
       for (const token of allAssets) {
         const pools = await riskFundConverter.getPools(token);
@@ -259,7 +270,7 @@ forking(35945670, () => {
 
     it("Convert exact tokens should work correctly", async () => {
       const amountInMantissa = amount.div(2);
-      await usdt.connect(user1).allocateTo(user1Address, amount);
+      await usdt.connect(usdtHolder).transfer(user1Address, amount);
 
       const usdcBalanceOfRiskFundConverterPrevious = await riskFundConverter.balanceOf(USDC);
       const usdtBalanceOfRiskFundPrevious = await usdt.balanceOf(RISK_FUND_PROXY);
@@ -285,13 +296,13 @@ forking(35945670, () => {
     });
 
     it("ConvertForExactTokens should work properly", async () => {
-      await usdc.connect(user1).allocateTo(user1Address, amount);
+      await usdc.connect(usdcHolder).transfer(user1Address, amount);
       await usdc.connect(user1).transfer(RISK_FUND_CONVERTER, amount);
       await riskFundConverter.connect(user1).updateAssetsState(COMPTROLLER, USDC);
 
       const amountOutMantissa = amount.div(2);
       const amountInMaxMantissa = amount;
-      await usdt.connect(user1).allocateTo(user1Address, amount);
+      await usdt.connect(usdtHolder).transfer(user1Address, amount);
 
       const usdcBalanceOfRiskFundConverterPrevious = await riskFundConverter.balanceOf(USDC);
       const usdtBalanceOfRiskFundPrevious = await usdt.balanceOf(RISK_FUND_PROXY);
@@ -316,8 +327,8 @@ forking(35945670, () => {
 
     it("Private conversion should occur on updateAssetsState", async () => {
       const newAmount = amount.mul(2);
-      await usdc.connect(user1).allocateTo(user1Address, newAmount);
-      await usdt.connect(user1).allocateTo(user1Address, newAmount);
+      await usdc.connect(usdcHolder).transfer(user1Address, newAmount);
+      await usdt.connect(usdtHolder).transfer(user1Address, newAmount);
 
       const destinationAddressForUsdcConverter = await usdcPrimeConverter.destinationAddress();
 
