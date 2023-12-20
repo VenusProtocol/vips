@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
-import { vip221Testnet } from "../../../vips/vip-221/vip-221";
+import { vip221Testnet } from "../../../vips/vip-221/vip-221-testnet";
 import USDT_ABI from "./abi/USDT_ABI.json";
 import VFDUSD_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -15,7 +15,7 @@ import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const FDUSD = "0xcF27439fA231af9931ee40c4f27Bb77B83826F3C";
-const VFDUSD = "0x885071905c270Eaf6626f14fc939161D2825784f";
+const VFDUSD = "0xF06e662a00796c122AaAE935EC4F0Be3F74f5636";
 const VENUS_TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
@@ -31,7 +31,7 @@ const RESERVES_BLOCK_DELTA = 100;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const RATE_MODEL = "0xf59B7f2733a549dCF82b804d69d9c6a38985B90B";
 
-forking(36124930, () => {
+forking(36131280, () => {
   let comptroller: ethers.Contract;
   let fdusd: ethers.Contract;
   let vFdusd: ethers.Contract;
