@@ -34,21 +34,55 @@ const MAX_STALE_PERIOD = 88200; // 24.5 hours max stale period
 export const vip221 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-221 Add FDUSD Market",
-    description: `
-    VIP
-    Risk parameters suggested by Chaos lab:
-    Supply cap: 5,500,000 (full tokens)
-    Borrow cap: 4,400,000 (full tokens)
-    Collateral factor: 75%
-    Reserve factor: 10%
-    XVS rewards:
-      borrowers: 173611111111111
-      suppliers: 173611111111111
-    `,
-    forDescription: "I agree that Venus Protocol should proceed with the Add UNI Market",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Add UNI Market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Add UNI Market or not",
+    title: "VIP-222 Add support for FDUSD on Venus Core Pool",
+    description: `#### Summary
+
+If passed, this VIP will add a new market for the [FDUSD token](https://bscscan.com/address/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409) on Venus Core Pool. Moreover, it will transfer 10,000 USDT to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) to compensate for the [provision of the bootstrap liquidity for the market](https://bscscan.com/tx/0x9b3d1fa33e3d210d258f4138e599d7f1efa616aabe283adfe2b93ca2da923b85).
+
+#### Description
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/support-fdusd-on-venus-core-pool/3982/2), the risk parameters for the new markets are:
+
+- Underlying token: [FDUSD](https://bscscan.com/address/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409)
+- Borrow cap: 4,400,000 FDUSD
+- Supply cap: 5,500,000 FDUSD
+- Collateral factor: 75%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 10,000 FDUSD - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+XVS Distributions:
+
+- 5 XVS/day for suppliers
+- 5 XVS/day for borrowers
+
+Interest rate curve for the new market:
+
+- kink: 80%
+- base (yearly): 0
+- multiplier (yearly): 6.875%
+- jump multiplier (yearly): 250%
+
+#### Security and additional considerations
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the core pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+- Mainnet FDUSD market (vFDUSD): [0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
+- Testnet FDUSD market (vFDUSD): [0xF06e662a00796c122AaAE935EC4F0Be3F74f5636](https://testnet.bscscan.com/address/0xF06e662a00796c122AaAE935EC4F0Be3F74f5636)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/139)
+- [Testnet deployment](https://testnet.bscscan.com/tx/0x224ad2b0f15bf95fe6d9643727d81d772d74c2fa3e712fb4ff33e59db5fc7750)
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "I agree that Venus Protocol should proceed with this VIP",
+    againstDescription: "I do not think that Venus Protocol should proceed with this VIP",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this VIP or not",
   };
 
   return makeProposal(
