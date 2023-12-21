@@ -29,8 +29,9 @@ const RESERVES_BLOCK_DELTA = 28800;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const DEVIATION_LOWER_BOUND = parseUnits("0.99", 18);
 const DEVIATION_UPPER_BOUND = parseUnits("1.01", 18);
+const MAX_STALE_PERIOD = 88200; // 24.5 hours max stale period
 
-export const vip221 = () => {
+export const vip221 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-221 Add FDUSD Market",
@@ -55,7 +56,7 @@ export const vip221 = () => {
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[FDUSD, FDUSD_CHAINLINK_FEED, 88200]], // 24.5 hours max stale period
+        params: [[FDUSD, FDUSD_CHAINLINK_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
       },
       // {
       //   target: BINANCE_ORACLE,

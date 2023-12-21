@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
 import { vip221Testnet } from "../../../vips/vip-221/vip-221-testnet";
 import USDT_ABI from "./abi/USDT_ABI.json";
@@ -11,7 +12,6 @@ import VFDUSD_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import FDUSD_ABI from "./abi/mockToken.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
-import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
@@ -126,6 +126,13 @@ forking(36131280, () => {
       expect(await usdt.balanceOf(COMMUNITY_WALLET)).to.equal(communityBalanceBefore.add(COMMUNITY_WALLET_FUNDING));
     });
     await checkInterestRate(RATE_MODEL, "FDUSD", { base: "0", kink: "0.8", multiplier: "0.06875", jump: "2.5" });
-    await checkVToken(VFDUSD, { name: "Venus FDUSD", symbol: "vFDUSD", decimals: 8, underlying: FDUSD, exchangeRate: parseUnits("1", 28), comptroller: COMPTROLLER });
+    await checkVToken(VFDUSD, {
+      name: "Venus FDUSD",
+      symbol: "vFDUSD",
+      decimals: 8,
+      underlying: FDUSD,
+      exchangeRate: parseUnits("1", 28),
+      comptroller: COMPTROLLER,
+    });
   });
 });
