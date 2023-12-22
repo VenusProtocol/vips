@@ -132,11 +132,6 @@ export const vip003 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setMinDstGas(uint16,uint16,uint256)", NORMAL_TIMELOCK],
-    },
-    {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
       params: [XVS, "migrateMinterTokens(address,address)", NORMAL_TIMELOCK],
     },
     {
@@ -169,11 +164,6 @@ export const vip003 = () => {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [10102, "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0"],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMinDstGas(uint16,uint16,uint256)",
-      params: [10102, 0, "300000"],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
