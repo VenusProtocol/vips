@@ -2448,6 +2448,7 @@ __metadata:
     "@venusprotocol/venus-protocol": ^6.1.0-dev.3
     ajv: ^8.12.0
     chai: ^4.3.7
+    chai-jest-snapshot: ^2.0.0
     commitizen: ^4.2.5
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
@@ -3466,6 +3467,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chai-jest-snapshot@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "chai-jest-snapshot@npm:2.0.0"
+  dependencies:
+    jest-snapshot: 21.2.1
+    lodash.values: ^4.3.0
+  peerDependencies:
+    chai: ">=1.9.0"
+  checksum: 30975e553c3cefdd8cdca349f01827a37946944006d8aabebb6b7d62b33539a137cfd2d74540daac64fa2564a4d9de659f45c297287ce3074d3a9b956ce4b82b
+  languageName: node
+  linkType: hard
+
 "chai@npm:^4.3.7":
   version: 4.3.7
   resolution: "chai@npm:4.3.7"
@@ -3488,7 +3501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^2.0.0, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
+"chalk@npm:^2.0.0, chalk@npm:^2.0.1, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
   dependencies:
@@ -4373,7 +4386,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"diff@npm:3.5.0":
+"diff@npm:3.5.0, diff@npm:^3.2.0":
   version: 3.5.0
   resolution: "diff@npm:3.5.0"
   checksum: 00842950a6551e26ce495bdbce11047e31667deea546527902661f25cc2e73358967ebc78cf86b1a9736ec3e14286433225f9970678155753a6291c3bca5227b
@@ -7162,6 +7175,50 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jest-diff@npm:^21.2.1":
+  version: 21.2.1
+  resolution: "jest-diff@npm:21.2.1"
+  dependencies:
+    chalk: ^2.0.1
+    diff: ^3.2.0
+    jest-get-type: ^21.2.0
+    pretty-format: ^21.2.1
+  checksum: b707f37670782c1d668fdb8aeb3fb9a7103478dea855981347e0474b5ac39b1a88559e6f110bb990f40a457a0b87efc16771f555491d6fda7454348e83314866
+  languageName: node
+  linkType: hard
+
+"jest-get-type@npm:^21.2.0":
+  version: 21.2.0
+  resolution: "jest-get-type@npm:21.2.0"
+  checksum: 6fbd55e2b4df55a698fc8fe8cfa053b108b295ad78e4358df4aaad3e9944ccff6d8a47a309c6bd546bf2508e2e501bab6d2a0bd96af47af96d9c7d64e4ec2f32
+  languageName: node
+  linkType: hard
+
+"jest-matcher-utils@npm:^21.2.1":
+  version: 21.2.1
+  resolution: "jest-matcher-utils@npm:21.2.1"
+  dependencies:
+    chalk: ^2.0.1
+    jest-get-type: ^21.2.0
+    pretty-format: ^21.2.1
+  checksum: ea311edfdb23ec960ab740efd6189a1ebeff6445e6b426c88846550fa2d4bc9271925f42d5a888c4283db1c2ebf791961e911eccae16d2fdc61c79137ee898c3
+  languageName: node
+  linkType: hard
+
+"jest-snapshot@npm:21.2.1":
+  version: 21.2.1
+  resolution: "jest-snapshot@npm:21.2.1"
+  dependencies:
+    chalk: ^2.0.1
+    jest-diff: ^21.2.1
+    jest-matcher-utils: ^21.2.1
+    mkdirp: ^0.5.1
+    natural-compare: ^1.4.0
+    pretty-format: ^21.2.1
+  checksum: f1d33d1586ffca99be03a3e061c77bbe46c4e13774cc411bacf205817d6a5e87541a16845122ee61a965f4db1fcf0db75b284ab785f264d5d5b2ab2843f121a6
+  languageName: node
+  linkType: hard
+
 "js-cookie@npm:^2.2.1":
   version: 2.2.1
   resolution: "js-cookie@npm:2.2.1"
@@ -7616,6 +7673,13 @@ __metadata:
   version: 4.3.1
   resolution: "lodash.upperfirst@npm:4.3.1"
   checksum: cadec6955900afe1928cc60cdc4923a79c2ef991e42665419cc81630ed9b4f952a1093b222e0141ab31cbc4dba549f97ec28ff67929d71e01861c97188a5fa83
+  languageName: node
+  linkType: hard
+
+"lodash.values@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "lodash.values@npm:4.3.0"
+  checksum: 857e122ddf6edb50137887f0b834d471f96d66692ebb5de8b048ed277c8a3dd1bc8f85d82cf31b0f5c6dbc5b72c036a591205f76eec86bb11818a1a6f7e5a28c
   languageName: node
   linkType: hard
 
@@ -9047,6 +9111,16 @@ __metadata:
   bin:
     prettier: bin-prettier.js
   checksum: 8ac94fa67aec0e65743ea15ebf954ef2f1e52638abd129dc04e8b49e8bb3224c0233c98df6b5c98efd31bd2a43866590486559438ee4ead09dc81be389068572
+  languageName: node
+  linkType: hard
+
+"pretty-format@npm:^21.2.1":
+  version: 21.2.1
+  resolution: "pretty-format@npm:21.2.1"
+  dependencies:
+    ansi-regex: ^3.0.0
+    ansi-styles: ^3.2.0
+  checksum: fd6b5c5f6d1d8dd0ae5e351604e787fc256ece85ae3f166a3887609eb377055a4074ae4b0c24eeb24637af9ec4d1f60d98f95c42a1d90e8c829432f66e7bfb1e
   languageName: node
   linkType: hard
 
