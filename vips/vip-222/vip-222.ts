@@ -32,7 +32,7 @@ const DEVIATION_UPPER_BOUND = parseUnits("1.01", 18);
 const MAX_STALE_PERIOD_CHAINLINK = 88200; // 24.5 hours max stale period
 const MAX_STALE_PERIOD_BINANCE = 1500; // 25 minutes max stale period
 
-export const vip221 = (maxStalePeriod?: number) => {
+export const vip222 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-222 Add support for FDUSD on Venus Core Pool",
@@ -63,6 +63,12 @@ Interest rate curve for the new market:
 - base (yearly): 0
 - multiplier (yearly): 6.875%
 - jump multiplier (yearly): 250%
+
+Oracle configuration:
+
+- Main oracle: [Chainlink](https://data.chain.link/bsc/mainnet/stablecoins/fdusd-usd)
+- Pivot oracle: [Binance oracle](https://oracle.binance.com/data-feeds/detail/bsc/FDUSD-USD)
+- [Bounds](https://docs-v4.venus.io/technical-reference/reference-oracle/boundvalidator): [0.99, 1.01]
 
 #### Security and additional considerations
 

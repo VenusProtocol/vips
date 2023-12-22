@@ -24,10 +24,10 @@ const COLLATERAL_FACTOR = parseUnits("0.75", 18);
 const RESERVES_BLOCK_DELTA = 100;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 
-export const vip221Testnet = () => {
+export const vip222Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-221 Add FDUSD Market",
+    title: "VIP-222 Add FDUSD Market",
     description: `
     VIP
     Risk parameters suggested by Chaos lab:

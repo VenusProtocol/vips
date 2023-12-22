@@ -6,7 +6,7 @@ import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
-import { vip221Testnet } from "../../../vips/vip-221/vip-221-testnet";
+import { vip222Testnet } from "../../../vips/vip-222/vip-222-testnet";
 import USDT_ABI from "./abi/USDT_ABI.json";
 import VFDUSD_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -50,7 +50,7 @@ forking(36131280, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-221-testnet Add FDUSD Market", vip221Testnet(), {
+  testVip("VIP-222-testnet Add FDUSD Market", vip222Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
