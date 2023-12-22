@@ -93,7 +93,7 @@ No changes in the code are involved in this VIP. We applied the following securi
   };
 
   return makeProposal(
-    [     
+    [
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
@@ -102,7 +102,7 @@ No changes in the code are involved in this VIP. We applied the following securi
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["FDUSD", maxStalePeriod || MAX_STALE_PERIOD_BINANCE], 
+        params: ["FDUSD", maxStalePeriod || MAX_STALE_PERIOD_BINANCE],
       },
       {
         target: BOUND_VALIDATOR,
@@ -115,11 +115,7 @@ No changes in the code are involved in this VIP. We applied the following securi
         params: [
           [
             FDUSD,
-            [
-              CHAINLINK_ORACLE,
-              BINANCE_ORACLE,
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [CHAINLINK_ORACLE, BINANCE_ORACLE, "0x0000000000000000000000000000000000000000"],
             [true, true, false],
           ],
         ],
