@@ -160,6 +160,11 @@ export const vip003 = () => {
       params: [10102, 0, "300000"],
     },
     {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setWhitelist(address,bool)",
+      params: [NORMAL_TIMELOCK, true],
+    },
+    {
       target: XVS,
       signature: "setMintCap(address,uint256)",
       params: [XVS_BRIDGE, parseUnits("10000", 18)],
