@@ -52,7 +52,7 @@ forking(16382000, () => {
 
     it("Should set trusted remote address in bridge", async () => {
       const trustedRemote = await xvsBridge.getTrustedRemoteAddress(10102);
-      expect(trustedRemote).equals("0x963cabdc5bb51c1479ec94df44de2ec1a49439e3");
+      expect(trustedRemote).equals("0x0e132cd94fd70298b747d2b4d977db8d086e5fd0");
     });
 
     it("Should set minting limit in XVS token", async () => {

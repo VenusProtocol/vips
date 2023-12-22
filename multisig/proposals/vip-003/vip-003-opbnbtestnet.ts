@@ -152,7 +152,7 @@ export const vip003 = () => {
     {
       target: XVS_BRIDGE_ADMIN,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
-      params: [10102, "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3"],
+      params: [10102, "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0"],
     },
     {
       target: XVS_BRIDGE_ADMIN,
