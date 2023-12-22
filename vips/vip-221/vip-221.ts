@@ -29,7 +29,8 @@ const RESERVES_BLOCK_DELTA = 28800;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const DEVIATION_LOWER_BOUND = parseUnits("0.99", 18);
 const DEVIATION_UPPER_BOUND = parseUnits("1.01", 18);
-const MAX_STALE_PERIOD = 88200; // 24.5 hours max stale period
+const MAX_STALE_PERIOD_CHAINLINK = 88200; // 24.5 hours max stale period
+const MAX_STALE_PERIOD_BINANCE = 1500; // 25 minutes max stale period
 
 export const vip221 = (maxStalePeriod?: number) => {
   const meta = {
@@ -90,18 +91,18 @@ No changes in the code are involved in this VIP. We applied the following securi
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[FDUSD, FDUSD_CHAINLINK_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
+        params: [[FDUSD, FDUSD_CHAINLINK_FEED, maxStalePeriod || MAX_STALE_PERIOD_CHAINLINK]],
       },
-      // {
-      //   target: BINANCE_ORACLE,
-      //   signature: "setMaxStalePeriod(string,uint256)",
-      //   params: [["FDUSD", "1500"]], // 25 minutes max stale period
-      // },
-      // {
-      //   target: BOUND_VALIDATOR,
-      //   signature: "setValidateConfig((address,uint256,uint256))",
-      //   params: [[FDUSD, DEVIATION_UPPER_BOUND, DEVIATION_LOWER_BOUND]],
-      // },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["FDUSD", maxStalePeriod || MAX_STALE_PERIOD_BINANCE], 
+      },
+      {
+        target: BOUND_VALIDATOR,
+        signature: "setValidateConfig((address,uint256,uint256))",
+        params: [[FDUSD, DEVIATION_UPPER_BOUND, DEVIATION_LOWER_BOUND]],
+      },
       {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
@@ -110,10 +111,10 @@ No changes in the code are involved in this VIP. We applied the following securi
             FDUSD,
             [
               CHAINLINK_ORACLE,
-              "0x0000000000000000000000000000000000000000",
+              BINANCE_ORACLE,
               "0x0000000000000000000000000000000000000000",
             ],
-            [true, false, false],
+            [true, true, false],
           ],
         ],
       },
@@ -147,19 +148,6 @@ No changes in the code are involved in this VIP. We applied the following securi
         signature: "_setCollateralFactor(address,uint256)",
         params: [VFDUSD, COLLATERAL_FACTOR],
       },
-      // // Checking if permissions are granted for that
-      // {
-      //   target: ACCESS_CONTROL_MANAGER,
-      //   signature: "giveCallPermission(address,string,address)",
-      //   params: [VFDUSD, "setReduceReservesBlockDelta(uint256)", NORMAL_TIMELOCK],
-      // },
-
-      // // Checking if permissions are granted for that
-      // {
-      //   target: ACCESS_CONTROL_MANAGER,
-      //   signature: "giveCallPermission(address,string,address)",
-      //   params: [VFDUSD, "_setReserveFactor(uint256)", NORMAL_TIMELOCK],
-      // },
       {
         target: VFDUSD,
         signature: "setAccessControlManager(address)",

@@ -32,7 +32,7 @@ const RESERVES_BLOCK_DELTA = 28800;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const RATE_MODEL = "0xB105F9B511836cc7dF9F3dD0Ec4873766b5b6660";
 
-forking(34548160, () => {
+forking(34573350, () => {
   let comptroller: ethers.Contract;
   let fdusd: ethers.Contract;
   let vFdusd: ethers.Contract;
