@@ -2,9 +2,11 @@ import { makeProposal } from "../../../src/utils";
 
 const NORMAL_TIMELOCK = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
-const XVS_BRIDGE_ADMIN = "0x418D05AAe6356417cCb571c98bfbff27bD40F19c";
-const XVS_BRIDGE = "0x1be95611FC9A808F8794bc9164223b1Fcf49C8Bd";
-const XVS = "0x3d0e20D4caD958bc848B045e1da19Fe378f86f03";
+const XVS_BRIDGE_ADMIN = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
+const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+const BINANCE_ORACLE = "0x496B6b03469472572C47bdB407d5549b244a74F2";
+const RESILIENT_ORACLE = "0xEF4e53a9A4565ef243A2f0ee9a7fc2410E1aA623";
 
 export const vip003 = () => {
   return makeProposal([
@@ -122,6 +124,22 @@ export const vip003 = () => {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [XVS_BRIDGE_ADMIN, "transferBridgeOwnership(address)", NORMAL_TIMELOCK],
+    },
+    {
+      target: BINANCE_ORACLE,
+      signature: "setMaxStalePeriod(string,uint256)",
+      params: ["XVS", "86400"],
+    },
+    {
+      target: RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          XVS,
+          [BINANCE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
+          [true, false, false],
+        ],
+      ],
     },
     { target: XVS_BRIDGE_ADMIN, signature: "acceptOwnership()", params: [] },
     {

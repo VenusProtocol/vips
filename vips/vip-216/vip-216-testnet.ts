@@ -1,8 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const XVSBridgeAdmin_Proxy = "0x5D08D49A2e43aC4c72C60754d1550BA12e846d66";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const XVSBridgeAdmin_Proxy = "0xB164Cb262328Ca44a806bA9e3d4094931E658513";
 
 export const MIN_DST_GAS = "300000";
 export const SINGLE_SEND_LIMIT = "10000000000000000000";
@@ -27,7 +26,7 @@ export const vip216Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [DEST_CHAIN_ID, "0x1be95611FC9A808F8794bc9164223b1Fcf49C8Bd"], // OPBNBTESTNET
+        params: [DEST_CHAIN_ID, "0xA03205bC635A772E533E7BE36b5701E331a70ea3"], // OPBNBTESTNET
       },
       {
         target: XVSBridgeAdmin_Proxy,

@@ -18,12 +18,12 @@ import XVS_ABI from "./abi/XVS.json";
 import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
-const XVSProxyOFTSrc = "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3";
+const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(35718574, () => {
+forking(36177672, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
   let xvs: ethers.Contract;
