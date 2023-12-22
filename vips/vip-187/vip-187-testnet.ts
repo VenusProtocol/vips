@@ -347,27 +347,27 @@ export const vip187Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMinDstGas(uint16,uint16,uint256)",
-        params: [10161, 0, "300000"],
+        params: [10161, 0, MIN_DST_GAS],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [10161, "500000000000000000000"],
+        params: [10161, MAX_DAILY_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-        params: [10161, "10000000000000000000"],
+        params: [10161, MAX_DAILY_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-        params: [10161, "500000000000000000000"],
+        params: [10161, MAX_DAILY_RECEIVE_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        params: [10161, "10000000000000000000"],
+        params: [10161, MAX_DAILY_SEND_LIMIT],
       },
     ],
     meta,

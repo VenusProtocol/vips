@@ -2,6 +2,7 @@ import { ethers } from "hardhat";
 
 import { getCalldatas } from "../src/utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "../src/vip-framework/abi/governorBravoDelegateAbi.json";
+import { vip187Testnet } from "../vips/vip-187/vip-187-testnet";
 
 const readline = require("readline-sync");
 
@@ -14,7 +15,7 @@ export const loadProposal = async (num: string) => {
 
 export const proposeTestnetVIP = async () => {
   const vipNumber = readline.question("Number of the VIP to propose => ");
-  const proposal = await loadProposal(vipNumber);
+  const proposal = vip187Testnet();
 
   const { targets, signatures, values, meta } = proposal;
 
@@ -30,3 +31,4 @@ export const proposeTestnetVIP = async () => {
   );
   await tx.wait();
 };
+proposeTestnetVIP();
