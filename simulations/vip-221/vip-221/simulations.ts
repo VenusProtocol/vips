@@ -50,7 +50,7 @@ forking(34573350, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-221 Add FDUSD Market", vip221(24 * 60 * 60 * 3), {
+  testVip("VIP-221 Add FDUSD Market", vip221(24 * 60 * 60 * 4), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
