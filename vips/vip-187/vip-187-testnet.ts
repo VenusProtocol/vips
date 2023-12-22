@@ -337,7 +337,11 @@ export const vip187Testnet = () => {
         params: [XVSBridgeAdmin_Proxy, "unpause()", GUARDIAN],
       },
       { target: XVSBridgeAdmin_Proxy, signature: "acceptOwnership()", params: [] },
-
+      {
+        target: XVSBridgeAdmin_Proxy,
+        signature: "setWhitelist(address,bool)",
+        params: [NORMAL_TIMELOCK, true],
+      },
       // SEPOLIA CONFIGURATION
       {
         target: XVSBridgeAdmin_Proxy,
@@ -357,7 +361,7 @@ export const vip187Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-        params: [10161, MAX_DAILY_SEND_LIMIT],
+        params: [10161, SINGLE_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
@@ -367,7 +371,7 @@ export const vip187Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        params: [10161, MAX_DAILY_SEND_LIMIT],
+        params: [10161, SINGLE_RECEIVE_LIMIT],
       },
     ],
     meta,
