@@ -1,3 +1,5 @@
+import { parseUnits } from "ethers/lib/utils";
+
 import { makeProposal } from "../../../src/utils";
 
 const NORMAL_TIMELOCK = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
@@ -103,6 +105,11 @@ export const vip003 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
+      params: [XVS_BRIDGE_ADMIN, "setMinDstGas(uint16,uint16,uint256)", NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
       params: [XVS, "mint(address,uint256)", XVS_BRIDGE],
     },
     {
@@ -148,9 +155,14 @@ export const vip003 = () => {
       params: [10102, "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3"],
     },
     {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [10102, 0, "300000"],
+    },
+    {
       target: XVS,
       signature: "setMintCap(address,uint256)",
-      params: [XVS_BRIDGE, "100000000000000000000"],
+      params: [XVS_BRIDGE, parseUnits("10000", 18)],
     },
   ]);
 };

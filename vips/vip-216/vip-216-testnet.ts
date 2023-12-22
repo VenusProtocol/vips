@@ -41,7 +41,7 @@ export const vip216Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-        params: [DEST_CHAIN_ID, "10000000000000000000"],
+        params: [DEST_CHAIN_ID, SINGLE_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
@@ -51,7 +51,7 @@ export const vip216Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        params: [DEST_CHAIN_ID, "10000000000000000000"],
+        params: [DEST_CHAIN_ID, SINGLE_RECEIVE_LIMIT],
       },
     ],
     meta,
