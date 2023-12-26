@@ -51,8 +51,6 @@ export const checkVAIController = () => {
       const markets = await comptroller.getAssetsIn(ACCOUNT);
 
       for (let i = 0; i < markets.length; i++) {
-        const vToken = await ethers.getContractAt(VTOKEN_ABI, markets[i], signer);
-        const underlyingToken = await ethers.getContractAt(ERC20_ABI, await vToken.underlying());
         if (markets[i] === vBNB) {
           await setMaxStalePeriodInChainlinkOracle(
             CHAINLINK_ORACLE,
@@ -63,6 +61,8 @@ export const checkVAIController = () => {
           continue;
         }
 
+        const vToken = await ethers.getContractAt(VTOKEN_ABI, markets[i], signer);
+        const underlyingToken = await ethers.getContractAt(ERC20_ABI, await vToken.underlying());
         await setMaxStalePeriod(resilientOracle, underlyingToken);
       }
     });
