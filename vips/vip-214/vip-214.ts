@@ -20,6 +20,7 @@ const IL_COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
 const IL_VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
 const NEW_IL_COMPTROLLER_IMPL = "0x3f66e044dfd1ccc834e55624b5f6e9e75ab36000";
 const NEW_IL_VTOKEN_IMPL = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
+const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 
 export const vip214 = () => {
   const meta = {
@@ -42,7 +43,7 @@ export const vip214 = () => {
       {
         target: PRIME_PROXY,
         signature: "initializeV2(address)",
-        params: [ethers.constants.AddressZero],
+        params: [POOL_REGISTRY],
       },
       {
         target: VAI_CONTROLLER_PROXY,
