@@ -19,7 +19,7 @@ export const NETWORK_ADDRESSES = {
     XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
     VAI_UNITROLLER: bscmainnet_deployed_contracts.contracts.VaiUnitroller.address,
-    VAI_MINT_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    VAI_MINT_USER_ACCOUNT: "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc",
     UNITROLLER: bscmainnet_deployed_contracts.contracts.Unitroller.address,
     VAI: bscmainnet_deployed_contracts.contracts.VAI.address,
     VTREASURY: bscmainnet_deployed_contracts.contracts.VTreasury.address,

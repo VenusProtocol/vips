@@ -7,8 +7,10 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
-import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "../../utils";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
+import ERC20_ABI from "../abi/erc20.json";
+import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 import VAI_ABI from "../abi/vai.json";
 import VAI_CONTROLLER_ABI from "../abi/vaiController.json";
@@ -18,6 +20,7 @@ const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI_MINT_USER_ACCO
 const UNITROLLER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].UNITROLLER;
 const VAI = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI;
 const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
 let NORMAL_TIMELOCK = mainnet.contracts.NormalTimelock.address;
 let vBNB = mainnet.contracts.vBNB.address;
 let WBNB = mainnet.contracts.WBNB.address;
@@ -32,6 +35,7 @@ export const checkVAIController = () => {
   describe("generic VAI controller checks", () => {
     let vaiController: Contract;
     let comptroller: Contract;
+    let resilientOracle: Contract;
     let vai: Contract;
 
     before(async () => {
@@ -41,11 +45,13 @@ export const checkVAIController = () => {
       vaiController = await ethers.getContractAt(VAI_CONTROLLER_ABI, VAI_UNITROLLER, signer);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER, signer);
       vai = await ethers.getContractAt(VAI_ABI, VAI, signer);
+      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
 
       const markets = await comptroller.getAssetsIn(ACCOUNT);
 
       for (let i = 0; i < markets.length; i++) {
         const vToken = await ethers.getContractAt(VTOKEN_ABI, markets[i], signer);
+        const underlyingToken = await ethers.getContractAt(ERC20_ABI, await vToken.underlying());
         if (markets[i] === vBNB) {
           await setMaxStalePeriodInChainlinkOracle(
             CHAINLINK_ORACLE,
@@ -56,12 +62,7 @@ export const checkVAIController = () => {
           continue;
         }
 
-        await setMaxStalePeriodInChainlinkOracle(
-          CHAINLINK_ORACLE,
-          await vToken.underlying(),
-          ethers.constants.AddressZero,
-          NORMAL_TIMELOCK,
-        );
+        await setMaxStalePeriod(resilientOracle, underlyingToken);
       }
     });
 
