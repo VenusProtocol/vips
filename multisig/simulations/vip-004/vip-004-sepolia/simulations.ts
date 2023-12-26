@@ -14,13 +14,16 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(4795108, () => {
+const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
+
+forking(4961243, () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 
   before(async () => {
-    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, sepolia.XVS_VAULT_PROXY);
-    xvsStore = await ethers.getContractAt(XVS_STORE_ABI, sepolia.XVS_STORE);
+    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY);
+    xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
     await pretendExecutingVip(vip004());
   });
 
@@ -49,7 +52,7 @@ forking(4795108, () => {
 
     it("Should set correct xvs store address", async () => {
       const xvsStore = await xvsVault.xvsStore();
-      expect(xvsStore).equals(sepolia.XVS_STORE);
+      expect(xvsStore).equals(XVS_STORE);
     });
 
     it("Should set correct reward token address", async () => {
