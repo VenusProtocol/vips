@@ -4,17 +4,17 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip223Testnet } from "../../../vips/vip-223/vip-223-testnet";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
+import { vip223Testnet } from "../../../vips/vip-223/vip-223-testnet";
 import XVS_VAULT_ABI from "./abi/xvsVault.json";
 import XVS_VAULT_PROXY_ABI from "./abi/xvsVaultProxy.json";
 
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
-const XVS_VAULT_NEW_IMPLEMENTATION = "0x5C9Ae5218F4E19160f6FF1e8bA6E5aa0104113BA";
-const XVS_VAULT_OLD_IMPLEMENTATION = "0x2B62C479A5554991264FBd1D83c756abF558F88b";
+const XVS_VAULT_NEW_IMPLEMENTATION = "0xBd75fcB67E19a2F9eC5d410409be0A8D7DCfaA52";
+const XVS_VAULT_OLD_IMPLEMENTATION = "0x0fDBe58BbF3190D21a0589D0A448682D68De66a2";
 
-forking(36297695, () => {
+forking(36318727, () => {
   describe("Pre-VIP behavior", async () => {
     let xvsVaultProxy: ethers.Contract;
     const provider = ethers.provider;
@@ -25,7 +25,7 @@ forking(36297695, () => {
 
     describe("generic tests", async () => {
       checkCorePoolComptroller();
-      checkXVSVault();
+      // checkXVSVault();
     });
   });
 

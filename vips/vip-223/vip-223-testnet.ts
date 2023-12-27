@@ -2,7 +2,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
-const XVS_VAULT = "0x5C9Ae5218F4E19160f6FF1e8bA6E5aa0104113BA";
+const XVS_VAULT = "0xBd75fcB67E19a2F9eC5d410409be0A8D7DCfaA52";
 
 export const vip223Testnet = () => {
   const meta = {
