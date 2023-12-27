@@ -65,6 +65,10 @@ export const checkVAIController = () => {
         const underlyingToken = await ethers.getContractAt(ERC20_ABI, await vToken.underlying());
         await setMaxStalePeriod(resilientOracle, underlyingToken);
       }
+
+      // increase max stale period of VAI
+      const underlyingToken = await ethers.getContractAt(ERC20_ABI, VAI);
+      await setMaxStalePeriod(resilientOracle, underlyingToken);
     });
 
     it("mint and repay", async () => {
@@ -99,7 +103,10 @@ export const checkVAIController = () => {
         repayAmountWithInterestBefore[1].add(repayAmountWithInterestBefore[2]),
       );
 
-      await expect(vaiController.repayVAI(parseUnits("500", "18"))).to.not.reverted;
+      const amountToRepay = parseUnits("500", "18");
+      await vai.approve(vaiController.address, amountToRepay);
+
+      await expect(vaiController.repayVAI(amountToRepay)).to.not.reverted;
       const balanceAfterRepay = await vai.balanceOf(ACCOUNT);
 
       expect(balanceAfterRepay).to.be.lt(balanceAfter);

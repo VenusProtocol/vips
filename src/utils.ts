@@ -75,6 +75,11 @@ export const setMaxStalePeriodInBinanceOracle = async (
 ) => {
   const oracle = await ethers.getContractAt(BINANCE_ORACLE_ABI, binanceOracleAddress);
   const oracleAdmin = await initMainnetUser(await oracle.owner(), ethers.utils.parseEther("1.0"));
+  const overrideSymbol = await oracle.symbols(assetSymbol);
+
+  if (overrideSymbol.length > 0) {
+    assetSymbol = overrideSymbol;
+  }
 
   const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(assetSymbol, maxStalePeriodInSeconds);
   await tx.wait();
