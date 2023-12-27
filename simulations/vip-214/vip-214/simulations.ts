@@ -19,11 +19,6 @@ import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/vaiControllerProxy.json";
 
-
-import VTOKEN_ABI from "./abi/vToken.json";
-import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
-import PLP_ABI from "./abi/primeLiquidityProvider.json";
-
 const PRIME_PROXY = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 const VAI_CONTROLLER_PROXY = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 const PLP_PROXY = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
@@ -33,7 +28,7 @@ const OLD_PRIME_IMPLEMENTATION = "0x371c0355CC22Ea13404F2fEAc989435DAD9b9d03";
 const OLD_VAI_CONTROLLER_IMPLEMENTATION = "0x8A1e5Db8f622B97f4bCceC4684697199C1B1D11b";
 const NEW_PRIME_IMPLEMENTATION = "0x7A2e3481F345367045539896e5Bf385910fB5C2C";
 const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x9817823d5C4023EFb6173099928F17bb77CD1d69";
-const NEW_PLP_IMPLEMENTATION = "0x383BD24C541aFFB6Bca2C31dE8534438dD9C37b7";
+const NEW_PLP_IMPLEMENTATION = "0x8a36681F84479804aaEeb16c2EFf61A0d4F9e36A";
 const OLD_PLP_IMPLEMENTATION = "0xf0361f9B3dcCa728603be2aBf15D1Ec106d43D51";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const USER = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
@@ -52,7 +47,7 @@ const XVS_CHAINLINK_FEED = "0xbf63f430a79d4036a5900c19818aff1fa710f206";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 
-forking(34690426, () => {
+forking(34708397, () => {
   const provider = ethers.provider;
   let oldPrime: ethers.Contract;
   let newPrime: ethers.Contract;
@@ -62,7 +57,6 @@ forking(34690426, () => {
   let comptroller: ethers.Contract;
   let beaconProxyComptroller: ethers.Contract;
   let beaconProxyVtoken: ethers.Contract;
-  let plp: ethers.Contract;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
@@ -77,7 +71,6 @@ forking(34690426, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
     beaconProxyComptroller = new ethers.Contract(IL_COMPTROLLER_BEACON, BEACON_ABI, provider);
     beaconProxyVtoken = new ethers.Contract(IL_VTOKEN_BEACON, BEACON_ABI, provider);
-    plp = new ethers.Contract(PLP_PROXY, PLP_ABI, provider);
 
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, BTC, BTC_CHAINLINK_FEED, NORMAL_TIMELOCK);
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, XVS, XVS_CHAINLINK_FEED, NORMAL_TIMELOCK);
@@ -104,14 +97,8 @@ forking(34690426, () => {
     it("apr", async () => {
       const apr = await oldPrime.calculateAPR(vBTC, USER);
 
-      const effectiveDistributionSpeed = await plp.getEffectiveDistributionSpeed(BTC);
-      const distributionSpeed = await plp.tokenDistributionSpeeds(BTC);
-      const accrued = await plp.tokenAmountAccrued(BTC);
-
-      console.log({effectiveDistributionSpeed, distributionSpeed, accrued})
-
-      expect(apr[0]).to.be.equal(291);
-      expect(apr[1]).to.be.equal(291);
+      expect(apr[0]).to.be.equal(278);
+      expect(apr[1]).to.be.equal(278);
     });
 
     describe("generic tests", async () => {
@@ -163,29 +150,24 @@ forking(34690426, () => {
     it("apr (legacy)", async () => {
       const apr = await oldPrime.calculateAPR(vBTC, USER);
 
-      expect(apr.supplyAPR).to.be.equal(996);
-      expect(apr.borrowAPR).to.be.equal(1605);
+      expect(apr.supplyAPR).to.be.equal(278);
+      expect(apr.borrowAPR).to.be.equal(278);
     });
 
     it("apr (new)", async () => {
-      const effectiveDistributionSpeed = await plp.getEffectiveDistributionSpeed(BTC);
-      const distributionSpeed = await plp.tokenDistributionSpeeds(BTC);
-      const accrued = await plp.tokenAmountAccrued(BTC);
-      
-      console.log({effectiveDistributionSpeed, distributionSpeed, accrued})
-
       const apr = await newPrime.calculateAPR(vBTC, USER);
 
-      expect(apr.supplyAPR).to.be.equal(996);
-      expect(apr.borrowAPR).to.be.equal(1605);
-      expect(apr.totalScore).to.be.equal(BigNumber.from("3202493156937100961495"));
-      expect(apr.userScore).to.be.equal(BigNumber.from("2024915848628363594635"));
-      expect(apr.xvsBalanceForScore).to.be.equal(BigNumber.from("100000000000000000000000"));
-      expect(apr.capital).to.be.equal(BigNumber.from("52214401195862928372"));
-      expect(apr.cappedSupply).to.be.equal(BigNumber.from("47708882045868937252"));
-      expect(apr.cappedBorrow).to.be.equal(BigNumber.from("4505519149993991120"));
-      expect(apr.supplyCapUSD).to.be.equal(BigNumber.from("1956161490000000000000000"));
-      expect(apr.borrowCapUSD).to.be.equal(BigNumber.from("3912322980000000000000000"));
+      expect(apr.supplyAPR).to.be.equal(278);
+      expect(apr.borrowAPR).to.be.equal(278);
+
+      expect(apr.totalScore).to.be.equal(BigNumber.from("20769000944307229349905"));
+      expect(apr.userScore).to.be.equal(BigNumber.from("1287873463735446779712"));
+      expect(apr.xvsBalanceForScore).to.be.equal(BigNumber.from("56183554851760828762240"));
+      expect(apr.capital).to.be.equal(BigNumber.from("29522777392074126107"));
+      expect(apr.cappedSupply).to.be.equal(BigNumber.from("27222169377297964663"));
+      expect(apr.cappedBorrow).to.be.equal(BigNumber.from("2300608014776161444"));
+      expect(apr.supplyCapUSD).to.be.equal(BigNumber.from("1429298496477210573609475"));
+      expect(apr.borrowCapUSD).to.be.equal(BigNumber.from("2858596992954421147218950"));
     });
 
     it("poolRegistry", async () => {
