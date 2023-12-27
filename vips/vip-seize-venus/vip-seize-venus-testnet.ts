@@ -1,4 +1,4 @@
-import { cutParams as params } from "../../simulations/vip-223/vip-223-testnet/utils/cut-params.json";
+import { cutParams as params } from "../../simulations/vip-seize-venus/vip-seize-venus-testnet/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -11,7 +11,7 @@ const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 
 const cutParams = params;
 
-export const vip223Testnet = () => {
+export const vipSeizeVenusTestnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-223 New seizeVenus functionality",

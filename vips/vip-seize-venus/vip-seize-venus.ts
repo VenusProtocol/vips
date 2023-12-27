@@ -1,4 +1,4 @@
-import { cutParams as params } from "../../simulations/vip-223/vip-223/utils/cut-params.json";
+import { cutParams as params } from "../../simulations/vip-seize-venus/vip-seize-venus/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -11,7 +11,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
 const cutParams = params;
 
-export const vip223 = () => {
+export const vipSeizeVenus = () => {
   const meta = {
     version: "v2",
     title: "VIP-223 Fix on the Diamond Comptroller configuration",
