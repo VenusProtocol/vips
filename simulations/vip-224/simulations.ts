@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { vip221 } from "../../vips/vip-221";
+import { vip224 } from "../../vips/vip-224";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidator.json";
@@ -25,7 +25,7 @@ const USDC_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 const USDT_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 
 forking(34469100, () => {
-  testVip("VIP-221 Forced liquidations for user", vip221());
+  testVip("VIP-224 Forced liquidations for user", vip224());
 });
 
 forking(34469100, () => {
@@ -39,7 +39,7 @@ forking(34469100, () => {
     liquidatorContract = await ethers.getContractAt(LIQUIDATOR_ABI, LIQUIDATOR_CONTRACT);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
-    await pretendExecutingVip(vip221());
+    await pretendExecutingVip(vip224());
   });
 
   describe("Post-VIP behavior", () => {
