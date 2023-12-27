@@ -14,18 +14,24 @@ const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const XVS_VAULT_NEW_IMPLEMENTATION = "0xBd75fcB67E19a2F9eC5d410409be0A8D7DCfaA52";
 const XVS_VAULT_OLD_IMPLEMENTATION = "0x0fDBe58BbF3190D21a0589D0A448682D68De66a2";
 
-forking(36318727, () => {
+forking(36321347, () => {
   describe("Pre-VIP behavior", async () => {
     let xvsVaultProxy: ethers.Contract;
+    let xvsVault: ethers.Contract;
     const provider = ethers.provider;
 
     before(async () => {
       xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
+      xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
+    });
+
+    it("should have the old implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.be.equal(XVS_VAULT_OLD_IMPLEMENTATION);
     });
 
     describe("generic tests", async () => {
       checkCorePoolComptroller();
-      // checkXVSVault();
+      checkXVSVault();
     });
   });
 
@@ -36,6 +42,19 @@ forking(36318727, () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    let xvsVaultProxy: ethers.Contract;
+    let xvsVault: ethers.Contract;
+    const provider = ethers.provider;
+
+    before(async () => {
+      xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
+      xvsVault = new ethers.Contract(XVS_VAULT_NEW_IMPLEMENTATION, XVS_VAULT_ABI, provider);
+    });
+
+    it("should have the new implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.be.equal(XVS_VAULT_NEW_IMPLEMENTATION);
+    });
+
     describe("generic tests", async () => {
       checkCorePoolComptroller();
       checkXVSVault();
