@@ -28,7 +28,7 @@ const OLD_PRIME_IMPLEMENTATION = "0x371c0355CC22Ea13404F2fEAc989435DAD9b9d03";
 const OLD_VAI_CONTROLLER_IMPLEMENTATION = "0x8A1e5Db8f622B97f4bCceC4684697199C1B1D11b";
 const NEW_PRIME_IMPLEMENTATION = "0x7A2e3481F345367045539896e5Bf385910fB5C2C";
 const NEW_VAI_CONTROLLER_IMPLEMENTATION = "0x9817823d5C4023EFb6173099928F17bb77CD1d69";
-const NEW_PLP_IMPLEMENTATION = "0x8a36681F84479804aaEeb16c2EFf61A0d4F9e36A";
+const NEW_PLP_IMPLEMENTATION = "0x208068AE8A619FCc851659791659B1aA40d796dA";
 const OLD_PLP_IMPLEMENTATION = "0xf0361f9B3dcCa728603be2aBf15D1Ec106d43D51";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const USER = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
@@ -47,7 +47,7 @@ const XVS_CHAINLINK_FEED = "0xbf63f430a79d4036a5900c19818aff1fa710f206";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 
-forking(34708397, () => {
+forking(34718730, () => {
   const provider = ethers.provider;
   let oldPrime: ethers.Contract;
   let newPrime: ethers.Contract;
@@ -160,14 +160,14 @@ forking(34708397, () => {
       expect(apr.supplyAPR).to.be.equal(278);
       expect(apr.borrowAPR).to.be.equal(278);
 
-      expect(apr.totalScore).to.be.equal(BigNumber.from("20769000944307229349905"));
+      expect(apr.totalScore).to.be.equal(BigNumber.from("20772100064895849438361"));
       expect(apr.userScore).to.be.equal(BigNumber.from("1287873463735446779712"));
       expect(apr.xvsBalanceForScore).to.be.equal(BigNumber.from("56183554851760828762240"));
-      expect(apr.capital).to.be.equal(BigNumber.from("29522777392074126107"));
-      expect(apr.cappedSupply).to.be.equal(BigNumber.from("27222169377297964663"));
-      expect(apr.cappedBorrow).to.be.equal(BigNumber.from("2300608014776161444"));
-      expect(apr.supplyCapUSD).to.be.equal(BigNumber.from("1429298496477210573609475"));
-      expect(apr.borrowCapUSD).to.be.equal(BigNumber.from("2858596992954421147218950"));
+      expect(apr.capital).to.be.equal(BigNumber.from("29522920362792221593"));
+      expect(apr.cappedSupply).to.be.equal(BigNumber.from("27222266421160237990"));
+      expect(apr.cappedBorrow).to.be.equal(BigNumber.from("2300653941631983603"));
+      expect(apr.supplyCapUSD).to.be.equal(BigNumber.from("1444054466666500245210429"));
+      expect(apr.borrowCapUSD).to.be.equal(BigNumber.from("2888108933333000490420859"));
     });
 
     it("poolRegistry", async () => {
