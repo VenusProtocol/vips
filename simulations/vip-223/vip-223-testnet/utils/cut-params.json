@@ -1,7 +1,7 @@
 {
   "cutParams": [
     [
-      "",
+      "0x7fcEc39e83f17469069b7A0f24A59B5BbEC0faBb",
       1,
       [
         "0xa7604b41",
@@ -15,6 +15,6 @@
         "0xededbae6"
       ]
     ],
-    ["", 0, ["0x655f0725"]]
+    ["0x7fcEc39e83f17469069b7A0f24A59B5BbEC0faBb", 0, ["0x655f0725"]]
   ]
 }

@@ -1,6 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumberish, Contract, Signer } from "ethers";
+import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -10,17 +10,23 @@ import { vip223Testnet } from "../../../vips/vip-223/vip-223-testnet";
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
-import VENUS_LENS_ABI from "../abi/VenusLens.json";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const Owner = "0xce10739590001705F7FF231611ba4A48B2820327";
 const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
 const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
+const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const ACCOUNT_1 = "0xa0747a72C329377C2CE4F0F3165197B3a5359EfE";
+const ACCOUNT_2 = "0x6997901e20D83ED40F7A46213814EeC15af6B09f";
+const ACCOUNT_3 = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+const ACCOUNT_4 = "0x4C45758bF15AF0714E4CC44C4EFd177e209C2890";
+const ACCOUNT_5 = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 
 // As this vip is updating diamond proxy, therefore adding additional tests to verify
 // all storage values before and after executing this vip, setter functions and core
 // functionalities are working properly
-forking(33763885, async () => {
+forking(36320999, async () => {
   let owner: Signer,
     unitroller: Contract,
     // layout variables
@@ -322,11 +328,12 @@ forking(33763885, async () => {
   });
 });
 
-forking(33763885, async () => {
+forking(36320999, async () => {
   let owner, unitroller;
   let USDT: Contract;
   let usdtHolder: Signer;
   let vUSDT: Contract;
+  let xvs: Contract;
   let diamondUnitroller: Contract;
 
   before(async () => {
@@ -346,6 +353,11 @@ forking(33763885, async () => {
 
     usdtHolder = await initMainnetUser("0xa0747a72C329377C2CE4F0F3165197B3a5359EfE", parseUnits("1000", 18));
 
+    [xvs] = await Promise.all(
+      [XVS].map((address: string) => {
+        return new ethers.Contract(address, VBEP20_DELEGATE_ABI, ethers.provider);
+      }),
+    );
     [vUSDT] = await Promise.all(
       [VUSDT].map((address: string) => {
         return new ethers.Contract(address, VBEP20_DELEGATE_ABI, ethers.provider);
@@ -357,16 +369,19 @@ forking(33763885, async () => {
         return new ethers.Contract(underlying, IERC20Upgradeable, ethers.provider);
       }),
     );
+
     await diamondUnitroller.connect(owner)._setActionsPaused([VBUSD], [0], false);
   });
 
   describe("Diamond Hooks", () => {
     it("mint vToken vUSDT", async () => {
-      const vUSDTBalance = await USDT.balanceOf(vUSDT.address);
+      const vUSDTBalance = await vUSDT.balanceOf(await usdtHolder.getAddress());
       const usdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
-      await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await vUSDT.connect(usdtHolder).mint(2000);
-      const newvUSDTBalance = await USDT.balanceOf(vUSDT.address);
+
+      await USDT.connect(usdtHolder).approve(vUSDT.address, 5000);
+      await vUSDT.connect(usdtHolder).mint(5000);
+
+      const newvUSDTBalance = await vUSDT.balanceOf(await usdtHolder.getAddress());
       const newUsdtHolderBalance = await USDT.balanceOf(await usdtHolder.getAddress());
 
       expect(newvUSDTBalance).greaterThan(vUSDTBalance);
@@ -375,10 +390,10 @@ forking(33763885, async () => {
 
     it("redeem vToken", async () => {
       await USDT.connect(usdtHolder).approve(vUSDT.address, 2000);
-      await expect(vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
+      expect(await vUSDT.connect(usdtHolder).mint(2000)).to.emit(vUSDT, "Mint");
 
       const vUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
-      await expect(vUSDT.connect(usdtHolder).redeem(2000)).to.emit(vUSDT, "Redeem");
+      expect(await vUSDT.connect(usdtHolder).redeem(2000)).to.emit(vUSDT, "Redeem");
       const newVUSDTUserBal = await vUSDT.connect(usdtHolder).balanceOf(await usdtHolder.getAddress());
 
       expect(newVUSDTUserBal).to.equal(vUSDTUserBal.sub(2000));
@@ -404,6 +419,67 @@ forking(33763885, async () => {
 
       const balanceAfterRepay = await USDT.balanceOf(await usdtHolder.getAddress());
       expect(balanceAfterRepay).to.equal(usdtUserBal);
+    });
+  });
+
+  describe("Seize Token Scenario", () => {
+    let deployer: Signer;
+    let user;
+
+    it("Emits events for every holders successfull seize of tokens", async () => {
+      deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
+      user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
+
+      const recipient = await deployer.getAddress();
+      const xvsHotWallet = await initMainnetUser(ACCOUNT_3, parseUnits("1", 18));
+      const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("1", 18));
+
+      await xvs.connect(xvsHotWallet).transfer(diamondUnitroller.address, parseUnits("1", 18));
+
+      const txn = await diamondUnitroller.connect(timelock).seizeVenus([user.address], recipient);
+
+      await expect(txn).to.emit(diamondUnitroller, "VenusSeized").withArgs(user.address, 5699376475641491);
+      await expect(txn).to.emit(diamondUnitroller, "VenusGranted").withArgs(recipient, 5699376475641491);
+    });
+
+    it("Fails when the XVS doesn't have enough funds", async () => {
+      user = await initMainnetUser(ACCOUNT_4, parseUnits("10", 18));
+      const recipient = await deployer.getAddress();
+      await expect(diamondUnitroller.connect(user).seizeVenus([user.address], recipient)).to.be.reverted;
+    });
+  });
+
+  describe("Claim Venus Scenario", () => {
+    let user;
+
+    it("Transfers XVS Tokens and sets the venus accrued to XVS claim Balance", async () => {
+      user = await initMainnetUser(ACCOUNT_5, parseUnits("10", 18));
+      const xvsBalanceBeforeClaim = await xvs.balanceOf(user.address);
+
+      await diamondUnitroller
+        .connect(user)
+        ["claimVenus(address[],address[],bool,bool,bool)"]([user.address], [vUSDT.address], true, true, true);
+
+      const xvsBalanceAfterClaim = await xvs.balanceOf(user.address);
+
+      expect(await diamondUnitroller.venusAccrued(user.address)).to.greaterThan(BigNumber.from(0));
+      expect(xvsBalanceAfterClaim).to.equal(xvsBalanceBeforeClaim);
+    });
+
+    it("Transfers XVS Tokens and sets the venus accrued to 0", async () => {
+      user = await initMainnetUser(ACCOUNT_5, parseUnits("10", 18));
+      const xvsHotWallet = await initMainnetUser(ACCOUNT_3, parseUnits("1", 18));
+      const xvsBalanceBeforeClaim = await xvs.balanceOf(user.address);
+
+      await xvs.connect(xvsHotWallet).transfer(diamondUnitroller.address, parseUnits("3", 18));
+      await diamondUnitroller
+        .connect(user)
+        ["claimVenus(address[],address[],bool,bool,bool)"]([user.address], [vUSDT.address], true, true, true);
+
+      const xvsBalanceAfterClaim = await xvs.balanceOf(user.address);
+
+      expect(await diamondUnitroller.venusAccrued(user.address)).to.equal(BigNumber.from(0));
+      expect(xvsBalanceAfterClaim).to.be.greaterThan(xvsBalanceBeforeClaim);
     });
   });
 });
