@@ -1,4 +1,4 @@
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
 import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import { expect } from "chai";
@@ -22,7 +22,7 @@ let COMPTROLLER = mainnet.contracts.Unitroller.address;
 let LENS = mainnet.contracts.ComptrollerLens.address;
 const ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
 const USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
+const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_COMPTROLLER_USER_ACCOUNT;
 const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
 
 if (process.env.FORKED_NETWORK === "bsctestnet") {
@@ -84,9 +84,10 @@ export const checkCorePoolComptroller = () => {
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
 
+
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
       expect(await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance);
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gte(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));

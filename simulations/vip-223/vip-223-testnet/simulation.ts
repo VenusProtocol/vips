@@ -23,10 +23,10 @@ forking(36297695, () => {
       xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
     });
 
-    // describe("generic tests", async () => {
-    //   checkCorePoolComptroller();
-    //   checkXVSVault();
-    // });
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 
   testVip("VIP-223Testnet Upgrdae XVS Vault", vip223Testnet(), {
@@ -36,9 +36,9 @@ forking(36297695, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    // describe("generic tests", async () => {
-    //   checkCorePoolComptroller();
-    //   checkXVSVault();
-    // });
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkXVSVault();
+    });
   });
 });

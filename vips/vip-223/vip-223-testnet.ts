@@ -1,5 +1,3 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
