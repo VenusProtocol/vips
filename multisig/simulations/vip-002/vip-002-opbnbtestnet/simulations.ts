@@ -9,6 +9,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip002 } from "../../../proposals/vip-002/vip-002-opbnbtestnet";
+import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -28,6 +29,10 @@ const VBTCB_CORE = "0x86F82bca79774fc04859966917D2291A68b870A9";
 const VETH_CORE = "0x034Cc5097379B13d3Ed5F6c85c8FAf20F48aE480";
 const VUSDT_CORE = "0xe3923805f6E117E51f5387421240a86EF1570abC";
 const VWBNB_CORE = "0xD36a31AcD3d901AeD998da6E24e848798378474e";
+const COMPTROLLER_NEW_IMPL = "0xA693FbB4C5F479142e4Fb253B06FC113E5EB1536";
+const VTOKEN_NEW_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
+const COMPTROLLER_BEACON = "0x2020BDa1F931E07B14C9d346E2f6D5943b4cd56D";
+const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
 const BLOCKS_PER_YEAR = 31_536_000; // assuming a block is mined every 1 seconds
 
 type VTokenSymbol = "vBTCB_Core" | "vETH_Core" | "vUSDT_Core" | "vWBNB_Core";
@@ -182,7 +187,7 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(15415205, () => {
+forking(16885889, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -206,6 +211,26 @@ forking(15415205, () => {
         }
       }
     });
+    describe("Implementation check", () => {
+      let comptrollerBeacon: Contract;
+      let vtokenBeacon: Contract;
+
+      before(async () => {
+        comptrollerBeacon = await ethers.getContractAt(BEACON_ABI, COMPTROLLER_BEACON);
+        vtokenBeacon = await ethers.getContractAt(BEACON_ABI, VTOKEN_BEACON);
+      });
+
+      it("should have correct comptroller implementation", async () => {
+        const impl = await comptrollerBeacon.implementation();
+        expect(impl).equals(COMPTROLLER_NEW_IMPL);
+      });
+
+      it("should have correct vtoken implementation", async () => {
+        const impl = await vtokenBeacon.implementation();
+        expect(impl).equals(VTOKEN_NEW_IMPL);
+      });
+    });
+
     describe("PoolRegistry state", () => {
       let registeredPools: { name: string; creator: string; comptroller: string }[];
 
@@ -228,7 +253,7 @@ forking(15415205, () => {
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(6);
+        expect(poolVTokens).to.have.lengthOf(4);
         expect(poolVTokens).to.include(vTokens.vBTCB_Core);
         expect(poolVTokens).to.include(vTokens.vETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);

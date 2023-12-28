@@ -15,6 +15,10 @@ const VBTCB_CORE = "0x86F82bca79774fc04859966917D2291A68b870A9";
 const VETH_CORE = "0x034Cc5097379B13d3Ed5F6c85c8FAf20F48aE480";
 const VUSDT_CORE = "0xe3923805f6E117E51f5387421240a86EF1570abC";
 const VWBNB_CORE = "0xD36a31AcD3d901AeD998da6E24e848798378474e";
+const COMPTROLLER_NEW_IMPL = "0xA693FbB4C5F479142e4Fb253B06FC113E5EB1536";
+const VTOKEN_NEW_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
+const COMPTROLLER_BEACON = "0x2020BDa1F931E07B14C9d346E2f6D5943b4cd56D";
+const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
 
 export const vip002 = () => {
   return makeProposal([
@@ -145,6 +149,9 @@ export const vip002 = () => {
     },
     { target: POOL_REGISTRY, signature: "acceptOwnership()", params: [] },
     { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [] },
+    { target: COMPTROLLER_BEACON, signature: "upgradeTo(address)", params: [COMPTROLLER_NEW_IMPL] },
+    { target: VTOKEN_BEACON, signature: "upgradeTo(address)", params: [VTOKEN_NEW_IMPL] },
+
     {
       target: COMPTROLLER_CORE,
       signature: "setPriceOracle(address)",
