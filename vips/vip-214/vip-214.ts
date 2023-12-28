@@ -133,7 +133,7 @@ export const vip214 = () => {
       {
         target: VAI_CONTROLLER_PROXY,
         signature: "setMintCap(uint256)",
-        params: [parseUnits("20000000", 18).toString()],
+        params: [parseUnits("10000000", 18).toString()],
       },
       {
         target: COMPTROLLER,

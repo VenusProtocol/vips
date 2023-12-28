@@ -181,7 +181,7 @@ forking(34718730, () => {
       expect(baseRate).to.equal(parseUnits("0.07", 18));
 
       const mintCap = await vaiController.mintCap();
-      expect(mintCap).to.equal(parseUnits("20000000", 18));
+      expect(mintCap).to.equal(parseUnits("10000000", 18));
 
       const mintRate = await comptroller.vaiMintRate();
       expect(mintRate).to.equal(parseUnits("1", 18));
