@@ -143,7 +143,7 @@ export const vip187Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "transferBridgeOwnership(address)", NORMAL_TIMELOCK],
       },
-      //  FASTTRACK TIMELOCK PERMISSIONS
+      // FASTTRACK TIMELOCK PERMISSIONS
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -197,11 +197,6 @@ export const vip187Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setPrecrime(address)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setMinDstGas(uint16,uint16,uint256)", FAST_TRACK_TIMELOCK],
       },
       {
@@ -223,16 +218,6 @@ export const vip187Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "updateSendAndCallEnabled(bool)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setTrustedRemoteAddress(uint16,bytes)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "transferBridgeOwnership(address)", FAST_TRACK_TIMELOCK],
       },
       // CRITICAL TIMELOCK PERMISSIONS
       {
@@ -288,11 +273,6 @@ export const vip187Testnet = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setPrecrime(address)", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setMinDstGas(uint16,uint16,uint256)", CRITICAL_TIMELOCK],
       },
       {
@@ -315,16 +295,6 @@ export const vip187Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "updateSendAndCallEnabled(bool)", CRITICAL_TIMELOCK],
       },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "setTrustedRemoteAddress(uint16,bytes)", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "transferBridgeOwnership(address)", CRITICAL_TIMELOCK],
-      },
       // GUARDIAN PERMISSIONS
       {
         target: ACM,
@@ -346,32 +316,32 @@ export const vip187Testnet = () => {
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [10161, "0xc340b7d3406502F43dC11a988E4EC5bbE536E642"],
+        params: [DEST_CHAIN_ID, "0xc340b7d3406502F43dC11a988E4EC5bbE536E642"],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMinDstGas(uint16,uint16,uint256)",
-        params: [10161, 0, MIN_DST_GAS],
+        params: [DEST_CHAIN_ID, 0, MIN_DST_GAS],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [10161, MAX_DAILY_SEND_LIMIT],
+        params: [DEST_CHAIN_ID, MAX_DAILY_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-        params: [10161, SINGLE_SEND_LIMIT],
+        params: [DEST_CHAIN_ID, SINGLE_SEND_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-        params: [10161, MAX_DAILY_RECEIVE_LIMIT],
+        params: [DEST_CHAIN_ID, MAX_DAILY_RECEIVE_LIMIT],
       },
       {
         target: XVSBridgeAdmin_Proxy,
         signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        params: [10161, SINGLE_RECEIVE_LIMIT],
+        params: [DEST_CHAIN_ID, SINGLE_RECEIVE_LIMIT],
       },
     ],
     meta,
