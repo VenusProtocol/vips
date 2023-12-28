@@ -34,7 +34,7 @@ forking(4961243, () => {
         const admin = await initMainnetUser(sepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
         const xvsHolder = await initMainnetUser(sepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
         await xvsVault.connect(admin).setRewardAmountPerBlock(sepolia.XVS, "61805555555555555");
-        await xvs.connect(xvsHolder).transfer(sepolia.XVS_STORE, ethers.utils.parseEther("1"));
+        await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
         await mine(604800);
       });
       checkXVSVault();
