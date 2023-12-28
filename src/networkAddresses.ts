@@ -65,8 +65,7 @@ export const NETWORK_ADDRESSES = {
     REDSTONE_ORACLE: "0x4e6269Ef406B4CEE6e67BA5B5197c2FfD15099AE",
     MOCK_CRV: "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3",
     MOCK_crvUSD: "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6",
-    XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
-    XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
+    XVS_VAULT_PROXY: "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5",
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
   opbnbtestnet: {
