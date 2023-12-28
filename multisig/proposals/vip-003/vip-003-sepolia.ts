@@ -140,6 +140,21 @@ export const vip003 = () => {
       params: [XVS, "setMintCap(address,uint256)", NORMAL_TIMELOCK],
     },
     {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [XVS, "pause()", NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [XVS, "unpause()", NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [XVS, "updateBlacklist(address,bool)", NORMAL_TIMELOCK],
+    },
+    {
       target: sepolia.REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
       params: [[sepolia.XVS, REDSTONE_XVS_FEED, 144000]],
