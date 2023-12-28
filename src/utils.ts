@@ -7,10 +7,38 @@ import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
 import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
+
+const BSCTESTNET_OMICHANNEL_SENDER = "0xb601a67eb6a5f3f7cc8ce184a8ee38333a1f4a5e";
+const BSCMAINNET_OMNICHANNEL_SENDER = "";
+
+export const networkChainIds = {
+  ethereum: 101,
+  sepolia: 10161,
+  arbitrum_goerli: 10143,
+};
+
+const currentChainId = () => {
+  return networkChainIds[process.env.FORKED_NETWORK];
+};
+
+export const getPayload = (proposal: Proposal) => {
+  for (let j = proposal.targets.length - 1; j > 0; j--) {
+    if (proposal.params[j][0] === currentChainId() && proposal.signatures[j] === "execute(uint16,bytes,bytes)") {
+      return proposal.params[j][1];
+    }
+  }
+};
+
+const gasUsedPerCommand = {
+  101: 0,
+  10161: 300000,
+  10143: 300000,
+} as { [key: number]: number };
 
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
@@ -25,6 +53,14 @@ export async function setForkBlock(blockNumber: number) {
     ],
   });
 }
+
+export const makePayload = (targets: any, values: any, signatures: any, calldatas: any, proposalType: ProposalType) => {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+    [targets, values, signatures, calldatas, proposalType],
+  );
+  return payload;
+};
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
@@ -42,7 +78,7 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
+export const makeProposal = (commands: Command[], meta: ProposalMeta, type: ProposalType): Proposal => {
   return {
     signatures: commands.map(cmd => cmd.signature),
     targets: commands.map(cmd => cmd.target),
@@ -51,6 +87,80 @@ export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: Pr
     meta,
     type,
   };
+};
+
+const getAdapterParam = (chainId: number, noOfCommands: number): string => {
+  const requiredGas = 600000 + gasUsedPerCommand[chainId] * noOfCommands;
+  const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
+  return adapterParam;
+};
+const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
+  const provider = ethers.provider;
+  const OmnichainProposalSender = new ethers.Contract(
+    BSCTESTNET_OMICHANNEL_SENDER,
+    OmnichainProposalSender_ABI,
+    provider,
+  );
+  let fee;
+  if (process.env.FORKED_NETWORK === "bsctestnet") {
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+  } else {
+    fee = ethers.BigNumber.from("1");
+  }
+  return fee;
+};
+
+export const makeProposalV2 = async (
+  commands: Command[],
+  meta?: ProposalMeta,
+  type: ProposalType,
+): Promise<Proposal> => {
+  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const map = new Map<number, Command[]>();
+  const _commands = [];
+  for (const command of commands) {
+    const { dstChainId } = command;
+    if (dstChainId) {
+      const currentChainCommands = map.get(dstChainId) || [];
+      currentChainCommands.push(command);
+      map.set(dstChainId, currentChainCommands);
+    } else {
+      _commands.push(command);
+    }
+  }
+  if (_commands.length != 0) {
+    proposal.targets.push(..._commands.map(cmd => cmd.target));
+    proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
+    proposal.signatures.push(..._commands.map(cmd => cmd.signature));
+    proposal.params.push(..._commands.map(cmd => cmd.params));
+  }
+  for (const key of map.keys()) {
+    const chainCommands = map.get(key);
+    if (chainCommands) {
+      const remoteParam = makePayload(
+        chainCommands.map(cmd => cmd.target),
+        chainCommands.map(cmd => cmd.value ?? "0"),
+        chainCommands.map(cmd => cmd.signature),
+        getCalldatas({
+          signatures: chainCommands.map(cmd => cmd.signature),
+          params: chainCommands.map(cmd => cmd.params),
+        }),
+        type,
+      );
+      const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
+
+      proposal.targets.push(
+        process.env.FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
+      );
+      const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
+      proposal.values.push(value);
+      proposal.signatures.push("execute(uint16,bytes,bytes)");
+      proposal.params.push([key, remoteParam, remoteAdapterParam]);
+    } else {
+      throw "Chain Id is not supported";
+    }
+  }
+  return proposal;
 };
 
 export const setMaxStalePeriodInOracle = async (
@@ -124,7 +234,7 @@ export const expectEvents = async (
   for (let i = 0; i < expectedEvents.length; ++i) {
     expect(
       namedEvents.filter(it => it === expectedEvents[i]),
-      `expected a differnt number of ${expectedEvents[i]} events`,
+      `expected a different number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
 };
