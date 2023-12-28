@@ -2,7 +2,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
-const XVS_VAULT = "0xBd75fcB67E19a2F9eC5d410409be0A8D7DCfaA52";
+const XVS_VAULT = "0x9801565BE8fe2c9fD12C17992ecDeb510BaF677A";
 
 export const vip223Testnet = () => {
   const meta = {
@@ -25,6 +25,11 @@ export const vip223Testnet = () => {
         target: XVS_VAULT,
         signature: "_become(address)",
         params: [XVS_VAULT_PROXY],
+      },
+      {
+        target: XVS_VAULT_PROXY,
+        signature: "initializeTimeManager(bool,uint256)",
+        params: [false, 10512000],
       },
     ],
     meta,

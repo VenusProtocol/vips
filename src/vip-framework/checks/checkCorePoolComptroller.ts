@@ -1,4 +1,4 @@
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
 import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import { expect } from "chai";
