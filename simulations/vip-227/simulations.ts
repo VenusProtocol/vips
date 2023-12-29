@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
-import { vip224 } from "../../vips/vip-224";
+import { vip227 } from "../../vips/vip-227";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
@@ -32,7 +32,7 @@ forking(34772092, () => {
     checkCorePoolComptroller();
   });
 
-  testVip("VIP-224 Venus Recommend Parameters", vip224(), {
+  testVip("VIP-227 Venus Recommend Parameters", vip227(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },
