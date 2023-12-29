@@ -32,7 +32,7 @@ forking(34772092, () => {
     checkCorePoolComptroller();
   });
 
-  testVip("VIP-101 Venus Recommend Parameters", vip224(), {
+  testVip("VIP-224 Venus Recommend Parameters", vip224(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },
