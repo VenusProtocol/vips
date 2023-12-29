@@ -22,7 +22,7 @@ const NEW_IL_COMPTROLLER_IMPL = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
 const NEW_IL_VTOKEN_IMPL = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 
-export const vip214 = () => {
+export const vip225 = () => {
   const meta = {
     version: "v2",
     title: "VAI Controller and Prime Upgrade",
