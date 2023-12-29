@@ -24,11 +24,11 @@ const APPROVED_LIQUIDATOR_WALLET = "0x56306851238D7Aee9FaC8cDd6877E92f83d5924c";
 const USDC_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 const USDT_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 
-forking(34469100, () => {
+forking(34775900, () => {
   testVip("VIP-224 Forced liquidations for user", vip224());
 });
 
-forking(34469100, () => {
+forking(34775900, () => {
   let comptroller: Contract;
   let liquidatorContract: Contract;
   let usdc: Contract;
