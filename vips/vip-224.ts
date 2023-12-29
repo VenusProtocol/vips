@@ -3,14 +3,11 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-const MOVE_DEBT_DELEGATE = "0x89621C48EeC04A85AfadFD37d32077e65aFe2226";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 
-const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
-const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
 const BUSD = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56";
 
@@ -31,16 +28,6 @@ export const vip224 = () => {
 
   return makeProposal(
     [
-      {
-        target: MOVE_DEBT_DELEGATE,
-        signature: "setBorrowAllowed(address,bool)",
-        params: [VUSDC, false],
-      },
-      {
-        target: MOVE_DEBT_DELEGATE,
-        signature: "setBorrowAllowed(address,bool)",
-        params: [VUSDT, false],
-      },
       {
         target: VBUSD,
         signature: "setProtocolShareReserve(address)",
