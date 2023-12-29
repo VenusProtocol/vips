@@ -42,18 +42,42 @@ const MOVE_DEBT_ALLOWLIST = [
 export const vip224 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-224 Enable forced liquidations of BNB bridge account",
+    title: "VIP-224 Enable MoveDebtDelegate for Shortfall Accounts",
     description: `#### Summary
 
-If passed, this VIP will enable the forced liquidations of the [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) and [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) borrows of the [BNB bridge account](https://bscscan.com/address/0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec), as it was [proposed in the Community forum](https://community.venus.io/t/proposal-bnb-bridge-exploiter-account-remediation/3974). No Market liquidations will happen.
+Following BNB Chain’s [proposal](https://community.venus.io/t/proposal-bnb-bridge-exploiter-account-remediation/3974) to liquidate the BNB exploiter’s debts, and the [Community proposal](https://community.venus.io/t/enable-movedebtdelegate-for-btc-and-eth-shortfall-account/4015), this VIP would allow to service most of the shortfall into solvent debt by using the [MoveDebtDelegate](https://app.venus.io/#/governance/proposal/215?chainId=56) contract with the [BNB bridge exploiter’s account](https://bscscan.com/address/0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec).
+
+At the end of this operation:
+
+- The BTC and ETH bad debt will be reduced
+- Venus maintains the BNB liquidity
+- Another whitelisted liquidator in [VIP-79](https://app.venus.io/#/governance/proposal/79?chainId=56) will still manage the BNB exploiter’s account health
+- The BNB bridge exploiter will carry additional debt, now defined across other markets
 
 #### Details
 
-After executing the VIP, only the authorized address (see [VIP-99](https://app.venus.io/#/governance/proposal/99)) will be able to (forcibly) liquidate the mentioned positions.
+If passed, this VIP will:
 
-Forced liquidations for individual accounts are available since [VIP-209](https://app.venus.io/#/governance/proposal/209).
+- upgrade the implementation of the MoveDebtDelegate (related to [VIP-215](https://app.venus.io/#/governance/proposal/215?chainId=56))
+    - add ETH and BTC to the list of markets where MoveDebtDelegate will be allowed to borrow on behalf of the BNB bridge exploiter’s account (previously only USDT and USDC were included)
+    - set the whitelist of borrowers and markets, considering the biggest bad debts. MoveDebtDelegate will be able to repay only the debt of these wallets. The full list of borrowers and markets are set in the commands of this VIP.
+- enable the forced liquidations of the [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955), [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d) borrows of the BNB bridge exploiter’s account, as it was [proposed by BNB Chain](https://community.venus.io/t/proposal-bnb-bridge-exploiter-account-remediation/3974), and [BTC](https://bscscan.com/address/0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c) and [ETH](https://bscscan.com/address/0x2170Ed0880ac9A755fd29B2688956BD959F933F8) borrows of the same wallet, to make [this Community proposal](https://community.venus.io/t/enable-movedebtdelegate-for-btc-and-eth-shortfall-account/4015) doable.
+- add 0x1934057d1DE58cF65fB59277A91f26aC9f8A4282 to the list of authorized liquidators for the BNB bridge exploiter’s account.
 
-VIP simulation: [https://github.com/VenusProtocol/vips/pull/135](https://github.com/VenusProtocol/vips/pull/135)`,
+Regarding MoveDebtDelegate and its use after this VIP: it is a permissionless contract that will allow any wallet to interact with it via the function moveDebt. The interaction with this function, to repay the BTC shortfall for example (it would be similar for the rest of the markets), would be:
+
+1. External BTC providers (any wallet) invoke the moveDebt function on the MoveDebtDelegate contract, sending BTC tokens to the MoveDebtDelegate contract
+2. MoveDebtDelegate repays BTC borrows on behalf of the BTC shortfall borrowers
+3. In the same transaction, the MoveDebtDelegate contract will borrow the equivalent amount of BTC, ETH, USDC or USDT, on behalf of the BNB bridge exploiter, and it will send those borrowed tokens to the external BTC provider, to compensate for their contribution
+
+There isn’t any economical incentive to interact with the MoveDebtDelegate: the BTC, ETH, USDC or USDT received from the MoveDebtDelegate contract will be the equivalent amount to the BTC provided (according to the [Venus oracles](https://docs-v4.venus.io/risk/resilient-price-oracle)).
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/135](https://github.com/VenusProtocol/vips/pull/135)
+
+#### References
+
+- [New MoveDebtDelegate implementation](https://bscscan.com/address/0x8439932C45e646FcC1009690417A65BF48f68Ce7)
+- Forced liquidations for individual accounts are available since [VIP-209](https://app.venus.io/#/governance/proposal/209).`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this proposal",
