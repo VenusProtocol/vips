@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { vip224 } from "../../../vips/vip-224";
+import { expectEvents } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
+import { vip224 } from "../../vips/vip-224";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
