@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
-import { vip224 } from "../../vips/vip-224";
+import { vip226 } from "../../vips/vip-226";
 import IERC20_UPGRADABLE_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -16,9 +16,9 @@ const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
 const BNB_CHAIN_RECEIVER = "0x6657911F7411765979Da0794840D671Be55bA273";
 
 const EXPECTED_RESERVES_TRANSFER = parseUnits("2373087.553409498607767042", 18);
-const EXPECTED_LIQUIDATION_REVENUE_VTOKENS = parseUnits("6944693.44741659", 8);
+const EXPECTED_LIQUIDATION_REVENUE_VTOKENS = parseUnits("7021262.3028218", 8);
 
-forking(34703300, () => {
+forking(34837453, () => {
   let comptroller: Contract;
   let busd: Contract;
   let vBUSD: Contract;
@@ -38,7 +38,7 @@ forking(34703300, () => {
     vBUSDBalanceBefore = await busd.balanceOf(VBUSD);
   });
 
-  testVip("VIP-224", vip224());
+  testVip("VIP-226", vip226());
 
   describe("Oracle price", () => {
     it("sets BUSD price to fixed $1", async () => {
