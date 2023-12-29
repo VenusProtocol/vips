@@ -2,11 +2,11 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import COMPTROLLER_ABI from "./abi/comptroller.json";
-import { vip224 } from "../../../vips/vip-224";
+import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { expectEvents } from "../../../src/utils";
+import { vip224 } from "../../../vips/vip-224";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -29,17 +29,12 @@ forking(34772092, () => {
       expect(newCap).to.equal(parseUnits("50000", 18));
     });
 
-    checkCorePoolComptroller()
+    checkCorePoolComptroller();
   });
 
   testVip("VIP-101 Venus Recommend Parameters", vip224(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        ["NewSupplyCap", "NewBorrowCap"],
-        [1, 1,]
-      );
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },
   });
 
@@ -54,8 +49,6 @@ forking(34772092, () => {
       expect(newCap).to.equal(parseUnits("100000", 18));
     });
 
-    checkCorePoolComptroller()
+    checkCorePoolComptroller();
   });
 });
-
-  
