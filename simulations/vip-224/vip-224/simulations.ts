@@ -20,13 +20,13 @@ forking(34772092, () => {
 
   describe("Pre-VIP behavior", async () => {
     it("supply cap of UNI equals 100K UNI", async () => {
-      const newCap = await comptroller.supplyCaps(VUNI);
-      expect(newCap).to.equal(parseUnits("100000", 18));
+      const prevCap = await comptroller.supplyCaps(VUNI);
+      expect(prevCap).to.equal(parseUnits("100000", 18));
     });
 
     it("borrow cap of UNI equals 50K UNI", async () => {
-      const newCap = await comptroller.borrowCaps(VUNI);
-      expect(newCap).to.equal(parseUnits("50000", 18));
+      const prevCap = await comptroller.borrowCaps(VUNI);
+      expect(prevCap).to.equal(parseUnits("50000", 18));
     });
 
     checkCorePoolComptroller();
