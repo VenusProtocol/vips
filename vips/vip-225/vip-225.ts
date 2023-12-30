@@ -25,9 +25,8 @@ const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 export const vip225 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-XXX Enable VAI minting for Prime holders",
-    description:
-      `#### Summary
+    title: "VIP-225 Enable VAI minting for Prime holders",
+    description: `#### Summary
 
 If passed, this VIP will:
 
@@ -74,7 +73,8 @@ We applied the following security procedures for this VIP:
 #### References
 
 - [Pull request with the deployed changes](https://github.com/VenusProtocol/venus-protocol/pull/407)
-- [VIP simulations](https://github.com/VenusProtocol/vips/pull/125)
+- [VIP simulations](https://github.com/VenusProtocol/vips/pull/137)
+- [VIP executed on testnet](https://testnet.bscscan.com/tx/0xb513a9daa63954e7f552c073914d36a3833c2e78be6287134bf94d9cf7a461d7)
 - [Documentation](https://docs-v4.venus.io/whats-new/prime-yield)
 - [Technical article about Venus Prime](https://docs-v4.venus.io/technical-reference/reference-technical-articles/prime)`,
     forDescription: "Execute this proposal",
