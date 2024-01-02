@@ -107,26 +107,26 @@ forking(5005207, () => {
     before(async () => {
       await pretendExecutingVip(vip007());
 
-      // prime = await ethers.getContractAt(PRIME_ABI, PRIME);
-      // primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
 
-      // for (let i = 0; i < vTokens.length; i++) {
-      //   const vToken = vTokens[i];
-      //   await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, GUARDIAN);
-      // }
+      for (let i = 0; i < vTokens.length; i++) {
+        const vToken = vTokens[i];
+        await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, vToken.assetAddress, vToken.feed, GUARDIAN);
+      }
     });
 
     it("prime markets", async () => {
-      // expect((await prime.getAllMarkets()).length).to.equal(4);
+      expect((await prime.getAllMarkets()).length).to.equal(4);
     });
 
-    // it("prime address", async () => {
-    //   expect(await primeLiquidityProvider.prime()).to.equal(PRIME);
-    // });
+    it("prime address", async () => {
+      expect(await primeLiquidityProvider.prime()).to.equal(PRIME);
+    });
 
-    // it("is paused", async () => {
-    //   expect(await prime.paused()).to.be.equal(true);
-    // });
+    it("is paused", async () => {
+      expect(await prime.paused()).to.be.equal(true);
+    });
 
     describe("generic tests", async () => {
       // checkCorePoolComptroller();
