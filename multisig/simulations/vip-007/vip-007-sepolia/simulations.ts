@@ -1,25 +1,25 @@
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
+import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
+import { vip007 } from "../../../proposals/vip-007/vip-007-sepolia";
+import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
-import ERC20_ABI from "./abis/ERC20.json";
-import { vip007 } from "../../../proposals/vip-007/vip-007-sepolia";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
 
-const PRIME_LIQUIDITY_PROVIDER = "0xF30312DF854742CAAf9E37D789B0F2617CE15239";
-const PRIME = "0x1c4B6D86712639b5d9EFaa938457f7a3dEa0de98";
+const PRIME_LIQUIDITY_PROVIDER = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
+const PRIME = "0x27A8ca2aFa10B9Bc1E57FC4Ca610d9020Aab3739";
 const CHAINLINK_ORACLE = "0x102F0b714E5d321187A4b6E5993358448f7261cE";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 const USER = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
-const XVS_VAULT_PROXY = "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6";
-const XVS = "0xDb633C11D3F9E6B8D17aC2c972C9e3B05DA59bF9";
+const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 
 interface vTokenConfig {
   name: string;
@@ -61,13 +61,12 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(5006494, () => {
+forking(5007188, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
     let xvsVault: Contract;
     let xvs: Contract;
-
 
     before(async () => {
       impersonateAccount(USER);
@@ -92,7 +91,7 @@ forking(5006494, () => {
     });
 
     describe("generic tests", async () => {
-      // checkXVSVault();
+      checkXVSVault();
     });
   });
 
@@ -138,13 +137,12 @@ forking(5006494, () => {
       await xvsVault.deposit(XVS, 0, parseUnits("1000", 18));
       await expect(prime.claim()).to.be.be.reverted;
 
-      // await mine(10000);
-      // console.log(await prime.stakedAt(USER));
-      // await prime.callStatic.claim();
-    })
+      await mine(10000);
+      await expect(prime.claim()).to.be.not.be.reverted;
+    });
 
     describe("generic tests", async () => {
-      // checkXVSVault();
+      checkXVSVault();
     });
   });
 });
