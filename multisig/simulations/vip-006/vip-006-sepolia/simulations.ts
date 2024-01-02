@@ -21,13 +21,13 @@ import {
   vip006,
 } from "../../../proposals/vip-006/vip-006-sepolia";
 
-forking(4971577, () => {
+forking(5005859, () => {
   describe("Generic checks", async () => {
     before(async () => {
       await pretendExecutingVip(vip006());
     });
 
-    checkRewardsDistributorPool(COMPTROLLER_CORE, 4);
+    checkRewardsDistributorPool(COMPTROLLER_CORE, 8);
     checkXVSVault();
 
     const wbtcRewardsDistributorConfig: RewardsDistributorConfig = {
