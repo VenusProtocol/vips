@@ -1,3 +1,5 @@
+import il_bscmainnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
+import il_bsctestnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import bscmainnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
 import bsctestnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import sepolia_deployed_contracts from "@venusprotocol/venus-protocol/deployments/sepolia.json";
@@ -16,6 +18,14 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
     XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bscmainnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc",
+    UNITROLLER: bscmainnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bscmainnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bscmainnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bscmainnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bscmainnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bscmainnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
@@ -28,6 +38,14 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa",
     XVS_VAULT_PROXY: bsctestnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bsctestnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bsctestnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x6eACe20E1F89D0B24e5B295Af1802dfBc730B37D",
+    UNITROLLER: bsctestnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bsctestnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bsctestnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bsctestnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bsctestnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bsctestnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",

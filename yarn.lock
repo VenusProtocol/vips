@@ -2358,6 +2358,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@venusprotocol/isolated-pools@npm:2.3.0-dev.9":
+  version: 2.3.0-dev.9
+  resolution: "@venusprotocol/isolated-pools@npm:2.3.0-dev.9"
+  dependencies:
+    "@nomiclabs/hardhat-ethers": ^2.2.3
+    "@openzeppelin/contracts": ^4.8.3
+    "@openzeppelin/contracts-upgradeable": ^4.8.3
+    "@openzeppelin/hardhat-upgrades": ^1.21.0
+    "@solidity-parser/parser": ^0.13.2
+    ethers: ^5.7.0
+    hardhat-deploy: ^0.11.14
+    module-alias: ^2.2.2
+  checksum: 5c252470f768cea1b7d96db77c1e9b436803864a0784a865dceeba4b2da257419a8a0a4811c6959bde6f6ad8122f09901fdb3665cac881da4d36a7e88831b4e6
+  languageName: node
+  linkType: hard
+
 "@venusprotocol/protocol-reserve@npm:1.2.0-dev.2":
   version: 1.2.0-dev.2
   resolution: "@venusprotocol/protocol-reserve@npm:1.2.0-dev.2"
@@ -2428,6 +2444,7 @@ __metadata:
     "@types/node": ^18.11.9
     "@typescript-eslint/eslint-plugin": ^5.44.0
     "@typescript-eslint/parser": ^5.44.0
+    "@venusprotocol/isolated-pools": 2.3.0-dev.9
     "@venusprotocol/venus-protocol": ^6.1.0-dev.3
     ajv: ^8.12.0
     chai: ^4.3.7
