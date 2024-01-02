@@ -82,7 +82,7 @@ export const vip007 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [PRIME, "addMarket(address,uint256,uint256)", GUARDIAN],
+      params: [PRIME, "addMarket(address,address,uint256,uint256)", GUARDIAN],
     },
     {
       target: ACM,
@@ -149,41 +149,36 @@ export const vip007 = () => {
     },
     {
       target: PRIME,
-      signature: "addMarket(address,uint256,uint256)",
-      params: [vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
+      signature: "addMarket(address,address,uint256,uint256)",
+      params: [COMPTROLLER, vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
     },
-    // {
-    //   target: PRIME,
-    //   signature: "addMarket(address,uint256,uint256)",
-    //   params: [vBTC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    // },
-    // {
-    //   target: PRIME,
-    //   signature: "addMarket(address,uint256,uint256)",
-    //   params: [vUSDC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    // },
-    // {
-    //   target: PRIME,
-    //   signature: "addMarket(address,uint256,uint256)",
-    //   params: [vUSDT, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    // },
-    // {
-    //   target: PRIME,
-    //   signature: "setLimit(uint256,uint256)",
-    //   params: [
-    //     0, // irrevocable
-    //     500, // revocable
-    //   ],
-    // },
-    // {
-    //   target: PRIME_LIQUIDITY_PROVIDER,
-    //   signature: "pauseFundsTransfer()",
-    //   params: [],
-    // },
-    // {
-    //   target: XVS_VAULT_PROXY,
-    //   signature: "setPrimeToken(address,address,uint256)",
-    //   params: [PRIME, XVS, PRIME_POOL_ID],
-    // },
+    {
+      target: PRIME,
+      signature: "addMarket(address,address,uint256,uint256)",
+      params: [COMPTROLLER, vBTC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
+    },
+    {
+      target: PRIME,
+      signature: "addMarket(address,address,uint256,uint256)",
+      params: [COMPTROLLER, vUSDC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
+    },
+    {
+      target: PRIME,
+      signature: "addMarket(address,address,uint256,uint256)",
+      params: [COMPTROLLER, vUSDT, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
+    },
+    {
+      target: PRIME,
+      signature: "setLimit(uint256,uint256)",
+      params: [
+        0, // irrevocable
+        500, // revocable
+      ],
+    },
+    {
+      target: PRIME_LIQUIDITY_PROVIDER,
+      signature: "pauseFundsTransfer()",
+      params: [],
+    },
   ]);
 };
