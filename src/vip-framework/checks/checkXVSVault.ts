@@ -27,6 +27,9 @@ export const checkXVSVault = () => {
 
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
       xvsVault = await ethers.getContractAt(XVSVault_ABI, XVS_VAULT_PROXY, signer);
+
+      const accounts = await ethers.getSigners();
+      await accounts[0].sendTransaction({ to: ACCOUNT, value: parseUnits("10") });
     });
 
     it("deposit and withdraw", async () => {

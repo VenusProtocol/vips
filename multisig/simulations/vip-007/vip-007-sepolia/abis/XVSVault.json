@@ -240,7 +240,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "rewardPerBlock",
+        "name": "rewardPerBlockOrSecond",
         "type": "uint256"
       },
       {
@@ -505,10 +505,25 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "SECONDS_PER_YEAR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract IXVSVaultProxy",
+        "internalType": "contract XVSVaultProxy",
         "name": "xvsVaultProxy",
         "type": "address"
       }
@@ -554,7 +569,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_rewardPerBlock",
+        "name": "_rewardPerBlockOrSecond",
         "type": "uint256"
       },
       {
@@ -586,6 +601,21 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "blocksOrSecondsPerYear",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -602,7 +632,7 @@
     "outputs": [
       {
         "internalType": "uint32",
-        "name": "fromBlock",
+        "name": "fromBlockOrSecond",
         "type": "uint32"
       },
       {
@@ -763,6 +793,21 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "getBlockNumberOrTimestamp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -823,7 +868,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "blockNumber",
+        "name": "blockNumberOrSecond",
         "type": "uint256"
       }
     ],
@@ -975,6 +1020,26 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "timeBased_",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blocksPerYear_",
+        "type": "uint256"
+      }
+    ],
+    "name": "initializeTimeManager",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
@@ -984,6 +1049,21 @@
       }
     ],
     "name": "isStakedToken",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isTimeBased",
     "outputs": [
       {
         "internalType": "bool",
@@ -1192,7 +1272,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "lastRewardBlock",
+        "name": "lastRewardBlockOrSecond",
         "type": "uint256"
       },
       {
@@ -1315,11 +1395,32 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_rewardToken",
         "type": "address"
       }
     ],
     "name": "rewardTokenAmountsPerBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "rewardTokenAmountsPerBlockOrSecond",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1410,7 +1511,7 @@
         "type": "uint256"
       }
     ],
-    "name": "setRewardAmountPerBlock",
+    "name": "setRewardAmountPerBlockOrSecond",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
