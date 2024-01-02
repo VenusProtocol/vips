@@ -5,14 +5,20 @@ import { ethers } from "hardhat";
 import { setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
+import XVS_VAULT_ABI from "./abis/XVSVault.json";
 import { vip007 } from "../../../proposals/vip-007/vip-007-sepolia";
 import { forking, pretendExecutingVip, testVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { parseUnits } from "ethers/lib/utils";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xF30312DF854742CAAf9E37D789B0F2617CE15239";
 const PRIME = "0x1c4B6D86712639b5d9EFaa938457f7a3dEa0de98";
 const CHAINLINK_ORACLE = "0x102F0b714E5d321187A4b6E5993358448f7261cE";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
+const USER = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 
 interface vTokenConfig {
   name: string;
@@ -88,12 +94,19 @@ forking(5005207, () => {
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
+    let xvsVault: Contract;
 
     before(async () => {
       await pretendExecutingVip(vip007());
 
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      impersonateAccount(USER);
+      const accounnts = await ethers.getSigners();
+      await accounnts[0].sendTransaction({ to: USER, value: parseUnits("1000") });
+
+      const signer = await ethers.getSigner(USER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY, signer);
 
       for (let i = 0; i < vTokens.length; i++) {
         const vToken = vTokens[i];
@@ -112,6 +125,14 @@ forking(5005207, () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
     });
+
+    it("claim prime token", async () => {
+      await xvsVault.deposit(XVS, 0, parseUnits("1000"));
+      await expect(prime.claim()).to.be.be.reverted;
+
+      await mine(10000);
+      await prime.claim();
+    })
 
     describe("generic tests", async () => {
       checkXVSVault();
