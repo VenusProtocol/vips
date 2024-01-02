@@ -3,7 +3,7 @@ import { makeProposal } from "../../../src/utils";
 import { ethers } from "hardhat";
 
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const PRIME_LIQUIDITY_PROVIDER = "0xF30312DF854742CAAf9E37D789B0F2617CE15239";
 const PRIME = "0x1c4B6D86712639b5d9EFaa938457f7a3dEa0de98";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
@@ -142,11 +142,16 @@ export const vip007 = () => {
         [0, 0, 0, 0],
       ],
     },
-    // {
-    //   target: PRIME,
-    //   signature: "addMarket(address,uint256,uint256)",
-    //   params: [vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    // },
+    {
+      target: XVS_VAULT_PROXY,
+      signature: "setPrimeToken(address,address,uint256)",
+      params: [PRIME, XVS, PRIME_POOL_ID],
+    },
+    {
+      target: PRIME,
+      signature: "addMarket(address,uint256,uint256)",
+      params: [vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
+    },
     // {
     //   target: PRIME,
     //   signature: "addMarket(address,uint256,uint256)",
