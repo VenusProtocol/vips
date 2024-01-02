@@ -1,17 +1,13 @@
-import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
-// import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-// import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
+import { setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import SETTER_FACET_ABI from "./abis/SetterFacet.json";
-import XVS_VAULT_ABI from "./abis/XVSVault.json";
 import { vip007 } from "../../../proposals/vip-007/vip-007-sepolia";
 import { forking, pretendExecutingVip, testVip } from "../../../../src/vip-framework";
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 
 const PRIME_LIQUIDITY_PROVIDER = "0xF30312DF854742CAAf9E37D789B0F2617CE15239";
 const PRIME = "0x1c4B6D86712639b5d9EFaa938457f7a3dEa0de98";
@@ -85,20 +81,9 @@ forking(5005207, () => {
     });
 
     describe("generic tests", async () => {
-      // checkCorePoolComptroller();
+      checkXVSVault();
     });
   });
-
-  // testVip("VIP-007 Prime Program", vip007(), {
-  //   callbackAfterExecution: async (txResponse: TransactionResponse) => {
-  //     await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewPrimeToken"], [1]);
-  //     await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["PrimeTokenUpdated"], [1]);
-  //     await expectEvents(txResponse, [PRIME_ABI], ["MarketAdded"], [4]);
-  //     await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated"], [1]);
-  //     await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["Paused"], [1]);
-  //     await expectEvents(txResponse, [XVS_VAULT_ABI], ["NewPrimeToken"], [1]);
-  //   },
-  // });
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
@@ -129,8 +114,7 @@ forking(5005207, () => {
     });
 
     describe("generic tests", async () => {
-      // checkCorePoolComptroller();
-      // checkXVSVault();
+      checkXVSVault();
     });
   });
 });

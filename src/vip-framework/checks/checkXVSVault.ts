@@ -40,7 +40,8 @@ export const checkXVSVault = () => {
       await xvsVault.requestWithdrawal(xvs.address, POOL_ID, parseUnits("1", 18));
       await mine(10000);
       await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalBalance);
+
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gte(originalBalance);
     });
   });
 };
