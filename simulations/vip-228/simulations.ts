@@ -6,8 +6,8 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip228 } from "../../vips/vip-228";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
+import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 
 const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -30,7 +30,11 @@ forking(34925177, () => {
     });
   });
 
-  testVip("VIP-228 Venus Recommend Parameters", vip228());
+  testVip("VIP-228 Venus Recommend Parameters", vip228(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     it("Check XVS Balance", async () => {
