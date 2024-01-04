@@ -87,7 +87,7 @@ export const vip187 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "dropFailedMessage(uint16,bytes)", NORMAL_TIMELOCK],
+        params: [XVSBridgeAdmin_Proxy, "dropFailedMessage(uint16,bytes,uint64)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -97,7 +97,7 @@ export const vip187 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [XVSBridgeAdmin_Proxy, "fallbackDeposit(uint256)", NORMAL_TIMELOCK],
+        params: [XVSBridgeAdmin_Proxy, "fallbackDeposit(address,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -198,6 +198,11 @@ export const vip187 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "dropFailedMessage(uint16,bytes,uint64)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setMinDstGas(uint16,uint16,uint256)", FAST_TRACK_TIMELOCK],
       },
       {
@@ -274,6 +279,11 @@ export const vip187 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "dropFailedMessage(uint16,bytes,uint64)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "setMinDstGas(uint16,uint16,uint256)", CRITICAL_TIMELOCK],
       },
       {
@@ -307,6 +317,27 @@ export const vip187 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [XVSBridgeAdmin_Proxy, "unpause()", GUARDIAN],
       },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "setMaxSingleTransactionLimit(uint16,uint256)", GUARDIAN],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "setMaxDailyLimit(uint16,uint256)", GUARDIAN],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "setMaxSingleReceiveTransactionLimit(uint16,uint256)", GUARDIAN],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVSBridgeAdmin_Proxy, "setMaxDailyReceiveLimit(uint16,uint256)", GUARDIAN],
+      },
+
       { target: XVSBridgeAdmin_Proxy, signature: "acceptOwnership()", params: [] },
       {
         target: XVSBridgeAdmin_Proxy,
