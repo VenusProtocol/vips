@@ -137,7 +137,7 @@ export const vip228 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BTT, parseUnits("1392507212.37901", 6), BINANCE_WALLET],
+        params: [BTT, parseUnits("1392507212.379014539551354601", 18), BINANCE_WALLET],
       },
     ],
     meta,

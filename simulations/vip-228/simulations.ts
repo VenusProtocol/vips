@@ -168,8 +168,8 @@ const TOKENS: Token[] = [
     name: "BTT",
     address: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B",
     binanceOracle: true,
-    amount: parseUnits("1392507212.37901", 6),
-    usdValue: "0.000000001531757933",
+    amount: parseUnits("1392507212.379014539551354601", 18),
+    usdValue: "1531.757933616915993506",
   },
 ];
 
@@ -217,8 +217,9 @@ forking(34945549, () => {
         await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, token.address, token.feed || "", NORMAL_TIMELOCK);
       }
     });
-    it("Check Balance", async () => {
-      for (let i = 0; i < TOKENS.length; i++) {
+
+    for (let i = 0; i < TOKENS.length; i++) {
+      it(`Check ${TOKENS[i].name} Balances`, async () => {
         const token = TOKENS[i];
         const tokenContract = new ethers.Contract(token.address, ERC20_ABI, ethers.provider);
         const treasuryBalance = await tokenContract.balanceOf(VTREASURY);
@@ -229,7 +230,7 @@ forking(34945549, () => {
 
         const usdValue = (await resilientOracle.getPrice(token.address)).mul(token.amount);
         expect(formatEther(formatEther(usdValue).split(".")[0])).to.be.eq(token.usdValue);
-      }
-    });
+      });
+    }
   });
 });
