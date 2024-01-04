@@ -23,6 +23,7 @@ interface Token {
   name: string;
   address: string;
   originalTreasuryBalance?: BigNumber;
+  originalBinanceBalance?: BigNumber;
   feed?: string;
   binanceOracle?: boolean;
   amount?: BigNumber;
@@ -187,6 +188,9 @@ forking(34945549, () => {
         const tokenContract = new ethers.Contract(token.address, ERC20_ABI, ethers.provider);
         const balance = await tokenContract.balanceOf(VTREASURY);
         TOKENS[i].originalTreasuryBalance = balance;
+
+        const binanceBalance = await tokenContract.balanceOf(BINANCE_WALLET);
+        TOKENS[i].originalBinanceBalance = binanceBalance;
       }
     });
   });
@@ -219,6 +223,9 @@ forking(34945549, () => {
         const tokenContract = new ethers.Contract(token.address, ERC20_ABI, ethers.provider);
         const treasuryBalance = await tokenContract.balanceOf(VTREASURY);
         expect(treasuryBalance.add(token.amount)).to.be.eq(token.originalTreasuryBalance);
+
+        const binanceBalance = await tokenContract.balanceOf(BINANCE_WALLET);
+        expect(binanceBalance.sub(token.amount)).to.be.eq(token.originalBinanceBalance);
 
         const usdValue = (await resilientOracle.getPrice(token.address)).mul(token.amount);
         expect(formatEther(formatEther(usdValue).split(".")[0])).to.be.eq(token.usdValue);
