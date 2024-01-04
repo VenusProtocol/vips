@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 
-import { ProposalType } from "../../../src/types";
 import { makeProposal } from "../../../src/utils";
 
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";

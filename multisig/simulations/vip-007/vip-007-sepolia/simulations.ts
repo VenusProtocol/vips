@@ -1,7 +1,7 @@
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
@@ -65,8 +65,6 @@ forking(5007188, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
-    let xvsVault: Contract;
-    let xvs: Contract;
 
     before(async () => {
       impersonateAccount(USER);
@@ -130,6 +128,7 @@ forking(5007188, () => {
 
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
+      expect(await primeLiquidityProvider.paused()).to.be.equal(true);
     });
 
     it("claim prime token", async () => {

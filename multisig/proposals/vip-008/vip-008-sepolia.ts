@@ -9,7 +9,7 @@ const BTC = "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b";
 const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 const USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
 
-export const vip007 = () => {
+export const vip008 = () => {
   return makeProposal([
     {
       target: PRIME_LIQUIDITY_PROVIDER,
