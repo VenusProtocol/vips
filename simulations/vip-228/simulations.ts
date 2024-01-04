@@ -7,11 +7,19 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip228 } from "../../vips/vip-228";
 import ERC20_ABI from "./abi/ERC20.json";
+import VTreasurer_ABI from "./abi/VTreasury.json";
 
 const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
 
-const TOKENS = [
+interface Token {
+  name: string;
+  address: string;
+  originalTreasuryBalance?: BigNumber;
+  originalBinanceBalance?: BigNumber;
+}
+
+const TOKENS: Token[] = [
   {
     name: "ETH",
     address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
@@ -110,6 +118,7 @@ forking(34945549, () => {
 
   testVip("VIP-228", vip228(), {
     callbackAfterExecution: async txResponse => {
+      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [20]); 
     },
   });
 
