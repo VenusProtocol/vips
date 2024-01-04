@@ -35,8 +35,8 @@ const TOKENS: Token[] = [
     name: "ETH",
     address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
     feed: "0x9ef1b8c0e4f7dc8bf5719ea496883dc6401d5b2e",
-    amount: parseUnits("69.89", 18),
-    usdValue: "154983.884578",
+    amount: parseUnits("92.81", 18),
+    usdValue: "205809.905962",
   },
   {
     name: "CAKE",
@@ -51,13 +51,6 @@ const TOKENS: Token[] = [
     feed: "0xa767f745331D267c7751297D982b050c93985627",
     amount: parseUnits("107165.54", 18),
     usdValue: "60045.0974710866",
-  },
-  {
-    name: "TUSD_OLD",
-    address: "0x14016E85a25aeb13065688cAFB43044C2ef86784",
-    feed: "0xa3334a9762090e827413a7495afece76f41dfc06",
-    amount: parseUnits("39233.57", 18),
-    usdValue: "39229.6470353357",
   },
   {
     name: "DOT",
@@ -109,13 +102,6 @@ const TOKENS: Token[] = [
     usdValue: "12619.7916824529807868",
   },
   {
-    name: "TRX_OLD",
-    address: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
-    feed: "0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be",
-    amount: parseUnits("72175.747054974582785017", 18),
-    usdValue: "7752.191290295713259377",
-  },
-  {
     name: "DOGE",
     address: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
     feed: "0x3ab0a0d137d4f946fbb19eecc6e92e64660231c8",
@@ -142,13 +128,6 @@ const TOKENS: Token[] = [
     feed: "0xf4c5e535756d11994fcbb12ba8add0192d9b88be",
     amount: parseUnits("40954.233946", 6),
     usdValue: "4398.7775485731139",
-  },
-  {
-    name: "SXP",
-    address: "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A",
-    feed: "0xe188a9875af525d25334d75f3327863b2b8cd0f1",
-    amount: parseUnits("32622.12", 18),
-    usdValue: "12243.8586948984",
   },
   {
     name: "AAVE",
@@ -197,7 +176,7 @@ forking(34945549, () => {
 
   testVip("VIP-228", vip228(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [20]);
+      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [17]);
     },
   });
 
