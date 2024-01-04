@@ -72,7 +72,7 @@ export const vip228 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BETH, parseUnits("14.99", 18), BINANCE_WALLET],
+        params: [BETH, parseUnits("14.98882392", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
@@ -82,32 +82,32 @@ export const vip228 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [LINK, parseUnits("1474.52", 18), BINANCE_WALLET],
+        params: [LINK, parseUnits("1474.51885596", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [LTC, parseUnits("308.8828", 18), BINANCE_WALLET],
+        params: [LTC, parseUnits("306.882774686205524558", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BCH, parseUnits("53.85", 18), BINANCE_WALLET],
+        params: [BCH, parseUnits("53.84898038", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [TRX_OLD, parseUnits("72175.75", 18), BINANCE_WALLET],
+        params: [TRX_OLD, parseUnits("72175.747054974582785017", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [DOGE, parseUnits("98580", 8), BINANCE_WALLET],
+        params: [DOGE, parseUnits("98579.90244918", 8), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [FLOKI, parseUnits("177082683", 9), BINANCE_WALLET],
+        params: [FLOKI, parseUnits("177082682.555785183", 9), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
@@ -117,7 +117,7 @@ export const vip228 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [TRX, parseUnits("40954.23", 6), BINANCE_WALLET],
+        params: [TRX, parseUnits("40954.233946", 6), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
@@ -137,7 +137,7 @@ export const vip228 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BTT, parseUnits("1.3925", 6), BINANCE_WALLET],
+        params: [BTT, parseUnits("1392507212.37901", 6), BINANCE_WALLET],
       },
     ],
     meta,
