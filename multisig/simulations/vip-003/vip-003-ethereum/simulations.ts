@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip003 } from "../../../proposals/vip-003/vip-003-ethereum";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -18,6 +19,7 @@ const XVS_MINT_LIMIT = parseUnits("500000", 18);
 const TRUSTED_REMOTE = "0xf8f46791e3db29a029ec6c9d946226f3c613e854";
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
+const REGULAR_USER = "0x68dC394Aa8aFe0Af3F772DeEcB97dC63fB5E0B77";
 
 forking(18889414, () => {
   let xvs: Contract;
@@ -94,6 +96,20 @@ forking(18889414, () => {
     it("validate asset prices", async () => {
       const price = await resilientOracle.getPrice(XVS);
       expect(price).to.be.equal("12354412440000000000");
+    });
+  });
+
+  describe("Post-Execution extra checks", () => {
+    it(`should fail if someone else tries to mint XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).mint(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
+    });
+
+    it(`should fail if someone else tries to burn XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).burn(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
     });
   });
 });

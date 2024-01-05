@@ -11,24 +11,39 @@
     "type": "constructor"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "AccountBlacklisted",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AddressesMustDiffer",
+    "type": "error"
+  },
+  {
     "inputs": [],
     "name": "MintLimitExceed",
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "MintNotAllowed",
+    "inputs": [],
+    "name": "MintedAmountExceed",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NewCapNotGreaterThanMintedTokens",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "Unauthorized",
     "type": "error"
   },
   {
@@ -143,6 +158,25 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "source",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "destination",
+        "type": "address"
+      }
+    ],
+    "name": "MintedTokensMigrated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "oldAccessControlManager",
         "type": "address"
       },
@@ -225,25 +259,6 @@
     ],
     "name": "Unpaused",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "_blacklist",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [],
@@ -421,6 +436,24 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "source_",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "destination_",
+        "type": "address"
+      }
+    ],
+    "name": "migrateMinterTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
