@@ -8,7 +8,7 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { fetchVTokenStorageCore, fetchVTokenStorageIL, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
-import { CORE_MARKETS, vip219Testnet } from "../../../vips/vip-219/bsctestnet";
+import { CORE_MARKETS, vip219Testnet, NEW_VBEP20_DELEGATE_IMPL, IL_VTOKEN_IMPL } from "../../../vips/vip-234/bsctestnet";
 import beaconAbi from "./abi/beacon.json";
 import comptrollerAbi from "./abi/comptroller.json";
 import ilComptrollerAbi from "./abi/il_comptroller.json";
@@ -151,7 +151,7 @@ beforeEach(function () {
   chaiJestSnapshot.configureUsingMochaContext(this);
 });
 
-let snapshotFilename = __filename + ".snap";
+const snapshotFilename = __filename + ".snap";
 
 let vToken: ethers.Contract;
 let underlying: ethers.Contract;

@@ -114,6 +114,8 @@ export const fetchVTokenStorageCore = async (vToken: ethers.Contract, user: stri
   };
 };
 
+const PAUSED_MARKETS = ["vTUSDOLD"];
+
 export const performVTokenBasicActions = async (
   marketAddress: string,
   user: SignerWithAddress,
@@ -163,20 +165,22 @@ export const performVTokenBasicActions = async (
   await underlying.connect(user).approve(marketAddress, mintAmount.add(repayAmount));
 
   // Mint tokens
-  await vToken.connect(user).mint(mintAmount);
-  expect(await vToken.balanceOf(user.address)).to.be.greaterThan(previousBalance);
-  previousBalance = await vToken.balanceOf(user.address);
-
-  // Borrow tokens
-  await vToken.connect(user).borrow(borrowAmount);
-  expect(await vToken.borrowBalanceStored(user.address)).to.be.greaterThan(previousBorrowBalance);
-  previousBorrowBalance = await vToken.borrowBalanceStored(user.address);
-
-  // Repay borrowed tokens
-  await vToken.connect(user).repayBorrow(repayAmount);
-  expect(await vToken.borrowBalanceStored(user.address)).to.be.lessThan(previousBorrowBalance);
-
-  // Redeem tokens
-  await vToken.connect(user).redeemUnderlying(redeemAmount);
-  expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+  if (!PAUSED_MARKETS.includes(await vToken.symbol())) {
+    await vToken.connect(user).mint(mintAmount);
+    expect(await vToken.balanceOf(user.address)).to.be.greaterThan(previousBalance);
+    previousBalance = await vToken.balanceOf(user.address);
+    
+    // Borrow tokens
+    await vToken.connect(user).borrow(borrowAmount);
+    expect(await vToken.borrowBalanceStored(user.address)).to.be.greaterThan(previousBorrowBalance);
+    previousBorrowBalance = await vToken.borrowBalanceStored(user.address);
+    
+    // Repay borrowed tokens
+    await vToken.connect(user).repayBorrow(repayAmount);
+    expect(await vToken.borrowBalanceStored(user.address)).to.be.lessThan(previousBorrowBalance);
+    
+    // Redeem tokens
+    await vToken.connect(user).redeemUnderlying(redeemAmount);
+    expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+  }
 };
