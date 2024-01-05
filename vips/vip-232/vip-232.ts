@@ -16,15 +16,58 @@ export const SINGLE_RECEIVE_LIMIT = "10000000000000000000000";
 export const MAX_DAILY_RECEIVE_LIMIT = "50000000000000000000000";
 export const DEST_CHAIN_ID = 101;
 
-export const vip187 = () => {
+export const vip232 = () => {
   const meta = {
     version: "v2",
-    title: "VIP to configure bsc XVS bridge",
-    description: ``,
+    title: "VIP-232 XVS bridge BNB Chain - Ethereum",
+    description: `#### Summary
 
-    forDescription: "I agree that Venus Protocol should proceed with this configuration for XVS Bridge",
-    againstDescription: "I do not think that Venus Protocol should proceed with this configuration for XVS Bridge",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this configuration for XVS Bridge",
+Following the community proposal [[VRC] Deploy Venus Protocol on Ethereum Mainnet](https://community.venus.io/t/vrc-deploy-venus-protocol-on-ethereum-mainnet/3885), and the [associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x68be3a2cf0d4e72459c286ecb3dfae7d6f489ba9d962747987be3a46771a0df2), this VIP is the first one directly related to the multichain deployment of the Venus protocol. It configures the bridge contracts between BNB Chain and Ethereum using [LayerZero](https://layerzero.network/) ([snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x62440d98cb7513d4873662203b7a27f9441880afa73105c55a733005de7ac9a1)). After the execution, it will be possible to send XVS from BNB Chain to Ethereum mainnet and vice versa.
+
+#### Description
+
+If passed, this VIP will perform the following actions:
+
+- Link the [bridge contract on BNB Chain](https://bscscan.com/address/0xf8F46791E3dB29a029Ec6c9d946226f3c613e854) with the [bridge contract on Ethereum](https://etherscan.io/address/0x888E317606b4c590BBAD88653863e8B345702633), setting the trustworthiness relationship
+- Configuration of limits (they could be updated in the future with a new VIP):
+    - Maximum bridged XVS in a single transaction: 10,000 USD
+    - Maximum bridged XVS in 24 hours: 50,000 USD
+- Governance is whitelisted, so it could bridge any amount of XVS to/from Ethereum
+- Governance accepts the ownership of the XVSBridgeAdmin contract
+
+### Security and additional considerations
+
+- **Audits:** [Certik](https://www.certik.com/), and [Quantstamp](https://quantstamp.com/) have audited the deployed code. Moreover, [LayerZero](https://layerzero.network/) team reviewed the design and the code directly related to the bridge.
+- **VIP simulation**: in a simulation environment, validating the bridge is properly configured after the execution
+- **Deployment on testnet**: the same bridge has been deployed to testnet (BNB testnet - Sepolia)
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/token-bridge/blob/develop/audits/083_multichain_token_bridge_certik_20231226.pdf) (2023/December/26)
+- [Quantstamp audit report](https://github.com/VenusProtocol/token-bridge/blob/develop/audits/064_multichain_token_bridge_quantstamp_20231219.pdf) (2023/December/19)
+
+#### Deployed contracts
+
+- BNB Chain
+    - XVSBridgeAdmin: [0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21](https://bscscan.com/address/0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21)
+    - XVSProxyOFTSrc: [0xf8F46791E3dB29a029Ec6c9d946226f3c613e854](https://bscscan.com/address/0xf8F46791E3dB29a029Ec6c9d946226f3c613e854)
+- Ethereum
+    - XVSBridgeAdmin: [0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96](https://etherscan.io/address/0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96)
+    - XVSProxyOFTDest: [0x888E317606b4c590BBAD88653863e8B345702633](https://etherscan.io/address/0x888E317606b4c590BBAD88653863e8B345702633)
+    - XVS: [0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A](https://etherscan.io/address/0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A)
+    - Guardian: [0x285960C5B22fD66A736C7136967A3eB15e93CC67](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67)
+- [Contracts on the testnets](https://docs-v4.venus.io/deployed-contracts/xvs-multichain#testnet-chains)
+
+#### References
+
+- [Repository](https://github.com/VenusProtocol/token-bridge)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/140)
+- [Resilient oracle deployed to Ethereum](https://docs-v4.venus.io/deployed-contracts/oracles#ethereum-mainnet)
+- [Configuration of the bridge contract on Ethereum](https://github.com/VenusProtocol/vips/pull/148)
+- [Documentation](https://docs-v4.venus.io/technical-reference/reference-technical-articles/technical-doc-xvs-bridge)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
