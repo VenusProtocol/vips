@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip228 } from "../../vips/vip-228";
+import { vip231 } from "../../vips/vip-231";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTreasurer_ABI from "./abi/VTreasury.json";
@@ -174,7 +174,7 @@ forking(34945549, () => {
     });
   });
 
-  testVip("VIP-228", vip228(), {
+  testVip("VIP-231", vip231(), {
     callbackAfterExecution: async txResponse => {
       expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [17]);
     },
