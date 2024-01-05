@@ -35,8 +35,8 @@ const TOKENS: Token[] = [
     name: "ETH",
     address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
     feed: "0x9ef1b8c0e4f7dc8bf5719ea496883dc6401d5b2e",
-    amount: parseUnits("92.81", 18),
-    usdValue: "205809.905962",
+    amount: parseUnits("93.50", 18),
+    usdValue: "207340.0087",
   },
   {
     name: "CAKE",
@@ -143,13 +143,6 @@ const TOKENS: Token[] = [
     amount: parseUnits("2201.65", 18),
     usdValue: "2201.4298570165",
   },
-  {
-    name: "BTT",
-    address: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B",
-    binanceOracle: true,
-    amount: parseUnits("1392507212.379014539551354601", 18),
-    usdValue: "1531.757933616915993506",
-  },
 ];
 
 forking(34945549, () => {
@@ -176,7 +169,7 @@ forking(34945549, () => {
 
   testVip("VIP-231", vip231(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [17]);
+      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [16]);
     },
   });
 

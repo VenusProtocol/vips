@@ -22,7 +22,6 @@ const MATIC = "0xCC42724C6683B7E57334c4E856f4c9965ED682bD";
 const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
 const AAVE = "0xfb6115445Bff7b52FeB98650C87f44907E58f802";
 const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
-const BTT = "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B";
 
 export const vip231 = () => {
   const meta = {
@@ -36,7 +35,7 @@ The total protocol revenues for this quarter were: $5,148,257. Based on the prev
 
 Based on the protocol’s [Tokenomics](https://snapshot.org/#/venus-xvs.eth/proposal/0xc9d270ccecb7b91c75b95b8d9af24fc7c20cd38c0c0c44888ed4e7724f4e7ce9), the resulting buyback amount is $642,516.
 
-If passed, this VIP will transfer 17 tokens, valued at $642,516, to Binance for the swap to XVS.
+If passed, this VIP will transfer 16 tokens, valued at $642,516, to Binance for the swap to XVS.
 
 #### Details
 
@@ -119,7 +118,7 @@ The following tokens will be sent and converted to XVS:
 
 **Assets with Token Amounts and USD Values:**
 
-- ETH: 92.81 ($203,661.43)
+- ETH: 93.50 ($205,180.66)
 - Cake: 54,198.52 ($169,641.37)
 - ADA (Binance-Peg): 107,165.54 ($58,915.69)
 - DOT: 4,845.75 ($37,048.28)
@@ -135,7 +134,6 @@ The following tokens will be sent and converted to XVS:
 - TRX: 40,954.23 ($4,287.64)
 - AAVE: 28.45 ($2,841.24)
 - TUSD: 2,202.10 ($2,201.65)
-- BTT: 1.3925B ($1,519.23)
 
 **Total:** $642,516
 
@@ -159,7 +157,7 @@ Legacy rewards for this quarter: **95,550** XVS
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [ETH, parseUnits("92.81", 18), BINANCE_WALLET],
+        params: [ETH, parseUnits("93.50", 18), BINANCE_WALLET],
       },
       {
         target: VTREASURY,
@@ -235,11 +233,6 @@ Legacy rewards for this quarter: **95,550** XVS
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [TUSD, parseUnits("2201.65", 18), BINANCE_WALLET],
-      },
-      {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BTT, parseUnits("1392507212.379014539551354601", 18), BINANCE_WALLET],
       },
     ],
     meta,
