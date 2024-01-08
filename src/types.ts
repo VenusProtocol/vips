@@ -30,3 +30,9 @@ export interface Command {
   params: any[];
   value?: string;
 }
+
+export interface TokenConfig {
+  asset: string;
+  oracles: string[];
+  enableFlagsForOracles: boolean[];
+}
