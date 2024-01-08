@@ -12,20 +12,20 @@ import {
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip187Testnet,
-} from "../../../vips/vip-187/vip-187-testnet";
+  vip232Testnet,
+} from "../../../vips/vip-232/vip-232-testnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
-const XVSProxyOFTSrc = "0x963cAbDC5bb51C1479ec94Df44DE2EC1a49439E3";
-const XVSBridgeAdmin_Proxy = "0x5D08D49A2e43aC4c72C60754d1550BA12e846d66";
+const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
+const XVSBridgeAdmin_Proxy = "0xB164Cb262328Ca44a806bA9e3d4094931E658513";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(35486130, () => {
+forking(36177672, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
   let bridgeAdmin: ethers.Contract;
@@ -39,13 +39,13 @@ forking(35486130, () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVSProxyOFTSrc_ABI, provider);
     bridgeAdmin = new ethers.Contract(XVSBridgeAdmin_Proxy, XVSBridgeAdmin_ABI, provider);
     xvs = new ethers.Contract(XVS, XVS_ABI, provider);
-    xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
+    xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("5"));
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
-    defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 200000]);
+    defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip187Testnet", vip187Testnet(), {
+  testVip("vip232Testnet", vip232Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -61,7 +61,7 @@ forking(35486130, () => {
           "SetTrustedRemoteAddress",
           "Failure",
         ],
-        [50, 2, 1, 1, 1, 1, 1, 1, 0],
+        [55, 2, 1, 1, 1, 1, 1, 1, 0],
       );
     },
   });
@@ -92,7 +92,7 @@ forking(35486130, () => {
     });
 
     it("Should emit an event on successfull bridging of XVS", async () => {
-      const amount = parseUnits("1", 18);
+      const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
@@ -139,15 +139,15 @@ forking(35486130, () => {
     });
 
     it("Reverts if max daily transaction limit exceed", async function () {
-      const maxPlusAmount = ethers.utils.parseUnits("110");
-      const amount = ethers.utils.parseUnits("1");
+      const maxPlusAmount = ethers.utils.parseUnits("500");
+      const amount = ethers.utils.parseUnits("0.9");
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      for (let i = 0; i < 70; i++) {
+      for (let i = 0; i < 50; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
