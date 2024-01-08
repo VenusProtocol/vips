@@ -39,6 +39,11 @@ forking(18890306, () => {
       // checkXVSVault(); // TODO: Can be executed once we have XVS on ethereum
     });
 
+    it("Should pause xvs vault", async () => {
+      const isPaused = await xvsVault.vaultPaused();
+      expect(isPaused).equals(true);
+    });
+
     it("Should set xvs vault owner to multisig", async () => {
       const owner = await xvsVault.admin();
       expect(owner).equals(ethereum.NORMAL_TIMELOCK);
