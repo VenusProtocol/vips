@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, BTC, ETH, USDC, USDT, BTC_AMOUNT, USDC_AMOUNT, USDT_AMOUNT, ETH_AMOUNT, COMMUNITY_WALLET, BNB_TREASURY, vip213 } from "../../../vips/vip-213/vip-213";
+import { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, BTC, ETH, USDC, USDT, BTC_AMOUNT, USDC_AMOUNT, USDT_AMOUNT, ETH_AMOUNT, COMMUNITY_WALLET, BNB_TREASURY, vip213Testnet } from "../../../vips/vip-213/vip-213-testnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";

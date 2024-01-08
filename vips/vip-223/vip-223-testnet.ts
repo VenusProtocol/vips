@@ -15,20 +15,10 @@ export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [SEPOLIA_TREASURY]);
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const XVS_AMOUNT = parseUnits("75750", 18);
+export const XVS_AMOUNT = parseUnits("171500", 18);
 export const DEST_CHAIN_ID = 10161;
 
-export const BTC = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-export const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
-export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-
-export const BTC_AMOUNT = parseUnits("0.3", 18);
-export const ETH_AMOUNT = parseUnits("5", 18);
-export const USDC_AMOUNT = parseUnits("20000", 6);
-export const USDT_AMOUNT = parseUnits("20000", 6);
-
-export const vip213Testnet = () => {
+export const vip223Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP to transfer XVS to destination chain",
@@ -67,26 +57,6 @@ export const vip213Testnet = () => {
           [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         value: "300000000000000000",
-      },
-      {
-        target: BNB_TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BTC, BTC_AMOUNT, COMMUNITY_WALLET],
-      },
-      {
-        target: BNB_TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [ETH, ETH_AMOUNT, COMMUNITY_WALLET],
-      },
-      {
-        target: BNB_TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, USDC_AMOUNT, COMMUNITY_WALLET],
-      },
-      {
-        target: BNB_TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_AMOUNT, COMMUNITY_WALLET],
       },
     ],
     meta,
