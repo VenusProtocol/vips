@@ -102,7 +102,7 @@ forking(5007188, () => {
     before(async () => {
       await pretendExecutingVip(vip007());
 
-      impersonateAccount(USER);
+      await impersonateAccount(USER);
       const accounts = await ethers.getSigners();
       await accounts[0].sendTransaction({ to: USER, value: parseUnits("10") });
 
