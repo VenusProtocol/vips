@@ -16,7 +16,7 @@ export const vip008 = () => {
       signature: "setTokensDistributionSpeed(address[],uint256[])",
       params: [
         [ETH, BTC, USDC, USDT],
-        ["24438657407407", "1261574074074", "36881", "87191"],
+        ["24438657407407", "126", "36881", "87191"],
       ],
     },
     {

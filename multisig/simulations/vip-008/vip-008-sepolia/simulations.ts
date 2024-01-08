@@ -128,7 +128,7 @@ forking(5007188, () => {
       expect(speed).to.deep.equal("24438657407407");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
-      expect(speed).to.deep.equal("1261574074074");
+      expect(speed).to.deep.equal("126");
 
       speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
       expect(speed).to.deep.equal("36881");
