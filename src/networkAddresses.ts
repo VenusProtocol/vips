@@ -1,3 +1,5 @@
+import il_bscmainnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
+import il_bsctestnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import bscmainnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
 import bsctestnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import sepolia_deployed_contracts from "@venusprotocol/venus-protocol/deployments/sepolia.json";
@@ -16,6 +18,14 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
     XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bscmainnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc",
+    UNITROLLER: bscmainnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bscmainnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bscmainnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bscmainnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bscmainnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bscmainnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
@@ -28,6 +38,14 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa",
     XVS_VAULT_PROXY: bsctestnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bsctestnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bsctestnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x6eACe20E1F89D0B24e5B295Af1802dfBc730B37D",
+    UNITROLLER: bsctestnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bsctestnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bsctestnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bsctestnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bsctestnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bsctestnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
@@ -45,7 +63,7 @@ export const NETWORK_ADDRESSES = {
     MOCK_USDT: "0x8d412FD0bc5d826615065B931171Eed10F5AF266",
     MOCK_WETH: "0x700868CAbb60e90d77B6588ce072d9859ec8E281",
     MOCK_WBTC: "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b",
-    XVS: "0xDb633C11D3F9E6B8D17aC2c972C9e3B05DA59bF9",
+    XVS: "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E",
     POOL_REGISTRY: "0x758f5715d817e02857Ba40889251201A5aE3E186",
     COMPTROLLER_CORE: "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70",
     VCRV_CORE: "0x121E3be152F283319310D807ed847E8b98319C1e",
@@ -65,8 +83,7 @@ export const NETWORK_ADDRESSES = {
     REDSTONE_ORACLE: "0x4e6269Ef406B4CEE6e67BA5B5197c2FfD15099AE",
     MOCK_CRV: "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3",
     MOCK_crvUSD: "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6",
-    XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
-    XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
+    XVS_VAULT_PROXY: "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5",
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
   opbnbtestnet: {
@@ -74,16 +91,7 @@ export const NETWORK_ADDRESSES = {
     GUARDIAN: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
   },
   opbnbmainnet: {
-    NORMAL_TIMELOCK: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207", // OPBNB Multisig
+    NORMAL_TIMELOCK: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
     GUARDIAN: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
-    BINANCE_ORACLE: "0xB09EC9B628d04E1287216Aa3e2432291f50F9588",
-    RESILIENT_ORACLE: "0x8f3618c4F0183e14A218782c116fb2438571dAC9",
-    BOUND_VALIDATOR: "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE",
-    BTCB: "0x7c6b91d9be155a6db01f749217d76ff02a7227f2",
-    ETH: "0xe7798f023fc62146e8aa1b36da45fb70855a77ea",
-    USDT: "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3",
-    WBNB: "0x4200000000000000000000000000000000000006",
-    ACM: "0xA60Deae5344F1152426cA440fb6552eA0e3005D6",
-    XVS: "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA",
   },
 };
