@@ -164,6 +164,12 @@ export const vip219Testnet = () => {
           params: [NEW_VBEP20_DELEGATE_IMPL, false, "0x"],
         };
       }),
+      // TRX is missing a set ProtocolShareReserve contract in testnet
+      {
+        target: "0x6AF3Fdb3282c5bb6926269Db10837fa8Aec67C04",
+        signature: "setProtocolShareReserve(address)",
+        params: ["0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3"],
+      },
       {
         target: VTOKEN_BEACON,
         signature: "upgradeTo(address)",
