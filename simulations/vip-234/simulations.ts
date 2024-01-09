@@ -58,89 +58,89 @@ forking(35091610, () => {
       expect(await vEth.interestRateModel()).to.equals(OldvETHInterestModel);
     });
     it("supply cap should be 5,500,000 FDUSD", async () => {
-      const newCap = await comptroller.supplyCaps(vFDUSD);
-      expect(newCap).to.equal(parseUnits("5500000", 18));
+      const oldCap = await comptroller.supplyCaps(vFDUSD);
+      expect(oldCap).to.equal(parseUnits("5500000", 18));
     });
 
-    it("supply cap should be 8,000,000 FDUSD", async () => {
-      const newCap = await comptroller.borrowCaps(vFDUSD);
-      expect(newCap).to.equal(parseUnits("4400000", 18));
+    it("supply cap should be 4,400,000 FDUSD", async () => {
+      const oldCap = await comptroller.borrowCaps(vFDUSD);
+      expect(oldCap).to.equal(parseUnits("4400000", 18));
     });
 
     it("supply cap should be 8,000 ankrBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vankrBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("8000", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vankrBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("8000", 18));
     });
     it("supply cap should be 9,600 BNBx market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vBNBx_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("9600", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vBNBx_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("9600", 18));
     });
     it("supply cap should be 2,900 stkBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vstkBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("2900", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vstkBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("2900", 18));
     });
     it("supply cap should be 3,000 SnBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vSnBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("3000", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vSnBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("3000", 18));
     });
     it("supply cap should be 24,000 WBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vWBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("24000", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vWBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("24000", 18));
     });
 
     it("supply cap should be 500,000 HAY market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vHAY_Stablecoins);
-      expect(newCap).to.equal(parseUnits("500000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.supplyCaps(vHAY_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("500000", 18));
     });
     it("supply cap should be 960,000 USDT market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDT_Stablecoins);
-      expect(newCap).to.equal(parseUnits("960000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDT_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("960000", 18));
     });
     it("supply cap should be 240,000 USDD market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDD_Stablecoins);
-      expect(newCap).to.equal(parseUnits("240000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDD_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("240000", 18));
     });
     it("supply cap should be 250,000 agEUR market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vagEUR_Stablecoins);
-      expect(newCap).to.equal(parseUnits("250000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.supplyCaps(vagEUR_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("250000", 18));
     });
 
-    it("borrow cap should be 10 ankrBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vankrBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("1600", 18));
+    it("borrow cap should be 1,600 ankrBNB market of LiquidStake_Pool", async () => {
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vankrBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("1600", 18));
     });
     it("borrow cap should be 1,920 BNBx market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vBNBx_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("1920", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vBNBx_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("1920", 18));
     });
     it("borrow cap should be 580 stkBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vstkBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("580", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vstkBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("580", 18));
     });
     it("borrow cap should be 800 SnBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vSnBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("800", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vSnBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("800", 18));
     });
     it("borrow cap should be 16,000 WBNB market of LiquidStake_Pool", async () => {
-      const newCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vWBNB_LiquidStakedBNB);
-      expect(newCap).to.equal(parseUnits("16000", 18));
+      const oldCap = await LiquidStakedBNB_Pool_Comptroller.borrowCaps(vWBNB_LiquidStakedBNB);
+      expect(oldCap).to.equal(parseUnits("16000", 18));
     });
 
     it("borrow cap should be 250,000 HAY market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vHAY_Stablecoins);
-      expect(newCap).to.equal(parseUnits("250000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.borrowCaps(vHAY_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("250000", 18));
     });
     it("borrow cap should be 640,000 USDT market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDT_Stablecoins);
-      expect(newCap).to.equal(parseUnits("640000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDT_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("640000", 18));
     });
     it("borrow cap should be 160,000 USDD market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDD_Stablecoins);
-      expect(newCap).to.equal(parseUnits("160000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDD_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("160000", 18));
     });
     it("borrow cap should be 200,000 agEUR market of StableCoin_Pool", async () => {
-      const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vagEUR_Stablecoins);
-      expect(newCap).to.equal(parseUnits("200000", 18));
+      const oldCap = await StableCoin_Pool_Comptroller.borrowCaps(vagEUR_Stablecoins);
+      expect(oldCap).to.equal(parseUnits("200000", 18));
     });
   });
 
