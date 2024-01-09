@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
+import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import { vip234 } from "../../vips/vip-234";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
@@ -14,9 +15,11 @@ const Comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
-const vETH_INTEREST_MODEL = "0xDA8ED13b2e88Ec292c9E8Ba8252E7a160429Ff7B";
+const OldvETHInterestModel = "0x16412DBB7B2a4E119eDFCb3b58B08d196eC733BE";
+const vETHInterestModel = "0xDA8ED13b2e88Ec292c9E8Ba8252E7a160429Ff7B";
 const ChainlinkOracle = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
+const OracleAdmin = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const NewCollateralFactor = parseUnits("0.78", 18);
 
 const LiquidStakedBNB_Pool = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
@@ -44,12 +47,7 @@ forking(35091610, () => {
     LiquidStakedBNB_Pool_Comptroller = new ethers.Contract(LiquidStakedBNB_Pool, IL_COMPTROLLER_ABI, provider);
     StableCoin_Pool_Comptroller = new ethers.Contract(StableCoin_Pool, IL_COMPTROLLER_ABI, provider);
     vEth = new ethers.Contract(vETH, VTOKEN_ABI, provider);
-    await setMaxStalePeriodInChainlinkOracle(
-      ChainlinkOracle,
-      BNB,
-      ethers.constants.AddressZero,
-      "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396",
-    );
+    await setMaxStalePeriodInChainlinkOracle(ChainlinkOracle, BNB, ethers.constants.AddressZero, OracleAdmin);
   });
   describe("Pre-VIP behaviour", async () => {
     it("collateral factor should be 75%", async () => {
@@ -57,14 +55,14 @@ forking(35091610, () => {
       expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
     });
     it("old interest rate model", async () => {
-      expect(await vEth.interestRateModel()).to.equals("0x16412DBB7B2a4E119eDFCb3b58B08d196eC733BE");
+      expect(await vEth.interestRateModel()).to.equals(OldvETHInterestModel);
     });
-    it("supply cap should be 55,00,000 FDUSD", async () => {
+    it("supply cap should be 5,500,000 FDUSD", async () => {
       const newCap = await comptroller.supplyCaps(vFDUSD);
       expect(newCap).to.equal(parseUnits("5500000", 18));
     });
 
-    it("supply cap should be 80,00,000 FDUSD", async () => {
+    it("supply cap should be 8,000,000 FDUSD", async () => {
       const newCap = await comptroller.borrowCaps(vFDUSD);
       expect(newCap).to.equal(parseUnits("4400000", 18));
     });
@@ -90,19 +88,19 @@ forking(35091610, () => {
       expect(newCap).to.equal(parseUnits("24000", 18));
     });
 
-    it("supply cap should be 5,00,000 HAY market of StableCoin_Pool", async () => {
+    it("supply cap should be 500,000 HAY market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vHAY_Stablecoins);
       expect(newCap).to.equal(parseUnits("500000", 18));
     });
-    it("supply cap should be 9,60,000 USDT market of StableCoin_Pool", async () => {
+    it("supply cap should be 960,000 USDT market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDT_Stablecoins);
       expect(newCap).to.equal(parseUnits("960000", 18));
     });
-    it("supply cap should be 2,40,000 USDD market of StableCoin_Pool", async () => {
+    it("supply cap should be 240,000 USDD market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDD_Stablecoins);
       expect(newCap).to.equal(parseUnits("240000", 18));
     });
-    it("supply cap should be 2,50,000 agEUR market of StableCoin_Pool", async () => {
+    it("supply cap should be 250,000 agEUR market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vagEUR_Stablecoins);
       expect(newCap).to.equal(parseUnits("250000", 18));
     });
@@ -128,19 +126,19 @@ forking(35091610, () => {
       expect(newCap).to.equal(parseUnits("16000", 18));
     });
 
-    it("borrow cap should be 2,50,000 HAY market of StableCoin_Pool", async () => {
+    it("borrow cap should be 250,000 HAY market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vHAY_Stablecoins);
       expect(newCap).to.equal(parseUnits("250000", 18));
     });
-    it("borrow cap should be 6,40,000 USDT market of StableCoin_Pool", async () => {
+    it("borrow cap should be 640,000 USDT market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDT_Stablecoins);
       expect(newCap).to.equal(parseUnits("640000", 18));
     });
-    it("borrow cap should be 1,60,000 USDD market of StableCoin_Pool", async () => {
+    it("borrow cap should be 160,000 USDD market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDD_Stablecoins);
       expect(newCap).to.equal(parseUnits("160000", 18));
     });
-    it("borrow cap should be 2,00,000 agEUR market of StableCoin_Pool", async () => {
+    it("borrow cap should be 200,000 agEUR market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vagEUR_Stablecoins);
       expect(newCap).to.equal(parseUnits("200000", 18));
     });
@@ -162,14 +160,14 @@ forking(35091610, () => {
       expect(market.collateralFactorMantissa).to.equal(NewCollateralFactor);
     });
     it("sets new interest rate model", async () => {
-      expect(await vEth.interestRateModel()).to.equals(vETH_INTEREST_MODEL);
+      expect(await vEth.interestRateModel()).to.equals(vETHInterestModel);
     });
-    it("sets the supply cap to 1,00,00,000 FDUSD", async () => {
+    it("sets the supply cap to 100,00,000 FDUSD", async () => {
       const newCap = await comptroller.supplyCaps(vFDUSD);
       expect(newCap).to.equal(parseUnits("10000000", 18));
     });
 
-    it("sets the supply cap to 80,00,000 FDUSD", async () => {
+    it("sets the supply cap to 8,000,000 FDUSD", async () => {
       const newCap = await comptroller.borrowCaps(vFDUSD);
       expect(newCap).to.equal(parseUnits("8000000", 18));
     });
@@ -199,7 +197,7 @@ forking(35091610, () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vHAY_Stablecoins);
       expect(newCap).to.equal(parseUnits("45000", 18));
     });
-    it("sets the supply cap to 1,50,000 USDT market of StableCoin_Pool", async () => {
+    it("sets the supply cap to 150,000 USDT market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.supplyCaps(vUSDT_Stablecoins);
       expect(newCap).to.equal(parseUnits("150000", 18));
     });
@@ -237,7 +235,7 @@ forking(35091610, () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vHAY_Stablecoins);
       expect(newCap).to.equal(parseUnits("30000", 18));
     });
-    it("sets the borrow cap to 1,00,000 USDT market of StableCoin_Pool", async () => {
+    it("sets the borrow cap to 100,000 USDT market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vUSDT_Stablecoins);
       expect(newCap).to.equal(parseUnits("100000", 18));
     });
@@ -248,6 +246,12 @@ forking(35091610, () => {
     it("sets the borrow cap to 30,000 agEUR market of StableCoin_Pool", async () => {
       const newCap = await StableCoin_Pool_Comptroller.borrowCaps(vagEUR_Stablecoins);
       expect(newCap).to.equal(parseUnits("30000", 18));
+    });
+    checkInterestRate(vETHInterestModel, "ETH", {
+      base: "0",
+      multiplier: ".09",
+      jump: "2",
+      kink: "0.75",
     });
   });
 });
