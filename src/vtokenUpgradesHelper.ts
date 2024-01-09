@@ -119,37 +119,41 @@ const PAUSED_MARKETS = ["vTUSDOLD"];
 export const performVTokenBasicActions = async (
   marketAddress: string,
   user: SignerWithAddress,
-  mintAmount: BigNumber,
-  borrowAmount: BigNumber,
-  repayAmount: BigNumber,
-  redeemAmount: BigNumber,
   vToken: ethers.Contract,
   underlying: ethers.Contract,
   isUnderlyingMock: boolean,
+  defaults: {
+    mintAmount: BigNumber;
+    borrowAmount: BigNumber;
+    repayAmount: BigNumber;
+    redeemAmount: BigNumber;
+  },
 ) => {
   const underlyingDecimals = await underlying.decimals();
   const symbol = await underlying.symbol();
+  let { mintAmount, borrowAmount, repayAmount, redeemAmount } = defaults;
 
   if (symbol === "WBNB") {
-    mintAmount = parseUnits("1", 18);
-    borrowAmount = parseUnits("0.5", 18);
-    repayAmount = parseUnits("0.25", 18);
-    redeemAmount = parseUnits("0.5", 18);
+    mintAmount = mintAmount || parseUnits("1", 18);
+    borrowAmount = borrowAmount || parseUnits("0.5", 18);
+    repayAmount = repayAmount || parseUnits("0.25", 18);
+    redeemAmount = redeemAmount || parseUnits("0.5", 18);
     await underlying.connect(user).deposit({ value: mintAmount });
   }
   if (underlyingDecimals == 6) {
-    mintAmount = parseUnits("200", 6);
-    borrowAmount = parseUnits("50", 6);
-    repayAmount = parseUnits("25", 6);
-    redeemAmount = parseUnits("50", 6);
+    mintAmount = mintAmount || parseUnits("200", 6);
+    borrowAmount = borrowAmount || parseUnits("50", 6);
+    repayAmount = repayAmount || parseUnits("25", 6);
+    redeemAmount = redeemAmount || parseUnits("50", 6);
   }
 
   if (underlyingDecimals == 8) {
-    mintAmount = parseUnits("200", 8);
-    borrowAmount = parseUnits("50", 8);
-    repayAmount = parseUnits("25", 8);
-    redeemAmount = parseUnits("50", 8);
+    mintAmount = mintAmount || parseUnits("200", 8);
+    borrowAmount = borrowAmount || parseUnits("50", 8);
+    repayAmount = repayAmount || parseUnits("25", 8);
+    redeemAmount = redeemAmount || parseUnits("50", 8);
   }
+
   if (process.env.FORK_TESTNET === "true" && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
@@ -169,16 +173,16 @@ export const performVTokenBasicActions = async (
     await vToken.connect(user).mint(mintAmount);
     expect(await vToken.balanceOf(user.address)).to.be.greaterThan(previousBalance);
     previousBalance = await vToken.balanceOf(user.address);
-    
+
     // Borrow tokens
     await vToken.connect(user).borrow(borrowAmount);
     expect(await vToken.borrowBalanceStored(user.address)).to.be.greaterThan(previousBorrowBalance);
     previousBorrowBalance = await vToken.borrowBalanceStored(user.address);
-    
+
     // Repay borrowed tokens
     await vToken.connect(user).repayBorrow(repayAmount);
     expect(await vToken.borrowBalanceStored(user.address)).to.be.lessThan(previousBorrowBalance);
-    
+
     // Redeem tokens
     await vToken.connect(user).redeemUnderlying(redeemAmount);
     expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);

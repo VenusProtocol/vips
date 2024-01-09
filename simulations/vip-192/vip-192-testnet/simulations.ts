@@ -55,17 +55,12 @@ forking(34517682, () => {
 
         if (market.name == "vTRXOLD") {
           // Several actions are paused in vBUSD and vTUSDOLD
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
         }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
@@ -139,17 +134,12 @@ forking(34517682, () => {
 
         if (market.name == "vTRXOLD") {
           // Several actions are paused in vBUSD and vTUSDOLD
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
         }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 

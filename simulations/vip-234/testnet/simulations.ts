@@ -7,14 +7,23 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { fetchVTokenStorageCore, fetchVTokenStorageIL, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
-import { CORE_MARKETS, vip219Testnet, NEW_VBEP20_DELEGATE_IMPL, IL_VTOKEN_IMPL } from "../../../vips/vip-234/bsctestnet";
+import {
+  fetchVTokenStorageCore,
+  fetchVTokenStorageIL,
+  performVTokenBasicActions,
+} from "../../../src/vtokenUpgradesHelper";
+import {
+  CORE_MARKETS,
+  IL_VTOKEN_IMPL,
+  NEW_VBEP20_DELEGATE_IMPL,
+  vip219Testnet,
+} from "../../../vips/vip-234/bsctestnet";
 import beaconAbi from "./abi/beacon.json";
 import comptrollerAbi from "./abi/comptroller.json";
-import ilComptrollerAbi from "./abi/il_comptroller.json";
-import mockTokenAbi from "./abi/mockToken.json";
 import coreTokenAbi from "./abi/coreVToken.json";
+import ilComptrollerAbi from "./abi/il_comptroller.json";
 import isolatedPoolsVTokenAbi from "./abi/isolatedPoolsVToken.json";
+import mockTokenAbi from "./abi/mockToken.json";
 
 chai.use(chaiJestSnapshot);
 
@@ -185,17 +194,12 @@ forking(36586320, () => {
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
         if (market.name != "vBUSD")
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
 
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
@@ -220,17 +224,12 @@ forking(36586320, () => {
           .connect(impersonatedTimelock)
           .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
+        await performVTokenBasicActions(market.address, user, vToken, underlying, true, {
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
-          vToken,
-          underlying,
-          true,
-        );
+        });
         const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;
@@ -273,17 +272,12 @@ forking(36586320, () => {
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
         if (market.name != "vBUSD")
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
 
           const state = await fetchVTokenStorageCore(vToken, user.address);
 
@@ -310,17 +304,12 @@ forking(36586320, () => {
           .connect(impersonatedTimelock)
           .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
+        await performVTokenBasicActions(market.address, user, vToken, underlying, true, {
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
-          vToken,
-          underlying,
-          true,
-        );
+        });
         const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;
@@ -401,8 +390,7 @@ forking(36586320, () => {
             vToken,
             "SpreadReservesReduced",
           );
-        } else if (Number(cashPrior) < Number(reservesPrior) && reservesPrior != 0) {
-          console.log('hheeeeerrrre')
+        } else if (cashPrior.lt(reservesPrior) && !reservesPrior.eq(0)) {
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(
             vToken,
             "SpreadReservesReduced",

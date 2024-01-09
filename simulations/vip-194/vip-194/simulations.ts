@@ -48,17 +48,12 @@ forking(32940330, () => {
           .connect(impersonatedTimelock)
           .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
+        await performVTokenBasicActions(market.address, user, vToken, underlying, false, {
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
-          vToken,
-          underlying,
-          false,
-        );
+        });
         const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;
@@ -98,17 +93,12 @@ forking(32940330, () => {
           .connect(impersonatedTimelock)
           .setCollateralFactor(market.address, parseUnits("0.8", 18), parseUnits("0.9", 18));
 
-        await performVTokenBasicActions(
-          market.address,
-          user,
+        await performVTokenBasicActions(market.address, user, vToken, underlying, false, {
           mintAmount,
           borrowAmount,
           repayAmount,
           redeemAmount,
-          vToken,
-          underlying,
-          false,
-        );
+        });
         const state = await fetchVTokenStorageIL(vToken, user.address);
 
         delete state.protocolShareReserve;

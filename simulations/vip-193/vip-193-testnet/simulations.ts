@@ -54,17 +54,12 @@ forking(34541821, () => {
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
 
         if (market.name != "vBUSD")
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
 
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
@@ -135,17 +130,12 @@ forking(34541821, () => {
         await comptroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
         await comptroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.95", 18));
         if (market.name != "vBUSD")
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, market.isMock, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            market.isMock,
-          );
+          });
 
         const state = await fetchVTokenStorageCore(vToken, user.address);
 

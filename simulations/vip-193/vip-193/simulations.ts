@@ -50,17 +50,12 @@ forking(32915411, () => {
 
         // Some actions are paused
         if (market.name != "vBETH" && market.name != "vSXP" && market.name != "vBUSD") {
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, false, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            false,
-          );
+          });
         }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
@@ -129,17 +124,12 @@ forking(32915411, () => {
 
         // Some actions are paused
         if (market.name != "vBETH" && market.name != "vSXP" && market.name != "vBUSD") {
-          await performVTokenBasicActions(
-            market.address,
-            user,
+          await performVTokenBasicActions(market.address, user, vToken, underlying, false, {
             mintAmount,
             borrowAmount,
             repayAmount,
             redeemAmount,
-            vToken,
-            underlying,
-            false,
-          );
+          });
         }
         const state = await fetchVTokenStorageCore(vToken, user.address);
 
