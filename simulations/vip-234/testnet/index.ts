@@ -32,11 +32,6 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-// IL
-const IL_VTOKEN_IMPL = "0x72581fd0Ff9224Dbc8983ca45bbc61C75B0FD94c";
-// Core
-const NEW_VBEP20_DELEGATE_IMPL = "0x5C7ED65F06A714a7128122749d7e1fF76ea303cf";
-
 const IL_MARKETS = [
   {
     name: "vHAY",
@@ -171,7 +166,8 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
-forking(36586320, () => {
+
+forking(36704628, () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -241,15 +237,15 @@ forking(36586320, () => {
   });
 });
 
-forking(36586320, () => {
-  testVip("VIP-219 IL VToken Upgrade", vip219Testnet(), {
+forking(36704628, () => {
+  testVip("VIP-219 VToken Upgrade", vip219Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [coreTokenAbi, beaconAbi], ["NewImplementation", "Upgraded"], [21, 2]);
     },
   });
 });
 
-forking(36586320, () => {
+forking(36704628, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip219Testnet());
@@ -279,15 +275,15 @@ forking(36586320, () => {
             redeemAmount,
           });
 
-          const state = await fetchVTokenStorageCore(vToken, user.address);
+        const state = await fetchVTokenStorageCore(vToken, user.address);
 
-          delete state.totalReserves;
-          delete state.pendingOwner;
-          delete state.owner;
+        delete state.totalReserves;
+        delete state.pendingOwner;
+        delete state.owner;
 
-          expect(await vToken.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
+        expect(await vToken.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
 
-          expect(state).to.matchSnapshot(snapshotFilename, market.name);
+        expect(state).to.matchSnapshot(snapshotFilename, market.name);
       });
     }
 
@@ -328,7 +324,7 @@ forking(36586320, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(36586320, () => {
+forking(36704628, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(vip219Testnet());
@@ -344,20 +340,20 @@ forking(36586320, () => {
         const reservesPrior = await vToken.totalReserves();
         const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
-        if (Number(cashPrior) > Number(reservesPrior) && reservesPrior != 0) {
+        if (cashPrior.gt(reservesPrior) && !reservesPrior.eq(0)) {
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
           const reservesAfter = await vToken.totalReserves();
           const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
           expect(psrBalAfter).greaterThanOrEqual(psrBalPrior.add(reservesPrior));
           expect(reservesAfter).equals(0);
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
-        } else if (Number(cashPrior) < Number(reservesPrior) && reservesPrior != 0) {
-          await expect(await vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
+        } else if (cashPrior.lt(reservesPrior) && !reservesPrior.eq(0)) {
+          await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(vToken, "ReservesReduced");
           const reservesAfter = await vToken.totalReserves();
           const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
           expect(psrBalAfter).to.equal(psrBalPrior.add(cashPrior));
           expect(reservesAfter).greaterThan(reservesPrior.sub(cashPrior));
-        } else if (reservesPrior != 0) {
+        } else if (!reservesPrior.eq(0)) {
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(vToken, "ReservesReduced");
           const reservesAfter = await vToken.totalReserves();
           const psrBalAfter = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
@@ -376,7 +372,7 @@ forking(36586320, () => {
         const reservesPrior = await vToken.totalReserves();
         const psrBalPrior = await underlying.balanceOf(PROTOCOL_SHARE_RESERVE);
 
-        if (Number(cashPrior) > Number(reservesPrior) && reservesPrior != 0) {
+        if (cashPrior.gt(reservesPrior) && !reservesPrior.eq(0)) {
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.be.emit(
             vToken,
             "SpreadReservesReduced",
@@ -404,7 +400,7 @@ forking(36586320, () => {
             vToken,
             "SpreadReservesReduced",
           );
-        } else if (reservesPrior != 0) {
+        } else if (!reservesPrior.eq(0)) {
           await expect(vToken.connect(impersonatedTimelock).accrueInterest()).to.not.be.emit(
             vToken,
             "SpreadReservesReduced",

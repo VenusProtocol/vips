@@ -1,11 +1,13 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
+
 // IL
-const IL_VTOKEN_IMPL = "0x72581fd0Ff9224Dbc8983ca45bbc61C75B0FD94c";
+export const IL_VTOKEN_IMPL = "0x72581fd0Ff9224Dbc8983ca45bbc61C75B0FD94c";
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const SN_BNB_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
+
 // Core
-const NEW_VBEP20_DELEGATE_IMPL = "0x5C7ED65F06A714a7128122749d7e1fF76ea303cf";
+export const NEW_VBEP20_DELEGATE_IMPL = "0x5C7ED65F06A714a7128122749d7e1fF76ea303cf";
 
 interface AssetConfig {
   name: string;
