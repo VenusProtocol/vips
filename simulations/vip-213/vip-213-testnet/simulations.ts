@@ -9,7 +9,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(36721466, () => {
+forking(36724865, () => {
   let xvsBridge: ethers.Contract;
   let xvs: ethers.Contract;
   let oldCirculatingSupply: BigNumber;

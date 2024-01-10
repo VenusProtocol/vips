@@ -7,8 +7,8 @@ import { forking, testVip } from "../../../src/vip-framework";
 import { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, vip213 } from "../../../vips/vip-213/vip-213";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
-import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
+import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
 forking(35117102, () => {
   let xvsBridge: ethers.Contract;
