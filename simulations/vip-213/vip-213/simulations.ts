@@ -10,7 +10,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(34889414, () => {
+forking(35117102, () => {
   let xvsBridge: ethers.Contract;
   let xvs: ethers.Contract;
   let oldCirculatingSupply: BigNumber;
