@@ -1,24 +1,27 @@
 import { ethers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
-export const XVS_BRIDGE_SRC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
-export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const ETHEREUM_TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
-export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+export const XVS_BRIDGE_ADMIN = "0xB164Cb262328Ca44a806bA9e3d4094931E658513";
+export const XVS_BRIDGE_SRC = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
+export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+export const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+export const SEPOLIA_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+export const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+export const BNB_TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [ETHEREUM_TREASURY]);
+export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [SEPOLIA_TREASURY]);
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const XVS_AMOUNT = parseUnits("171500", 18);
-export const DEST_CHAIN_ID = 101;
+export const DEST_CHAIN_ID = 10161;
 
-export const vip234 = () => {
+export const vip234Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP to send needed liquidity of 171,500 XVS to Ethereum",
+    title: "VIP to transfer XVS to destination chain",
     description: ``,
 
     forDescription: "I agree that Venus Protocol should proceed with this transfer for XVS",

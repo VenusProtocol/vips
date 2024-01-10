@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, vip234 } from "../../vips/vip-234";
-import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
+import { expectEvents } from "../../../src/utils";
+import { forking, testVip } from "../../../src/vip-framework";
+import { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, vip234Testnet } from "../../../vips/vip-234/vip-223-testnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(35096050, () => {
+forking(36724845, () => {
   let xvsBridge: ethers.Contract;
   let xvs: ethers.Contract;
   let oldCirculatingSupply: BigNumber;
@@ -22,7 +22,7 @@ forking(35096050, () => {
     oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-234 Send XVS to Dest Chain", vip234(), {
+  testVip("VIP-234 Send XVS to Dest Chain", vip234Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI, XVS_BRIDGE_ABI], ["VenusGranted", "SendToChain"], [1, 1]);
     },
