@@ -5,8 +5,6 @@ import { makeProposal } from "../src/utils";
 
 const Comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
-const vETH_INTEREST_MODEL = "0xDA8ED13b2e88Ec292c9E8Ba8252E7a160429Ff7B";
 const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
 const NewCollateralFactor = parseUnits("0.78", 18);
 
@@ -33,16 +31,16 @@ export const vip234 = () => {
         - Update Multiplier to 9% and Kink to 75% for ETH
         - Increase CF of BNB to 78%
         - Update Supply caps of:
-          - FDUSD to 1,00,00,000
+          - FDUSD to 10,000,000
           - WBNB(LiquidStakedBNB_Pool) to 2,500
           - SnBNB(LiquidStakedBNB_Pool) to 500
           - BNBx(LiquidStakedBNB_Pool) to 350
           - ankrBNB(LiquidStakedBNB_Pool) to 1,200
           - stkBNB(LiquidStakedBNB_Pool) to 600
-          - USDT(StableCoin_Pool) to 1,50,000
+          - USDT(StableCoin_Pool) to 150,000
           - USDD(StableCoin_Pool) to 45,000
-          - HAY(StableCoin_Pool) to 5,00,000
-          - agEUR(StableCoin_Pool) to 2,50,000
+          - HAY(StableCoin_Pool) to 500,000
+          - agEUR(StableCoin_Pool) to 250,000
         -Update Borrow caps of :
           - FDUSD to 80,00,000
           - WBNB(LiquidStakedBNB_Pool) to 200
@@ -50,7 +48,7 @@ export const vip234 = () => {
           - BNBx(LiquidStakedBNB_Pool) to 10
           - ankrBNB(LiquidStakedBNB_Pool) to 10
           - stkBNB(LiquidStakedBNB_Pool) to 10
-          - USDT(StableCoin_Pool) to 1,00,000
+          - USDT(StableCoin_Pool) to 100,000
           - USDD(StableCoin_Pool) to 30,000
           - HAY(StableCoin_Pool) to 30,000
           - agEUR(StableCoin_Pool) to 30,000
@@ -68,11 +66,6 @@ export const vip234 = () => {
         target: Comptroller,
         signature: "_setCollateralFactor(address,uint256)",
         params: [vBNB, NewCollateralFactor],
-      },
-      {
-        target: vETH,
-        signature: "_setInterestRateModel(address)",
-        params: [vETH_INTEREST_MODEL],
       },
       {
         target: Comptroller,
