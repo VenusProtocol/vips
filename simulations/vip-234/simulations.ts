@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { ADDRESSES_1, PRIME, vip234 } from "../../vips/vip-234";
 import { expectEvents, setMaxStalePeriod } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
+import { ADDRESSES_1, PRIME, vip234 } from "../../vips/vip-234";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
