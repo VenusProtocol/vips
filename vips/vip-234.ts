@@ -16,7 +16,7 @@ This VIP will perform the following actions:
 
 #### Description
 
-Our latest [buyback](https://app.venus.io/#/governance/proposal/231) earlier this month for the amount of approximately USD $642,516 resulted in the buyback of 53,408.06 XVS. These XVS were [already sent](https://bscscan.com/tx/0x7df77052207e0ce68a24fbfccbdaf409d32a3b65858a94b67ee9f12a05b66944) to the XVS Vault rewards distribution wallet.
+Our latest [buyback](https://app.venus.io/#/governance/proposal/231) earlier this month for the amount of approximately USD $642,516 resulted in the buyback of 53,408.06 XVS (2,007 additional XVS were bought instead of the previously estimated 51,401 XVS). These XVS were [already sent](https://bscscan.com/tx/0x7df77052207e0ce68a24fbfccbdaf409d32a3b65858a94b67ee9f12a05b66944) to the XVS Vault rewards distribution wallet.
 
 The new distribution speed will be 1,630 XVS per day for a period of 91 days, resulting in an estimated APR of 8.83%.`,
     forDescription: "I agree, Venus Protocol should immediately proceed with these adjustments.",
