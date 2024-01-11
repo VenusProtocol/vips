@@ -53,7 +53,7 @@ forking(35091610, () => {
       const market = await comptroller.markets(vBNB);
       expect(market.collateralFactorMantissa).to.equal(NewCollateralFactor);
     });
-    it("sets the supply cap to 100,00,000 FDUSD", async () => {
+    it("sets the supply cap to 10,000,000 FDUSD", async () => {
       const newCap = await comptroller.supplyCaps(vFDUSD);
       expect(newCap).to.equal(parseUnits("10000000", 18));
     });
