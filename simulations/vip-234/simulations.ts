@@ -3,20 +3,10 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip234 } from "../../vips/vip-234";
-import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
-import VTOKEN_ABI from "./abi/VTokenAbi.json";
-
-const Comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
-const ChainlinkOracle = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
-const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
-const OracleAdmin = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const NewCollateralFactor = parseUnits("0.78", 18);
 
 const LiquidStakedBNB_Pool = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
 const vankrBNB_LiquidStakedBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
@@ -32,32 +22,15 @@ const vUSDT_Stablecoins = "0x5e3072305F9caE1c7A82F6Fe9E38811c74922c3B";
 const vagEUR_Stablecoins = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
 
 forking(35091610, () => {
-  let comptroller: Contract;
   let LiquidStakedBNB_Pool_Comptroller: Contract;
   let StableCoin_Pool_Comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {
-    comptroller = new ethers.Contract(Comptroller, COMPTROLLER_ABI, provider);
     LiquidStakedBNB_Pool_Comptroller = new ethers.Contract(LiquidStakedBNB_Pool, IL_COMPTROLLER_ABI, provider);
     StableCoin_Pool_Comptroller = new ethers.Contract(StableCoin_Pool, IL_COMPTROLLER_ABI, provider);
-    await setMaxStalePeriodInChainlinkOracle(ChainlinkOracle, BNB, ethers.constants.AddressZero, OracleAdmin);
   });
   describe("Pre-VIP behaviour", async () => {
-    it("collateral factor should be 75%", async () => {
-      const market = await comptroller.markets(vBNB);
-      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
-    });
-    it("supply cap should be 5,500,000 FDUSD", async () => {
-      const oldCap = await comptroller.supplyCaps(vFDUSD);
-      expect(oldCap).to.equal(parseUnits("5500000", 18));
-    });
-
-    it("supply cap should be 4,400,000 FDUSD", async () => {
-      const oldCap = await comptroller.borrowCaps(vFDUSD);
-      expect(oldCap).to.equal(parseUnits("4400000", 18));
-    });
-
     it("supply cap should be 8,000 ankrBNB market of LiquidStake_Pool", async () => {
       const oldCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vankrBNB_LiquidStakedBNB);
       expect(oldCap).to.equal(parseUnits("8000", 18));
@@ -137,29 +110,10 @@ forking(35091610, () => {
 
   testVip("VIP-234 Update Risk Parameters", vip234(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI, VTOKEN_ABI],
-        ["NewCollateralFactor", "NewSupplyCap", "NewBorrowCap", "Failure"],
-        [1, 10, 10, 0],
-      );
+      await expectEvents(txResponse, [IL_COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [9, 9, 0]);
     },
   });
   describe("Post-VIP behavior", async () => {
-    it("set collateral factor to 78%", async () => {
-      const market = await comptroller.markets(vBNB);
-      expect(market.collateralFactorMantissa).to.equal(NewCollateralFactor);
-    });
-    it("sets the supply cap to 100,00,000 FDUSD", async () => {
-      const newCap = await comptroller.supplyCaps(vFDUSD);
-      expect(newCap).to.equal(parseUnits("10000000", 18));
-    });
-
-    it("sets the supply cap to 8,000,000 FDUSD", async () => {
-      const newCap = await comptroller.borrowCaps(vFDUSD);
-      expect(newCap).to.equal(parseUnits("8000000", 18));
-    });
-
     it("sets the supply cap to 1,200 ankrBNB market of LiquidStake_Pool", async () => {
       const newCap = await LiquidStakedBNB_Pool_Comptroller.supplyCaps(vankrBNB_LiquidStakedBNB);
       expect(newCap).to.equal(parseUnits("1200", 18));

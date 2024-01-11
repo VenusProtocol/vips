@@ -3,11 +3,6 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
 
-const Comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
-const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
-const NewCollateralFactor = parseUnits("0.78", 18);
-
 const LiquidStakedBNB_Pool = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
 const vankrBNB_LiquidStakedBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
 const vBNBx_LiquidStakedBNB = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
@@ -24,14 +19,11 @@ const vagEUR_Stablecoins = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
 export const vip234 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-234 Update Risk Parameters",
+    title: "VIP-234 Update Risk Parameters of IL",
     description: `
         VIP
         Risk parameters suggested by Chaos lab:
-        - Update Multiplier to 9% and Kink to 75% for ETH
-        - Increase CF of BNB to 78%
         - Update Supply caps of:
-          - FDUSD to 10,000,000
           - WBNB(LiquidStakedBNB_Pool) to 2,500
           - SnBNB(LiquidStakedBNB_Pool) to 500
           - BNBx(LiquidStakedBNB_Pool) to 350
@@ -42,7 +34,6 @@ export const vip234 = () => {
           - HAY(StableCoin_Pool) to 500,000
           - agEUR(StableCoin_Pool) to 250,000
         -Update Borrow caps of :
-          - FDUSD to 80,00,000
           - WBNB(LiquidStakedBNB_Pool) to 200
           - SnBNB(LiquidStakedBNB_Pool) to 10
           - BNBx(LiquidStakedBNB_Pool) to 10
@@ -62,21 +53,6 @@ export const vip234 = () => {
   };
   return makeProposal(
     [
-      {
-        target: Comptroller,
-        signature: "_setCollateralFactor(address,uint256)",
-        params: [vBNB, NewCollateralFactor],
-      },
-      {
-        target: Comptroller,
-        signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[vFDUSD], [parseUnits("10000000", 18)]],
-      },
-      {
-        target: Comptroller,
-        signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[vFDUSD], [parseUnits("8000000", 18)]],
-      },
       {
         target: LiquidStakedBNB_Pool,
         signature: "setMarketSupplyCaps(address[],uint256[])",
