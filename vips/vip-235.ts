@@ -11,18 +11,21 @@ const NewCollateralFactor = parseUnits("0.78", 18);
 export const vip235 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-235 Update Risk Parameters of core pool",
-    description: `
-        VIP
-        Risk parameters for core pool suggested by Chaos lab:
-        - Increase CF of BNB to 78%
-        - Update Supply cap and borrow cap of FDUSD to 10,000,000 and 80,00,000
-       `,
-    forDescription: "I agree that Venus Protocol should proceed with these parameter updation suggested by chaos lab",
-    againstDescription:
-      "I do not think that Venus Protocol should proceed with these parameter updation suggested by chaos lab",
-    abstainDescription:
-      "I am indifferent to whether Venus Protocol proceeds with these parameter updation suggested by chaos lab or not",
+    title: "VIP-235 Risk Parameters Adjustments (BNB, FDUSD)",
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Risk Parameter Updates 01/09/2024](https://community.venus.io/t/chaos-labs-risk-parameter-updates-01-09-24/4042).
+
+- [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
+    - Increase supply cap, from 5.5M FDUSD to 10M FDUSD
+    - Increase borrow cap, from 4.4M FDUSD to 8M FDUSD
+- [BNB (Core pool)](https://bscscan.com/address/0xA07c5b74C9B40447a954e1466938b865b6BBea36)
+    - Increase collateral factor, from 0.75 to 0.78
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/165](https://github.com/VenusProtocol/vips/pull/165)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
   return makeProposal(
     [
@@ -44,6 +47,6 @@ export const vip235 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
