@@ -3,7 +3,7 @@ import { makeProposal } from "../../../src/utils";
 import { CONVERTER_NETWORK } from "./Addresses";
 import { acceptOwnershipCommandsAllConverters, callPermissionCommandsAllConverter } from "./commands";
 
-const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
+const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
 
 export const vipConverter1 = () => {
   const meta = {

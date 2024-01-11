@@ -12,9 +12,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "../abi/ERC20.json";
-import PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION_ABI from "../abi/ProtocolShareReserve.json";
 import PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION_ABI from "../abi/ProtocolShareReserveNew.json";
-import RISK_FUND_ABI from "../abi/RiskFund.json";
 import RISK_FUND_CONVERTER_ABI from "../abi/RiskFundConverter.json";
 import RISK_FUND_V2_ABI from "../abi/RiskFundV2.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
@@ -40,22 +38,22 @@ const FEED_ADDRESS_USDT = "0xEca2605f0BCF2BA5966372C99837b1F182d3D620";
 const FEED_ADDRESS_USDC = "0x90c069C4538adAc136E051052E14c1cD799C41B7";
 
 const VTREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
-const XVS_VAULT_TREASURY = "0xab79995b1154433C9652393B7BF3aeb65C2573Bd";
+const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
 
-const CONVERTER_NETWORK = "0x650B1C775E737c439129611f068AFA3763b57Ff5";
-const RISK_FUND_CONVERTER = "0x07c10cd93d7ACE4c1EfAE0248393e96c072A69F3";
-const USDC_PRIME_CONVERTER = "0x18F2543DCCD09dEb0e28575008CD24c0700e964B";
-const XVS_VAULT_CONVERTER = "0x354B807373a9D07A08b0F6a4064B9Ef80fAD7DBf";
+const CONVERTER_NETWORK = "0xC8f2B705d5A2474B390f735A5aFb570e1ce0b2cf";
+const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
 
 const RISK_FUND_PROXY = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
-const RISK_FUND_OLD_IMPLEMENTATION = "0x1E7DEC93C77740c2bB46daf87ef42056E388dA14";
-const RISK_FUND_V2_IMPLEMENTATION = "0x217a907B0c6a7Dc67a21F769a915722B98136F82";
+const RISK_FUND_V2_OLD_IMPLEMENTATION = "0x217a907B0c6a7Dc67a21F769a915722B98136F82";
+const RISK_FUND_V2_NEW_IMPLEMENTATION = "0xcA2A023FBe3be30b7187E88D7FDE1A9a4358B509";
 
 const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x6A7FF4641F52b267102a5a0779cE7a060374d6cC";
-const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
+const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
+const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x91B67df8B13a1B53a3828EAAD3f4233B55FEc26d";
 
-forking(35945670, () => {
+forking(36752108, () => {
   const provider = ethers.provider;
   let riskFund: Contract;
   let proxyAdmin: Contract;
@@ -77,10 +75,10 @@ forking(35945670, () => {
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
-    riskFund = new ethers.Contract(RISK_FUND_PROXY, RISK_FUND_ABI, provider);
+    riskFund = new ethers.Contract(RISK_FUND_PROXY, RISK_FUND_V2_ABI, provider);
     protocolShareReserve = new ethers.Contract(
       PROTOCOL_SHARE_RESERVE_PROXY,
-      PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION_ABI,
+      PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION_ABI,
       provider,
     );
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
@@ -95,7 +93,7 @@ forking(35945670, () => {
     for (const token of allAssets) {
       const pools = await riskFundConverter.getPools(token);
       for (const pool of pools) {
-        RiskFundPoolAssetReservesBefore.push(await riskFund.getPoolAssetReserve(pool, token));
+        RiskFundPoolAssetReservesBefore.push(await riskFund.poolAssetsFunds(pool, token));
       }
       PsrTotalAssetReserveBefore.push(await protocolShareReserve.totalAssetReserve(token));
     }
@@ -103,7 +101,7 @@ forking(35945670, () => {
 
   describe("Pre-VIP behavior Check for RiskFund and PSR", () => {
     it("RiskFund Proxy should have old implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_PROXY)).to.equal(RISK_FUND_OLD_IMPLEMENTATION);
+      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_PROXY)).to.equal(RISK_FUND_V2_OLD_IMPLEMENTATION);
     });
 
     it("ProtocolShareReserve Proxy should have old implementation", async () => {
@@ -118,9 +116,9 @@ forking(35945670, () => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(
         txResponse,
-        [PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION_ABI],
+        [PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION_ABI],
         ["DistributionConfigUpdated", "DistributionConfigRemoved"],
-        [4, 4],
+        [10, 10],
       );
       await expectEvents(
         txResponse,
@@ -135,7 +133,7 @@ forking(35945670, () => {
         txResponse,
         [SINGLE_TOKEN_CONVERTER_ABI],
         ["ConversionConfigUpdated", "ConverterNetworkAddressUpdated"],
-        [216, 6],
+        [222, 6],
       );
     },
   });
@@ -180,7 +178,7 @@ forking(35945670, () => {
     });
 
     it("RiskFund Proxy should have new implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_PROXY)).to.equal(RISK_FUND_V2_IMPLEMENTATION);
+      expect(await proxyAdmin.getProxyImplementation(RISK_FUND_PROXY)).to.equal(RISK_FUND_V2_NEW_IMPLEMENTATION);
     });
 
     it("RiskFund should have correct storage", async () => {

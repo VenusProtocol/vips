@@ -13,10 +13,10 @@ import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import XVS_VAULT_CONVERTER_ABI from "../abi/XVSVaultTreasury.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const XVS_VAULT_TREASURY = "0x4D0Af9D0E15Fb36674535CDE804a9bd0aD3dd4Ac";
-const CONVERTER_NETWORK = "0xc2Eb000a98b4BB9c6Bff346Bd86C49135d13E2B6";
+const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
+const CONVERTER_NETWORK = "0xF7Caad5CeB0209165f2dFE71c92aDe14d0F15995";
 
-forking(34489340, () => {
+forking(35140949, () => {
   const provider = ethers.provider;
   testVip("VIP-converter1", vipConverter1(), {
     callbackAfterExecution: async (txResponse: any) => {

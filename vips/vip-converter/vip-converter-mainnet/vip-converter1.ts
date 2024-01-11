@@ -6,7 +6,7 @@ import {
 } from "../vip-converter-mainnet/commands";
 import { CONVERTER_NETWORK } from "./Addresses";
 
-const XVS_VAULT_TREASURY = "0x4D0Af9D0E15Fb36674535CDE804a9bd0aD3dd4Ac";
+const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 
 export const vipConverter1 = () => {
   const meta = {

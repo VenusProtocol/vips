@@ -68,6 +68,11 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
