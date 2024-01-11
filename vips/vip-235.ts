@@ -13,6 +13,9 @@ export const ADDRESSES_2 = [
   "0x8dd7b41c2a54f4ae983b5240eff60977494e65ed",
   "0xa7df5a0dd755baf70f8229cfbc7f032dd6476391",
   "0xaad950242f130d590fdb96f95b53fa9c0fa74dea",
+  "0xaee09af04285e02d19f05ff608c7548c3ca56730",
+  "0xb48df2de5833abf4dd5bd1f7fcad1b1f023cb8db",
+  "0xb9056d39efa7d60dbc7e0b2b872e154dd7869c5f",
 ];
 
 export const vip235 = () => {
@@ -30,7 +33,7 @@ export const vip235 = () => {
       {
         target: PRIME,
         signature: "setLimit(uint256,uint256)",
-        params: [20, 500],
+        params: [23, 500],
       },
       {
         target: PRIME,
@@ -39,6 +42,6 @@ export const vip235 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };

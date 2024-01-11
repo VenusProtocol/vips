@@ -33,7 +33,7 @@ forking(35091518, () => {
 
   testVip("VIP-235 Prime Program", vip235(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Mint"], [1, 10]);
+      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Mint"], [1, 13]);
     },
   });
 
