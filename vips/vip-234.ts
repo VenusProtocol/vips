@@ -30,7 +30,7 @@ export const vip234 = () => {
       {
         target: PRIME,
         signature: "setLimit(uint256,uint256)",
-        params: [10, 500],
+        params: [23, 500],
       },
       {
         target: PRIME,

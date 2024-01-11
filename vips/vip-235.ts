@@ -32,11 +32,6 @@ export const vip235 = () => {
     [
       {
         target: PRIME,
-        signature: "setLimit(uint256,uint256)",
-        params: [23, 500],
-      },
-      {
-        target: PRIME,
         signature: "issue(bool,address[])",
         params: [true, ADDRESSES_2],
       },
