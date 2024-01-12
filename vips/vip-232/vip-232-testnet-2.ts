@@ -47,6 +47,6 @@ export const vip232Testnet = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
