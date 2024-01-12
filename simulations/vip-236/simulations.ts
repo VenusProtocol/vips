@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
 import {
   BNB_TREASURY,
   BTC,
@@ -13,12 +13,12 @@ import {
   ETH_AMOUNT,
   USDT,
   USDT_AMOUNT,
-  vip234Testnet,
-} from "../../../vips/vip-234/vip-234-testnet";
+  vip236,
+} from "../../vips/vip-236";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36724768, () => {
+forking(35116910, () => {
   let btc: ethers.Contract;
   let eth: ethers.Contract;
   let usdt: ethers.Contract;
@@ -41,14 +41,14 @@ forking(36724768, () => {
     oldUSDTBalTreasury = await usdt.balanceOf(BNB_TREASURY);
   });
 
-  testVip("VIP-213 Send XVS to Dest Chain", vip234Testnet(), {
+  testVip("VIP-236 Bootstrap liquidity for the Ethereum deployment", vip236(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
+      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [3]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Should transfer BTC, ETH, USDC and USDT", async () => {
+    it("Should transfer BTC, ETH and USDT", async () => {
       const currBTCBal = await btc.balanceOf(COMMUNITY_WALLET);
       const currETHBal = await eth.balanceOf(COMMUNITY_WALLET);
       const currUSDTBal = await usdt.balanceOf(COMMUNITY_WALLET);
