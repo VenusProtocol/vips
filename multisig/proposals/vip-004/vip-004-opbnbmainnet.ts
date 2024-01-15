@@ -61,5 +61,11 @@ export const vip004 = () => {
       signature: "add(address,uint256,address,uint256,uint256)",
       params: [XVS, 100, XVS, "0", 604800],
     },
+
+    {
+      target: XVS_VAULT_PROXY,
+      signature: "pause()",
+      params: [],
+    },
   ]);
 };
