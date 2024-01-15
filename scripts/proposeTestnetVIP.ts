@@ -14,7 +14,7 @@ export const loadProposal = async (num: string) => {
 
 export const proposeTestnetVIP = async () => {
   const vipNumber = readline.question("Number of the VIP to propose => ");
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await await loadProposal(vipNumber);
 
   const { targets, signatures, values, meta } = proposal;
 
@@ -30,3 +30,4 @@ export const proposeTestnetVIP = async () => {
   );
   await tx.wait();
 };
+proposeTestnetVIP();
