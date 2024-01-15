@@ -15,14 +15,18 @@ export const ADDRESSES_1 = [
   "0x3b1897657d4a37ba2aabdf31e5cc7d0d70521152",
 ];
 
-export const vip234 = () => {
+export const vip238 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-234 Venus Prime: Mint Irrevocable Prime Tokens",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-238 Prime tokens for Venus 3rd Anniversary x Polyhedra Campaign winners (1/2)",
+    description: `If passed this VIP will mint 10 irrevocable tokens to part of the winners of the [Venus 3rd Anniversary x Polyhedra Campaign](https://community.venus.io/t/venus-3rd-anniversary-x-polyhedra-campaign-results/4020)**.**
+
+There will be a second VIP minting the Prime tokens for the rest of the winners.
+
+After 30 days, another VIP will be proposed to burn these Prime tokens.`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(

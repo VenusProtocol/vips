@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriod } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { ADDRESSES_1, PRIME, vip234 } from "../../vips/vip-234";
+import { ADDRESSES_1, PRIME, vip238 } from "../../vips/vip-238";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
@@ -31,7 +31,7 @@ forking(35091518, () => {
     );
   });
 
-  testVip("VIP-234 Prime Program", vip234(), {
+  testVip("VIP-238 Prime Program", vip238(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Mint"], [1, 10]);
     },
