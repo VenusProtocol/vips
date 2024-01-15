@@ -6,7 +6,8 @@ import { expect } from "chai";
 import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
@@ -74,6 +75,11 @@ export const setMaxStalePeriodInBinanceOracle = async (
 ) => {
   const oracle = await ethers.getContractAt(BINANCE_ORACLE_ABI, binanceOracleAddress);
   const oracleAdmin = await initMainnetUser(await oracle.owner(), ethers.utils.parseEther("1.0"));
+  const overrideSymbol = await oracle.symbols(assetSymbol);
+
+  if (overrideSymbol.length > 0) {
+    assetSymbol = overrideSymbol;
+  }
 
   const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(assetSymbol, maxStalePeriodInSeconds);
   await tx.wait();
@@ -91,12 +97,46 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
   const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
 
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await oracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
   const tx = await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
   await tx.wait();
+};
+
+export const setMaxStalePeriod = async (
+  resilientOracle: Contract,
+  underlyingAsset: Contract,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const binanceOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+  const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+
+  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
+  if (tokenConfig.asset !== ethers.constants.AddressZero) {
+    const mainOracle = tokenConfig.oracles[0];
+    if (mainOracle === binanceOracle) {
+      const symbol = await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
+    } else {
+      await setMaxStalePeriodInChainlinkOracle(
+        mainOracle,
+        underlyingAsset.address,
+        ethers.constants.AddressZero,
+        normalTimelock,
+        maxStalePeriodInSeconds,
+      );
+    }
+  }
 };
 
 export const expectEvents = async (
