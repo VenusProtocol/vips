@@ -19,7 +19,7 @@ export const vip238 = () => {
   const meta = {
     version: "v2",
     title: "VIP-238 Prime tokens for Venus 3rd Anniversary x Polyhedra Campaign winners (1/2)",
-    description: `If passed this VIP will mint 10 irrevocable tokens to part of the winners of the [Venus 3rd Anniversary x Polyhedra Campaign](https://community.venus.io/t/venus-3rd-anniversary-x-polyhedra-campaign-results/4020).
+    description: `If passed this VIP will mint 10 Prime tokens to part of the winners of the [Venus 3rd Anniversary x Polyhedra Campaign](https://community.venus.io/t/venus-3rd-anniversary-x-polyhedra-campaign-results/4020).
 
 There will be a second VIP minting the Prime tokens for the rest of the winners.
 
