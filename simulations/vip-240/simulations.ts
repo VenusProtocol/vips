@@ -10,11 +10,10 @@ import { PRIME, vip240 } from "../../vips/vip-240";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
-import { vip236 } from "../../vips/vip-236";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 
-const ADDRESSES = [...ADDRESSES_1, ...ADDRESSES_2];
+const ADDRESSES = [...ADDRESSES_1];
 
 const PRIME_ASSET_ADDRESSES = [
   "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
@@ -37,12 +36,11 @@ forking(35091518, () => {
 
     await pretendExecutingVip(vip238());
     await pretendExecutingVip(vip239());
-    await pretendExecutingVip(vip236());
   });
 
-  testVip("VIP-240 Prime Program", vip240(), {
+  testVip("VIP-236 Prime Program", vip240(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 13]);
+      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 10]);
     },
   });
 

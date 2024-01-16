@@ -1,11 +1,11 @@
 import { ProposalType } from "../src/types";
 import { makeProposal } from "../src/utils";
-import { ADDRESSES_2 } from "./vip-239";
+import { ADDRESSES_1 } from "./vip-238";
 
 export const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 
 const commands = [
-  ...ADDRESSES_2.map(address => {
+  ...ADDRESSES_1.map(address => {
     return {
       target: PRIME,
       signature: "burn(address)",
@@ -30,7 +30,7 @@ export const vip240 = () => {
       {
         target: PRIME,
         signature: "setLimit(uint256,uint256)",
-        params: [0, 500],
+        params: [13, 500],
       },
     ],
     meta,
