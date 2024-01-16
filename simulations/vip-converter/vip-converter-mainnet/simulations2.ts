@@ -222,7 +222,7 @@ forking(35140949, () => {
     });
 
     it("PSR should have correct distribution configs", async () => {
-      const percentageDistributionConverters = [4000, 420, 192, 177, 211, 1000];
+      const percentageDistributionConverters = [4000, 400, 300, 50, 250, 1000];
       expect(await protocolShareReserve.totalDistributions()).to.equal(10);
       for (let i = 0; i < 6; i++) {
         expect(await protocolShareReserve.getPercentageDistribution(converters[i], 0)).to.equal(
