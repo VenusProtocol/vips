@@ -14,12 +14,12 @@ const USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
 
 const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 
-const ETH_AMOUNT = "800000000000000000";
-const BTC_AMOUNT = "2180000";
-const USDC_AMOUNT = "10000000102";
-const USDT_AMOUNT = "10000000000";
+const ETH_AMOUNT = "42230000000000000000";
+const BTC_AMOUNT = "218000000";
+const USDC_AMOUNT = "61329430000";
+const USDT_AMOUNT = "150666500000";
 
-forking(5096265, () => {
+forking(5096713, () => {
   let btc: ethers.Contract;
   let eth: ethers.Contract;
   let usdc: ethers.Contract;
