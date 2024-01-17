@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { Actions, UNITROLLER, VTUSD, vip238 } from "../../vips/vip-238";
+import { Actions, UNITROLLER, VTUSD, vip240 } from "../../vips/vip-240";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -59,7 +59,7 @@ forking(35315117, () => {
     });
   });
 
-  testVip("VIP-238 Start TUSD deprecation", vip238(), {
+  testVip("VIP-240 Start TUSD deprecation", vip240(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

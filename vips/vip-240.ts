@@ -13,18 +13,18 @@ export const Actions = {
 export const RESERVE_FACTOR = parseUnits("1", 18);
 export const COLLATERAL_FACTOR = parseUnits(".65", 18);
 
-export const vip238 = () => {
+export const vip240 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-238 Start TUSD deprecation",
-    description: `
-    Pause MINT
-    Pause BORROW
-    Pause ENTER_MARKET - will not allow users to start using TUSD as collateral. Users who have already enabled TUSD as
-    collateral will not be affected by this update.
-    Set XVS rewards in the TUSD market to 0.
-    Increase TUSD Reserve Factor to 100%
-    Reduce CF from 75% to 65%`,
+    title: "VIP-240 TUSD market deprecation",
+    description: `If passed, this VIP will perform the following actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Risk Parameter Updates - TUSD - 01/16/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-tusd-01-16-2023/4053).
+
+- Pause supply, borrow and enter market actions in the [vTUSD market](https://bscscan.com/address/0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E)
+- Set XVS rewards in the vTUSD market to 0
+- Increase vTUSD Reserve Factor to 100%
+- Reduce CF from 75% to 65%
+
+Review the Chaos Labs’ recommendations [Risk Parameter Updates - TUSD - 01/16/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-tusd-01-16-2023/4053), for a deeper analysis.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
