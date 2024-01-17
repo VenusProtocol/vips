@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip237 } from "../../vips/vip-237";
+import { vip241 } from "../../vips/vip-241";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
@@ -26,7 +26,7 @@ forking(35259895, () => {
     prevBalanceChaosLabs = await usdt.balanceOf(CHAOS_LABS_RECEIVER);
   });
 
-  testVip("VIP-237 Payments for auditors", vip237(), {
+  testVip("VIP-241 Payments for auditors", vip241(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
     },
