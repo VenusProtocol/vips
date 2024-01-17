@@ -24,7 +24,9 @@ export const vip240 = () => {
 - Increase vTUSD Reserve Factor to 100%
 - Reduce CF from 75% to 65%
 
-Review the Chaos Labs’ recommendations [Risk Parameter Updates - TUSD - 01/16/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-tusd-01-16-2023/4053), for a deeper analysis.`,
+Review the Chaos Labs’ recommendations [Risk Parameter Updates - TUSD - 01/16/2023](https://community.venus.io/t/chaos-labs-risk-parameter-updates-tusd-01-16-2023/4053), for a deeper analysis.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/176](https://github.com/VenusProtocol/vips/pull/176)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
