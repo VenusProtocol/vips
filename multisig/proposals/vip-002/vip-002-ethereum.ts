@@ -1,3 +1,5 @@
+import { parseUnits } from "@ethersproject/units";
+
 import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
@@ -29,6 +31,14 @@ const WBTC = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599";
 const WETH = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const CRV = "0xD533a949740bb3306d119CC777fa900bA034cd52";
 const crvUSD = "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e";
+
+//New IRs
+const IR_BASE0_SLOPE900_JUMP7500_KINK7500 = "0xa4f048254631119f4E899359711fB282589c4ED8";
+const IR_BASE0_SLOPE900_JUMP7500_KINK8000 = "0x694536cbCe185f8549Ca56cDFeE4531593762686";
+const IR_BASE0_SLOPE750_JUMP8000_KINK8000 = "0x1C243a1aCe202424fa79F71de36225DF93B9e5C5";
+const IR_BASE200_SLOPE2000_JUMP30000_KINK5000 = "0x87C427b00C89E82064B32Ca63c9E983fedD3e53e";
+
+const NEW_PROTOCOL_SHARE_SEIZE_MANTISSA = parseUnits("1", 16); // 1%
 
 // IL configuration
 export const vip002 = () => {
@@ -158,6 +168,71 @@ export const vip002 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", ETHEREUM_MULTISIG],
     },
+    {
+      target: vWBTC_Core,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE900_JUMP7500_KINK7500],
+    },
+    {
+      target: vWETH_Core,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE900_JUMP7500_KINK8000],
+    },
+    {
+      target: vUSDC_Core,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vUSDT_Core,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vcrvUSD_Core,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vUSDC_Stablecoins,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vUSDT_Stablecoins,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vcrvUSD_Stablecoins,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vcrvUSD_Curve,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE0_SLOPE750_JUMP8000_KINK8000],
+    },
+    {
+      target: vCRV_Curve,
+      signature: "setInterestRateModel(address)",
+      params: [IR_BASE200_SLOPE2000_JUMP30000_KINK5000],
+    },
+    {
+      target: vUSDC_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
+    },
+    {
+      target: vUSDT_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
+    },
+    {
+      target: vcrvUSD_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
+    },
     { target: POOL_REGISTRY, signature: "acceptOwnership()", params: [] },
     { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [] },
     {
@@ -183,7 +258,7 @@ export const vip002 = () => {
         "Stablecoins",
         COMPTROLLER_STABLECOINS,
         "500000000000000000",
-        "1100000000000000000",
+        "1020000000000000000",
         "100000000000000000000",
       ],
     },
@@ -222,13 +297,19 @@ export const vip002 = () => {
       target: POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [vWBTC_Core, "750000000000000000", "800000000000000000", "30000000", TREASURY, "30000000000", "25000000000"],
+        [vWBTC_Core, "750000000000000000", "800000000000000000", "30000000", TREASURY, "100000000000", "85000000000"],
       ],
     },
     {
       target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, "5000000000000000000", ETHEREUM_MULTISIG],
+      signature: "withdrawTreasuryNative(uint256,address)",
+      params: ["5000000000000000000", ETHEREUM_MULTISIG],
+    },
+    {
+      target: WETH,
+      signature: "deposit()",
+      params: [],
+      value: "5000000000000000000",
     },
     {
       target: WETH,
@@ -255,8 +336,8 @@ export const vip002 = () => {
           "800000000000000000",
           "5000000000000000000",
           TREASURY,
-          "5500000000000000000000",
-          "4600000000000000000000",
+          "20000000000000000000000",
+          "18000000000000000000000",
         ],
       ],
     },
@@ -286,12 +367,12 @@ export const vip002 = () => {
       params: [
         [
           vUSDC_Core,
+          "780000000000000000",
           "800000000000000000",
-          "820000000000000000",
           "10000000000",
           TREASURY,
-          "10000000000000",
-          "9000000000000",
+          "50000000000000",
+          "45000000000000",
         ],
       ],
     },
@@ -321,12 +402,12 @@ export const vip002 = () => {
       params: [
         [
           vUSDT_Core,
+          "780000000000000000",
           "800000000000000000",
-          "820000000000000000",
           "10000000000",
           TREASURY,
-          "10000000000000",
-          "9000000000000",
+          "50000000000000",
+          "45000000000000",
         ],
       ],
     },
@@ -356,12 +437,12 @@ export const vip002 = () => {
       params: [
         [
           vcrvUSD_Core,
+          "780000000000000000",
           "800000000000000000",
-          "820000000000000000",
           "10000000000000000000000",
           TREASURY,
-          "10000000000000000000000000",
-          "9000000000000000000000000",
+          "50000000000000000000000000",
+          "45000000000000000000000000",
         ],
       ],
     },
@@ -391,12 +472,12 @@ export const vip002 = () => {
       params: [
         [
           vCRV_Core,
+          "300000000000000000",
           "350000000000000000",
-          "400000000000000000",
           "20000000000000000000000",
           TREASURY,
-          "5000000000000000000000000",
-          "2500000000000000000000000",
+          "2000000000000000000000000",
+          "1100000000000000000000000",
         ],
       ],
     },
@@ -426,12 +507,12 @@ export const vip002 = () => {
       params: [
         [
           vUSDC_Stablecoins,
-          "850000000000000000",
+          "870000000000000000",
           "900000000000000000",
           "10000000000",
           TREASURY,
-          "5000000000000",
-          "4500000000000",
+          "50000000000000",
+          "45000000000000",
         ],
       ],
     },
@@ -461,12 +542,12 @@ export const vip002 = () => {
       params: [
         [
           vUSDT_Stablecoins,
-          "850000000000000000",
+          "870000000000000000",
           "900000000000000000",
           "10000000000",
           TREASURY,
-          "5000000000000",
-          "4500000000000",
+          "50000000000000",
+          "45000000000000",
         ],
       ],
     },
@@ -496,12 +577,12 @@ export const vip002 = () => {
       params: [
         [
           vcrvUSD_Stablecoins,
-          "850000000000000000",
+          "870000000000000000",
           "900000000000000000",
           "10000000000000000000000",
           TREASURY,
-          "5000000000000000000000000",
-          "4500000000000000000000000",
+          "50000000000000000000000000",
+          "45000000000000000000000000",
         ],
       ],
     },
@@ -531,8 +612,8 @@ export const vip002 = () => {
       params: [
         [
           vcrvUSD_Curve,
-          "750000000000000000",
-          "800000000000000000",
+          "450000000000000000",
+          "500000000000000000",
           "10000000000000000000000",
           TREASURY,
           "2500000000000000000000000",
@@ -566,12 +647,12 @@ export const vip002 = () => {
       params: [
         [
           vCRV_Curve,
-          "600000000000000000",
-          "650000000000000000",
+          "450000000000000000",
+          "500000000000000000",
           "20000000000000000000000",
           TREASURY,
-          "5000000000000000000000000",
-          "2500000000000000000000000",
+          "6000000000000000000000000",
+          "3000000000000000000000000",
         ],
       ],
     },
