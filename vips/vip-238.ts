@@ -11,15 +11,15 @@ export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
-export const BTC_AMOUNT = parseUnits("1.59", 18);
-export const ETH_AMOUNT = parseUnits("72.39", 18);
-export const USDC_AMOUNT = parseUnits("187500", 18);
-export const USDT_AMOUNT = parseUnits("300000", 18);
+export const BTC_AMOUNT = parseUnits("0.8837559297", 18);
+export const ETH_AMOUNT = parseUnits("74.547052111", 18);
+export const USDC_AMOUNT = parseUnits("224932.52", 18);
+export const USDT_AMOUNT = parseUnits("300300.30", 18);
 
-export const BTC_DISTRIBUTION_SPEED = "613425925925";
-export const ETH_DISTRIBUTION_SPEED = "27928240740740";
-export const USDC_DISTRIBUTION_SPEED = "72337962962962962";
-export const USDT_DISTRIBUTION_SPEED = "115740740740740740";
+export const BTC_DISTRIBUTION_SPEED = "3409552198";
+export const ETH_DISTRIBUTION_SPEED = "287604367712";
+export const USDC_DISTRIBUTION_SPEED = "867795216049383";
+export const USDT_DISTRIBUTION_SPEED = "1158565972222222";
 
 export const vip238 = () => {
   const meta = {
