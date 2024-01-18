@@ -61,6 +61,7 @@ const BORROWERS_IN_SHORTFALL = [
   "0xb38a6184069cf136ee9d145c6acf564dd10fd195",
   "0x1e85d99e182557960e2b86bb53ca417007eed16a",
   "0x5cf9f8a81eb9a3eff4c72326903b27782eb47be2",
+  EXPLOITER_WALLET,
 ];
 
 const VTOKENS_WITH_BAD_DEBT = [VUSDC, VUSDT, VBNB, VBTC, VETH, VBCH, VDAI, VTUSDOLD];
@@ -84,6 +85,7 @@ const MOVE_DEBT_ALLOWLIST: { [borrower: string]: string[] } = {
   "0xb38a6184069cf136ee9d145c6acf564dd10fd195": [VUSDT],
   "0x1e85d99e182557960e2b86bb53ca417007eed16a": [VUSDC],
   "0x5cf9f8a81eb9a3eff4c72326903b27782eb47be2": [VTUSDOLD],
+  [EXPLOITER_WALLET]: [VUSDC, VUSDT],
 };
 
 // Interest rate model with no interest, for testing purposes
@@ -287,6 +289,86 @@ forking(34775900, () => {
         .withArgs(
           EXPLOITER_WALLET, // new borrower
           await convert(vBTC, vETH, repayAmount),
+          anyValue,
+          anyValue,
+        );
+    });
+  });
+
+  describe(`Moving USDT debt from 0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc to BTC debt of the exploiter`, () => {
+    const borrowerAddress = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
+    const repayAmount = parseUnits("10000000", 18);
+    let vUSDT: Contract;
+    let vBTC: Contract;
+    let usdt: Contract;
+    let btc: Contract;
+    let usdtHolder: SignerWithAddress;
+
+    before(async () => {
+      vUSDT = await ethers.getContractAt(VTOKEN_ABI, VUSDT);
+      vBTC = await ethers.getContractAt(VTOKEN_ABI, VBTC);
+      usdt = await ethers.getContractAt(ERC20_ABI, await vUSDT.underlying());
+      btc = await ethers.getContractAt(ERC20_ABI, await vBTC.underlying());
+      usdtHolder = await initMainnetUser(USDT_HOLDER, parseEther("1"));
+      const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
+      await vUSDT.connect(timelock)._setInterestRateModel(ZERO_RATE_MODEL);
+    });
+
+    beforeEach(async () => {
+      await usdt.connect(usdtHolder).approve(moveDebtDelegate.address, repayAmount);
+    });
+
+    const convert = async (from: Contract, to: Contract, amount: BigNumber) => {
+      const fromPrice = await oracle.getUnderlyingPrice(from.address);
+      const toPrice = await oracle.getUnderlyingPrice(to.address);
+      return amount.mul(fromPrice).div(toPrice);
+    };
+
+    it(`moves USDT debt from ${borrowerAddress} to BTC debt of the exploiter`, async () => {
+      const [shortfallAccountDebtBefore, exploiterDebtBefore] = await Promise.all([
+        vUSDT.callStatic.borrowBalanceCurrent(borrowerAddress),
+        vBTC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET),
+      ]);
+      await moveDebtDelegate.connect(usdtHolder).moveDebt(vUSDT.address, borrowerAddress, repayAmount, vBTC.address);
+      const [shortfallAccountDebtAfter, exploiterDebtAfter] = await Promise.all([
+        vUSDT.callStatic.borrowBalanceCurrent(borrowerAddress),
+        vBTC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET),
+      ]);
+      expect(shortfallAccountDebtBefore.sub(shortfallAccountDebtAfter)).to.equal(repayAmount);
+      expect(exploiterDebtAfter.sub(exploiterDebtBefore)).to.equal(await convert(vUSDT, vBTC, repayAmount));
+    });
+
+    it(`transfers USDT from the sender and sends BTC to the sender`, async () => {
+      const [usdtBalanceBefore, btcBalanceBefore] = await Promise.all([
+        usdt.balanceOf(USDT_HOLDER),
+        btc.balanceOf(USDT_HOLDER),
+      ]);
+      await moveDebtDelegate.connect(usdtHolder).moveDebt(vUSDT.address, borrowerAddress, repayAmount, vBTC.address);
+      const [usdtBalanceAfter, btcBalanceAfter] = await Promise.all([
+        usdt.balanceOf(USDT_HOLDER),
+        btc.balanceOf(USDT_HOLDER),
+      ]);
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.equal(repayAmount);
+      expect(btcBalanceAfter.sub(btcBalanceBefore)).to.equal(await convert(vUSDT, vBTC, repayAmount));
+    });
+
+    it("emits RepayBorrow and Borrow events", async () => {
+      const tx = await moveDebtDelegate
+        .connect(usdtHolder)
+        .moveDebt(vUSDT.address, borrowerAddress, repayAmount, vBTC.address);
+      await expect(tx).to.emit(vUSDT, "RepayBorrow").withArgs(
+        MOVE_DEBT_DELEGATE, // payer
+        borrowerAddress, // old borrower
+        repayAmount,
+        anyValue,
+        anyValue,
+      );
+
+      await expect(tx)
+        .to.emit(vBTC, "Borrow")
+        .withArgs(
+          EXPLOITER_WALLET, // new borrower
+          await convert(vUSDT, vBTC, repayAmount),
           anyValue,
           anyValue,
         );

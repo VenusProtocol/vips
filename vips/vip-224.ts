@@ -37,6 +37,7 @@ const MOVE_DEBT_ALLOWLIST = [
   { borrower: "0xb38a6184069cf136ee9d145c6acf564dd10fd195", markets: [VUSDT] },
   { borrower: "0x1e85d99e182557960e2b86bb53ca417007eed16a", markets: [VUSDC] },
   { borrower: "0x5cf9f8a81eb9a3eff4c72326903b27782eb47be2", markets: [VTUSDOLD] },
+  { borrower: EXPLOITER_WALLET, markets: [VUSDC, VUSDT] },
 ];
 
 export const vip224 = () => {
