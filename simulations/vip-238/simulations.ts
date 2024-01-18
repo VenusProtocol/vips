@@ -25,7 +25,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import VTreasurer_ABI from "./abi/VTreasury.json";
 
-forking(35288583, () => {
+forking(35355081, () => {
   let btc: ethers.Contract;
   let eth: ethers.Contract;
   let usdc: ethers.Contract;
