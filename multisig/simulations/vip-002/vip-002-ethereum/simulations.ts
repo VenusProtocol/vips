@@ -22,7 +22,6 @@ const TREASURY = "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa";
 // Comptrollers
 const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const COMPTROLLER_CURVE = "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796";
-const COMPTROLLER_STABLECOINS = "0xE4373b7D00233A6370F2e359551f849aD099cf29";
 
 const BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
 
@@ -33,9 +32,6 @@ type VTokenSymbol =
   | "vUSDC_Core"
   | "vcrvUSD_Core"
   | "vCRV_Core"
-  | "vUSDC_Stablecoins"
-  | "vUSDT_Stablecoins"
-  | "vcrvUSD_Stablecoins"
   | "vcrvUSD_Curve"
   | "vCRV_Curve";
 
@@ -46,9 +42,6 @@ const vTokens: { [key in VTokenSymbol]: string } = {
   vUSDC_Core: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
   vcrvUSD_Core: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
   vCRV_Core: "0xa38B2718Fda8fFdF9EF160A29a47e7C447102b2b",
-  vUSDC_Stablecoins: "0xB0983aE919D5E7F932da277F0b9a52f521db9aA4",
-  vUSDT_Stablecoins: "0xE3f2278425B2c5e8C48Eb87256EfB43A5c18FC91",
-  vcrvUSD_Stablecoins: "0xb209b110247A002eFfeb97B6BAf9606B95D9cA26",
   vcrvUSD_Curve: "0x2d499800239C4CD3012473Cb1EAE33562F0A6933",
   vCRV_Curve: "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa",
 };
@@ -121,33 +114,6 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
   },
-
-  // Stablecoins Pool
-  vUSDT_Stablecoins: {
-    name: "Venus USDT (Stablecoins)",
-    symbol: "vUSDT_Stablecoins",
-    decimals: 8,
-    underlying: tokens.USDT,
-    exchangeRate: parseUnits("1", 16),
-    comptroller: COMPTROLLER_STABLECOINS,
-  },
-  vUSDC_Stablecoins: {
-    name: "Venus USDC (Stablecoins)",
-    symbol: "vUSDC_Stablecoins",
-    decimals: 8,
-    underlying: tokens.USDC,
-    exchangeRate: parseUnits("1", 16),
-    comptroller: COMPTROLLER_STABLECOINS,
-  },
-  vcrvUSD_Stablecoins: {
-    name: "Venus crvUSD (Stablecoins)",
-    symbol: "vcrvUSD_Stablecoins",
-    decimals: 8,
-    underlying: tokens.crvUSD,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: COMPTROLLER_STABLECOINS,
-  },
-
   // Curve Pool
   vcrvUSD_Curve: {
     name: "Venus crvUSD (Curve)",
@@ -233,36 +199,6 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "20000",
     vTokenReceiver: TREASURY,
   },
-
-  // Stablecoins Pool
-  vUSDC_Stablecoins: {
-    borrowCap: "45000000",
-    supplyCap: "50000000",
-    collateralFactor: "0.87",
-    liquidationThreshold: "0.9",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
-    vTokenReceiver: TREASURY,
-  },
-  vUSDT_Stablecoins: {
-    borrowCap: "45000000",
-    supplyCap: "50000000",
-    collateralFactor: "0.87",
-    liquidationThreshold: "0.9",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
-    vTokenReceiver: TREASURY,
-  },
-  vcrvUSD_Stablecoins: {
-    borrowCap: "45000000",
-    supplyCap: "50000000",
-    collateralFactor: "0.87",
-    liquidationThreshold: "0.9",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
-    vTokenReceiver: TREASURY,
-  },
-
   // Curve Pool
   vcrvUSD_Curve: {
     borrowCap: "2000000",
@@ -322,7 +258,7 @@ const interestRateModels: InterestRateModelSpec[] = [
     jump: "3",
   },
   {
-    vTokens: ["vUSDC_Stablecoins", "vUSDT_Stablecoins", "vcrvUSD_Stablecoins", "vcrvUSD_Curve"],
+    vTokens: ["vcrvUSD_Curve"],
     kink: "0.8",
     base: "0",
     multiplier: "0.075",
@@ -370,8 +306,8 @@ forking(19033343, () => {
         registeredPools = await poolRegistry.getAllPools();
       });
 
-      it("should have 3 pools", async () => {
-        expect(registeredPools).to.have.lengthOf(3);
+      it("should have 2 pools", async () => {
+        expect(registeredPools).to.have.lengthOf(2);
       });
 
       it("should register Core pool in PoolRegistry", async () => {
@@ -381,15 +317,8 @@ forking(19033343, () => {
         expect(pool.comptroller).to.equal(COMPTROLLER_CORE);
       });
 
-      it("should register Stablecoins pool in PoolRegistry", async () => {
-        const pool = registeredPools[1];
-        expect(pool.name).to.equal("Stablecoins");
-        expect(pool.creator).to.equal(ETHEREUM_MULTISIG);
-        expect(pool.comptroller).to.equal(COMPTROLLER_STABLECOINS);
-      });
-
       it("should register Curve pool in PoolRegistry", async () => {
-        const pool = registeredPools[2];
+        const pool = registeredPools[1];
         expect(pool.name).to.equal("Curve");
         expect(pool.creator).to.equal(ETHEREUM_MULTISIG);
         expect(pool.comptroller).to.equal(COMPTROLLER_CURVE);
@@ -405,15 +334,6 @@ forking(19033343, () => {
         expect(poolVTokens).to.include(vTokens.vUSDC_Core);
         expect(poolVTokens).to.include(vTokens.vCRV_Core);
         expect(poolVTokens).to.include(vTokens.vcrvUSD_Core);
-      });
-
-      it("should register Stablecoins pool vTokens in Stablecoins pool Comptroller", async () => {
-        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_STABLECOINS);
-        const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(3);
-        expect(poolVTokens).to.include(vTokens.vUSDC_Stablecoins);
-        expect(poolVTokens).to.include(vTokens.vUSDT_Stablecoins);
-        expect(poolVTokens).to.include(vTokens.vcrvUSD_Stablecoins);
       });
 
       it("should register Curve pool vTokens in Curve pool Comptroller", async () => {
@@ -481,12 +401,8 @@ forking(19033343, () => {
             expect(market.liquidationThresholdMantissa).to.equal(parseUnits(params.liquidationThreshold, 18));
           });
 
-          it(`should ${symbol} have correct protocol seize share`, async () => {
-            if (symbol === "vUSDC_Stablecoins" || symbol === "vUSDT_Stablecoins" || symbol === "vcrvUSD_Stablecoins") {
-              expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.01", 18));
-            } else {
-              expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
-            }
+          it(`should ${symbol} have correct protocol seize share eual to 0.05`, async () => {
+            expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
           });
 
           it(`should set ${symbol} supply cap to ${params.supplyCap}`, async () => {
@@ -544,7 +460,6 @@ forking(19033343, () => {
       };
 
       checkComptroller(COMPTROLLER_CORE, "Core", parseUnits("1.1", 18));
-      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins", parseUnits("1.02", 18));
       checkComptroller(COMPTROLLER_CURVE, "Curve", parseUnits("1.1", 18));
     });
 
