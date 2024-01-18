@@ -1,5 +1,3 @@
-import { parseUnits } from "@ethersproject/units";
-
 import { ZERO_ADDRESS } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
