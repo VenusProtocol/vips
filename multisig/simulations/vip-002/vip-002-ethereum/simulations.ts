@@ -13,6 +13,7 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import { initMainnetUser } from "../../../../src/utils";
 
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
@@ -180,8 +181,8 @@ interface RiskParameters {
 const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   // Core Pool
   vWBTC_Core: {
-    borrowCap: "250",
-    supplyCap: "300",
+    borrowCap: "850",
+    supplyCap: "1000",
     collateralFactor: "0.75",
     liquidationThreshold: "0.8",
     reserveFactor: "0.2",
@@ -189,8 +190,8 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     vTokenReceiver: TREASURY,
   },
   vWETH_Core: {
-    borrowCap: "4600",
-    supplyCap: "5500",
+    borrowCap: "18000",
+    supplyCap: "20000",
     collateralFactor: "0.75",
     liquidationThreshold: "0.8",
     reserveFactor: "0.2",
@@ -198,37 +199,37 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     vTokenReceiver: TREASURY,
   },
   vUSDC_Core: {
-    borrowCap: "9000000",
-    supplyCap: "10000000",
-    collateralFactor: "0.8",
-    liquidationThreshold: "0.82",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.78",
+    liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vUSDT_Core: {
-    borrowCap: "9000000",
-    supplyCap: "10000000",
-    collateralFactor: "0.8",
-    liquidationThreshold: "0.82",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.78",
+    liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vcrvUSD_Core: {
-    borrowCap: "9000000",
-    supplyCap: "10000000",
-    collateralFactor: "0.8",
-    liquidationThreshold: "0.82",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.78",
+    liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vCRV_Core: {
-    borrowCap: "2500000",
-    supplyCap: "5000000",
-    collateralFactor: "0.35",
-    liquidationThreshold: "0.4",
+    borrowCap: "1100000",
+    supplyCap: "2000000",
+    collateralFactor: "0.3",
+    liquidationThreshold: "0.35",
     reserveFactor: "0.25",
     initialSupply: "20000",
     vTokenReceiver: TREASURY,
@@ -236,27 +237,27 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
 
   // Stablecoins Pool
   vUSDC_Stablecoins: {
-    borrowCap: "4500000",
-    supplyCap: "5000000",
-    collateralFactor: "0.85",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.87",
     liquidationThreshold: "0.9",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vUSDT_Stablecoins: {
-    borrowCap: "4500000",
-    supplyCap: "5000000",
-    collateralFactor: "0.85",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.87",
     liquidationThreshold: "0.9",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vcrvUSD_Stablecoins: {
-    borrowCap: "4500000",
-    supplyCap: "5000000",
-    collateralFactor: "0.85",
+    borrowCap: "45000000",
+    supplyCap: "50000000",
+    collateralFactor: "0.87",
     liquidationThreshold: "0.9",
     reserveFactor: "0.1",
     initialSupply: "10000",
@@ -267,17 +268,17 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   vcrvUSD_Curve: {
     borrowCap: "2000000",
     supplyCap: "2500000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.8",
+    collateralFactor: "0.45",
+    liquidationThreshold: "0.5",
     reserveFactor: "0.1",
     initialSupply: "10000",
     vTokenReceiver: TREASURY,
   },
   vCRV_Curve: {
-    borrowCap: "2500000",
-    supplyCap: "5000000",
-    collateralFactor: "0.6",
-    liquidationThreshold: "0.65",
+    borrowCap: "3000000",
+    supplyCap: "6000000",
+    collateralFactor: "0.45",
+    liquidationThreshold: "0.5",
     reserveFactor: "0.25",
     initialSupply: "20000",
     vTokenReceiver: TREASURY,
@@ -297,21 +298,21 @@ const interestRateModels: InterestRateModelSpec[] = [
     vTokens: ["vWBTC_Core"],
     kink: "0.75",
     base: "0",
-    multiplier: "0.05",
-    jump: "0.8",
+    multiplier: "0.09",
+    jump: "0.75",
   },
   {
     vTokens: ["vWETH_Core"],
     kink: "0.8",
     base: "0",
-    multiplier: "0.045",
-    jump: "0.8",
+    multiplier: "0.09",
+    jump: "0.75",
   },
   {
     vTokens: ["vUSDC_Core", "vUSDT_Core", "vcrvUSD_Core"],
     kink: "0.8",
     base: "0",
-    multiplier: "0.07",
+    multiplier: "0.075",
     jump: "0.8",
   },
   {
@@ -321,15 +322,35 @@ const interestRateModels: InterestRateModelSpec[] = [
     multiplier: "0.15",
     jump: "3",
   },
+  {
+    vTokens: ["vUSDC_Stablecoins","vUSDT_Stablecoins","vcrvUSD_Stablecoins","vcrvUSD_Curve"],
+    kink: "0.8",
+    base: "0",
+    multiplier: "0.075",
+    jump: "0.8",
+  },
+  {
+    vTokens: ["vCRV_Curve"],
+    kink: "0.5",
+    base: "0.02",
+    multiplier: "0.2",
+    jump: "3",
+  },
 ];
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(18975851, () => {
+forking(19032700, () => {
   let poolRegistry: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
+
+    // Transfer WBTC to treasury. Remove after we have initial liquidity there
+    const wbtcHolder = await initMainnetUser("0x5680b3FcBB64FB161adbD347BC92e8DDEDA97008",ethers.utils.parseEther("2"));
+    const wbtc = await ethers.getContractAt(ERC20_ABI,tokens.WBTC);
+    const initialLiquidityWbtc = "30000000"; // 0.3 WBTC
+    await wbtc.connect(wbtcHolder).transfer(TREASURY,initialLiquidityWbtc);
   });
 
   describe("Contracts setup", () => {
@@ -341,7 +362,6 @@ forking(18975851, () => {
   describe("Post-Execution state", () => {
     before(async () => {
       await pretendExecutingVip(vip002());
-
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {
           const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);
@@ -488,7 +508,7 @@ forking(18975851, () => {
     });
 
     describe("Pools configuration", () => {
-      const checkComptroller = (comptrollerAddress: string, comptrollerName: string) => {
+      const checkComptroller = (comptrollerAddress: string, comptrollerName: string, liquidationIncentive: BigNumber) => {
         describe(`${comptrollerName} Comptroller`, () => {
           let comptroller: Contract;
 
@@ -508,8 +528,8 @@ forking(18975851, () => {
             expect(await comptroller.closeFactorMantissa()).to.equal(parseUnits("0.5", 18));
           });
 
-          it("should have liquidation incentive = 1.1", async () => {
-            expect(await comptroller.liquidationIncentiveMantissa()).to.equal(parseUnits("1.1", 18));
+          it("should have correct liquidation incentive ", async () => {
+            expect(await comptroller.liquidationIncentiveMantissa()).to.equal(liquidationIncentive);
           });
 
           it("should have minLiquidatableCollateral = $100", async () => {
@@ -522,9 +542,9 @@ forking(18975851, () => {
         });
       };
 
-      checkComptroller(COMPTROLLER_CORE, "Core");
-      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins");
-      checkComptroller(COMPTROLLER_CURVE, "Curve");
+      checkComptroller(COMPTROLLER_CORE, "Core", parseUnits("1.1", 18));
+      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins",parseUnits("1.02", 18));
+      checkComptroller(COMPTROLLER_CURVE, "Curve", parseUnits("1.1", 18));
     });
 
     it("Interest rates", async () => {

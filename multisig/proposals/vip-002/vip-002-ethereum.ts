@@ -218,21 +218,6 @@ export const vip002 = () => {
       signature: "setInterestRateModel(address)",
       params: [IR_BASE200_SLOPE2000_JUMP30000_KINK5000],
     },
-    {
-      target: vUSDC_Stablecoins,
-      signature: "setProtocolSeizeShare(uint256)",
-      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
-    },
-    {
-      target: vUSDT_Stablecoins,
-      signature: "setProtocolSeizeShare(uint256)",
-      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
-    },
-    {
-      target: vcrvUSD_Stablecoins,
-      signature: "setProtocolSeizeShare(uint256)",
-      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
-    },
     { target: POOL_REGISTRY, signature: "acceptOwnership()", params: [] },
     { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [] },
     {
@@ -396,21 +381,21 @@ export const vip002 = () => {
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["6171"],
     },
-    {
-      target: POOL_REGISTRY,
-      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [
-        [
-          vUSDT_Core,
-          "780000000000000000",
-          "800000000000000000",
-          "10000000000",
-          TREASURY,
-          "50000000000000",
-          "45000000000000",
-        ],
-      ],
-    },
+    // {
+    //   target: POOL_REGISTRY,
+    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+    //   params: [
+    //     [
+    //       vUSDT_Core,
+    //       "780000000000000000",
+    //       "800000000000000000",
+    //       "10000000000",
+    //       TREASURY,
+    //       "50000000000000",
+    //       "45000000000000",
+    //     ],
+    //   ],
+    // },
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
@@ -536,21 +521,21 @@ export const vip002 = () => {
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["6171"],
     },
-    {
-      target: POOL_REGISTRY,
-      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [
-        [
-          vUSDT_Stablecoins,
-          "870000000000000000",
-          "900000000000000000",
-          "10000000000",
-          TREASURY,
-          "50000000000000",
-          "45000000000000",
-        ],
-      ],
-    },
+    // {
+    //   target: POOL_REGISTRY,
+    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+    //   params: [
+    //     [
+    //       vUSDT_Stablecoins,
+    //       "870000000000000000",
+    //       "900000000000000000",
+    //       "10000000000",
+    //       TREASURY,
+    //       "50000000000000",
+    //       "45000000000000",
+    //     ],
+    //   ],
+    // },
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
@@ -655,6 +640,21 @@ export const vip002 = () => {
           "3000000000000000000000000",
         ],
       ],
+    },
+    {
+      target: vUSDC_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
+    },
+    {
+      target: vUSDT_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
+    },
+    {
+      target: vcrvUSD_Stablecoins,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [NEW_PROTOCOL_SHARE_SEIZE_MANTISSA],
     },
   ]);
 };
