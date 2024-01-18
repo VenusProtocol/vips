@@ -1,6 +1,6 @@
 import { parseUnits } from "@ethersproject/units";
 
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../src/networkAddresses";
+import { ZERO_ADDRESS } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
@@ -8,6 +8,8 @@ const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 const TREASURY = "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa";
+const DEFAULT_PROXY_ADMIN = "0x567e4cc5e085d09f66f836fa8279f38b4e5866b9";
+const POOL_REGISTRY_IMPL = "0x08A2577611Ae63d1ba40188035eD6Ad21F8502A9";
 // Comptrollers
 const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const COMPTROLLER_CURVE = "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796";
@@ -220,6 +222,7 @@ export const vip002 = () => {
     },
     { target: POOL_REGISTRY, signature: "acceptOwnership()", params: [] },
     { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [] },
+    { target: DEFAULT_PROXY_ADMIN, signature: "upgrade(address,address)", params: [POOL_REGISTRY, POOL_REGISTRY_IMPL] },
     {
       target: COMPTROLLER_CORE,
       signature: "setPriceOracle(address)",
@@ -261,7 +264,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WBTC, "30000000", ETHEREUM_MULTISIG],
+      params: [WBTC, "29818818", ETHEREUM_MULTISIG],
     },
     {
       target: WBTC,
@@ -271,7 +274,7 @@ export const vip002 = () => {
     {
       target: WBTC,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "30000000"],
+      params: [POOL_REGISTRY, "29818818"],
     },
     {
       target: vWBTC_Core,
@@ -282,7 +285,7 @@ export const vip002 = () => {
       target: POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [vWBTC_Core, "750000000000000000", "800000000000000000", "30000000", TREASURY, "100000000000", "85000000000"],
+        [vWBTC_Core, "750000000000000000", "800000000000000000", "29818818", TREASURY, "100000000000", "85000000000"],
       ],
     },
     {
@@ -381,21 +384,21 @@ export const vip002 = () => {
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["6171"],
     },
-    // {
-    //   target: POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       vUSDT_Core,
-    //       "780000000000000000",
-    //       "800000000000000000",
-    //       "10000000000",
-    //       TREASURY,
-    //       "50000000000000",
-    //       "45000000000000",
-    //     ],
-    //   ],
-    // },
+    {
+      target: POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          vUSDT_Core,
+          "780000000000000000",
+          "800000000000000000",
+          "10000000000",
+          TREASURY,
+          "50000000000000",
+          "45000000000000",
+        ],
+      ],
+    },
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
@@ -521,21 +524,21 @@ export const vip002 = () => {
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["6171"],
     },
-    // {
-    //   target: POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       vUSDT_Stablecoins,
-    //       "870000000000000000",
-    //       "900000000000000000",
-    //       "10000000000",
-    //       TREASURY,
-    //       "50000000000000",
-    //       "45000000000000",
-    //     ],
-    //   ],
-    // },
+    {
+      target: POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          vUSDT_Stablecoins,
+          "870000000000000000",
+          "900000000000000000",
+          "10000000000",
+          TREASURY,
+          "50000000000000",
+          "45000000000000",
+        ],
+      ],
+    },
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",

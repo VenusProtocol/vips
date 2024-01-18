@@ -4,6 +4,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
@@ -13,7 +14,6 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RATE_MODEL_ABI from "./abi/rateModel.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { initMainnetUser } from "../../../../src/utils";
 
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
@@ -186,7 +186,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.8",
     reserveFactor: "0.2",
-    initialSupply: "0.3",
+    initialSupply: "0.29818818",
     vTokenReceiver: TREASURY,
   },
   vWETH_Core: {
@@ -323,7 +323,7 @@ const interestRateModels: InterestRateModelSpec[] = [
     jump: "3",
   },
   {
-    vTokens: ["vUSDC_Stablecoins","vUSDT_Stablecoins","vcrvUSD_Stablecoins","vcrvUSD_Curve"],
+    vTokens: ["vUSDC_Stablecoins", "vUSDT_Stablecoins", "vcrvUSD_Stablecoins", "vcrvUSD_Curve"],
     kink: "0.8",
     base: "0",
     multiplier: "0.075",
@@ -340,17 +340,11 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(19032700, () => {
+forking(19033343, () => {
   let poolRegistry: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
-
-    // Transfer WBTC to treasury. Remove after we have initial liquidity there
-    const wbtcHolder = await initMainnetUser("0x5680b3FcBB64FB161adbD347BC92e8DDEDA97008",ethers.utils.parseEther("2"));
-    const wbtc = await ethers.getContractAt(ERC20_ABI,tokens.WBTC);
-    const initialLiquidityWbtc = "30000000"; // 0.3 WBTC
-    await wbtc.connect(wbtcHolder).transfer(TREASURY,initialLiquidityWbtc);
   });
 
   describe("Contracts setup", () => {
@@ -488,8 +482,12 @@ forking(19032700, () => {
             expect(market.liquidationThresholdMantissa).to.equal(parseUnits(params.liquidationThreshold, 18));
           });
 
-          it(`should set ${symbol} protocol seize share to 0.05`, async () => {
-            expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+          it(`should ${symbol} have correct protocol seize share`, async () => {
+            if (symbol === "vUSDC_Stablecoins" || symbol === "vUSDT_Stablecoins" || symbol === "vcrvUSD_Stablecoins") {
+              expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.01", 18));
+            } else {
+              expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+            }
           });
 
           it(`should set ${symbol} supply cap to ${params.supplyCap}`, async () => {
@@ -508,7 +506,11 @@ forking(19032700, () => {
     });
 
     describe("Pools configuration", () => {
-      const checkComptroller = (comptrollerAddress: string, comptrollerName: string, liquidationIncentive: BigNumber) => {
+      const checkComptroller = (
+        comptrollerAddress: string,
+        comptrollerName: string,
+        liquidationIncentive: BigNumber,
+      ) => {
         describe(`${comptrollerName} Comptroller`, () => {
           let comptroller: Contract;
 
@@ -543,7 +545,7 @@ forking(19032700, () => {
       };
 
       checkComptroller(COMPTROLLER_CORE, "Core", parseUnits("1.1", 18));
-      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins",parseUnits("1.02", 18));
+      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins", parseUnits("1.02", 18));
       checkComptroller(COMPTROLLER_CURVE, "Curve", parseUnits("1.1", 18));
     });
 
