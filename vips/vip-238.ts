@@ -16,16 +16,23 @@ export const ETH_AMOUNT = parseUnits("74.547052111", 18);
 export const USDC_AMOUNT = parseUnits("224932.52", 18);
 export const USDT_AMOUNT = parseUnits("300300.30", 18);
 
-export const BTC_DISTRIBUTION_SPEED = "3409552198";
-export const ETH_DISTRIBUTION_SPEED = "287604367712";
-export const USDC_DISTRIBUTION_SPEED = "867795216049383";
-export const USDT_DISTRIBUTION_SPEED = "1158565972222222";
+export const BTC_DISTRIBUTION_SPEED = "340955219791";
+export const ETH_DISTRIBUTION_SPEED = "29146239240354";
+export const USDC_DISTRIBUTION_SPEED = "86779521604938271";
+export const USDT_DISTRIBUTION_SPEED = "115856597222222222";
 
 export const vip238 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-238 Treasury management",
-    description: ``,
+    title: "VIP-XXX Prime Adjustment",
+    description: `If passed, this VIP will follow the recommendations from the [Prime Adjustment Proposal](https://community.venus.io/t/prime-adjustment-proposal/4054) and transfer funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) contract. These funds will be distributed among the Prime holders for the next 3 months.
+
+The token amounts have been adjusted based on token prices for January 18 2024, block number: 35354264
+
+- BTC: 0.8837559297
+- ETH: 74.547052111
+- USDC: 224,932.52
+- USDT: 300,300.30`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
