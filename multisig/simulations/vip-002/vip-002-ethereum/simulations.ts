@@ -5,6 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip002 } from "../../../proposals/vip-002/vip-002-ethereum";
@@ -453,6 +454,10 @@ forking(19033343, () => {
           );
         }
       }
+    });
+
+    describe.only("generic tests", async () => {
+      checkIsolatedPoolsComptrollers();
     });
   });
 });
