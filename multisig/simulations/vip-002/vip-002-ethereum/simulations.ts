@@ -401,7 +401,7 @@ forking(19033343, () => {
             expect(market.liquidationThresholdMantissa).to.equal(parseUnits(params.liquidationThreshold, 18));
           });
 
-          it(`should ${symbol} have correct protocol seize share eual to 0.05`, async () => {
+          it(`should ${symbol} have correct protocol seize share equal to 0.05`, async () => {
             expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
           });
 
