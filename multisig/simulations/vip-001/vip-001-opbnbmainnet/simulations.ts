@@ -15,6 +15,7 @@ const RESILIENT_ORACLE = "0x8f3618c4F0183e14A218782c116fb2438571dAC9";
 const BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
 const STALE_PERIOD_26H = 60 * 60 * 26;
 const STALE_PERIOD_100S = 100;
+const STALE_PERIOD_25M = 60 * 25;
 
 interface AssetConfig {
   name: string;
@@ -26,26 +27,31 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "BTC",
     address: "0x7c6b91d9be155a6db01f749217d76ff02a7227f2",
-    price: "42736266582560000000000",
+    price: "41387756941850000000000",
   },
   {
     name: "ETH",
     address: "0xe7798f023fc62146e8aa1b36da45fb70855a77ea",
-    price: "2545079891360000000000",
+    price: "2483997580340000000000",
   },
   {
     name: "USDT",
     address: "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3",
-    price: "999667500000000000",
+    price: "998703330000000000",
   },
   {
     name: "BNB",
     address: "0x4200000000000000000000000000000000000006",
-    price: "308925598450000000000",
+    price: "313573063660000000000",
+  },
+  {
+    name: "XVS",
+    address: "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61",
+    price: "11937234000000000000",
   },
 ];
 
-forking(13734155, () => {
+forking(13905270, () => {
   const provider = ethers.provider;
   let resilientOracle: ethers.Contract;
   let binanceOracle: ethers.Contract;
@@ -67,6 +73,7 @@ forking(13734155, () => {
       expect(await binanceOracle.maxStalePeriod("ETH")).to.be.equals(0);
       expect(await binanceOracle.maxStalePeriod("USDT")).to.be.equals(0);
       expect(await binanceOracle.maxStalePeriod("BNB")).to.be.equals(0);
+      expect(await binanceOracle.maxStalePeriod("XVS")).to.be.equals(0);
     });
     it("should revert for unconfigured asset price request", async () => {
       for (let i = 0; i < assetConfigs.length; i++) {
@@ -92,6 +99,7 @@ forking(13734155, () => {
       expect(await binanceOracle.maxStalePeriod("ETH")).to.be.equals(STALE_PERIOD_100S);
       expect(await binanceOracle.maxStalePeriod("USDT")).to.be.equals(STALE_PERIOD_26H);
       expect(await binanceOracle.maxStalePeriod("BNB")).to.be.equals(STALE_PERIOD_100S);
+      expect(await binanceOracle.maxStalePeriod("XVS")).to.be.equals(STALE_PERIOD_25M);
     });
     it("validate asset prices", async () => {
       for (let i = 0; i < assetConfigs.length; i++) {

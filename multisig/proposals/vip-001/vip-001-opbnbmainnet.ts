@@ -11,8 +11,10 @@ const BTCB = "0x7c6b91d9be155a6db01f749217d76ff02a7227f2";
 const ETH = "0xe7798f023fc62146e8aa1b36da45fb70855a77ea";
 const USDT = "0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3";
 const WBNB = "0x4200000000000000000000000000000000000006";
+const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const STALE_PERIOD_100S = 100; // 100 seconds (pricefeeds with heartbeat of 1 minute)
+const STALE_PERIOD_25M = 60 * 25; // 25 minutes (pricefeeds with heartbeat of 15 minutes)
 
 export const vip001 = () => {
   return makeProposal([
@@ -130,6 +132,22 @@ export const vip001 = () => {
       params: [
         [
           WBNB,
+          [BINANCE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
+          [true, false, false],
+        ],
+      ],
+    },
+    {
+      target: BINANCE_ORACLE,
+      signature: "setMaxStalePeriod(string,uint256)",
+      params: ["XVS", STALE_PERIOD_25M],
+    },
+    {
+      target: RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          XVS,
           [BINANCE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
           [true, false, false],
         ],
