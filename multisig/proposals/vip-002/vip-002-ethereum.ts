@@ -239,7 +239,7 @@ export const vip002 = () => {
     {
       target: vWBTC_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -272,7 +272,7 @@ export const vip002 = () => {
     {
       target: vWETH_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -307,7 +307,7 @@ export const vip002 = () => {
     {
       target: vUSDC_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -342,7 +342,7 @@ export const vip002 = () => {
     {
       target: vUSDT_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -377,7 +377,7 @@ export const vip002 = () => {
     {
       target: vcrvUSD_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -412,7 +412,7 @@ export const vip002 = () => {
     {
       target: vCRV_Core,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -447,7 +447,7 @@ export const vip002 = () => {
     {
       target: vcrvUSD_Curve,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
@@ -482,7 +482,7 @@ export const vip002 = () => {
     {
       target: vCRV_Curve,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["6171"],
+      params: ["7200"],
     },
     {
       target: POOL_REGISTRY,
