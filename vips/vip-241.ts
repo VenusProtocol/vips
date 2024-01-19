@@ -21,10 +21,10 @@ export const ETH_DISTRIBUTION_SPEED = "28760436771219";
 export const USDC_DISTRIBUTION_SPEED = "86779521604938271";
 export const USDT_DISTRIBUTION_SPEED = "115856597222222222";
 
-export const vip238 = () => {
+export const vip241 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-XXX Prime Adjustment",
+    title: "VIP-241 Prime Adjustment",
     description: `If passed, this VIP will follow the recommendations from the [Prime Adjustment Proposal](https://community.venus.io/t/prime-adjustment-proposal/4054) and transfer funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) contract. These funds will be distributed among the Prime holders for the next 3 months.
 
 The token amounts have been adjusted based on token prices for January 18 2024, block number: 35354264

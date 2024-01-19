@@ -19,8 +19,8 @@ import {
   USDT_AMOUNT,
   USDT_DISTRIBUTION_SPEED,
   VTREASURY,
-  vip238,
-} from "../../vips/vip-238";
+  vip241,
+} from "../../vips/vip-241";
 import ERC20_ABI from "./abi/ERC20.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import VTreasurer_ABI from "./abi/VTreasury.json";
@@ -60,7 +60,7 @@ forking(35355081, () => {
     plp = new ethers.Contract(PLP, PLP_ABI, ethers.provider);
   });
 
-  testVip("VIP-237", vip238(), {
+  testVip("VIP-241", vip241(), {
     callbackAfterExecution: async txResponse => {
       expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },
