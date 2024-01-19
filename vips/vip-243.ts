@@ -8,10 +8,10 @@ const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const CERTIK_RECEIVER = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
 const CHAOS_LABS_RECEIVER = "0xfb1912af5b9d3fb678f801bf764e98f1c217ef35";
 
-export const vip241 = () => {
+export const vip243 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-241 Payments Issuance for audits and ChaosLabs Risk Management services",
+    title: "VIP-243 Payments Issuance for audits and ChaosLabs Risk Management services",
     description: `#### Summary
 If passed this VIP will perform the following actions:
 
