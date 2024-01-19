@@ -12,7 +12,6 @@ const POOL_REGISTRY_IMPL = "0x08A2577611Ae63d1ba40188035eD6Ad21F8502A9";
 const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const COMPTROLLER_CURVE = "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796";
 // Markets
-const vCRV_Core = "0xa38B2718Fda8fFdF9EF160A29a47e7C447102b2b";
 const vCRV_Curve = "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa";
 const vUSDC_Core = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
 const vUSDT_Core = "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E";
@@ -27,6 +26,7 @@ const WBTC = "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599";
 const WETH = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const CRV = "0xD533a949740bb3306d119CC777fa900bA034cd52";
 const crvUSD = "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e";
+const CRV_VTOKEN_RECEIVER = "0x7a16fF8270133F063aAb6C9977183D9e72835428";
 
 //New IRs
 const IR_BASE0_SLOPE900_JUMP7500_KINK7500 = "0xa4f048254631119f4E899359711fB282589c4ED8";
@@ -115,22 +115,27 @@ export const vip002 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", ETHEREUM_MULTISIG],
+      params: [ZERO_ADDRESS, "setForcedLiquidation(address,bool)", ETHEREUM_MULTISIG],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addMarket(AddMarketInput)", ETHEREUM_MULTISIG],
+      params: [POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", ETHEREUM_MULTISIG],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", ETHEREUM_MULTISIG],
+      params: [POOL_REGISTRY, "addMarket(AddMarketInput)", ETHEREUM_MULTISIG],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", ETHEREUM_MULTISIG],
+      params: [POOL_REGISTRY, "setPoolName(address,string)", ETHEREUM_MULTISIG],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", ETHEREUM_MULTISIG],
     },
     {
       target: ACM,
@@ -388,44 +393,9 @@ export const vip002 = () => {
           "780000000000000000",
           "800000000000000000",
           "10000000000000000000000",
-          TREASURY,
+          CRV_VTOKEN_RECEIVER,
           "50000000000000000000000000",
           "45000000000000000000000000",
-        ],
-      ],
-    },
-    {
-      target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [CRV, "20000000000000000000000", ETHEREUM_MULTISIG],
-    },
-    {
-      target: CRV,
-      signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, 0],
-    },
-    {
-      target: CRV,
-      signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "20000000000000000000000"],
-    },
-    {
-      target: vCRV_Core,
-      signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["7200"],
-    },
-    {
-      target: POOL_REGISTRY,
-      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [
-        [
-          vCRV_Core,
-          "300000000000000000",
-          "350000000000000000",
-          "20000000000000000000000",
-          TREASURY,
-          "2000000000000000000000000",
-          "1100000000000000000000000",
         ],
       ],
     },
@@ -458,7 +428,7 @@ export const vip002 = () => {
           "450000000000000000",
           "500000000000000000",
           "10000000000000000000000",
-          TREASURY,
+          CRV_VTOKEN_RECEIVER,
           "2500000000000000000000000",
           "2000000000000000000000000",
         ],
@@ -467,7 +437,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [CRV, "20000000000000000000000", ETHEREUM_MULTISIG],
+      params: [CRV, "40000000000000000000000", ETHEREUM_MULTISIG],
     },
     {
       target: CRV,
@@ -477,7 +447,7 @@ export const vip002 = () => {
     {
       target: CRV,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "20000000000000000000000"],
+      params: [POOL_REGISTRY, "40000000000000000000000"],
     },
     {
       target: vCRV_Curve,
@@ -492,8 +462,8 @@ export const vip002 = () => {
           vCRV_Curve,
           "450000000000000000",
           "500000000000000000",
-          "20000000000000000000000",
-          TREASURY,
+          "40000000000000000000000",
+          CRV_VTOKEN_RECEIVER,
           "6000000000000000000000000",
           "3000000000000000000000000",
         ],

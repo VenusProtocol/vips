@@ -18,6 +18,7 @@ const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 const TREASURY = "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa";
+const CRV_VTOKEN_RECEIVER = "0x7a16fF8270133F063aAb6C9977183D9e72835428";
 
 // Comptrollers
 const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
@@ -31,7 +32,6 @@ type VTokenSymbol =
   | "vUSDT_Core"
   | "vUSDC_Core"
   | "vcrvUSD_Core"
-  | "vCRV_Core"
   | "vcrvUSD_Curve"
   | "vCRV_Curve";
 
@@ -41,7 +41,6 @@ const vTokens: { [key in VTokenSymbol]: string } = {
   vUSDT_Core: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
   vUSDC_Core: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
   vcrvUSD_Core: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
-  vCRV_Core: "0xa38B2718Fda8fFdF9EF160A29a47e7C447102b2b",
   vcrvUSD_Curve: "0x2d499800239C4CD3012473Cb1EAE33562F0A6933",
   vCRV_Curve: "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa",
 };
@@ -103,14 +102,6 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     symbol: "vcrvUSD_Core",
     decimals: 8,
     underlying: tokens.crvUSD,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: COMPTROLLER_CORE,
-  },
-  vCRV_Core: {
-    name: "Venus CRV (Core)",
-    symbol: "vCRV_Core",
-    decimals: 8,
-    underlying: tokens.CRV,
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
   },
@@ -188,16 +179,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "10000",
-    vTokenReceiver: TREASURY,
-  },
-  vCRV_Core: {
-    borrowCap: "1100000",
-    supplyCap: "2000000",
-    collateralFactor: "0.3",
-    liquidationThreshold: "0.35",
-    reserveFactor: "0.25",
-    initialSupply: "20000",
-    vTokenReceiver: TREASURY,
+    vTokenReceiver: CRV_VTOKEN_RECEIVER,
   },
   // Curve Pool
   vcrvUSD_Curve: {
@@ -207,7 +189,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.5",
     reserveFactor: "0.1",
     initialSupply: "10000",
-    vTokenReceiver: TREASURY,
+    vTokenReceiver: CRV_VTOKEN_RECEIVER,
   },
   vCRV_Curve: {
     borrowCap: "3000000",
@@ -215,8 +197,8 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.45",
     liquidationThreshold: "0.5",
     reserveFactor: "0.25",
-    initialSupply: "20000",
-    vTokenReceiver: TREASURY,
+    initialSupply: "40000",
+    vTokenReceiver: CRV_VTOKEN_RECEIVER,
   },
 };
 
@@ -249,13 +231,6 @@ const interestRateModels: InterestRateModelSpec[] = [
     base: "0",
     multiplier: "0.075",
     jump: "0.8",
-  },
-  {
-    vTokens: ["vCRV_Core"],
-    kink: "0.45",
-    base: "0.02",
-    multiplier: "0.15",
-    jump: "3",
   },
   {
     vTokens: ["vcrvUSD_Curve"],
@@ -327,12 +302,11 @@ forking(19033343, () => {
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(6);
+        expect(poolVTokens).to.have.lengthOf(5);
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
         expect(poolVTokens).to.include(vTokens.vWETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);
         expect(poolVTokens).to.include(vTokens.vUSDC_Core);
-        expect(poolVTokens).to.include(vTokens.vCRV_Core);
         expect(poolVTokens).to.include(vTokens.vcrvUSD_Core);
       });
 
