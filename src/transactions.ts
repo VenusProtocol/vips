@@ -4,14 +4,13 @@ import { getCalldatas } from "./utils";
 
 const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
 
-export const loadProposal = async (num: string) => {
-  const x = await import(`../vips/vip-${num}.ts`);
-  num = num.replace("-testnet", "Testnet");
-  return x[`vip${num}`]();
+export const loadProposal = async (path: string) => {
+  const proposalModule = await import(`../vips/${path}`);
+  return proposalModule.default();
 };
 
-export const proposeVIP = async (vipNumber: string, governorProxyAddress?: string) => {
-  const proposal = await loadProposal(vipNumber);
+export const proposeVIP = async (vipPath: string, governorProxyAddress?: string) => {
+  const proposal = await loadProposal(vipPath);
 
   const { targets, signatures, values, meta } = proposal;
 
