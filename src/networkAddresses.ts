@@ -15,7 +15,7 @@ export const NETWORK_ADDRESSES = {
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
-    GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    GENERIC_TEST_USER_ACCOUNT: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
     VAI_UNITROLLER: bscmainnet_deployed_contracts.contracts.VaiUnitroller.address,
