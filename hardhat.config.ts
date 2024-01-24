@@ -58,20 +58,24 @@ const config: HardhatUserConfig = {
       gasPrice: ethers.utils.parseUnits("10", "gwei").toNumber(),
       gasMultiplier: 10,
       timeout: 12000000,
+      blockGasLimit: 140000000,
     },
     bscmainnet: {
       url: process.env.ARCHIVE_NODE_bscmainnet || "https://bsc-dataseed.binance.org/",
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: 140000000,
     },
     sepolia: {
       url: process.env.ARCHIVE_NODE_sepolia || "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
       chainId: 11155111,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: 30000000,
     },
     ethereum: {
       url: process.env.ARCHIVE_NODE_ethereum || "https://ethereum.blockpi.network/v1/rpc/public",
       chainId: 1,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: 30000000,
     },
   },
   paths: {
@@ -94,6 +98,10 @@ function isFork() {
           accountsBalance: "100000000000000000000000",
         },
         live: false,
+        gas: "auto",
+        get blockGasLimit(): function () {
+          return config.networks[[process.env.FORKED_NETWORK]].blockGasLimit;
+        },
       }
     : {
         allowUnlimitedContractSize: true,
