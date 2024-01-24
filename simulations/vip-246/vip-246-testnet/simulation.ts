@@ -5,9 +5,9 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { Assets, converters } from "../../../vips/vip-converter/vip-converter-testnet/Addresses";
-import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter1";
-import { vipConverter2 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter2";
+import { Assets, converters } from "../../../vips/vip-246/vip-246-testnet/Addresses";
+import { vip245 } from "../../../vips/vip-245/vip-245-testnet/vip-245-testnet";
+import { vip246 } from "../../../vips/vip-246/vip-246-testnet/vip-246-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
@@ -71,7 +71,7 @@ forking(36752108, () => {
   const PsrTotalAssetReserveBefore: number[] = [];
 
   before(async () => {
-    await pretendExecutingVip(vipConverter1());
+    await pretendExecutingVip(vip245());
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
@@ -111,7 +111,7 @@ forking(36752108, () => {
     });
   });
 
-  testVip("VIP-converter2", vipConverter2(), {
+  testVip("VIP-246", vip246(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(

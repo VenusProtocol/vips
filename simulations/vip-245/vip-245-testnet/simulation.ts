@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { converters } from "../../../vips/vip-converter/vip-converter-testnet/Addresses";
-import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-testnet/vip-converter1";
+import { converters } from "../../../vips/vip-245/vip-245-testnet/Addresses";
+import { vip245 } from "../../../vips/vip-245/vip-245-testnet/vip-245-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
@@ -19,7 +19,7 @@ const CONVERTER_NETWORK = "0xC8f2B705d5A2474B390f735A5aFb570e1ce0b2cf";
 forking(36752108, () => {
   const provider = ethers.provider;
 
-  testVip("VIP-converter1", vipConverter1(), {
+  testVip("VIP-245", vip245(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["OwnershipTransferred"], [8]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [84]);
