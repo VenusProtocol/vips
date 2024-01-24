@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
+import { vip245 } from "../../../vips/vip-245/vip-245/vip-245";
 import {
   Assets,
   CONVERTER_NETWORK,
@@ -13,7 +14,6 @@ import {
   XVS_VAULT_CONVERTER,
   converters,
 } from "../../../vips/vip-246/vip-246/Addresses";
-import { vip245 } from "../../../vips/vip-245/vip-245/vip-245";
 import { vip246 } from "../../../vips/vip-246/vip-246/vip-246";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManagerMainnet.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";

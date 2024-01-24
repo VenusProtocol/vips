@@ -1,16 +1,6 @@
 import { ProposalType } from "../../../src/types";
 import { makeProposal } from "../../../src/utils";
 import {
-  converterCommands,
-  grant,
-  incentiveAndAccessibilityForBTCBPrimeConverter,
-  incentiveAndAccessibilityForETHPrimeConverter,
-  incentiveAndAccessibilityForRiskFundConverter,
-  incentiveAndAccessibilityForUSDCPrimeConverter,
-  incentiveAndAccessibilityForUSDTPrimeConverter,
-  incentiveAndAccessibilityForXVSVaultConverter,
-} from "./commands";
-import {
   BTCBPrimeConverterTokenOuts,
   BTCB_PRIME_CONVERTER,
   BaseAssets,
@@ -29,6 +19,16 @@ import {
   XVSVaultConverterTokenOuts,
   XVS_VAULT_CONVERTER,
 } from "./Addresses";
+import {
+  converterCommands,
+  grant,
+  incentiveAndAccessibilityForBTCBPrimeConverter,
+  incentiveAndAccessibilityForETHPrimeConverter,
+  incentiveAndAccessibilityForRiskFundConverter,
+  incentiveAndAccessibilityForUSDCPrimeConverter,
+  incentiveAndAccessibilityForUSDTPrimeConverter,
+  incentiveAndAccessibilityForXVSVaultConverter,
+} from "./commands";
 
 const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const RISK_FUND_PROXY = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";

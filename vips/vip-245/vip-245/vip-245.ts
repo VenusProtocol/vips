@@ -1,10 +1,7 @@
 import { ProposalType } from "../../../src/types";
 import { makeProposal } from "../../../src/utils";
-import {
-  acceptOwnershipCommandsAllConverters,
-  callPermissionCommandsAllConverter,
-} from "./commands";
 import { CONVERTER_NETWORK } from "./Addresses";
+import { acceptOwnershipCommandsAllConverters, callPermissionCommandsAllConverter } from "./commands";
 
 const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 
