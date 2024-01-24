@@ -81,3 +81,5 @@ We applied the following security procedures for this upgrade:
     ProposalType.REGULAR,
   );
 };
+
+export default vip245;

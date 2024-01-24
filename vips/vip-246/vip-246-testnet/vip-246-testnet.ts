@@ -235,3 +235,5 @@ export const vip246 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip246;
