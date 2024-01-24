@@ -3,12 +3,12 @@ import { makeProposal } from "../../../src/utils";
 import {
   acceptOwnershipCommandsAllConverters,
   callPermissionCommandsAllConverter,
-} from "../vip-converter-mainnet/commands";
+} from "./commands";
 import { CONVERTER_NETWORK } from "./Addresses";
 
 const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 
-export const vipConverter1 = () => {
+export const vip245 = () => {
   const meta = {
     version: "v2",
     title: "VIP-converter1 accepts the ownership of different contracts and give call permissions to timelock",

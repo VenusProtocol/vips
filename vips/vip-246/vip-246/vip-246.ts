@@ -9,7 +9,7 @@ import {
   incentiveAndAccessibilityForUSDCPrimeConverter,
   incentiveAndAccessibilityForUSDTPrimeConverter,
   incentiveAndAccessibilityForXVSVaultConverter,
-} from "../vip-converter-mainnet/commands";
+} from "./commands";
 import {
   BTCBPrimeConverterTokenOuts,
   BTCB_PRIME_CONVERTER,
@@ -40,7 +40,7 @@ const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x86a2a5EB77984E923E7B5Af4581
 const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 
-export const vipConverter2 = () => {
+export const vip246 = () => {
   const meta = {
     version: "v2",
     title:

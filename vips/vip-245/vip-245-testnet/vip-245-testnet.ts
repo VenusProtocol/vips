@@ -5,7 +5,7 @@ import { acceptOwnershipCommandsAllConverters, callPermissionCommandsAllConverte
 
 const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
 
-export const vipConverter1 = () => {
+export const vip245 = () => {
   const meta = {
     version: "v2",
     title: "VIP-converter1 accepts the ownership of different contracts and give call permissions to timelock",

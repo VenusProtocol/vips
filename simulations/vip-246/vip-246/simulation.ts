@@ -12,9 +12,9 @@ import {
   USDC_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
   converters,
-} from "../../../vips/vip-converter/vip-converter-mainnet/Addresses";
-import { vipConverter1 } from "../../../vips/vip-converter/vip-converter-mainnet/vip-converter1";
-import { vipConverter2 } from "../../../vips/vip-converter/vip-converter-mainnet/vip-converter2";
+} from "../../../vips/vip-246/vip-246/Addresses";
+import { vip245 } from "../../../vips/vip-245/vip-245/vip-245";
+import { vip246 } from "../../../vips/vip-246/vip-246/vip-246";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManagerMainnet.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
@@ -78,7 +78,7 @@ forking(35140949, () => {
   const PsrTotalAssetReserveBefore: number[] = [];
 
   before(async () => {
-    await pretendExecutingVip(vipConverter1());
+    await pretendExecutingVip(vip245());
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
@@ -118,7 +118,7 @@ forking(35140949, () => {
     });
   });
 
-  testVip("VIP-converter2", vipConverter2(), {
+  testVip("VIP-246", vip246(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(
