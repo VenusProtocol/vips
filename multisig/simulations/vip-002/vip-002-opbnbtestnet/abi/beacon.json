@@ -1,0 +1,80 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [{ "name": "implementation_", "type": "address", "internalType": "address" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "OwnershipTransferred",
+    "type": "event",
+    "inputs": [
+      { "name": "previousOwner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newOwner", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+  },
+  {
+    "name": "Upgraded",
+    "type": "event",
+    "inputs": [{ "name": "implementation", "type": "address", "indexed": true, "internalType": "address" }],
+    "anonymous": false,
+    "signature": "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b"
+  },
+  {
+    "name": "implementation",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "value": "0xa8a2762B4704C3b3Fc677EAEDDd25B06cF382D78",
+        "internalType": "address"
+      }
+    ],
+    "constant": true,
+    "signature": "0x5c60da1b",
+    "stateMutability": "view"
+  },
+  {
+    "name": "owner",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "value": "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
+        "internalType": "address"
+      }
+    ],
+    "constant": true,
+    "signature": "0x8da5cb5b",
+    "stateMutability": "view"
+  },
+  {
+    "name": "renounceOwnership",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "signature": "0x715018a6",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "transferOwnership",
+    "type": "function",
+    "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "signature": "0xf2fde38b",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "upgradeTo",
+    "type": "function",
+    "inputs": [{ "name": "newImplementation", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "signature": "0x3659cfe6",
+    "stateMutability": "nonpayable"
+  }
+]
