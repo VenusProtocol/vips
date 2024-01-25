@@ -12,13 +12,15 @@ const readline = require("readline-sync");
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
 
-let vipNumber: string;
+let vipPath: string;
 let governorAddress: string | null;
 let transactionType: string;
 
 function processInputs(): Promise<void> {
   return new Promise(resolve => {
-    vipNumber = readline.question("Number of the VIP to propose (if using gnosisTXBuilder press enter to skip ) => ");
+    vipPath = readline.question(
+      "Path relative to ./vips directory to the VIP to propose e.g. vip-244/bscmainnet (if using gnosisTXBuilder press enter to skip ) => ",
+    );
     transactionType = readline.question("Type of the proposal txBuilder/venusApp/bsc/gnosisTXBuilder => ");
     governorAddress = readline.question("Address of the governance contract (optional, press enter to skip) => ");
     if (!governorAddress) {
@@ -46,7 +48,7 @@ const processJson = async (data: JsonObject) => {
 };
 
 const processTxBuilder = async () => {
-  const result = await proposeVIP(vipNumber, governorAddress);
+  const result = await proposeVIP(vipPath, governorAddress);
   const transactions = [
     {
       to: result.target,
@@ -71,7 +73,7 @@ const processGnosisTxBuilder = async () => {
 };
 
 const processVenusAppProposal = async () => {
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await loadProposal(vipPath);
   const validate = new Ajv().compile(proposalSchema);
   const isValid = validate(proposal);
 
@@ -83,7 +85,7 @@ const processVenusAppProposal = async () => {
 };
 
 const processBscProposal = async () => {
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await loadProposal(vipPath);
   const data = {
     targets: proposal.targets,
     signatures: proposal.signatures,
