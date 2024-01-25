@@ -14,9 +14,9 @@ const XVS_BRIDGE_ADMIN = "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831";
 const XVS_BRIDGE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
 const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 const SRC_CHAIN_ID = "102";
-const TRUSTED_REMOTE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
+const TRUSTED_REMOTE = "0xf8f46791e3db29a029ec6c9d946226f3c613e854";
 
-forking(12959100, () => {
+forking(14442236, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -59,7 +59,7 @@ forking(12959100, () => {
 
     it("Should set minting limit in XVS token", async () => {
       const cap = await xvs.minterToCap(XVS_BRIDGE);
-      expect(cap).equals(parseUnits("10000", 18));
+      expect(cap).equals(parseUnits("500000", 18));
     });
 
     it("Should set correct token address in bridge", async () => {
