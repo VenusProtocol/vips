@@ -8,7 +8,9 @@ export const blocksPerYear = 10512000;
 export const blocksPerDay = parseInt((blocksPerYear / 365).toString());
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const VAI_VAULT_RATE = parseUnits("62.50", 18).div(blocksPerDay);
+
+// we are adding one to make it 62.50 per day in the UI as there is precision loss during division
+export const VAI_VAULT_RATE = parseUnits("62.50", 18).div(blocksPerDay).add(1);
 
 export interface XVSSpeed {
   name: string;
