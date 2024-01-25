@@ -25,7 +25,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const XVS_FEED = "0xBF63F430A79D4036A5900C19818aFf1fa710f206";
 
-forking(34769469, () => {
+forking(35559076, () => {
   const provider = ethers.provider;
   let bridge: ethers.Contract;
   let xvs: ethers.Contract;
@@ -117,7 +117,7 @@ forking(34769469, () => {
     });
 
     it("Reverts if single transaction limit exceed", async function () {
-      const amount = ethers.utils.parseUnits("820", 18);
+      const amount = ethers.utils.parseUnits("900", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
       const nativeFee = (
@@ -139,7 +139,7 @@ forking(34769469, () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("50000");
-      const amount = parseUnits("815", 18);
+      const amount = parseUnits("885", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
