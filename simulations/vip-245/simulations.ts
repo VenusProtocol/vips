@@ -45,7 +45,7 @@ forking(35420320, () => {
     }
   });
 
-  testVip("VIP-244", vip245(), {
+  testVip("VIP-245", vip245(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVenusVAIVaultRate"], [1]);
       await expectEvents(
