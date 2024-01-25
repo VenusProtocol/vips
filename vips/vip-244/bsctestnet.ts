@@ -9,13 +9,14 @@ export const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 export const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 export const vLUNA = "0x9C3015191d39cF1930F92EB7e7BCbd020bCA286a";
 export const vUST = "0xF206af85BC2761c4F876d27Bd474681CfB335EfA";
+export const COMPTROLLER_IMPL = "0x3ce617fceb5e9ed622f73b483ac7c94053795197";
+export const COMPTROLLER_BEACON = "0xdddd7725c073105fb2abfcbdec16708fc4c24b74";
 export const cutParams = params;
 
 export const vip244 = () => {
   const meta = {
     version: "v2",
     title: "VIP-244 Unlist Market",
-
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -54,6 +55,11 @@ export const vip244 = () => {
         signature: "unlistMarket(address)",
         params: [vUST],
       },
+      {
+        target: COMPTROLLER_BEACON,
+        signature: "upgradeTo(address)",
+        params: [COMPTROLLER_IMPL],
+      }
     ],
     meta,
     ProposalType.REGULAR,
