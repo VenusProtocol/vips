@@ -169,14 +169,6 @@ export const Speeds: XVSSpeed[] = [
     oldBorrowSpeed: emissionPerBlock("1.56").div(2).toString(),
   },
   {
-    name: "vTUSD",
-    vToken: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E",
-    supplySpeed: "0",
-    borrowSpeed: "0",
-    oldSupplySpeed: emissionPerBlock("3.12").div(2).toString(),
-    oldBorrowSpeed: emissionPerBlock("3.12").div(2).toString(),
-  },
-  {
     name: "vFDUSD",
     vToken: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
     supplySpeed: "0",
