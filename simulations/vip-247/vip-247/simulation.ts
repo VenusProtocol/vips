@@ -26,7 +26,7 @@ import RISK_FUND_CONVERTER_ABI from "../abi/RiskFundConverter.json";
 import RISK_FUND_V2_ABI from "../abi/RiskFundV2.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
-import XVS_VAULT_CONVERTER_ABI from "../abi/XVSVaultTreasury.json";
+import XVS_VAULT_TREASURY_ABI from "../abi/XVSVaultTreasury.json";
 
 const allAssets = [
   ...Assets,
@@ -88,7 +88,7 @@ forking(35547098, () => {
       PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION_ABI,
       provider,
     );
-    xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
+    xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
     riskFundConverter = new ethers.Contract(RISK_FUND_CONVERTER, RISK_FUND_CONVERTER_ABI, provider);
 
     riskFundConvertibleBaseAsset = await riskFund.convertibleBaseAsset();
