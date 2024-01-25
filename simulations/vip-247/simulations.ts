@@ -12,8 +12,8 @@ import {
   borrowSpeeds,
   supplySpeeds,
   vTokens,
-  vip245,
-} from "../../vips/vip-245";
+  vip247,
+} from "../../vips/vip-247/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const OLD_VAI_VAULT_RATE = parseUnits("125.00", 18).div(blocksPerDay);
@@ -45,7 +45,7 @@ forking(35420320, () => {
     }
   });
 
-  testVip("VIP-245", vip245(), {
+  testVip("VIP-247", vip247(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVenusVAIVaultRate"], [1]);
       await expectEvents(

@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
 export const blocksPerYear = 10512000;
 export const blocksPerDay = parseInt((blocksPerYear / 365).toString());
@@ -200,7 +200,7 @@ export const vTokens = Speeds.map(speed => speed.vToken);
 export const supplySpeeds = Speeds.map(speed => speed.supplySpeed);
 export const borrowSpeeds = Speeds.map(speed => speed.borrowSpeed);
 
-export const vip245 = () => {
+export const vip247 = () => {
   const meta = {
     version: "v2",
     title: "VIP-247: XVS Emission Reduction",
@@ -236,6 +236,8 @@ Specifically, the changes in the daily XVS emissions are:
 - TRX. From 3.12 XVS/day to 0 XVS/day
 - UNI. From 4.68 XVS/day to 0 XVS/day
 
+Emissions in the [VAI vault](https://bscscan.com/address/0x0667Eed0a0aAb930af74a3dfeDD263A73994f216) will be reduced by 50%, from 125.00 XVS/day to 62.50 XVS/day.
+
 #### References
 
 - [Snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0xd11a145f3b8b721f11b0f9e97306822d65db81858080836ff13244617414ade7)
@@ -267,3 +269,5 @@ Specifically, the changes in the daily XVS emissions are:
     ProposalType.REGULAR,
   );
 };
+
+export default vip247;
