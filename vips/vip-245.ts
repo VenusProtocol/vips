@@ -203,8 +203,48 @@ export const borrowSpeeds = Speeds.map(speed => speed.borrowSpeed);
 export const vip245 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-244 Decrease XVS Emissions",
-    description: ``,
+    title: "VIP-247: XVS Emission Reduction",
+    description: `#### Summary
+
+After the successful passing of the [snapshot vote](https://snapshot.org/#/venus-xvs.eth/proposal/0xd11a145f3b8b721f11b0f9e97306822d65db81858080836ff13244617414ade7) to reduce XVS emissions, if passed, this VIP will reduce the amount of daily XVS emission on the Venus Core pool markets.
+
+The current emission on the core pool markets is 501.96 XVS/day, and after the change the daily emission of XVS in the markets will be 204.74 XVS/day.
+
+#### Details
+
+Specifically, the changes in the daily XVS emissions are:
+
+- BTCB. From 93.74 XVS/day to 46.87 XVS/day
+- BNB. From 93.74 XVS/day to 46.87 XVS/day
+- USDT. From 39.06 XVS/day to 9.77 XVS/day
+- ETH. From 46.87 XVS/day to 23.44 XVS/day
+- USDC. From 39.06 XVS/day to 9.77 XVS/day
+- CAKE. From 3.12 XVS/day to 1.25 XVS/day
+- WBETH. From 8.58 XVS/day to 4.29 XVS/day
+- ADA. From 4.68 XVS/day to 0 XVS/day
+- XRP. From 2.86 XVS/day to 0 XVS/day
+- LINK. From 2.86 XVS/day to 0 XVS/day
+- DOT. From 4.58 XVS/day to 0 XVS/day
+- MATIC. From 3.12 XVS/day to 0 XVS/day
+- LTC. From 2.86 XVS/day to 0 XVS/day
+- FIL. From 1.56 XVS/day to 0 XVS/day
+- DAI. From 4.68 XVS/day to 0 XVS/day
+- DOGE. From 1.56 XVS/day to 0 XVS/day
+- BCH. From 1.56 XVS/day to 0 XVS/day
+- AAVE. From 1.56 XVS/day to 0 XVS/day
+- FDUSD. From 9.99 XVS/day to 0 XVS/day
+- TRX. From 3.12 XVS/day to 0 XVS/day
+- UNI. From 4.68 XVS/day to 0 XVS/day
+
+#### References
+
+- [Snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0xd11a145f3b8b721f11b0f9e97306822d65db81858080836ff13244617414ade7)
+- [Community post proposing the XVS emission reduction](https://community.venus.io/t/xvs-emission-cut-proposal-v4/4070)
+- Previous XVS emission reductions:
+    - [VIP-171](https://app.venus.io/#/governance/proposal/171)
+    - [VIP-88](https://app.venus.io/#/governance/proposal/88)
+    - [VIP-78](https://app.venus.io/#/governance/proposal/78)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/187)`,
     forDescription: "I agree that Venus Protocol should proceed with this VIP",
     againstDescription: "I do not think that Venus Protocol should proceed with this VIP",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this VIP",
