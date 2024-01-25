@@ -119,7 +119,7 @@ const commandsForDistributionConfigs = [
   },
 ];
 
-export const vip246 = () => {
+export const vip247 = () => {
   const meta = {
     version: "v2",
     title:
@@ -236,4 +236,4 @@ export const vip246 = () => {
   );
 };
 
-export default vip246;
+export default vip247;
