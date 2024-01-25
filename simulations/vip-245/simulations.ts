@@ -18,7 +18,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const OLD_VAI_VAULT_RATE = parseUnits("125.00", 18).div(blocksPerDay);
 
-export const oldSupplySpeeds = Speeds.map(speed => speed.oldBorrowSpeed);
+export const oldSupplySpeeds = Speeds.map(speed => speed.oldSupplySpeed);
 export const oldBorrowSpeeds = Speeds.map(speed => speed.oldBorrowSpeed);
 
 forking(35518397, () => {
