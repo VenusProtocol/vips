@@ -456,7 +456,7 @@ forking(19033343, () => {
       }
     });
 
-    describe.only("generic tests", async () => {
+    describe("generic tests", async () => {
       checkIsolatedPoolsComptrollers();
     });
   });
