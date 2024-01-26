@@ -1,13 +1,10 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip009 } from "../../../proposals/vip-009/vip-009-sepolia";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
-import UPGRADABLE_BEACON_ABI from "./abis/upgradableBeacon.json";
 
 const COMPTROLLER_STABLECOIN = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
 const vUSDT_POOL_STABLECOIN = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
@@ -16,7 +13,7 @@ const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
 forking(5152462, () => {
   let stableCoinPoolComptroller: ethers.Contract;
-  
+
   before(async () => {
     impersonateAccount(GUARDIAN);
 
@@ -25,8 +22,8 @@ forking(5152462, () => {
       COMPTROLLER_FACET_ABI,
       await ethers.getSigner(GUARDIAN),
     );
-  })
-  
+  });
+
   describe("Pre-VIP behavior", () => {
     it("stablecoin pool market not unlisted", async () => {
       const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
