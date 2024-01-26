@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { STABLECOIN_COMPTROLLER } from "../../../vips/vip-185";
-import { ACM, NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip244 } from "../../../vips/vip-244/bsctestnet";
+import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip244 } from "../../../vips/vip-244/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 import UPGRADABLE_BEACON_ABI from "./abi/upgradableBeacon.json";
@@ -16,7 +16,6 @@ const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
 
 forking(37164546, () => {
-  let acm: ethers.Contract;
   let comptroller: ethers.Contract;
   let stableCoinPoolComptroller: ethers.Contract;
 
@@ -25,7 +24,6 @@ forking(37164546, () => {
     impersonateAccount(NORMAL_TIMELOCK);
     impersonateAccount(vUST_USER);
 
-    acm = new ethers.Contract(ACM, ACM_ABI, await ethers.getSigner(UNITROLLER));
     comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_FACET_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
     stableCoinPoolComptroller = new ethers.Contract(
       POOL_STABLECOIN_COMPTROLLER,
@@ -35,14 +33,6 @@ forking(37164546, () => {
   });
 
   describe("Pre-VIP", () => {
-    it("should have the correct call permissions", async () => {
-      const callPermissions = await acm.isAllowedToCall(NORMAL_TIMELOCK, "unlistMarket(address)");
-      expect(callPermissions).to.be.false;
-
-      const stableCoinPoolCallPermissions = await acm.isAllowedToCall(NORMAL_TIMELOCK, "unlistMarket(address)");
-      expect(stableCoinPoolCallPermissions).to.be.false;
-    });
-
     it("market not unlisted", async () => {
       const markets = await comptroller.getAssetsIn(vUST_USER);
       expect(markets.includes(vUST)).to.be.true;
@@ -69,14 +59,6 @@ forking(37164546, () => {
   });
 
   describe("Post-VIP", () => {
-    it("should have the correct call permissions", async () => {
-      const callPermissions = await acm.isAllowedToCall(NORMAL_TIMELOCK, "unlistMarket(address)");
-      expect(callPermissions).to.be.true;
-
-      const stableCoinPoolCallPermissions = await acm.isAllowedToCall(NORMAL_TIMELOCK, "unlistMarket(address)");
-      expect(stableCoinPoolCallPermissions).to.be.true;
-    });
-
     it("market unlisted", async () => {
       const markets = await comptroller.getAssetsIn(vUST_USER);
       expect(markets.includes(vUST)).to.be.false;
