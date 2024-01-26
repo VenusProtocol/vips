@@ -11,8 +11,7 @@ import UPGRADABLE_BEACON_ABI from "./abis/upgradableBeacon.json";
 
 forking(5152462, () => {
   describe("Pre-VIP behavior", () => {
-    before(async () => {
-    });
+    before(async () => {});
   });
 
   describe("Post-VIP behavior", async () => {
@@ -20,7 +19,6 @@ forking(5152462, () => {
       await pretendExecutingVip(vip009());
     });
 
-    it("should have the correct implementation", async () => {
-    });
+    it("should have the correct implementation", async () => {});
   });
 });
