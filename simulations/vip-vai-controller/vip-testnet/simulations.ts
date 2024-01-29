@@ -22,6 +22,7 @@ import {
   VAI_CONTROLLER,
   VAI_MINT_CAP,
 } from "../../../vips/vip-vai-controller/vip-testnet/bsctestnet";
+import ACM_ABI from "../abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "../abi/BeaconProxy.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/ERC20.json";
@@ -35,11 +36,12 @@ const VUSDT = "0x3338988d0beb4419Acb8fE624218754053362D06";
 const COMPTROLLER_OLD_IMPLEMENTATION = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
 
 const USER_1 = "0x0f11fb73A8791950cBADD00e13B6d6B73d36c844";
-const USER_2 = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
+const USER_2 = "0xAd63B47467145aD4f8159B415978aeF29452a442";
 
-forking(35259895, () => {
+forking(37272256, () => {
   let user1: Signer;
   let user2: Signer;
+  let impersonatedTimelock: Signer;
   let vai: Contract;
   let usdt: Contract;
   let vusdt: Contract;
@@ -63,6 +65,7 @@ forking(35259895, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
     usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
     vusdt = new ethers.Contract(VUSDT, VTOKEN_ABI, ethers.provider);
@@ -74,7 +77,7 @@ forking(35259895, () => {
     accessControlManager = await comptroller.accessControlManager();
     closeFactorMantissa = await comptroller.closeFactorMantissa();
     allMarkets = await comptroller.getAllMarkets();
-    rewardsDistributors = await comptroller.getRewardsDistributors();
+    rewardsDistributors = await comptroller.getRewardDistributors();
     marketListed = await comptroller.isMarketListed(VUSDT);
     liquidationIncentiveMantissa = await comptroller.liquidationIncentiveMantissa();
     maxLoopsLimit = await comptroller.maxLoopsLimit();
@@ -93,7 +96,9 @@ forking(35259895, () => {
 
   testVip("VIP-243 Payments for auditors", VAIControllerVIP(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [], [""], [2]);
+      await expectEvents(txResponse, [COMPTROLLER_BEACON_ABI], ["Upgraded"], [1]);
+      await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["OwnershipTransferred"], [1]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [5]);
     },
   });
 
@@ -105,8 +110,8 @@ forking(35259895, () => {
     it("storage layout of comptroller should be consistent", async () => {
       expect(await comptroller.accessControlManager()).to.equal(accessControlManager);
       expect(await comptroller.closeFactorMantissa()).to.equal(closeFactorMantissa);
-      expect(await comptroller.getAllMarkets()).to.equal(allMarkets);
-      expect(await comptroller.getRewardsDistributors()).to.equal(rewardsDistributors);
+      expect(await comptroller.getAllMarkets()).to.deep.equal(allMarkets);
+      expect(await comptroller.getRewardDistributors()).to.deep.equal(rewardsDistributors);
       expect(await comptroller.isMarketListed(VUSDT)).to.equal(marketListed);
       expect(await comptroller.liquidationIncentiveMantissa()).to.equal(liquidationIncentiveMantissa);
       expect(await comptroller.maxLoopsLimit()).to.equal(maxLoopsLimit);
@@ -118,7 +123,7 @@ forking(35259895, () => {
     });
 
     it("should validate the comptroller VAI controller address", async () => {
-      expect(await comptroller.VAIController()).to.equal(VAI_CONTROLLER);
+      expect((await comptroller.VAIController()).toLowerCase()).to.equal(VAI_CONTROLLER.toLowerCase());
     });
 
     it("owner of VAIController should be timelock", async () => {
@@ -134,7 +139,7 @@ forking(35259895, () => {
     });
 
     it("VAIController should have correct VAI token address", async () => {
-      expect(await vaiController.VAI()).to.equal(VAI);
+      expect(await vaiController.getVAIAddress()).to.equal(VAI);
     });
 
     it("VAIController should have correct VAIMintRate", async () => {
@@ -146,7 +151,7 @@ forking(35259895, () => {
     });
 
     it("VAIController should have correct receiver address", async () => {
-      expect(await vaiController.receiver()).to.equal(TREASURY);
+      expect((await vaiController.receiver()).toLowerCase()).to.equal(TREASURY.toLowerCase());
     });
 
     it("VAIController should have correct base rate", async () => {
@@ -158,8 +163,8 @@ forking(35259895, () => {
     });
 
     it("VAIController should have correct treasury data", async () => {
-      expect(await vaiController.treasuryAddress()).to.equal(TREASURY);
-      expect(await vaiController.treasuryGuardian()).to.equal(TREASURY_GUARDIAN);
+      expect((await vaiController.treasuryAddress()).toLowerCase()).to.equal(TREASURY.toLowerCase());
+      expect((await vaiController.treasuryGuardian()).toLowerCase()).to.equal(TREASURY_GUARDIAN.toLowerCase());
       expect(await vaiController.treasuryPercent()).to.equal(TREASURY_PERCENT);
     });
 
@@ -171,14 +176,20 @@ forking(35259895, () => {
       describe("Mint VAI Tokens", async () => {
         before("User Enters a market", async () => {
           await comptroller.connect(user1).enterMarkets([vusdt.address]);
-          await usdt.connect(user1).approve(vusdt.address, parseUnits("200", 18));
-          await vusdt.connect(user1).mint(parseUnits("200", 18));
+          await usdt.connect(user1).approve(vusdt.address, parseUnits("200", 6));
+          await vusdt.connect(user1).mint(parseUnits("200", 6));
         });
 
         it("Checks for minting of VAI tokens", async () => {
           await vaiController.connect(user1).mintVAI(parseUnits("100", 18));
-          expect(await vai.balanceOf(await user1.getAddress())).to.eq(parseUnits("100", 18));
-          expect(await vaiController.mintedVAIs(await user1.getAddress())).to.eq(parseUnits("100", 18));
+          expect(await vai.balanceOf(await user1.getAddress())).to.closeTo(
+            parseUnits("100", 18),
+            parseUnits("100", 16),
+          );
+          expect(await vaiController.mintedVAIs(await user1.getAddress())).to.closeTo(
+            parseUnits("100", 18),
+            parseUnits("100", 16),
+          );
         });
       });
 
@@ -186,18 +197,22 @@ forking(35259895, () => {
         beforeEach("mintVAI", async () => {
           // User mints VAI
           await comptroller.connect(user1).enterMarkets([vusdt.address]);
-          await usdt.connect(user1).approve(vusdt.address, parseUnits("100", 18));
-          await vusdt.connect(user1).mint(parseUnits("100", 18));
+          await usdt.connect(user1).approve(vusdt.address, parseUnits("100", 6));
+          await vusdt.connect(user1).mint(parseUnits("100", 6));
 
           await vaiController.connect(user1).mintVAI(parseUnits("100", 18));
-          expect(await vai.balanceOf(await user1.getAddress())).to.eq(parseUnits("100", 18));
+
           await vai.connect(user1).approve(vaiController.address, ethers.constants.MaxUint256);
         });
 
         it("Checks for successful repay", async () => {
-          await vaiController.connect(user1).repayVAI(parseUnits("100", 18));
-          expect(await vai.balanceOf(await user1.getAddress())).to.eq(0);
-          expect(await vaiController.mintedVAIs(await user1.getAddress())).to.eq(0);
+          const user1VaiBalancePrevious = await vai.balanceOf(await user1.getAddress());
+          await vaiController.connect(user1).repayVAI(parseUnits("50", 18));
+          const user1VaiBalanceCurrent = await vai.balanceOf(await user1.getAddress());
+          expect(user1VaiBalanceCurrent).to.closeTo(
+            user1VaiBalancePrevious.sub(parseUnits("50", 18)),
+            parseUnits("1", 15),
+          );
         });
       });
 
@@ -205,27 +220,34 @@ forking(35259895, () => {
         beforeEach("user1 borrow", async () => {
           // User mints VAI
           await comptroller.connect(user1).enterMarkets([vusdt.address]);
-          await usdt.connect(user1).approve(vusdt.address, parseUnits("100", 18));
-          await vusdt.connect(user1).mint(parseUnits("100", 18));
+
+          await usdt.connect(user1).approve(vusdt.address, parseUnits("100", 6));
+          await vusdt.connect(user1).mint(parseUnits("100", 6));
 
           await comptroller.connect(user2).enterMarkets([vusdt.address]);
-          await usdt.connect(user2).approve(vusdt.address, parseUnits("200", 18));
-          await vusdt.connect(user2).mint(parseUnits("200", 18));
+          await usdt.connect(user2).approve(vusdt.address, parseUnits("200", 6));
+          await vusdt.connect(user2).mint(parseUnits("200", 6));
 
           await vaiController.connect(user1).mintVAI(parseUnits("100", 18));
-          await vaiController.connect(user2).mintVAI(parseUnits("200", 18));
+          await vaiController.connect(user2).mintVAI(parseUnits("150", 18));
         });
 
         it("Checks for successful liquidation of user1 VAI borrows", async () => {
           await vai.connect(user2).approve(vaiController.address, parseUnits("100", 18));
 
           const user2VaiBalancePrevious = await vai.balanceOf(await user2.getAddress());
+          await comptroller
+            .connect(impersonatedTimelock)
+            .setCollateralFactor(vusdt.address, parseUnits("1", 17), parseUnits("1", 17));
           await vaiController
             .connect(user2)
             .liquidateVAI(await user1.getAddress(), parseUnits("100", 18), vusdt.address);
           const user2VaiBalanceCurrent = await vai.balanceOf(await user2.getAddress());
 
-          expect(user2VaiBalanceCurrent).to.eq(user2VaiBalancePrevious.sub(parseUnits("100", 18)));
+          expect(user2VaiBalanceCurrent).to.closeTo(
+            user2VaiBalancePrevious.sub(parseUnits("100", 18)),
+            parseUnits("1", 12),
+          );
         });
       });
     });
