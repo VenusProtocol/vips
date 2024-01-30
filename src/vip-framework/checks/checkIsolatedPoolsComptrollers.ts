@@ -112,7 +112,6 @@ const runPoolTests = async (pool: PoolMetadata) => {
   expect(await supplyMarket.balanceOf(ACCOUNT)).to.be.gt(originalSupplyMarketBalance);
 
   await comptroller.enterMarkets([borrowMarket.address, supplyMarket.address]);
-  const borrowMarketBalance = await borrowMarket.balanceOf(ACCOUNT);
   let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
   const borrowUnderlyingDecimals = await borrowUnderlying.decimals();
 
@@ -127,7 +126,7 @@ const runPoolTests = async (pool: PoolMetadata) => {
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
 
   await borrowMarket.borrow(borrowAmount);
-  expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.gt(borrowMarketBalance);
+  expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.gt(borrowUnderlyingBalance);
 
   borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
   await borrowUnderlying.approve(borrowMarket.address, borrowAmount);
