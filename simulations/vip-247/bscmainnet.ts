@@ -10,11 +10,11 @@ import {
   OLD_TUSD_CF,
   OLD_TWT_SUPPLY,
   OLD_UNI_SUPPLY,
-  OLD_WBETH_SUPPLY,
+  OLD_WBETH_BORROW,
   TUSD_CF,
   TWT_SUPPLY,
   UNI_SUPPLY,
-  WBETH_SUPPLY,
+  WBETH_BORROW,
   vTUSD,
   vTWT,
   vUNI,
@@ -34,12 +34,14 @@ forking(35700072, () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("Verify UNI and WBETH supply caps ", async () => {
+    it("Verify UNI supply cap", async () => {
       const uniSupplyCap = await corePoolComptroller.supplyCaps(vUNI);
       expect(uniSupplyCap).equals(OLD_UNI_SUPPLY);
+    });
 
-      const wbethSupplyCap = await corePoolComptroller.supplyCaps(vWBETH);
-      expect(wbethSupplyCap).equals(OLD_WBETH_SUPPLY);
+    it("Verify WBETH borrow cap", async () => {
+      const wbethBorrowCap = await corePoolComptroller.borrowCaps(vWBETH);
+      expect(wbethBorrowCap).equals(OLD_WBETH_BORROW);
     });
 
     it("Verify TWT supply caps ", async () => {
@@ -55,18 +57,21 @@ forking(35700072, () => {
 
   testVip("VIP-247 Chaos Labs Recommendations", vip247(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [COMTROLLER_ABI], ["NewSupplyCap"], [3]);
+      await expectEvents(txResponse, [COMTROLLER_ABI], ["NewSupplyCap"], [2]);
+      await expectEvents(txResponse, [COMTROLLER_ABI], ["NewBorrowCap"], [1]);
       await expectEvents(txResponse, [COMTROLLER_ABI], ["NewCollateralFactor"], [1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Verify UNI and WBETH supply caps ", async () => {
+    it("Verify UNI supply cap", async () => {
       const uniSupplyCap = await corePoolComptroller.supplyCaps(vUNI);
       expect(uniSupplyCap).equals(UNI_SUPPLY);
+    });
 
-      const wbethSupplyCap = await corePoolComptroller.supplyCaps(vWBETH);
-      expect(wbethSupplyCap).equals(WBETH_SUPPLY);
+    it("Verify WBETH borrow cap", async () => {
+      const wbethBorrowCap = await corePoolComptroller.borrowCaps(vWBETH);
+      expect(wbethBorrowCap).equals(WBETH_BORROW);
     });
 
     it("Verify TWT supply caps ", async () => {

@@ -12,11 +12,11 @@ export const IL_DEFI_COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 export const vTWT = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
 
 export const UNI_SUPPLY = parseUnits("300000", 18);
-export const WBETH_SUPPLY = parseUnits("2000", 18);
+export const WBETH_BORROW = parseUnits("2000", 18);
 export const TWT_SUPPLY = parseUnits("1500000", 18);
 
 export const OLD_UNI_SUPPLY = parseUnits("200000", 18);
-export const OLD_WBETH_SUPPLY = parseUnits("40000", 18);
+export const OLD_WBETH_BORROW = parseUnits("1000", 18);
 export const OLD_TWT_SUPPLY = parseUnits("1000000", 18);
 
 export const TUSD_CF = "0";
@@ -37,10 +37,12 @@ export const vip247 = () => {
       {
         target: COMPTROLLER,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          [vUNI, vWBETH],
-          [UNI_SUPPLY, WBETH_SUPPLY],
-        ],
+        params: [[vUNI], [UNI_SUPPLY]],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[vWBETH], [WBETH_BORROW]],
       },
       {
         target: IL_DEFI_COMPTROLLER,
