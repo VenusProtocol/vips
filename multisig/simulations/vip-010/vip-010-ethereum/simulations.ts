@@ -80,7 +80,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.9",
     liquidationThreshold: "0.93",
     reserveFactor: "0.2",
-    initialSupply: "5",
+    initialSupply: "4.33315750",
     vTokenReceiver: ethereum.VTREASURY,
   },
   vWETH_LiquidStakedETH: {
@@ -89,7 +89,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.9",
     liquidationThreshold: "0.93",
     reserveFactor: "0.15",
-    initialSupply: "4.33315750",
+    initialSupply: "5",
     vTokenReceiver: ethereum.VTREASURY,
   },
 };
@@ -121,7 +121,7 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(19076302, () => {
+forking(19134480, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -158,7 +158,7 @@ forking(19076302, () => {
       });
 
       it("should register Liquid Staked ETH pool in PoolRegistry", async () => {
-        const pool = registeredPools[3];
+        const pool = registeredPools[2];
         expect(pool.name).to.equal("Liquid Staked ETH");
         expect(pool.comptroller).to.equal(LIQUID_STAKED_COMPTROLLER);
       });

@@ -36,7 +36,7 @@ export const vip010 = () => {
     {
       target: ethereum.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WSTETH, parseUnits("5", 18), ethereum.NORMAL_TIMELOCK],
+      params: [WSTETH, parseUnits("4.333157504239697044", 18), ethereum.NORMAL_TIMELOCK],
     },
     {
       target: WSTETH,
@@ -46,7 +46,7 @@ export const vip010 = () => {
     {
       target: WSTETH,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, parseUnits("5", 18)],
+      params: [POOL_REGISTRY, parseUnits("4.333157504239697044", 18)],
     },
     {
       target: VWSTETH,
@@ -66,7 +66,7 @@ export const vip010 = () => {
           VWSTETH,
           "900000000000000000",
           "930000000000000000",
-          "5000000000000000000",
+          "4333157504239697044",
           ethereum.VTREASURY,
           "20000000000000000000000",
           "2000000000000000000000",
@@ -76,8 +76,14 @@ export const vip010 = () => {
     // WETH Configuration
     {
       target: ethereum.VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, parseUnits("4.333157504239697044", 18), ethereum.NORMAL_TIMELOCK],
+      signature: "withdrawTreasuryNative(uint256,address)",
+      params: [parseUnits("5", 18), ethereum.NORMAL_TIMELOCK],
+    },
+    {
+      target: WETH,
+      signature: "deposit()",
+      params: [],
+      value: "5000000000000000000",
     },
     {
       target: WETH,
@@ -87,7 +93,7 @@ export const vip010 = () => {
     {
       target: WETH,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, parseUnits("4.333157504239697044", 18)],
+      params: [POOL_REGISTRY, parseUnits("5", 18)],
     },
     {
       target: VWETH,
@@ -107,7 +113,7 @@ export const vip010 = () => {
           VWETH,
           "900000000000000000",
           "930000000000000000",
-          "4333157504239697044",
+          "5000000000000000000",
           ethereum.VTREASURY,
           "20000000000000000000000",
           "18000000000000000000000",
