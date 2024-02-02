@@ -1,17 +1,15 @@
-import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 
-import { setMaxStalePeriod } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { vip007 } from "../../../proposals/vip-007/vip-007-ethereum";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
 import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
@@ -43,10 +41,7 @@ forking(19140554, () => {
       await accounts[0].sendTransaction({ to: GENERIC_TEST_USER_ACCOUNT, value: parseUnits("1") });
       await accounts[0].sendTransaction({ to: GUARDIAN, value: parseUnits("1") });
 
-      await network.provider.send("hardhat_setCode", [
-        XVS_ADMIN,
-        "0x",
-      ]);
+      await network.provider.send("hardhat_setCode", [XVS_ADMIN, "0x"]);
 
       await accounts[0].sendTransaction({ to: XVS_ADMIN, value: parseUnits("1") });
       await xvsVault.resume();
@@ -90,7 +85,11 @@ forking(19140554, () => {
       // const signer = await ethers.getSigner(USER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
-      xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY);
+      xvsVault = await ethers.getContractAt(
+        XVS_VAULT_ABI,
+        XVS_VAULT_PROXY,
+        await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT),
+      );
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT));
     });
 
@@ -103,13 +102,16 @@ forking(19140554, () => {
       expect(await primeLiquidityProvider.paused()).to.be.equal(true);
     });
 
-    it("claim prime token", async () => {
-      await xvs.approve(xvsVault.address, parseUnits("1000", 18));
-      // await xvsVault.deposit(XVS, 0, parseUnits("1000", 18));
-      // await expect(prime.claim()).to.be.be.reverted;
+    it("stake XVS", async () => {
+      let stakedAt = await prime.stakedAt(GENERIC_TEST_USER_ACCOUNT);
+      expect(stakedAt).to.be.equal(0);
 
-      // let stakedAt = await prime.stakedAt(GENERIC_TEST_USER_ACCOUNT);
-      // expect(stakedAt).to.be.equal(0);
+      await xvs.approve(xvsVault.address, parseUnits("1000", 18));
+      await xvsVault.deposit(XVS, 0, parseUnits("1000", 18));
+      await expect(prime.claim()).to.be.be.reverted;
+
+      stakedAt = await prime.stakedAt(GENERIC_TEST_USER_ACCOUNT);
+      expect(stakedAt).to.be.gt(0);
     });
 
     describe("generic tests", async () => {
