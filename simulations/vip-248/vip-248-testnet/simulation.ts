@@ -6,8 +6,8 @@ import { ethers } from "hardhat";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vip245 } from "../../../vips/vip-245/vip-245-testnet/vip-245-testnet";
-import { Assets, converters } from "../../../vips/vip-247/vip-247-testnet/Addresses";
-import { vip247 } from "../../../vips/vip-247/vip-247-testnet/vip-247-testnet";
+import { Assets, converters } from "../../../vips/vip-248/vip-248-testnet/Addresses";
+import { vip248 } from "../../../vips/vip-248/vip-248-testnet/vip-248-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
@@ -111,7 +111,7 @@ forking(36752108, () => {
     });
   });
 
-  testVip("VIP-247", vip247(), {
+  testVip("VIP-248", vip248(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(

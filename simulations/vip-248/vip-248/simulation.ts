@@ -13,8 +13,8 @@ import {
   USDC_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
   converters,
-} from "../../../vips/vip-247/vip-247/Addresses";
-import { vip247 } from "../../../vips/vip-247/vip-247/vip-247";
+} from "../../../vips/vip-248/vip-248/Addresses";
+import { vip248 } from "../../../vips/vip-248/vip-248/vip-248";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManagerMainnet.json";
 import CONVERTER_NETWORK_ABI from "../abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
@@ -118,7 +118,7 @@ forking(35547098, () => {
     });
   });
 
-  testVip("VIP-247", vip247(), {
+  testVip("VIP-248", vip248(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(

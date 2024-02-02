@@ -40,7 +40,7 @@ const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x86a2a5EB77984E923E7B5Af4581
 const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 
-export const vip247 = () => {
+export const vip248 = () => {
   const meta = {
     version: "v2",
     title:
@@ -185,4 +185,4 @@ export const vip247 = () => {
   );
 };
 
-export default vip247;
+export default vip248;
