@@ -5,7 +5,6 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { vip245 } from "../../../vips/vip-245/vip-245/vip-245";
 import {
   Assets,
   CONVERTER_NETWORK,
@@ -60,7 +59,7 @@ const PROTOCOL_SHARE_RESERVE_PROXY = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446
 const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x5108E5F903Ecc5e3a2dA20171527aCe96CB3c7f8";
 const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x86a2a5EB77984E923E7B5Af45819A8c8f870f061";
 
-forking(35547098, () => {
+forking(35781703, () => {
   const provider = ethers.provider;
   let riskFund: Contract;
   let proxyAdmin: Contract;
@@ -78,7 +77,6 @@ forking(35547098, () => {
   const PsrTotalAssetReserveBefore: number[] = [];
 
   before(async () => {
-    await pretendExecutingVip(vip245());
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
