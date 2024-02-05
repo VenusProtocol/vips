@@ -4,24 +4,21 @@ import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../networkAddresses";
+import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-let NORMAL_TIMELOCK_DELAY_BLOCKS = 57600;
+
 const VOTING_PERIOD = 28800;
 
-let DEFAULT_PROPOSER_ADDRESS = "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D";
-let GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
-let NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-
-if (process.env.FORK_TESTNET === "true") {
-  DEFAULT_PROPOSER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-  GOVERNOR_PROXY = "0x5573422a1a59385c247ec3a66b93b7c08ec2f8f2";
-  NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
-  NORMAL_TIMELOCK_DELAY_BLOCKS = 200;
-}
+export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
+  NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
+  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
+  : 0;
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
@@ -45,6 +42,10 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
       return "0x";
     }
     const iface = new ethers.utils.Interface([`function ${signature}`]);
+    const canonicalSignature = iface.fragments[0].format();
+    if (signature !== canonicalSignature) {
+      throw new Error(`Signature "${signature}" should be in the canonical form: "${canonicalSignature}"`);
+    }
     return iface.encodeFunctionData(signature, params);
   };
 
@@ -57,7 +58,7 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 };
 
 export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
   }
@@ -123,21 +124,20 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
 
-    it("should be queued sucessfully", async () => {
+    it("should be queued successfully", async () => {
       await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
       await tx.wait();
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + NORMAL_TIMELOCK_DELAY_BLOCKS);
-      const proposal = await governorProxy.proposals(proposalId);
-      await time.increaseTo(proposal.eta.toNumber());
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
+      const blockchainProposal = await governorProxy.proposals(proposalId);
+      await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
-      const txResponse = await tx.wait();
 
       if (options.callbackAfterExecution) {
-        await options.callbackAfterExecution(txResponse);
+        await options.callbackAfterExecution(tx);
       }
     });
   });

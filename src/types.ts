@@ -20,7 +20,7 @@ export interface Proposal {
   values: BigNumberish[];
   signatures: string[];
   params: any[][];
-  meta: ProposalMeta;
+  meta?: ProposalMeta;
   type?: ProposalType;
 }
 
@@ -29,4 +29,10 @@ export interface Command {
   signature: string;
   params: any[];
   value?: string;
+}
+
+export interface TokenConfig {
+  asset: string;
+  oracles: string[];
+  enableFlagsForOracles: boolean[];
 }

@@ -1,12 +1,15 @@
 import { defaultAbiCoder } from "@ethersproject/abi";
+import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { ContractInterface, TransactionResponse } from "ethers";
+import { ContractInterface } from "ethers";
 import { ethers, network } from "hardhat";
 
-import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
+import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
@@ -16,7 +19,7 @@ export async function setForkBlock(blockNumber: number) {
     params: [
       {
         forking: {
-          jsonRpcUrl: process.env.BSC_ARCHIVE_NODE,
+          jsonRpcUrl: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
           blockNumber: blockNumber,
         },
       },
@@ -26,37 +29,13 @@ export async function setForkBlock(blockNumber: number) {
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
-    let types = getArgs(signatures[i]);
-    // Fix for the oracle VIP as there is struct in types and defaultAbiCoder
-    // is unable to process struct.
-
-    if (signatures[i] == "setTokenConfig((address,address,uint256))") {
-      types = ["tuple(address, address, uint256)"];
-    } else if (signatures[i] == "setTokenConfig((address,address[3],bool[3]))") {
-      types = ["tuple(address, address[3], bool[3])"];
+    if (signatures[i] === "") {
+      return "0x";
     }
-
-    return defaultAbiCoder.encode(types, args);
+    const fragment = ethers.utils.FunctionFragment.from(signatures[i]);
+    return defaultAbiCoder.encode(fragment.inputs, args);
   });
 }
-
-const getArgs = (func: string) => {
-  if (func === "") return [];
-  // First match everything inside the function argument parens.
-  const match = func.match(/.*?\(([^]*)\)/);
-  const args = match ? match[1] : "";
-  // Split the arguments string into an array comma delimited.
-  return args
-    .split(",")
-    .map(arg => {
-      // Ensure no inline comments are parsed and trim the whitespace.
-      return arg.replace(/\/\*.*\*\//, "").trim();
-    })
-    .filter(arg => {
-      // Ensure no undefined values are added.
-      return arg;
-    });
-};
 
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
   await impersonateAccount(user);
@@ -64,7 +43,7 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta: ProposalMeta, type: ProposalType): Proposal => {
+export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
   return {
     signatures: commands.map(cmd => cmd.signature),
     targets: commands.map(cmd => cmd.target),
@@ -89,6 +68,23 @@ export const setMaxStalePeriodInOracle = async (
   await tx.wait();
 };
 
+export const setMaxStalePeriodInBinanceOracle = async (
+  binanceOracleAddress: string,
+  assetSymbol: string,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const oracle = await ethers.getContractAt(BINANCE_ORACLE_ABI, binanceOracleAddress);
+  const oracleAdmin = await initMainnetUser(await oracle.owner(), ethers.utils.parseEther("1.0"));
+  const overrideSymbol = await oracle.symbols(assetSymbol);
+
+  if (overrideSymbol.length > 0) {
+    assetSymbol = overrideSymbol;
+  }
+
+  const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(assetSymbol, maxStalePeriodInSeconds);
+  await tx.wait();
+};
+
 export const setMaxStalePeriodInChainlinkOracle = async (
   chainlinkOracleAddress: string,
   asset: string,
@@ -101,6 +97,14 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
   const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
 
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await oracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
   const tx = await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
@@ -109,15 +113,42 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   await tx.wait();
 };
 
+export const setMaxStalePeriod = async (
+  resilientOracle: Contract,
+  underlyingAsset: Contract,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  const binanceOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+  const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+
+  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
+  if (tokenConfig.asset !== ethers.constants.AddressZero) {
+    const mainOracle = tokenConfig.oracles[0];
+    if (mainOracle === binanceOracle) {
+      const symbol = await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
+    } else {
+      await setMaxStalePeriodInChainlinkOracle(
+        mainOracle,
+        underlyingAsset.address,
+        ethers.constants.AddressZero,
+        normalTimelock,
+        maxStalePeriodInSeconds,
+      );
+    }
+  }
+};
+
 export const expectEvents = async (
   txResponse: TransactionResponse,
   abis: ContractInterface[],
   expectedEvents: string[],
   expectedCounts: number[],
 ) => {
+  const receipt = await txResponse.wait();
   const getNamedEvents = (abi: ContractInterface) => {
     const iface = new ethers.utils.Interface(abi);
-    return txResponse.events
+    return receipt.events
       .map(it => {
         try {
           return iface.parseLog(it).name;
@@ -136,6 +167,35 @@ export const expectEvents = async (
       `expected a differnt number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
+};
+
+export const expectEventWithParams = async (
+  txResponse: TransactionResponse,
+  abi: ContractInterface,
+  expectedEvent: string,
+  expectedParams: any[], // Array of expected parameters
+) => {
+  const receipt = await txResponse.wait();
+  const iface = new ethers.utils.Interface(abi);
+
+  // Extract the events that match the expected event name
+  const matchingEvents = receipt.events
+    .map(event => {
+      try {
+        return iface.parseLog(event);
+      } catch (error) {
+        return null; // Ignore events that do not match the ABI
+      }
+    })
+    .filter(parsedEvent => parsedEvent && parsedEvent.name === expectedEvent);
+
+  // Check each event's parameters
+  matchingEvents.forEach((event, index) => {
+    expect(
+      event.args[index],
+      `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
+    ).to.deep.equal(expectedParams[index]);
+  });
 };
 
 export const proposalSchema = {
@@ -175,14 +235,13 @@ export const proposalSchema = {
   },
   required: ["signatures", "targets", "params", "values", "meta", "type"],
 };
-
 interface AssetConfig {
   name: string;
   address: string;
   feed: string;
 }
 
-const ASSETS: AssetConfig[] = [
+const BNB_MAINNET_ASSETS: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
@@ -328,7 +387,7 @@ const ASSETS: AssetConfig[] = [
 ];
 
 export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: string) => {
-  for (const asset of ASSETS) {
+  for (const asset of BNB_MAINNET_ASSETS) {
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
 };
