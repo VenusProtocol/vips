@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, vip248 } from "../../vips/vip-248/bscmainnet";
+import ACM_ABI from "./abi/acm.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 
 forking(35869619, () => {
@@ -40,6 +41,7 @@ forking(35869619, () => {
   testVip("VIP-247 Chaos Labs Recommendations", vip248(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden", "MaxStalePeriodAdded"], [2, 2]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
     },
   });
 
