@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip155 } from "../../../vips/vip-155/vip-155";
+import { vip248 } from "../../../vips/vip-248/vip-248";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 import CHAINLINK_ABI from "./abi/chainlinkOracle.json";
@@ -38,7 +38,7 @@ forking(32084738, () => {
     liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Update", vip155(createInitializeData()), {
+  testVip("VIP-Liquidator Update", vip248(createInitializeData()), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

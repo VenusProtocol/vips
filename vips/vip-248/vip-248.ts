@@ -11,7 +11,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
 const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
-export const vip155 = (data?: string) => {
+export const vip248 = (data?: string) => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",

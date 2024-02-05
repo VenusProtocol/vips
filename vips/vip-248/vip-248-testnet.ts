@@ -8,7 +8,7 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
-export const vip155Testnet = () => {
+export const vip248Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",
