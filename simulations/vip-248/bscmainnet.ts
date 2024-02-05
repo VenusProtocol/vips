@@ -81,11 +81,11 @@ forking(35869619, () => {
     });
 
     it("Check Prices", async () => {
-      const priceSnBNB = await resilientOracle.getUnderlyingPrice(vHAY);
-      expect(priceSnBNB).equals("1002184030000000000");
+      const priceHAY = await resilientOracle.getUnderlyingPrice(vHAY);
+      expect(priceHAY).equals("1002184030000000000");
 
-      const priceHAY = await resilientOracle.getUnderlyingPrice(vSnBNB);
-      expect(priceHAY).equals("304064425310000000000");
+      const priceSnBNB = await resilientOracle.getUnderlyingPrice(vSnBNB);
+      expect(priceSnBNB).equals("304064425310000000000");
     });
   });
 });
