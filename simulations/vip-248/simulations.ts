@@ -29,9 +29,9 @@ forking(35700072, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Verify UNI supply cap", async () => {
-      const uniSupplyCap = await corePoolComptroller.supplyCaps(vFDUSD);
-      expect(uniSupplyCap).equals(FDUSD_SUPPLY);
+    it("Verify FDUSD supply cap", async () => {
+      const fdusdSupplyCap = await corePoolComptroller.supplyCaps(vFDUSD);
+      expect(fdusdSupplyCap).equals(FDUSD_SUPPLY);
     });
   });
 });
