@@ -8,6 +8,7 @@ const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const CERTIK_RECEIVER = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
 const QUANTSTAMP_RECEIVER = "0xd88139f832126b465a0d7A76be887912dc367016";
+const CAKE_PIE_RECEIVER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const vip248 = () => {
   const meta = {
@@ -30,6 +31,16 @@ export const vip248 = () => {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDC, parseUnits("32500", 18), QUANTSTAMP_RECEIVER],
+      },
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("8000", 18), CAKE_PIE_RECEIVER],
+      },
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("15000", 18), CAKE_PIE_RECEIVER],
       },
     ],
     meta,
