@@ -13,7 +13,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 const vSnBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const vHAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
 
-forking(35896208, () => {
+forking(35903238, () => {
   const provider = ethers.provider;
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
@@ -59,13 +59,11 @@ forking(35896208, () => {
       await binanceOracle.setMaxStalePeriod("lisUSD", "31536000");
       await binanceOracle.setMaxStalePeriod("slisBNB", "31536000");
 
-      // console.log(await binanceOracle.getPrice("0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5"));
+      const priceHAY = await resilientOracle.getUnderlyingPrice(vHAY);
+      expect(priceHAY).equals("998728590000000000");
 
-      // const priceHAY = await resilientOracle.getUnderlyingPrice(vHAY);
-      // expect(priceHAY).equals("1002184030000000000");
-
-      // const priceSnBNB = await resilientOracle.getUnderlyingPrice(vSnBNB);
-      // expect(priceSnBNB).equals("304064425310000000000");
+      const priceSnBNB = await resilientOracle.getUnderlyingPrice(vSnBNB);
+      expect(priceSnBNB).equals("303738002240000000000");
     });
   });
 });
