@@ -42,7 +42,7 @@ This VIP is similar to [VIP-232 XVS bridge BNB Chain - Ethereum](https://app.ven
 
 We applied the following security procedures for this upgrade:
 
-- **Audits:** [Certik](https://www.certik.com/), and [Quantstamp](https://quantstamp.com/) have audited the deployed code. Moreover, [LayerZero](https://layerzero.network/) team reviewed the design and the code directly related to the bridge.
+- **Audits:** [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [Peckshield](https://peckshield.com/) have audited the deployed code. Moreover, [LayerZero](https://layerzero.network/) team reviewed the design and the code directly related to the bridge.
 - **VIP execution simulation**: in a simulation environment, validating the bridge is properly configured after the execution
 - **Deployment on testnet**: the same bridge has been deployed to testnet (BNB testnet - opBNB testnet), and used in the Venus Protocol testnet environment
 
@@ -50,6 +50,7 @@ We applied the following security procedures for this upgrade:
 
 - [Certik audit report](https://github.com/VenusProtocol/token-bridge/blob/323e95fa3c0167cca2fc1d2807e911e0bae54de9/audits/083_multichain_token_bridge_certik_20231226.pdf) (2023/December/26)
 - [Quantstamp audit report](https://github.com/VenusProtocol/token-bridge/blob/323e95fa3c0167cca2fc1d2807e911e0bae54de9/audits/064_multichain_token_bridge_quantstamp_20231219.pdf) (2023/December/19)
+- [Peckshield audit report](https://github.com/VenusProtocol/token-bridge/blob/04b0a8526bb2fa916785c41eefd94b4f84c12819/audits/079_multichain_token_bridge_peckshield_20231020.pdf) (2023/October/20)
 
 #### Deployed contracts
 
