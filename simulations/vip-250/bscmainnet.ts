@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, CRITICAL_TIMELOCK, RESILIENT_ORACLE, vip248 } from "../../vips/vip-248/bscmainnet";
+import { BINANCE_ORACLE, CRITICAL_TIMELOCK, RESILIENT_ORACLE, vip250 } from "../../vips/vip-250/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -36,7 +36,7 @@ forking(35893074, () => {
     });
   });
 
-  testVip("VIP-247 Chaos Labs Recommendations", vip248(), {
+  testVip("VIP-250 Rebrand of HAY and SnBNB to lisUSD and slisBNB", vip250(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [2]);
     },
