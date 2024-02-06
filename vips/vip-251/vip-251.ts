@@ -34,7 +34,7 @@ The bridge contracts use LayerZero, specifically the [Omnichain Fungible Token V
 - BNB chain → opBNB: XVS tokens are locked in BNB Chain bridge contract, and minted on opBNB
 - opBNB → BNB chain: XVS tokens are burnt on opBNB, and released on BNB Chain
 
-The Venus UI includes a section to allow the bridge of XVS tokens from a web user interface. Moreover, it will be possible to bridge XVS from BNB Chain (chain id 102 [according to LayerZero](https://layerzero.gitbook.io/docs/technical-reference/mainnet/supported-chain-ids)) and opBNB mainnet (chain id 202 according to LayerZero) directly interacting with the contracts. A detailed technical guide is provided in the [Venus official documentation site](https://docs-v4.venus.io/technical-reference/reference-technical-articles/technical-doc-xvs-bridge).
+The Venus UI includes a section to allow the bridge of XVS tokens from a web user interface. Moreover, it will be possible to bridge XVS from BNB Chain (chain id 102 [according to LayerZero](https://layerzero.gitbook.io/docs/technical-reference/mainnet/supported-chain-ids)) and opBNB mainnet (chain id 202 according to LayerZero) directly interacting with the contracts. A detailed technical guide is provided in the [Venus official documentation site](https://docs-v4.venus.io/technical-reference/reference-technical-articles/xvs-bridge).
 
 This VIP is similar to [VIP-232 XVS bridge BNB Chain - Ethereum](https://app.venus.io/#/governance/proposal/232), but for opBNB instead of Ethereum.
 
