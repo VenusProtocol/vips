@@ -35,12 +35,12 @@ export const vip248 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("8000", 18), CAKE_PIE_RECEIVER],
+        params: [USDT, parseUnits("8000", 18), COMMUNITY_RECEIVER],
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("15000", 18), CAKE_PIE_RECEIVER],
+        params: [USDT, parseUnits("15000", 18), COMMUNITY_RECEIVER],
       },
     ],
     meta,
