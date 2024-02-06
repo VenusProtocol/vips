@@ -1,17 +1,14 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-const LIQUIDATOR = "0x0870793286aada55d39ce7f82fb2766e8004cf43";
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
-const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-const PROXY_ADMIN = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
-const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+const LIQUIDATOR = "0x55AEABa76ecf144031Ef64E222166eb28Cb4865F";
+const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
-export const vip248 = (data?: string) => {
+export const vip251Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-Liquidator Upgrades",
@@ -46,31 +43,7 @@ export const vip248 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "restrictLiquidation(address)", VENUS_GUARDIAN],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "unrestrictLiquidation(address)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "unrestrictLiquidation(address)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "unrestrictLiquidation(address)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "unrestrictLiquidation(address)", VENUS_GUARDIAN],
       },
 
       {
@@ -94,31 +67,7 @@ export const vip248 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "addToAllowlist(address,address)", VENUS_GUARDIAN],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "removeFromAllowlist(address,address)", NORMAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", FAST_TRACK_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", CRITICAL_TIMELOCK],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "removeFromAllowlist(address,address)", VENUS_GUARDIAN],
       },
 
       {
@@ -154,12 +103,6 @@ export const vip248 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "pauseForceVAILiquidate()", VENUS_GUARDIAN],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "resumeForceVAILiquidate()", NORMAL_TIMELOCK],
       },
 
@@ -178,19 +121,13 @@ export const vip248 = (data?: string) => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [LIQUIDATOR, "resumeForceVAILiquidate()", VENUS_GUARDIAN],
-      },
-
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [LIQUIDATOR, "setPendingRedeemChunkLength(uint256)", NORMAL_TIMELOCK],
       },
 
       {
-        target: PROXY_ADMIN,
-        signature: "upgradeAndCall(address,address,bytes)",
-        params: [LIQUIDATOR, "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96", data],
+        target: LIQUIDATOR,
+        signature: "acceptOwnership()",
+        params: [],
       },
 
       {
@@ -201,8 +138,13 @@ export const vip248 = (data?: string) => {
 
       {
         target: LIQUIDATOR,
-        signature: "setMinLiquidatableVAI(uint256)",
-        params: [parseUnits("1000", 18)],
+        signature: "resumeForceVAILiquidate()",
+        params: [],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "_setLiquidatorContract(address)",
+        params: [LIQUIDATOR],
       },
     ],
     meta,
