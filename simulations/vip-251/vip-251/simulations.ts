@@ -12,8 +12,8 @@ import {
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip216,
-} from "../../../vips/vip-216/vip-216";
+  vip251,
+} from "../../../vips/vip-251/vip-251";
 import XVS_ABI from "./abi/XVS.json";
 import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -44,7 +44,7 @@ forking(35559076, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, XVS, XVS_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("vip216", vip216(), {
+  testVip("vip251", vip251(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

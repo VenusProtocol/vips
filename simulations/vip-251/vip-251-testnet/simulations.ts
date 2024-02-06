@@ -12,8 +12,8 @@ import {
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip216Testnet,
-} from "../../../vips/vip-216/vip-216-testnet";
+  vip251Testnet,
+} from "../../../vips/vip-251/vip-251-testnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVSBridgeAdmin_ABI from "./abi/XVSBridgeAdmin.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -41,7 +41,7 @@ forking(36182674, () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip216Testnet", vip216Testnet(), {
+  testVip("vip251Testnet", vip251Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

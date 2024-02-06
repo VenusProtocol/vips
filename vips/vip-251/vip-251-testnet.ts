@@ -10,7 +10,7 @@ export const SINGLE_RECEIVE_LIMIT = "10000000000000000000";
 export const MAX_DAILY_RECEIVE_LIMIT = "500000000000000000000";
 export const DEST_CHAIN_ID = 10202; // OPBNBTESTNET
 
-export const vip216Testnet = () => {
+export const vip251Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP to configure bsc XVS bridge for opBNBTestnet",

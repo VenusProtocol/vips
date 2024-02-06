@@ -9,8 +9,8 @@ import {
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip216Testnet,
-} from "../../../vips/vip-216/vip-216-testnet-2";
+  vip251Testnet,
+} from "../../../vips/vip-251/vip-251-testnet-2";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
 const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
@@ -23,7 +23,7 @@ forking(36862380, () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVSProxyOFTSrc_ABI, provider);
   });
 
-  testVip("vip216Testnet-2", vip216Testnet(), {
+  testVip("vip251Testnet-2", vip251Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
