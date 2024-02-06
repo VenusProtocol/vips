@@ -23,8 +23,6 @@ After executing this VIP, the markets for the lisUSD and slisBNB tokens should b
 
 It’s needed to configure the maximum stale period for the new symbols in the BinanceOracle contract. This can be done only with a Normal VIP, not a Critical VIP. To reduce the time without access to the markets, this (Critical) VIP would set a new BinanceOracle contract instance for the tokens lisUSD and slisBNB, with the expected maximum stale periods configured. Another (Normal) VIP will be proposed in the following days to restore the use of the usual [BinanceOracle instance](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820) for these symbols.
 
-Moreover, this VIP will grant the Fast-track, Critical and Oracle guardian to perform these changes in the future.
-
 #### References
 
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/198)
