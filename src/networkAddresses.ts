@@ -1,3 +1,5 @@
+import il_bscmainnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
+import il_bsctestnet_deployed_contracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import bscmainnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
 import bsctestnet_deployed_contracts from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import sepolia_deployed_contracts from "@venusprotocol/venus-protocol/deployments/sepolia.json";
@@ -13,9 +15,17 @@ export const NETWORK_ADDRESSES = {
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: "0x1B2103441A0A108daD8848D8F5d790e4D402921F",
-    GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
+    GENERIC_TEST_USER_ACCOUNT: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
     XVS_VAULT_PROXY: bscmainnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bscmainnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bscmainnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc",
+    UNITROLLER: bscmainnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bscmainnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bscmainnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bscmainnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bscmainnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bscmainnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
@@ -28,11 +38,24 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa",
     XVS_VAULT_PROXY: bsctestnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bsctestnet_deployed_contracts.contracts.XVS.address,
+    VAI_UNITROLLER: bsctestnet_deployed_contracts.contracts.VaiUnitroller.address,
+    VAI_MINT_USER_ACCOUNT: "0x6eACe20E1F89D0B24e5B295Af1802dfBc730B37D",
+    UNITROLLER: bsctestnet_deployed_contracts.contracts.Unitroller.address,
+    VAI: bsctestnet_deployed_contracts.contracts.VAI.address,
+    VTREASURY: bsctestnet_deployed_contracts.contracts.VTreasury.address,
+    POOL_REGISTRY: il_bsctestnet_deployed_contracts.addresses.PoolRegistry,
+    BINANCE_ORACLE: bsctestnet_deployed_contracts.contracts.BinanceOracle.address,
+    RESILIENT_ORACLE: bsctestnet_deployed_contracts.contracts.ResilientOracle.address,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
     GUARDIAN: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
     VTREASURY: "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa",
+    POOL_REGISTRY: "0x61CAff113CCaf05FFc6540302c37adcf077C5179",
+    RESILIENT_ORACLE: "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94",
+    XVS: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
+    XVS_VAULT_PROXY: "0xA0882C2D5DF29233A092d2887A258C2b90e9b994",
+    GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
   },
   sepolia: {
     NORMAL_TIMELOCK: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB", // Sepolia Multisig
@@ -45,7 +68,7 @@ export const NETWORK_ADDRESSES = {
     MOCK_USDT: "0x8d412FD0bc5d826615065B931171Eed10F5AF266",
     MOCK_WETH: "0x700868CAbb60e90d77B6588ce072d9859ec8E281",
     MOCK_WBTC: "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b",
-    XVS: "0xDb633C11D3F9E6B8D17aC2c972C9e3B05DA59bF9",
+    XVS: "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E",
     POOL_REGISTRY: "0x758f5715d817e02857Ba40889251201A5aE3E186",
     COMPTROLLER_CORE: "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70",
     VCRV_CORE: "0x121E3be152F283319310D807ed847E8b98319C1e",
@@ -65,16 +88,21 @@ export const NETWORK_ADDRESSES = {
     REDSTONE_ORACLE: "0x4e6269Ef406B4CEE6e67BA5B5197c2FfD15099AE",
     MOCK_CRV: "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3",
     MOCK_crvUSD: "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6",
-    XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
-    XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
+    XVS_VAULT_PROXY: "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5",
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
   opbnbtestnet: {
     NORMAL_TIMELOCK: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
     GUARDIAN: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
+    XVS: "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9",
+    XVS_VAULT_PROXY: "0xB14A0e72C5C202139F78963C9e89252c1ad16f01",
+    GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
   },
   opbnbmainnet: {
     NORMAL_TIMELOCK: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
     GUARDIAN: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
+    XVS: "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61",
+    XVS_VAULT_PROXY: "0x7dc969122450749A8B0777c0e324522d67737988",
+    GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
   },
 };

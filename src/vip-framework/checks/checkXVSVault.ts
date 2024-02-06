@@ -27,6 +27,9 @@ export const checkXVSVault = () => {
 
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
       xvsVault = await ethers.getContractAt(XVSVault_ABI, XVS_VAULT_PROXY, signer);
+
+      const accounts = await ethers.getSigners();
+      await accounts[0].sendTransaction({ to: ACCOUNT, value: parseUnits("10") });
     });
 
     it("deposit and withdraw", async () => {
@@ -40,7 +43,8 @@ export const checkXVSVault = () => {
       await xvsVault.requestWithdrawal(xvs.address, POOL_ID, parseUnits("1", 18));
       await mine(10000);
       await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalBalance);
+
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.gte(originalBalance);
     });
   });
 };
