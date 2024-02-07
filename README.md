@@ -14,6 +14,10 @@ yarn install
 
 ```
 
+### Repo structure
+
+The simulations and create commands require the function creating the VIP to be the default export.
+
 ### Run Simulations
 
 ```
