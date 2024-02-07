@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vip248, vSnBNB, vHAY } from "../../vips/vip-248/bsctestnet";
+import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vHAY, vSnBNB, vip248 } from "../../vips/vip-248/bsctestnet";
 import ACM_ABI from "./abi/acm.json";
 import BEACON_ABI from "./abi/beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
@@ -58,7 +58,7 @@ forking(37533665, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [2]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
-      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [TEMP_VTOKEN_ABI], ["NameUpdated", "SymbolUpdated"], [2, 2]);
     },
   });
@@ -89,14 +89,11 @@ forking(37533665, () => {
     });
 
     it("Check Prices", async () => {
-      await binanceOracle.setMaxStalePeriod("lisUSD", "31536000");
-      await binanceOracle.setMaxStalePeriod("slisBNB", "31536000");
-
       const priceHAY = await resilientOracle.getUnderlyingPrice(vHAY);
-      expect(priceHAY).equals("998606210000000000");
+      expect(priceHAY).equals("998594200000000000");
 
       const priceSnBNB = await resilientOracle.getUnderlyingPrice(vSnBNB);
-      expect(priceSnBNB).equals("303298104890000000000");
+      expect(priceSnBNB).equals("217000000000000000000");
     });
   });
 });

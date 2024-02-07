@@ -12,9 +12,11 @@ export const HAY = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
 export const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 export const TEMP_VTOKEN_IMPL = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
+export const VTOKEN_BEACON_SnBNB = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 export const vSnBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 export const vHAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
 export const VTOKEN_IMPL = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
+export const VTOKEN_IMPL_SnBNB = "0xcA408D716011169645Aa94ddc5665043C33df814";
 
 export const vip248 = () => {
   const meta = {
@@ -74,6 +76,11 @@ export const vip248 = () => {
         params: [TEMP_VTOKEN_IMPL],
       },
       {
+        target: VTOKEN_BEACON_SnBNB,
+        signature: "upgradeTo(address)",
+        params: [TEMP_VTOKEN_IMPL],
+      },
+      {
         target: vHAY,
         signature: "setName(string)",
         params: ["Venus lisUSD (Stablecoins)"],
@@ -97,6 +104,11 @@ export const vip248 = () => {
         target: VTOKEN_BEACON,
         signature: "upgradeTo(address)",
         params: [VTOKEN_IMPL],
+      },
+      {
+        target: VTOKEN_BEACON_SnBNB,
+        signature: "upgradeTo(address)",
+        params: [VTOKEN_IMPL_SnBNB],
       },
     ],
     meta,
