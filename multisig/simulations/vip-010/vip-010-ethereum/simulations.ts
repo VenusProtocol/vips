@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip010 } from "../../../proposals/vip-010/vip-010-ethereum";
@@ -121,7 +122,7 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(19134480, () => {
+forking(19175701, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -301,5 +302,9 @@ forking(19134480, () => {
         }
       }
     });
+  });
+
+  describe("generic tests", async () => {
+    // checkIsolatedPoolsComptrollers();
   });
 });
