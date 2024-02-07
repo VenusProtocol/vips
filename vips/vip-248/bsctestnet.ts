@@ -16,7 +16,6 @@ export const VTOKEN_BEACON_SnBNB = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 export const vSnBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 export const vHAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
 export const VTOKEN_IMPL = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
-export const VTOKEN_IMPL_SnBNB = "0xcA408D716011169645Aa94ddc5665043C33df814";
 
 export const vip248 = () => {
   const meta = {
@@ -108,7 +107,7 @@ export const vip248 = () => {
       {
         target: VTOKEN_BEACON_SnBNB,
         signature: "upgradeTo(address)",
-        params: [VTOKEN_IMPL_SnBNB],
+        params: [VTOKEN_IMPL],
       },
     ],
     meta,
