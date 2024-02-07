@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vip248, vSnBNB, vHAY } from "../../vips/vip-248/bscmainnet";
+import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vip248, vSnBNB, vHAY } from "../../vips/vip-248/bsctestnet";
 import ACM_ABI from "./abi/acm.json";
 import BEACON_ABI from "./abi/beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TEMP_VTOKEN_ABI from "./abi/tempVToken.json";
 
-forking(35926690, () => {
+forking(37533665, () => {
   const provider = ethers.provider;
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
@@ -41,10 +41,10 @@ forking(35926690, () => {
 
     it("Verify Name and Symbol", async () => {
       const name = await vHay.name();
-      expect(name).equals("Venus HAY (Stablecoins)");
+      expect(name).equals("Venus HAY (Stable Coins)");
 
       const symbol = await vHay.symbol();
-      expect(symbol).equals("vHAY_Stablecoins");
+      expect(symbol).equals("vHAY_StableCoins");
 
       const nameSnbnb = await vSnbnb.name();
       expect(nameSnbnb).equals("Venus SnBNB (Liquid Staked BNB)");
