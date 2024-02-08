@@ -11,7 +11,7 @@ export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const BINANCE = "0x6657911F7411765979Da0794840D671Be55bA273";
 
-const WBNB_AMOUNT = parseUnits("5901.651898613689829191", 18).toString();
+export const WBNB_AMOUNT = parseUnits("5901.651898613689829191", 18).toString();
 const vBNB_AMOUNT = parseUnits("672665.16913031", 8).toString();
 const BNB_AMOUNT = BigNumber.from(parseUnits("672665.16913031", 8)).div(parseUnits("235584951.241397336794490075", 18)).toString();
 
