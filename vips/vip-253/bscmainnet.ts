@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
 import { ProposalType } from "../../src/types";
@@ -13,9 +12,7 @@ export const BINANCE = "0x6657911F7411765979Da0794840D671Be55bA273";
 
 export const WBNB_AMOUNT = parseUnits("5901.651898613689829191", 18).toString();
 export const vBNB_AMOUNT = parseUnits("672665.16913031", 8).toString();
-export const BNB_AMOUNT_TO_BINANCE = BigNumber.from(parseUnits("15636.74", 18))
-  .add(parseUnits("5865.60", 18))
-  .toString();
+export const BNB_AMOUNT_TO_BINANCE = parseUnits("15636.74", 18).add(parseUnits("5865.60", 18)).toString();
 
 // Received from vBNB after redeem is 15847.979107135037434728. But we will send to treasury only 15847.679107135037434728 i.e., 0.3 is kept in the timelock
 export const BNB_AMOUNT_TO_TREASURY = parseUnits("15847.679107135037434728", 18).toString();
@@ -158,17 +155,17 @@ export const vToken_Transfers = [
 export const BEP20Transfers = [
   {
     symbol: "BTCB",
-    amount: BigNumber.from(parseUnits("3.5029", 18)).add(parseUnits("1.06876", 18)).toString(),
+    amount: parseUnits("3.5029", 18).add(parseUnits("1.06876", 18)).toString(),
     address: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
   },
   {
     symbol: "ETH",
-    amount: BigNumber.from(parseUnits("17.371", 18)).add(parseUnits("14.55908", 18)).toString(),
+    amount: parseUnits("17.371", 18).add(parseUnits("14.55908", 18)).toString(),
     address: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
   },
   {
     symbol: "USDT",
-    amount: BigNumber.from(parseUnits("29508.0359", 18)).add(parseUnits("219816.5002", 18)).toString(),
+    amount: parseUnits("29508.0359", 18).add(parseUnits("219816.5002", 18)).toString(),
     address: "0x55d398326f99059fF775485246999027B3197955",
   },
   {
@@ -183,7 +180,7 @@ export const BEP20Transfers = [
   },
   {
     symbol: "Cake",
-    amount: BigNumber.from(parseUnits("3397.15865", 18)).add(parseUnits("891.64848", 18)).toString(),
+    amount: parseUnits("3397.15865", 18).add(parseUnits("891.64848", 18)).toString(),
     address: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
   },
   {
@@ -198,7 +195,7 @@ export const BEP20Transfers = [
   },
   {
     symbol: "DOT",
-    amount: BigNumber.from(parseUnits("618.32785", 18)).add(parseUnits("529.97468", 18)).toString(),
+    amount: parseUnits("618.32785", 18).add(parseUnits("529.97468", 18)).toString(),
     address: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
   },
   {
@@ -213,7 +210,7 @@ export const BEP20Transfers = [
   },
   {
     symbol: "LINK",
-    amount: BigNumber.from(parseUnits("141.65625", 18)).add(parseUnits("75.03636", 18)).toString(),
+    amount: parseUnits("141.65625", 18).add(parseUnits("75.03636", 18)).toString(),
     address: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
   },
   {
@@ -238,7 +235,7 @@ export const BEP20Transfers = [
   },
   {
     symbol: "TUSD",
-    amount: BigNumber.from(parseUnits("1327.33975", 18)).add(parseUnits("3883.51888", 18)).toString(),
+    amount: parseUnits("1327.33975", 18).add(parseUnits("3883.51888", 18)).toString(),
     address: "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9",
   },
   {
