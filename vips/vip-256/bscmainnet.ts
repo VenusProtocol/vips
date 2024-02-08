@@ -30,7 +30,7 @@ interface BEP20Transfer {
 // underlyingBalance * rate = vTokenBalance
 // underlyingBalance = vTokenBalance / rate
 
-const vToken_Transfers = [
+export const vToken_Transfers = [
     {
         symbol: "vBTC",
         amount: parseUnits("344.60553433", 8).toString(),
@@ -57,6 +57,21 @@ const vToken_Transfers = [
         address: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D"
     },
     {
+        symbol: "vCAKE",
+        amount: parseUnits("245187.19242229", 8).toString(),
+        address: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c"
+    },
+    {
+        symbol: "vUNI",
+        amount: parseUnits("2497.74135186", 8).toString(),
+        address: "0x27FF564707786720C71A2e5c1490A63266683612"
+    },
+    {
+        symbol: "vFDUSD",
+        amount: parseUnits("10355.09068368", 8).toString(),
+        address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba"
+    },
+    {
         symbol: "vUSDC",
         amount: parseUnits("1251038.96782643", 8).toString(),
         address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8"
@@ -75,6 +90,16 @@ const vToken_Transfers = [
         symbol: "vXRP",
         amount: parseUnits("534654.72490775", 8).toString(),
         address: "0xB248a295732e0225acd3337607cc01068e3b9c10"
+    },
+    // {
+    //     symbol: "vTUSDOLD",
+    //     amount: parseUnits("234046.29380374", 8).toString(),
+    //     address: "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3"
+    // },
+    {
+        symbol: "vMATIC",
+        amount: parseUnits("255028.0497963", 8).toString(),
+        address: "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8"
     },
     {
         symbol: "vLINK",
@@ -95,6 +120,16 @@ const vToken_Transfers = [
         symbol: "vFIL",
         amount: parseUnits("25756.68067599", 8).toString(),
         address: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343"
+    },
+    {
+        symbol: "vTUSD",
+        amount: parseUnits("2576.73315234", 8).toString(),
+        address: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E"
+    },
+    {
+        symbol: "vWBETH",
+        amount: parseUnits("0.89365885", 8).toString(),
+        address: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0"
     },
     {
         symbol: "vDAI",
@@ -118,7 +153,7 @@ const vToken_Transfers = [
     }
 ]
 
-const BEP20Transfers = [
+export const BEP20Transfers = [
     {
         symbol: "BTCB",
         amount: BigNumber.from(parseUnits("3.5029", 18)).add(parseUnits("1.06876", 18)).toString(),
@@ -191,7 +226,7 @@ const BEP20Transfers = [
     },
     {
         symbol: "DOGE",
-        amount: parseUnits("19727.91485", 18).toString(),
+        amount: parseUnits("19727.91485", 8).toString(),
         address: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43"
     },
     {
@@ -223,9 +258,9 @@ const BEP20Transfers = [
 
 const vBEP20TransferCommands = vToken_Transfers.map((vTokenTransfer: VTokenTransfer) => {
     return {
-        target: vTokenTransfer.address,
-        signature: "transfer(address,uint256)",
-        params: [TOKEN_REDEEMER, vTokenTransfer.amount],
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [vTokenTransfer.address, vTokenTransfer.amount, TOKEN_REDEEMER],
     }
 })
 
