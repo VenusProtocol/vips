@@ -237,18 +237,18 @@ forking(35928235, () => {
     let oracle: ethers.Contract;
     let impersonatedTimelock: any;
     let comptroller: ethers.Contract;
-    let eth: ethers.Contract;
+    let btc: ethers.Contract;
     let vaiController: ethers.Contract;
     let vai: ethers.Contract;
     let usdt: ethers.Contract;
     let vtusd: ethers.Contract;
 
-    const USER = "0x2781a5fF0b93F8a5E42346DdA40D15FA92438514";
+    const USER = "0x8E3c1fe7c4B890e2Aa96A3F6a5813E6de8e12Fe9";
     const LIQUIDATOR_USER = "0xf977814e90da44bfa03b6295a0616a897441acec";
     const VTUSD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
     const TUSD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";
-    const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
-    const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
+    const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+    const VBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
     const CHAINLINK = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
     const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
     const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
@@ -270,7 +270,7 @@ forking(35928235, () => {
       comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, provider);
       tusd = new ethers.Contract(TUSD, IERC20_ABI, provider);
       vtusd = new ethers.Contract(VTUSD, VBEP20_ABI, provider);
-      eth = new ethers.Contract(ETH, IERC20_ABI, provider);
+      btc = new ethers.Contract(BTC, IERC20_ABI, provider);
       usdt = new ethers.Contract(USDT, IERC20_ABI, provider);
       vaiController = new ethers.Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, provider);
       vai = new ethers.Contract(VAI, IERC20_ABI, provider);
@@ -283,27 +283,27 @@ forking(35928235, () => {
       // Reserves reduced to treasury as redeem action is active
       const tusdHolder = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
       const tusdHolderSigner = await initMainnetUser(tusdHolder, ethers.utils.parseEther("2"));
-      const protocolBalBefore = await eth.balanceOf(TREASURY);
-      await oracle.connect(impersonatedTimelock).setDirectPrice(ETH, 1000000);
+      const protocolBalBefore = await btc.balanceOf(TREASURY);
+      await oracle.connect(impersonatedTimelock).setDirectPrice(BTC, 1000000);
       await tusd.connect(tusdHolderSigner).approve(liquidator.address, "100");
-      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "100", VETH);
-      const protocolBalAfter = await eth.balanceOf(TREASURY);
+      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "100", VBTC);
+      const protocolBalAfter = await btc.balanceOf(TREASURY);
       expect(protocolBalAfter).greaterThan(protocolBalBefore);
     });
 
     it("Tusd Liquidation and reduce reserves fails; action paused", async () => {
       // Reserves will not reduce to treasury as redeem action is paused
-      await comptroller.connect(impersonatedTimelock)._setActionsPaused([VETH], [1], true);
+      await comptroller.connect(impersonatedTimelock)._setActionsPaused([VBTC], [1], true);
       const tusdHolder = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
       const tusdHolderSigner = await initMainnetUser(tusdHolder, ethers.utils.parseEther("2"));
-      const protocolBalBefore = await eth.balanceOf(TREASURY);
-      await oracle.connect(impersonatedTimelock).setDirectPrice(ETH, 1000000);
+      const protocolBalBefore = await btc.balanceOf(TREASURY);
+      await oracle.connect(impersonatedTimelock).setDirectPrice(BTC, 1000000);
       await tusd.connect(tusdHolderSigner).approve(liquidator.address, "100");
-      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "100", VETH);
-      const protocolBalAfter = await eth.balanceOf(TREASURY);
+      await liquidator.connect(tusdHolderSigner).liquidateBorrow(VTUSD, USER, "100", VBTC);
+      const protocolBalAfter = await btc.balanceOf(TREASURY);
       // As redeem was paused
       expect(protocolBalAfter).equals(protocolBalBefore);
-      expect(await liquidator.pendingRedeem(0)).equals(VETH);
+      expect(await liquidator.pendingRedeem(0)).equals(VBTC);
     });
 
     it("Usdt Liquidation and reduce reserves fails not enough liquidity", async () => {
