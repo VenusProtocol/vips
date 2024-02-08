@@ -13,9 +13,12 @@ export const BINANCE = "0x6657911F7411765979Da0794840D671Be55bA273";
 
 export const WBNB_AMOUNT = parseUnits("5901.651898613689829191", 18).toString();
 export const vBNB_AMOUNT = parseUnits("672665.16913031", 8).toString();
+export const BNB_AMOUNT_TO_BINANCE = BigNumber.from(parseUnits("15636.74", 18))
+  .add(parseUnits("5865.60", 18))
+  .toString();
 
 // Received from vBNB after redeem is 15847.979107135037434728. But we will send to treasury only 15847.679107135037434728 i.e., 0.3 is kept in the timelock
-export const BNB_AMOUNT = parseUnits("15847.679107135037434728", 18).toString();
+export const BNB_AMOUNT_TO_TREASURY = parseUnits("15847.679107135037434728", 18).toString();
 
 interface VTokenTransfer {
   symbol: string;
@@ -307,7 +310,7 @@ export const vip256 = () => {
         target: TREASURY,
         signature: "",
         params: [],
-        value: BNB_AMOUNT,
+        value: BNB_AMOUNT_TO_TREASURY,
       },
       {
         target: TREASURY,
@@ -326,6 +329,11 @@ export const vip256 = () => {
         value: WBNB_AMOUNT,
       },
       ...BEP20TransferCommands,
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [BNB_AMOUNT_TO_BINANCE, BINANCE],
+      },
     ],
     meta,
     ProposalType.REGULAR,

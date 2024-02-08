@@ -8,10 +8,8 @@ import { forking, testVip } from "../../src/vip-framework";
 import {
   BEP20Transfers,
   BINANCE,
-  BNB_AMOUNT,
+  BNB_AMOUNT_TO_BINANCE,
   NORMAL_TIMELOCK,
-  TREASURY,
-  WBNB_AMOUNT,
   vToken_Transfers,
   vip256,
 } from "../../vips/vip-256/bscmainnet";
@@ -20,9 +18,11 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 forking(35949601, () => {
   let oldBalances: any;
+  let oldBNBBalance: BigNumber;
 
   before(async () => {
     impersonateAccount(NORMAL_TIMELOCK);
+    oldBNBBalance = await ethers.provider.getBalance(BINANCE);
     oldBalances = {};
     for (const token of BEP20Transfers) {
       const assetContract = new ethers.Contract(token.address, BEP20_ABI, ethers.provider);
@@ -41,6 +41,8 @@ forking(35949601, () => {
         ["WithdrawTreasuryBEP20"],
         [vToken_Transfers.length + BEP20Transfers.length + 2],
       );
+
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBNB"], [1]);
     },
   });
 
@@ -53,9 +55,9 @@ forking(35949601, () => {
       });
     }
 
-    it("Verify that the treasury has received the correct amount of BNB", async () => {
-      const newBnbBalance = await ethers.provider.getBalance(TREASURY);
-      expect(newBnbBalance).to.be.equal(BigNumber.from(WBNB_AMOUNT).add(BigNumber.from(BNB_AMOUNT)));
+    it("Verify that the binance wallet has received the correct amount of BNB", async () => {
+      const balance = await ethers.provider.getBalance(BINANCE);
+      expect(balance).to.be.equal(oldBNBBalance.add(BigNumber.from(BNB_AMOUNT_TO_BINANCE)));
     });
   });
 });
