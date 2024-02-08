@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip010 } from "../../../proposals/vip-010/vip-010-ethereum";
