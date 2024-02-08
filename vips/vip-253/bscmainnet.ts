@@ -282,7 +282,7 @@ const BEP20TransferCommands = BEP20Transfers.map((bep20Transfer: BEP20Transfer) 
   };
 });
 
-export const vip256 = () => {
+export const vip253 = () => {
   const meta = {
     version: "v2",
     title: "VIP-253 Residual Shortfall Repayments",
@@ -478,4 +478,4 @@ It is important to consider that tokens with a balance of less than $1,000 will 
   );
 };
 
-export default vip256;
+export default vip253;
