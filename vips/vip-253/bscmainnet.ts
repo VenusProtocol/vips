@@ -68,11 +68,11 @@ export const vToken_Transfers = [
     amount: parseUnits("2497.74135186", 8).toString(),
     address: "0x27FF564707786720C71A2e5c1490A63266683612",
   },
-  {
-    symbol: "vFDUSD",
-    amount: parseUnits("10355.09068368", 8).toString(),
-    address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
-  },
+  // {
+  //   symbol: "vFDUSD",
+  //   amount: parseUnits("10355.09068368", 8).toString(),
+  //   address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
+  // },
   {
     symbol: "vUSDC",
     amount: parseUnits("1251038.96782643", 8).toString(),
@@ -193,7 +193,7 @@ export const BEP20Transfers = [
   },
   {
     symbol: "FDUSD",
-    amount: BigNumber.from(parseUnits("5261.65425", 18)).add(parseUnits("1031.64844", 18)).toString(),
+    amount: parseUnits("1031.64844", 18).toString(),
     address: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
   },
   {
@@ -286,7 +286,7 @@ export const vip253 = () => {
   const meta = {
     version: "v2",
     title: "VIP-253 Residual Shortfall Repayments",
-    description: `Following [VIP-244](https://app.venus.io/#/governance/proposal/244?chainId=56), if passed, this VIP will execute steps 1, 2, 3 and 4 of the execution plan to further repay the remaining shortfall in the BNB Bridge Exploiter account by reducing the USDC debt. This repayment will make use of the fees from the liquidation of this account and the protocol risk fund balance. The expected repayment amount is: $7,205,911
+    description: `Following [VIP-244](https://app.venus.io/#/governance/proposal/244?chainId=56), if passed, this VIP will execute steps 1, 2, 3 and 4 of the execution plan to further repay the remaining shortfall in the BNB Bridge Exploiter account by reducing the USDC debt. This repayment will make use of the fees from the liquidation of this account and the protocol risk fund balance. The expected repayment amount is: $7,200,650
 
 The following are the relevant balances for the repayment operation:
 
@@ -392,7 +392,6 @@ It is important to consider that tokens with a balance of less than $1,000 will 
 - XVS: 1,322.056 ($14,033.90)
 - Cake: 3,397.15865 ($8,204.14)
 - UNI: 1,252.25385 ($7,506.80)
-- FDUSD: 5,261.65425 ($5,255.58)
 - DOT: 618.32785 ($4,206.34)
 - ADA(Binance-Peg): 6,877.765 ($3,404.45)
 - XRP: 5,427.9473 ($2,728.03)
@@ -420,11 +419,11 @@ It is important to consider that tokens with a balance of less than $1,000 will 
 
 **Total Amount to send to Binance:**
 
-- $7,082,298.38
+- $7,077,036.72575
 
 **Estimated USDC Repayment Amount:**
 
-- $7,205,911.72`,
+- $7,200,650.06575`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
