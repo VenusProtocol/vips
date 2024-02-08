@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { NORMAL_TIMELOCK, vip256, vBNB, TREASURY, vToken_Transfers, WBNB_AMOUNT, BEP20Transfers, BINANCE } from "../../vips/vip-256/bscmainnet";
+import { NORMAL_TIMELOCK, vip256, vBNB, TREASURY, vToken_Transfers, WBNB_AMOUNT, BEP20Transfers, BINANCE, BNB_AMOUNT } from "../../vips/vip-256/bscmainnet";
 import vBNB_ABI from "./abi/vBNB.json";
 import vBEP20_ABI from "./abi/vBEP20.json";
 import BEP20_ABI from "./abi/BEP20.json";
@@ -15,14 +15,10 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 forking(35949601, () => {
   let vBNBContract: ethers.Contract;
   let oldBalances: any;
-  let oldBnbBalance: BigNumber;
-  let oldBalancesAll: any;
 
   before(async () => {
     impersonateAccount(NORMAL_TIMELOCK)
     vBNBContract = new ethers.Contract(vBNB, vBNB_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
-
-    oldBnbBalance = (await ethers.provider.getBalance(TREASURY));
 
     oldBalances = {}
     for(const token of BEP20Transfers) {
@@ -35,7 +31,7 @@ forking(35949601, () => {
 
   testVip("VIP-256", vip256(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [vToken_Transfers.length+BEP20Transfers.length+1]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [vToken_Transfers.length+BEP20Transfers.length+2]);
     },
   });
 
@@ -50,8 +46,7 @@ forking(35949601, () => {
 
     it("Verify that the treasury has received the correct amount of BNB", async () => {
       const newBnbBalance = (await ethers.provider.getBalance(TREASURY));
-      expect(newBnbBalance).to.be.equal(BigNumber.from(WBNB_AMOUNT))
+      expect(newBnbBalance).to.be.equal(BigNumber.from(WBNB_AMOUNT).add(BigNumber.from(BNB_AMOUNT)))
     })
-
   });
 });
