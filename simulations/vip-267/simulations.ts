@@ -22,18 +22,20 @@ const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
 const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
-const REPAY_AMOUNT = parseUnits("39137.18", 18);
-const EXPECTED_BNB_AMOUNT = parseUnits("131.130431007685944719", 18);
+const VUSDC_AMOUNT = parseUnits("326081635.9401868", 8);
+const REPAY_AMOUNT = parseUnits("7605011.44891787996502290", 18);
+const EXPECTED_BNB_AMOUNT = parseUnits("20456.609799695853115141", 18);
 
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(36083280, () => {
+forking(36726026, () => {
   const usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
   const vUSDC = new ethers.Contract(VUSDC, VTOKEN_ABI, ethers.provider);
   const vBNB = new ethers.Contract(VBNB, VTOKEN_ABI, ethers.provider);
   const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
 
+  let treasuryVTokenBalanceBefore: BigNumber;
   let treasuryBalanceBefore: BigNumber;
   let exploiterDebtBefore: BigNumber;
   let binanceWalletBalanceBefore: BigNumber;
@@ -46,6 +48,7 @@ forking(36083280, () => {
     vUSDC.connect(timelock)._setInterestRateModel(ZERO_RATE_MODEL);
 
     treasuryBalanceBefore = await usdc.balanceOf(TREASURY);
+    treasuryVTokenBalanceBefore = await vUSDC.balanceOf(TREASURY);
     exploiterDebtBefore = await vUSDC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET);
     binanceWalletBalanceBefore = await ethers.provider.getBalance(BINANCE_WALLET);
   });
@@ -53,10 +56,16 @@ forking(36083280, () => {
   testVip("VIP-267", vip267());
 
   describe("Post-VIP state", () => {
-    it(`transfers ${formatUnits(REPAY_AMOUNT, 18)} USDC from treasury`, async () => {
+    it(`transfers ${formatUnits(VUSDC_AMOUNT, 8)} vUSDC from treasury`, async () => {
+      const treasuryVTokenBalanceAfter = await vUSDC.balanceOf(TREASURY);
+      const treasuryVTokenBalanceDelta = treasuryVTokenBalanceBefore.sub(treasuryVTokenBalanceAfter);
+      expect(treasuryVTokenBalanceDelta).to.equal(VUSDC_AMOUNT);
+    });
+
+    it(`redeems vUSDC and transfers dust to treasury`, async () => {
       const treasuryBalanceAfter = await usdc.balanceOf(TREASURY);
-      const treasuryBalanceDelta = treasuryBalanceBefore.sub(treasuryBalanceAfter);
-      expect(treasuryBalanceDelta).to.equal(REPAY_AMOUNT);
+      const treasuryBalanceDelta = treasuryBalanceAfter.sub(treasuryBalanceBefore);
+      expect(treasuryBalanceDelta).to.equal(parseUnits("8.018348270861963412", 18));
     });
 
     it("leaves no USDC in the liquidate and redeem helper contract", async () => {

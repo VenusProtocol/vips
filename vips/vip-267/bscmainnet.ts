@@ -3,6 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+const TOKEN_REDEEMER = "0x67B10f3BC6B141D67c598C73CEe45E6635292Acd";
 const LIQUIDATE_AND_REDEEM_HELPER = "0xA08301b7C5f4BccD654De95E8C9BD4388CC54Ec1";
 const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -13,7 +14,8 @@ const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 
 const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
-const REPAY_AMOUNT = parseUnits("39137.18", 18);
+const VUSDC_AMOUNT = parseUnits("326081635.9401868", 8);
+const REPAY_AMOUNT = parseUnits("7605011.44891787996502290", 18);
 
 export const vip267 = () => {
   const meta = {
@@ -26,6 +28,16 @@ export const vip267 = () => {
   };
   return makeProposal(
     [
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [VUSDC, VUSDC_AMOUNT, TOKEN_REDEEMER],
+      },
+      {
+        target: TOKEN_REDEEMER,
+        signature: "redeemAndTransfer(address,address)",
+        params: [VUSDC, TREASURY],
+      },
       {
         target: COMPTROLLER,
         signature: "_setLiquidatorContract(address)",
