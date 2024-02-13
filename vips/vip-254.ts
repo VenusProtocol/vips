@@ -43,11 +43,32 @@ export const BRIDGE_ASSETS = [
 export const vip254 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-254",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with these proposal",
-    againstDescription: "I do not think that Venus Protocol should proceed with these proposal",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with these proposal",
+    title: "VIP-254 Bootstrap liquidity for the opBNB deployment",
+    description: `If passed, this VIP will performance the following actions:
+
+- withdraw 0.3 BTC, 5 ETH, 10,000 USDT and 45 BNB from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on BNB chain, and bridge them to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
+- transfer 10,000 USDT from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) (on BNB chain) to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391). These tokens will be converted by the Community wallet to FDUSD and sent to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
+
+These tokens will be used for the bootstrap liquidity of the new Venus markets on opBNB.
+
+After the execution of this VIP, and the manual operation by the Community wallet, the balance of the Venus Treasury on opBNB will be:
+
+- 0.3 [BTCB](https://opbnbscan.com/token/0x7c6b91d9be155a6db01f749217d76ff02a7227f2)
+- 5 [ETH](https://opbnbscan.com/token/0xe7798f023fc62146e8aa1b36da45fb70855a77ea)
+- 10,000 [USDT](https://opbnbscan.com/token/0x9e5aac1ba1a2e6aed6b32689dfcf62a509ca96f3)
+- 10,000 [FDUSD](https://opbnbscan.com/token/0x50c5725949a6f0c72e6c4a641f24049a917db0cb)
+- 45 BNB
+
+#### References
+
+- [Repository](https://github.com/VenusProtocol/token-bridge)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/203)
+- [Deploy Venus Protocol on opBNB - community proposal](https://community.venus.io/t/deploy-venus-protocol-on-opbnb/3995)
+- Snapshot ["Deploy Venus Protocol on opBNB"](https://snapshot.org/#/venus-xvs.eth/proposal/0xbde3c7b8acf4bba025ad838f3f515c9d9e6f4c2eb0e68fca7f37234baf4ed103)
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
