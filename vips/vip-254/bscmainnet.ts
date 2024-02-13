@@ -1,7 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
 
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -46,8 +46,8 @@ export const vip254 = () => {
     title: "VIP-254 Bootstrap liquidity for the opBNB deployment",
     description: `If passed, this VIP will performance the following actions:
 
-- withdraw 0.3 BTC, 5 ETH, 10,000 USDT and 45 BNB from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on BNB chain, and bridge them to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
-- transfer 10,000 USDT from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) (on BNB chain) to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391). These tokens will be converted by the Community wallet to FDUSD and sent to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
+- withdraw 0.3 BTCB, 5 ETH, 10,000 USDT and 45 BNB from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on BNB chain, and bridge them to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
+- withdraw 10,000 USDT from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) (on BNB chain) to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391). These tokens will be converted by the Community wallet to FDUSD and sent to the [Venus Treasury on opBNB](https://opbnbscan.com/address/0xDDc9017F3073aa53a4A8535163b0bf7311F72C52)
 
 These tokens will be used for the bootstrap liquidity of the new Venus markets on opBNB.
 
@@ -133,3 +133,5 @@ After the execution of this VIP, and the manual operation by the Community walle
     ProposalType.REGULAR,
   );
 };
+
+export default vip254;
