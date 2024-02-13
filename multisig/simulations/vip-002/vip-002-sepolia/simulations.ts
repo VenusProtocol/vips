@@ -12,16 +12,36 @@ import { vip002 } from "../../../proposals/vip-002/vip-002-sepolia";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
-import RATE_MODEL_ABI from "./abi/rateModel.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
 const RESILIENT_ORACLE = sepolia.RESILIENT_ORACLE;
-const GUARDIAN = sepolia.GUARDIAN;
+const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 const POOL_REGISTRY = sepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = 2_252_571; // assuming a block is mined every 14 seconds
+
+const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+const COMPTROLLER_STABLECOINS = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
+const COMPTROLLER_CURVE = "0xD298182D3ACb43e98e32757FF09C91F203e9E67E";
+const MOCK_WBTC = "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b";
+const MOCK_USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
+const MOCK_USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
+const MOCK_WETH = "0x700868CAbb60e90d77B6588ce072d9859ec8E281";
+const VCRV_CORE = "0x121E3be152F283319310D807ed847E8b98319C1e";
+const VCRVUSD_CORE = "0xA09cFAd2e138fe6d8FF62df803892cbCb79ED082";
+const VUSDC_CORE = "0xF87bceab8DD37489015B426bA931e08A4D787616";
+const VUSDT_CORE = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+const VWBTC_CORE = "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383";
+const VWETH_CORE = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+const VCRVUSD_STABLECOINS = "0x9C5e7a3B4db931F07A6534f9e44100DDDc78c408";
+const VUSDC_STABLECOINS = "0xD5f83FCbb4a62779D0B37b9E603CD19Ad84884F0";
+const VUSDT_STABLECOINS = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
+const VCRV_CURVE = "0x9Db62c5BBc6fb79416545FcCBDB2204099217b78";
+const VCRVUSD_CURVE = "0xc7be132027e191636172798B933202E0f9CAD548";
+const MOCK_CRV = "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3";
+const MOCK_crvUSD = "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6";
 
 type VTokenSymbol =
   | "vWBTC_Core"
@@ -37,26 +57,26 @@ type VTokenSymbol =
   | "vCRV_Curve";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
-  vWBTC_Core: sepolia.VWBTC_CORE,
-  vWETH_Core: sepolia.VWETH_CORE,
-  vUSDT_Core: sepolia.VUSDT_CORE,
-  vUSDC_Core: sepolia.VUSDC_CORE,
-  vcrvUSD_Core: sepolia.VCRVUSD_CORE,
-  vCRV_Core: sepolia.VCRV_CORE,
-  vUSDC_Stablecoins: sepolia.VUSDC_STABLECOINS,
-  vUSDT_Stablecoins: sepolia.VUSDT_STABLECOINS,
-  vcrvUSD_Stablecoins: sepolia.VCRVUSD_STABLECOINS,
-  vcrvUSD_Curve: sepolia.VCRVUSD_CURVE,
-  vCRV_Curve: sepolia.VCRV_CURVE,
+  vWBTC_Core: VWBTC_CORE,
+  vWETH_Core: VWETH_CORE,
+  vUSDT_Core: VUSDT_CORE,
+  vUSDC_Core: VUSDC_CORE,
+  vcrvUSD_Core: VCRVUSD_CORE,
+  vCRV_Core: VCRV_CORE,
+  vUSDC_Stablecoins: VUSDC_STABLECOINS,
+  vUSDT_Stablecoins: VUSDT_STABLECOINS,
+  vcrvUSD_Stablecoins: VCRVUSD_STABLECOINS,
+  vcrvUSD_Curve: VCRVUSD_CURVE,
+  vCRV_Curve: VCRV_CURVE,
 };
 
 const tokens = {
-  WBTC: sepolia.MOCK_WBTC,
-  WETH: sepolia.MOCK_WETH,
-  USDT: sepolia.MOCK_USDT,
-  USDC: sepolia.MOCK_USDC,
-  CRV: sepolia.MOCK_CRV,
-  crvUSD: sepolia.MOCK_crvUSD,
+  WBTC: MOCK_WBTC,
+  WETH: MOCK_WETH,
+  USDT: MOCK_USDT,
+  USDC: MOCK_USDC,
+  CRV: MOCK_CRV,
+  crvUSD: MOCK_crvUSD,
 };
 
 interface VTokenState {
@@ -76,7 +96,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.WBTC,
     exchangeRate: parseUnits("1", 18),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vWETH_Core: {
     name: "Venus WETH (Core)",
@@ -84,7 +104,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.WETH,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vUSDT_Core: {
     name: "Venus USDT (Core)",
@@ -92,7 +112,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.USDT,
     exchangeRate: parseUnits("1", 16),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vUSDC_Core: {
     name: "Venus USDC (Core)",
@@ -100,7 +120,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.USDC,
     exchangeRate: parseUnits("1", 16),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vcrvUSD_Core: {
     name: "Venus crvUSD (Core)",
@@ -108,7 +128,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.crvUSD,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vCRV_Core: {
     name: "Venus CRV (Core)",
@@ -116,7 +136,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.CRV,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
 
   // Stablecoins Pool
@@ -126,7 +146,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.USDT,
     exchangeRate: parseUnits("1", 16),
-    comptroller: sepolia.COMPTROLLER_STABLECOINS,
+    comptroller: COMPTROLLER_STABLECOINS,
   },
   vUSDC_Stablecoins: {
     name: "Venus USDC (Stablecoins)",
@@ -134,7 +154,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.USDC,
     exchangeRate: parseUnits("1", 16),
-    comptroller: sepolia.COMPTROLLER_STABLECOINS,
+    comptroller: COMPTROLLER_STABLECOINS,
   },
   vcrvUSD_Stablecoins: {
     name: "Venus crvUSD (Stablecoins)",
@@ -142,7 +162,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.crvUSD,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_STABLECOINS,
+    comptroller: COMPTROLLER_STABLECOINS,
   },
 
   // Curve Pool
@@ -152,7 +172,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.crvUSD,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_CURVE,
+    comptroller: COMPTROLLER_CURVE,
   },
   vCRV_Curve: {
     name: "Venus CRV (Curve)",
@@ -160,7 +180,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.CRV,
     exchangeRate: parseUnits("1", 28),
-    comptroller: sepolia.COMPTROLLER_CURVE,
+    comptroller: COMPTROLLER_CURVE,
   },
 };
 
@@ -362,25 +382,25 @@ forking(4783370, () => {
         const pool = registeredPools[0];
         expect(pool.name).to.equal("Core");
         expect(pool.creator).to.equal(GUARDIAN);
-        expect(pool.comptroller).to.equal(sepolia.COMPTROLLER_CORE);
+        expect(pool.comptroller).to.equal(COMPTROLLER_CORE);
       });
 
       it("should register Stablecoins pool in PoolRegistry", async () => {
         const pool = registeredPools[1];
         expect(pool.name).to.equal("Stablecoins");
         expect(pool.creator).to.equal(GUARDIAN);
-        expect(pool.comptroller).to.equal(sepolia.COMPTROLLER_STABLECOINS);
+        expect(pool.comptroller).to.equal(COMPTROLLER_STABLECOINS);
       });
 
       it("should register Curve pool in PoolRegistry", async () => {
         const pool = registeredPools[2];
         expect(pool.name).to.equal("Curve");
         expect(pool.creator).to.equal(GUARDIAN);
-        expect(pool.comptroller).to.equal(sepolia.COMPTROLLER_CURVE);
+        expect(pool.comptroller).to.equal(COMPTROLLER_CURVE);
       });
 
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
-        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, sepolia.COMPTROLLER_CORE);
+        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
         expect(poolVTokens).to.have.lengthOf(6);
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
@@ -392,7 +412,7 @@ forking(4783370, () => {
       });
 
       it("should register Stablecoins pool vTokens in Stablecoins pool Comptroller", async () => {
-        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, sepolia.COMPTROLLER_STABLECOINS);
+        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_STABLECOINS);
         const poolVTokens = await comptroller.getAllMarkets();
         expect(poolVTokens).to.have.lengthOf(3);
         expect(poolVTokens).to.include(vTokens.vUSDC_Stablecoins);
@@ -401,7 +421,7 @@ forking(4783370, () => {
       });
 
       it("should register Curve pool vTokens in Curve pool Comptroller", async () => {
-        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, sepolia.COMPTROLLER_CURVE);
+        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CURVE);
         const poolVTokens = await comptroller.getAllMarkets();
         expect(poolVTokens).to.have.lengthOf(2);
         expect(poolVTokens).to.include(vTokens.vCRV_Curve);
@@ -519,9 +539,9 @@ forking(4783370, () => {
         });
       };
 
-      checkComptroller(sepolia.COMPTROLLER_CORE, "Core");
-      checkComptroller(sepolia.COMPTROLLER_STABLECOINS, "Stablecoins");
-      checkComptroller(sepolia.COMPTROLLER_CURVE, "Curve");
+      checkComptroller(COMPTROLLER_CORE, "Core");
+      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins");
+      checkComptroller(COMPTROLLER_CURVE, "Curve");
     });
 
     it("Interest rates", async () => {
