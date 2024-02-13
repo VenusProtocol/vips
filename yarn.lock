@@ -2819,9 +2819,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@venusprotocol/venus-protocol@npm:^7.3.0-dev.1":
-  version: 7.3.0-dev.1
-  resolution: "@venusprotocol/venus-protocol@npm:7.3.0-dev.1"
+"@venusprotocol/venus-protocol@npm:^7.3.0-dev.2":
+  version: 7.3.0-dev.2
+  resolution: "@venusprotocol/venus-protocol@npm:7.3.0-dev.2"
   dependencies:
     "@openzeppelin/contracts": 4.9.3
     "@openzeppelin/contracts-upgradeable": ^4.8.0
@@ -2833,7 +2833,7 @@ __metadata:
     bignumber.js: ^9.1.2
     dotenv: ^16.0.1
     module-alias: ^2.2.2
-  checksum: 764dd83b1b0c9d0f9d86f42f511a444ece14087fc5fea9f6ef7581e7b00eef963f6f5111829b74bbdd53b2b305d09e4a8641db13b32ec8ca7a573f9075c499fe
+  checksum: 4b644f82da409b58fc75eda5b93a140aa8410e5f267735ea7326505a0ea54cabf6567e90b4164fd533d1c81aecfa423ac383a55819e6f82e9be95ee8dac11047
   languageName: node
   linkType: hard
 
@@ -2871,7 +2871,7 @@ __metadata:
     "@venusprotocol/isolated-pools": ^2.5.0
     "@venusprotocol/oracle": ^1.10.0-dev.2
     "@venusprotocol/token-bridge": ^1.1.0-dev.1
-    "@venusprotocol/venus-protocol": ^7.3.0-dev.1
+    "@venusprotocol/venus-protocol": ^7.3.0-dev.2
     ajv: ^8.12.0
     chai: ^4.3.7
     commitizen: ^4.2.5
