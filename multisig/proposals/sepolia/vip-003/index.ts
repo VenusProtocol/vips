@@ -10,6 +10,7 @@ const NORMAL_TIMELOCK = "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb";
 const XVS_BRIDGE_ADMIN_PROXY = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
 const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const XVS_BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
+const REDSTONE_ORACLE = "0x4e6269Ef406B4CEE6e67BA5B5197c2FfD15099AE";
 const REDSTONE_XVS_FEED = "0x0d7697a15bce933cE8671Ba3D60ab062dA216C60";
 
 const vip003 = () => {
@@ -155,7 +156,7 @@ const vip003 = () => {
       params: [XVS, "updateBlacklist(address,bool)", NORMAL_TIMELOCK],
     },
     {
-      target: sepolia.REDSTONE_ORACLE,
+      target: REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
       params: [[sepolia.XVS, REDSTONE_XVS_FEED, 144000]],
     },
@@ -165,11 +166,7 @@ const vip003 = () => {
       params: [
         [
           sepolia.XVS,
-          [
-            sepolia.REDSTONE_ORACLE,
-            "0x0000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000",
-          ],
+          [REDSTONE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
           [true, false, false],
         ],
       ],

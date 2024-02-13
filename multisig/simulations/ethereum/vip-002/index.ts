@@ -20,11 +20,32 @@ const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 const TREASURY = "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa";
 const CRV_VTOKEN_RECEIVER = "0x7a16fF8270133F063aAb6C9977183D9e72835428";
 
-// Comptrollers
-const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
-const COMPTROLLER_CURVE = "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796";
+const RESILIENT_ORACLE = sepolia.RESILIENT_ORACLE;
+const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
+const POOL_REGISTRY = sepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
+
+const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+const COMPTROLLER_STABLECOINS = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
+const COMPTROLLER_CURVE = "0xD298182D3ACb43e98e32757FF09C91F203e9E67E";
+const MOCK_WBTC = "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b";
+const MOCK_USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
+const MOCK_USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
+const MOCK_WETH = "0x700868CAbb60e90d77B6588ce072d9859ec8E281";
+const VCRV_CORE = "0x121E3be152F283319310D807ed847E8b98319C1e";
+const VCRVUSD_CORE = "0xA09cFAd2e138fe6d8FF62df803892cbCb79ED082";
+const VUSDC_CORE = "0xF87bceab8DD37489015B426bA931e08A4D787616";
+const VUSDT_CORE = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+const VWBTC_CORE = "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383";
+const VWETH_CORE = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+const VCRVUSD_STABLECOINS = "0x9C5e7a3B4db931F07A6534f9e44100DDDc78c408";
+const VUSDC_STABLECOINS = "0xD5f83FCbb4a62779D0B37b9E603CD19Ad84884F0";
+const VUSDT_STABLECOINS = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
+const VCRV_CURVE = "0x9Db62c5BBc6fb79416545FcCBDB2204099217b78";
+const VCRVUSD_CURVE = "0xc7be132027e191636172798B933202E0f9CAD548";
+const MOCK_CRV = "0x2c78EF7eab67A6e0C9cAa6f2821929351bdDF3d3";
+const MOCK_crvUSD = "0x36421d873abCa3E2bE6BB3c819C0CF26374F63b6";
 
 type VTokenSymbol =
   | "vWBTC_Core"
@@ -36,22 +57,26 @@ type VTokenSymbol =
   | "vCRV_Curve";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
-  vWBTC_Core: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
-  vWETH_Core: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
-  vUSDT_Core: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
-  vUSDC_Core: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
-  vcrvUSD_Core: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
-  vcrvUSD_Curve: "0x2d499800239C4CD3012473Cb1EAE33562F0A6933",
-  vCRV_Curve: "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa",
+  vWBTC_Core: VWBTC_CORE,
+  vWETH_Core: VWETH_CORE,
+  vUSDT_Core: VUSDT_CORE,
+  vUSDC_Core: VUSDC_CORE,
+  vcrvUSD_Core: VCRVUSD_CORE,
+  vCRV_Core: VCRV_CORE,
+  vUSDC_Stablecoins: VUSDC_STABLECOINS,
+  vUSDT_Stablecoins: VUSDT_STABLECOINS,
+  vcrvUSD_Stablecoins: VCRVUSD_STABLECOINS,
+  vcrvUSD_Curve: VCRVUSD_CURVE,
+  vCRV_Curve: VCRV_CURVE,
 };
 
 const tokens = {
-  WBTC: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-  WETH: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-  USDC: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-  CRV: "0xD533a949740bb3306d119CC777fa900bA034cd52",
-  crvUSD: "0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E",
+  WBTC: MOCK_WBTC,
+  WETH: MOCK_WETH,
+  USDT: MOCK_USDT,
+  USDC: MOCK_USDC,
+  CRV: MOCK_CRV,
+  crvUSD: MOCK_crvUSD,
 };
 
 interface VTokenState {
@@ -105,6 +130,41 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
   },
+  vCRV_Core: {
+    name: "Venus CRV (Core)",
+    symbol: "vCRV_Core",
+    decimals: 8,
+    underlying: tokens.CRV,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+
+  // Stablecoins Pool
+  vUSDT_Stablecoins: {
+    name: "Venus USDT (Stablecoins)",
+    symbol: "vUSDT_Stablecoins",
+    decimals: 8,
+    underlying: tokens.USDT,
+    exchangeRate: parseUnits("1", 16),
+    comptroller: COMPTROLLER_STABLECOINS,
+  },
+  vUSDC_Stablecoins: {
+    name: "Venus USDC (Stablecoins)",
+    symbol: "vUSDC_Stablecoins",
+    decimals: 8,
+    underlying: tokens.USDC,
+    exchangeRate: parseUnits("1", 16),
+    comptroller: COMPTROLLER_STABLECOINS,
+  },
+  vcrvUSD_Stablecoins: {
+    name: "Venus crvUSD (Stablecoins)",
+    symbol: "vcrvUSD_Stablecoins",
+    decimals: 8,
+    underlying: tokens.crvUSD,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_STABLECOINS,
+  },
+
   // Curve Pool
   vcrvUSD_Curve: {
     name: "Venus crvUSD (Curve)",
@@ -288,14 +348,21 @@ forking(19033343, () => {
       it("should register Core pool in PoolRegistry", async () => {
         const pool = registeredPools[0];
         expect(pool.name).to.equal("Core");
-        expect(pool.creator).to.equal(ETHEREUM_MULTISIG);
+        expect(pool.creator).to.equal(GUARDIAN);
         expect(pool.comptroller).to.equal(COMPTROLLER_CORE);
+      });
+
+      it("should register Stablecoins pool in PoolRegistry", async () => {
+        const pool = registeredPools[1];
+        expect(pool.name).to.equal("Stablecoins");
+        expect(pool.creator).to.equal(GUARDIAN);
+        expect(pool.comptroller).to.equal(COMPTROLLER_STABLECOINS);
       });
 
       it("should register Curve pool in PoolRegistry", async () => {
         const pool = registeredPools[1];
         expect(pool.name).to.equal("Curve");
-        expect(pool.creator).to.equal(ETHEREUM_MULTISIG);
+        expect(pool.creator).to.equal(GUARDIAN);
         expect(pool.comptroller).to.equal(COMPTROLLER_CURVE);
       });
 
@@ -308,6 +375,15 @@ forking(19033343, () => {
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);
         expect(poolVTokens).to.include(vTokens.vUSDC_Core);
         expect(poolVTokens).to.include(vTokens.vcrvUSD_Core);
+      });
+
+      it("should register Stablecoins pool vTokens in Stablecoins pool Comptroller", async () => {
+        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_STABLECOINS);
+        const poolVTokens = await comptroller.getAllMarkets();
+        expect(poolVTokens).to.have.lengthOf(3);
+        expect(poolVTokens).to.include(vTokens.vUSDC_Stablecoins);
+        expect(poolVTokens).to.include(vTokens.vUSDT_Stablecoins);
+        expect(poolVTokens).to.include(vTokens.vcrvUSD_Stablecoins);
       });
 
       it("should register Curve pool vTokens in Curve pool Comptroller", async () => {
@@ -433,8 +509,9 @@ forking(19033343, () => {
         });
       };
 
-      checkComptroller(COMPTROLLER_CORE, "Core", parseUnits("1.1", 18));
-      checkComptroller(COMPTROLLER_CURVE, "Curve", parseUnits("1.1", 18));
+      checkComptroller(COMPTROLLER_CORE, "Core");
+      checkComptroller(COMPTROLLER_STABLECOINS, "Stablecoins");
+      checkComptroller(COMPTROLLER_CURVE, "Curve");
     });
 
     it("Interest rates", async () => {
