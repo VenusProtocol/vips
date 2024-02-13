@@ -6,9 +6,10 @@ import { makeProposal } from "../src/utils";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-const WBNB_AMOUNT = parseUnits("45", 18);
-
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const OPBNB_BRIDGE = "0xF05F0e4362859c3331Cb9395CBC201E3Fa6757Ea";
+const WBNB_AMOUNT = parseUnits("45", 18);
 export const BRIDGE_ASSETS = [
   {
     name: "BTCB",
@@ -51,6 +52,12 @@ export const vip254 = () => {
 
   return makeProposal(
     [
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("10000", 18), COMMUNITY_WALLET],
+      },
+
       ...BRIDGE_ASSETS.map(market => {
         return {
           target: TREASURY,
@@ -72,6 +79,14 @@ export const vip254 = () => {
           target: OPBNB_BRIDGE,
           signature: "bridgeERC20To(address,address,address,uint256,uint32,bytes)",
           params: [market.localAddress, market.remoteAddress, TREASURY, market.amount, 1, "0x"],
+        };
+      }),
+
+      ...BRIDGE_ASSETS.map(market => {
+        return {
+          target: market.localAddress,
+          signature: "approve(address,uint256)",
+          params: [OPBNB_BRIDGE, 0],
         };
       }),
 
