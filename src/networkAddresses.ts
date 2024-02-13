@@ -101,7 +101,7 @@ export const NETWORK_ADDRESSES = {
     NORMAL_TIMELOCK: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
     GUARDIAN: "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207",
     XVS: tokenBridgeOpbnbmainnetContracts.addresses.XVS,
-    XVS_VAULT_PROXY: opbnbmainnetDeployedContracts.addresses.XVSVaultProxy, // need to update package version when multisig is executed
+    XVS_VAULT_PROXY: opbnbmainnetDeployedContracts.addresses.XVSVaultProxy,
     GENERIC_TEST_USER_ACCOUNT: "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb",
     POOL_REGISTRY: "0x345a030Ad22e2317ac52811AC41C1A63cfa13aEe",
     RESILIENT_ORACLE: "0x8f3618c4F0183e14A218782c116fb2438571dAC9",
