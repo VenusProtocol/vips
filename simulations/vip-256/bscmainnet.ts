@@ -3,16 +3,18 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriod } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { ADDRESSES_1 } from "../../vips/vip-238";
-import { PRIME, vip254 } from "../../vips/vip-254/bscmainnet";
+import { ADDRESSES_2 } from "../../vips/vip-239";
+import { vip256 } from "../../vips/vip-256/bscmainnet";
+import { PRIME, vip255 } from "../../vips/vip-255/bscmainnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 
-const ADDRESSES = [...ADDRESSES_1];
+const ADDRESSES = [...ADDRESSES_1, ...ADDRESSES_2];
 
 const PRIME_ASSET_ADDRESSES = [
   "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
@@ -32,11 +34,13 @@ forking(36120958, () => {
         return setMaxStalePeriod(resilientOracle, assetContract);
       }),
     );
+
+    await pretendExecutingVip(vip255());
   });
 
-  testVip("VIP-236 Prime Program", vip254(), {
+  testVip("VIP-256 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)", vip256(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 10]);
+      await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 13]);
     },
   });
 
