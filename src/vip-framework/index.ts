@@ -119,7 +119,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be voteable", async () => {
-      await mine(150);
+      const proposalConfig = await governorProxy.proposalConfigs(proposal.type);
+      const votingDelay = await proposalConfig.votingDelay;
+      await mine(votingDelay);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
