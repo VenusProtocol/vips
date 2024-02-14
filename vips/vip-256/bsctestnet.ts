@@ -1,25 +1,26 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
-export const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
-export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
-export const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
+export const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
+export const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+export const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const ORACLE_GUARDIAN = "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-export const SnBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
-export const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
-export const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
-export const TEMP_VTOKEN_IMPL = "0xD2E69514F33111093586a25D75A306B66f75F658";
-export const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
-export const vSnBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
-export const vHAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
-export const VTOKEN_IMPL = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
+export const SnBNB = "0xd2aF6A916Bc77764dc63742BC30f71AF4cF423F4";
+export const HAY = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
+export const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
+export const TEMP_VTOKEN_IMPL = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
+export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
+export const VTOKEN_BEACON_SnBNB = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
+export const vSnBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
+export const vHAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
+export const VTOKEN_IMPL = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F";
 
-export const vip248 = () => {
+export const vip256 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-248 Stale Period Configuration for lisUSD and slisBNB",
+    title: "VIP-256 Stale Period Configuration for lisUSD and slisBNB",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -37,36 +38,6 @@ export const vip248 = () => {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
         params: ["slisBNB", 1500],
-      },
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            SnBNB,
-            [
-              BINANCE_ORACLE,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
-            [true, false, false],
-          ],
-        ],
-      },
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            HAY,
-            [
-              BINANCE_ORACLE,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
-            [true, false, false],
-          ],
-        ],
       },
       {
         target: ACM,
@@ -104,6 +75,11 @@ export const vip248 = () => {
         params: [TEMP_VTOKEN_IMPL],
       },
       {
+        target: VTOKEN_BEACON_SnBNB,
+        signature: "upgradeTo(address)",
+        params: [TEMP_VTOKEN_IMPL],
+      },
+      {
         target: vHAY,
         signature: "setName(string)",
         params: ["Venus lisUSD (Stablecoins)"],
@@ -128,10 +104,15 @@ export const vip248 = () => {
         signature: "upgradeTo(address)",
         params: [VTOKEN_IMPL],
       },
+      {
+        target: VTOKEN_BEACON_SnBNB,
+        signature: "upgradeTo(address)",
+        params: [VTOKEN_IMPL],
+      },
     ],
     meta,
     ProposalType.REGULAR,
   );
 };
 
-export default vip248;
+export default vip256;

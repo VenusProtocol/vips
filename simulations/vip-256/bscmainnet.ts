@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vHAY, vSnBNB, vip248 } from "../../vips/vip-248/bsctestnet";
+import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vHAY, vSnBNB, vip256 } from "../../vips/vip-256/bscmainnet";
 import ACM_ABI from "./abi/acm.json";
 import BEACON_ABI from "./abi/beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TEMP_VTOKEN_ABI from "./abi/tempVToken.json";
 
-forking(37533665, () => {
+forking(35926690, () => {
   const provider = ethers.provider;
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
@@ -41,10 +41,10 @@ forking(37533665, () => {
 
     it("Verify Name and Symbol", async () => {
       const name = await vHay.name();
-      expect(name).equals("Venus HAY (Stable Coins)");
+      expect(name).equals("Venus HAY (Stablecoins)");
 
       const symbol = await vHay.symbol();
-      expect(symbol).equals("vHAY_StableCoins");
+      expect(symbol).equals("vHAY_Stablecoins");
 
       const nameSnbnb = await vSnbnb.name();
       expect(nameSnbnb).equals("Venus SnBNB (Liquid Staked BNB)");
@@ -54,11 +54,11 @@ forking(37533665, () => {
     });
   });
 
-  testVip("VIP-247 Chaos Labs Recommendations", vip248(), {
+  testVip("VIP-256 Rebrand of VTokens for HAY and SnBNB", vip256(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [2]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
-      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [4]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [TEMP_VTOKEN_ABI], ["NameUpdated", "SymbolUpdated"], [2, 2]);
     },
   });
@@ -89,11 +89,14 @@ forking(37533665, () => {
     });
 
     it("Check Prices", async () => {
+      await binanceOracle.setMaxStalePeriod("lisUSD", "31536000");
+      await binanceOracle.setMaxStalePeriod("slisBNB", "31536000");
+
       const priceHAY = await resilientOracle.getUnderlyingPrice(vHAY);
-      expect(priceHAY).equals("998594200000000000");
+      expect(priceHAY).equals("998606210000000000");
 
       const priceSnBNB = await resilientOracle.getUnderlyingPrice(vSnBNB);
-      expect(priceSnBNB).equals("217000000000000000000");
+      expect(priceSnBNB).equals("303298104890000000000");
     });
   });
 });
