@@ -38,5 +38,4 @@ export const vip254 = () => {
   );
 };
 
-
 export default vip254;
