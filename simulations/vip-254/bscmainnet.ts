@@ -6,7 +6,7 @@ import { expectEvents, setMaxStalePeriod } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { ADDRESSES_1, vip238 } from "../../vips/vip-238";
 import { ADDRESSES_2, vip239 } from "../../vips/vip-239";
-import { PRIME, vip240 } from "../../vips/vip-240";
+import { PRIME, vip254 } from "../../vips/vip-254/bscmainnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
@@ -35,7 +35,7 @@ forking(36120958, () => {
     );
   });
 
-  testVip("VIP-236 Prime Program", vip240(), {
+  testVip("VIP-236 Prime Program", vip254(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 10]);
     },
