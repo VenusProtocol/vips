@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { ADDRESSES_1 } from "../../vips/vip-238";
 import { ADDRESSES_2 } from "../../vips/vip-239";
 import { PRIME, vip255 } from "../../vips/vip-255/bscmainnet";
-import { vip256 } from "../../vips/vip-256/bscmainnet";
+import { vip257 } from "../../vips/vip-257/bscmainnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
@@ -38,7 +38,7 @@ forking(36120958, () => {
     await pretendExecutingVip(vip255());
   });
 
-  testVip("VIP-256 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)", vip256(), {
+  testVip("VIP-257 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)", vip257(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 13]);
     },

@@ -14,7 +14,7 @@ const commands = [
   }),
 ];
 
-export const vip256 = () => {
+export const vip257 = () => {
   const meta = {
     version: "v2",
     title: "VIP-256 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)",
@@ -38,4 +38,4 @@ export const vip256 = () => {
   );
 };
 
-export default vip256;
+export default vip257;
