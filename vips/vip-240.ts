@@ -37,3 +37,6 @@ export const vip240 = () => {
     ProposalType.FAST_TRACK,
   );
 };
+
+
+export default vip240;
