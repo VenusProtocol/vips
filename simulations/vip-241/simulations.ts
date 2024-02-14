@@ -24,7 +24,7 @@ const PRIME_ASSET_ADDRESSES = [
 ];
 const XVS_ADDRESS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-forking(35091518, () => {
+forking(36120958, () => {
   before(async () => {
     const resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
 
@@ -35,8 +35,6 @@ forking(35091518, () => {
       }),
     );
 
-    await pretendExecutingVip(vip238());
-    await pretendExecutingVip(vip239());
     await pretendExecutingVip(vip240());
   });
 
