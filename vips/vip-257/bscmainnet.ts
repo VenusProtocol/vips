@@ -17,7 +17,7 @@ const commands = [
 export const vip257 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-256 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)",
+    title: "VIP-257 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)",
     description: `If passed, this VIP will burn the remaining 13 (30 days) Prime tokens minted in the [VIP-239](https://app.venus.io/#/governance/proposal/239), related to the [Venus 3rd Anniversary x Polyhedra Campaign](https://community.venus.io/t/venus-3rd-anniversary-x-polyhedra-campaign-results/4020).`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
