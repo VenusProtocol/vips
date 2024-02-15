@@ -1,7 +1,7 @@
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract, ContractInterface } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
@@ -9,15 +9,19 @@ import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
+import { TransactionResponse } from "@ethersproject/providers";
+import { Fragment, JsonFragment } from "@ethersproject/abi";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 
 const VOTING_PERIOD = 28800;
 
+const FORKED_NETWORK = process.env.FORKED_NETWORK as keyof typeof NETWORK_ADDRESSES;
+
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
+  NETWORK_ADDRESSES[FORKED_NETWORK];
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK]
+  ? NETWORK_CONFIG[FORKED_NETWORK]
   : 0;
 
 export const forking = (blockNumber: number, fn: () => void) => {
@@ -30,10 +34,10 @@ export const forking = (blockNumber: number, fn: () => void) => {
 };
 
 export interface TestingOptions {
-  governorAbi?: ContractInterface;
+  governorAbi?: Array<Fragment | JsonFragment | string>;
   proposer?: string;
   supporter?: string;
-  callbackAfterExecution?: Func;
+  callbackAfterExecution?: (tx: TransactionResponse) => void | Promise<void>;
 }
 
 const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
@@ -78,7 +82,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
 
     // Iniitalize impl via Proxy
-    governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
+    governorProxy = await ethers.getContractAt(options.governorAbi ?? (GOVERNOR_BRAVO_DELEGATE_ABI as any[]), GOVERNOR_PROXY);
   };
 
   describe(`${description} commands`, () => {
