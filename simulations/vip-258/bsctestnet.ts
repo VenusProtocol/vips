@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip251Testnet } from "../../vips/vip-251/bsctestnet";
+import { vip258Testnet } from "../../vips/vip-258/bsctestnet";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidatorAbi.json";
@@ -29,7 +29,7 @@ forking(31942719, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Liquidator Update", vip251Testnet(), {
+  testVip("VIP-Liquidator Liquidator Update", vip258Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

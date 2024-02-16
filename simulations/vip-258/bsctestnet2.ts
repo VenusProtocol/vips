@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip251Testnet2 } from "../../vips/vip-251/bsctestnet-2";
+import { vip258Testnet2 } from "../../vips/vip-258/bsctestnet-2";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidatorAbi.json";
@@ -29,7 +29,7 @@ forking(33476706, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Liquidator Update", vip251Testnet2());
+  testVip("VIP-Liquidator Liquidator Update", vip258Testnet2());
 
   describe("Post-VIP behavior", async () => {
     it("Permissions restrictLiquidation", async () => {
