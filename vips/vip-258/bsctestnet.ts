@@ -37,16 +37,6 @@ export const vip258 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setCollateralFactor(address,uint256)", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setCollateralFactor(address,uint256)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [COMPTROLLER, "_setLiquidationIncentive(uint256)", NORMAL_TIMELOCK],
       },
       {
@@ -57,27 +47,7 @@ export const vip258 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
@@ -87,27 +57,7 @@ export const vip258 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setProtocolPaused(bool)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setProtocolPaused(bool)", CRITICAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", FAST_TRACK_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", CRITICAL_TIMELOCK],
       },
       {
         target: ACM,
