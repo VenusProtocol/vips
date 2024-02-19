@@ -27,9 +27,9 @@ import {
 } from "../../../vips/vip-converter/bsctestnet";
 import BEACON_ABI from "../abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
+import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
-import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 
 forking(37698400, () => {
   const provider = ethers.provider;

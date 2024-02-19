@@ -27,10 +27,10 @@ import {
 } from "../../../vips/vip-converter/bscmainnet";
 import BEACON_ABI from "../abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
+import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "../abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
-import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
