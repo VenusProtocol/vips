@@ -16,9 +16,11 @@ import {
   converters,
 } from "../../../vips/vip-248/vip-248-testnet/Addresses";
 import {
+  LIQUIDATOR,
   NEW_RISK_FUND_CONVERTER_IMP,
   NEW_SINGLE_TOKEN_CONVERTER_IMP,
   PROXY_ADMIN,
+  PSR,
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
   vipConverter,
@@ -27,15 +29,18 @@ import BEACON_ABI from "../abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
+import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 
 forking(37698400, () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let beacon: Contract;
+  let liquidator: Contract;
 
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
+    liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
   });
 
   testVip("VIP-Converter", vipConverter(), {
@@ -78,6 +83,10 @@ forking(37698400, () => {
           }
         }
       }
+    });
+
+    it("updates protocolShareReserveAddress", async () => {
+      expect(PSR).to.equal(await liquidator.protocolShareReserve());
     });
   });
 });

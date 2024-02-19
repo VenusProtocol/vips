@@ -16,9 +16,11 @@ import {
   converters,
 } from "../../../vips/vip-248/vip-248/Addresses";
 import {
+  LIQUIDATOR,
   NEW_RISK_FUND_CONVERTER_IMP,
   NEW_SINGLE_TOKEN_CONVERTER_IMP,
   PROXY_ADMIN,
+  PSR,
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
   vipConverter,
@@ -28,6 +30,7 @@ import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "../abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
+import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
@@ -53,11 +56,13 @@ forking(35781703, () => {
   let proxyAdmin: Contract;
   let protocolShareReserve: Contract;
   let beacon: Contract;
+  let liquidator: Contract;
 
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+    liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
 
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
@@ -106,6 +111,10 @@ forking(35781703, () => {
           }
         }
       }
+    });
+
+    it("updates protocolShareReserveAddress", async () => {
+      expect(PSR).to.equal(await liquidator.protocolShareReserve());
     });
   });
 });

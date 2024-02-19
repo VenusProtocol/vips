@@ -6,6 +6,8 @@ export const NEW_SINGLE_TOKEN_CONVERTER_IMP = "";
 export const NEW_RISK_FUND_CONVERTER_IMP = "";
 export const RISK_FUND_CONVERTER_PROXY = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
 export const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+export const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
+export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
 export const vipConverter = () => {
   const meta = {
@@ -29,6 +31,11 @@ export const vipConverter = () => {
         target: SINGLE_TOKEN_CONVERTER_BEACON,
         signature: "upgradeTo(address)",
         params: [NEW_SINGLE_TOKEN_CONVERTER_IMP],
+      },
+      {
+        target: LIQUIDATOR,
+        signature: "setProtocolShareReserve(address)",
+        params: [PSR],
       },
     ],
     meta,
