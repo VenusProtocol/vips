@@ -12,9 +12,11 @@ export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const vipConverter = () => {
   const meta = {
     version: "v2",
-    title: "VIP-Converter upgrades the implementation of token converter",
+    title:
+      "VIP-Converter upgrades the implementation of token converter and sets the PSR address in liquidator contract.",
     description: `
-            This VIP upgrades the implementation of RiskFundConverter and SingleTokenConverter`,
+            1. This VIP upgrades the implementation of RiskFundConverter, SingleTokenConverter.
+            2. This VIP sets the address of the PSR in the Liquidator contract.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
