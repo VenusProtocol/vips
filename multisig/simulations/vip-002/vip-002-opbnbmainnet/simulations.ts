@@ -1,11 +1,10 @@
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
@@ -36,7 +35,7 @@ const COMPTROLLER_BEACON = "0x11C3e19236ce17729FC66b74B537de00C54d44e7";
 const COMPTROLLER_IMPL = "0x557C69aDf4bB12305F00F62f1Ab71CAe9BFa3D46";
 const VTOKEN_BEACON = "0xfeD1d3a13597c5aBc893Af41ED5cb17e64c847c7";
 const VTOKEN_IMPL = "0x227c4D4176604908755be2B513A2b7bcA6f54a1F";
-
+const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const BLOCKS_PER_YEAR = 31_536_000; // assuming a block is mined every 1 seconds
 
 type VTokenSymbol = "vBTCB_Core" | "vETH_Core" | "vUSDT_Core" | "vWBNB_Core" | "vFDUSD_Core";
@@ -128,7 +127,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.7",
     liquidationThreshold: "0.75",
     reserveFactor: "0.2",
-    initialSupply: "0.3",
+    initialSupply: "0.03553143",
     vTokenReceiver: TREASURY,
   },
   vETH_Core: {
@@ -137,7 +136,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.7",
     liquidationThreshold: "0.75",
     reserveFactor: "0.2",
-    initialSupply: "5",
+    initialSupply: "0.61097887",
     vTokenReceiver: TREASURY,
   },
   vUSDT_Core: {
@@ -146,7 +145,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.77",
     reserveFactor: "0.1",
-    initialSupply: "10000",
+    initialSupply: "1800.00000001",
     vTokenReceiver: TREASURY,
   },
   vWBNB_Core: {
@@ -155,7 +154,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.6",
     liquidationThreshold: "0.65",
     reserveFactor: "0.25",
-    initialSupply: "45",
+    initialSupply: "4.88149960",
     vTokenReceiver: TREASURY,
   },
   vFDUSD_Core: {
@@ -164,7 +163,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.77",
     reserveFactor: "0.1",
-    initialSupply: "10000",
+    initialSupply: "1800.00000001",
     vTokenReceiver: TREASURY,
   },
 };
@@ -217,43 +216,15 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(16347100, () => {
+forking(16775600, () => {
   let poolRegistry: Contract;
+  let fdusd: Contract;
+  let oldCommunityWalletBalance: BigNumber;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
-
-    const btcb = await ethers.getContractAt(ERC20_ABI, BTCB);
-    const btcbHolder = await initMainnetUser(
-      "0xA7E84DE1F48743143223bA17153EA88732490Cd2",
-      ethers.utils.parseEther("1"),
-    );
-    await btcb.connect(btcbHolder).transfer(TREASURY, parseUnits("0.3", 18));
-
-    const eth = await ethers.getContractAt(ERC20_ABI, ETH);
-    const ethHolder = await initMainnetUser("0xA7E84DE1F48743143223bA17153EA88732490Cd2", ethers.utils.parseEther("1"));
-    await eth.connect(ethHolder).transfer(TREASURY, parseUnits("5", 18));
-
-    const usdt = await ethers.getContractAt(ERC20_ABI, USDT);
-    const usdtHolder = await initMainnetUser(
-      "0x001cEb373C83ae75b9f5CF78Fc2aBa3e185d09E2",
-      ethers.utils.parseEther("1"),
-    );
-    await usdt.connect(usdtHolder).transfer(TREASURY, parseUnits("10000", 18));
-
-    const wbnb = await ethers.getContractAt(ERC20_ABI, WBNB);
-    const wbnbHolder = await initMainnetUser(
-      "0x5A5454A6030FB50ceb3eb78977D140198A27be5e",
-      ethers.utils.parseEther("1"),
-    );
-    await wbnb.connect(wbnbHolder).transfer(TREASURY, parseUnits("45", 18));
-
-    const fdusd = await ethers.getContractAt(ERC20_ABI, FDUSD);
-    const fdusdHolder = await initMainnetUser(
-      "0x001cEb373C83ae75b9f5CF78Fc2aBa3e185d09E2",
-      ethers.utils.parseEther("1"),
-    );
-    await fdusd.connect(fdusdHolder).transfer(TREASURY, parseUnits("10000", 18));
+    fdusd = await ethers.getContractAt(ERC20_ABI, FDUSD);
+    oldCommunityWalletBalance = await fdusd.balanceOf(COMMUNITY_WALLET);
   });
 
   describe("Contracts setup", () => {
@@ -273,6 +244,15 @@ forking(16347100, () => {
         }
       }
     });
+
+    describe("Community Wallet", () => {
+      it(`should have received 7,200 FDUSD`, async () => {
+        const FDUSD_EXPECTED_TRANSFER_AMOUNT: BigNumber = parseUnits("7200", 18);
+        const currentCommunityWalletBalance: BigNumber = await fdusd.balanceOf(COMMUNITY_WALLET);
+        expect(currentCommunityWalletBalance.sub(oldCommunityWalletBalance)).equals(FDUSD_EXPECTED_TRANSFER_AMOUNT);
+      });
+    });
+
     describe("Implementation check", () => {
       let comptrollerBeacon: Contract;
       let vtokenBeacon: Contract;

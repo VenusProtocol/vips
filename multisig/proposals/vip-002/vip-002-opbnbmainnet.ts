@@ -20,6 +20,7 @@ const VUSDT_CORE = "0xb7a01Ba126830692238521a1aA7E7A7509410b8e";
 const VWBNB_CORE = "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672";
 const VFDUSD_CORE = "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917";
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 
 // IL configuration & FDUSD price feed configuration
 export const vip002 = () => {
@@ -214,7 +215,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [BTCB, "300000000000000000", opbnbmainnet.NORMAL_TIMELOCK],
+      params: [BTCB, "35531430000000000", opbnbmainnet.NORMAL_TIMELOCK],
     },
     {
       target: BTCB,
@@ -224,7 +225,7 @@ export const vip002 = () => {
     {
       target: BTCB,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "300000000000000000"],
+      params: [POOL_REGISTRY, "35531430000000000"],
     },
     {
       target: VBTCB_CORE,
@@ -239,7 +240,7 @@ export const vip002 = () => {
           VBTCB_CORE,
           "700000000000000000",
           "750000000000000000",
-          "300000000000000000",
+          "35531430000000000",
           TREASURY,
           "1000000000000000000",
           "550000000000000000",
@@ -249,7 +250,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [ETH, "5000000000000000000", opbnbmainnet.NORMAL_TIMELOCK],
+      params: [ETH, "610978879332136515", opbnbmainnet.NORMAL_TIMELOCK],
     },
     {
       target: ETH,
@@ -259,7 +260,7 @@ export const vip002 = () => {
     {
       target: ETH,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "5000000000000000000"],
+      params: [POOL_REGISTRY, "610978879332136515"],
     },
     {
       target: VETH_CORE,
@@ -274,7 +275,7 @@ export const vip002 = () => {
           VETH_CORE,
           "700000000000000000",
           "750000000000000000",
-          "5000000000000000000",
+          "610978879332136515",
           TREASURY,
           "25000000000000000000",
           "16000000000000000000",
@@ -284,7 +285,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDT, "10000000000000000000000", opbnbmainnet.NORMAL_TIMELOCK],
+      params: [USDT, "1800000000010000000000", opbnbmainnet.NORMAL_TIMELOCK],
     },
     {
       target: USDT,
@@ -294,7 +295,7 @@ export const vip002 = () => {
     {
       target: USDT,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "10000000000000000000000"],
+      params: [POOL_REGISTRY, "1800000000010000000000"],
     },
     {
       target: VUSDT_CORE,
@@ -309,7 +310,7 @@ export const vip002 = () => {
           VUSDT_CORE,
           "750000000000000000",
           "770000000000000000",
-          "10000000000000000000000",
+          "1800000000010000000000",
           TREASURY,
           "150000000000000000000000",
           "130000000000000000000000",
@@ -319,7 +320,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WBNB, "45000000000000000000", opbnbmainnet.NORMAL_TIMELOCK],
+      params: [WBNB, "4881499602605344833", opbnbmainnet.NORMAL_TIMELOCK],
     },
     {
       target: WBNB,
@@ -329,7 +330,7 @@ export const vip002 = () => {
     {
       target: WBNB,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "45000000000000000000"],
+      params: [POOL_REGISTRY, "4881499602605344833"],
     },
     {
       target: VWBNB_CORE,
@@ -344,7 +345,7 @@ export const vip002 = () => {
           VWBNB_CORE,
           "600000000000000000",
           "650000000000000000",
-          "45000000000000000000",
+          "4881499602605344833",
           TREASURY,
           "100000000000000000000",
           "75000000000000000000",
@@ -354,7 +355,7 @@ export const vip002 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [FDUSD, "10000000000000000000000", opbnbmainnet.NORMAL_TIMELOCK],
+      params: [FDUSD, "1800000000010000000000", opbnbmainnet.NORMAL_TIMELOCK],
     },
     {
       target: FDUSD,
@@ -364,7 +365,7 @@ export const vip002 = () => {
     {
       target: FDUSD,
       signature: "approve(address,uint256)",
-      params: [POOL_REGISTRY, "10000000000000000000000"],
+      params: [POOL_REGISTRY, "1800000000010000000000"],
     },
     {
       target: VFDUSD_CORE,
@@ -379,12 +380,17 @@ export const vip002 = () => {
           VFDUSD_CORE,
           "750000000000000000",
           "770000000000000000",
-          "10000000000000000000000",
+          "1800000000010000000000",
           TREASURY,
           "150000000000000000000000",
           "130000000000000000000000",
         ],
       ],
+    },
+    {
+      target: TREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [FDUSD, "7200000000000000000000", COMMUNITY_WALLET],
     },
   ]);
 };
