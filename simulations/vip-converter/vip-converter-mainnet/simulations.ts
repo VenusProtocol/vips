@@ -3,7 +3,7 @@ import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 // imported addresses from converter vip
 import {
   BTCBPrimeConverterTokenOuts,
@@ -20,6 +20,7 @@ import {
   NEW_RISK_FUND_CONVERTER_IMP,
   NEW_SINGLE_TOKEN_CONVERTER_IMP,
   PROXY_ADMIN,
+  PROXY_ADMIN_LIQUIDATOR,
   PSR,
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
@@ -29,35 +30,56 @@ import BEACON_ABI from "../abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
 import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "../abi/ProtocolShareReserve.json";
+import PROXY_ADMIN_ABI from "../abi/ProxyAdmin.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+
 const ASSETS = [
-  "0x55d398326f99059ff775485246999027b3197955",
-  "0x7130d2a12b9bcbfae4f2634d864a1ee1ce3ead9c",
-  "0x2170ed0880ac9a755fd29b2688956bd959f933f8",
-  "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3",
-  "0x40af3827f39d0eacbf4a168f8d4ee67c121d11c9",
-  "0x7083609fce4d1d8dc0c979aab8c869ea2c873402",
-  "0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82",
-  "0xf8a0bf9cf54bb92f17374d9e9a321e6a111a51bd",
-  "0xce7de646e7208a4ef112cb6ed5038fa6cc6b12e3",
-  "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409",
+  "0xfb6115445Bff7b52FeB98650C87f44907E58f802", // AAVE
+  "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47", // ADA
+  "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf", // BCH
+  "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B", // BETH
+  "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
+  "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82", // CAKE
+  "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3", // DAI -- shi chala
+  "0xbA2aE424d960c26247Dd6c32edC70B295c744C43", // DOGE
+  "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402", // DOT
+  "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
+  "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409", // FDUSD
+  "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153", // FIL
+  "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD", // LINK
+  "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94", // LTC -- shi chala
+  "0xCC42724C6683B7E57334c4E856f4c9965ED682bD", // MATIC
+  "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A", // SXP
+  "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", // TRX
+  "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9", // TUSD
+  "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1", // UNI -- shi chala
+  "0x55d398326f99059fF775485246999027B3197955", // USDT
+  "0xa2E3356610840701BDf5611a53974510Ae27E2e1", // WBETH
+  "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE", // XRP
+  "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS
+  "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // USDC
 ];
 
 const PROTOCOL_SHARE_RESERVE_PROXY = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
-forking(35781703, () => {
-  const provider = ethers.provider;
-  let impersonatedTimelock: Signer;
-  let proxyAdmin: Contract;
-  let protocolShareReserve: Contract;
-  let beacon: Contract;
-  let liquidator: Contract;
+function createInitializeData() {
+  const iface = new ethers.utils.Interface(LIQUIDATOR_ABI);
+  return iface.encodeFunctionData("transferOwnershipToTimelock", [NORMAL_TIMELOCK]);
+}
 
+const provider = ethers.provider;
+let impersonatedTimelock: Signer;
+let proxyAdmin: Contract;
+let protocolShareReserve: Contract;
+let beacon: Contract;
+let liquidator: Contract;
+
+forking(36330720, () => {
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
@@ -67,54 +89,104 @@ forking(35781703, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
 
-  testVip("VIP-Converter", vipConverter(), {
+  testVip("VIP-Converter", vipConverter(createInitializeData()), {
     callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [4]);
+      await expectEvents(
+        txResponse,
+        [LIQUIDATOR_ABI],
+        ["OwnershipTransferStarted", "OwnershipTransferred", "NewProtocolShareReserve"],
+        [1, 1, 1],
+      );
     },
   });
 
   describe("Post-VIP behavior", () => {
-    it("release funds should execute successfully", async () => {
-      await protocolShareReserve.connect(impersonatedTimelock).releaseFunds(COMPTROLLER, ASSETS);
-    });
-
     it("RiskFundConverter and SingleTokenConverter should have new implementation", async () => {
       expect(await proxyAdmin.getProxyImplementation(RISK_FUND_CONVERTER_PROXY)).to.equal(NEW_RISK_FUND_CONVERTER_IMP);
       expect(await beacon.implementation()).to.equal(NEW_SINGLE_TOKEN_CONVERTER_IMP);
     });
 
-    it("amount out and amount in tests", async () => {
-      const convertersTokenOutArray = [
-        RiskFundConverterTokenOuts,
-        USDTPrimeConverterTokenOuts,
-        USDCPrimeConverterTokenOuts,
-        BTCBPrimeConverterTokenOuts,
-        ETHPrimeConverterTokenOuts,
-        XVSVaultConverterTokenOuts,
-      ];
-
-      for (let i = 0; i < converters.length; i++) {
-        const converterAddress = converters[i];
-        const tokenOuts = convertersTokenOutArray[i];
-
-        for (const tokenAddress of tokenOuts) {
-          const converter: Contract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, provider);
-          const configuration = await converter.conversionConfigurations(BaseAssets[i], tokenAddress);
-          if (configuration.conversionAccess == 2) continue;
-
-          const balance = await converter.balanceOf(tokenAddress);
-          if (balance > 0) {
-            const [, amountInMantissa] = await converter.getAmountIn(balance, BaseAssets[i], tokenAddress);
-            const [, amountOutMantissa] = await converter.getAmountOut(amountInMantissa, BaseAssets[i], tokenAddress);
-
-            expect(amountOutMantissa).to.be.lessThanOrEqual(balance);
-          }
-        }
-      }
-    });
-
     it("updates protocolShareReserveAddress", async () => {
       expect(PSR).to.equal(await liquidator.protocolShareReserve());
+    });
+  });
+});
+
+// Release Fund tests
+forking(36324143, () => {
+  before(async () => {
+    protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
+    await pretendExecutingVip(vipConverter(createInitializeData()));
+  });
+
+  it("amount out and amount in tests", async () => {
+    const convertersTokenOutArray = [
+      RiskFundConverterTokenOuts,
+      USDTPrimeConverterTokenOuts,
+      USDCPrimeConverterTokenOuts,
+      BTCBPrimeConverterTokenOuts,
+      ETHPrimeConverterTokenOuts,
+      XVSVaultConverterTokenOuts,
+    ];
+
+    for (let i = 0; i < converters.length; i++) {
+      const converterAddress = converters[i];
+      const tokenOuts = convertersTokenOutArray[i];
+
+      for (const tokenAddress of tokenOuts) {
+        const converter: Contract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        const configuration = await converter.conversionConfigurations(BaseAssets[i], tokenAddress);
+        if (configuration.conversionAccess == 2) continue;
+
+        const balance = await converter.balanceOf(tokenAddress);
+        if (balance > 0) {
+          const [, amountInMantissa] = await converter.getAmountIn(balance, BaseAssets[i], tokenAddress);
+          const [, amountOutMantissa] = await converter.getAmountOut(amountInMantissa, BaseAssets[i], tokenAddress);
+
+          expect(amountOutMantissa).to.be.lessThanOrEqual(balance);
+        }
+      }
+    }
+  });
+
+  it("release funds should execute successfully", async () => {
+    await protocolShareReserve.connect(impersonatedTimelock).releaseFunds(COMPTROLLER, ASSETS);
+  });
+});
+
+forking(36324143, () => {
+  let liquidator: ethers.Contract;
+  let proxyAdmin: ethers.Contract;
+  const provider = ethers.provider;
+  let prevImplLiquidator: string;
+
+  before(async () => {
+    liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
+    proxyAdmin = new ethers.Contract(PROXY_ADMIN_LIQUIDATOR, PROXY_ADMIN_ABI, provider);
+    prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR);
+    await pretendExecutingVip(vipConverter(createInitializeData()));
+  });
+
+  describe("Checks", async () => {
+    it("Liquidator Owner should equal to Normal Timelock", async () => {
+      const currOwner = await liquidator.owner();
+      expect(currOwner).equals(NORMAL_TIMELOCK);
+    });
+
+    it("Liquidator Implementation should restore", async () => {
+      const currImpl = await proxyAdmin.getProxyImplementation(LIQUIDATOR);
+      expect(currImpl).equals(prevImplLiquidator);
+    });
+
+    it("Liquidator pending owner should equal to zero address", async () => {
+      const currPendingOwner = await liquidator.pendingOwner();
+      expect(currPendingOwner).equals(ethers.constants.AddressZero);
+    });
+
+    it("ProxyAdmin owner should equal to Normal Timelock", async () => {
+      const currOwner = await proxyAdmin.owner();
+      expect(currOwner).equals(NORMAL_TIMELOCK);
     });
   });
 });
