@@ -13,6 +13,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import WSTETH_ORACLE_ABI from "./abi/wstETHOracle.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -25,6 +26,7 @@ const WSTETH = "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0";
 const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
+const WSTETH_NONEQUIVALENCE_ORACLE = "0xd082B50b3EeB012605598bB45Fc2Be853b9AFEEf";
 
 type VTokenSymbol = "vwstETH_LiquidStakedETH" | "vWETH_LiquidStakedETH";
 
@@ -121,17 +123,25 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(19175701, () => {
+forking(19276500, () => {
   let poolRegistry: Contract;
+  let wstETHNonEquivalentOracle: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
+    wstETHNonEquivalentOracle = await ethers.getContractAt(WSTETH_ORACLE_ABI, WSTETH_NONEQUIVALENCE_ORACLE);
   });
 
   describe("Contracts setup", () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
       checkVToken(address, vTokenState[symbol]);
     }
+  });
+
+  describe("Secondary wstETH oracle", () => {
+    it("should revert for uncofigured stETH price", async () => {
+      await expect(wstETHNonEquivalentOracle.getPrice(WSTETH)).to.be.revertedWith("invalid resilient oracle price");
+    });
   });
 
   describe("Post-Execution state", () => {
@@ -282,6 +292,14 @@ forking(19175701, () => {
         });
       };
       checkComptroller(LIQUID_STAKED_COMPTROLLER, "Liquid Staked ETH");
+    });
+
+    describe("Secondary wstETH oracle", () => {
+      it("should not revert", async () => {
+        await expect(wstETHNonEquivalentOracle.getPrice(WSTETH)).not.to.be.revertedWith(
+          "invalid resilient oracle price",
+        );
+      });
     });
 
     it("Interest rates", async () => {
