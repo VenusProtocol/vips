@@ -31,7 +31,7 @@ export const vip011 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[vWETH_NEW_UNDERLYING, CHAINLINK_ETH_FEED, 144000]],
+      params: [[vWETH_NEW_UNDERLYING, CHAINLINK_ETH_FEED, 86400]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
