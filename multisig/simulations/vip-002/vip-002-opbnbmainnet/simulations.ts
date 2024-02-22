@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip002 } from "../../../proposals/vip-002/vip-002-opbnbmainnet";
@@ -432,6 +433,10 @@ forking(16775600, () => {
           );
         }
       }
+    });
+
+    describe("generic tests", async () => {
+      checkIsolatedPoolsComptrollers();
     });
   });
 });
