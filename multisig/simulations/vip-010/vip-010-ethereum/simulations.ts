@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { vip010 } from "../../../proposals/vip-010/vip-010-ethereum";
@@ -27,6 +28,8 @@ const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const WSTETH_NONEQUIVALENCE_ORACLE = "0xd082B50b3EeB012605598bB45Fc2Be853b9AFEEf";
+
+const WSTETH_HOLDER = "0x5fEC2f34D80ED82370F733043B6A536d7e9D7f8d";
 
 type VTokenSymbol = "vwstETH_LiquidStakedETH" | "vWETH_LiquidStakedETH";
 
@@ -322,6 +325,8 @@ forking(19276500, () => {
   });
 
   describe("generic tests", async () => {
-    // checkIsolatedPoolsComptrollers();
+    checkIsolatedPoolsComptrollers({
+      [LIQUID_STAKED_COMPTROLLER]: WSTETH_HOLDER,
+    });
   });
 });
