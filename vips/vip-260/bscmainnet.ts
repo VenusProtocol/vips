@@ -3,7 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const TUSDOLD = "0x14016E85a25aeb13065688cAFB43044C2ef86784"
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
 
@@ -22,7 +22,7 @@ export const vip260 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [TUSDOLD, parseUnits("105000", 18), BINANCE_WALLET],
+        params: [USDC, parseUnits("105000", 18), BINANCE_WALLET],
       },
     ],
     meta,
