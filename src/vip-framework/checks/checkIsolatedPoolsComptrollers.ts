@@ -82,7 +82,7 @@ const runPoolTests = async (pool: PoolMetadata) => {
         supplyMarket = undefined;
         continue;
       }
-    } 
+    }
     if (!borrowMarket) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);

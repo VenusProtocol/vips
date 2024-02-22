@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import {
   COMPTROLLER_BEACON,
   NATIVE_TOKEN_GATEWAY,
@@ -19,7 +20,6 @@ import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/ERC20.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
 import VTOKEN_ABI from "../abi/VToken.json";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
@@ -44,7 +44,6 @@ forking(5223870, () => {
   const provider = ethers.provider;
   let user1: Signer;
   let user2: Signer;
-  let wstEthHolder: Signer;
   let comptroller: Contract;
   let vWeth: Contract;
   let vcrvUsd: Contract;
@@ -71,7 +70,6 @@ forking(5223870, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
-    wstEthHolder = await initMainnetUser(WST_ETH_HOLDER, parseUnits("2"));
 
     nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, provider);
 
@@ -214,7 +212,7 @@ forking(5223870, () => {
     });
 
     describe("generic tests", () => {
-      before(async ()=> {
+      before(async () => {
         await wstEth.transfer(VTREASURY, parseUnits("5", 18));
       });
 
