@@ -49,7 +49,7 @@ const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 const OLD_MARKET_FACET = "0x1B9806d9d2925e8Cd318E268e562eeb7e02C6E00";
-const NEW_MARKET_FACET = "0x11e4A38F6b2FCA36580ba98E34AfB90699EfC594";
+const NEW_MARKET_FACET = "0xeaa588cEB8CDb29AfDae90Ba78B595b725E1f6D7";
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
@@ -79,7 +79,7 @@ let poolRegistry: string;
 let prime: string;
 let marketFacetSelectors: string[];
 
-forking(37951430, () => {
+forking(37954151, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
@@ -256,7 +256,7 @@ forking(37951430, () => {
 });
 
 // core pool vToken tests
-forking(37951430, () => {
+forking(37954151, () => {
   let vToken: ethers.Contract;
   let underlying: ethers.Contract;
   let user: SignerWithAddress;
