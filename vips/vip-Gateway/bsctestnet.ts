@@ -116,7 +116,7 @@ export const vipGateway = () => {
     This VIP does the following:
     1. Updates the implementation of all VTokens and Comptroller market facet in Core Pool
     2. Sets the AccessControlManager, ProtocolShareReserve and ReduceReservesBlockDelta in vTRX, vUST and vLUNA
-    3. Updated the implementation of VTokens and Cmptrollers In IL
+    3. Updates the implementation of VTokens and Comptrollers in IL
     4. Accepts the ownership of the NativeTokenGateway contract`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
