@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { vip260, BINANCE_WALLET, USDC } from "../../vips/vip-260/bscmainnet";
+import { BINANCE_WALLET, USDC, vip260 } from "../../vips/vip-260/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
