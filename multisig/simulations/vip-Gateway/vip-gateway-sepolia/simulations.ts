@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,6 +19,7 @@ import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/ERC20.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
 import VTOKEN_ABI from "../abi/VToken.json";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
@@ -32,21 +33,27 @@ const CORE_POOL = sepolia.COMPTROLLER_CORE;
 const CRV_USD = sepolia.MOCK_crvUSD;
 const WETH = sepolia.MOCK_WETH;
 
+const WST_ETH = "0x9b87Ea90FDb55e1A0f17FBEdDcF7EB0ac4d50493";
+const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+
 const USER_1 = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const USER_2 = "0x058F25CDeA0B2a66DbDAA51e39f75bd964a0dBe7";
+const WST_ETH_HOLDER = "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D";
 
 forking(5223870, () => {
   const provider = ethers.provider;
   let user1: Signer;
   let user2: Signer;
-  let comptroller: ethers.Contract;
-  let vWeth: ethers.Contract;
-  let vcrvUsd: ethers.Contract;
-  let crvUsd: ethers.Contract;
-  let weth: ethers.Contract;
-  let comptrollerBeacon: ethers.Contract;
-  let vtokenBeacon: ethers.Contract;
-  let nativeTokenGateway: ethers.Contract;
+  let wstEthHolder: Signer;
+  let comptroller: Contract;
+  let vWeth: Contract;
+  let vcrvUsd: Contract;
+  let crvUsd: Contract;
+  let weth: Contract;
+  let wstEth: Contract;
+  let comptrollerBeacon: Contract;
+  let vtokenBeacon: Contract;
+  let nativeTokenGateway: Contract;
 
   let accessControlManager: string;
   let closeFactorMantissa: BigNumber;
@@ -64,6 +71,7 @@ forking(5223870, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
+    wstEthHolder = await initMainnetUser(WST_ETH_HOLDER, parseUnits("2"));
 
     nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, provider);
 
@@ -76,6 +84,7 @@ forking(5223870, () => {
 
     crvUsd = new ethers.Contract(CRV_USD, ERC20_ABI, provider);
     weth = new ethers.Contract(WETH, ERC20_ABI, provider);
+    wstEth = new ethers.Contract(WST_ETH, ERC20_ABI, provider);
 
     accessControlManager = await comptroller.accessControlManager();
     closeFactorMantissa = await comptroller.closeFactorMantissa();
@@ -202,6 +211,16 @@ forking(5223870, () => {
           expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
         });
       });
+    });
+
+    describe("generic tests", () => {
+      before(async ()=> {
+        await wstEth.transfer(VTREASURY, parseUnits("5", 18));
+      });
+
+      checkIsolatedPoolsComptrollers();
+
+      //Check the simulation for not updating borrow behalf balance
     });
   });
 });
