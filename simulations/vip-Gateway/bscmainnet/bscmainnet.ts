@@ -1,24 +1,35 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, Signer } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
+import { expectEvents, initMainnetUser } from "../../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { performVTokenBasicAndBehalfActions } from "../../../src/vtokenUpgradesHelper";
 import {
   COMPTROLLER_BEACON,
+  CORE_MARKETS,
   NATIVE_TOKEN_GATEWAY,
   NEW_COMPTROLLER_IMPLEMENTATION,
+  NEW_VBEP20_DELEGATE_IMPL,
   NEW_VTOKEN_IMPLEMENTATION,
+  UNITROLLER,
   VTOKEN_BEACON,
   vipGateway,
-} from "../../vips/vip-Gateway/bscmainnet";
-import BEACON_ABI from "./abi/Beacon.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import ERC20_ABI from "./abi/ERC20.json";
-import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
-import VTOKEN_ABI from "./abi/VToken.json";
+} from "../../../vips/vip-Gateway/bscmainnet";
+import BEACON_ABI from "../abi/Beacon.json";
+import COMPTROLLER_ABI from "../abi/Comptroller.json";
+import UNITROLLER_ABI from "../abi/CorePoolComptroller.json";
+import DIAMOND_ABI from "../abi/Diamond.json";
+import MOCK_TOKEN_ABI from "../abi/MockToken.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
+import VBEP_20_DELEGATE_ABI from "../abi/VBep20Delegate.json";
+import VEBEP_20_DELEGATOR_ABI from "../abi/VBep20Delegator.json";
+import VTOKEN_ABI from "../abi/VToken.json";
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0x3F66e044dfd1Ccc834e55624B5f6e9e75ab36000";
 const OLD_VTOKEN_IMPLEMENTATION = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
@@ -33,47 +44,59 @@ const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 const USER_1 = "0x1a0a28D2217503f29f5579C16D8783bd7B9C8C93";
 const USER_2 = "0x5f947Ad9F834A647e7aA791CC78FA2857f30Df3F";
 
-forking(35863186, () => {
-  const provider = ethers.provider;
-  let user1: Signer;
-  let user2: Signer;
-  let comptroller: ethers.Contract;
-  let vWbnb: ethers.Contract;
-  let vBnbx: ethers.Contract;
-  let bnbx: ethers.Contract;
-  let wbnb: ethers.Contract;
-  let comptrollerBeacon: ethers.Contract;
-  let vtokenBeacon: ethers.Contract;
-  let nativeTokenGateway: ethers.Contract;
+const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-  let accessControlManager: string;
-  let closeFactorMantissa: BigNumber;
-  let allMarkets: string[];
-  let rewardsDistributors: string[];
-  let marketListed: boolean;
-  let liquidationIncentiveMantissa: BigNumber;
-  let maxLoopsLimit: BigNumber;
-  let minLiquidatableCollateral: BigNumber;
-  let oracle: string;
-  let owner: string;
-  let poolRegistry: string;
-  let prime: string;
+const OLD_MARKET_FACET = "";
+const NEW_MARKET_FACET = "";
 
+const provider = ethers.provider;
+let user1: SignerWithAddress;
+let user2: SignerWithAddress;
+let impersonatedTimelock: SignerWithAddress;
+let comptroller: ethers.Contract;
+let unitroller: ethers.Contract;
+let vWbnb: ethers.Contract;
+let vBnbx: ethers.Contract;
+let bnbx: ethers.Contract;
+let wbnb: ethers.Contract;
+let comptrollerBeacon: ethers.Contract;
+let vtokenBeacon: ethers.Contract;
+let nativeTokenGateway: ethers.Contract;
+
+let accessControlManager: string;
+let closeFactorMantissa: BigNumber;
+let allMarkets: string[];
+let rewardsDistributors: string[];
+let marketListed: boolean;
+let liquidationIncentiveMantissa: BigNumber;
+let maxLoopsLimit: BigNumber;
+let minLiquidatableCollateral: BigNumber;
+let oracle: string;
+let owner: string;
+let poolRegistry: string;
+let prime: string;
+let marketFacetSelectors: string[];
+
+forking(36345514, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
     nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, provider);
 
     comptrollerBeacon = new ethers.Contract(COMPTROLLER_BEACON, BEACON_ABI, provider);
     comptroller = new ethers.Contract(POOL_LIQUID_STAKED_BNB, COMPTROLLER_ABI, provider);
+    unitroller = new ethers.Contract(UNITROLLER, UNITROLLER_ABI, provider);
 
     vtokenBeacon = new ethers.Contract(VTOKEN_BEACON, BEACON_ABI, provider);
     vWbnb = new ethers.Contract(VWBNB_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
     vBnbx = new ethers.Contract(VBNBX_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
 
-    bnbx = new ethers.Contract(BNBX, ERC20_ABI, provider);
-    wbnb = new ethers.Contract(WBNB, ERC20_ABI, provider);
+    bnbx = new ethers.Contract(BNBX, MOCK_TOKEN_ABI, provider);
+    wbnb = new ethers.Contract(WBNB, MOCK_TOKEN_ABI, provider);
+
+    marketFacetSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
 
     accessControlManager = await comptroller.accessControlManager();
     closeFactorMantissa = await comptroller.closeFactorMantissa();
@@ -105,10 +128,22 @@ forking(35863186, () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
+      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [23]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
+    it("market facet function selectors should be replaced with new facet address", async () => {
+      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(marketFacetSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
+    });
+
+    it("unitroller should contain the new facet address", async () => {
+      expect(await unitroller.facetAddresses()).to.include(NEW_MARKET_FACET);
+      expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET);
+    });
+
     it("comptroller should have new implementations", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         NEW_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
@@ -204,5 +239,60 @@ forking(35863186, () => {
         });
       });
     });
+
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkIsolatedPoolsComptrollers();
+    });
+  });
+});
+
+// core pool vToken tests
+forking(36345514, () => {
+  let vToken: ethers.Contract;
+  let underlying: ethers.Contract;
+  let user: SignerWithAddress;
+  const mintAmount = parseUnits("200", 18);
+  const borrowAmount = parseUnits("50", 18);
+  const repayAmount = parseUnits("50", 18);
+  const redeemAmount = parseUnits("50", 18);
+  const actions = [0, 1, 2, 3, 7]; // Mint, Redeem, Borrow, Repay, EnterMarket
+
+  describe("VToken Tests", () => {
+    before(async () => {
+      impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
+      await pretendExecutingVip(vipGateway());
+    });
+
+    for (const market of CORE_MARKETS) {
+      it(`Generic tests for mint, borrow, redeem, repay for ${market.name} should work`, async () => {
+        user = await initMainnetUser(market.holder, ethers.utils.parseEther("5"));
+        user1 = await initMainnetUser(USER_1, ethers.utils.parseEther("5"));
+
+        vToken = new ethers.Contract(market.address, VBEP_20_DELEGATE_ABI, provider);
+
+        underlying = new ethers.Contract(await vToken.underlying(), MOCK_TOKEN_ABI, provider);
+        await unitroller.connect(impersonatedTimelock)._setMarketBorrowCaps([market.address], [parseUnits("2", 48)]);
+        await unitroller.connect(impersonatedTimelock)._setMarketSupplyCaps([market.address], [parseUnits("2", 48)]);
+        await unitroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.89", 18));
+        await unitroller.connect(impersonatedTimelock)._setActionsPaused([market.address], actions, false);
+
+        await performVTokenBasicAndBehalfActions(
+          market.address,
+          user,
+          user1,
+          mintAmount,
+          borrowAmount,
+          repayAmount,
+          redeemAmount,
+          vToken,
+          underlying,
+          unitroller,
+          false,
+        );
+
+        expect(await vToken.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
+      });
+    }
   });
 });

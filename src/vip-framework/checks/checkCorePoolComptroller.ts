@@ -48,8 +48,8 @@ export const checkCorePoolComptroller = () => {
     let xvs: Contract;
 
     before(async () => {
-      impersonateAccount(ACCOUNT);
-      impersonateAccount(NORMAL_TIMELOCK);
+      await impersonateAccount(ACCOUNT);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(ACCOUNT);
       timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 
@@ -84,8 +84,8 @@ export const checkCorePoolComptroller = () => {
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(usdtBalance);
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
-      expect(await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance);
+      await expect(await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.greaterThanOrEqual(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));

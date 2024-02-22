@@ -1,6 +1,6 @@
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { ContractInterface } from "ethers";
@@ -99,18 +99,21 @@ export const setMaxStalePeriodInChainlinkOracle = async (
 
   if (feed === ethers.constants.AddressZero) {
     feed = (await oracle.tokenConfigs(asset)).feed;
+    console.log(feed);
 
     if (feed === ethers.constants.AddressZero) {
       return;
     }
   }
+  console.log(maxStalePeriodInSeconds);
 
-  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+  await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  await tx.wait();
+  console.log((await oracle.getPrice(asset)).toString());
+  // await tx.wait();
 };
 
 export const setMaxStalePeriod = async (
@@ -125,9 +128,12 @@ export const setMaxStalePeriod = async (
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
     if (mainOracle === binanceOracle) {
+      console.log("binanceOracle");
       const symbol = await underlyingAsset.symbol();
       await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
     } else {
+      console.log("chainlink", maxStalePeriodInSeconds);
+
       await setMaxStalePeriodInChainlinkOracle(
         mainOracle,
         underlyingAsset.address,
@@ -137,6 +143,7 @@ export const setMaxStalePeriod = async (
       );
     }
   }
+  await mine(100);
 };
 
 export const expectEvents = async (
