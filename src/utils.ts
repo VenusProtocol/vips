@@ -92,6 +92,11 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   admin: string,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
+  const networkSpecificChainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+
+  // skip execution of this function if input oracle address is really not of chainlinkOracleAddress
+  if (chainlinkOracleAddress != networkSpecificChainlinkOracle) return;
+
   const provider = ethers.provider;
 
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
