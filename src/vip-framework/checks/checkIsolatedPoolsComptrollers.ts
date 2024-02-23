@@ -60,9 +60,9 @@ const runPoolTests = async (pool: PoolMetadata) => {
   let supplyUnderlying: Contract;
   let borrowUnderlying: Contract;
 
-  impersonateAccount(ACCOUNT);
+  await impersonateAccount(ACCOUNT);
   await setBalance(ACCOUNT, ethers.utils.parseEther("5"));
-  impersonateAccount(NORMAL_TIMELOCK);
+  await impersonateAccount(NORMAL_TIMELOCK);
   const signer: Signer = await ethers.getSigner(ACCOUNT);
   const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
 
@@ -82,8 +82,7 @@ const runPoolTests = async (pool: PoolMetadata) => {
         supplyMarket = undefined;
         continue;
       }
-    }
-    if (!borrowMarket) {
+    } else if (!borrowMarket) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
       break; // Exit the loop if both supplyMarket and borrowMarket are initialized
