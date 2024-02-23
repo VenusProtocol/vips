@@ -10,6 +10,7 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const GUARDIAN = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const TRUSTED_REMOTE = "0xFA62BC6C0E20A507E3Ad0dF4F6b89E71953161fa";
+const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 
 export const vip260Testnet = () => {
   const meta = {
@@ -127,6 +128,11 @@ export const vip260Testnet = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [TOKEN_BRIDGE_CONTROLLER_VAI, "mint(address,uint256)", TOKEN_BRIDGE_VAI],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)", // TokenController permission to mint tokens
+        params: [VAI, "rely(address)", TOKEN_BRIDGE_CONTROLLER_VAI],
       },
       {
         target: ACM,

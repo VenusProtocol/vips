@@ -49,7 +49,7 @@ forking(37969204, () => {
         txResponse,
         [ACM_ABI, VAIBridgeAdmin_ABI, VAI_BRIDGE_ABI],
         ["RoleGranted", "OwnershipTransferred", "SetTrustedRemoteAddress", "Failure"],
-        [62, 2, 1, 0],
+        [63, 2, 1, 0],
       );
     },
   });
