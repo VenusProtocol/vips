@@ -1,3 +1,6 @@
+import { parseUnits } from "ethers/lib/utils";
+
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
@@ -5,6 +8,8 @@ const NORMAL_TIMELOCK = "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb";
 const VAI = "0x9414b9d8fbC128799B896A50c8927C369AA553CB";
 const TOKEN_BRIDGE_VAI = "0xFA62BC6C0E20A507E3Ad0dF4F6b89E71953161fa";
 const TOKEN_BRIDGE_ADMIN_VAI = "0x296349C4E86C7C3dd1fC9e5b30Ca47cf31162486";
+
+const { sepolia } = NETWORK_ADDRESSES;
 
 export const vip011 = () => {
   return makeProposal([
@@ -183,6 +188,26 @@ export const vip011 = () => {
       target: TOKEN_BRIDGE_ADMIN_VAI,
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
       params: [10102, "10000000000000000000000"], // $10K
+    },
+    {
+      target: sepolia.CHAINLINK_ORACLE,
+      signature: "setDirectPrice(address,uint256)",
+      params: [VAI, parseUnits("1", 18)],
+    },
+    {
+      target: sepolia.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          VAI,
+          [
+            sepolia.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [true, false, false],
+        ],
+      ],
     },
   ]);
 };

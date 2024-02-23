@@ -3,8 +3,10 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip011 } from "../../../proposals/vip-011/vip-011-sepolia";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VAI_ABI from "./abi/vai.json";
 import VAI_BRIDGE_ABI from "./abi/vaiBridge.json";
 import VAI_BRIDGE_ADMIN_ABI from "./abi/vaiBridgeAdmin.json";
@@ -14,15 +16,19 @@ const VAI = "0x9414b9d8fbC128799B896A50c8927C369AA553CB";
 const TOKEN_BRIDGE_VAI = "0xFA62BC6C0E20A507E3Ad0dF4F6b89E71953161fa";
 const TOKEN_BRIDGE_ADMIN_VAI = "0x296349C4E86C7C3dd1fC9e5b30Ca47cf31162486";
 
+const { sepolia } = NETWORK_ADDRESSES;
+
 forking(5340851, () => {
   let vai: Contract;
   let vaiBridgeAdmin: Contract;
   let vaiBridge: Contract;
+  let oracle: Contract;
 
   before(async () => {
     vai = await ethers.getContractAt(VAI_ABI, VAI);
     vaiBridgeAdmin = await ethers.getContractAt(VAI_BRIDGE_ADMIN_ABI, TOKEN_BRIDGE_ADMIN_VAI);
     vaiBridge = await ethers.getContractAt(VAI_BRIDGE_ABI, TOKEN_BRIDGE_VAI);
+    oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
   });
 
   describe("Pre-Execution state", () => {
@@ -88,6 +94,11 @@ forking(5340851, () => {
     it("Should set correct mint cap in VAI token", async () => {
       const token = await vai.minterToCap(TOKEN_BRIDGE_VAI);
       expect(token).equals("100000000000000000000000");
+    });
+
+    it("Should get correct price of VAI token", async () => {
+      const price = await oracle.getPrice(VAI);
+      expect(price).equals(parseUnits("1", 18));
     });
   });
 });
