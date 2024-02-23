@@ -6,12 +6,13 @@ export const NEW_SINGLE_TOKEN_CONVERTER_IMP = "0x0d8C55db1C0778A094B0283ed9e6bA2
 export const NEW_RISK_FUND_CONVERTER_IMP = "0xda35a8DB2031e6d8164Eb8aCCd2C2f83c52E7745";
 export const RISK_FUND_CONVERTER_PROXY = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
 export const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
-export const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
-export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
 export const PROXY_ADMIN_LIQUIDATOR = "0x2b40B43AC5F7949905b0d2Ed9D6154a8ce06084a";
+export const LIQUIDATOR_CONTRACT = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
+
 export const OLD_IMPL = "0xE26cE9b5FDd602225cCcC4cef7FAE596Dcf2A965";
 export const TEMP_IMPL = "0x3aD4b5677AdC2a6930B2A08f443b9B3c6c605CD8";
+export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
 export const vipConverter = (data?: string) => {
   const meta = {
@@ -29,6 +30,26 @@ export const vipConverter = (data?: string) => {
   return makeProposal(
     [
       {
+        target: PROXY_ADMIN_LIQUIDATOR,
+        signature: "upgradeAndCall(address,address,bytes)",
+        params: [LIQUIDATOR_CONTRACT, TEMP_IMPL, data],
+      },
+      {
+        target: PROXY_ADMIN_LIQUIDATOR,
+        signature: "upgrade(address,address)",
+        params: [LIQUIDATOR_CONTRACT, OLD_IMPL],
+      },
+      {
+        target: LIQUIDATOR_CONTRACT,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: LIQUIDATOR_CONTRACT,
+        signature: "setProtocolShareReserve(address)",
+        params: [PSR],
+      },
+      {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [RISK_FUND_CONVERTER_PROXY, NEW_RISK_FUND_CONVERTER_IMP],
@@ -37,26 +58,6 @@ export const vipConverter = (data?: string) => {
         target: SINGLE_TOKEN_CONVERTER_BEACON,
         signature: "upgradeTo(address)",
         params: [NEW_SINGLE_TOKEN_CONVERTER_IMP],
-      },
-      {
-        target: PROXY_ADMIN_LIQUIDATOR,
-        signature: "upgradeAndCall(address,address,bytes)",
-        params: [LIQUIDATOR, TEMP_IMPL, data],
-      },
-      {
-        target: PROXY_ADMIN_LIQUIDATOR,
-        signature: "upgrade(address,address)",
-        params: [LIQUIDATOR, OLD_IMPL],
-      },
-      {
-        target: LIQUIDATOR,
-        signature: "acceptOwnership()",
-        params: [],
-      },
-      {
-        target: LIQUIDATOR,
-        signature: "setProtocolShareReserve(address)",
-        params: [PSR],
       },
     ],
     meta,

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
@@ -16,7 +17,7 @@ import {
   converters,
 } from "../../../vips/vip-248/vip-248/Addresses";
 import {
-  LIQUIDATOR,
+  LIQUIDATOR_CONTRACT,
   NEW_RISK_FUND_CONVERTER_IMP,
   NEW_SINGLE_TOKEN_CONVERTER_IMP,
   PROXY_ADMIN,
@@ -28,11 +29,14 @@ import {
 } from "../../../vips/vip-converter/bscmainnet";
 import BEACON_ABI from "../abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
+import ERC20_ABI from "../abi/ERC20.json";
 import LIQUIDATOR_ABI from "../abi/Liquidator.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "../abi/ProtocolShareReserve.json";
 import PROXY_ADMIN_ABI from "../abi/ProxyAdmin.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
+import VTOKEN_ABI from "../abi/VTOKEN_ABI.json";
+import COMPTROLLER_CORE_ABI from "../abi/comptroller.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
@@ -45,19 +49,19 @@ const ASSETS = [
   "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B", // BETH
   "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
   "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82", // CAKE
-  "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3", // DAI -- shi chala
+  "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3", // DAI
   "0xbA2aE424d960c26247Dd6c32edC70B295c744C43", // DOGE
   "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402", // DOT
   "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH
   "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409", // FDUSD
   "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153", // FIL
   "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD", // LINK
-  "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94", // LTC -- shi chala
+  "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94", // LTC
   "0xCC42724C6683B7E57334c4E856f4c9965ED682bD", // MATIC
   "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A", // SXP
   "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", // TRX
   "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9", // TUSD
-  "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1", // UNI -- shi chala
+  "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1", // UNI
   "0x55d398326f99059fF775485246999027B3197955", // USDT
   "0xa2E3356610840701BDf5611a53974510Ae27E2e1", // WBETH
   "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE", // XRP
@@ -84,7 +88,7 @@ forking(36330720, () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-    liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
+    liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
 
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
@@ -114,7 +118,7 @@ forking(36330720, () => {
 });
 
 // Release Fund tests
-forking(36324143, () => {
+forking(36382142, () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     await pretendExecutingVip(vipConverter(createInitializeData()));
@@ -153,18 +157,110 @@ forking(36324143, () => {
   it("release funds should execute successfully", async () => {
     await protocolShareReserve.connect(impersonatedTimelock).releaseFunds(COMPTROLLER, ASSETS);
   });
+
+  it.only("checks that 5% of the repaid amount is sent to the PSR, as underlying tokens", async () => {
+    //Liquidation Test requisite
+    const LIQUIDATOR = "0x1934057d1de58cf65fb59277a91f26ac9f8a4282";
+    const BORROWER = "0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec";
+    const wBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+    const vETH_ADDRESS = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8";
+    const vBNB_ADDRESS = "0xa07c5b74c9b40447a954e1466938b865b6bbea36";
+    const COMPTROLLER_CORE = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+    const REPAY_AMOUNT = "12600000000000000";
+
+    // const vETH = await ethers.getContractAt(VTOKEN_ABI, vETH_ADDRESS);
+    const vBNB = await ethers.getContractAt(VTOKEN_ABI, vBNB_ADDRESS);
+    const wBNB = await ethers.getContractAt(ERC20_ABI, wBNB_ADDRESS);
+
+    const liquidator = await initMainnetUser(LIQUIDATOR, parseUnits("2", 18));
+    const liquidatorContract = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
+    const comptroller = await ethers.getContractAt(COMPTROLLER_CORE_ABI, COMPTROLLER_CORE);
+
+    const liquidationIncentiveMantissa = await comptroller.liquidationIncentiveMantissa();
+    const treasuryPercentMantissa = await liquidatorContract.treasuryPercentMantissa();
+
+    const exchangeRateCurrent = await vBNB.callStatic.exchangeRateCurrent();
+    const seizeTokens = await comptroller.liquidateCalculateSeizeTokens(vETH_ADDRESS, vBNB_ADDRESS, REPAY_AMOUNT);
+
+    const seizedAmount = (exchangeRateCurrent * seizeTokens[1]) / 1e18;
+    const psrIncentive = (seizedAmount * treasuryPercentMantissa) / liquidationIncentiveMantissa;
+    // release funds here so that mapping becomes empty to make further calculation easy
+    await protocolShareReserve.connect(liquidator).releaseFunds(COMPTROLLER_CORE, [wBNB_ADDRESS]);
+
+    const psrBalanceBefore = await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1);
+    await liquidatorContract.connect(liquidator).liquidateBorrow(vETH_ADDRESS, BORROWER, REPAY_AMOUNT, vBNB_ADDRESS);
+    const psrBalanceAfter = await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1);
+
+    const balanceDiff = psrBalanceAfter - psrBalanceBefore;
+    console.log("🚀 ~ it.only ~ balanceDiff:", balanceDiff);
+
+    expect(balanceDiff).to.closeTo(psrIncentive, parseUnits("1", 10));
+
+    // Release funds
+    const riskFundConverter = new ethers.Contract(
+      "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0",
+      ERC20_ABI,
+      ethers.provider,
+    );
+    const xvsVaultConverter = new ethers.Contract(
+      "0xd5b9AE835F4C59272032B3B954417179573331E0",
+      ERC20_ABI,
+      ethers.provider,
+    );
+    console.log("before", await riskFundConverter.balanceOf(wBNB_ADDRESS));
+    console.log("xvsVaultConverter", await xvsVaultConverter.balanceOf(wBNB_ADDRESS));
+
+    const riskFundConverterBalanceBefore = await wBNB.balanceOf("0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0");
+    const treasuryBalanceBefore = await wBNB.balanceOf("0xF322942f644A996A617BD29c16bd7d231d9F35E9");
+    const xvsConverterBalanceBefore = await wBNB.balanceOf("0xd5b9AE835F4C59272032B3B954417179573331E0");
+
+    console.log("🚀 ~ it.only ~ xvsConverterBalanceBefore:", xvsConverterBalanceBefore);
+    const tx = await protocolShareReserve.connect(liquidator).releaseFunds(COMPTROLLER_CORE, [wBNB_ADDRESS]);
+    const receipt = await tx.wait();
+
+    for (const event of receipt.events) {
+      console.log(event.event, event.args);
+    }
+    console.log("after", await riskFundConverter.balanceOf(wBNB_ADDRESS));
+    console.log("xvsVaultConverterafter", await xvsVaultConverter.balanceOf(wBNB_ADDRESS));
+
+    const riskFundConverterBalanceAfter = await wBNB.balanceOf("0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0");
+    const treasuryBalanceAfter = await wBNB.balanceOf("0xF322942f644A996A617BD29c16bd7d231d9F35E9");
+    const xvsConverterBalanceAfter = await wBNB.balanceOf("0xd5b9AE835F4C59272032B3B954417179573331E0");
+    console.log("🚀 ~ it.only ~ xvsConverterBalanceAfter:", xvsConverterBalanceAfter);
+
+    // console.log((balanceDiff*10)/100, (balanceDiff*40)/100, (balanceDiff*50)/100);
+    // console.log((balanceDiff*10)/100 + (balanceDiff*40)/100 + (balanceDiff*50)/100);
+    //     console.log(">>>>", await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1));
+
+    console.log(
+      "🚀 ~ it.only ~ xvsConverterBalanceAfter-xvsConverterBalanceBefore:",
+      xvsConverterBalanceAfter - xvsConverterBalanceBefore,
+    );
+    console.log(
+      "🚀 ~ it.only ~ treasuryBalanceAfter-treasuryBalanceBefore:",
+      treasuryBalanceAfter - treasuryBalanceBefore,
+    );
+    console.log(
+      "🚀 ~ it.only ~ riskFundConverterBalanceAfter-riskFundConverterBalanceBefore:",
+      riskFundConverterBalanceAfter - riskFundConverterBalanceBefore,
+    );
+    // expect((balanceDiff*50)/100).to.equal(riskFundConverterBalanceAfter-riskFundConverterBalanceBefore);
+    // expect((balanceDiff*40)/100).to.equal(treasuryBalanceAfter-treasuryBalanceBefore);
+    expect((balanceDiff * 10) / 100).to.equal(xvsConverterBalanceAfter - xvsConverterBalanceBefore);
+  });
 });
 
 forking(36324143, () => {
-  let liquidator: ethers.Contract;
-  let proxyAdmin: ethers.Contract;
+  let liquidator: Contract;
+  let proxyAdmin: Contract;
   const provider = ethers.provider;
   let prevImplLiquidator: string;
 
   before(async () => {
-    liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
+    liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
     proxyAdmin = new ethers.Contract(PROXY_ADMIN_LIQUIDATOR, PROXY_ADMIN_ABI, provider);
-    prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR);
+    prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR_CONTRACT);
     await pretendExecutingVip(vipConverter(createInitializeData()));
   });
 
@@ -175,7 +271,7 @@ forking(36324143, () => {
     });
 
     it("Liquidator Implementation should restore", async () => {
-      const currImpl = await proxyAdmin.getProxyImplementation(LIQUIDATOR);
+      const currImpl = await proxyAdmin.getProxyImplementation(LIQUIDATOR_CONTRACT);
       expect(currImpl).equals(prevImplLiquidator);
     });
 
@@ -190,3 +286,13 @@ forking(36324143, () => {
     });
   });
 });
+
+// original amounts which were transferred through PSR to them calculated through events
+// schema 1
+// xvs 489023496968360
+// trea: 1956093987873440
+// riskfundCon: 2445117484841801
+
+// schema 0
+// rikund : 1
+// tre: 1
