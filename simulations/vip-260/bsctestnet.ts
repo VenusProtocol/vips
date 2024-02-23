@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { vip260Testnet } from "../../vips/vip-260/bsctestnet";
@@ -12,14 +13,12 @@ import VAI_ABI from "./abi/VAI.json";
 import VAIBridgeAdmin_ABI from "./abi/VAIBridgeAdmin.json";
 import VAI_BRIDGE_ABI from "./abi/VAITokenBridge.json";
 
-const TOKEN_BRIDGE_VAI = "0x2280aCD3BE2eE270161a11A6176814C26FD747f9";
-const TOKEN_BRIDGE_ADMIN_VAI = "0xfF058122378BD9AC5B572A2F7c1815E09504D859";
-const VAI = "0x5fFbE5302BadED40941A403228E6AD03f93752d9";
 const DEST_CHAIN_ID = "10161";
 const TOKEN_BRIDGE_CONTROLLER_VAI = "0x91b653f7527D698320133Eb97BB55a617663e792";
-const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const TRUSTED_REMOTE = "0xfa62bc6c0e20a507e3ad0df4f6b89e71953161fa";
 const VAI_HOLDER = "0x7Db4f5cC3bBA3e12FF1F528D2e3417afb0a57118";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 forking(37969204, () => {
   const provider = ethers.provider;
@@ -33,9 +32,9 @@ forking(37969204, () => {
   let defaultAdapterParams: string;
 
   beforeEach(async () => {
-    vaiBridge = new ethers.Contract(TOKEN_BRIDGE_VAI, VAI_BRIDGE_ABI, provider);
-    bridgeAdmin = new ethers.Contract(TOKEN_BRIDGE_ADMIN_VAI, VAIBridgeAdmin_ABI, provider);
-    vai = new ethers.Contract(VAI, VAI_ABI, provider);
+    vaiBridge = new ethers.Contract(bsctestnet.TOKEN_BRIDGE_VAI, VAI_BRIDGE_ABI, provider);
+    bridgeAdmin = new ethers.Contract(bsctestnet.TOKEN_BRIDGE_ADMIN_VAI, VAIBridgeAdmin_ABI, provider);
+    vai = new ethers.Contract(bsctestnet.VAI, VAI_ABI, provider);
     tokenController = new ethers.Contract(TOKEN_BRIDGE_CONTROLLER_VAI, TOKEN_BRIDGE_CONTROLLER_ABI, provider);
     [receiver] = await ethers.getSigners();
     vaiHolderSigner = await initMainnetUser(VAI_HOLDER, ethers.utils.parseEther("2"));
@@ -61,16 +60,16 @@ forking(37969204, () => {
     });
 
     it("Should set minting limit in Token Controller", async () => {
-      const cap = await tokenController.minterToCap(TOKEN_BRIDGE_VAI);
+      const cap = await tokenController.minterToCap(bsctestnet.TOKEN_BRIDGE_VAI);
       expect(cap).equals(parseUnits("100000", 18));
     });
 
     it("Should set correct token address in vaiBridge", async () => {
       const token = await vaiBridge.token();
-      expect(token).equals(VAI);
+      expect(token).equals(bsctestnet.VAI);
     });
     it("Owner of the BridgeAdmin should be Normal Timelock", async () => {
-      expect(await bridgeAdmin.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await bridgeAdmin.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
     it("Should match minDestGas value", async () => {
@@ -95,7 +94,7 @@ forking(37969204, () => {
       expect(await vaiBridge.chainIdToMaxDailyReceiveLimit(DEST_CHAIN_ID)).to.equal("50000000000000000000000");
     });
 
-    it("Should emit an event on successfull bridging of VAI", async () => {
+    it("Should emit an event on successfull bridging of bsctestnet.VAI", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await vaiBridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)

@@ -11,11 +11,6 @@ import VAI_ABI from "./abi/vai.json";
 import VAI_BRIDGE_ABI from "./abi/vaiBridge.json";
 import VAI_BRIDGE_ADMIN_ABI from "./abi/vaiBridgeAdmin.json";
 
-const NORMAL_TIMELOCK = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB"; // Sepolia Multisig
-const VAI = "0x9414b9d8fbC128799B896A50c8927C369AA553CB";
-const TOKEN_BRIDGE_VAI = "0xFA62BC6C0E20A507E3Ad0dF4F6b89E71953161fa";
-const TOKEN_BRIDGE_ADMIN_VAI = "0x296349C4E86C7C3dd1fC9e5b30Ca47cf31162486";
-
 const { sepolia } = NETWORK_ADDRESSES;
 
 forking(5340851, () => {
@@ -25,16 +20,16 @@ forking(5340851, () => {
   let oracle: Contract;
 
   before(async () => {
-    vai = await ethers.getContractAt(VAI_ABI, VAI);
-    vaiBridgeAdmin = await ethers.getContractAt(VAI_BRIDGE_ADMIN_ABI, TOKEN_BRIDGE_ADMIN_VAI);
-    vaiBridge = await ethers.getContractAt(VAI_BRIDGE_ABI, TOKEN_BRIDGE_VAI);
+    vai = await ethers.getContractAt(VAI_ABI, sepolia.VAI);
+    vaiBridgeAdmin = await ethers.getContractAt(VAI_BRIDGE_ADMIN_ABI, sepolia.TOKEN_BRIDGE_ADMIN_VAI);
+    vaiBridge = await ethers.getContractAt(VAI_BRIDGE_ABI, sepolia.TOKEN_BRIDGE_VAI);
     oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
   });
 
   describe("Pre-Execution state", () => {
     it("Bridge Owner != sepolia multisig", async () => {
       const owner = await vaiBridgeAdmin.owner();
-      expect(owner).not.equal(NORMAL_TIMELOCK);
+      expect(owner).not.equal(sepolia.NORMAL_TIMELOCK);
     });
 
     it("Trusted remote should not exist", async () => {
@@ -42,7 +37,7 @@ forking(5340851, () => {
     });
 
     it("Mint limit = 0", async () => {
-      const cap = await vai.minterToCap(TOKEN_BRIDGE_VAI);
+      const cap = await vai.minterToCap(sepolia.TOKEN_BRIDGE_VAI);
       expect(cap).equals(0);
     });
   });
@@ -53,7 +48,7 @@ forking(5340851, () => {
     });
     it("Should set bridge owner to multisig", async () => {
       const owner = await vaiBridgeAdmin.owner();
-      expect(owner).equals(NORMAL_TIMELOCK);
+      expect(owner).equals(sepolia.NORMAL_TIMELOCK);
     });
 
     it("Should set trusted remote address in bridge", async () => {
@@ -61,14 +56,14 @@ forking(5340851, () => {
       expect(trustedRemote).equals("0x2280acd3be2ee270161a11a6176814c26fd747f9");
     });
 
-    it("Should set minting limit in VAI token", async () => {
-      const cap = await vai.minterToCap(TOKEN_BRIDGE_VAI);
+    it("Should set minting limit in sepolia.VAI token", async () => {
+      const cap = await vai.minterToCap(sepolia.TOKEN_BRIDGE_VAI);
       expect(cap).equals(parseUnits("100000", 18));
     });
 
     it("Should set correct token address in bridge", async () => {
       const token = await vaiBridge.token();
-      expect(token).equals(VAI);
+      expect(token).equals(sepolia.VAI);
     });
 
     it("Should set correct max daily limit", async () => {
@@ -91,13 +86,13 @@ forking(5340851, () => {
       expect(token).equals("10000000000000000000000");
     });
 
-    it("Should set correct mint cap in VAI token", async () => {
-      const token = await vai.minterToCap(TOKEN_BRIDGE_VAI);
+    it("Should set correct mint cap in sepolia.VAI token", async () => {
+      const token = await vai.minterToCap(sepolia.TOKEN_BRIDGE_VAI);
       expect(token).equals("100000000000000000000000");
     });
 
-    it("Should get correct price of VAI token", async () => {
-      const price = await oracle.getPrice(VAI);
+    it("Should get correct price of sepolia.VAI token", async () => {
+      const price = await oracle.getPrice(sepolia.VAI);
       expect(price).equals(parseUnits("1", 18));
     });
   });
