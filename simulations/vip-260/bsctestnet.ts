@@ -13,7 +13,7 @@ import VAI_ABI from "./abi/VAI.json";
 import VAIBridgeAdmin_ABI from "./abi/VAIBridgeAdmin.json";
 import VAI_BRIDGE_ABI from "./abi/VAITokenBridge.json";
 
-const DEST_CHAIN_ID = "10161";
+const DEST_CHAIN_ID = 10161;
 const TOKEN_BRIDGE_CONTROLLER_VAI = "0x91b653f7527D698320133Eb97BB55a617663e792";
 const TRUSTED_REMOTE = "0xfa62bc6c0e20a507e3ad0df4f6b89e71953161fa";
 const VAI_HOLDER = "0x7Db4f5cC3bBA3e12FF1F528D2e3417afb0a57118";
@@ -94,7 +94,7 @@ forking(37969204, () => {
       expect(await vaiBridge.chainIdToMaxDailyReceiveLimit(DEST_CHAIN_ID)).to.equal("50000000000000000000000");
     });
 
-    it("Should emit an event on successfull bridging of bsctestnet.VAI", async () => {
+    it("Should emit an event on successfull bridging of VAI", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await vaiBridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
@@ -102,8 +102,8 @@ forking(37969204, () => {
 
       await vai.connect(vaiHolderSigner).approve(vaiBridge.address, amount);
 
-      expect(
-        await vaiBridge
+      await expect(
+        vaiBridge
           .connect(vaiHolderSigner)
           .sendFrom(
             vaiHolderSigner.address,
