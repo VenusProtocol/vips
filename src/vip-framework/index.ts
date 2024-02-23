@@ -14,8 +14,8 @@ import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const ENDPOINT = "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1";
-const OMNICHAIN_PROPOSAL_SENDER = "0xb601a67eb6a5f3f7cc8ce184a8ee38333a1f4a5e";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xb0ab719aed3bc55196862337d18dc4e3ee142e30";
+const OMNICHAIN_PROPOSAL_SENDER = "0x02d188Be98CF7676Cd98b03C8470f059fD7799Da";
+const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xE09E4784C2Dd7B0f2Db5bf9B00E101a4dC8CC9EB";
 const LZ_LIBRARY = "0x3acaaf60502791d199a5a5f0b173d78229ebfe32";
 
 const VOTING_PERIOD = 28800;
@@ -177,6 +177,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
         );
       await tx.wait();
+      expect(await executor.queued(proposalId)).to.be.true;
     });
 
     it("should be executed successfully", async () => {

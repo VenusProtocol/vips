@@ -5,10 +5,10 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
-const OMNICHAIN_PROPOSAL_SENDER = "0xb601a67eb6a5f3f7cc8ce184a8ee38333a1f4a5e";
-const OMNICHAIN_EXECUTOR_OWNER = "0x4dFb9FF22e5cb2FA998c395E9e1BcD7c0fb25A86";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xb0ab719aed3bc55196862337d18dc4e3ee142e30";
-const SEPOLIA_NORMAL_TIMELOCK = "0x64F3843d6E83be07d06A2E2f0596cA6765b5839B";
+const OMNICHAIN_PROPOSAL_SENDER = "0x02d188be98cf7676cd98b03c8470f059fd7799da";
+const OMNICHAIN_EXECUTOR_OWNER = "0x2b9CbD9e28322ac6e46c52B592680e2D829B702C";
+const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xe09e4784c2dd7b0f2db5bf9b00e101a4dc8cc9eb";
+const SEPOLIA_NORMAL_TIMELOCK = "0x51f560a018b89A470f8fcE6BF22f3a9F3a4789e5";
 const SEPOLIA_ACCESS_CONTROL_MANAGER = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const SEPOLIA_CHAIN_ID = 10161;
 
@@ -35,17 +35,17 @@ export const vip214Testnet = () => {
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_PROPOSAL_SENDER, "updateValidChainId(uint16,bool)", NORMAL_TIMELOCK],
-      },
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "retryExecute(uint256,uint16,bytes,bytes,uint256)", NORMAL_TIMELOCK],
       },
       {
         target: ACCESS_CONTROL_MANAGER,
@@ -73,11 +73,7 @@ export const vip214Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", FASTTRACK_TIMELOCK],
       },
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_PROPOSAL_SENDER, "updateValidChainId(uint16,bool)", FASTTRACK_TIMELOCK],
-      },
+
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
@@ -87,6 +83,11 @@ export const vip214Testnet = () => {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", FASTTRACK_TIMELOCK],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "retryExecute(uint256,uint16,bytes,bytes,uint256)", FASTTRACK_TIMELOCK],
       },
       {
         target: ACCESS_CONTROL_MANAGER,
@@ -114,11 +115,7 @@ export const vip214Testnet = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", CRITICAL_TIMELOCK],
       },
-      {
-        target: ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_PROPOSAL_SENDER, "updateValidChainId(uint16,bool)", CRITICAL_TIMELOCK],
-      },
+
       {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
@@ -128,6 +125,11 @@ export const vip214Testnet = () => {
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "retryExecute(uint256,uint16,bytes,bytes,uint256)", CRITICAL_TIMELOCK],
       },
       {
         target: ACCESS_CONTROL_MANAGER,
@@ -154,11 +156,6 @@ export const vip214Testnet = () => {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setMaxDailyLimit(uint16,uint256)",
         params: [SEPOLIA_CHAIN_ID, 100],
-      },
-      {
-        target: OMNICHAIN_PROPOSAL_SENDER,
-        signature: "updateValidChainId(uint16,bool)",
-        params: [SEPOLIA_CHAIN_ID, "true"],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,

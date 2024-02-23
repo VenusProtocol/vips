@@ -13,7 +13,7 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMICHANNEL_SENDER = "0xb601a67eb6a5f3f7cc8ce184a8ee38333a1f4a5e";
+const BSCTESTNET_OMICHANNEL_SENDER = "0x02d188Be98CF7676Cd98b03C8470f059fD7799Da";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
 export const networkChainIds = {

@@ -2,11 +2,13 @@
   {
     "inputs": [
       { "internalType": "address", "name": "endpoint_", "type": "address" },
-      { "internalType": "address", "name": "guardian_", "type": "address" }
+      { "internalType": "address", "name": "guardian_", "type": "address" },
+      { "internalType": "uint16", "name": "srcChainId_", "type": "uint16" }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
+  { "inputs": [], "name": "InvalidProposalId", "type": "error" },
   { "inputs": [], "name": "ZeroAddressNotAllowed", "type": "error" },
   {
     "anonymous": false,
@@ -38,24 +40,13 @@
   {
     "anonymous": false,
     "inputs": [{ "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" }],
-    "name": "ProposalCancelled",
+    "name": "ProposalCanceled",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [{ "indexed": true, "internalType": "uint256", "name": "id", "type": "uint256" }],
     "name": "ProposalExecuted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      { "indexed": false, "internalType": "uint16", "name": "srcChainId", "type": "uint16" },
-      { "indexed": false, "internalType": "bytes", "name": "srcAddress", "type": "bytes" },
-      { "indexed": false, "internalType": "uint64", "name": "nonce", "type": "uint64" },
-      { "indexed": false, "internalType": "bytes", "name": "reason", "type": "bytes" }
-    ],
-    "name": "ProposalFailed",
     "type": "event"
   },
   {
@@ -78,6 +69,17 @@
       { "indexed": false, "internalType": "uint8", "name": "proposalType", "type": "uint8" }
     ],
     "name": "ProposalReceived",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint16", "name": "srcChainId", "type": "uint16" },
+      { "indexed": true, "internalType": "bytes", "name": "srcAddress", "type": "bytes" },
+      { "indexed": false, "internalType": "uint64", "name": "nonce", "type": "uint64" },
+      { "indexed": false, "internalType": "bytes", "name": "reason", "type": "bytes" }
+    ],
+    "name": "ReceivePayloadFailed",
     "type": "event"
   },
   {
@@ -119,6 +121,15 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": true, "internalType": "uint16", "name": "oldSrcChainId", "type": "uint16" },
+      { "indexed": true, "internalType": "uint16", "name": "newSrcChainId", "type": "uint16" }
+    ],
+    "name": "SetSrcChainId",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": false, "internalType": "uint16", "name": "_remoteChainId", "type": "uint16" },
       { "indexed": false, "internalType": "bytes", "name": "_path", "type": "bytes" }
     ],
@@ -136,7 +147,11 @@
   },
   {
     "anonymous": false,
-    "inputs": [{ "indexed": true, "internalType": "address", "name": "timelock", "type": "address" }],
+    "inputs": [
+      { "indexed": false, "internalType": "uint8", "name": "routeType", "type": "uint8" },
+      { "indexed": true, "internalType": "address", "name": "oldTimelock", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newTimelock", "type": "address" }
+    ],
     "name": "TimelockAdded",
     "type": "event"
   },
@@ -154,6 +169,13 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "GUARDIAN",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [{ "internalType": "contract ITimelock[]", "name": "timelocks_", "type": "address[]" }],
     "name": "addTimelocks",
     "outputs": [],
@@ -165,27 +187,6 @@
     "name": "cancel",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
-    "name": "chainIdToLast24HourCommandsReceived",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
-    "name": "chainIdToLast24HourReceiveWindowStart",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
-    "name": "chainIdToMaxDailyReceiveLimit",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -236,19 +237,26 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "guardian",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       { "internalType": "uint16", "name": "_srcChainId", "type": "uint16" },
       { "internalType": "bytes", "name": "_srcAddress", "type": "bytes" }
     ],
     "name": "isTrustedRemote",
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "last24HourCommandsReceived",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "last24HourReceiveWindowStart",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -276,6 +284,13 @@
     "name": "lzReceive",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxDailyReceiveLimit",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -330,13 +345,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "proposalRecievedTimestamp",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "name": "proposalTimelocks",
     "outputs": [{ "internalType": "contract ITimelock", "name": "", "type": "address" }],
@@ -349,7 +357,7 @@
     "outputs": [
       { "internalType": "uint256", "name": "id", "type": "uint256" },
       { "internalType": "uint256", "name": "eta", "type": "uint256" },
-      { "internalType": "bool", "name": "cancelled", "type": "bool" },
+      { "internalType": "bool", "name": "canceled", "type": "bool" },
       { "internalType": "bool", "name": "executed", "type": "bool" },
       { "internalType": "uint8", "name": "proposalType", "type": "uint8" }
     ],
@@ -389,10 +397,7 @@
     "type": "function"
   },
   {
-    "inputs": [
-      { "internalType": "uint16", "name": "chainId_", "type": "uint16" },
-      { "internalType": "uint256", "name": "limit_", "type": "uint256" }
-    ],
+    "inputs": [{ "internalType": "uint256", "name": "limit_", "type": "uint256" }],
     "name": "setMaxDailyReceiveLimit",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -441,6 +446,13 @@
     "type": "function"
   },
   {
+    "inputs": [{ "internalType": "uint16", "name": "srcChainId_", "type": "uint16" }],
+    "name": "setSrcChainId",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       { "internalType": "uint16", "name": "_remoteChainId", "type": "uint16" },
       { "internalType": "bytes", "name": "_path", "type": "bytes" }
@@ -458,6 +470,20 @@
     "name": "setTrustedRemoteAddress",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "srcChainId",
+    "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "proposalId_", "type": "uint256" }],
+    "name": "state",
+    "outputs": [{ "internalType": "enum OmnichainGovernanceExecutor.ProposalState", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
     "type": "function"
   },
   {

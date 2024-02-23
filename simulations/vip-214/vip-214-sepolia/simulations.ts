@@ -5,16 +5,16 @@ import { ethers } from "hardhat";
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, testVipV2 } from "../../../src/vip-framework";
 import { vip214Testnet } from "../../../vips/vip-214/vip-214-testnet";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
-import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
+import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager_ABI.json";
+import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "../abi/OmnichainGovernanceExecutor_ABI.json";
 
 const SEPOLIA_GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xb0ab719aed3bc55196862337d18dc4e3ee142e30";
-const SEPOLIA_NORMAL_TIMELOCK = "0x64F3843d6E83be07d06A2E2f0596cA6765b5839B";
+const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xE09E4784C2Dd7B0f2Db5bf9B00E101a4dC8CC9EB";
+const SEPOLIA_NORMAL_TIMELOCK = "0x51f560a018b89A470f8fcE6BF22f3a9F3a4789e5";
 const SEPOLIA_ACCESS_CONTROL_MANAGER = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-forking(4800221, async () => {
+forking(5345042, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: number;
   let executor: Contract;
