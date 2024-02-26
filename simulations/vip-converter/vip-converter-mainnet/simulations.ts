@@ -118,7 +118,7 @@ forking(36330720, () => {
 });
 
 // Release Fund tests
-forking(36382142, () => {
+forking(36468671, () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     await pretendExecutingVip(vipConverter(createInitializeData()));
@@ -168,8 +168,8 @@ forking(36382142, () => {
     const COMPTROLLER_CORE = "0xfD36E2c2a6789Db23113685031d7F16329158384";
     const REPAY_AMOUNT = "12600000000000000";
 
-    // const vETH = await ethers.getContractAt(VTOKEN_ABI, vETH_ADDRESS);
     const vBNB = await ethers.getContractAt(VTOKEN_ABI, vBNB_ADDRESS);
+
     const wBNB = await ethers.getContractAt(ERC20_ABI, wBNB_ADDRESS);
 
     const liquidator = await initMainnetUser(LIQUIDATOR, parseUnits("2", 18));
@@ -183,71 +183,21 @@ forking(36382142, () => {
     const seizeTokens = await comptroller.liquidateCalculateSeizeTokens(vETH_ADDRESS, vBNB_ADDRESS, REPAY_AMOUNT);
 
     const seizedAmount = (exchangeRateCurrent * seizeTokens[1]) / 1e18;
-    const psrIncentive = (seizedAmount * treasuryPercentMantissa) / liquidationIncentiveMantissa;
-    // release funds here so that mapping becomes empty to make further calculation easy
+    const psrBalanceIncreased = (seizedAmount * treasuryPercentMantissa) / liquidationIncentiveMantissa;
+
     await protocolShareReserve.connect(liquidator).releaseFunds(COMPTROLLER_CORE, [wBNB_ADDRESS]);
 
-    const psrBalanceBefore = await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1);
+    const psrBalanceBeforeLiquidating = await wBNB.balanceOf(PSR);
     await liquidatorContract.connect(liquidator).liquidateBorrow(vETH_ADDRESS, BORROWER, REPAY_AMOUNT, vBNB_ADDRESS);
-    const psrBalanceAfter = await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1);
+    const psrBalanceAfterLiquidating = await wBNB.balanceOf(PSR);
 
-    const balanceDiff = psrBalanceAfter - psrBalanceBefore;
-    console.log("🚀 ~ it.only ~ balanceDiff:", balanceDiff);
+    const balanceDiff = psrBalanceAfterLiquidating - psrBalanceBeforeLiquidating;
 
-    expect(balanceDiff).to.closeTo(psrIncentive, parseUnits("1", 10));
+    expect(balanceDiff).to.closeTo(psrBalanceIncreased, parseUnits("1", 10));
 
-    // Release funds
-    const riskFundConverter = new ethers.Contract(
-      "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0",
-      ERC20_ABI,
-      ethers.provider,
-    );
-    const xvsVaultConverter = new ethers.Contract(
-      "0xd5b9AE835F4C59272032B3B954417179573331E0",
-      ERC20_ABI,
-      ethers.provider,
-    );
-    console.log("before", await riskFundConverter.balanceOf(wBNB_ADDRESS));
-    console.log("xvsVaultConverter", await xvsVaultConverter.balanceOf(wBNB_ADDRESS));
-
-    const riskFundConverterBalanceBefore = await wBNB.balanceOf("0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0");
-    const treasuryBalanceBefore = await wBNB.balanceOf("0xF322942f644A996A617BD29c16bd7d231d9F35E9");
-    const xvsConverterBalanceBefore = await wBNB.balanceOf("0xd5b9AE835F4C59272032B3B954417179573331E0");
-
-    console.log("🚀 ~ it.only ~ xvsConverterBalanceBefore:", xvsConverterBalanceBefore);
-    const tx = await protocolShareReserve.connect(liquidator).releaseFunds(COMPTROLLER_CORE, [wBNB_ADDRESS]);
-    const receipt = await tx.wait();
-
-    for (const event of receipt.events) {
-      console.log(event.event, event.args);
-    }
-    console.log("after", await riskFundConverter.balanceOf(wBNB_ADDRESS));
-    console.log("xvsVaultConverterafter", await xvsVaultConverter.balanceOf(wBNB_ADDRESS));
-
-    const riskFundConverterBalanceAfter = await wBNB.balanceOf("0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0");
-    const treasuryBalanceAfter = await wBNB.balanceOf("0xF322942f644A996A617BD29c16bd7d231d9F35E9");
-    const xvsConverterBalanceAfter = await wBNB.balanceOf("0xd5b9AE835F4C59272032B3B954417179573331E0");
-    console.log("🚀 ~ it.only ~ xvsConverterBalanceAfter:", xvsConverterBalanceAfter);
-
-    // console.log((balanceDiff*10)/100, (balanceDiff*40)/100, (balanceDiff*50)/100);
-    // console.log((balanceDiff*10)/100 + (balanceDiff*40)/100 + (balanceDiff*50)/100);
-    //     console.log(">>>>", await protocolShareReserve.assetsReserves(COMPTROLLER_CORE, wBNB_ADDRESS, 1));
-
-    console.log(
-      "🚀 ~ it.only ~ xvsConverterBalanceAfter-xvsConverterBalanceBefore:",
-      xvsConverterBalanceAfter - xvsConverterBalanceBefore,
-    );
-    console.log(
-      "🚀 ~ it.only ~ treasuryBalanceAfter-treasuryBalanceBefore:",
-      treasuryBalanceAfter - treasuryBalanceBefore,
-    );
-    console.log(
-      "🚀 ~ it.only ~ riskFundConverterBalanceAfter-riskFundConverterBalanceBefore:",
-      riskFundConverterBalanceAfter - riskFundConverterBalanceBefore,
-    );
-    // expect((balanceDiff*50)/100).to.equal(riskFundConverterBalanceAfter-riskFundConverterBalanceBefore);
-    // expect((balanceDiff*40)/100).to.equal(treasuryBalanceAfter-treasuryBalanceBefore);
-    expect((balanceDiff * 10) / 100).to.equal(xvsConverterBalanceAfter - xvsConverterBalanceBefore);
+    // Please reference the below code to understand the percentage division asserted below
+    // https://github.com/VenusProtocol/venus-protocol/blob/VEN-2375/contracts/Liquidator/Liquidator.sol#L439
+    expect((balanceDiff / seizedAmount) * 100).to.equal(4.545451712688683);
   });
 });
 
