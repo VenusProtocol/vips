@@ -158,7 +158,7 @@ forking(36468671, () => {
     await protocolShareReserve.connect(impersonatedTimelock).releaseFunds(COMPTROLLER, ASSETS);
   });
 
-  it.only("checks that 5% of the repaid amount is sent to the PSR, as underlying tokens", async () => {
+  it("checks that 5% of the repaid amount is sent to the PSR, as underlying tokens", async () => {
     //Liquidation Test requisite
     const LIQUIDATOR = "0x1934057d1de58cf65fb59277a91f26ac9f8a4282";
     const BORROWER = "0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec";
@@ -237,12 +237,3 @@ forking(36324143, () => {
   });
 });
 
-// original amounts which were transferred through PSR to them calculated through events
-// schema 1
-// xvs 489023496968360
-// trea: 1956093987873440
-// riskfundCon: 2445117484841801
-
-// schema 0
-// rikund : 1
-// tre: 1
