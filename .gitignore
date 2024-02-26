@@ -29,3 +29,6 @@ yarn-error.log*
 # Generated files
 venusApp.json
 gnosisTXBuilder.json
+
+.DS_Store
+**/.DS_Store
