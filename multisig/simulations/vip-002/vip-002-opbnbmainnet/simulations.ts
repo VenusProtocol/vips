@@ -39,6 +39,8 @@ const VTOKEN_IMPL = "0x227c4D4176604908755be2B513A2b7bcA6f54a1F";
 const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const BLOCKS_PER_YEAR = 31_536_000; // assuming a block is mined every 1 seconds
 
+const CORE_POOL_SUPPLIER = "0xa7e84de1f48743143223ba17153ea88732490cd2";
+
 type VTokenSymbol = "vBTCB_Core" | "vETH_Core" | "vUSDT_Core" | "vWBNB_Core" | "vFDUSD_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
@@ -436,7 +438,7 @@ forking(16775600, () => {
     });
 
     describe("generic tests", async () => {
-      checkIsolatedPoolsComptrollers();
+      checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: CORE_POOL_SUPPLIER });
     });
   });
 });

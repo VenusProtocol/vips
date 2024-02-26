@@ -101,7 +101,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   );
   const supplyUnderlyingDecimals = await supplyUnderlying.decimals();
   const initialSupplyAmount = parseUnits("0.05", supplyUnderlyingDecimals);
-  const balance = await supplyUnderlying.balanceOf(ACCOUNT);
+  const balance = await supplyUnderlying.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket.balanceOf(poolSupplier);
 
@@ -111,6 +111,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   expect(await supplyMarket.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
 
   await comptroller.enterMarkets([borrowMarket.address, supplyMarket.address]);
+
   let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(poolSupplier);
   const borrowUnderlyingDecimals = await borrowUnderlying.decimals();
 
@@ -131,9 +132,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   await borrowMarket.repayBorrow(borrowAmount);
   expect(await borrowUnderlying.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
 
-  const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(ACCOUNT);
+  const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(poolSupplier);
   await supplyMarket.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
-  expect(await supplyUnderlying.balanceOf(ACCOUNT)).to.gt(supplyUnderlyingBalance);
+  expect(await supplyUnderlying.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
   console.log(`${pool.name} > set storage`);
   const originalOracle = await comptroller.oracle();
