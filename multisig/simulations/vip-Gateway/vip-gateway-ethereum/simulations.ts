@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import {
   COMPTROLLER_BEACON,
   NATIVE_TOKEN_GATEWAY,
@@ -199,6 +200,10 @@ forking(19161237, () => {
           expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
         });
       });
+    });
+
+    describe("generic tests", () => {
+      checkIsolatedPoolsComptrollers();
     });
   });
 });
