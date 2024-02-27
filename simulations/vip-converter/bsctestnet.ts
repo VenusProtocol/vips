@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
 // imported addresses from converter vip
 import {
   BTCBPrimeConverterTokenOuts,
@@ -14,7 +14,7 @@ import {
   USDTPrimeConverterTokenOuts,
   XVSVaultConverterTokenOuts,
   converters,
-} from "../../../vips/vip-248/vip-248-testnet/Addresses";
+} from "../../vips/vip-248/vip-248-testnet/Addresses";
 import {
   LIQUIDATOR,
   NEW_RISK_FUND_CONVERTER_IMP,
@@ -24,12 +24,12 @@ import {
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
   vipConverter,
-} from "../../../vips/vip-converter/bsctestnet";
-import BEACON_ABI from "../abi/Beacon.json";
-import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
-import LIQUIDATOR_ABI from "../abi/Liquidator.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
-import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
+} from "../../vips/vip-converter/bsctestnet";
+import BEACON_ABI from "./abi/Beacon.json";
+import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import LIQUIDATOR_ABI from "./abi/Liquidator.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import TRANSPARENT_PROXY_ABI from "./abi/TransparentProxyAbi.json";
 
 forking(37698400, () => {
   const provider = ethers.provider;

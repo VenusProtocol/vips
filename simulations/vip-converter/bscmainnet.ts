@@ -3,8 +3,8 @@ import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
+import { expectEvents, initMainnetUser } from "../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 // imported addresses from converter vip
 import {
   BTCBPrimeConverterTokenOuts,
@@ -15,7 +15,7 @@ import {
   USDTPrimeConverterTokenOuts,
   XVSVaultConverterTokenOuts,
   converters,
-} from "../../../vips/vip-248/vip-248/Addresses";
+} from "../../vips/vip-248/vip-248/Addresses";
 import {
   LIQUIDATOR_CONTRACT,
   NEW_RISK_FUND_CONVERTER_IMP,
@@ -26,17 +26,17 @@ import {
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
   vipConverter,
-} from "../../../vips/vip-converter/bscmainnet";
-import BEACON_ABI from "../abi/Beacon.json";
-import DEFAULT_PROXY_ADMIN_ABI from "../abi/DefaultProxyAdmin.json";
-import ERC20_ABI from "../abi/ERC20.json";
-import LIQUIDATOR_ABI from "../abi/Liquidator.json";
-import PROTOCOL_SHARE_RESERVE_ABI from "../abi/ProtocolShareReserve.json";
-import PROXY_ADMIN_ABI from "../abi/ProxyAdmin.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
-import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
-import VTOKEN_ABI from "../abi/VTOKEN_ABI.json";
-import COMPTROLLER_CORE_ABI from "../abi/comptroller.json";
+} from "../../vips/vip-converter/bscmainnet";
+import BEACON_ABI from "./abi/Beacon.json";
+import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import LIQUIDATOR_ABI from "./abi/Liquidator.json";
+import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import TRANSPARENT_PROXY_ABI from "./abi/TransparentProxyAbi.json";
+import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
+import COMPTROLLER_CORE_ABI from "./abi/comptroller.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
