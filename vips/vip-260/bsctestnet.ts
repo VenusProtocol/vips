@@ -425,27 +425,7 @@ export const vip260Testnet = () => {
       {
         target: bsctestnet.TOKEN_BRIDGE_CONTROLLER_VAI,
         signature: "setMintCap(address,uint256)",
-        params: [bsctestnet.TOKEN_BRIDGE_VAI, "100000000000000000000000"], // 100K bsctestnet.VAI
-      },
-      {
-        target: bsctestnet.TOKEN_BRIDGE_ADMIN_VAI,
-        signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [10161, "50000000000000000000000"], // $50K
-      },
-      {
-        target: bsctestnet.TOKEN_BRIDGE_ADMIN_VAI,
-        signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-        params: [10161, "10000000000000000000000"], // $10K
-      },
-      {
-        target: bsctestnet.TOKEN_BRIDGE_ADMIN_VAI,
-        signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-        params: [10161, "50000000000000000000000"], // $50K
-      },
-      {
-        target: bsctestnet.TOKEN_BRIDGE_ADMIN_VAI,
-        signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        params: [10161, "10000000000000000000000"], // $10K
+        params: [bsctestnet.TOKEN_BRIDGE_VAI, "100000000000000000000000"], // 100K VAI
       },
     ],
     meta,

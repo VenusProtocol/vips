@@ -166,27 +166,7 @@ export const vip011 = () => {
     {
       target: sepolia.VAI,
       signature: "setMintCap(address,uint256)",
-      params: [sepolia.TOKEN_BRIDGE_VAI, "100000000000000000000000"],
-    },
-    {
-      target: sepolia.TOKEN_BRIDGE_ADMIN_VAI,
-      signature: "setMaxDailyLimit(uint16,uint256)",
-      params: [10102, "50000000000000000000000"], // $50K
-    },
-    {
-      target: sepolia.TOKEN_BRIDGE_ADMIN_VAI,
-      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-      params: [10102, "10000000000000000000000"], // $10K
-    },
-    {
-      target: sepolia.TOKEN_BRIDGE_ADMIN_VAI,
-      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [10102, "50000000000000000000000"], // $50K
-    },
-    {
-      target: sepolia.TOKEN_BRIDGE_ADMIN_VAI,
-      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [10102, "10000000000000000000000"], // $10K
+      params: [sepolia.TOKEN_BRIDGE_VAI, "100000000000000000000000"], // 100K VAI
     },
     {
       target: sepolia.CHAINLINK_ORACLE,
