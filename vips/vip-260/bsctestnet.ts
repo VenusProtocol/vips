@@ -3,7 +3,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const GUARDIAN = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-const TRUSTED_REMOTE = "0xFA62BC6C0E20A507E3Ad0dF4F6b89E71953161fa";
+const TRUSTED_REMOTE = "0x69fFBFCe81c105a07916d3a8fCA205Ed1758B826";
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 export const vip260Testnet = () => {

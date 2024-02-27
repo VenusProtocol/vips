@@ -14,13 +14,13 @@ import VAIBridgeAdmin_ABI from "./abi/VAIBridgeAdmin.json";
 import VAI_BRIDGE_ABI from "./abi/VAITokenBridge.json";
 
 const DEST_CHAIN_ID = 10161;
-const TOKEN_BRIDGE_CONTROLLER_VAI = "0x91b653f7527D698320133Eb97BB55a617663e792";
-const TRUSTED_REMOTE = "0xfa62bc6c0e20a507e3ad0df4f6b89e71953161fa";
+const TOKEN_BRIDGE_CONTROLLER_VAI = "0x5E19dc192DaB0d97986e02795817F72BA85E52A8";
+const TRUSTED_REMOTE = "0x69ffbfce81c105a07916d3a8fca205ed1758b826";
 const VAI_HOLDER = "0x7Db4f5cC3bBA3e12FF1F528D2e3417afb0a57118";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(37969204, () => {
+forking(38107132, () => {
   const provider = ethers.provider;
   let vaiBridge: ethers.Contract;
   let bridgeAdmin: ethers.Contract;
@@ -94,13 +94,13 @@ forking(37969204, () => {
       expect(await vaiBridge.chainIdToMaxDailyReceiveLimit(DEST_CHAIN_ID)).to.equal("50000000000000000000000");
     });
 
-    it("Should emit an event on successfull bridging of VAI", async () => {
+    it("Should emit an event on successful bridging of VAI", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await vaiBridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      await vai.connect(vaiHolderSigner).approve(vaiBridge.address, amount);
+      await vai.connect(vaiHolderSigner).approve(tokenController.address, amount);
 
       await expect(
         vaiBridge
@@ -143,7 +143,7 @@ forking(37969204, () => {
       const maxPlusAmount = ethers.utils.parseUnits("50001");
       const amount = ethers.utils.parseUnits("10000");
 
-      await vai.connect(vaiHolderSigner).approve(vaiBridge.address, maxPlusAmount);
+      await vai.connect(vaiHolderSigner).approve(tokenController.address, maxPlusAmount);
       const nativeFee = (
         await vaiBridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;

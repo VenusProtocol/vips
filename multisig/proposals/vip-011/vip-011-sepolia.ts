@@ -4,6 +4,7 @@ import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { makeProposal } from "../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
+const TRUSTED_REMOTE = "0xeaa89cF3bAB8245F8A2F438595e1fF5cC3eEaE18";
 
 export const vip011 = () => {
   return makeProposal([
@@ -160,7 +161,7 @@ export const vip011 = () => {
     {
       target: sepolia.TOKEN_BRIDGE_ADMIN_VAI,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
-      params: ["10102", "0x2280aCD3BE2eE270161a11A6176814C26FD747f9"],
+      params: ["10102", TRUSTED_REMOTE],
     },
     {
       target: sepolia.VAI,

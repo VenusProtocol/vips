@@ -14,9 +14,10 @@ import VAI_BRIDGE_ABI from "./abi/vaiBridge.json";
 import VAI_BRIDGE_ADMIN_ABI from "./abi/vaiBridgeAdmin.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
+const TRUSTED_REMOTE = "0xeaa89cf3bab8245f8a2f438595e1ff5cc3eeae18";
 const DEST_CHAIN_ID = 10102;
 
-forking(5340851, () => {
+forking(5373511, () => {
   let vai: Contract;
   let vaiBridgeAdmin: Contract;
   let vaiBridge: Contract;
@@ -66,7 +67,7 @@ forking(5340851, () => {
 
     it("Should set trusted remote address in bridge", async () => {
       const trustedRemote = await vaiBridge.getTrustedRemoteAddress(10102);
-      expect(trustedRemote).equals("0x2280acd3be2ee270161a11a6176814c26fd747f9");
+      expect(trustedRemote).equals(TRUSTED_REMOTE);
     });
 
     it("Should set minting limit in sepolia.VAI token", async () => {
