@@ -11,9 +11,9 @@ export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 export const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 export const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
-export const USDC_AMOUNT = parseUnits("7619561", 18);
-export const USDT_AMOUNT = parseUnits("440000", 18);
-export const ETH_AMOUNT = parseUnits("126", 18);
+export const USDC_AMOUNT = parseUnits("7587064.24", 18);
+export const USDT_AMOUNT = parseUnits("377487.92", 18);
+export const ETH_AMOUNT = parseUnits("126.6523", 18);
 
 export const vip262 = () => {
   const meta = {
@@ -71,6 +71,21 @@ export const vip262 = () => {
         target: vETH,
         signature: "mintBehalf(address,uint256)",
         params: [TREASURY, ETH_AMOUNT],
+      },
+      {
+        target: USDC,
+        signature: "approve(address,uint256)",
+        params: [vUSDC, 0],
+      },
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [vUSDT, 0],
+      },
+      {
+        target: ETH,
+        signature: "approve(address,uint256)",
+        params: [vETH, 0],
       },
     ],
     meta,

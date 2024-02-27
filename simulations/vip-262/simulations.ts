@@ -18,7 +18,7 @@ import {
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36494615, () => {
+forking(36506196, () => {
   let vUSDCContract: ethers.Contract;
   let vUSDTContract: ethers.Contract;
   let vETHContract: ethers.Contract;
@@ -38,6 +38,7 @@ forking(36494615, () => {
   testVip("VIP-262", vip262(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [3]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["MintBehalf"], [3]);
     },
   });
 
