@@ -18,8 +18,27 @@ export const ETH_AMOUNT = parseUnits("126.6523", 18);
 export const vip262 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-262: Treasury Management Proposal",
-    description: ``,
+    title: "VIP-262 Treasury Management",
+    description: `#### Summary
+
+Following the community proposal for [Treasury Managment](https://community.venus.io/t/treasury-management-proposal/4134), and the [associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0xb58cdfa3dba5459e9279a06065033c327f239afb834b27e06c5474954e51b30d), this VIP, If approved, will supply 7,587,064.24 USDC, 377,487.92 USDT and 126.6523 ETH from the vTreausry to the Venus market.
+
+These actions are projected to generate approximately $1,057,435 annual revenues considering market prices and conditions for Feb 21, 2024.
+
+#### Description
+
+This proposal aims to manage USDC, USDT, and ETH by taking advantage of the current market supply APYs in Venus. Due to some expected pending payments that will be proposed in the following VIP, the total amount supplied will be reduced by the following amounts:
+
+- 32,500 USDC for Quantstamp for the retainer program.
+- 63,500 USDT for Certik for the retainer program and community wallet refund.
+
+More details will be provided in the following VIP, and funds will be used only if the VIP is approved.
+
+With this, the total supplied amounts are as follows:
+
+- 7,587,064.24 USDC
+- 377,487.92 USDT
+- 126.6523 ETH`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
