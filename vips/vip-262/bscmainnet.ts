@@ -23,7 +23,7 @@ export const vip262 = () => {
 
 Following the community proposal for [Treasury Managment](https://community.venus.io/t/treasury-management-proposal/4134), and the [associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0xb58cdfa3dba5459e9279a06065033c327f239afb834b27e06c5474954e51b30d), this VIP, If approved, will supply 7,587,064.24 USDC, 377,487.92 USDT and 126.6523 ETH from the vTreausry to the Venus market.
 
-These actions are projected to generate approximately $1,057,435 annual revenues considering market prices and conditions for Feb 21, 2024.
+These actions are projected to generate approximately $754,083 annual revenues considering market prices and conditions for Feb 27, 2024.
 
 #### Description
 
