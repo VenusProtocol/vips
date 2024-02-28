@@ -66,6 +66,7 @@ forking(36530274, () => {
       await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
     },
     proposer: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
+    supporter: "0x2a7affEf37EE145cB9DA989a7C93FbF487325b2e",
   });
 
   describe("Post-VIP behavior", async () => {
@@ -80,7 +81,7 @@ forking(36530274, () => {
       expect(newUSDTBalanceOfCertik).to.be.eq(prevUSDTBalanceOfCertik.add(CERTIK_USDT_AMOUNT));
       expect(newUSDCBalanceOfQuantstamp).to.be.eq(prevUSDCBalanceOfQuantstamp.add(QUANTSTAMP_USDC_AMOUNT));
       expect(newBNBBalanceOfTreasury).to.be.eq(prevBNBBalanceOfTreasury.sub(COMMUNITY_BNB_AMOUNT));
-      expect(newBNBBalanceOfCommunity).to.be.gte(prevBNBBalanceOfCommunity.add(COMMUNITY_BNB_AMOUNT));
+      expect(newBNBBalanceOfCommunity).to.be.eq(prevBNBBalanceOfCommunity.add(COMMUNITY_BNB_AMOUNT));
       expect(newUSDTBalanceOfCommunity).to.be.eq(prevUSDTBalanceOfCommunity.add(COMMUNITY_USDT_AMOUNT));
       expect(newXVSBalanceOfXVSReceiver).to.be.eq(prevXVSBalanceOfXVSReceiver.add(XVS_AMOUNT));
     });
