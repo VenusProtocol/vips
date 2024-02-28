@@ -72,11 +72,6 @@ export const vip263 = () => {
       {
         target: XVS,
         signature: "approve(address,uint256)",
-        params: [XVS_BRIDGE, 0],
-      },
-      {
-        target: XVS,
-        signature: "approve(address,uint256)",
         params: [XVS_BRIDGE, BRIDGE_XVS_AMOUNT],
       },
       {

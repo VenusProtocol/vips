@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
+  BRIDGE_XVS_AMOUNT,
   CERTIK_RECEIVER,
   CERTIK_USDT_AMOUNT,
   COMMUNITY_BNB_AMOUNT,
@@ -86,12 +87,12 @@ forking(36530274, () => {
 
     it("Should decrease circulating supply", async () => {
       const currCirculatingSupply = await xvsBridge.circulatingSupply();
-      expect(oldCirculatingSupply.sub(currCirculatingSupply)).equals(XVS_AMOUNT);
+      expect(oldCirculatingSupply.sub(currCirculatingSupply)).equals(BRIDGE_XVS_AMOUNT);
     });
 
     it("Should increase number of locked tokens on bridge", async () => {
       const currXVSBal = await xvs.balanceOf(XVS_BRIDGE);
-      expect(currXVSBal.sub(oldXVSBalance)).equals(XVS_AMOUNT);
+      expect(currXVSBal.sub(oldXVSBalance)).equals(BRIDGE_XVS_AMOUNT);
     });
   });
 });
