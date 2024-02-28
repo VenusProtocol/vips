@@ -1,18 +1,22 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   CERTIK_RECEIVER,
+  CERTIK_USDT_AMOUNT,
+  COMMUNITY_BNB_AMOUNT,
   COMMUNITY_RECEIVER,
+  COMMUNITY_USDT_AMOUNT,
   QUANTSTAMP_RECEIVER,
+  QUANTSTAMP_USDC_AMOUNT,
   TREASURY,
   USDC,
   USDT,
   XVS,
+  XVS_AMOUNT,
   XVS_RECEIVER,
   vip263,
 } from "../../vips/vip-263/bscmainnet";
@@ -29,6 +33,7 @@ forking(36524619, () => {
   let prevBNBBalanceOfTreasury: BigNumber;
   let prevUSDTBalanceOfCommunity: BigNumber;
   let prevXVSBalanceOfXVSReceiver: BigNumber;
+  let prevBNBBalanceOfCommunity: BigNumber;
 
   before(async () => {
     usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
@@ -40,6 +45,7 @@ forking(36524619, () => {
     prevBNBBalanceOfTreasury = await ethers.provider.getBalance(TREASURY);
     prevUSDTBalanceOfCommunity = await usdt.balanceOf(COMMUNITY_RECEIVER);
     prevXVSBalanceOfXVSReceiver = await xvs.balanceOf(XVS_RECEIVER);
+    prevBNBBalanceOfCommunity = await ethers.provider.getBalance(COMMUNITY_RECEIVER);
   });
 
   testVip("VIP-263", vip263(), {
@@ -57,12 +63,14 @@ forking(36524619, () => {
       const newBNBBalanceOfTreasury = await ethers.provider.getBalance(TREASURY);
       const newUSDTBalanceOfCommunity = await usdt.balanceOf(COMMUNITY_RECEIVER);
       const newXVSBalanceOfXVSReceiver = await xvs.balanceOf(XVS_RECEIVER);
+      const newBNBBalanceOfCommunity = await ethers.provider.getBalance(COMMUNITY_RECEIVER);
 
-      expect(newUSDTBalanceOfCertik).to.be.eq(prevUSDTBalanceOfCertik.add(parseUnits("19000", 18)));
-      expect(newUSDCBalanceOfQuantstamp).to.be.eq(prevUSDCBalanceOfQuantstamp.add(parseUnits("32500", 18)));
-      expect(newBNBBalanceOfTreasury).to.be.eq(prevBNBBalanceOfTreasury.sub(parseUnits("1", 18)));
-      expect(newUSDTBalanceOfCommunity).to.be.eq(prevUSDTBalanceOfCommunity.add(parseUnits("44500", 18)));
-      expect(newXVSBalanceOfXVSReceiver).to.be.eq(prevXVSBalanceOfXVSReceiver.add(parseUnits("620", 18)));
+      expect(newUSDTBalanceOfCertik).to.be.eq(prevUSDTBalanceOfCertik.add(CERTIK_USDT_AMOUNT));
+      expect(newUSDCBalanceOfQuantstamp).to.be.eq(prevUSDCBalanceOfQuantstamp.add(QUANTSTAMP_USDC_AMOUNT));
+      expect(newBNBBalanceOfTreasury).to.be.eq(prevBNBBalanceOfTreasury.sub(COMMUNITY_BNB_AMOUNT));
+      expect(newBNBBalanceOfCommunity).to.be.gte(prevBNBBalanceOfCommunity.add(COMMUNITY_BNB_AMOUNT));
+      expect(newUSDTBalanceOfCommunity).to.be.eq(prevUSDTBalanceOfCommunity.add(COMMUNITY_USDT_AMOUNT));
+      expect(newXVSBalanceOfXVSReceiver).to.be.eq(prevXVSBalanceOfXVSReceiver.add(XVS_AMOUNT));
     });
   });
 });
