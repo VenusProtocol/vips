@@ -83,7 +83,7 @@ let protocolShareReserve: Contract;
 let beacon: Contract;
 let liquidator: Contract;
 
-forking(36330720, () => {
+forking(36531596, () => {
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
@@ -118,7 +118,7 @@ forking(36330720, () => {
 });
 
 // Release Fund tests
-forking(36468671, () => {
+forking(36531596, () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     await pretendExecutingVip(vipConverter(createInitializeData()));
@@ -197,11 +197,11 @@ forking(36468671, () => {
 
     // Please reference the below code to understand the percentage division asserted below
     // https://github.com/VenusProtocol/venus-protocol/blob/VEN-2375/contracts/Liquidator/Liquidator.sol#L439
-    expect((balanceDiff / seizedAmount) * 100).to.equal(4.545451712688683);
+    expect((balanceDiff / seizedAmount) * 100).to.equal(4.545453161034283);
   });
 });
 
-forking(36324143, () => {
+forking(36531596, () => {
   let liquidator: Contract;
   let proxyAdmin: Contract;
   const provider = ethers.provider;
