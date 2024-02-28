@@ -122,7 +122,6 @@ export const setMaxStalePeriod = async (
   const chainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
   const redstoneOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].REDSTONE_ORACLE;
   const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-  console.log(`StalePeriod Und Asst: ${underlyingAsset.address}`);
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
