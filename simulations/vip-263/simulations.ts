@@ -3,7 +3,8 @@ import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import vip262 from "../../vips/vip-262/bscmainnet";
 import {
   BRIDGE_XVS_AMOUNT,
   CERTIK_RECEIVER,
@@ -27,7 +28,7 @@ import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(36530274, () => {
+forking(36530861, () => {
   let usdc: ethers.Contract;
   let usdt: ethers.Contract;
   let xvs: ethers.Contract;
@@ -56,6 +57,8 @@ forking(36530274, () => {
 
     oldCirculatingSupply = await xvsBridge.circulatingSupply();
     oldXVSBalance = await xvs.balanceOf(XVS_BRIDGE);
+
+    await pretendExecutingVip(vip262());
   });
 
   testVip("VIP-263", vip263(), {
