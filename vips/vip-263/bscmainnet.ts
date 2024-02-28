@@ -143,7 +143,7 @@ In this first test with real XVS we are bridging 10 XVS to the [Venus Treasury o
           BRIDGE_XVS_AMOUNT,
           [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
-        value: parseUnits("0.3", 18).toString(),
+        value: parseUnits("0.5", 18).toString(),
       },
       {
         target: XVS,
