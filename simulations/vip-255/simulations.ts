@@ -14,7 +14,7 @@ const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const V2_LP = "0xD94FeFc80a7d10d4708b140c7210569061a7eddb";
 const V3_POSITION_MANAGER = "0x46A15B0b27311cedF172AB29E4f4766fbE7F4364";
-const LIQUIDITY_MOVER = "0x6F9947f15896169C122EaF621628C437B7d3583e";
+const LIQUIDITY_MOVER = "0xcE18DA58f469A2dA9decDf1B168494240430D1D4";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 // Actual refunds will depend on the amounts of USDT and VAI
@@ -22,7 +22,7 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 // and the current state of the PCS v3 pool.
 // The numbers are calculated based on the fork block.
 const EXPECTED_USDT_REFUND = parseUnits("0", 18);
-const EXPECTED_VAI_REFUND = parseUnits("1223.979168968828407775", 18);
+const EXPECTED_VAI_REFUND = parseUnits("972.654329673144663427", 18);
 
 export const tickToPrice = (tick: number): BigNumber => {
   const E18 = new Decimal(10).pow(18);
@@ -67,7 +67,7 @@ The following tick values are used in this VIP:
     )} USDT/VAI.
 `);
 
-forking(36328740, () => {
+forking(36557358, () => {
   const usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
   const vai = new ethers.Contract(VAI, IERC20_ABI, ethers.provider);
   const v2lp = new ethers.Contract(V2_LP, IERC20_ABI, ethers.provider);
