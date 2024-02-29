@@ -5,7 +5,7 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { forking, testVip } from "../../src/vip-framework";
+import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import vip255, { MAX_TICK_CENTER, MIN_TICK_CENTER, TICK_SPREAD } from "../../vips/vip-255/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import V3_POSITION_MANAGER_ABI from "./abi/NonfungiblePositionManager.json";
@@ -144,6 +144,10 @@ forking(36557358, () => {
       const treasuryVaiBalanceAfter = await vai.balanceOf(TREASURY);
       const delta = treasuryVaiBalanceAfter.sub(treasuryVaiBalanceBefore);
       expect(delta).to.equal(EXPECTED_VAI_REFUND);
+    });
+
+    it(`should send the NFT to the timelock`, async () => {
+      expect(await v3pm.ownerOf(positionId())).to.equal(NORMAL_TIMELOCK);
     });
   });
 });
