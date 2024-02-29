@@ -45,9 +45,6 @@ export const vip005 = () => {
       params: [],
     },
     {
-      target: PROTOCOL_SHARE_RESERVE,
-      signature: "setAccessControlManager(address)",
-      params: [ACM],
     },
     {
       target: ACM,
