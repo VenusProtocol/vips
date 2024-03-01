@@ -14,16 +14,16 @@ export const BORROWER_3 = "0xbd043882d36b6def4c30f20c613cfa70d3af8bb7";
 export const TUSD_OLD_DEBT_BORROWER_1 = parseUnits("131748.1702", 18);
 export const TUSD_OLD_DEBT_BORROWER_2 = parseUnits("12482.2791", 18); // ~0.0001
 export const BNB_DEBT_BORROWER_3 = parseUnits("232.0791", 18);
-export const USDT_DEBT_BORROWER_1 = parseUnits("1330", 18); // TBR
-export const TREASURY_VUSDT_WITHDRAW_AMOUNT = parseUnits("57845.42049285", 8); // TBR
+export const USDT_DEBT_BORROWER_1 = parseUnits("22592.7081", 18); // TBR
+export const TREASURY_VUSDT_WITHDRAW_AMOUNT = parseUnits("970536.83159314", 8); // 1 USDT=42.957968 vUSDT
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const TOKEN_REDEEMER = "0x67B10f3BC6B141D67c598C73CEe45E6635292Acd";
 
-export const vip263 = () => {
+export const vip264 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-263 Repay BUSD debt on behalf borrower",
+    title: "VIP-264 Repay BUSD debt on behalf borrower",
     description: `#### Summary
 
     Normal VIP, performing some repayments of bad debt in the Core pool, using funds from the VTreasury:

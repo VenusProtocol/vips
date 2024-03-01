@@ -4,7 +4,9 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import vip262 from "../../vips/vip-262/bscmainnet";
+import vip263 from "../../vips/vip-263/bscmainnet";
 import {
   BNB_DEBT_BORROWER_3,
   BORROWER_1,
@@ -20,8 +22,8 @@ import {
   VBNB,
   VTUSD_OLD,
   VUSDT,
-  vip263,
-} from "../../vips/vip-263/bscmainnet";
+  vip264,
+} from "../../vips/vip-264/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
@@ -55,9 +57,12 @@ forking(36585173, () => {
     borrower2TusdDebtPrev = await vTusdOld.borrowBalanceStored(BORROWER_2);
     borrower1UsdtDebtPrev = await vUSDT.borrowBalanceStored(BORROWER_1);
     borrower3BnbDebtPrev = await vBNB.borrowBalanceStored(BORROWER_3);
+
+    await pretendExecutingVip(vip262());
+    await pretendExecutingVip(vip263());
   });
 
-  testVip("VIP-263", vip263(), {
+  testVip("VIP-264", vip264(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB"], [1]);
