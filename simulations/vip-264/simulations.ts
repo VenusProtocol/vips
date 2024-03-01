@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { expectEventWithParams, expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import { vip264 } from "../../vips/vip-264";
+import { vip264 } from "../../vips/vip-264/bscmainnet";
 import ILIR_ABI from "./abi/ILInterestRateModelABI.json";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20DelegatorAbi.json";
