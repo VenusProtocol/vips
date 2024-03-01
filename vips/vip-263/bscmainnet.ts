@@ -15,10 +15,10 @@ export const TUSD_OLD_DEBT_BORROWER_1 = parseUnits("131748.1702", 18);
 export const TUSD_OLD_DEBT_BORROWER_2 = parseUnits("12482.2791", 18); // ~0.0001
 export const BNB_DEBT_BORROWER_3 = parseUnits("232.0791", 18);
 export const USDT_DEBT_BORROWER_1 = parseUnits("1330", 18); // TBR
-export const TREASURY_USDT_REDEEM_AMOUNT = parseUnits("1330", 18); // TBR
 export const TREASURY_VUSDT_WITHDRAW_AMOUNT = parseUnits("57845.42049285", 8); // TBR
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+export const TOKEN_REDEEMER = "0x67B10f3BC6B141D67c598C73CEe45E6635292Acd";
 
 export const vip263 = () => {
   const meta = {
@@ -58,25 +58,13 @@ export const vip263 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [VUSDT, TREASURY_VUSDT_WITHDRAW_AMOUNT, NORMAL_TIMELOCK],
-      },
-
-      {
-        target: VUSDT,
-        signature: "redeemUnderlying(uint256)",
-        params: [TREASURY_USDT_REDEEM_AMOUNT],
+        params: [VUSDT, TREASURY_VUSDT_WITHDRAW_AMOUNT, TOKEN_REDEEMER],
       },
 
       {
         target: TUSD_OLD,
         signature: "approve(address,uint256)",
         params: [VTUSD_OLD, TUSD_OLD_DEBT_BORROWER_1.add(TUSD_OLD_DEBT_BORROWER_2)],
-      },
-
-      {
-        target: USDT,
-        signature: "approve(address,uint256)",
-        params: [VUSDT, USDT_DEBT_BORROWER_1],
       },
 
       {
@@ -99,21 +87,15 @@ export const vip263 = () => {
       },
 
       {
-        target: VUSDT,
-        signature: "repayBorrowBehalf(address,uint256)",
-        params: [BORROWER_1, USDT_DEBT_BORROWER_1],
+        target: TOKEN_REDEEMER,
+        signature: "redeemUnderlyingAndRepayBorrowBehalf(address,address,uint256,address)",
+        params: [VUSDT, BORROWER_1, USDT_DEBT_BORROWER_1, TREASURY],
       },
 
       {
         target: TUSD_OLD,
         signature: "approve(address,uint256)",
         params: [VTUSD_OLD, 0],
-      },
-
-      {
-        target: USDT,
-        signature: "approve(address,uint256)",
-        params: [VUSDT, 0],
       },
     ],
     meta,

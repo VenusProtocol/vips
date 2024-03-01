@@ -10,10 +10,8 @@ import {
   BORROWER_1,
   BORROWER_2,
   BORROWER_3,
-  NORMAL_TIMELOCK,
+  TOKEN_REDEEMER,
   TREASURY,
-  TREASURY_USDT_REDEEM_AMOUNT,
-  TREASURY_VUSDT_WITHDRAW_AMOUNT,
   TUSD_OLD,
   TUSD_OLD_DEBT_BORROWER_1,
   TUSD_OLD_DEBT_BORROWER_2,
@@ -28,7 +26,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36553318, () => {
+forking(36585173, () => {
   let vUSDT: ethers.Contract;
   let vTusdOld: ethers.Contract;
   let vBNB: ethers.Contract;
@@ -41,7 +39,6 @@ forking(36553318, () => {
   let borrower1UsdtDebtPrev: BigNumber;
   let borrower2TusdDebtPrev: BigNumber;
   let borrower3BnbDebtPrev: BigNumber;
-  let timelockUsdtBalPrev: BigNumber;
 
   before(async () => {
     vUSDT = new ethers.Contract(VUSDT, VTOKEN_ABI, ethers.provider);
@@ -58,8 +55,6 @@ forking(36553318, () => {
     borrower2TusdDebtPrev = await vTusdOld.borrowBalanceStored(BORROWER_2);
     borrower1UsdtDebtPrev = await vUSDT.borrowBalanceStored(BORROWER_1);
     borrower3BnbDebtPrev = await vBNB.borrowBalanceStored(BORROWER_3);
-
-    timelockUsdtBalPrev = await usdt.balanceOf(NORMAL_TIMELOCK);
   });
 
   testVip("VIP-263", vip263(), {
@@ -80,7 +75,9 @@ forking(36553318, () => {
       expect(treasuryTusdBalPrev).equals(
         treasuryTusdBalNew.add(TUSD_OLD_DEBT_BORROWER_1.add(TUSD_OLD_DEBT_BORROWER_2)),
       );
-      expect(treasuryVUsdtBalPrev).equals(treasuryVUsdtBalNew.add(TREASURY_VUSDT_WITHDRAW_AMOUNT));
+      const exchangeRateStored = await vUSDT.exchangeRateStored();
+      const redeemedTokens = USDT_DEBT_BORROWER_1.mul(parseUnits("1", 18)).div(exchangeRateStored);
+      expect(treasuryVUsdtBalPrev).equals(treasuryVUsdtBalNew.add(redeemedTokens));
       expect(treasuryBnbBalPrev).equals(treasuryBnbBalNew.add(BNB_DEBT_BORROWER_3));
     });
 
@@ -96,9 +93,11 @@ forking(36553318, () => {
       expect(borrower3BnbDebtPrev).to.closeTo(borrower3BnbDebtNew.add(BNB_DEBT_BORROWER_3), parseUnits("0.15", 18));
     });
 
-    it("Timelock balance checks", async () => {
-      const timelockUsdtBalNew = await usdt.balanceOf(NORMAL_TIMELOCK);
-      expect(timelockUsdtBalPrev).equals(timelockUsdtBalNew.add(TREASURY_USDT_REDEEM_AMOUNT.sub(USDT_DEBT_BORROWER_1)));
+    it("Redeemer's balance checks", async () => {
+      const redeemerVUsdtBalance = await vUSDT.balanceOf(TOKEN_REDEEMER);
+      const redemmerUsdtBalance = await usdt.balanceOf(TOKEN_REDEEMER);
+      expect(redeemerVUsdtBalance).equals(0);
+      expect(redemmerUsdtBalance).equals(0);
     });
   });
 });
