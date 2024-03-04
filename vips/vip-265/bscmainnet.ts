@@ -14,7 +14,8 @@ export const OLD_IMPL = "0xE26cE9b5FDd602225cCcC4cef7FAE596Dcf2A965";
 export const TEMP_IMPL = "0x3aD4b5677AdC2a6930B2A08f443b9B3c6c605CD8";
 export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 
-export const vipConverter = (data?: string) => {
+export const vip265 = (data?: string) => {
+  console.log({data})
   const meta = {
     version: "v2",
     title:
@@ -65,4 +66,4 @@ export const vipConverter = (data?: string) => {
   );
 };
 
-export default vipConverter;
+export default vip265;

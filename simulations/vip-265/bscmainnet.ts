@@ -25,8 +25,8 @@ import {
   PSR,
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
-  vipConverter,
-} from "../../vips/vip-converter/bscmainnet";
+  vip265,
+} from "../../vips/vip-265/bscmainnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -83,7 +83,7 @@ let protocolShareReserve: Contract;
 let beacon: Contract;
 let liquidator: Contract;
 
-forking(36531596, () => {
+forking(36680347, () => {
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
@@ -93,7 +93,7 @@ forking(36531596, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
 
-  testVip("VIP-Converter", vipConverter(createInitializeData()), {
+  testVip("VIP-Converter", vip265(createInitializeData()), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(
@@ -118,10 +118,10 @@ forking(36531596, () => {
 });
 
 // Release Fund tests
-forking(36531596, () => {
+forking(36680347, () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
-    await pretendExecutingVip(vipConverter(createInitializeData()));
+    await pretendExecutingVip(vip265(createInitializeData()));
   });
 
   it("amount out and amount in tests", async () => {
@@ -197,11 +197,11 @@ forking(36531596, () => {
 
     // Please reference the below code to understand the percentage division asserted below
     // https://github.com/VenusProtocol/venus-protocol/blob/VEN-2375/contracts/Liquidator/Liquidator.sol#L439
-    expect((balanceDiff / seizedAmount) * 100).to.equal(4.545453161034283);
+    expect((balanceDiff / seizedAmount) * 100).to.equal(4.545454390274249);
   });
 });
 
-forking(36531596, () => {
+forking(36680347, () => {
   let liquidator: Contract;
   let proxyAdmin: Contract;
   const provider = ethers.provider;
@@ -211,7 +211,7 @@ forking(36531596, () => {
     liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
     proxyAdmin = new ethers.Contract(PROXY_ADMIN_LIQUIDATOR, PROXY_ADMIN_ABI, provider);
     prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR_CONTRACT);
-    await pretendExecutingVip(vipConverter(createInitializeData()));
+    await pretendExecutingVip(vip265(createInitializeData()));
   });
 
   describe("Checks", async () => {
