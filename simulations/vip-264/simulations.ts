@@ -26,7 +26,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36595455, () => {
+forking(36670852, () => {
   let vUSDT: ethers.Contract;
   let vTusdOld: ethers.Contract;
   let vBNB: ethers.Contract;
@@ -46,9 +46,6 @@ forking(36595455, () => {
     vBNB = new ethers.Contract(VBNB, VTOKEN_ABI, ethers.provider);
     usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
     tusdOld = new ethers.Contract(TUSD_OLD, IERC20_ABI, ethers.provider);
-
-    // await pretendExecutingVip(vip262());
-    // await pretendExecutingVip(vip263());
 
     treasuryTusdBalPrev = await tusdOld.balanceOf(TREASURY);
     treasuryVUsdtBalPrev = await vUSDT.balanceOf(TREASURY);
