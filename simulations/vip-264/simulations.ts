@@ -4,9 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import vip262 from "../../vips/vip-262/bscmainnet";
-import vip263 from "../../vips/vip-263/bscmainnet";
+import { forking, testVip } from "../../src/vip-framework";
 import {
   BNB_DEBT_BORROWER_3,
   BORROWER_1,
@@ -28,7 +26,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36585173, () => {
+forking(36595455, () => {
   let vUSDT: ethers.Contract;
   let vTusdOld: ethers.Contract;
   let vBNB: ethers.Contract;
@@ -49,8 +47,8 @@ forking(36585173, () => {
     usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
     tusdOld = new ethers.Contract(TUSD_OLD, IERC20_ABI, ethers.provider);
 
-    await pretendExecutingVip(vip262());
-    await pretendExecutingVip(vip263());
+    // await pretendExecutingVip(vip262());
+    // await pretendExecutingVip(vip263());
 
     treasuryTusdBalPrev = await tusdOld.balanceOf(TREASURY);
     treasuryVUsdtBalPrev = await vUSDT.balanceOf(TREASURY);
@@ -80,9 +78,9 @@ forking(36585173, () => {
       expect(treasuryTusdBalPrev).equals(
         treasuryTusdBalNew.add(TUSD_OLD_DEBT_BORROWER_1.add(TUSD_OLD_DEBT_BORROWER_2)),
       );
-      // const exchangeRateStored = await vUSDT.exchangeRateStored();
-      // const redeemedTokens = USDT_DEBT_BORROWER_1.mul(parseUnits("1", 18)).div(exchangeRateStored);
-      // expect(treasuryVUsdtBalPrev).equals(treasuryVUsdtBalNew.add(redeemedTokens));
+      const exchangeRateStored = await vUSDT.exchangeRateStored();
+      const redeemedTokens = USDT_DEBT_BORROWER_1.mul(parseUnits("1", 18)).div(exchangeRateStored);
+      expect(treasuryVUsdtBalPrev).equals(treasuryVUsdtBalNew.add(redeemedTokens));
       expect(treasuryBnbBalPrev).equals(treasuryBnbBalNew.add(BNB_DEBT_BORROWER_3));
     });
 
