@@ -24,7 +24,7 @@ import {
   RISK_FUND_CONVERTER_PROXY,
   SINGLE_TOKEN_CONVERTER_BEACON,
   vipConverter,
-} from "../../vips/vip-converter/bsctestnet";
+} from "../../vips/vip-265/bsctestnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
