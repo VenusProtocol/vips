@@ -137,7 +137,7 @@ forking(5415505, () => {
       expect(await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).to.equal(ORIGINAL_POOL_REGISTRY_IMP);
     });
 
-    it("getVTokenForAsset should return vweth address for weth and zero_address for mock_weth ", async () => {
+    it("getVTokenForAsset should return vweth liquid staked eth address for weth and zero_address for mock_weth ", async () => {
       expect(await poolRegistry.getVTokenForAsset(COMPTROLLER_LIQUID_STAKED_ETH, WETH)).to.be.equal(
         VWETH_LIQUID_STAKED_ETH,
       );
