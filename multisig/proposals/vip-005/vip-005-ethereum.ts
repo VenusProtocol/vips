@@ -40,6 +40,14 @@ export const MARKETS: VenusMarket[] = [
     name: "vcrvUSD_Curve",
     address: "0x2d499800239C4CD3012473Cb1EAE33562F0A6933",
   },
+  {
+    name: "vwstETH_LiquidStakedETH",
+    address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
+  },
+  {
+    name: "vWETH_LiquidStakedETH",
+    address: "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
+  },
 ];
 
 // ProtocolShareReserve post-deployment configuration
