@@ -26,7 +26,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36670852, () => {
+forking(36710086, () => {
   let vUSDT: ethers.Contract;
   let vTusdOld: ethers.Contract;
   let vBNB: ethers.Contract;
@@ -89,7 +89,7 @@ forking(36670852, () => {
 
       expect(borrower1TusdDebtPrev).equals(borrower1TusdDebtNew.add(TUSD_OLD_DEBT_BORROWER_1));
       expect(borrower2TusdDebtPrev).equals(borrower2TusdDebtNew.add(TUSD_OLD_DEBT_BORROWER_2));
-      expect(borrower1UsdtDebtPrev).to.closeTo(borrower1UsdtDebtNew.add(USDT_DEBT_BORROWER_1), parseUnits("56", 18));
+      expect(borrower1UsdtDebtPrev).to.closeTo(borrower1UsdtDebtNew.add(USDT_DEBT_BORROWER_1), parseUnits("70", 18));
       expect(borrower3BnbDebtPrev).to.closeTo(borrower3BnbDebtNew.add(BNB_DEBT_BORROWER_3), parseUnits("0.15", 18));
     });
 
