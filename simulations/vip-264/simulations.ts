@@ -10,7 +10,6 @@ import {
   BORROWER_1,
   BORROWER_2,
   BORROWER_3,
-  BRIDGE_XVS_AMOUNT,
   TOKEN_REDEEMER,
   TREASURY,
   TUSD_OLD,
@@ -21,15 +20,11 @@ import {
   VBNB,
   VTUSD_OLD,
   VUSDT,
-  XVS,
-  XVS_BRIDGE,
   vip264,
 } from "../../vips/vip-264/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
-import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
-import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
 forking(36670852, () => {
   let vUSDT: ethers.Contract;
@@ -37,8 +32,6 @@ forking(36670852, () => {
   let vBNB: ethers.Contract;
   let usdt: ethers.Contract;
   let tusdOld: ethers.Contract;
-  let xvsBridge: ethers.Contract;
-  let xvs: ethers.Contract;
   let treasuryTusdBalPrev: BigNumber;
   let treasuryVUsdtBalPrev: BigNumber;
   let treasuryBnbBalPrev: BigNumber;
@@ -46,8 +39,6 @@ forking(36670852, () => {
   let borrower1UsdtDebtPrev: BigNumber;
   let borrower2TusdDebtPrev: BigNumber;
   let borrower3BnbDebtPrev: BigNumber;
-  let oldCirculatingSupply: BigNumber;
-  let oldXVSBalance: BigNumber;
 
   before(async () => {
     vUSDT = new ethers.Contract(VUSDT, VTOKEN_ABI, ethers.provider);
@@ -55,8 +46,6 @@ forking(36670852, () => {
     vBNB = new ethers.Contract(VBNB, VTOKEN_ABI, ethers.provider);
     usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
     tusdOld = new ethers.Contract(TUSD_OLD, IERC20_ABI, ethers.provider);
-    xvs = new ethers.Contract(XVS, IERC20_ABI, ethers.provider);
-    xvsBridge = new ethers.Contract(XVS_BRIDGE, XVS_BRIDGE_ABI, ethers.provider);
 
     treasuryTusdBalPrev = await tusdOld.balanceOf(TREASURY);
     treasuryVUsdtBalPrev = await vUSDT.balanceOf(TREASURY);
@@ -66,9 +55,6 @@ forking(36670852, () => {
     borrower2TusdDebtPrev = await vTusdOld.borrowBalanceStored(BORROWER_2);
     borrower1UsdtDebtPrev = await vUSDT.borrowBalanceStored(BORROWER_1);
     borrower3BnbDebtPrev = await vBNB.borrowBalanceStored(BORROWER_3);
-
-    oldCirculatingSupply = await xvsBridge.circulatingSupply();
-    oldXVSBalance = await xvs.balanceOf(XVS_BRIDGE);
   });
 
   testVip("VIP-264", vip264(), {
@@ -77,8 +63,6 @@ forking(36670852, () => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB"], [1]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["Redeem"], [1]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [4]);
-      await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
-      await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
     },
   });
 
@@ -114,16 +98,6 @@ forking(36670852, () => {
       const redemmerUsdtBalance = await usdt.balanceOf(TOKEN_REDEEMER);
       expect(redeemerVUsdtBalance).equals(0);
       expect(redemmerUsdtBalance).equals(0);
-    });
-
-    it("Should decrease circulating supply", async () => {
-      const currCirculatingSupply = await xvsBridge.circulatingSupply();
-      expect(oldCirculatingSupply.sub(currCirculatingSupply)).equals(BRIDGE_XVS_AMOUNT);
-    });
-
-    it("Should increase number of locked tokens on bridge", async () => {
-      const currXVSBal = await xvs.balanceOf(XVS_BRIDGE);
-      expect(currXVSBal.sub(oldXVSBalance)).equals(BRIDGE_XVS_AMOUNT);
     });
   });
 });
