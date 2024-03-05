@@ -186,11 +186,17 @@ export const performVTokenBasicAndBehalfActions = async (
   await vToken.connect(user).redeemUnderlying(redeemAmount);
   expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
 
+  if (await unitroller.approvedDelegates(user.address, trustee.address)) {
+    await unitroller.connect(user).updateDelegate(trustee.address, false);
+  }
+
   // reverting when trustee is not allowed to perform actions on behalf of user.
-  await unitroller.connect(user).updateDelegate(trustee.address, false);
   await expect(vToken.connect(trustee).redeemUnderlyingBehalf(user.address, redeemAmount)).to.be.reverted;
   await expect(vToken.connect(trustee).redeemBehalf(user.address, redeemVTokenAmount)).to.be.reverted;
-  await unitroller.connect(user).updateDelegate(trustee.address, true);
+
+  if (!(await unitroller.approvedDelegates(user.address, trustee.address))) {
+    await unitroller.connect(user).updateDelegate(trustee.address, true);
+  }
 
   // Redeem underlying tokens behalf
   const previousUnderlyingTokenBalance = await underlying.balanceOf(trustee.address);

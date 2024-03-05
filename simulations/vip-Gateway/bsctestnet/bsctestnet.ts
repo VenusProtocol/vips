@@ -45,11 +45,11 @@ const USER_1 = "0x03862dFa5D0be8F64509C001cb8C6188194469DF";
 const USER_2 = "0xb07A7f0A252bc7a3a26aa3c3C9D9c38aD8a6f02F";
 
 const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-
+const WBNB_HOLDER = "0xbABAd3C68E95BD76FaFd53e17A8cbdBcad31134d";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 const OLD_MARKET_FACET = "0x1B9806d9d2925e8Cd318E268e562eeb7e02C6E00";
-const NEW_MARKET_FACET = "0xeaa588cEB8CDb29AfDae90Ba78B595b725E1f6D7";
+const NEW_MARKET_FACET = "0xbcA3d5E7a66D97E0415662c2394Ed2605944b614";
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
@@ -79,7 +79,7 @@ let poolRegistry: string;
 let prime: string;
 let marketFacetSelectors: string[];
 
-forking(37954151, () => {
+forking(38305470, () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
@@ -183,9 +183,17 @@ forking(37954151, () => {
     });
 
     describe("onBehalfTests", () => {
+      before(async () => {
+        // sending some WBNB to the vWBNB so that reduceReserves does not fail on vWBNB
+        const wbnbHolder = await initMainnetUser(WBNB_HOLDER, parseUnits("1", 18));
+        await wbnb.connect(wbnbHolder).transfer(vWbnb.address, parseUnits("5", 17));
+      });
+
       beforeEach(async () => {
         await comptroller.connect(user1).enterMarkets([VBNBX_LIQUID_STAKED_BNB, VWBNB_LIQUID_STAKED_BNB]);
-        await comptroller.connect(user1).updateDelegate(USER_2, false);
+        if (await comptroller.approvedDelegates(user1.address, USER_2)) {
+          await comptroller.connect(user1).updateDelegate(USER_2, false);
+        }
 
         await bnbx.connect(user1).approve(vBnbx.address, parseUnits("1", 18));
         await vBnbx.connect(user1).mint(parseUnits("1", 18));
@@ -256,7 +264,7 @@ forking(37954151, () => {
 });
 
 // core pool vToken tests
-forking(37954151, () => {
+forking(38305470, () => {
   let vToken: ethers.Contract;
   let underlying: ethers.Contract;
   let user: SignerWithAddress;
