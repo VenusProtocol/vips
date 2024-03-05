@@ -20,8 +20,8 @@ import {
   VBNB,
   VTUSD_OLD,
   VUSDT,
-  vip264,
-} from "../../vips/vip-264/bscmainnet";
+  vip266,
+} from "../../vips/vip-266/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
@@ -57,7 +57,7 @@ forking(36710086, () => {
     borrower3BnbDebtPrev = await vBNB.borrowBalanceStored(BORROWER_3);
   });
 
-  testVip("VIP-264", vip264(), {
+  testVip("VIP-266", vip266(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB"], [1]);
