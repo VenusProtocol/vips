@@ -36,17 +36,12 @@ export const vip267 = () => {
       {
         target: TOKEN_REDEEMER,
         signature: "redeemAndTransfer(address,address)",
-        params: [VUSDC, TREASURY],
+        params: [VUSDC, LIQUIDATE_AND_REDEEM_HELPER],
       },
       {
         target: COMPTROLLER,
         signature: "_setLiquidatorContract(address)",
         params: [LIQUIDATE_AND_REDEEM_HELPER],
-      },
-      {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, REPAY_AMOUNT, LIQUIDATE_AND_REDEEM_HELPER],
       },
       {
         target: LIQUIDATE_AND_REDEEM_HELPER,

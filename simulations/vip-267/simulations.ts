@@ -24,7 +24,9 @@ const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
 const VUSDC_AMOUNT = parseUnits("326081635.9401868", 8);
 const REPAY_AMOUNT = parseUnits("7605011.44891787996502290", 18);
-const EXPECTED_BNB_AMOUNT = parseUnits("20456.609799695853115141", 18);
+const EXPECTED_INTEREST_ACCUMULATED = parseUnits("8.018348270861963412", 18);
+const REPAY_AMOUNT_WITH_INTEREST = REPAY_AMOUNT.add(EXPECTED_INTEREST_ACCUMULATED);
+const EXPECTED_BNB_AMOUNT = parseUnits("20456.631368134499749989", 18);
 
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
@@ -62,12 +64,6 @@ forking(36726026, () => {
       expect(treasuryVTokenBalanceDelta).to.equal(VUSDC_AMOUNT);
     });
 
-    it(`redeems vUSDC and transfers dust to treasury`, async () => {
-      const treasuryBalanceAfter = await usdc.balanceOf(TREASURY);
-      const treasuryBalanceDelta = treasuryBalanceAfter.sub(treasuryBalanceBefore);
-      expect(treasuryBalanceDelta).to.equal(parseUnits("8.018348270861963412", 18));
-    });
-
     it("leaves no USDC in the liquidate and redeem helper contract", async () => {
       expect(await usdc.balanceOf(LIQUIDATE_AND_REDEEM_HELPER)).to.equal(0);
     });
@@ -76,10 +72,10 @@ forking(36726026, () => {
       expect(await vBNB.balanceOf(LIQUIDATE_AND_REDEEM_HELPER)).to.equal(0);
     });
 
-    it(`reduces exploiter debt by ${formatUnits(REPAY_AMOUNT, 18)} USDC`, async () => {
+    it(`reduces exploiter debt by ${formatUnits(REPAY_AMOUNT_WITH_INTEREST, 18)} USDC`, async () => {
       const exploiterDebtAfter = await vUSDC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET);
       const exploiterDebtDelta = exploiterDebtBefore.sub(exploiterDebtAfter);
-      expect(exploiterDebtDelta).to.equal(REPAY_AMOUNT);
+      expect(exploiterDebtDelta).to.equal(REPAY_AMOUNT_WITH_INTEREST);
     });
 
     it(`transfers ${formatUnits(EXPECTED_BNB_AMOUNT, 18)} BNB to Binance wallet`, async () => {
