@@ -33,7 +33,7 @@ const CORE_POOL = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(22739629, () => {
+forking(22849558, () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;
@@ -92,7 +92,9 @@ forking(22739629, () => {
     });
 
     it("pool registry should have original implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).to.equal(ORIGINAL_POOL_REGISTRY_IMP);
+      expect((await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).toLowerCase()).to.equal(
+        ORIGINAL_POOL_REGISTRY_IMP.toLowerCase(),
+      );
     });
 
     it("getVTokenForAsset should return vwbnb core address for mock_wbnb and zero_address for wbnb ", async () => {
@@ -115,7 +117,9 @@ forking(22739629, () => {
     });
 
     it("pool registry should have original implementation", async () => {
-      expect(await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).to.equal(ORIGINAL_POOL_REGISTRY_IMP);
+      expect((await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).toLowerCase()).to.equal(
+        ORIGINAL_POOL_REGISTRY_IMP.toLowerCase(),
+      );
     });
 
     it("getVTokenForAsset should return vwbnb core address for wbnb and zero_address for mock_wbnb ", async () => {
