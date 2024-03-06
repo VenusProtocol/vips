@@ -23,7 +23,7 @@ const GENERIC_TEST_USER_ACCOUNT = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
 const XVS_ADMIN = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
-forking(21620487, () => {
+forking(22879768, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
