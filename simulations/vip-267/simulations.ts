@@ -46,7 +46,6 @@ forking(36731756, () => {
 
   let timelock: SignerWithAddress;
   let treasuryVTokenBalanceBefore: BigNumber;
-  let treasuryBalanceBefore: BigNumber;
   let exploiterDebtBefore: BigNumber;
   let binanceWalletBalanceBefore: BigNumber;
 
