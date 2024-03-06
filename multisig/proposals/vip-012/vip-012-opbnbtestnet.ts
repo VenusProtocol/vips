@@ -29,11 +29,6 @@ export const vip012 = () => {
       params: [VTOKEN_IMPL],
     },
     {
-      target: opbnbtestnet.BINANCE_ORACLE,
-      signature: "setMaxStalePeriod(string,uint256)",
-      params: ["BNB", STALE_PERIOD],
-    },
-    {
       target: opbnbtestnet.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
