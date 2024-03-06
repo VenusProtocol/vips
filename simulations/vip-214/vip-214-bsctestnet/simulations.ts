@@ -2,20 +2,24 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { expectEvents, networkChainIds } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { vip214Testnet } from "../../../vips/vip-214/vip-214-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "../abi/OmnichainProposalSender.json";
 
-const OMNICHAIN_PROPOSAL_SENDER = "0x02d188be98cf7676cd98b03c8470f059fd7799da";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xe09e4784c2dd7b0f2db5bf9b00e101a4dc8cc9eb";
+const { bsctestnet, sepolia } = NETWORK_ADDRESSES;
 
 forking(37874227, async () => {
   let omnichainProposalSender: Contract;
   const provider = ethers.provider;
   before(async () => {
-    omnichainProposalSender = new ethers.Contract(OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_PROPOSAL_SENDER_ABI, provider);
+    omnichainProposalSender = new ethers.Contract(
+      bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
+      OMNICHAIN_PROPOSAL_SENDER_ABI,
+      provider,
+    );
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -45,7 +49,10 @@ forking(37874227, async () => {
 
     it("Trusted remote should be set", async () => {
       expect(await omnichainProposalSender.trustedRemoteLookup(networkChainIds["sepolia"])).to.be.equals(
-        `${OMNICHAIN_GOVERNANCE_EXECUTOR}${OMNICHAIN_PROPOSAL_SENDER.slice(2)}`,
+        ethers.utils.solidityPack(
+          ["address", "address"],
+          [sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, bsctestnet.OMNICHAIN_PROPOSAL_SENDER],
+        ),
       );
     });
   });

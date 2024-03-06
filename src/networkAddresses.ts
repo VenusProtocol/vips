@@ -21,6 +21,9 @@ export const NETWORK_ADDRESSES = {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GOVERNOR_PROXY: "0x5573422a1a59385c247ec3a66b93b7c08ec2f8f2",
     NORMAL_TIMELOCK: bsctestnet_deployed_contracts.contracts.NormalTimelock.address,
+    FASTTRACK_TIMELOCK: bsctestnet_deployed_contracts.contracts.FastTrackTimelock.address,
+    CRITICAL_TIMELOCK: bsctestnet_deployed_contracts.contracts.CriticalTimelock.address,
+    ACM: bsctestnet_deployed_contracts.contracts.AccessControlManager.address,
     ETH_CHAINLINK_FEED: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
     USDT_CHAINLINK_FEED: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
     CHAINLINK_ORACLE: "0xCeA29f1266e880A1482c06eD656cD08C148BaA32",
@@ -28,6 +31,7 @@ export const NETWORK_ADDRESSES = {
     GENERIC_TEST_USER_ACCOUNT: "0x80dd0cB9c1EB88356bA5dd39161E391ACcF3FbCa",
     XVS_VAULT_PROXY: bsctestnet_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS: bsctestnet_deployed_contracts.contracts.XVS.address,
+    OMNICHAIN_PROPOSAL_SENDER: "0x02d188be98cf7676cd98b03c8470f059fd7799da",
   },
   ethereum: {
     NORMAL_TIMELOCK: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
@@ -35,7 +39,7 @@ export const NETWORK_ADDRESSES = {
     VTREASURY: "0xfd9b071168bc27dbe16406ec3aba050ce8eb22fa",
   },
   sepolia: {
-    NORMAL_TIMELOCK: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB", // Sepolia Multisig
+    NORMAL_TIMELOCK: "0x51f560a018b89A470f8fcE6BF22f3a9F3a4789e5",
     GUARDIAN: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB",
     CHAINLINK_ORACLE: "0x102F0b714E5d321187A4b6E5993358448f7261cE",
     RESILIENT_ORACLE: "0x8000eca36201dddf5805Aa4BeFD73d1EB4D23264",
@@ -68,5 +72,7 @@ export const NETWORK_ADDRESSES = {
     XVS_VAULT_PROXY: sepolia_deployed_contracts.contracts.XVSVaultProxy.address,
     XVS_STORE: sepolia_deployed_contracts.contracts.XVSStore.address,
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    OMNICHAIN_EXECUTOR_OWNER: "0x2b9CbD9e28322ac6e46c52B592680e2D829B702C",
+    OMNICHAIN_GOVERNANCE_EXECUTOR: "0xe09e4784c2dd7b0f2db5bf9b00e101a4dc8cc9eb",
   },
 };

@@ -103,7 +103,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   );
   let fee;
   if (process.env.FORKED_NETWORK === "bsctestnet") {
-    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams)).nativeFee.toString();
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams))[0].toString();
   } else {
     fee = ethers.BigNumber.from("1");
   }
