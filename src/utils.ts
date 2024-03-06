@@ -117,7 +117,6 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  console.log((await oracle.getPrice(asset)).toString());
   // await tx.wait();
 };
 
