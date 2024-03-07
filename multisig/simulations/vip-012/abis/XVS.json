@@ -1,0 +1,398 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [{ "name": "accessControlManager_", "type": "address", "internalType": "address" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "AccountBlacklisted",
+    "type": "error",
+    "inputs": [{ "name": "user", "type": "address", "internalType": "address" }]
+  },
+  { "name": "MintLimitExceed", "type": "error", "inputs": [] },
+  { "name": "NewCapNotGreaterThanMintedTokens", "type": "error", "inputs": [] },
+  { "name": "Unauthorized", "type": "error", "inputs": [] },
+  { "name": "ZeroAddressNotAllowed", "type": "error", "inputs": [] },
+  {
+    "name": "Approval",
+    "type": "event",
+    "inputs": [
+      { "name": "owner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "spender", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "value", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false,
+    "signature": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
+  },
+  {
+    "name": "BlacklistUpdated",
+    "type": "event",
+    "inputs": [
+      { "name": "user", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "value", "type": "bool", "indexed": false, "internalType": "bool" }
+    ],
+    "anonymous": false,
+    "signature": "0x6a12b3df6cba4203bd7fd06b816789f87de8c594299aed5717ae070fac781bac"
+  },
+  {
+    "name": "MintCapChanged",
+    "type": "event",
+    "inputs": [
+      { "name": "minter", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false,
+    "signature": "0x01a85f4ecff52e70907e25b863010bca98a9458d9f2fe9b3efb4c47d197e6448"
+  },
+  {
+    "name": "MintLimitDecreased",
+    "type": "event",
+    "inputs": [
+      { "name": "minter", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newLimit", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false,
+    "signature": "0xbe214d1fa2403a39be9a36c9f4b45125eba30bf27a8b56a619baf00493ad3e61"
+  },
+  {
+    "name": "MintLimitIncreased",
+    "type": "event",
+    "inputs": [
+      { "name": "minter", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newLimit", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false,
+    "signature": "0x0831a8ba59684daef8a957d2bd2d943e233993771429e9a17b71ddb1cea35cdb"
+  },
+  {
+    "name": "MintedTokensMigrated",
+    "type": "event",
+    "inputs": [
+      { "name": "source", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "destination", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0x63ce671e4a37975f0a9e340f6f72320c617a5f728b83e3860b03aa847dc26ebb"
+  },
+  {
+    "name": "NewAccessControlManager",
+    "type": "event",
+    "inputs": [
+      { "name": "oldAccessControlManager", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newAccessControlManager", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0x66fd58e82f7b31a2a5c30e0888f3093efe4e111b00cd2b0c31fe014601293aa0"
+  },
+  {
+    "name": "OwnershipTransferred",
+    "type": "event",
+    "inputs": [
+      { "name": "previousOwner", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "newOwner", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+  },
+  {
+    "name": "Paused",
+    "type": "event",
+    "inputs": [{ "name": "account", "type": "address", "indexed": false, "internalType": "address" }],
+    "anonymous": false,
+    "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+  },
+  {
+    "name": "Transfer",
+    "type": "event",
+    "inputs": [
+      { "name": "from", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "to", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "value", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false,
+    "signature": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+  },
+  {
+    "name": "Unpaused",
+    "type": "event",
+    "inputs": [{ "name": "account", "type": "address", "indexed": false, "internalType": "address" }],
+    "anonymous": false,
+    "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
+  },
+  {
+    "name": "accessControlManager",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "value": "0x049f77F7046266d27C3bC96376f53C17Ef09c986",
+        "internalType": "address"
+      }
+    ],
+    "constant": true,
+    "signature": "0xb4a0bdf3",
+    "stateMutability": "view"
+  },
+  {
+    "name": "allowance",
+    "type": "function",
+    "inputs": [
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "spender", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "constant": true,
+    "signature": "0xdd62ed3e",
+    "stateMutability": "view"
+  },
+  {
+    "name": "approve",
+    "type": "function",
+    "inputs": [
+      { "name": "spender", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "signature": "0x095ea7b3",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "balanceOf",
+    "type": "function",
+    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "constant": true,
+    "signature": "0x70a08231",
+    "stateMutability": "view"
+  },
+  {
+    "name": "burn",
+    "type": "function",
+    "inputs": [
+      { "name": "account_", "type": "address", "internalType": "address" },
+      { "name": "amount_", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "signature": "0x9dc29fac",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "decimals",
+    "type": "function",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint8", "value": "18", "internalType": "uint8" }],
+    "constant": true,
+    "signature": "0x313ce567",
+    "stateMutability": "view"
+  },
+  {
+    "name": "decreaseAllowance",
+    "type": "function",
+    "inputs": [
+      { "name": "spender", "type": "address", "internalType": "address" },
+      { "name": "subtractedValue", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "signature": "0xa457c2d7",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "increaseAllowance",
+    "type": "function",
+    "inputs": [
+      { "name": "spender", "type": "address", "internalType": "address" },
+      { "name": "addedValue", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "signature": "0x39509351",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "isBlackListed",
+    "type": "function",
+    "inputs": [{ "name": "user_", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "constant": true,
+    "signature": "0xe47d6060",
+    "stateMutability": "view"
+  },
+  {
+    "name": "migrateMinterTokens",
+    "type": "function",
+    "inputs": [
+      { "name": "source_", "type": "address", "internalType": "address" },
+      { "name": "destination_", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0xd89e2dac",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "mint",
+    "type": "function",
+    "inputs": [
+      { "name": "account_", "type": "address", "internalType": "address" },
+      { "name": "amount_", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "signature": "0x40c10f19",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "minterToCap",
+    "type": "function",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "constant": true,
+    "signature": "0x391efe12",
+    "stateMutability": "view"
+  },
+  {
+    "name": "minterToMintedAmount",
+    "type": "function",
+    "inputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "constant": true,
+    "signature": "0x7b517334",
+    "stateMutability": "view"
+  },
+  {
+    "name": "name",
+    "type": "function",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "value": "Venus XVS", "internalType": "string" }],
+    "constant": true,
+    "signature": "0x06fdde03",
+    "stateMutability": "view"
+  },
+  {
+    "name": "owner",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "value": "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C",
+        "internalType": "address"
+      }
+    ],
+    "constant": true,
+    "signature": "0x8da5cb5b",
+    "stateMutability": "view"
+  },
+  {
+    "name": "pause",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "signature": "0x8456cb59",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "paused",
+    "type": "function",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "value": false, "internalType": "bool" }],
+    "constant": true,
+    "signature": "0x5c975abb",
+    "stateMutability": "view"
+  },
+  {
+    "name": "renounceOwnership",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "signature": "0x715018a6",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "setAccessControlManager",
+    "type": "function",
+    "inputs": [{ "name": "newAccessControlAddress_", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "signature": "0x0e32cb86",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "setMintCap",
+    "type": "function",
+    "inputs": [
+      { "name": "minter_", "type": "address", "internalType": "address" },
+      { "name": "amount_", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "signature": "0xc06abe77",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "symbol",
+    "type": "function",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "value": "XVS", "internalType": "string" }],
+    "constant": true,
+    "signature": "0x95d89b41",
+    "stateMutability": "view"
+  },
+  {
+    "name": "totalSupply",
+    "type": "function",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "value": "0", "internalType": "uint256" }],
+    "constant": true,
+    "signature": "0x18160ddd",
+    "stateMutability": "view"
+  },
+  {
+    "name": "transfer",
+    "type": "function",
+    "inputs": [
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "signature": "0xa9059cbb",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "transferFrom",
+    "type": "function",
+    "inputs": [
+      { "name": "from", "type": "address", "internalType": "address" },
+      { "name": "to", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "signature": "0x23b872dd",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "transferOwnership",
+    "type": "function",
+    "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "signature": "0xf2fde38b",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "unpause",
+    "type": "function",
+    "inputs": [],
+    "outputs": [],
+    "signature": "0x3f4ba83a",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "updateBlacklist",
+    "type": "function",
+    "inputs": [
+      { "name": "user_", "type": "address", "internalType": "address" },
+      { "name": "value_", "type": "bool", "internalType": "bool" }
+    ],
+    "outputs": [],
+    "signature": "0x9155e083",
+    "stateMutability": "nonpayable"
+  }
+]
