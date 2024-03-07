@@ -44,7 +44,6 @@ export const vip005 = () => {
       signature: "acceptOwnership()",
       params: [],
     },
-    {},
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
