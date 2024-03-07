@@ -13,7 +13,7 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
-import { vip012 } from "../../proposals/vip-012/vip-012-opbnbtestnet";
+import { vip013 } from "../../proposals/vip-013/vip-013-opbnbtestnet";
 
 const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const PRIME_LIQUIDITY_PROVIDER = "0xF68E8925d45fb6679aE8caF7f859C76BdD964325";
@@ -65,7 +65,7 @@ forking(22879768, () => {
     let prime: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip012());
+      await pretendExecutingVip(vip013());
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);

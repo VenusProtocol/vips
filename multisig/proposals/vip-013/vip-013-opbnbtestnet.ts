@@ -8,7 +8,7 @@ const BTCB = "0x7Af23F9eA698E9b953D2BD70671173AaD0347f19";
 const ETH = "0x94680e003861D43C6c0cf18333972312B6956FF1";
 const USDT = "0x8ac9B3801D0a8f5055428ae0bF301CA1Da976855";
 
-export const vip012 = () => {
+export const vip013= () => {
   return makeProposal([
     {
       target: PRIME_LIQUIDITY_PROVIDER,
