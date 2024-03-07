@@ -23,13 +23,13 @@ export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const vip267 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-267 Fund the XVSVesting contract and start bridging XVS to Ethereum",
+    title: "VIP-267 Fund the XVSVestingProxy contract and bridge XVS to Ethereum",
     description: `#### Summary
 
 If passed this VIP will perform the following actions:
 
-- Transfer 12,270.35 XVS to the [XVSVaultProxy](https://bscscan.com/address/0xb28Dec7C7Ac80f4D0B6a1B711c39e444cDE8B2cE) contract
-- Transfer 277,729.65 XVS to the [XVS Distribution contract](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+- Transfer 12,270.35 XVS to the [XVSVestingProxy](https://bscscan.com/address/0xb28Dec7C7Ac80f4D0B6a1B711c39e444cDE8B2cE) contract
+- Transfer 277,729.65 XVS back to the [XVS Distribution contract](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
 - Bridge 1,000 XVS to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA)
 
 #### Details
@@ -40,7 +40,7 @@ Users sent 5,667,244,158.75 VRT to the VRTConverter contract. Considering the [c
 
 In the [VIP-55](https://app.venus.io/#/governance/proposal/55), 750,000 XVS were sent to the multisig wallet [0xbc6343132981df72b4dfefab8f3847a40f5ce6b5](https://bscscan.com/address/0xbc6343132981df72b4dfefab8f3847a40f5ce6b5), to fund the XVSVestingProxy contract. Only 460,000 XVS were transferred from the multisig wallet to the XVSVestingProxy contract, for that purpose.
 
-After sending back the rest 290,000 XVS from the multisig wallet to the Venus Treasury, this VIP will fund the XVSVestingProxy contract with 12,270.35 XVS, and it will send the rest 277,729.65 XVS to the XVS Distribution contract.
+After sending back the rest 290,000 XVS from the multisig wallet to the Venus Treasury ([TX](https://bscscan.com/tx/0x402bf96e4f8ec6bbd7d5e51fa77bbefebd74db45dd22c41ecff51003354ea0bc)), this VIP will fund the XVSVestingProxy contract with 12,270.35 XVS, and it will send the rest 277,729.65 XVS to the XVS Distribution contract.
 
 Moreover, 1,000 XVS from the Distribution contract would be sent to the Venus Treasury on Ethereum using the XVS bridge enabled at [VIP-232](https://app.venus.io/#/governance/proposal/232). This is the second and last test for bridging XVS via VIP. The first one was in [VIP-263](https://app.venus.io/#/governance/proposal/263), where 10 XVS were bridged successfully. These XVS will be used for the rewards on Ethereum.
 
