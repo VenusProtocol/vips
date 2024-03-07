@@ -14,6 +14,7 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
 import { vip013 } from "../../proposals/vip-013/vip-013-opbnbtestnet";
+import { vip012 } from "../../proposals/vip-012/vip-012-opbnbtestnet";
 
 const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const PRIME_LIQUIDITY_PROVIDER = "0xF68E8925d45fb6679aE8caF7f859C76BdD964325";
@@ -30,6 +31,7 @@ const USDT = "0x8ac9B3801D0a8f5055428ae0bF301CA1Da976855";
 forking(22879768, () => {
   before(async () => {
     await pretendExecutingVip(vip011());
+    await pretendExecutingVip(vip012());
   });
 
   describe("Pre-VIP behavior", () => {
@@ -75,21 +77,21 @@ forking(22879768, () => {
       let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
       expect(speed).to.deep.equal("24438657407407");
 
-      // speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTCB);
-      // expect(speed).to.deep.equal("126");
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTCB);
+      expect(speed).to.deep.equal("126");
 
 
-      // speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
-      // expect(speed).to.deep.equal("87191");
+      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
+      expect(speed).to.deep.equal("87191");
     });
 
-    // it("paused", async () => {
-    //   const paused = await primeLiquidityProvider.paused();
-    //   expect(paused).to.be.equal(false);
+    it("paused", async () => {
+      const paused = await primeLiquidityProvider.paused();
+      expect(paused).to.be.equal(false);
 
-    //   const primePaused = await prime.paused();
-    //   expect(primePaused).to.be.equal(false);
-    // });
+      const primePaused = await prime.paused();
+      expect(primePaused).to.be.equal(false);
+    });
 
     // describe("generic tests", async () => {
     //   checkXVSVault();
