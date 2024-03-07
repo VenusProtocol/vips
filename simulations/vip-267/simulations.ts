@@ -18,7 +18,7 @@ import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(36759548, () => {
+forking(36760588, () => {
   let xvsBridge: ethers.Contract;
   let xvs: ethers.Contract;
   let treasuryXVSBalPrev: BigNumber;

@@ -5,7 +5,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-export const XVS_AMOUNT_TO_VESTING = parseUnits("1000", 18); // TBR
+export const XVS_AMOUNT_TO_VESTING = parseUnits("20000", 18);
 export const XVS_VESTING_PROXY = "0xb28Dec7C7Ac80f4D0B6a1B711c39e444cDE8B2cE";
 
 // For bridge purpose
@@ -14,7 +14,7 @@ export const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 export const ETHEREUM_TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 export const ETHEREUM_XVS_RECEIVER = ethers.utils.defaultAbiCoder.encode(["address"], [ETHEREUM_TREASURY]);
-export const BRIDGE_XVS_AMOUNT = parseUnits("1000", 18); // TBR
+export const BRIDGE_XVS_AMOUNT = parseUnits("1000", 18);
 export const DEST_CHAIN_ID = 101;
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
