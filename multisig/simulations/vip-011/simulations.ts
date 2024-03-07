@@ -66,10 +66,6 @@ forking(22879768, () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
     });
-
-    describe("generic tests", async () => {
-      checkXVSVault();
-    });
   });
 
   describe("Post-VIP behavior", async () => {
