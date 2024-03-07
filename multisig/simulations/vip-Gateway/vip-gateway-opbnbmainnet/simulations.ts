@@ -16,8 +16,8 @@ import BEACON_ABI from "../abi/Beacon.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
 
-const OLD_COMPTROLLER_IMPLEMENTATION = "";
-const OLD_VTOKEN_IMPLEMENTATION = "";
+const OLD_COMPTROLLER_IMPLEMENTATION = "0x557C69aDf4bB12305F00F62f1Ab71CAe9BFa3D46";
+const OLD_VTOKEN_IMPLEMENTATION = "0x227c4D4176604908755be2B513A2b7bcA6f54a1F";
 
 const VWBNB_CORE = "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672";
 const CORE_POOL = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
@@ -25,7 +25,7 @@ const CORE_POOL = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(17864373, () => {
+forking(18057901, () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;
@@ -67,7 +67,7 @@ forking(17864373, () => {
     prime = await comptroller.prime();
   });
 
-  describe("Pre-VIP behaviour", async () => {
+  describe("Pre-VIP behavior", async () => {
     it("comptroller should have old implementations", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
