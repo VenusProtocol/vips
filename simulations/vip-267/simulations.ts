@@ -6,8 +6,10 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   BRIDGE_XVS_AMOUNT,
+  COMPTROLLER,
   TREASURY,
   XVS,
+  XVS_AMOUNT_TO_COMPTROLLER,
   XVS_AMOUNT_TO_VESTING,
   XVS_BRIDGE,
   XVS_VESTING_PROXY,
@@ -23,6 +25,7 @@ forking(36760588, () => {
   let xvs: ethers.Contract;
   let treasuryXVSBalPrev: BigNumber;
   let vestingProxyXVSBalPrev: BigNumber;
+  let comptrollerXVSBalPrev: BigNumber;
   let bridgeXVSBalPrev: BigNumber;
   let oldCirculatingSupply: BigNumber;
 
@@ -31,13 +34,14 @@ forking(36760588, () => {
     xvsBridge = new ethers.Contract(XVS_BRIDGE, XVS_BRIDGE_ABI, ethers.provider);
     treasuryXVSBalPrev = await xvs.balanceOf(TREASURY);
     vestingProxyXVSBalPrev = await xvs.balanceOf(XVS_VESTING_PROXY);
+    comptrollerXVSBalPrev = await xvs.balanceOf(COMPTROLLER);
     oldCirculatingSupply = await xvsBridge.circulatingSupply();
     bridgeXVSBalPrev = await xvs.balanceOf(XVS_BRIDGE);
   });
 
   testVip("VIP-267", vip267(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
+      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
       await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
     },
@@ -46,12 +50,19 @@ forking(36760588, () => {
   describe("Post-VIP behavior", async () => {
     it("Treasury balance checks", async () => {
       const currXVSBal = await xvs.balanceOf(TREASURY);
-      expect(treasuryXVSBalPrev.sub(currXVSBal)).equals(XVS_AMOUNT_TO_VESTING);
+      // (PrevBal - CurrBal) = (Amount sent to XVSVestingProxy + Amount sent to Comptroller)
+      expect(treasuryXVSBalPrev.sub(currXVSBal)).equals(XVS_AMOUNT_TO_VESTING.add(XVS_AMOUNT_TO_COMPTROLLER));
     });
 
     it("Should increase XVS balance of XVSVestingProxy", async () => {
       const currXVSBal = await xvs.balanceOf(XVS_VESTING_PROXY);
       expect(currXVSBal.sub(vestingProxyXVSBalPrev)).equals(XVS_AMOUNT_TO_VESTING);
+    });
+
+    it("Should increase XVS balance of Comptroller", async () => {
+      const currXVSBal = await xvs.balanceOf(COMPTROLLER);
+      // (CurrBal - PrevBal) = (Amount received from Treasury - Amount sent to XVSBridge)
+      expect(currXVSBal.sub(comptrollerXVSBalPrev)).equals(XVS_AMOUNT_TO_COMPTROLLER.sub(BRIDGE_XVS_AMOUNT));
     });
 
     it("Should decrease circulating supply", async () => {

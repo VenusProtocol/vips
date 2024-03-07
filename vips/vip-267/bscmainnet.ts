@@ -7,6 +7,7 @@ import { makeProposal } from "../../src/utils";
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const XVS_AMOUNT_TO_VESTING = parseUnits("20000", 18);
 export const XVS_VESTING_PROXY = "0xb28Dec7C7Ac80f4D0B6a1B711c39e444cDE8B2cE";
+export const XVS_AMOUNT_TO_COMPTROLLER = parseUnits("270000", 18);
 
 // For bridge purpose
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -35,6 +36,12 @@ export const vip267 = () => {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [XVS, XVS_AMOUNT_TO_VESTING, XVS_VESTING_PROXY],
+      },
+
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [XVS, XVS_AMOUNT_TO_COMPTROLLER, COMPTROLLER],
       },
 
       {
