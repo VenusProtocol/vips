@@ -1,15 +1,15 @@
-import { cutParams as params } from "../../simulations/vip-Gateway/bsctestnet/utils/cut-params.json";
+import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const NEW_VBEP20_DELEGATE_IMPL = "";
+export const NEW_VBEP20_DELEGATE_IMPL = "0x3E0BAbA193fA5227cAe573236ceC63aa47076125";
 
 export const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
 export const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
-export const NEW_COMPTROLLER_IMPLEMENTATION = "";
-export const NEW_VTOKEN_IMPLEMENTATION = "";
-export const NATIVE_TOKEN_GATEWAY = "";
+export const NEW_COMPTROLLER_IMPLEMENTATION = "0x9Ea638B93b9cb591fbB28EA66085591B3B511bf1";
+export const NEW_VTOKEN_IMPLEMENTATION = "0xC760459324C6F5cdd17c447b6bE6D6Fc43aCcCCa";
+export const NATIVE_TOKEN_GATEWAY = "0xa8433F284795aE7f8652127af47482578b58673d";
 
 export const CORE_MARKETS = [
   {
@@ -88,11 +88,6 @@ export const CORE_MARKETS = [
     holder: "0xf977814e90da44bfa03b6295a0616a897441acec",
   },
   {
-    name: "vLUNA",
-    address: "0xb91a659e88b51474767cd97ef3196a3e7cedd2c8",
-    holder: "0x3146ed44c6ca0aa3633342de31f09243228f6b49",
-  },
-  {
     name: "vMATIC",
     address: "0x5c9476fcd6a4f9a3654139721c949c2233bbbbc8",
     holder: "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
@@ -120,7 +115,7 @@ export const CORE_MARKETS = [
   {
     name: "vTUSDOLD",
     address: "0x08ceb3f4a7ed3500ca0982bcd0fc7816688084c3",
-    holder: "0xf68a4b64162906eff0ff6ae34e2bb1cd42fef62d",
+    holder: "0x2e28b9b74d6d99d4697e913b82b41ef1cac51c6c",
   },
   {
     name: "vUNI",
@@ -136,11 +131,6 @@ export const CORE_MARKETS = [
     name: "vUSDT",
     address: "0xfd5840cd36d94d7229439859c0112a4185bc0255",
     holder: "0xee5b5b923ffce93a870b3104b7ca09c3db80047a",
-  },
-  {
-    name: "vUST",
-    address: "0x78366446547d062f45b4c0f320cdaa6d710d87bb",
-    holder: "0x0001f4beb2276fce6676aa1fa9abe0abc9dfb1b7",
   },
   {
     name: "vWBETH",

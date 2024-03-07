@@ -46,8 +46,8 @@ const USER_2 = "0x5f947Ad9F834A647e7aA791CC78FA2857f30Df3F";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-const OLD_MARKET_FACET = "";
-const NEW_MARKET_FACET = "";
+const OLD_MARKET_FACET = "0x40A30E1B01e0CF3eE3F22f769b0E437160550eEa";
+const NEW_MARKET_FACET = "0x93520Fa75b569eB67232Bd43d3655E85E75F6C2A";
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
@@ -77,10 +77,8 @@ let poolRegistry: string;
 let prime: string;
 let marketFacetSelectors: string[];
 
-forking(36345514, () => {
+forking(36754421, () => {
   before(async () => {
-    user1 = await initMainnetUser(USER_1, parseUnits("2"));
-    user2 = await initMainnetUser(USER_2, parseUnits("2"));
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
     nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, provider);
@@ -90,11 +88,6 @@ forking(36345514, () => {
     unitroller = new ethers.Contract(UNITROLLER, UNITROLLER_ABI, provider);
 
     vtokenBeacon = new ethers.Contract(VTOKEN_BEACON, BEACON_ABI, provider);
-    vWbnb = new ethers.Contract(VWBNB_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
-    vBnbx = new ethers.Contract(VBNBX_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
-
-    bnbx = new ethers.Contract(BNBX, MOCK_TOKEN_ABI, provider);
-    wbnb = new ethers.Contract(WBNB, MOCK_TOKEN_ABI, provider);
 
     marketFacetSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
 
@@ -129,7 +122,7 @@ forking(36345514, () => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [23]);
+      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [27]);
     },
   });
 
@@ -173,82 +166,107 @@ forking(36345514, () => {
       expect(await comptroller.prime()).to.equal(prime);
       expect(await comptroller.approvedDelegates(USER_1, USER_2)).to.equal(false);
     });
+  });
+});
 
-    describe("onBehalfTests", () => {
-      beforeEach(async () => {
-        await comptroller.connect(user1).enterMarkets([VBNBX_LIQUID_STAKED_BNB, VWBNB_LIQUID_STAKED_BNB]);
+forking(36754421, () => {
+  describe("onBehalfTests", () => {
+    before(async () => {
+      await pretendExecutingVip(vipGateway());
+    });
+    beforeEach(async () => {
+      user1 = await initMainnetUser(USER_1, parseUnits("2"));
+      user2 = await initMainnetUser(USER_2, parseUnits("2"));
+      comptroller = new ethers.Contract(POOL_LIQUID_STAKED_BNB, COMPTROLLER_ABI, provider);
+
+      vWbnb = new ethers.Contract(VWBNB_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
+      vBnbx = new ethers.Contract(VBNBX_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
+
+      bnbx = new ethers.Contract(BNBX, MOCK_TOKEN_ABI, provider);
+      wbnb = new ethers.Contract(WBNB, MOCK_TOKEN_ABI, provider);
+
+      await comptroller.connect(user1).enterMarkets([VBNBX_LIQUID_STAKED_BNB, VWBNB_LIQUID_STAKED_BNB]);
+      if (await comptroller.approvedDelegates(user1.address, USER_2)) {
         await comptroller.connect(user1).updateDelegate(USER_2, false);
+      }
 
-        await bnbx.connect(user1).approve(vBnbx.address, parseUnits("1", 18));
-        await vBnbx.connect(user1).mint(parseUnits("1", 18));
+      await bnbx.connect(user1).approve(vBnbx.address, parseUnits("1", 18));
+      await vBnbx.connect(user1).mint(parseUnits("1", 18));
+    });
+
+    describe("borrowBehalf", () => {
+      it("borrowBehalf should revert when approval is not given", async () => {
+        await expect(vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8))).to.be.revertedWithCustomError(
+          vWbnb,
+          "DelegateNotApproved",
+        );
       });
 
-      describe("borrowBehalf", () => {
-        it("borrowBehalf should revert when approval is not given", async () => {
-          await expect(vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8))).to.be.revertedWithCustomError(
-            vWbnb,
-            "DelegateNotApproved",
-          );
-        });
+      it("borrowBehalf should work properly", async () => {
+        await comptroller.connect(user1).updateDelegate(USER_2, true);
 
-        it("borrowBehalf should work properly", async () => {
-          await comptroller.connect(user1).updateDelegate(USER_2, true);
+        const user2WbnbBalancePrevious = await wbnb.balanceOf(USER_2);
+        await vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8));
+        const user2WbnbBalanceNew = await wbnb.balanceOf(USER_2);
 
-          const user2WbnbBalancePrevious = await wbnb.balanceOf(USER_2);
-          await vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8));
-          const user2WbnbBalanceNew = await wbnb.balanceOf(USER_2);
-
-          expect(user2WbnbBalanceNew).to.greaterThan(user2WbnbBalancePrevious);
-        });
-      });
-
-      describe("redeemBehalf", () => {
-        it("redeemBehalf should revert when approval is not given", async () => {
-          await expect(vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 6))).to.be.revertedWithCustomError(
-            vWbnb,
-            "DelegateNotApproved",
-          );
-        });
-
-        it("redeemBehalf should work properly", async () => {
-          await comptroller.connect(user1).updateDelegate(USER_2, true);
-
-          const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
-          await vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 8));
-          const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
-
-          expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
-        });
-      });
-
-      describe("redeemUnderlyingBehalf", () => {
-        it("redeemUnderlyingBehalf should revert when approval is not given", async () => {
-          await expect(
-            vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 6)),
-          ).to.be.revertedWithCustomError(vWbnb, "DelegateNotApproved");
-        });
-
-        it("redeemUnderlyingBehalf should work properly", async () => {
-          await comptroller.connect(user1).updateDelegate(USER_2, true);
-
-          const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
-          await vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 18));
-          const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
-
-          expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
-        });
+        expect(user2WbnbBalanceNew).to.greaterThan(user2WbnbBalancePrevious);
       });
     });
 
-    describe("generic tests", async () => {
-      checkCorePoolComptroller();
-      checkIsolatedPoolsComptrollers();
+    describe("redeemBehalf", () => {
+      it("redeemBehalf should revert when approval is not given", async () => {
+        await expect(vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 6))).to.be.revertedWithCustomError(
+          vWbnb,
+          "DelegateNotApproved",
+        );
+      });
+
+      it("redeemBehalf should work properly", async () => {
+        await comptroller.connect(user1).updateDelegate(USER_2, true);
+
+        const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
+        await vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 8));
+        const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
+
+        expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
+      });
     });
+
+    describe("redeemUnderlyingBehalf", () => {
+      it("redeemUnderlyingBehalf should revert when approval is not given", async () => {
+        await expect(
+          vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 6)),
+        ).to.be.revertedWithCustomError(vWbnb, "DelegateNotApproved");
+      });
+
+      it("redeemUnderlyingBehalf should work properly", async () => {
+        await comptroller.connect(user1).updateDelegate(USER_2, true);
+
+        const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
+        await vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 18));
+        const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
+
+        expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
+      });
+    });
+  });
+
+  describe("generic tests", async () => {
+    const COMPTROLLER_STABLECOIN = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+    const VLIUSD = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
+
+    before(async () => {
+      // setting the increased supply cap so that `checkIsolatedPoolsComptrollers` does not fail
+      const comptrollerStableCoins = new ethers.Contract(COMPTROLLER_STABLECOIN, COMPTROLLER_ABI, ethers.provider);
+      await comptrollerStableCoins.connect(impersonatedTimelock).setMarketSupplyCaps([VLIUSD], [parseUnits("1", 30)]);
+    });
+    checkCorePoolComptroller();
+    checkIsolatedPoolsComptrollers();
   });
 });
 
 // core pool vToken tests
-forking(36345514, () => {
+forking(36754421, () => {
   let vToken: ethers.Contract;
   let underlying: ethers.Contract;
   let user: SignerWithAddress;
