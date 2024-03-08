@@ -17,9 +17,9 @@ import {
   SUPPLY_CAP,
   vFDUSD,
   vTUSD,
-  vip268,
+  vip270,
   vlisUSD,
-} from "../../vips/vip-268/bscmainnet";
+} from "../../vips/vip-270/bscmainnet";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SETTER_FACET_ABI from "./abi/SetterFacet.json";
@@ -92,7 +92,7 @@ forking(36760588, () => {
     });
   });
 
-  testVip("VIP-268", vip268(), {
+  testVip("VIP-270", vip270(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

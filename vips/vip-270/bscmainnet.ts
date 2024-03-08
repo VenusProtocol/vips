@@ -22,11 +22,29 @@ export const Actions = {
   ENTER_MARKET: 7,
 };
 
-export const vip268 = () => {
+export const vip270 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-268 Enable TUSD Market",
-    description: ``,
+    title: "VIP-270 Risk Parameters Adjustments (TUSD, FDUSD, lisUSD)",
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publications:
+
+- [Chaos Labs - Risk Parameter Updates - 03/07/24](https://community.venus.io/t/ext-chaos-labs-risk-parameter-updates-03-07-24/4192)
+    - [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
+        - Increase supply cap to 20,000,000 FDUSD
+        - Increase borrow cap to 16,000,000 FDUSD
+- [Chaos Labs - lisUSD Supply Cap Increase - 3/7/24](https://community.venus.io/t/chaos-labs-lisusd-supply-cap-increase-3-7-24/4190)
+    - [lisUSD (Stablecoins isolated pool)](https://bscscan.com/address/0xCa2D81AA7C09A1a025De797600A7081146dceEd9)
+        - Increase supply cap from 500,000 lisUSD to 1,000,000 lisUSD
+- [Chaos Labs Risk Parameter Updates - TUSD - 4/3/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-tusd-4-3-24/4175)
+    - [TUSD (Core pool)](https://bscscan.com/address/0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E)
+        - Unpause MINT, BORROW and ENTER_MARKET (will allow users to start using TUSD as collateral)
+        - Reduce Reserve Factor from 100% to 10%
+        - Increase Collateral Factor from 0% to 75%
+        - Decrease Supply and Borrow Caps from 5M and 4M to 1.5M and 1.2M, respectively
+
+Complete analysis and details of these recommendations are available in the above publications.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/226](https://github.com/VenusProtocol/vips/pull/226)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -76,4 +94,4 @@ export const vip268 = () => {
   );
 };
 
-export default vip268;
+export default vip270;
