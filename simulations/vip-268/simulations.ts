@@ -12,11 +12,13 @@ import {
   COMPTROLLER,
   FD_USD_BORROW_CAP,
   FD_USD_SUPPLY_CAP,
+  IL_COMPTROLLER,
   RESERVE_FACTOR,
   SUPPLY_CAP,
   vFDUSD,
   vTUSD,
   vip268,
+  vlisUSD,
 } from "../../vips/vip-268/bscmainnet";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -32,6 +34,7 @@ forking(36760588, () => {
   let resilientOracle: ethers.Contract;
   let tusdContract: ethers.Contract;
   let vTUSDContract: ethers.Contract;
+  let ilComptroller: ethers.Contract;
 
   before(async () => {
     impersonateAccount(NORMAL_TIMELOCK);
@@ -40,6 +43,7 @@ forking(36760588, () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
     tusdContract = await ethers.getContractAt(ERC20_ABI, TUSD);
     vTUSDContract = await ethers.getContractAt(VTOKEN_ABI, vTUSD, await ethers.getSigner(NORMAL_TIMELOCK));
+    ilComptroller = await ethers.getContractAt(SETTER_FACET_ABI, IL_COMPTROLLER);
 
     await setMaxStalePeriod(resilientOracle, tusdContract);
   });
@@ -81,6 +85,11 @@ forking(36760588, () => {
       paused = await comptroller.actionPaused(vTUSD, Actions.ENTER_MARKET);
       expect(paused).to.be.true;
     });
+
+    it("IL supply cap", async () => {
+      let cap = await ilComptroller.supplyCaps(vlisUSD);
+      expect(cap).to.equal(parseUnits("500000", 18));
+    });
   });
 
   testVip("VIP-268", vip268(), {
@@ -89,7 +98,7 @@ forking(36760588, () => {
         txResponse,
         [SETTER_FACET_ABI],
         ["ActionPausedMarket", "NewBorrowCap", "NewSupplyCap", "NewCollateralFactor"],
-        [3, 2, 2, 1],
+        [3, 2, 3, 1],
       );
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewReserveFactor"], [1]);
     },
@@ -131,6 +140,11 @@ forking(36760588, () => {
 
       paused = await comptroller.actionPaused(vTUSD, Actions.ENTER_MARKET);
       expect(paused).to.be.false;
+    });
+
+    it("IL borrow cap", async () => {
+      let cap = await ilComptroller.supplyCaps(vlisUSD);
+      expect(cap).to.equal(parseUnits("1000000", 18));
     });
   });
 });

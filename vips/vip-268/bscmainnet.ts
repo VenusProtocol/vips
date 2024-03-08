@@ -12,6 +12,9 @@ export const SUPPLY_CAP = parseUnits("1500000", 18).toString();
 export const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
 export const FD_USD_BORROW_CAP = parseUnits("16000000", 18).toString();
 export const FD_USD_SUPPLY_CAP = parseUnits("20000000", 18).toString();
+export const IL_COMPTROLLER = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+export const vlisUSD = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
+export const lisUSD_SUPPLY_CAP = parseUnits("1000000", 18).toString();
 
 export const Actions = {
   MINT: 0,
@@ -61,6 +64,11 @@ export const vip268 = () => {
           [vTUSD, vFDUSD],
           [SUPPLY_CAP, FD_USD_SUPPLY_CAP],
         ],
+      },
+      {
+        target: IL_COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [[vlisUSD], [lisUSD_SUPPLY_CAP]],
       },
     ],
     meta,
