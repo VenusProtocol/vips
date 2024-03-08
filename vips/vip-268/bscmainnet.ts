@@ -7,15 +7,7 @@ export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-
 export const WBNB_WITHDRAW_AMOUNT = parseUnits("2431.068422494325838291", 18);
-export const EXCHANGE_RATE_AFTER_MINT = parseUnits("239107672.531201493662817556", 18);
-
-/**
- * Exchange rate after minting is 239107672.531201498829432328
- * exchangeRate * vBNBAmount = ~wBNBAmount
- * */
-export const VTOKEN_AMOUNT = parseUnits("0.000010167253926898", 18);
 
 export const vip268 = () => {
   const meta = {
@@ -44,11 +36,6 @@ export const vip268 = () => {
         signature: "mint(uint256)",
         params: [WBNB_WITHDRAW_AMOUNT],
         value: WBNB_WITHDRAW_AMOUNT.toString(),
-      },
-      {
-        target: vBNB,
-        signature: "transfer(address,uint256)",
-        params: [TREASURY, VTOKEN_AMOUNT],
       },
     ],
     meta,
