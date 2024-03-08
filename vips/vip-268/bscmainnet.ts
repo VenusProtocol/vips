@@ -4,7 +4,6 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const vTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
 export const RESERVE_FACTOR = parseUnits("0.1", 18).toString();
 export const COLLATERAL_FACTOR = parseUnits("0.75", 18).toString();
