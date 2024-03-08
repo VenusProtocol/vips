@@ -26,13 +26,13 @@ const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
 const VUSDC_AMOUNT = parseUnits("326081635.9401868", 8);
-const REPAY_AMOUNT_WITH_INTEREST = parseUnits("7606059.637666350902865002", 18);
-const EXPECTED_BNB_AMOUNT = parseUnits("19740.154659961833876246", 18);
+const REPAY_AMOUNT_WITH_INTEREST = parseUnits("7614604.072351454845842746", 18);
+const EXPECTED_BNB_AMOUNT = parseUnits("17539.381728335269168380", 18);
 
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(36731756, () => {
+forking(36789305, () => {
   const usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
   const vUSDC = new ethers.Contract(VUSDC, VTOKEN_ABI, ethers.provider);
   const vBNB = new ethers.Contract(VBNB, VTOKEN_ABI, ethers.provider);
@@ -56,7 +56,6 @@ forking(36731756, () => {
     timelock = await initMainnetUser(NORMAL_TIMELOCK, parseEther("1"));
     vUSDC.connect(timelock)._setInterestRateModel(ZERO_RATE_MODEL);
 
-    treasuryBalanceBefore = await usdc.balanceOf(TREASURY);
     treasuryVTokenBalanceBefore = await vUSDC.balanceOf(TREASURY);
     exploiterDebtBefore = await vUSDC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET);
     binanceWalletBalanceBefore = await ethers.provider.getBalance(BINANCE_WALLET);
