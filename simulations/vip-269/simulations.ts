@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
 import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
-import vip267 from "../../vips/vip-267/bscmainnet";
+import vip269 from "../../vips/vip-269/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import IERC20_ABI from "./abi/IERC20Abi.json";
 import LIQUIDATE_AND_REDEEM_ABI from "./abi/LiquidateAndRedeem.json";
@@ -104,7 +104,7 @@ forking(36789305, () => {
     });
   });
 
-  testVip("VIP-267", vip267());
+  testVip("VIP-269", vip269());
 
   describe("Post-VIP state", () => {
     it(`transfers ${formatUnits(VUSDC_AMOUNT, 8)} vUSDC from treasury`, async () => {
