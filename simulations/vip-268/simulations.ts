@@ -10,8 +10,11 @@ import {
   BORROW_CAP,
   COLLATERAL_FACTOR,
   COMPTROLLER,
+  FD_USD_BORROW_CAP,
+  FD_USD_SUPPLY_CAP,
   RESERVE_FACTOR,
   SUPPLY_CAP,
+  vFDUSD,
   vTUSD,
   vip268,
 } from "../../vips/vip-268/bscmainnet";
@@ -53,13 +56,19 @@ forking(36760588, () => {
     });
 
     it("borrow cap", async () => {
-      const cap = await comptroller.borrowCaps(vTUSD);
+      let cap = await comptroller.borrowCaps(vTUSD);
       expect(cap).to.equal(parseUnits("4000000", 18));
+
+      cap = await comptroller.borrowCaps(vFDUSD);
+      expect(cap).to.equal(parseUnits("8000000", 18));
     });
 
     it("supply cap", async () => {
-      const cap = await comptroller.supplyCaps(vTUSD);
+      let cap = await comptroller.supplyCaps(vTUSD);
       expect(cap).to.equal(parseUnits("5000000", 18));
+
+      cap = await comptroller.supplyCaps(vFDUSD);
+      expect(cap).to.equal(parseUnits("15000000", 18));
     });
 
     it("unpuased actions", async () => {
@@ -80,7 +89,7 @@ forking(36760588, () => {
         txResponse,
         [SETTER_FACET_ABI],
         ["ActionPausedMarket", "NewBorrowCap", "NewSupplyCap", "NewCollateralFactor"],
-        [3, 1, 1, 1],
+        [3, 2, 2, 1],
       );
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewReserveFactor"], [1]);
     },
@@ -98,13 +107,19 @@ forking(36760588, () => {
     });
 
     it("borrow cap", async () => {
-      const cap = await comptroller.borrowCaps(vTUSD);
+      let cap = await comptroller.borrowCaps(vTUSD);
       expect(cap).to.equal(BORROW_CAP);
+
+      cap = await comptroller.borrowCaps(vFDUSD);
+      expect(cap).to.equal(FD_USD_BORROW_CAP);
     });
 
     it("supply cap", async () => {
-      const cap = await comptroller.supplyCaps(vTUSD);
+      let cap = await comptroller.supplyCaps(vTUSD);
       expect(cap).to.equal(SUPPLY_CAP);
+
+      cap = await comptroller.supplyCaps(vFDUSD);
+      expect(cap).to.equal(FD_USD_SUPPLY_CAP);
     });
 
     it("unpuased actions", async () => {

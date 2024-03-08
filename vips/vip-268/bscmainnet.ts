@@ -10,6 +10,9 @@ export const RESERVE_FACTOR = parseUnits("0.1", 18).toString();
 export const COLLATERAL_FACTOR = parseUnits("0.75", 18).toString();
 export const BORROW_CAP = parseUnits("1200000", 18).toString();
 export const SUPPLY_CAP = parseUnits("1500000", 18).toString();
+export const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
+export const FD_USD_BORROW_CAP = parseUnits("16000000", 18).toString();
+export const FD_USD_SUPPLY_CAP = parseUnits("20000000", 18).toString();
 
 export const Actions = {
   MINT: 0,
@@ -47,16 +50,22 @@ export const vip268 = () => {
       {
         target: COMPTROLLER,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[vTUSD], [BORROW_CAP]],
+        params: [
+          [vTUSD, vFDUSD],
+          [BORROW_CAP, FD_USD_BORROW_CAP],
+        ],
       },
       {
         target: COMPTROLLER,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[vTUSD], [SUPPLY_CAP]],
+        params: [
+          [vTUSD, vFDUSD],
+          [SUPPLY_CAP, FD_USD_SUPPLY_CAP],
+        ],
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
