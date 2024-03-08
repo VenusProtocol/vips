@@ -87,7 +87,7 @@ forking(36760588, () => {
     });
 
     it("IL supply cap", async () => {
-      let cap = await ilComptroller.supplyCaps(vlisUSD);
+      const cap = await ilComptroller.supplyCaps(vlisUSD);
       expect(cap).to.equal(parseUnits("500000", 18));
     });
   });
@@ -143,7 +143,7 @@ forking(36760588, () => {
     });
 
     it("IL borrow cap", async () => {
-      let cap = await ilComptroller.supplyCaps(vlisUSD);
+      const cap = await ilComptroller.supplyCaps(vlisUSD);
       expect(cap).to.equal(parseUnits("1000000", 18));
     });
   });
