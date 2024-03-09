@@ -4,7 +4,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const TOKEN_REDEEMER = "0x67B10f3BC6B141D67c598C73CEe45E6635292Acd";
-const LIQUIDATE_AND_REDEEM_HELPER = "0x05D90a7Ca62E8f20AAb0D3B569Cf6BDd1C70AB8b";
+const LIQUIDATE_AND_REDEEM_HELPER = "0xa569524A42E28580d5A5B1BdB847517BA0000ffE";
 const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
@@ -39,7 +39,7 @@ Review the full plan regarding the liquidation of the BNB exploiter account in t
 This VIP uses two contracts to complete the commands:
 
 - [TokenRedeemer](https://bscscan.com/address/0x67B10f3BC6B141D67c598C73CEe45E6635292Acd). It is used to redeem the vUSDC and transfer 100% of the withdrawn underlying tokens to another contract (in this case the Temporary Liquidator contract)
-- [Temporary Liquidator contract for the Core pool](https://bscscan.com/address/0x05D90a7Ca62E8f20AAb0D3B569Cf6BDd1C70AB8b). It doesn’t split the fees between the liquidator agent and the protocol, it redeems the seized vTokens, and it transfers 100% of the withdrawn underlying tokens to an address (in this case the OTC provider)
+- [Temporary Liquidator contract for the Core pool](https://bscscan.com/address/0xa569524A42E28580d5A5B1BdB847517BA0000ffE). It doesn’t split the fees between the liquidator agent and the protocol, it redeems the seized vTokens, and it transfers 100% of the withdrawn underlying tokens to an address (in this case the OTC provider)
 
 The owner of both contracts is the [Normal Timelock](https://bscscan.com/address/0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396). They won’t hold any tokens after the VIP execution. The last command of the VIP restores the [original Liquidator contract](https://bscscan.com/address/0x0870793286aaDA55D39CE7f82fb2766e8004cF43) in the Core pool.
 
@@ -47,7 +47,7 @@ The owner of both contracts is the [Normal Timelock](https://bscscan.com/address
 
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/202)
 - [TokenRedeemer contract](https://bscscan.com/address/0x67B10f3BC6B141D67c598C73CEe45E6635292Acd)
-- [Temporary Liquidator contract](https://bscscan.com/address/0x05D90a7Ca62E8f20AAb0D3B569Cf6BDd1C70AB8b)`,
+- [Temporary Liquidator contract](https://bscscan.com/address/0xa569524A42E28580d5A5B1BdB847517BA0000ffE)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this proposal",
