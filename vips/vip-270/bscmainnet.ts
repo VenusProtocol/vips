@@ -26,7 +26,7 @@ export const vip270 = () => {
   const meta = {
     version: "v2",
     title: "VIP-270 Risk Parameters Adjustments (TUSD, FDUSD, lisUSD)",
-    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publications:
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in these Venus community forum publications:
 
 - [Chaos Labs - Risk Parameter Updates - 03/07/24](https://community.venus.io/t/ext-chaos-labs-risk-parameter-updates-03-07-24/4192)
     - [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
