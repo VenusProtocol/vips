@@ -6,7 +6,6 @@ const PRIME_LIQUIDITY_PROVIDER = "0x8ba6aFfd0e7Bcd0028D1639225C84DdCf53D8872";
 const PRIME = "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39";
 const GUARDIAN = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
-const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
 const PRIME_POOL_ID = 0;
 
@@ -94,11 +93,6 @@ export const vip007 = () => {
     },
     {
       target: PRIME_LIQUIDITY_PROVIDER,
-      signature: "setPrimeToken(address)",
-      params: [PRIME],
-    },
-    {
-      target: COMPTROLLER,
       signature: "setPrimeToken(address)",
       params: [PRIME],
     },
