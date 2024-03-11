@@ -6,7 +6,6 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriod } from "../../utils";
-import CHAINLINK_ORACLE_ABI from "../abi/chainlinkOracle.json";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
 import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
@@ -14,7 +13,7 @@ import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
 const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
+const DEFAULT_SUPPLIER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
 const POOL_REGISTRY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].POOL_REGISTRY;
 const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
 
@@ -53,17 +52,17 @@ const calculateBorrowableAmount = async (
   return parseUnits(borrowTokenAmount.toString(), borrowUnderlyingDecimals);
 };
 
-const runPoolTests = async (pool: PoolMetadata) => {
+const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   console.log(`${pool.name} > generic comptroller checks for pool`);
   let supplyMarket: Contract;
   let borrowMarket: Contract;
   let supplyUnderlying: Contract;
   let borrowUnderlying: Contract;
 
-  impersonateAccount(ACCOUNT);
-  await setBalance(ACCOUNT, ethers.utils.parseEther("5"));
+  impersonateAccount(poolSupplier);
+  await setBalance(poolSupplier, ethers.utils.parseEther("5"));
   impersonateAccount(NORMAL_TIMELOCK);
-  const signer: Signer = await ethers.getSigner(ACCOUNT);
+  const signer: Signer = await ethers.getSigner(poolSupplier);
   const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
 
   const comptroller: Contract = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
@@ -77,7 +76,7 @@ const runPoolTests = async (pool: PoolMetadata) => {
     if (!supplyMarket) {
       supplyMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       supplyUnderlying = await ethers.getContractAt(ERC20_ABI, await supplyMarket.underlying(), signer);
-      const balance = await supplyUnderlying.balanceOf(ACCOUNT);
+      const balance = await supplyUnderlying.balanceOf(poolSupplier);
       if (balance.isZero()) {
         supplyMarket = undefined;
         continue;
@@ -101,18 +100,19 @@ const runPoolTests = async (pool: PoolMetadata) => {
     } > operations - supplying ${await supplyUnderlying.symbol()} | borrowing ${await borrowUnderlying.symbol()}`,
   );
   const supplyUnderlyingDecimals = await supplyUnderlying.decimals();
-  const initialSupplyAmount = parseUnits("2", supplyUnderlyingDecimals);
-  const balance = await supplyUnderlying.balanceOf(ACCOUNT);
+  const initialSupplyAmount = parseUnits("0.05", supplyUnderlyingDecimals);
+  const balance = await supplyUnderlying.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
-  const originalSupplyMarketBalance = await supplyMarket.balanceOf(ACCOUNT);
+  const originalSupplyMarketBalance = await supplyMarket.balanceOf(poolSupplier);
 
   await supplyUnderlying.approve(supplyMarket.address, supplyAmountScaled);
   await supplyMarket.mint(supplyAmountScaled);
 
-  expect(await supplyMarket.balanceOf(ACCOUNT)).to.be.gt(originalSupplyMarketBalance);
+  expect(await supplyMarket.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
 
   await comptroller.enterMarkets([borrowMarket.address, supplyMarket.address]);
-  let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
+
+  let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(poolSupplier);
   const borrowUnderlyingDecimals = await borrowUnderlying.decimals();
 
   let borrowAmount = await calculateBorrowableAmount(
@@ -124,18 +124,17 @@ const runPoolTests = async (pool: PoolMetadata) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
-
   await borrowMarket.borrow(borrowAmount);
-  expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.gt(borrowUnderlyingBalance);
+  expect(await borrowUnderlying.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
-  borrowUnderlyingBalance = await borrowUnderlying.balanceOf(ACCOUNT);
+  borrowUnderlyingBalance = await borrowUnderlying.balanceOf(poolSupplier);
   await borrowUnderlying.approve(borrowMarket.address, borrowAmount);
   await borrowMarket.repayBorrow(borrowAmount);
-  expect(await borrowUnderlying.balanceOf(ACCOUNT)).to.lt(borrowUnderlyingBalance);
+  expect(await borrowUnderlying.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
 
-  const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(ACCOUNT);
-  await supplyMarket.redeemUnderlying(parseUnits("0.1", supplyUnderlyingDecimals));
-  expect(await supplyUnderlying.balanceOf(ACCOUNT)).to.gt(supplyUnderlyingBalance);
+  const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(poolSupplier);
+  await supplyMarket.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
+  expect(await supplyUnderlying.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
   console.log(`${pool.name} > set storage`);
   const originalOracle = await comptroller.oracle();
@@ -145,7 +144,11 @@ const runPoolTests = async (pool: PoolMetadata) => {
   await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
 };
 
-export const checkIsolatedPoolsComptrollers = (): void => {
+// NOTE: The default supplier for each pool will be VTreasury, if in case VTreasury has no
+//       underlying token balance in any or only in the last market in the list, you can use the
+//       poolToSupplierMap in order to specify a supplier per pool
+//       You can check multisig/simulations/vip-010/vip-010-ethereum/simulations.ts for example.
+export const checkIsolatedPoolsComptrollers = (poolToSupplierMap: { [comptroller: string]: string } = {}): void => {
   describe("generic Isolated pool comptroller checks", () => {
     let pools: PoolMetadata[];
 
@@ -157,8 +160,9 @@ export const checkIsolatedPoolsComptrollers = (): void => {
       }
 
       for (const pool of pools) {
+        const poolSupplier: string = poolToSupplierMap[pool.comptroller] || DEFAULT_SUPPLIER;
         // Dynamically creating a describe block for each pool
-        await runPoolTests(pool);
+        await runPoolTests(pool, poolSupplier);
       }
     });
   });

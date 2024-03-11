@@ -119,15 +119,16 @@ export const setMaxStalePeriod = async (
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
   const binanceOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
+  const chainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+  const redstoneOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].REDSTONE_ORACLE;
   const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
     if (mainOracle === binanceOracle) {
       const symbol = await underlyingAsset.symbol();
       await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
-    } else {
+    } else if (mainOracle === chainlinkOracle || mainOracle === redstoneOracle) {
       await setMaxStalePeriodInChainlinkOracle(
         mainOracle,
         underlyingAsset.address,
@@ -383,6 +384,11 @@ const BNB_MAINNET_ASSETS: AssetConfig[] = [
     name: "TUSD_NEW",
     address: "0x40af3827f39d0eacbf4a168f8d4ee67c121d11c9",
     feed: "0xa3334A9762090E827413A7495AfeCE76F41dFc06",
+  },
+  {
+    name: "FDUSD",
+    address: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+    feed: "0x390180e80058A8499930F0c13963AD3E0d86Bfc9",
   },
 ];
 
