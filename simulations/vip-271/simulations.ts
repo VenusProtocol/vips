@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { ERC20_TOKENS, TREASURY, vip271 } from "../../vips/vip-271/bscmainnet";
+import { ERC20_TOKENS, NORMAL_TIMELOCK, TREASURY, vip271 } from "../../vips/vip-271/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 
 const prevBalances: any = {};
@@ -30,6 +30,9 @@ forking(36903529, () => {
         const newBalance = await tokenContract.balanceOf(TREASURY);
         const expectedBalance = BigNumber.from(token.amount).add(prevBalances[token.symbol]);
         expect(newBalance).to.equal(expectedBalance);
+
+        const timelockBalance = await tokenContract.balanceOf(NORMAL_TIMELOCK);
+        expect(timelockBalance).to.equal(0);
       }
     });
   });
