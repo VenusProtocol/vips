@@ -14,6 +14,7 @@ export const DIAMOND = "0x1D5F9752bA40cF7047db2E24Cb6Aa196E3c334DA";
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const NEW_VBEP20_DELEGATE_IMPL = "0xad6aa8Bb4829560412A94AA930745f407BF8000B";
 
+export const SN_BNB_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 export const COMPTROLLER_BEACON = "0xdddd7725c073105fb2abfcbdec16708fc4c24b74";
 export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const NEW_COMPTROLLER_IMPLEMENTATION = "0x2CF0e211c99dFd28892cf80D142aA27a9042Dbf4";
@@ -164,6 +165,11 @@ export const vipGateway = () => {
       },
       {
         target: VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_VTOKEN_IMPLEMENTATION],
+      },
+      {
+        target: SN_BNB_BEACON,
         signature: "upgradeTo(address)",
         params: [NEW_VTOKEN_IMPLEMENTATION],
       },

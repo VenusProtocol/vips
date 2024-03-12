@@ -20,6 +20,7 @@ import {
   NEW_VBEP20_DELEGATE_IMPL,
   NEW_VTOKEN_IMPLEMENTATION,
   NORMAL_TIMELOCK,
+  SN_BNB_BEACON,
   UNITROLLER,
   VTOKEN_BEACON,
   XVS,
@@ -139,7 +140,7 @@ forking(38508666, () => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [24]); // +1 for unitroller
-      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [3]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["NewXVSToken", "NewXVSVToken"], [1, 1]);
@@ -191,6 +192,11 @@ forking(38508666, () => {
 
     it("vToken should have new implementations", async () => {
       expect((await vtokenBeacon.implementation()).toLowerCase()).to.equal(NEW_VTOKEN_IMPLEMENTATION.toLowerCase());
+    });
+
+    it("SnBnb vToken should have new implementations", async () => {
+      const SnBnbBeacon = new ethers.Contract(SN_BNB_BEACON, BEACON_ABI, ethers.provider);
+      expect((await SnBnbBeacon.implementation()).toLowerCase()).to.equal(NEW_VTOKEN_IMPLEMENTATION.toLowerCase());
     });
 
     it("timelock should be the owner of NativeTokenGateway contract", async () => {
