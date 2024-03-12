@@ -5,6 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+export const BNB_AMOUNT = parseUnits("39.861304218347259946", 18).toString();
 
 type Token = {
   symbol: string;
@@ -142,6 +143,12 @@ export const vip271 = () => {
         signature: "transfer(address,uint256)",
         params: [TREASURY, token.amount],
       })),
+      {
+        target: TREASURY,
+        signature: "",
+        params: [],
+        value: BNB_AMOUNT,
+      },
     ],
     meta,
     ProposalType.REGULAR,

@@ -4,17 +4,20 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { ERC20_TOKENS, NORMAL_TIMELOCK, TREASURY, vip271 } from "../../vips/vip-271/bscmainnet";
+import { BNB_AMOUNT, ERC20_TOKENS, NORMAL_TIMELOCK, TREASURY, vip271 } from "../../vips/vip-271/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 
 const prevBalances: any = {};
+let prevBNBBalance: any;
 
-forking(36903529, () => {
+forking(36907609, () => {
   before(async () => {
     for (const token of ERC20_TOKENS) {
       const tokenContract = await ethers.getContractAt(IERC20_ABI, token.address);
       prevBalances[token.symbol] = await tokenContract.balanceOf(TREASURY);
     }
+
+    prevBNBBalance = await ethers.provider.getBalance(TREASURY);
   });
 
   testVip("VIP-271", vip271(), {
@@ -34,6 +37,12 @@ forking(36903529, () => {
         const timelockBalance = await tokenContract.balanceOf(NORMAL_TIMELOCK);
         expect(timelockBalance).to.equal(0);
       }
+    });
+
+    it("check bnb balance", async () => {
+      const newBNBBalance = await ethers.provider.getBalance(TREASURY);
+      const expectedBNBBalance = BigNumber.from(prevBNBBalance).add(BNB_AMOUNT);
+      expect(newBNBBalance).to.equal(expectedBNBBalance);
     });
   });
 });

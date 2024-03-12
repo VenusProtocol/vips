@@ -75,7 +75,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
