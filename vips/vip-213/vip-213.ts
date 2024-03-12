@@ -37,11 +37,6 @@ export const vip213 = () => {
       {
         target: XVS,
         signature: "approve(address,uint256)",
-        params: [XVS_BRIDGE_SRC, 0],
-      },
-      {
-        target: XVS,
-        signature: "approve(address,uint256)",
         params: [XVS_BRIDGE_SRC, XVS_AMOUNT],
       },
       {
@@ -54,7 +49,12 @@ export const vip213 = () => {
           XVS_AMOUNT,
           [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
-        value: "300000000000000000",
+        value: "500000000000000000",
+      },
+      {
+        target: XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_SRC, 0],
       },
     ],
     meta,

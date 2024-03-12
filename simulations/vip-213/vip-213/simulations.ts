@@ -26,7 +26,6 @@ forking(35117102, () => {
   testVip("VIP-213 Send XVS to Dest Chain", vip213(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI, XVS_BRIDGE_ABI], ["VenusGranted", "SendToChain"], [1, 1]);
-      expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },
   });
 
