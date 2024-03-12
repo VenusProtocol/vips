@@ -15,7 +15,6 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
 const XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
-const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 const NORMAL_TIMELOCK = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 
 forking(16716512, () => {
@@ -31,10 +30,10 @@ forking(16716512, () => {
   describe("Post tx checks", () => {
     describe("Generic checks", async () => {
       before(async () => {
-        const xvs: Contract = await ethers.getContractAt(XVS_ABI, XVS);
+        const xvs: Contract = await ethers.getContractAt(XVS_ABI, opbnbtestnet.XVS);
         const admin = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
         const xvsHolder = await initMainnetUser(opbnbtestnet.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
-        await xvsVault.connect(admin).setRewardAmountPerBlock(XVS, "61805555555555555");
+        await xvsVault.connect(admin).setRewardAmountPerBlock(opbnbtestnet.XVS, "61805555555555555");
         await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
         await mine(604800);
       });
