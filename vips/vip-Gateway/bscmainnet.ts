@@ -2,14 +2,23 @@ import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/ut
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+export const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+export const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
+
+export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+export const XVSVTOKEN = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
+export const DIAMOND = "";
+
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const NEW_VBEP20_DELEGATE_IMPL = "0x3E0BAbA193fA5227cAe573236ceC63aa47076125";
+export const NEW_VBEP20_DELEGATE_IMPL = "";
 
 export const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
 export const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
-export const NEW_COMPTROLLER_IMPLEMENTATION = "0x9Ea638B93b9cb591fbB28EA66085591B3B511bf1";
-export const NEW_VTOKEN_IMPLEMENTATION = "0xC760459324C6F5cdd17c447b6bE6D6Fc43aCcCCa";
-export const NATIVE_TOKEN_GATEWAY = "0xa8433F284795aE7f8652127af47482578b58673d";
+export const NEW_COMPTROLLER_IMPLEMENTATION = "";
+export const NEW_VTOKEN_IMPLEMENTATION = "";
+export const NATIVE_TOKEN_GATEWAY = "";
 
 export const CORE_MARKETS = [
   {
@@ -158,7 +167,9 @@ export const vipGateway = () => {
     This VIP does the following:
     1. Updates the implementation of all VTokens and Comptroller market facet in Core Pool
     2. Updates the implementation of VTokens and Comptrollers in IL
-    3. Accepts the ownership of the NativeTokenGateway contract`,
+    3. Accepts the ownership of the NativeTokenGateway contract
+    4. Gives call permissions to Timelocks for seizeVenus function
+    5. Sets XVS and vXVS address in unitroller`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -168,10 +179,19 @@ export const vipGateway = () => {
     [
       {
         target: UNITROLLER,
+        signature: "_setPendingImplementation(address)",
+        params: [DIAMOND],
+      },
+      {
+        target: DIAMOND,
+        signature: "_become(address)",
+        params: [UNITROLLER],
+      },
+      {
+        target: UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [params],
       },
-
       ...CORE_MARKETS.map(vToken => {
         return {
           target: vToken.address,
@@ -193,6 +213,23 @@ export const vipGateway = () => {
         target: NATIVE_TOKEN_GATEWAY,
         signature: "acceptOwnership()",
         params: [],
+      },
+
+      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "seizeVenus(address[],address)", timelock],
+      })),
+
+      {
+        target: UNITROLLER,
+        signature: "_setXVSToken",
+        params: [XVS],
+      },
+      {
+        target: UNITROLLER,
+        signature: "_setXVSVToken",
+        params: [XVSVTOKEN],
       },
     ],
     meta,

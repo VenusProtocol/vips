@@ -25,8 +25,8 @@ import {
   XVS,
   XVSVTOKEN,
   vipGateway,
-} from "../../../vips/vip-Gateway/bscmainnet";
-import ACM_ABI from "../abi/AccessControlManagerMainnet.json";
+} from "../../../vips/vip-Gateway/bsctestnet2";
+import ACM_ABI from "../abi/AccessControlManager.json";
 import BEACON_ABI from "../abi/Beacon.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import CORE_POOL_ABI from "../abi/CorePoolComptroller.json";
@@ -39,40 +39,33 @@ import VBEP_20_DELEGATE_ABI from "../abi/VBep20Delegate.json";
 import VEBEP_20_DELEGATOR_ABI from "../abi/VBep20Delegator.json";
 import VTOKEN_ABI from "../abi/VToken.json";
 
-const OLD_COMPTROLLER_IMPLEMENTATION = "0x3F66e044dfd1Ccc834e55624B5f6e9e75ab36000";
-const OLD_VTOKEN_IMPLEMENTATION = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
+const OLD_COMPTROLLER_IMPLEMENTATION = "0xE1Ac99E486EBEcD40Ab4C9FF29Fe4d28be244D33";
+const OLD_VTOKEN_IMPLEMENTATION = "0xF83362aF1722b1762e21369225901B90D9b980d9";
 
-const VWBNB_LIQUID_STAKED_BNB = "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2";
-const VBNBX_LIQUID_STAKED_BNB = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
-const POOL_LIQUID_STAKED_BNB = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
+const VBNBX_LIQUID_STAKED_BNB = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
+const POOL_LIQUID_STAKED_BNB = "0x596B11acAACF03217287939f88d63b51d3771704";
 
-const BNBX = "0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275";
-const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+const USER_1 = "0x03862dFa5D0be8F64509C001cb8C6188194469DF";
+const USER_2 = "0xb07A7f0A252bc7a3a26aa3c3C9D9c38aD8a6f02F";
 
-const USER_1 = "0x1a0a28D2217503f29f5579C16D8783bd7B9C8C93";
-const USER_2 = "0x5f947Ad9F834A647e7aA791CC78FA2857f30Df3F";
+const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-const OLD_DIAMOND_ADDRESS = "0xD93bFED40466c9A9c3E7381ab335a08807318a1b";
-const OLD_SETTER_FACET = "0xF2b7D75557B75a878E997934014E95Dd089B5f24";
-const OLD_REWARD_FACET = "0x71e7AAcb01C5764A56DB92aa31aA473e839d964F";
-const OLD_MARKET_FACET = "0x40A30E1B01e0CF3eE3F22f769b0E437160550eEa";
-const OLD_POLICY_FACET = "0xa7fE89d9A7F9dc097fb71F13e2E025165CBf431f";
+const OLD_DIAMOND_ADDRESS = "0x795F7238514DE51d04a3550089a62F59ef6992Ad";
+const OLD_SETTER_FACET = "0xD346A70320C7Bca8A68b1aaF9eea1b1055BAB74B";
+const OLD_REWARD_FACET = "0x19fB43e4b46DCB803208253E42F5D1800D2ACEca";
+const OLD_MARKET_FACET = "0xbcA3d5E7a66D97E0415662c2394Ed2605944b614";
+const OLD_POLICY_FACET = "0xb16399Cb0f54D73D045F476b03A6Cb468F6BE7D2";
 
-const NEW_SETTER_FACET = "";
-const NEW_REWARD_FACET = "";
-const NEW_MARKET_FACET = "";
-const NEW_POLICY_FACET = "";
+const NEW_SETTER_FACET = "0xaBdE9599a4aEcE4fEC59fBF2b8445149bc8B2c70";
+const NEW_REWARD_FACET = "0x905006DCD5DbAa9B67359bcB341a0C49AfC8d0A6";
+const NEW_MARKET_FACET = "0xF2F2aE5480c4527787Fb7Cde1Ed9A3EdfD40A60d";
+const NEW_POLICY_FACET = "0x7b17b28687B817158c20e3d1bf100106fBE794cf";
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
-let user2: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
 let comptroller: ethers.Contract;
 let unitroller: ethers.Contract;
-let vWbnb: ethers.Contract;
-let vBnbx: ethers.Contract;
-let bnbx: ethers.Contract;
-let wbnb: ethers.Contract;
 let comptrollerBeacon: ethers.Contract;
 let vtokenBeacon: ethers.Contract;
 let nativeTokenGateway: ethers.Contract;
@@ -94,7 +87,7 @@ let policyFacetFunctionSelectors: string[];
 let rewardFacetFuntionSelectors: string[];
 let setterFacetFuntionSelectors: string[];
 
-forking(36754421, () => {
+forking(38508666, () => {
   before(async () => {
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
@@ -143,13 +136,12 @@ forking(36754421, () => {
 
   testVip("VIP-Gateway", vipGateway(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [27]);
+      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [24]); // +1 for unitroller
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
-      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [3]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["NewXVSToken", "NewXVSVToken"], [1, 1]);
     },
   });
@@ -161,8 +153,8 @@ forking(36754421, () => {
     });
 
     it("policy facet function selectors should be replaced with new facet address", async () => {
-      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
-      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal([]);
+      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
     });
 
     it("reward facet function selectors should be replaced with new facet address", async () => {
@@ -220,107 +212,16 @@ forking(36754421, () => {
       expect(await comptroller.prime()).to.equal(prime);
       expect(await comptroller.approvedDelegates(USER_1, USER_2)).to.equal(false);
     });
-  });
-});
 
-forking(36754421, () => {
-  describe("onBehalfTests", () => {
-    before(async () => {
-      await pretendExecutingVip(vipGateway());
+    describe("generic tests", async () => {
+      checkCorePoolComptroller();
+      checkIsolatedPoolsComptrollers();
     });
-    beforeEach(async () => {
-      user1 = await initMainnetUser(USER_1, parseUnits("2"));
-      user2 = await initMainnetUser(USER_2, parseUnits("2"));
-      comptroller = new ethers.Contract(POOL_LIQUID_STAKED_BNB, COMPTROLLER_ABI, provider);
-
-      vWbnb = new ethers.Contract(VWBNB_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
-      vBnbx = new ethers.Contract(VBNBX_LIQUID_STAKED_BNB, VTOKEN_ABI, provider);
-
-      bnbx = new ethers.Contract(BNBX, MOCK_TOKEN_ABI, provider);
-      wbnb = new ethers.Contract(WBNB, MOCK_TOKEN_ABI, provider);
-
-      await comptroller.connect(user1).enterMarkets([VBNBX_LIQUID_STAKED_BNB, VWBNB_LIQUID_STAKED_BNB]);
-      if (await comptroller.approvedDelegates(user1.address, USER_2)) {
-        await comptroller.connect(user1).updateDelegate(USER_2, false);
-      }
-
-      await bnbx.connect(user1).approve(vBnbx.address, parseUnits("1", 18));
-      await vBnbx.connect(user1).mint(parseUnits("1", 18));
-    });
-
-    describe("borrowBehalf", () => {
-      it("borrowBehalf should revert when approval is not given", async () => {
-        await expect(vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8))).to.be.revertedWithCustomError(
-          vWbnb,
-          "DelegateNotApproved",
-        );
-      });
-
-      it("borrowBehalf should work properly", async () => {
-        await comptroller.connect(user1).updateDelegate(USER_2, true);
-
-        const user2WbnbBalancePrevious = await wbnb.balanceOf(USER_2);
-        await vWbnb.connect(user2).borrowBehalf(USER_1, parseUnits("1", 8));
-        const user2WbnbBalanceNew = await wbnb.balanceOf(USER_2);
-
-        expect(user2WbnbBalanceNew).to.greaterThan(user2WbnbBalancePrevious);
-      });
-    });
-
-    describe("redeemBehalf", () => {
-      it("redeemBehalf should revert when approval is not given", async () => {
-        await expect(vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 6))).to.be.revertedWithCustomError(
-          vWbnb,
-          "DelegateNotApproved",
-        );
-      });
-
-      it("redeemBehalf should work properly", async () => {
-        await comptroller.connect(user1).updateDelegate(USER_2, true);
-
-        const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
-        await vBnbx.connect(user2).redeemBehalf(USER_1, parseUnits("1", 8));
-        const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
-
-        expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
-      });
-    });
-
-    describe("redeemUnderlyingBehalf", () => {
-      it("redeemUnderlyingBehalf should revert when approval is not given", async () => {
-        await expect(
-          vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 6)),
-        ).to.be.revertedWithCustomError(vWbnb, "DelegateNotApproved");
-      });
-
-      it("redeemUnderlyingBehalf should work properly", async () => {
-        await comptroller.connect(user1).updateDelegate(USER_2, true);
-
-        const user2BnbxBalancePrevious = await bnbx.balanceOf(USER_2);
-        await vBnbx.connect(user2).redeemUnderlyingBehalf(USER_1, parseUnits("1", 18));
-        const user2BnbxBalanceNew = await bnbx.balanceOf(USER_2);
-
-        expect(user2BnbxBalanceNew).to.greaterThan(user2BnbxBalancePrevious);
-      });
-    });
-  });
-
-  describe("generic tests", async () => {
-    const COMPTROLLER_STABLECOIN = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
-    const VLIUSD = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
-
-    before(async () => {
-      // setting the increased supply cap so that `checkIsolatedPoolsComptrollers` does not fail
-      const comptrollerStableCoins = new ethers.Contract(COMPTROLLER_STABLECOIN, COMPTROLLER_ABI, ethers.provider);
-      await comptrollerStableCoins.connect(impersonatedTimelock).setMarketSupplyCaps([VLIUSD], [parseUnits("1", 30)]);
-    });
-    checkCorePoolComptroller();
-    checkIsolatedPoolsComptrollers();
   });
 });
 
 // core pool vToken tests
-forking(36754421, () => {
+forking(38508666, () => {
   let vToken: ethers.Contract;
   let underlying: ethers.Contract;
   let user: SignerWithAddress;
@@ -331,6 +232,9 @@ forking(36754421, () => {
   const actions = [0, 1, 2, 3, 7]; // Mint, Redeem, Borrow, Repay, EnterMarket
 
   describe("VToken Tests", () => {
+    // these are markets which do not contain `allocateTo` or `faucet` function in their underlying, so treating them as genuine markets i.e. (mock = false)
+    const markets = ["vBTC", "vETH", "vLTC", "vXRP", "vXVS"];
+
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
       await pretendExecutingVip(vipGateway());
@@ -338,7 +242,7 @@ forking(36754421, () => {
 
     for (const market of CORE_MARKETS) {
       it(`Generic tests for mint, borrow, redeem, repay for ${market.name} should work`, async () => {
-        user = await initMainnetUser(market.holder, ethers.utils.parseEther("5"));
+        user = await initMainnetUser(TOKEN_HOLDER, ethers.utils.parseEther("5"));
         user1 = await initMainnetUser(USER_1, ethers.utils.parseEther("5"));
 
         vToken = new ethers.Contract(market.address, VBEP_20_DELEGATE_ABI, provider);
@@ -349,6 +253,8 @@ forking(36754421, () => {
         await unitroller.connect(impersonatedTimelock)._setCollateralFactor(market.address, parseUnits("0.89", 18));
         await unitroller.connect(impersonatedTimelock)._setActionsPaused([market.address], actions, false);
 
+        let isMock = true;
+        if (markets.includes(market.name)) isMock = false;
         await performVTokenBasicAndBehalfActions(
           market.address,
           user,
@@ -360,9 +266,8 @@ forking(36754421, () => {
           vToken,
           underlying,
           unitroller,
-          false,
+          isMock,
         );
-
         expect(await vToken.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
       });
     }
@@ -370,9 +275,10 @@ forking(36754421, () => {
 });
 
 // seizeVenus vip tests
-forking(36754421, () => {
-  const ACCOUNT_1 = "0x5a52e96bacdabb82fd05763e25335261b270efcb";
-  const ACCOUNT_2 = "0x051100480289e704d20e9db4804837068f3f9204";
+forking(38508666, () => {
+  const ACCOUNT_1 = "0xa0747a72C329377C2CE4F0F3165197B3a5359EfE";
+  const ACCOUNT_2 = "0x6997901e20D83ED40F7A46213814EeC15af6B09f";
+  const ACCOUNT_3 = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
   let xvs: Contract;
 
@@ -381,6 +287,7 @@ forking(36754421, () => {
     let user: SignerWithAddress;
 
     before(async () => {
+      await pretendExecutingVip(vipGateway());
       deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
       user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
 
@@ -390,11 +297,13 @@ forking(36754421, () => {
 
     it("Emits events for every holders successfull seize of tokens", async () => {
       const recipient = await deployer.getAddress();
+      const xvsHotWallet = await initMainnetUser(ACCOUNT_3, parseUnits("1", 18));
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("1", 18));
+
+      await xvs.connect(xvsHotWallet).transfer(unitroller.address, parseUnits("1", 18));
+
       const oldXvsBalance = await xvs.balanceOf(recipient);
-
       await unitroller.connect(timelock).seizeVenus([user.address], recipient);
-
       expect(await xvs.balanceOf(recipient)).to.be.gt(oldXvsBalance);
       expect(await unitroller.venusAccrued(user.address)).to.be.eq(0);
     });
@@ -402,17 +311,22 @@ forking(36754421, () => {
 });
 
 // xvs setter tests
-forking(36754421, () => {
+forking(38508666, () => {
+  beforeEach(async () => {
+    await pretendExecutingVip(vipGateway());
+  });
+
   it("Should return correct xvs and xvs vtoken addresses", async () => {
     expect(await unitroller.getXVSAddress()).to.equal(XVS);
     expect(await unitroller.getXVSVTokenAddress()).to.equal(XVSVTOKEN);
   });
 });
 
-forking(36754421, async () => {
-  const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
-  const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-
+// all storage values before and after executing this vip, setter functions and core
+// functionalities are working properly
+forking(38508666, async () => {
+  const VBUSD = "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4";
+  const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
   let owner: SignerWithAddress,
     unitroller: Contract,
     // layout variables
