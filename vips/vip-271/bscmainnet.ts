@@ -122,9 +122,8 @@ export const ERC20_TOKENS: Token[] = [
     symbol: "TRXOLD",
     address: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
     amount: parseUnits("1", 18).toString(),
-  }
-]
-
+  },
+];
 
 export const vip271 = () => {
   const meta = {
