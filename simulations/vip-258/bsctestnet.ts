@@ -22,7 +22,7 @@ forking(37883328, () => {
   testVip("VIP-258 Fix ACM in Comptroller", vip258(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewAccessControl"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [13]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [16]);
     },
   });
 

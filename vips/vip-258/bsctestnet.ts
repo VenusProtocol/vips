@@ -89,6 +89,21 @@ export const vip258 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [COMPTROLLER, "_setForcedLiquidationForUser(address,address,bool)", FAST_TRACK_TIMELOCK],
       },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "seizeVenus(address[],address)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "seizeVenus(address[],address)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [COMPTROLLER, "seizeVenus(address[],address)", FAST_TRACK_TIMELOCK],
+      },
     ],
     meta,
     ProposalType.REGULAR,
