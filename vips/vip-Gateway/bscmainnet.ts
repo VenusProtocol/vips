@@ -1,6 +1,7 @@
 import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
+import { accounts } from "./users";
 
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
@@ -169,7 +170,8 @@ export const vipGateway = () => {
     2. Updates the implementation of VTokens and Comptrollers in IL
     3. Accepts the ownership of the NativeTokenGateway contract
     4. Gives call permissions to Timelocks for seizeVenus function
-    5. Sets XVS and vXVS address in unitroller`,
+    5. Executes seizeVenus
+    6. Sets XVS and vXVS address in unitroller`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -221,6 +223,11 @@ export const vipGateway = () => {
         params: [UNITROLLER, "seizeVenus(address[],address)", timelock],
       })),
 
+      {
+        target: UNITROLLER,
+        signature: "seizeVenus(address[],address)",
+        params: [accounts, UNITROLLER],
+      },
       {
         target: UNITROLLER,
         signature: "_setXVSToken",

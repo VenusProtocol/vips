@@ -26,6 +26,7 @@ import {
   XVSVTOKEN,
   vipGateway,
 } from "../../../vips/vip-Gateway/bscmainnet";
+import { accounts } from "../../../vips/vip-Gateway/users";
 import ACM_ABI from "../abi/AccessControlManagerMainnet.json";
 import BEACON_ABI from "../abi/Beacon.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
@@ -67,15 +68,16 @@ const provider = ethers.provider;
 let user1: SignerWithAddress;
 let user2: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
-let comptroller: ethers.Contract;
-let unitroller: ethers.Contract;
-let vWbnb: ethers.Contract;
-let vBnbx: ethers.Contract;
-let bnbx: ethers.Contract;
-let wbnb: ethers.Contract;
-let comptrollerBeacon: ethers.Contract;
-let vtokenBeacon: ethers.Contract;
-let nativeTokenGateway: ethers.Contract;
+let comptroller: Contract;
+let unitroller: Contract;
+let vWbnb: Contract;
+let vBnbx: Contract;
+let bnbx: Contract;
+let wbnb: Contract;
+let comptrollerBeacon: Contract;
+let vtokenBeacon: Contract;
+let nativeTokenGateway: Contract;
+let xvs: Contract;
 
 let accessControlManager: string;
 let closeFactorMantissa: BigNumber;
@@ -93,6 +95,8 @@ let marketFacetFunctionSelectors: string[];
 let policyFacetFunctionSelectors: string[];
 let rewardFacetFuntionSelectors: string[];
 let setterFacetFuntionSelectors: string[];
+let oldXvsBalance: BigNumber;
+let totalXvsSeized: BigNumber;
 
 forking(36754421, () => {
   before(async () => {
@@ -105,6 +109,7 @@ forking(36754421, () => {
     unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
 
     vtokenBeacon = new ethers.Contract(VTOKEN_BEACON, BEACON_ABI, provider);
+    xvs = new ethers.Contract(XVS, VBEP_20_DELEGATE_ABI, ethers.provider);
 
     rewardFacetFuntionSelectors = await unitroller.facetFunctionSelectors(OLD_REWARD_FACET);
     setterFacetFuntionSelectors = await unitroller.facetFunctionSelectors(OLD_SETTER_FACET);
@@ -123,6 +128,12 @@ forking(36754421, () => {
     owner = await comptroller.owner();
     poolRegistry = await comptroller.poolRegistry();
     prime = await comptroller.prime();
+
+    oldXvsBalance = await xvs.balanceOf(UNITROLLER);
+
+    for (const account of accounts) {
+      totalXvsSeized += await unitroller.venusAccrued(account);
+    }
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -150,6 +161,7 @@ forking(36754421, () => {
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [3]);
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["VenusSeized", "VenusGranted"], [18, 1]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["NewXVSToken", "NewXVSVToken"], [1, 1]);
     },
   });
@@ -219,6 +231,14 @@ forking(36754421, () => {
       expect(await comptroller.poolRegistry()).to.equal(poolRegistry);
       expect(await comptroller.prime()).to.equal(prime);
       expect(await comptroller.approvedDelegates(USER_1, USER_2)).to.equal(false);
+    });
+
+    it("xvs balance of unitroller should increase after seizing of xvs", async () => {
+      for (const account of accounts) {
+        expect(await unitroller.venusAccrued(account)).to.be.equal(0);
+      }
+      expect(totalXvsSeized).to.be.equal(254699.50999999995);
+      expect(await xvs.balanceOf(UNITROLLER)).to.be.closeTo(oldXvsBalance.add(totalXvsSeized), parseUnits("1", 18));
     });
   });
 });
@@ -373,8 +393,6 @@ forking(36754421, () => {
 forking(36754421, () => {
   const ACCOUNT_1 = "0x5a52e96bacdabb82fd05763e25335261b270efcb";
   const ACCOUNT_2 = "0x051100480289e704d20e9db4804837068f3f9204";
-
-  let xvs: Contract;
 
   describe("Seize Token Scenario", () => {
     let deployer: SignerWithAddress;
