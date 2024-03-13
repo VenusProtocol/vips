@@ -10,14 +10,14 @@ import { vip012 } from "../../proposals/vip-012/vip-012-opbnbtestnet";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
-const PRIME_LIQUIDITY_PROVIDER = "0xF68E8925d45fb6679aE8caF7f859C76BdD964325";
-const PRIME = "0x7831156A181288ce76B5952624Df6C842F4Cc0c1";
+const PRIME_LIQUIDITY_PROVIDER = "0x4E953e3741a17aFaD69776742d1ED1c0130F43f7";
+const PRIME = "0xE6b7B1846106605fdfaB3a9F407dd64bed6917a6";
 const BTCB = "0x7Af23F9eA698E9b953D2BD70671173AaD0347f19";
 const ETH = "0x94680e003861D43C6c0cf18333972312B6956FF1";
 const vBTCB = "0x86F82bca79774fc04859966917D2291A68b870A9";
 const vETH = "0x034Cc5097379B13d3Ed5F6c85c8FAf20F48aE480";
 
-forking(22879768, () => {
+forking(23470140, () => {
   before(async () => {
     await pretendExecutingVip(vip011());
   });

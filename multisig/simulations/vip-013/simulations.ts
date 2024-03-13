@@ -16,7 +16,7 @@ const PRIME = "0x7831156A181288ce76B5952624Df6C842F4Cc0c1";
 const BTCB = "0x7Af23F9eA698E9b953D2BD70671173AaD0347f19";
 const ETH = "0x94680e003861D43C6c0cf18333972312B6956FF1";
 
-forking(22950579, () => {
+forking(23470140, () => {
   before(async () => {
     await pretendExecutingVip(vip011());
     await pretendExecutingVip(vip012());
