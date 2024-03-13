@@ -96,6 +96,11 @@ const config: HardhatUserConfig = {
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbmainnet,
     },
+    kavatestnet: {
+      url: process.env.ARCHIVE_NODE_kavatestnet || "https://evm.data-testnet.kava.io",
+      chainId: 2221,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
   },
   paths: {
     tests: "./tests",
