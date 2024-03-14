@@ -225,11 +225,6 @@ export const vipGateway = () => {
 
       {
         target: UNITROLLER,
-        signature: "seizeVenus(address[],address)",
-        params: [accounts, UNITROLLER],
-      },
-      {
-        target: UNITROLLER,
         signature: "_setXVSToken",
         params: [XVS],
       },
@@ -237,6 +232,11 @@ export const vipGateway = () => {
         target: UNITROLLER,
         signature: "_setXVSVToken",
         params: [XVSVTOKEN],
+      },
+      {
+        target: UNITROLLER,
+        signature: "seizeVenus(address[],address)",
+        params: [accounts, UNITROLLER],
       },
     ],
     meta,
