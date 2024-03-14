@@ -25,7 +25,7 @@ const CORE_POOL = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(18057901, () => {
+forking(18647639, () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;
@@ -68,13 +68,13 @@ forking(18057901, () => {
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("comptroller should have old implementations", async () => {
+    it("comptroller should have old implementation", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
       );
     });
 
-    it("vToken should have old implementations", async () => {
+    it("vToken should have old implementation", async () => {
       expect((await vtokenBeacon.implementation()).toLowerCase()).to.equal(OLD_VTOKEN_IMPLEMENTATION.toLowerCase());
     });
   });
@@ -84,13 +84,13 @@ forking(18057901, () => {
       await pretendExecutingVip(vipGateway());
     });
 
-    it("comptroller should have new implementations", async () => {
+    it("comptroller should have new implementation", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         NEW_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
       );
     });
 
-    it("vToken should have new implementations", async () => {
+    it("vToken should have new implementation", async () => {
       expect((await vtokenBeacon.implementation()).toLowerCase()).to.equal(NEW_VTOKEN_IMPLEMENTATION.toLowerCase());
     });
 
