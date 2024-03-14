@@ -10,7 +10,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(35117102, () => {
+forking(36953418, () => {
   let xvsBridge: ethers.Contract;
   let xvs: ethers.Contract;
   let oldCirculatingSupply: BigNumber;
@@ -26,6 +26,7 @@ forking(35117102, () => {
   testVip("VIP-213 Send XVS to Dest Chain", vip213(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI, XVS_BRIDGE_ABI], ["VenusGranted", "SendToChain"], [1, 1]);
+      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB"], [1]);
     },
   });
 

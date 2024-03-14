@@ -9,11 +9,12 @@ export const XVS_BRIDGE_SRC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const ETHEREUM_TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
+export const BSC_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [ETHEREUM_TREASURY]);
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const XVS_AMOUNT = parseUnits("75750", 18);
+export const XVS_AMOUNT = parseUnits("168000", 18);
 export const DEST_CHAIN_ID = 101;
 
 export const vip213 = () => {
@@ -29,6 +30,12 @@ export const vip213 = () => {
 
   return makeProposal(
     [
+      {
+        target: BSC_TREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [parseUnits("0.5", 18), NORMAL_TIMELOCK],
+        value: "0",
+      },
       {
         target: COMPTROLLER,
         signature: "_grantXVS(address,uint256)",
@@ -47,7 +54,7 @@ export const vip213 = () => {
           DEST_CHAIN_ID,
           RECEIVER_ADDRESS,
           XVS_AMOUNT,
-          [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         value: "500000000000000000",
       },
