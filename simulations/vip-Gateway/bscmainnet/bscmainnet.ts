@@ -26,7 +26,7 @@ import {
   XVSVTOKEN,
   vipGateway,
 } from "../../../vips/vip-Gateway/bscmainnet";
-import { accounts } from "../../../vips/vip-Gateway/users";
+import { accounts1, accounts2 } from "../../../vips/vip-Gateway/users";
 import ACM_ABI from "../abi/AccessControlManagerMainnet.json";
 import BEACON_ABI from "../abi/Beacon.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
@@ -59,10 +59,12 @@ const OLD_REWARD_FACET = "0x71e7AAcb01C5764A56DB92aa31aA473e839d964F";
 const OLD_MARKET_FACET = "0x40A30E1B01e0CF3eE3F22f769b0E437160550eEa";
 const OLD_POLICY_FACET = "0xa7fE89d9A7F9dc097fb71F13e2E025165CBf431f";
 
-const NEW_SETTER_FACET = "";
-const NEW_REWARD_FACET = "";
-const NEW_MARKET_FACET = "";
-const NEW_POLICY_FACET = "";
+const NEW_SETTER_FACET = "0x7dc9E7b21a9E343f4AD926b8B00Cff5adf5c1CdE";
+const NEW_REWARD_FACET = "0xc2F6bDCEa4907E8CB7480d3d315bc01c125fb63C";
+const NEW_MARKET_FACET = "0x9622522d94BdEe9b1d7C2CD944e3ed74B33BD9Cf";
+const NEW_POLICY_FACET = "0x95CC56f266BC95Ae2486cb0cFeda1054B4aA4086";
+
+const accounts = [...accounts1, ...accounts2];
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
@@ -95,10 +97,8 @@ let marketFacetFunctionSelectors: string[];
 let policyFacetFunctionSelectors: string[];
 let rewardFacetFuntionSelectors: string[];
 let setterFacetFuntionSelectors: string[];
-let oldXvsBalance: BigNumber;
-let totalXvsSeized: BigNumber;
 
-forking(36754421, () => {
+forking(36962054, () => {
   before(async () => {
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
@@ -128,12 +128,6 @@ forking(36754421, () => {
     owner = await comptroller.owner();
     poolRegistry = await comptroller.poolRegistry();
     prime = await comptroller.prime();
-
-    oldXvsBalance = await xvs.balanceOf(UNITROLLER);
-
-    for (const account of accounts) {
-      totalXvsSeized += await unitroller.venusAccrued(account);
-    }
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -141,28 +135,28 @@ forking(36754421, () => {
       expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(OLD_DIAMOND_ADDRESS.toLowerCase());
     });
 
-    it("comptroller should have old implementations", async () => {
+    it("comptroller should have old implementation", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
       );
     });
 
-    it("vToken should have old implementations", async () => {
+    it("vToken should have old implementation", async () => {
       expect((await vtokenBeacon.implementation()).toLowerCase()).to.equal(OLD_VTOKEN_IMPLEMENTATION.toLowerCase());
     });
   });
 
   testVip("VIP-Gateway", vipGateway(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [27]);
+      await expectEvents(txResponse, [VEBEP_20_DELEGATOR_ABI], ["NewImplementation"], [28]); // +1 for unitroller
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [3]);
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["VenusSeized", "VenusGranted"], [18, 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["NewXVSToken", "NewXVSVToken"], [1, 1]);
+      await expectEvents(txResponse, [CORE_POOL_ABI], ["VenusSeized", "VenusGranted"], [6, 2]);
     },
   });
 
@@ -173,8 +167,8 @@ forking(36754421, () => {
     });
 
     it("policy facet function selectors should be replaced with new facet address", async () => {
-      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
-      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal([]);
+      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
     });
 
     it("reward facet function selectors should be replaced with new facet address", async () => {
@@ -203,13 +197,13 @@ forking(36754421, () => {
       expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(DIAMOND.toLowerCase());
     });
 
-    it("comptroller should have new implementations", async () => {
+    it("comptroller should have new implementation", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         NEW_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
       );
     });
 
-    it("vToken should have new implementations", async () => {
+    it("vToken should have new implementation", async () => {
       expect((await vtokenBeacon.implementation()).toLowerCase()).to.equal(NEW_VTOKEN_IMPLEMENTATION.toLowerCase());
     });
 
@@ -233,17 +227,16 @@ forking(36754421, () => {
       expect(await comptroller.approvedDelegates(USER_1, USER_2)).to.equal(false);
     });
 
-    it("xvs balance of unitroller should increase after seizing of xvs", async () => {
+    it("venus accrued of users should be zero", async () => {
       for (const account of accounts) {
-        expect(await unitroller.venusAccrued(account)).to.be.equal(0);
+        const venusAccrued = await unitroller.venusAccrued(account);
+        expect(venusAccrued).to.be.equal(0);
       }
-      expect(totalXvsSeized).to.be.equal(254699.50999999995);
-      expect(await xvs.balanceOf(UNITROLLER)).to.be.closeTo(oldXvsBalance.add(totalXvsSeized), parseUnits("1", 18));
     });
   });
 });
 
-forking(36754421, () => {
+forking(36962054, () => {
   describe("onBehalfTests", () => {
     before(async () => {
       await pretendExecutingVip(vipGateway());
@@ -340,7 +333,7 @@ forking(36754421, () => {
 });
 
 // core pool vToken tests
-forking(36754421, () => {
+forking(36962054, () => {
   let vToken: ethers.Contract;
   let underlying: ethers.Contract;
   let user: SignerWithAddress;
@@ -390,44 +383,42 @@ forking(36754421, () => {
 });
 
 // seizeVenus vip tests
-forking(36754421, () => {
+forking(36962054, () => {
   const ACCOUNT_1 = "0x5a52e96bacdabb82fd05763e25335261b270efcb";
-  const ACCOUNT_2 = "0x051100480289e704d20e9db4804837068f3f9204";
+  const ACCOUNT_2 = "0xd93Dc91d7527a32199AaF6f8723292e452b871a4";
 
   describe("Seize Token Scenario", () => {
-    let deployer: SignerWithAddress;
-    let user: SignerWithAddress;
-
     before(async () => {
-      deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
-      user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
-
       xvs = new ethers.Contract(XVS, VBEP_20_DELEGATE_ABI, ethers.provider);
       unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
+      await pretendExecutingVip(vipGateway());
     });
 
     it("Emits events for every holders successfull seize of tokens", async () => {
-      const recipient = await deployer.getAddress();
       const timelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("1", 18));
-      const oldXvsBalance = await xvs.balanceOf(recipient);
+      const oldXvsBalance = await xvs.balanceOf(ACCOUNT_1);
 
-      await unitroller.connect(timelock).seizeVenus([user.address], recipient);
+      await unitroller.connect(timelock).seizeVenus([ACCOUNT_2], ACCOUNT_1);
 
-      expect(await xvs.balanceOf(recipient)).to.be.gt(oldXvsBalance);
-      expect(await unitroller.venusAccrued(user.address)).to.be.eq(0);
+      expect(await xvs.balanceOf(ACCOUNT_1)).to.be.gt(oldXvsBalance);
+      expect(await unitroller.venusAccrued(ACCOUNT_2)).to.be.eq(0);
     });
   });
 });
 
 // xvs setter tests
-forking(36754421, () => {
+forking(36962054, () => {
+  beforeEach(async () => {
+    await pretendExecutingVip(vipGateway());
+  });
+
   it("Should return correct xvs and xvs vtoken addresses", async () => {
     expect(await unitroller.getXVSAddress()).to.equal(XVS);
     expect(await unitroller.getXVSVTokenAddress()).to.equal(XVSVTOKEN);
   });
 });
 
-forking(36754421, async () => {
+forking(36962054, async () => {
   const VBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
   const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 

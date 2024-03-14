@@ -1,7 +1,7 @@
 import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/utils/cut-params.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import { accounts } from "./users";
+import { accounts1, accounts2 } from "./users";
 
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
@@ -10,16 +10,16 @@ export const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
 
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 export const XVSVTOKEN = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
-export const DIAMOND = "";
+export const DIAMOND = "0x347ba9559fFC65A94af0F6a513037Cd4982b7b18";
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const NEW_VBEP20_DELEGATE_IMPL = "";
+export const NEW_VBEP20_DELEGATE_IMPL = "0x6E5cFf66C7b671fA1D5782866D80BD15955d79F6";
 
 export const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
 export const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
-export const NEW_COMPTROLLER_IMPLEMENTATION = "";
-export const NEW_VTOKEN_IMPLEMENTATION = "";
-export const NATIVE_TOKEN_GATEWAY = "";
+export const NEW_COMPTROLLER_IMPLEMENTATION = "0x011a2ED16EBCbcAE5CC97B1d4c7319d19a9fad06";
+export const NEW_VTOKEN_IMPLEMENTATION = "0x1EC822383805FfDb9dC2Ae456DF8C0Ca2Bf14d7d";
+export const NATIVE_TOKEN_GATEWAY = "0x24896601A4bf1b6a27E51Cb3eff750Bd9FE00d08";
 
 export const CORE_MARKETS = [
   {
@@ -225,18 +225,23 @@ export const vipGateway = () => {
 
       {
         target: UNITROLLER,
-        signature: "_setXVSToken",
+        signature: "_setXVSToken(address)",
         params: [XVS],
       },
       {
         target: UNITROLLER,
-        signature: "_setXVSVToken",
+        signature: "_setXVSVToken(address)",
         params: [XVSVTOKEN],
       },
       {
         target: UNITROLLER,
         signature: "seizeVenus(address[],address)",
-        params: [accounts, UNITROLLER],
+        params: [accounts1, UNITROLLER],
+      },
+      {
+        target: UNITROLLER,
+        signature: "seizeVenus(address[],address)",
+        params: [accounts2, UNITROLLER],
       },
     ],
     meta,
