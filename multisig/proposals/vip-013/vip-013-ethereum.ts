@@ -1,9 +1,9 @@
 import { makeProposal } from "../../../src/utils";
 
-const XVS_BRIDGE_ADMIN = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
-const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+const XVS_BRIDGE_ADMIN = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96";
+const TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 
-export const vip007 = () => {
+export const vip013 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN,
