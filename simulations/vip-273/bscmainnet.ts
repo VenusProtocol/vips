@@ -11,8 +11,8 @@ import {
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip272,
-} from "../../vips/vip-272/bscmainnet";
+  vip273,
+} from "../../vips/vip-273/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
@@ -67,7 +67,7 @@ forking(36955530, () => {
     });
   });
 
-  testVip("vip272", vip272(), {
+  testVip("vip273", vip273(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
