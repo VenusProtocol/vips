@@ -22,7 +22,7 @@ export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 export const VETH_AMOUNT = parseUnits("1453.28319", 8); // (close to 30 ETH, taking into account 1 ETH=48.442773 vETH)
 
-export const vip213 = () => {
+export const vip272 = () => {
   const meta = {
     version: "v2",
     title: "VIP-272 Bootstrap XVS liquidity for the Ethereum rewards",
@@ -110,3 +110,5 @@ So, this VIP will transfer 168,000 XVS - 10 XVS - 1,000 XVS = **166,990 XVS**, t
     ProposalType.REGULAR,
   );
 };
+
+export default vip272;

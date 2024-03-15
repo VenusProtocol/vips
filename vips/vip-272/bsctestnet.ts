@@ -16,7 +16,7 @@ export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [
 export const XVS_AMOUNT = parseUnits("75750", 18);
 export const DEST_CHAIN_ID = 10161;
 
-export const vip213Testnet = () => {
+export const vip272 = () => {
   const meta = {
     version: "v2",
     title: "VIP to transfer XVS to destination chain",
@@ -61,3 +61,5 @@ export const vip213Testnet = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip272;

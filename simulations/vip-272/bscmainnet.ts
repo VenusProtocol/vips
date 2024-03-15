@@ -3,8 +3,8 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
 import {
   COMMUNITY_WALLET,
   TOKEN_REDEEMER,
@@ -12,8 +12,8 @@ import {
   XVS,
   XVS_AMOUNT,
   XVS_BRIDGE_SRC,
-  vip213,
-} from "../../../vips/vip-213/vip-213";
+  vip272,
+} from "../../vips/vip-272/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
@@ -40,7 +40,7 @@ forking(36990775, () => {
     prevBalanceCommunityWallet = await eth.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-213 Send XVS to Dest Chain", vip213(), {
+  testVip("VIP-272 Send XVS to Dest Chain", vip272(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI, XVS_BRIDGE_ABI], ["VenusGranted", "SendToChain"], [1, 1]);
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB", "WithdrawTreasuryBEP20"], [1, 1]);
