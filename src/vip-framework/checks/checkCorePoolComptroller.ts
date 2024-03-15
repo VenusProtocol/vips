@@ -78,11 +78,10 @@ export const checkCorePoolComptroller = () => {
 
       await comptroller.enterMarkets([vusdt.address, veth.address]);
 
-      const vusdtBalance = await vusdt.balanceOf(ACCOUNT);
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
       const usdtDecimals = await usdt.decimals();
       await vusdt.borrow(parseUnits("100", usdtDecimals));
-      expect(await usdt.balanceOf(ACCOUNT)).to.gt(vusdtBalance);
+      expect(await usdt.balanceOf(ACCOUNT)).to.gt(usdtBalance);
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
       expect(await comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;

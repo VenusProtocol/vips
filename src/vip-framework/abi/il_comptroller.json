@@ -5,11 +5,6 @@
         "internalType": "address",
         "name": "poolRegistry_",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "accessControl_",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -119,11 +114,43 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "MarketNotCollateral",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "market",
         "type": "address"
       }
     ],
     "name": "MarketNotListed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "loopsLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredLoops",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLoopsLimitExceeded",
     "type": "error"
   },
   {
@@ -233,6 +260,11 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -274,13 +306,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -293,13 +325,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -319,6 +351,44 @@
       }
     ],
     "name": "MarketSupported",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldMaxLoopsLimit",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newmaxLoopsLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLoopsLimitUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAccessControlManager",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAccessControlManager",
+        "type": "address"
+      }
+    ],
+    "name": "NewAccessControlManager",
     "type": "event"
   },
   {
@@ -452,13 +522,13 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "oldPriceOracle",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "newPriceOracle",
         "type": "address"
       }
@@ -545,10 +615,10 @@
   },
   {
     "inputs": [],
-    "name": "accessControl",
+    "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IAccessControlManagerV8",
         "name": "",
         "type": "address"
       }
@@ -797,6 +867,35 @@
         "internalType": "address",
         "name": "account",
         "type": "address"
+      }
+    ],
+    "name": "getBorrowingPower",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "error",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortfall",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
       },
       {
         "internalType": "address",
@@ -898,7 +997,18 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "loopLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "accessControlManager",
+        "type": "address"
+      }
+    ],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -1068,6 +1178,19 @@
   },
   {
     "inputs": [],
+    "name": "maxLoopsLimit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "minLiquidatableCollateral",
     "outputs": [
       {
@@ -1084,7 +1207,7 @@
     "name": "oracle",
     "outputs": [
       {
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "",
         "type": "address"
       }
@@ -1317,6 +1440,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "contract VToken[]",
         "name": "marketsList",
         "type": "address[]"
@@ -1426,6 +1562,19 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxLoopsLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "newMinLiquidatableCollateral",
         "type": "uint256"
       }
@@ -1438,7 +1587,7 @@
   {
     "inputs": [
       {
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "newOracle",
         "type": "address"
       }
@@ -1489,6 +1638,19 @@
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "updatePrices",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

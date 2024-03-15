@@ -58,7 +58,7 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 };
 
 export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
   }
@@ -75,7 +75,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
@@ -119,7 +119,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be voteable", async () => {
-      await mine(150);
+      const proposalConfig = await governorProxy.proposalConfigs(proposal.type);
+      const votingDelay = await proposalConfig.votingDelay;
+      await mine(votingDelay);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
