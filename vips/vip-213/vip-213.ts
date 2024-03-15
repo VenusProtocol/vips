@@ -14,8 +14,13 @@ export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [ETHEREUM_TREASURY]);
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const XVS_AMOUNT = parseUnits("168000", 18);
+export const XVS_AMOUNT = parseUnits("166990", 18);
 export const DEST_CHAIN_ID = 101;
+
+export const TOKEN_REDEEMER = "0x67B10f3BC6B141D67c598C73CEe45E6635292Acd";
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+export const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
+export const VETH_AMOUNT = parseUnits("1453.28319", 8); // (close to 30 ETH, taking into account 1 ETH=48.442773 vETH)
 
 export const vip213 = () => {
   const meta = {
@@ -62,6 +67,16 @@ export const vip213 = () => {
         target: XVS,
         signature: "approve(address,uint256)",
         params: [XVS_BRIDGE_SRC, 0],
+      },
+      {
+        target: BSC_TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [VETH, VETH_AMOUNT, TOKEN_REDEEMER],
+      },
+      {
+        target: TOKEN_REDEEMER,
+        signature: "redeemAndTransfer(address,address)",
+        params: [VETH, COMMUNITY_WALLET],
       },
     ],
     meta,
