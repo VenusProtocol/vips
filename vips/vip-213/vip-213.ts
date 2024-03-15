@@ -25,12 +25,39 @@ export const VETH_AMOUNT = parseUnits("1453.28319", 8); // (close to 30 ETH, tak
 export const vip213 = () => {
   const meta = {
     version: "v2",
-    title: "VIP to transfer XVS to ethereum chain",
-    description: ``,
+    title: "VIP-272 Bootstrap XVS liquidity for the Ethereum rewards",
+    description: `#### Summary
 
-    forDescription: "I agree that Venus Protocol should proceed with this transfer for XVS",
-    againstDescription: "I do not think that Venus Protocol should proceed with this transfer for XVS",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this transfer for XVS",
+If passed, this VIP will send 166,990 XVS from the [XVS Distributor on BNB chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). Moreover this VIP will redeem and transfer to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) around 30 ETH on BNB chain, which will be used later to inject liquidity in a XVS/ETH pool on Uniswap Ethereum.
+
+Most of the sent XVS tokens will be used on Ethereum for the first quarter of rewards defined at [XVS Ethereum Mainnet Development Program with Lido, Frax, Curve and Gitcoin](https://community.venus.io/t/xvs-ethereum-mainnet-development-program-with-lido-frax-curve-and-gitcoin/4200).
+
+#### Description
+
+According to the proposal [XVS Ethereum Mainnet Development Program with Lido, Frax, Curve and Gitcoin](https://community.venus.io/t/xvs-ethereum-mainnet-development-program-with-lido-frax-curve-and-gitcoin/4200), the following XVS rewards will be enabled on Ethereum for the first 3 months:
+
+- **Market Emissions**: 137,500 XVS allocated for the first quarter as liquidity incentives.
+- **XVS Vault Base Rewards**: 22,500 XVS allocated to the Ethereum vault for the first quarter.
+
+Moreover, 8,000 XVS and 30 ETH will be provided to a XVS/ETH pool on Uniswap Ethereum.
+
+In total, 168,000 XVS should be transferred to Ethereum. Previous VIP’s already sent some XVS to the Venus Treasury on Ethereum:
+
+- [VIP-263](https://app.venus.io/#/governance/proposal/263?chainId=56): 10 XVS
+- [VIP-267](https://app.venus.io/#/governance/proposal/267?chainId=56): 1,000 XVS
+
+So, this VIP will transfer 168,000 XVS - 10 XVS - 1,000 XVS = **166,990 XVS**, to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). The funds will be used from that in the following days to configure the defined rewards and inject the liquidity to Uniswap.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/119)
+- Snapshot “[XVS Ethereum Mainnet Development Program with Lido, Frax, Curve and Gitcoin](https://snapshot.org/#/venus-xvs.eth/proposal/0x39947aa28f834f73a607b506cf495925eda7ba2b5ab9e591ab23adb1f802cceb)”
+- Community proposal “[XVS Ethereum Mainnet Development Program with Lido, Frax, Curve and Gitcoin](https://community.venus.io/t/xvs-ethereum-mainnet-development-program-with-lido-frax-curve-and-gitcoin/4200)”
+- [Documentation](https://docs-v4.venus.io/)`,
+
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
   };
 
   return makeProposal(
