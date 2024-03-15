@@ -11,21 +11,21 @@ import {
   NEW_VTOKEN_IMPLEMENTATION,
   VTOKEN_BEACON,
   vipGateway,
-} from "../../../proposals/vip-Gateway/vip-gateway-opbnbmainnet";
+} from "../../../proposals/vip-Gateway/vip-gateway-opbnbtestnet2";
 import BEACON_ABI from "../abi/Beacon.json";
 import COMPTROLLER_ABI from "../abi/Comptroller.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
 
-const OLD_COMPTROLLER_IMPLEMENTATION = "0x557C69aDf4bB12305F00F62f1Ab71CAe9BFa3D46";
-const OLD_VTOKEN_IMPLEMENTATION = "0x227c4D4176604908755be2B513A2b7bcA6f54a1F";
+const OLD_COMPTROLLER_IMPLEMENTATION = "0x996597fc8726eC0f62BCA0aF4f2Af67D2f7563Ee";
+const OLD_VTOKEN_IMPLEMENTATION = "0xcdeF2739BAC410Af396054f17C9217b15FF89f96";
 
-const VWBNB_CORE = "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672";
-const CORE_POOL = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
+const VWBNB_CORE = "0xD36a31AcD3d901AeD998da6E24e848798378474e";
+const CORE_POOL = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";
 
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(18647639, () => {
+forking(23366791, () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;
@@ -65,9 +65,10 @@ forking(18647639, () => {
     owner = await comptroller.owner();
     poolRegistry = await comptroller.poolRegistry();
     prime = await comptroller.prime();
+    console.log(">>>>>>>");
   });
 
-  describe("Pre-VIP behavior", async () => {
+  describe("Pre-VIP behaviour", async () => {
     it("comptroller should have old implementation", async () => {
       expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
         OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),

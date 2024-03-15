@@ -154,7 +154,7 @@ export const performVTokenBasicAndBehalfActions = async (
   }
 
   const network = process.env.FORKED_NETWORK;
-  if ((network === "bsctestnet" || network === "sepolia") && isUnderlyingMock) {
+  if ((network === "bsctestnet" || network === "sepolia" || network === "opbnbtestnet") && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
     } catch (error) {

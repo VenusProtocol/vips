@@ -49,7 +49,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "borrower",
+        "name": "approver",
         "type": "address"
       },
       {
@@ -61,7 +61,7 @@
       {
         "indexed": false,
         "internalType": "bool",
-        "name": "allowDelegatedBorrows",
+        "name": "approved",
         "type": "bool"
       }
     ],
@@ -622,6 +622,44 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "oldXVS",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newXVS",
+        "type": "address"
+      }
+    ],
+    "name": "NewXVSToken",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldXVSVToken",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newXVSVToken",
+        "type": "address"
+      }
+    ],
+    "name": "NewXVSVToken",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
@@ -653,6 +691,25 @@
       }
     ],
     "name": "VenusGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "holder",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "VenusSeized",
     "type": "event"
   },
   {
@@ -1197,6 +1254,36 @@
       }
     ],
     "name": "_setVenusVAIVaultRate",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "xvs_",
+        "type": "address"
+      }
+    ],
+    "name": "_setXVSToken",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "xvsVToken_",
+        "type": "address"
+      }
+    ],
+    "name": "_setXVSVToken",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -1782,7 +1869,7 @@
       }
     ],
     "payable": false,
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1797,7 +1884,7 @@
       }
     ],
     "payable": false,
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -2495,6 +2582,32 @@
     "constant": false,
     "inputs": [
       {
+        "internalType": "address[]",
+        "name": "holders",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      }
+    ],
+    "name": "seizeVenus",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
         "internalType": "address",
         "name": "vTokenCollateral",
         "type": "address"
@@ -2694,7 +2807,7 @@
       },
       {
         "internalType": "bool",
-        "name": "allowBorrows",
+        "name": "approved",
         "type": "bool"
       }
     ],
