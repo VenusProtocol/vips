@@ -5,10 +5,10 @@ import { makeProposal } from "../../src/utils";
 
 const XVSBridgeAdmin_Proxy = "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21";
 
-export const SINGLE_SEND_LIMIT = parseUnits("50000", 18);
-export const MAX_DAILY_SEND_LIMIT = parseUnits("250000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("50000", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("250000", 18);
+export const SINGLE_SEND_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("1000000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("1000000", 18);
 export const DEST_CHAIN_ID = 101;
 
 export const vip272 = () => {

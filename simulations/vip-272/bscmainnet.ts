@@ -123,15 +123,15 @@ forking(36955530, () => {
     });
 
     it("Reverts if max daily transaction limit exceed", async function () {
-      const maxPlusAmount = ethers.utils.parseUnits("16000");
-      const amount = ethers.utils.parseUnits("3030", 18); // 1XVS = $16.3
+      const maxPlusAmount = ethers.utils.parseUnits("160000");
+      const amount = ethers.utils.parseUnits("6000", 18); // 1XVS = $16.3
 
       await xvs.connect(xvsHolderSigner).approve(xvsBridge.address, maxPlusAmount);
       const nativeFee = (
         await xvsBridge.estimateSendFee(DEST_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 10; i++) {
         await xvsBridge
           .connect(xvsHolderSigner)
           .sendFrom(
