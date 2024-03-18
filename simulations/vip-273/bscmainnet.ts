@@ -20,6 +20,13 @@ forking(37074155, () => {
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "agEUR");
   });
 
+  describe("Pre-VIP behavior", async () => {
+    it("getPrice and getUnderlying price should revert", async () => {
+      await expect(oracle.getPrice(agEUR)).to.be.revertedWith("invalid resilient oracle price");
+      await expect(oracle.getUnderlyingPrice(vagEUR)).to.be.revertedWith("invalid resilient oracle price");
+    });
+  });
+
   testVip("VIP-273 Send XVS to Dest Chain", vip273(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [1]);
