@@ -4,15 +4,15 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, vagEUR, vip273 } from "../../vips/vip-273/bscmainnet";
+import { BINANCE_ORACLE, vagEUR, vip273 } from "../../vips/vip-273/bsctestnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import TEMP_VTOKEN_ABI from "./abi/TempVToken.json";
 
-const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
+const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 
-forking(37074786, () => {
+forking(38683734, () => {
   const provider = ethers.provider;
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
@@ -65,7 +65,7 @@ forking(37074786, () => {
       await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "EURA");
 
       const priceHAY = await resilientOracle.getUnderlyingPrice(vagEUR);
-      expect(priceHAY).equals(parseUnits("1.08551962", 18));
+      expect(priceHAY).equals(parseUnits("1.06", 18));
     });
   });
 });
