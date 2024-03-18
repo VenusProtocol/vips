@@ -4,42 +4,68 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, vip273 } from "../../vips/vip-273/bscmainnet";
+import { BINANCE_ORACLE, vagEUR, vip273 } from "../../vips/vip-273/bscmainnet";
+import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import TEMP_VTOKEN_ABI from "./abi/TempVToken.json";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
-const agEUR = "0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89";
-const vagEUR = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
 
-forking(37074155, () => {
-  let oracle: ethers.Contract;
+forking(37074786, () => {
+  const provider = ethers.provider;
+  let binanceOracle: ethers.Contract;
+  let resilientOracle: ethers.Contract;
+  let vagEURContract: ethers.Contract;
 
   before(async () => {
-    oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-    await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "agEUR");
+    binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
+    resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+    vagEURContract = new ethers.Contract(vagEUR, TEMP_VTOKEN_ABI, provider);
   });
 
-  describe("Pre-VIP behavior", async () => {
-    it("getPrice and getUnderlying price should revert", async () => {
-      await expect(oracle.getPrice(agEUR)).to.be.revertedWith("invalid resilient oracle price");
-      await expect(oracle.getUnderlyingPrice(vagEUR)).to.be.revertedWith("invalid resilient oracle price");
+  describe("Pre-VIP behavior", () => {
+    it("Verify Max Stale Period", async () => {
+      const maxStalePeriod = await binanceOracle.maxStalePeriod("EURA");
+      expect(maxStalePeriod).equals(0);
+    });
+
+    it("Verify Name and Symbol", async () => {
+      const name = await vagEURContract.name();
+      expect(name).equals("Venus agEUR (Stablecoins)");
+
+      const symbol = await vagEURContract.symbol();
+      expect(symbol).equals("vagEUR_Stablecoins");
     });
   });
 
-  testVip("VIP-273 Send XVS to Dest Chain", vip273(), {
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [1]);
+  testVip("VIP-273", vip273(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [TEMP_VTOKEN_ABI], ["NameUpdated", "SymbolUpdated"], [1, 1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
-    it("getPrice and getUnderlying price should return correct price", async () => {
-      const price = await oracle.getPrice(agEUR);
-      expect(price).equals(parseUnits("1.08551962", 18));
+    it("Verify Max Stale Period", async () => {
+      const maxStalePeriod = await binanceOracle.maxStalePeriod("EURA");
+      expect(maxStalePeriod).equals(1500);
+    });
 
-      const underlyingPrice = await oracle.getUnderlyingPrice(vagEUR);
-      expect(underlyingPrice).equals(parseUnits("1.08551962", 18));
+    it("Verify Name and Symbol", async () => {
+      const name = await vagEURContract.name();
+      expect(name).equals("Venus EURA (Stablecoins)");
+
+      const symbol = await vagEURContract.symbol();
+      expect(symbol).equals("eura_Stablecoins");
+    });
+
+    it("Check Prices", async () => {
+      await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "EURA");
+
+      const priceHAY = await resilientOracle.getUnderlyingPrice(vagEUR);
+      expect(priceHAY).equals(parseUnits("1.08551962", 18));
     });
   });
 });
