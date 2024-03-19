@@ -1,15 +1,12 @@
-import { getImplementationAddress } from '@openzeppelin/upgrades-core';
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
-import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
-import BEACON_ABI from "./abi/beacon.json";
 import { vip0021 } from "../../../proposals/vip-002/vip-002-sepolia-reset-reward-distr";
+import BEACON_ABI from "./abi/beacon.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const COMPTROLLER_LST = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
@@ -21,7 +18,7 @@ forking(5517400, () => {
   let comptrollerStableCoins: Contract;
   let comptrollerCurve: Contract;
   let comptrollerLst: Contract;
-  let comptrollerBeacon: Contract
+  let comptrollerBeacon: Contract;
 
   before(async () => {
     comptrollerCore = await ethers.getContractAt(COMPTROLLER_ABI, sepolia.COMPTROLLER_CORE);
@@ -30,7 +27,6 @@ forking(5517400, () => {
     comptrollerLst = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_LST);
     comptrollerBeacon = await ethers.getContractAt(BEACON_ABI, COMPTROLLER_BEACON);
   });
-
 
   describe("Post-Execution state", () => {
     before(async () => {
