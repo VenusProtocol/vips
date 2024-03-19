@@ -32,11 +32,6 @@ export const vip0021 = () => {
       params: [],
     },
     {
-      target: sepolia.COMPTROLLER_CURVE,
-      signature: "removeAllRewardsDistributors()",
-      params: [],
-    },
-    {
       target: COMPTROLLER_LST,
       signature: "removeAllRewardsDistributors()",
       params: [],
