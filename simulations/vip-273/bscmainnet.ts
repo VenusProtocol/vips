@@ -37,11 +37,16 @@ forking(37074786, () => {
       const symbol = await vagEURContract.symbol();
       expect(symbol).equals("vagEUR_Stablecoins");
     });
+
+    it("Verify symbol override", async () => {
+      const symbolOverride = await binanceOracle.symbols("EURA");
+      expect(symbolOverride).equals("AGEUR");
+    });
   });
 
   testVip("VIP-273", vip273(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
+      await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded", "SymbolOverridden"], [1, 1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [TEMP_VTOKEN_ABI], ["NameUpdated", "SymbolUpdated"], [1, 1]);
     },
@@ -66,6 +71,11 @@ forking(37074786, () => {
 
       const priceHAY = await resilientOracle.getUnderlyingPrice(vagEUR);
       expect(priceHAY).equals(parseUnits("1.08551962", 18));
+    });
+
+    it("Verify symbol override", async () => {
+      const symbolOverride = await binanceOracle.symbols("EURA");
+      expect(symbolOverride).equals("");
     });
   });
 });

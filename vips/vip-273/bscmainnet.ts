@@ -21,6 +21,11 @@ export const vip273 = () => {
     [
       {
         target: BINANCE_ORACLE,
+        signature: "setSymbolOverride(string,string)",
+        params: ["EURA", ""],
+      },
+      {
+        target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
         params: ["EURA", 1500],
       },
