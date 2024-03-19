@@ -11,7 +11,7 @@ import {
   SINGLE_SEND_LIMIT,
   SRC_CHAIN_ID,
   vip013,
-} from "../../../proposals/vip-013/vip-013-ethereum";
+} from "../../../proposals/vip-014/vip-014-ethereum";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
