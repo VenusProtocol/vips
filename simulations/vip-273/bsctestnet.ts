@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, vagEUR, vip273 } from "../../vips/vip-273/bsctestnet";
+import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip273 } from "../../vips/vip-273/bsctestnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -17,11 +17,13 @@ forking(38683734, () => {
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
   let vagEURContract: ethers.Contract;
+  let beacon: ethers.Contract;
 
   before(async () => {
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
     vagEURContract = new ethers.Contract(vagEUR, TEMP_VTOKEN_ABI, provider);
+    beacon = new ethers.Contract(VTOKEN_BEACON, BEACON_ABI, provider);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -36,6 +38,11 @@ forking(38683734, () => {
 
       const symbol = await vagEURContract.symbol();
       expect(symbol).equals("vagEUR_Stablecoins");
+    });
+
+    it("check implementation", async () => {
+      const implementation = await beacon.implementation();
+      expect(implementation).equals(VTOKEN_IMPL);
     });
   });
 
@@ -66,6 +73,11 @@ forking(38683734, () => {
 
       const priceagEUR = await resilientOracle.getUnderlyingPrice(vagEUR);
       expect(priceagEUR).equals(parseUnits("1.06", 18));
+    });
+
+    it("check implementation", async () => {
+      const implementation = await beacon.implementation();
+      expect(implementation).equals(VTOKEN_IMPL);
     });
   });
 });

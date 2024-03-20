@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, vagEUR, vip273 } from "../../vips/vip-273/bscmainnet";
+import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip273 } from "../../vips/vip-273/bscmainnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -17,11 +17,13 @@ forking(37074786, () => {
   let binanceOracle: ethers.Contract;
   let resilientOracle: ethers.Contract;
   let vagEURContract: ethers.Contract;
+  let beacon: ethers.Contract;
 
   before(async () => {
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
     vagEURContract = new ethers.Contract(vagEUR, TEMP_VTOKEN_ABI, provider);
+    beacon = new ethers.Contract(VTOKEN_BEACON, BEACON_ABI, provider);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -41,6 +43,11 @@ forking(37074786, () => {
     it("Verify symbol override", async () => {
       const symbolOverride = await binanceOracle.symbols("EURA");
       expect(symbolOverride).equals("AGEUR");
+    });
+
+    it("check implementation", async () => {
+      const implementation = await beacon.implementation();
+      expect(implementation).equals(VTOKEN_IMPL);
     });
   });
 
@@ -76,6 +83,11 @@ forking(37074786, () => {
     it("Verify symbol override", async () => {
       const symbolOverride = await binanceOracle.symbols("EURA");
       expect(symbolOverride).equals("");
+    });
+
+    it("check implementation", async () => {
+      const implementation = await beacon.implementation();
+      expect(implementation).equals(VTOKEN_IMPL);
     });
   });
 });
