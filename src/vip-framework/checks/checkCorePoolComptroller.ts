@@ -1,10 +1,12 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
-import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
+import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
+import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
+import mainnetGovernance from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
+import testnetGovernance from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { ethers, forkedNetwork } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
@@ -12,29 +14,33 @@ import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-let vETH_ADDRESS = mainnet.contracts.vETH.address;
-let vUSDT_ADDRESS = mainnet.contracts.vUSDT.address;
-let USDT = mainnet.contracts.USDT.address;
-let ETH = mainnet.contracts.ETH.address;
-let NORMAL_TIMELOCK = mainnet.contracts.NormalTimelock.address;
-let XVS = mainnet.contracts.XVS.address;
-let COMPTROLLER = mainnet.contracts.Unitroller.address;
-let LENS = mainnet.contracts.ComptrollerLens.address;
-const ETH_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].ETH_CHAINLINK_FEED;
-const USDT_FEED = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].USDT_CHAINLINK_FEED;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
-const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+let vETH_ADDRESS = mainnet.addresses.vETH;
+let vUSDT_ADDRESS = mainnet.addresses.vUSDT;
+let USDT = mainnet.addresses.USDT;
+let ETH = mainnet.addresses.ETH;
+let NORMAL_TIMELOCK = mainnetGovernance.addresses.NormalTimelock;
+let XVS = mainnet.addresses.XVS;
+let COMPTROLLER = mainnet.addresses.Unitroller;
+let LENS = mainnet.addresses.ComptrollerLens;
+let ETH_FEED = NETWORK_ADDRESSES.bscmainnet.ETH_CHAINLINK_FEED;
+let USDT_FEED = NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED;
+let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_TEST_USER_ACCOUNT;
+let CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
-if (process.env.FORKED_NETWORK === "bsctestnet") {
-  vETH_ADDRESS = testnet.contracts.vETH.address;
-  vUSDT_ADDRESS = testnet.contracts.vUSDT.address;
-  USDT = testnet.contracts.USDT.address;
-  ETH = testnet.contracts.ETH.address;
-  NORMAL_TIMELOCK = testnet.contracts.NormalTimelock.address;
-  XVS = testnet.contracts.XVS.address;
-  COMPTROLLER = testnet.contracts.Unitroller.address;
+if (forkedNetwork === "bsctestnet") {
+  vETH_ADDRESS = testnet.addresses.vETH;
+  vUSDT_ADDRESS = testnet.addresses.vUSDT;
+  USDT = testnet.addresses.USDT;
+  ETH = testnet.addresses.ETH;
+  NORMAL_TIMELOCK = testnetGovernance.addresses.NormalTimelock;
+  XVS = testnet.addresses.XVS;
+  COMPTROLLER = testnet.addresses.Unitroller;
+  ETH_FEED = NETWORK_ADDRESSES.bsctestnet.ETH_CHAINLINK_FEED;
+  USDT_FEED = NETWORK_ADDRESSES.bsctestnet.USDT_CHAINLINK_FEED;
+  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_TEST_USER_ACCOUNT;
+  CHAINLINK_ORACLE = NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE;
 
-  LENS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].COMPTROLLER_LENS;
+  LENS = NETWORK_ADDRESSES[forkedNetwork].COMPTROLLER_LENS;
 }
 
 export const checkCorePoolComptroller = () => {

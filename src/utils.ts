@@ -4,7 +4,7 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { ContractInterface } from "ethers";
-import { ethers, network } from "hardhat";
+import { ethers, config, network, forkedNetwork } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
 import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
@@ -19,7 +19,7 @@ export async function setForkBlock(blockNumber: number) {
     params: [
       {
         forking: {
-          jsonRpcUrl: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
+          jsonRpcUrl: config.networks.hardhat.forking?.url,
           blockNumber: blockNumber,
         },
       },
@@ -118,10 +118,10 @@ export const setMaxStalePeriod = async (
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  const binanceOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].BINANCE_ORACLE;
-  const chainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
-  const redstoneOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].REDSTONE_ORACLE;
-  const normalTimelock = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
+  const binanceOracle = NETWORK_ADDRESSES[forkedNetwork].BINANCE_ORACLE;
+  const chainlinkOracle = NETWORK_ADDRESSES[forkedNetwork].CHAINLINK_ORACLE;
+  const redstoneOracle = NETWORK_ADDRESSES[forkedNetwork].REDSTONE_ORACLE;
+  const normalTimelock = NETWORK_ADDRESSES[forkedNetwork].NORMAL_TIMELOCK;
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];

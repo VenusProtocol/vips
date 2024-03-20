@@ -4,10 +4,9 @@ import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../networkAddresses";
-import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import { getForkedNetworkAddress, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "../../utils";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
@@ -16,17 +15,17 @@ import VAI_ABI from "../abi/vai.json";
 import VAI_CONTROLLER_ABI from "../abi/vaiController.json";
 
 const EXP_SCALE = parseUnits("1", "18");
-const VAI_UNITROLLER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI_UNITROLLER;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI_MINT_USER_ACCOUNT;
-const UNITROLLER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].UNITROLLER;
-const VAI = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VAI;
-const CHAINLINK_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
-const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
+const VAI_UNITROLLER = getForkedNetworkAddress("VAI_UNITROLLER");
+const ACCOUNT = getForkedNetworkAddress("VAI_MINT_USER_ACCOUNT");
+const UNITROLLER = getForkedNetworkAddress("UNITROLLER");
+const VAI = getForkedNetworkAddress("VAI");
+const CHAINLINK_ORACLE = getForkedNetworkAddress("CHAINLINK_ORACLE");
+const RESILIENT_ORACLE = getForkedNetworkAddress("RESILIENT_ORACLE");
 let NORMAL_TIMELOCK = mainnet.contracts.NormalTimelock.address;
 let vBNB = mainnet.contracts.vBNB.address;
 let WBNB = mainnet.contracts.WBNB.address;
 
-if (process.env.FORKED_NETWORK === "bsctestnet") {
+if (FORKED_NETWORK === "bsctestnet") {
   NORMAL_TIMELOCK = testnet.contracts.NormalTimelock.address;
   vBNB = testnet.contracts.vBNB.address;
   WBNB = testnet.contracts.WBNB.address;
