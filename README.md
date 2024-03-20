@@ -50,8 +50,6 @@ Script to build vip calldata and target.
 
 Procedure for Propose vip
 
-In .env, replace VIP_NUMBER with the number of vip to propose.
-
 ```
 npx hardhat test scripts/proposeVIP.ts
 ```
