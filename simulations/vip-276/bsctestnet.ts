@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip273 } from "../../vips/vip-273/bsctestnet";
+import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip276 } from "../../vips/vip-276/bsctestnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -46,7 +46,7 @@ forking(38683734, () => {
     });
   });
 
-  testVip("VIP-273", vip273(), {
+  testVip("VIP-276", vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);

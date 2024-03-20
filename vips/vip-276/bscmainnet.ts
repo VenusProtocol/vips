@@ -7,11 +7,28 @@ export const TEMP_VTOKEN_IMPL = "0xD2E69514F33111093586a25D75A306B66f75F658";
 export const vagEUR = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
 export const VTOKEN_IMPL = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
 
-export const vip273 = () => {
+export const vip276 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-273",
-    description: "",
+    title: "VIP-276 Rebrand agEUR into EURA (2/2)",
+    description: `#### Summary
+
+If passed, this VIP will perform the following actions:
+
+- Update the symbol of the VToken for [agEUR](https://bscscan.com/address/0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F):
+    - vagEUR_StableCoins -> vEURA_Stablecoins
+- Update the name of the same VToken:
+    - Venus agEUR (Stable Coins) -> Venus EURA (Stablecoins)
+- Configure the price feeds of the EROA token, using the [BinanceOracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820)
+
+#### Details
+
+Angle Protocol rebranded agEUR into EURA ([snapshot](https://snapshot.org/#/anglegovernance.eth/proposal/0x67b1a428cf8f0a6242c6649dab34acc6c59ac15de4198cc0e7e7796fb15c1455)), including the token symbol of the [underlying token](https://bscscan.com/address/0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89). This is a follow up of the [VIP-274](https://app.venus.io/#/governance/proposal/274?chainId=56), to complete the rebranding of the VTokens associated with the renamed underlying token.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/234)
+- [VIP executed on BNB testnet](https://testnet.bscscan.com/tx/0xcfcc1577dcfa09470dcac1b6d3e3d4ea5e03d6c86c6022d7b5b8254b43b6a4ea)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -55,4 +72,4 @@ export const vip273 = () => {
   );
 };
 
-export default vip273;
+export default vip276;
