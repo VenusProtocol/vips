@@ -69,8 +69,8 @@ forking(37074786, () => {
     it("Check Prices", async () => {
       await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "EURA");
 
-      const priceHAY = await resilientOracle.getUnderlyingPrice(vagEUR);
-      expect(priceHAY).equals(parseUnits("1.08551962", 18));
+      const priceagEUR = await resilientOracle.getUnderlyingPrice(vagEUR);
+      expect(priceagEUR).equals(parseUnits("1.08551962", 18));
     });
 
     it("Verify symbol override", async () => {
