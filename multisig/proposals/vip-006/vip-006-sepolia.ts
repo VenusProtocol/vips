@@ -28,7 +28,7 @@ const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 // REWARDS TO TRANSFER FOR EACH REWARD DISTRIBUTOR
 // CORE  - RD0: 510 XVS, RD1: 1250 CRV
 // CURVE - RD0: 75 XVS, RD1: 1250 CRV
-// LST   - RD0: 705 XVS, RD1: 0.154 WSTETH
+// LST   - RD0: 694 XVS, RD1: 0.154 WSTETH
 
 export const vip006 = () => {
   return makeProposal([
@@ -59,7 +59,7 @@ export const vip006 = () => {
     {
       target: TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [XVS, parseUnits("705", 18), REWARD_DISTRIBUTOR_LST_0],
+      params: [XVS, parseUnits("694", 18), REWARD_DISTRIBUTOR_LST_0],
     },
     {
       target: TREASURY,

@@ -147,7 +147,7 @@ forking(5523471, () => {
       vToken: VWSTETH_LST,
       borrowSpeed: "0",
       supplySpeed: "222222222222222",
-      totalRewardsToDistribute: parseUnits("705", 18),
+      totalRewardsToDistribute: parseUnits("694", 18),
     };
     checkRewardsDistributor("RewardsDistributor_LST_0_WSTETH", wstETHXVSRewardsDistributorConfig);
 
@@ -158,7 +158,7 @@ forking(5523471, () => {
       vToken: VWETH_LST,
       borrowSpeed: "594135802469135",
       supplySpeed: "254629629629629",
-      totalRewardsToDistribute: parseUnits("705", 18),
+      totalRewardsToDistribute: parseUnits("694", 18),
     };
     checkRewardsDistributor("RewardsDistributor_LST_0_WETH", wethLSTRewardsDistributorConfig);
 
