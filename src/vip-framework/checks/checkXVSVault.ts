@@ -2,18 +2,18 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { ethers, forkedNetwork } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { NETWORK_CONFIG } from "../../networkConfig";
 import XVSVault_ABI from "../abi/XVSVault.json";
 import ERC20_ABI from "../abi/erc20.json";
 
-const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-const XVS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS;
-const XVS_VAULT_PROXY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS_VAULT_PROXY;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
-const POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
+const NORMAL_TIMELOCK = NETWORK_ADDRESSES[forkedNetwork].NORMAL_TIMELOCK;
+const XVS = NETWORK_ADDRESSES[forkedNetwork].XVS;
+const XVS_VAULT_PROXY = NETWORK_ADDRESSES[forkedNetwork].XVS_VAULT_PROXY;
+const ACCOUNT = NETWORK_ADDRESSES[forkedNetwork].GENERIC_TEST_USER_ACCOUNT;
+const POOL_ID = NETWORK_CONFIG[forkedNetwork].XVS_VAULT_POOL_ID;
 
 export const checkXVSVault = () => {
   describe("generic XVS Vault checks", () => {

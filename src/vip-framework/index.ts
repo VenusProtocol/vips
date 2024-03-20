@@ -2,11 +2,11 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
-import { ethers } from "hardhat";
+import { ethers, forkedNetwork } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal } from "../types";
+import { Proposal, SUPPORTED_NETWORKS } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
@@ -15,10 +15,9 @@ const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  : 0;
+  NETWORK_ADDRESSES[forkedNetwork as 'bsctestnet' | 'bscmainnet'] || {};
+
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[forkedNetwork as SUPPORTED_NETWORKS]
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {

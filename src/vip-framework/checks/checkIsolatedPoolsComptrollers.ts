@@ -2,7 +2,7 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { ethers, forkedNetwork } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriod } from "../../utils";
@@ -12,10 +12,10 @@ import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-const DEFAULT_SUPPLIER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
-const POOL_REGISTRY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].POOL_REGISTRY;
-const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
+const NORMAL_TIMELOCK = NETWORK_ADDRESSES[forkedNetwork].NORMAL_TIMELOCK;
+const DEFAULT_SUPPLIER = NETWORK_ADDRESSES[forkedNetwork].VTREASURY;
+const POOL_REGISTRY = NETWORK_ADDRESSES[forkedNetwork].POOL_REGISTRY;
+const RESILIENT_ORACLE = NETWORK_ADDRESSES[forkedNetwork].RESILIENT_ORACLE;
 
 interface PoolMetadata {
   name: string;

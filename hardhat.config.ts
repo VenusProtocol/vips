@@ -4,6 +4,8 @@ import { ethers } from "ethers";
 import fs from "fs";
 import { HardhatUserConfig, task } from "hardhat/config";
 
+import "./type-extensions";
+
 require("dotenv").config();
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
@@ -54,10 +56,40 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opbnbmainnet: 100000000,
 };
 
+task("test", "Update fork config")
+  .addOptionalParam("fork", "Network to fork")
+  .setAction(async function (taskArguments, hre, runSuper) {
+    const { fork } = taskArguments;
+    const hardhatConfig = fork
+      ? {
+          allowUnlimitedContractSize: false,
+          loggingEnabled: false,
+          forking: {
+            url: process.env[`ARCHIVE_NODE_${fork}`],
+          },
+          accounts: {
+            accountsBalance: "100000000000000000000000",
+          },
+          gas: "auto" as const,
+          blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
+        }
+      : {
+          allowUnlimitedContractSize: true,
+          loggingEnabled: false,
+        };
+    hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
+    hre.FORKED_NETWORK = fork;
+
+    await runSuper(taskArguments);
+  });
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: isFork(),
+    hardhat: {
+      allowUnlimitedContractSize: true,
+      loggingEnabled: false,
+    },
     bsctestnet: {
       url: process.env.ARCHIVE_NODE_bsctestnet || "https://data-seed-prebsc-1-s1.binance.org:8545",
       chainId: 97,
@@ -114,27 +146,5 @@ const config: HardhatUserConfig = {
     timeout: 200000000,
   },
 };
-
-function isFork() {
-  return process.env.FORK === "true"
-    ? {
-        allowUnlimitedContractSize: false,
-        loggingEnabled: false,
-        forking: {
-          url: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
-        },
-        accounts: {
-          accountsBalance: "100000000000000000000000",
-        },
-        live: false,
-        gas: "auto",
-        blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[[process.env.FORKED_NETWORK]].blockGasLimit,
-      }
-    : {
-        allowUnlimitedContractSize: true,
-        loggingEnabled: false,
-        live: false,
-      };
-}
 
 export default config;
