@@ -5,10 +5,10 @@ export const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
-export const vipConverter = () => {
+export const vip275 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-276 Token converters - enable public conversions USDT/XVS in the XVSVaultConverter",
+    title: "VIP-275 Token converters - enable public conversions USDT/XVS in the XVSVaultConverter",
     description: `#### Summary
 
 If passed, this VIP will enable the public conversions of USDT/XVS in the [XVSVaultConverter](https://bscscan.com/address/0xd5b9AE835F4C59272032B3B954417179573331E0). The XVSVaultConverter will accept XVS (that will be transferred to the [XVSVaultTreasury](https://bscscan.com/address/0x269ff7818DB317f60E386D2be0B259e1a324a40a)), transferring USDT to the agent performing the conversion.
@@ -45,4 +45,4 @@ This VIP enables the conversions of USDT/XVS for everyone, not only for private 
   );
 };
 
-export default vipConverter;
+export default vip275;

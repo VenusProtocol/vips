@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { USDT, XVS, XVS_VAULT_CONVERTER, vipConverter } from "../../vips/vip-converter/bscmainnet";
+import { USDT, XVS, XVS_VAULT_CONVERTER, vip275 } from "../../vips/vip-275/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import CONVERTER_ABI from "./abi/XVSVaultConverter.json";
 
@@ -39,7 +39,7 @@ forking(37126200, () => {
     });
   });
 
-  testVip("VIP-Converter", vipConverter(), {
+  testVip("VIP-Converter", vip275(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [1]);
     },
