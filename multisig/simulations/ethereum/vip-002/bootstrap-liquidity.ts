@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip002 from "../../../proposals/ethereum/vip-002/bootstrap-liquidity";
-import ERC20_ABI from "./vip-002-ethereum-bootstrap-liquidity/abis/ERC20.json";
+import ERC20_ABI from "./abi/erc20.json";
 
 const VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 const NORMAL_TIMELOCK = NETWORK_ADDRESSES.ethereum.NORMAL_TIMELOCK;
