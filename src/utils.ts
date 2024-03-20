@@ -104,20 +104,17 @@ export const setMaxStalePeriodInChainlinkOracle = async (
 
   if (feed === ethers.constants.AddressZero) {
     feed = (await oracle.tokenConfigs(asset)).feed;
-    console.log(feed);
 
     if (feed === ethers.constants.AddressZero) {
       return;
     }
   }
-  console.log(maxStalePeriodInSeconds);
 
   await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  // await tx.wait();
 };
 
 export const setMaxStalePeriod = async (
@@ -133,7 +130,6 @@ export const setMaxStalePeriod = async (
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
     if (mainOracle === binanceOracle) {
-      console.log("binanceOracle");
       const symbol = await underlyingAsset.symbol();
       await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
     } else if (mainOracle === chainlinkOracle || mainOracle === redstoneOracle) {

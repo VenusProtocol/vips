@@ -1,4 +1,5 @@
 import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/utils/cut-params.json";
+import { ZERO_ADDRESS } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import { accounts1, accounts2 } from "./users";
@@ -159,46 +160,6 @@ export const CORE_MARKETS = [
   },
 ];
 
-const REWARD_DISTRIBUTORS_STABLECOIN = [
-  "0xBA711976CdF8CF3288bF721f758fB764503Eb1f6",
-  "0xA31185D804BF9209347698128984a43A67Ce6d11",
-  "0x177ED4625F57cEa2804EA3A396c8Ff78f314F1CA",
-];
-
-const REWARD_DISTRIBUTORS_DEFI = [
-  "0x7524116CEC937ef17B5998436F16d1306c4F7EF8",
-  "0x14d9A428D0f35f81A30ca8D8b2F3974D3CccB98B",
-  "0xD86FCff6CCF5C4E277E49e1dC01Ed4bcAb8260ba",
-];
-
-const REWARD_DISTRIBUTORS_GAMEFI = [
-  "0x501a91b995Bd41177503A1A4144F3D25BFF869e1",
-  "0x2517A3bEe42EA8f628926849B04870260164b555",
-];
-
-const REWARD_DISTRIBUTORS_LST = [
-  "0x63aFCe42086c8302659CA0E21F4Eade27Ad85ded",
-  "0x79397BAc982718347406Ebb7A6a8845896fdD8dE",
-  "0x6a7b50EccC721f0Fa9FD7879A7dF082cdA60Db78",
-  "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478",
-  "0x888E317606b4c590BBAD88653863e8B345702633",
-];
-
-const REWARD_DISTRIBUTORS_TRON = [
-  "0x804F3893d3c1C3EFFDf778eDDa7C199129235882",
-  "0x6536123503DF76BDfF8207e4Fb0C594Bc5eFD00A",
-  "0x22af8a65639a351a9D5d77d5a25ea5e1Cf5e9E6b",
-  "0x08e4AFd80A5849FDBa4bBeea86ed470D697e4C54",
-];
-
-const ALL_REWARD_DISTRIBUTORS = [
-  ...REWARD_DISTRIBUTORS_DEFI,
-  ...REWARD_DISTRIBUTORS_GAMEFI,
-  ...REWARD_DISTRIBUTORS_LST,
-  ...REWARD_DISTRIBUTORS_STABLECOIN,
-  ...REWARD_DISTRIBUTORS_TRON,
-];
-
 export const vipGateway = () => {
   const meta = {
     version: "v2",
@@ -264,11 +225,11 @@ export const vipGateway = () => {
         params: [UNITROLLER, "seizeVenus(address[],address)", timelock],
       })),
 
-      ...ALL_REWARD_DISTRIBUTORS.map((rewardDistributor: string) => ({
+      {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [rewardDistributor, "setLastRewardingBlocks(address[],uint32[],uint32[])", NORMAL_TIMELOCK],
-      })),
+        params: [ZERO_ADDRESS, "setLastRewardingBlocks(address[],uint32[],uint32[])", NORMAL_TIMELOCK],
+      },
 
       {
         target: UNITROLLER,

@@ -8,7 +8,7 @@ import ACM_ABI from "../abi/AccessControlManager.json";
 forking(38305471, () => {
   testVip("VIP-CallPermission", vipCallPermission(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [17]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [1]);
     },
   });
 });

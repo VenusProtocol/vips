@@ -154,7 +154,7 @@ forking(36962054, () => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [20]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [4]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["NewXVSToken", "NewXVSVToken"], [1, 1]);
       await expectEvents(txResponse, [CORE_POOL_ABI], ["VenusSeized", "VenusGranted"], [6, 2]);
     },
