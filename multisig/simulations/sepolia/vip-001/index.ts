@@ -125,18 +125,22 @@ forking(4744200, () => {
       expect(await chainLinkOracle.owner()).to.equal(NORMAL_TIMELOCK);
       expect(await boundValidator.owner()).to.equal(NORMAL_TIMELOCK);
     });
-    it("validate asset prices", async () => {
-      for (let i = 0; i < assetConfigs.length; i++) {
-        const assetConfig = assetConfigs[i];
-        const price = await resilientOracle.getPrice(assetConfig.address);
-        expect(price).to.be.equal(parseUnits(assetConfig.price, 18));
-      }
 
-      for (let i = 0; i < directAssetPriceConfigs.length; i++) {
-        const assetConfig = directAssetPriceConfigs[i];
+    for (let i = 0; i < assetConfigs.length; i++) {
+      const assetConfig = assetConfigs[i];
+      // @todo XVS price is invalid at fork
+      it(`Validate asset price ${assetConfig.name}`, async () => {
         const price = await resilientOracle.getPrice(assetConfig.address);
         expect(price).to.be.equal(parseUnits(assetConfig.price, 18));
-      }
-    });
+      })
+    }
+
+    for (let i = 0; i < directAssetPriceConfigs.length; i++) {
+      const assetConfig = directAssetPriceConfigs[i];
+      it(`Validate asset price ${assetConfig.name}`, async () => {
+        const price = await resilientOracle.getPrice(assetConfig.address);
+        expect(price).to.be.equal(parseUnits(assetConfig.price, 18));
+      })
+    }
   });
 });
