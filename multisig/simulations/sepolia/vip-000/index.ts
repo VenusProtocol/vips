@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { NETWORK_CONFIG } from "../../../../src/networkConfig";
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip000 from "../../../proposals/sepolia/vip-000";
 import TREASURY_ABI from "./abi/treasury.json";
@@ -20,7 +20,7 @@ forking(4646931, () => {
   describe("Post tx checks", () => {
     it("Should set owner to multisig", async () => {
       const owner = await treasury.owner();
-      expect(owner).equals(NETWORK_CONFIG.sepolia.NORMAL_TIMELOCK);
+      expect(owner).equals(NETWORK_ADDRESSES.sepolia.NORMAL_TIMELOCK);
     });
   });
 });

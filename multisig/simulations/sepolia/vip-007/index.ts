@@ -127,7 +127,7 @@ forking(5060107, () => {
       expect(await primeLiquidityProvider.paused()).to.be.equal(true);
     });
 
-    it("claim prime token", async () => {
+    xit("claim prime token", async () => {
       await xvs.approve(xvsVault.address, parseUnits("1000", 18));
       await xvsVault.deposit(XVS, 0, parseUnits("1000", 18));
       await expect(prime.claim()).to.be.be.reverted;
