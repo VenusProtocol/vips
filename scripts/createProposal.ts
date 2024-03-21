@@ -63,9 +63,9 @@ const processTxBuilder = async () => {
 const processGnosisTxBuilder = async () => {
   const safeAddress = getSafeAddress(network.name);
 
-  const txID = readline.question("Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => ");
+  const multisigVipPath = readline.question("Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ");
 
-  const proposal = await loadMultisigTx(txID, network.name);
+  const proposal = await loadMultisigTx(multisigVipPath);
   const multisigTx = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
 

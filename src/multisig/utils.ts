@@ -2,19 +2,17 @@ import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protoc
 import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
-import { Proposal } from "../../src/types";
+import { Proposal, SUPPORTED_NETWORKS } from "../../src/types";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
-
-const readline = require("readline-sync");
 
 const DEFAULT_OPERATION = 0; // Call
 
-export const loadMultisigTx = async (txID: string, networkName: string) => {
-  const x = await import(`../../multisig/proposals/vip-${txID}/vip-${txID}-${networkName}.ts`);
-  return x[`vip${txID}`]();
+export const loadMultisigTx = async (multisigVipPath: string) => {
+  const vip = require(`../../multisig/proposals/${multisigVipPath}`).default;
+  return vip();
 };
 
-export const getSafeAddress = (networkName: string): string => {
+export const getSafeAddress = (networkName: SUPPORTED_NETWORKS): string => {
   return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 
@@ -35,10 +33,9 @@ export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransacti
   return safeTransactionData;
 };
 
-export const createGnosisTx = async (ethAdapter: EthersAdapter, safeSdk: Safe): Promise<SafeTransaction> => {
-  const txID = readline.question("Multisig VIP ID to execute => ");
+export const createGnosisTx = async (ethAdapter: EthersAdapter, safeSdk: Safe, multisigVipPath: string): Promise<SafeTransaction> => {
 
-  const proposal = await loadMultisigTx(txID, network.name);
+  const proposal = await loadMultisigTx(multisigVipPath);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 

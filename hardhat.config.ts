@@ -37,6 +37,17 @@ task(
     })
 
 task(
+  "multisig",
+  "Execute multisig vip")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .setAction(
+    async function (taskArguments) {
+      const { proposalPath } = taskArguments
+      const executeMultiSigTx = require('./scripts/executeMultiSigTx.ts').default;
+      await executeMultiSigTx(proposalPath)
+    })
+
+task(
   "test",
   "Update fork config")
   .addOptionalParam("fork", "Network to fork")

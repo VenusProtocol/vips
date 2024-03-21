@@ -3,7 +3,7 @@ import { ethers, network } from "hardhat";
 
 import { createGnosisTx, getContractNetworks, getSafeAddress } from "../src/multisig/utils";
 
-const executeMultiSigTx = async () => {
+const executeMultiSigTx = async (multisigVipPath: string) => {
   const safeOwner = ethers.provider.getSigner(0);
 
   const ethAdapter = new EthersAdapter({
@@ -16,7 +16,7 @@ const executeMultiSigTx = async () => {
 
   const safeSdk = await Safe.create({ ethAdapter, safeAddress, contractNetworks });
 
-  const safeTransaction = await createGnosisTx(ethAdapter, safeSdk);
+  const safeTransaction = await createGnosisTx(ethAdapter, safeSdk, multisigVipPath);
 
   const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
 
@@ -28,4 +28,4 @@ const executeMultiSigTx = async () => {
   console.log(`Multisig transaction (txId: ${receipt?.transactionHash}) has been successfully submitted.`);
 };
 
-executeMultiSigTx();
+export default executeMultiSigTx;
