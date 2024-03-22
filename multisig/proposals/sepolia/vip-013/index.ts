@@ -13,4 +13,4 @@ const vip013 = () => {
   ]);
 };
 
-export default vip013
+export default vip013;

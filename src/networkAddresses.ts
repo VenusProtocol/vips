@@ -1,13 +1,13 @@
-import ilBscmainnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
-import ilBsctestnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
-import bscmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
-import bsctestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
-import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import bscmainnetGovernanceDeployedContracts from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
 import bsctestnetGovernanceDeployedContracts from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
+import ilBscmainnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
+import ilBsctestnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import bscmainnetOracleDeployedContracts from "@venusprotocol/oracle/deployments/bscmainnet_addresses.json";
 import bsctestetOracleDeployedContracts from "@venusprotocol/oracle/deployments/bsctestnet_addresses.json";
 import ethereumOracleDeployedContracts from "@venusprotocol/oracle/deployments/ethereum_addresses.json";
+import bscmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
+import bsctestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
+import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import { ethers } from "ethers";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;

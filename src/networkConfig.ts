@@ -48,5 +48,5 @@ export const NETWORK_CONFIG = {
       [ProposalType.CRITICAL]: 34,
     },
     XVS_VAULT_POOL_ID: 0,
-  }
+  },
 };

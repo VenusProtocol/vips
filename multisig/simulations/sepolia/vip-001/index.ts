@@ -132,7 +132,7 @@ forking(4744200, () => {
       it(`Validate asset price ${assetConfig.name}`, async () => {
         const price = await resilientOracle.getPrice(assetConfig.address);
         expect(price).to.be.equal(parseUnits(assetConfig.price, 18));
-      })
+      });
     }
 
     for (let i = 0; i < directAssetPriceConfigs.length; i++) {
@@ -140,7 +140,7 @@ forking(4744200, () => {
       it(`Validate asset price ${assetConfig.name}`, async () => {
         const price = await resilientOracle.getPrice(assetConfig.address);
         expect(price).to.be.equal(parseUnits(assetConfig.price, 18));
-      })
+      });
     }
   });
 });

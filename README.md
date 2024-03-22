@@ -25,6 +25,7 @@ npx hardhat test simulations/<simulation-path> --fork <network>
 ```
 
 ### Run Simulations for Multisig
+
 Simulations for multisig transactions can be run individually or sequentially. Running test for proposals can be done by passing in the index file of the network's simulation dir where each proposal test is imported.
 
 ```

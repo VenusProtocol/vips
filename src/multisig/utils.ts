@@ -33,8 +33,11 @@ export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransacti
   return safeTransactionData;
 };
 
-export const createGnosisTx = async (ethAdapter: EthersAdapter, safeSdk: Safe, multisigVipPath: string): Promise<SafeTransaction> => {
-
+export const createGnosisTx = async (
+  ethAdapter: EthersAdapter,
+  safeSdk: Safe,
+  multisigVipPath: string,
+): Promise<SafeTransaction> => {
   const proposal = await loadMultisigTx(multisigVipPath);
 
   const safeTransactionData = await buildMultiSigTx(proposal);

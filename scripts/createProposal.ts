@@ -63,7 +63,9 @@ const processTxBuilder = async () => {
 const processGnosisTxBuilder = async () => {
   const safeAddress = getSafeAddress(network.name);
 
-  const multisigVipPath = readline.question("Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ");
+  const multisigVipPath = readline.question(
+    "Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ",
+  );
 
   const proposal = await loadMultisigTx(multisigVipPath);
   const multisigTx = await buildMultiSigTx(proposal);

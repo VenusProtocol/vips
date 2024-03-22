@@ -45,4 +45,4 @@ const vip012 = () => {
   ]);
 };
 
-export default vip012
+export default vip012;

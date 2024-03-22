@@ -1,12 +1,12 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
-import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
 import mainnetGovernance from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
 import testnetGovernance from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
+import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
+import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers, FORKED_NETWORK } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
