@@ -10,6 +10,7 @@ import {
   IL_GAMEFI_COMPTROLLER,
   UNITROLLER,
   vETH_CORE,
+  vFDUSD_CORE,
   vTWT_DEFI,
   vUNI_CORE,
   vUSDC_CORE,
@@ -32,8 +33,11 @@ forking(37186111, () => {
 
   describe("Pre-VIP behavior", async () => {
     it("check supply caps core pool", async () => {
-      const cap = await comptroller_core.supplyCaps(vUNI_CORE);
+      let cap = await comptroller_core.supplyCaps(vUNI_CORE);
       expect(cap).to.equal(parseUnits("300000", 18));
+
+      cap = await comptroller_core.supplyCaps(vFDUSD_CORE);
+      expect(cap).to.equal(parseUnits("20000000", 18));
     });
 
     it("check borrow caps core pool", async () => {
@@ -60,14 +64,17 @@ forking(37186111, () => {
 
   testVip("VIP-276", vip276(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewBorrowCap", "NewSupplyCap"], [4, 2]);
+      await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewBorrowCap", "NewSupplyCap"], [4, 3]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
     it("check supply caps core pool", async () => {
-      const cap = await comptroller_core.supplyCaps(vUNI_CORE);
+      let cap = await comptroller_core.supplyCaps(vUNI_CORE);
       expect(cap).to.equal(parseUnits("400000", 18));
+
+      cap = await comptroller_core.supplyCaps(vFDUSD_CORE);
+      expect(cap).to.equal(parseUnits("30000000", 18));
     });
 
     it("check borrow caps core pool", async () => {
