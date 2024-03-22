@@ -25,31 +25,23 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opbnbmainnet: 100000000,
 };
 
-task(
-  "propose",
-  "Propose proposal")
+task("propose", "Propose proposal")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
-  .setAction(
-    async function (taskArguments) {
-      const { proposalPath } = taskArguments
-      const proposeVip = require('./scripts/proposeVIP').default;
-      await proposeVip(proposalPath)
-    })
+  .setAction(async function (taskArguments) {
+    const { proposalPath } = taskArguments;
+    const proposeVip = require("./scripts/proposeVIP").default;
+    await proposeVip(proposalPath);
+  });
 
-task(
-  "multisig",
-  "Execute multisig vip")
+task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
-  .setAction(
-    async function (taskArguments) {
-      const { proposalPath } = taskArguments
-      const executeMultiSigTx = require('./scripts/executeMultiSigTx.ts').default;
-      await executeMultiSigTx(proposalPath)
-    })
+  .setAction(async function (taskArguments) {
+    const { proposalPath } = taskArguments;
+    const executeMultiSigTx = require("./scripts/executeMultiSigTx.ts").default;
+    await executeMultiSigTx(proposalPath);
+  });
 
-task(
-  "test",
-  "Update fork config")
+task("test", "Update fork config")
   .addOptionalParam("fork", "Network to fork")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
