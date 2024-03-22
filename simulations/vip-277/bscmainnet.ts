@@ -3,12 +3,12 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import vipGateway from "../../../vips/vip-Gateway/bscmainnet";
-import { UNITROLLER, vipSeizeVenus } from "../../../vips/vip-Gateway/bscmainnet2";
-import { accounts3, accounts4, accounts5, accounts6 } from "../../../vips/vip-Gateway/users";
-import CORE_POOL_ABI from "../abi/CorePoolComptroller.json";
+import { expectEvents } from "../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import vip276 from "../../vips/vip-276/bscmainnet";
+import { UNITROLLER, vip277 } from "../../vips/vip-277/bscmainnet";
+import { accounts3, accounts4, accounts5, accounts6 } from "../../vips/vip-277/users";
+import CORE_POOL_ABI from "./abi/CorePoolComptroller.json";
 
 const accounts = [...accounts3, ...accounts4, ...accounts5, ...accounts6];
 
@@ -19,10 +19,10 @@ forking(36962090, () => {
   before(async () => {
     unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
 
-    await pretendExecutingVip(vipGateway());
+    await pretendExecutingVip(vip276());
   });
 
-  testVip("VIP-SeizeVenus", vipSeizeVenus(), {
+  testVip("VIP-SeizeVenus", vip277(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_POOL_ABI], ["VenusSeized", "VenusGranted"], [12, 4]);
     },

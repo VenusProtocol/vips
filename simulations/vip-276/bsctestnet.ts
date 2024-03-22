@@ -5,11 +5,11 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkIsolatedPoolsComptrollers } from "../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { performVTokenBasicAndBehalfActions } from "../../../src/vtokenUpgradesHelper";
+import { expectEvents, initMainnetUser } from "../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { performVTokenBasicAndBehalfActions } from "../../src/vtokenUpgradesHelper";
 import {
   COMPTROLLER_BEACON,
   CORE_MARKETS,
@@ -19,17 +19,17 @@ import {
   NEW_VTOKEN_IMPLEMENTATION,
   UNITROLLER,
   VTOKEN_BEACON,
-  vipGateway,
-} from "../../../vips/vip-Gateway/bsctestnet";
-import BEACON_ABI from "../abi/Beacon.json";
-import COMPTROLLER_ABI from "../abi/Comptroller.json";
-import UNITROLLER_ABI from "../abi/CorePoolComptroller.json";
-import DIAMOND_ABI from "../abi/Diamond.json";
-import MOCK_TOKEN_ABI from "../abi/MockToken.json";
-import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
-import VBEP_20_DELEGATE_ABI from "../abi/VBep20Delegate.json";
-import VEBEP_20_DELEGATOR_ABI from "../abi/VBep20Delegator.json";
-import VTOKEN_ABI from "../abi/VToken.json";
+  vip276,
+} from "../../vips/vip-276/bsctestnet";
+import BEACON_ABI from "./abi/Beacon.json";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import UNITROLLER_ABI from "./abi/CorePoolComptroller.json";
+import DIAMOND_ABI from "./abi/Diamond.json";
+import MOCK_TOKEN_ABI from "./abi/MockToken.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
+import VBEP_20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
+import VEBEP_20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
 const OLD_VTOKEN_IMPLEMENTATION = "0xe21251bc79ee0abeba71faabdc2ad36762a0b82f";
@@ -126,7 +126,7 @@ forking(38305470, () => {
     });
   });
 
-  testVip("VIP-Gateway", vipGateway(), {
+  testVip("VIP-Gateway", vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
@@ -280,7 +280,7 @@ forking(38305470, () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(vipGateway());
+      await pretendExecutingVip(vip276());
     });
 
     for (const market of CORE_MARKETS) {

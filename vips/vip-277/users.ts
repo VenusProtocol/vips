@@ -1,15 +1,3 @@
-export const accounts1 = [
-  "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc",
-  "0xef044206db68e40520bfa82d45419d498b4bc7bf",
-  "0x7589dd3355dae848fdbf75044a3495351655cb1a",
-];
-
-export const accounts2 = [
-  "0x24e77e5b74b30b026e9996e4bc3329c881e24968",
-  "0x33df7a7f6d44307e1e5f3b15975b47515e5524c0",
-  "0x1f6d66ba924ebf554883cf84d482394013ed294b",
-];
-
 export const accounts3 = [
   "0xbd043882d36b6def4c30f20c613cfa70d3af8bb7",
   "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a",

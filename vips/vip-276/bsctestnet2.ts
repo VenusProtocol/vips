@@ -1,17 +1,26 @@
-import { cutParams as params } from "../../simulations/vip-Gateway/bsctestnet/utils/cut-params.json";
+import { cutParams as params } from "../../simulations/vip-276/utils/bsctestnet-cut-params2.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-export const NEW_VBEP20_DELEGATE_IMPL = "0xdB1869CA9E008E102350f2e0c356500503A4d043";
+export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+export const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
+export const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+export const ACM_CORE_POOL = "0x69a9e5dee4007fb1311c4d086fed4803e09a30b5";
 
+export const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+export const XVSVTOKEN = "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E";
+export const DIAMOND = "0x1D5F9752bA40cF7047db2E24Cb6Aa196E3c334DA";
+
+export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+export const NEW_VBEP20_DELEGATE_IMPL = "0xad6aa8Bb4829560412A94AA930745f407BF8000B";
+
+export const SN_BNB_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 export const COMPTROLLER_BEACON = "0xdddd7725c073105fb2abfcbdec16708fc4c24b74";
 export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
-export const NEW_COMPTROLLER_IMPLEMENTATION = "0xE1Ac99E486EBEcD40Ab4C9FF29Fe4d28be244D33";
-export const NEW_VTOKEN_IMPLEMENTATION = "0xF83362aF1722b1762e21369225901B90D9b980d9";
-export const NATIVE_TOKEN_GATEWAY = "0xae5A30d694DFF2268C864834DEDa745B784c48bD";
-export const PSR = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+export const NEW_COMPTROLLER_IMPLEMENTATION = "0x2CF0e211c99dFd28892cf80D142aA27a9042Dbf4";
+export const NEW_VTOKEN_IMPLEMENTATION = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
+export const NATIVE_TOKEN_GATEWAY = "0xCf4C75398DaD73f16c762026144a1496f6869CD1";
+
 export const CORE_MARKETS = [
   {
     name: "vTRX",
@@ -107,7 +116,7 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vipGateway = () => {
+export const vip276 = () => {
   const meta = {
     version: "v2",
     title:
@@ -115,9 +124,10 @@ export const vipGateway = () => {
     description: `
     This VIP does the following:
     1. Updates the implementation of all VTokens and Comptroller market facet in Core Pool
-    2. Sets the AccessControlManager, ProtocolShareReserve and ReduceReservesBlockDelta in vTRX, vUST and vLUNA
-    3. Updates the implementation of VTokens and Comptrollers in IL
-    4. Accepts the ownership of the NativeTokenGateway contract`,
+    2. Updates the implementation of VTokens and Comptrollers in IL
+    3. Accepts the ownership of the NativeTokenGateway contract
+    4. Gives call permissions to Timelocks for seizeVenus function
+    5. Sets XVS and vXVS address in unitroller`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -125,6 +135,16 @@ export const vipGateway = () => {
 
   return makeProposal(
     [
+      {
+        target: UNITROLLER,
+        signature: "_setPendingImplementation(address)",
+        params: [DIAMOND],
+      },
+      {
+        target: DIAMOND,
+        signature: "_become(address)",
+        params: [UNITROLLER],
+      },
       {
         target: UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
@@ -149,54 +169,30 @@ export const vipGateway = () => {
         params: [NEW_VTOKEN_IMPLEMENTATION],
       },
       {
+        target: SN_BNB_BEACON,
+        signature: "upgradeTo(address)",
+        params: [NEW_VTOKEN_IMPLEMENTATION],
+      },
+      {
         target: NATIVE_TOKEN_GATEWAY,
         signature: "acceptOwnership()",
         params: [],
       },
+
+      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
+        target: ACM_CORE_POOL,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "seizeVenus(address[],address)", timelock],
+      })),
       {
-        target: CORE_MARKETS[0].address,
-        signature: "setAccessControlManager(address)",
-        params: [ACM],
+        target: UNITROLLER,
+        signature: "_setXVSToken(address)",
+        params: [XVS],
       },
       {
-        target: CORE_MARKETS[0].address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: [100],
-      },
-      {
-        target: CORE_MARKETS[0].address,
-        signature: "setProtocolShareReserve(address)",
-        params: [PSR],
-      },
-      {
-        target: CORE_MARKETS[1].address,
-        signature: "setAccessControlManager(address)",
-        params: [ACM],
-      },
-      {
-        target: CORE_MARKETS[1].address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: [100],
-      },
-      {
-        target: CORE_MARKETS[1].address,
-        signature: "setProtocolShareReserve(address)",
-        params: [PSR],
-      },
-      {
-        target: CORE_MARKETS[2].address,
-        signature: "setAccessControlManager(address)",
-        params: [ACM],
-      },
-      {
-        target: CORE_MARKETS[2].address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: [100],
-      },
-      {
-        target: CORE_MARKETS[2].address,
-        signature: "setProtocolShareReserve(address)",
-        params: [PSR],
+        target: UNITROLLER,
+        signature: "_setXVSVToken(address)",
+        params: [XVSVTOKEN],
       },
     ],
     meta,
@@ -204,4 +200,4 @@ export const vipGateway = () => {
   );
 };
 
-export default vipGateway;
+export default vip276;

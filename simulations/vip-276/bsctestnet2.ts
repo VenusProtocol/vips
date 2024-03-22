@@ -6,11 +6,11 @@ import { BigNumber, BigNumberish, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkIsolatedPoolsComptrollers } from "../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { performVTokenBasicAndBehalfActions } from "../../../src/vtokenUpgradesHelper";
+import { expectEvents, initMainnetUser } from "../../src/utils";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { performVTokenBasicAndBehalfActions } from "../../src/vtokenUpgradesHelper";
 import {
   COMPTROLLER_BEACON,
   CORE_MARKETS,
@@ -25,20 +25,20 @@ import {
   VTOKEN_BEACON,
   XVS,
   XVSVTOKEN,
-  vipGateway,
-} from "../../../vips/vip-Gateway/bsctestnet2";
-import ACM_ABI from "../abi/AccessControlManager.json";
-import BEACON_ABI from "../abi/Beacon.json";
-import COMPTROLLER_ABI from "../abi/Comptroller.json";
-import CORE_POOL_ABI from "../abi/CorePoolComptroller.json";
-import DIAMOND_ABI from "../abi/Diamond.json";
-import ERC20_ABI from "../abi/Erc20.json";
-import MOCK_TOKEN_ABI from "../abi/MockToken.json";
-import NATIVE_TOKEN_GATEWAY_ABI from "../abi/NativeTokenGateway.json";
-import UNITROLLER_ABI from "../abi/Unitroller.json";
-import VBEP_20_DELEGATE_ABI from "../abi/VBep20Delegate.json";
-import VEBEP_20_DELEGATOR_ABI from "../abi/VBep20Delegator.json";
-import VTOKEN_ABI from "../abi/VToken.json";
+  vip276,
+} from "../../vips/vip-276/bsctestnet2";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import BEACON_ABI from "./abi/Beacon.json";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import CORE_POOL_ABI from "./abi/CorePoolComptroller.json";
+import DIAMOND_ABI from "./abi/Diamond.json";
+import ERC20_ABI from "./abi/Erc20.json";
+import MOCK_TOKEN_ABI from "./abi/MockToken.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
+import UNITROLLER_ABI from "./abi/Unitroller.json";
+import VBEP_20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
+import VEBEP_20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0xE1Ac99E486EBEcD40Ab4C9FF29Fe4d28be244D33";
 const OLD_VTOKEN_IMPLEMENTATION = "0xF83362aF1722b1762e21369225901B90D9b980d9";
@@ -135,7 +135,7 @@ forking(38508666, () => {
     });
   });
 
-  testVip("VIP-Gateway", vipGateway(), {
+  testVip("VIP-Gateway", vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
@@ -243,7 +243,7 @@ forking(38508666, () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(vipGateway());
+      await pretendExecutingVip(vip276());
     });
 
     for (const market of CORE_MARKETS) {
@@ -293,7 +293,7 @@ forking(38508666, () => {
     let user: SignerWithAddress;
 
     before(async () => {
-      await pretendExecutingVip(vipGateway());
+      await pretendExecutingVip(vip276());
       deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
       user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
 
@@ -319,7 +319,7 @@ forking(38508666, () => {
 // xvs setter tests
 forking(38508666, () => {
   beforeEach(async () => {
-    await pretendExecutingVip(vipGateway());
+    await pretendExecutingVip(vip276());
   });
 
   it("Should return correct xvs and xvs vtoken addresses", async () => {
@@ -462,7 +462,7 @@ forking(38508666, async () => {
       );
     }
 
-    await pretendExecutingVip(vipGateway());
+    await pretendExecutingVip(vip276());
   });
 
   describe("Verify Storage slots after VIP execution", async () => {

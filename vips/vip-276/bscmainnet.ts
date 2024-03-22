@@ -1,4 +1,4 @@
-import { cutParams as params } from "../../simulations/vip-Gateway/bscmainnet/utils/cut-params.json";
+import { cutParams as params } from "../../simulations/vip-276/utils/bscmainnet-cut-params.json";
 import { ZERO_ADDRESS } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
@@ -160,7 +160,7 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vipGateway = () => {
+export const vip276 = () => {
   const meta = {
     version: "v2",
     title: "VIP-276 Recover XVS rewards from bad debtors and enable the NativeTokenGateway on the WBNB market",
@@ -299,4 +299,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vipGateway;
+export default vip276;
