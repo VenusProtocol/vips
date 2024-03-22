@@ -1,6 +1,6 @@
 import { defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { ContractInterface } from "ethers";
@@ -92,6 +92,11 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   admin: string,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
+  const networkSpecificChainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
+
+  // skip execution of this function if input oracle address is really not of chainlinkOracleAddress
+  if (chainlinkOracleAddress != networkSpecificChainlinkOracle) return;
+
   const provider = ethers.provider;
 
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
@@ -105,12 +110,11 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     }
   }
 
-  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+  await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  await tx.wait();
 };
 
 export const setMaxStalePeriod = async (
@@ -138,6 +142,7 @@ export const setMaxStalePeriod = async (
       );
     }
   }
+  await mine(100);
 };
 
 export const expectEvents = async (
