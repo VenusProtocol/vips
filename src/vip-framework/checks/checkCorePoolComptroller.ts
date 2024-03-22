@@ -6,7 +6,7 @@ import testnetGovernance from "@venusprotocol/governance-contracts/deployments/b
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers, forkedNetwork } from "hardhat";
+import { ethers, FORKED_NETWORK } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
@@ -27,7 +27,7 @@ let USDT_FEED = NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED;
 let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_TEST_USER_ACCOUNT;
 let CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
-if (forkedNetwork === "bsctestnet") {
+if (FORKED_NETWORK === "bsctestnet") {
   vETH_ADDRESS = testnet.addresses.vETH;
   vUSDT_ADDRESS = testnet.addresses.vUSDT;
   USDT = testnet.addresses.USDT;
@@ -40,7 +40,7 @@ if (forkedNetwork === "bsctestnet") {
   ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_TEST_USER_ACCOUNT;
   CHAINLINK_ORACLE = NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE;
 
-  LENS = NETWORK_ADDRESSES[forkedNetwork].COMPTROLLER_LENS;
+  LENS = NETWORK_ADDRESSES[FORKED_NETWORK].COMPTROLLER_LENS;
 }
 
 export const checkCorePoolComptroller = () => {

@@ -4,7 +4,7 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { ContractInterface } from "ethers";
-import { ethers, config, network, forkedNetwork } from "hardhat";
+import { ethers, config, network, FORKED_NETWORK } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
 import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
@@ -113,15 +113,23 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   await tx.wait();
 };
 
+export const getForkedNetworkAddress = (contractName: string) => {
+  const FORKED_NETWORK_ADDRESSES = FORKED_NETWORK && NETWORK_ADDRESSES[FORKED_NETWORK]
+  if (FORKED_NETWORK_ADDRESSES && Object.prototype.hasOwnProperty.call(FORKED_NETWORK_ADDRESSES, contractName)) {
+    return FORKED_NETWORK_ADDRESSES[contractName as keyof typeof FORKED_NETWORK_ADDRESSES]
+  }
+  throw new Error(`${contractName} address not found on forked ${FORKED_NETWORK}`)
+}
+
 export const setMaxStalePeriod = async (
   resilientOracle: Contract,
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  const binanceOracle = NETWORK_ADDRESSES[forkedNetwork].BINANCE_ORACLE;
-  const chainlinkOracle = NETWORK_ADDRESSES[forkedNetwork].CHAINLINK_ORACLE;
-  const redstoneOracle = NETWORK_ADDRESSES[forkedNetwork].REDSTONE_ORACLE;
-  const normalTimelock = NETWORK_ADDRESSES[forkedNetwork].NORMAL_TIMELOCK;
+  const binanceOracle = getForkedNetworkAddress('BINANCE_ORACLE');
+  const chainlinkOracle = getForkedNetworkAddress('CHAINLINK_ORACLE');
+  const redstoneOracle = getForkedNetworkAddress('REDSTONE_ORACLE');
+  const normalTimelock = getForkedNetworkAddress('NORMAL_TIMELOCK');
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
