@@ -20,7 +20,7 @@ const RESILIENT_ORACLE = sepolia.RESILIENT_ORACLE;
 const GUARDIAN = sepolia.GUARDIAN;
 const POOL_REGISTRY = sepolia.POOL_REGISTRY;
 
-const BLOCKS_PER_YEAR = BigNumber.from('2628000'); // assuming a block is mined every 12 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 12 seconds
 const VWSTETH = "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D";
 const VWETH = "0x9f6213dFa9069a5426Fe8fAE73857712E1259Ed4";
 const WSTETH = "0x9b87Ea90FDb55e1A0f17FBEdDcF7EB0ac4d50493";

@@ -2,7 +2,7 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
-import { ethers, FORKED_NETWORK } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
@@ -15,9 +15,9 @@ const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[FORKED_NETWORK as 'bsctestnet' | 'bscmainnet'] || {};
+  NETWORK_ADDRESSES[FORKED_NETWORK as "bsctestnet" | "bscmainnet"] || {};
 
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS]
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {

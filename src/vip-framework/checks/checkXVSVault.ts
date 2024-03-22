@@ -2,19 +2,19 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers, FORKED_NETWORK } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
-import { getForkedNetworkAddress } from "../../utils";
 import { NETWORK_CONFIG } from "../../networkConfig";
+import { getForkedNetworkAddress } from "../../utils";
 import XVSVault_ABI from "../abi/XVSVault.json";
 import ERC20_ABI from "../abi/erc20.json";
 
-const FORKED_NETWORK_CONFIG = FORKED_NETWORK && NETWORK_CONFIG[FORKED_NETWORK]
+const FORKED_NETWORK_CONFIG = FORKED_NETWORK && NETWORK_CONFIG[FORKED_NETWORK];
 
-const NORMAL_TIMELOCK = getForkedNetworkAddress('NORMAL_TIMELOCK');
-const XVS = getForkedNetworkAddress('XVS');
-const XVS_VAULT_PROXY = getForkedNetworkAddress('XVS_VAULT_PROXY');
-const ACCOUNT = getForkedNetworkAddress('GENERIC_TEST_USER_ACCOUNT');
+const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK");
+const XVS = getForkedNetworkAddress("XVS");
+const XVS_VAULT_PROXY = getForkedNetworkAddress("XVS_VAULT_PROXY");
+const ACCOUNT = getForkedNetworkAddress("GENERIC_TEST_USER_ACCOUNT");
 const POOL_ID = FORKED_NETWORK_CONFIG?.XVS_VAULT_POOL_ID;
 
 export const checkXVSVault = () => {
