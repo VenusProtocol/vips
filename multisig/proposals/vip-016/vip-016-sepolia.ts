@@ -117,19 +117,6 @@ export const vip016 = () => {
       params: [PRIME],
     },
     {
-      target: PRIME_LIQUIDITY_PROVIDER,
-      signature: "initializeTokens(address[])",
-      params: [[ETH, BTC, USDC, USDT]],
-    },
-    {
-      target: PRIME_LIQUIDITY_PROVIDER,
-      signature: "setTokensDistributionSpeed(address[],uint256[])",
-      params: [
-        [ETH, BTC, USDC, USDT],
-        [0, 0, 0, 0],
-      ],
-    },
-    {
       target: XVS_VAULT_PROXY,
       signature: "setPrimeToken(address,address,uint256)",
       params: [PRIME, XVS, PRIME_POOL_ID],
@@ -138,26 +125,6 @@ export const vip016 = () => {
       target: PRIME,
       signature: "initializeV2(address)",
       params: [POOL_REGISTRY],
-    },
-    {
-      target: PRIME,
-      signature: "addMarket(address,address,uint256,uint256)",
-      params: [COMPTROLLER, vETH, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    },
-    {
-      target: PRIME,
-      signature: "addMarket(address,address,uint256,uint256)",
-      params: [COMPTROLLER, vBTC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    },
-    {
-      target: PRIME,
-      signature: "addMarket(address,address,uint256,uint256)",
-      params: [COMPTROLLER, vUSDC, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
-    },
-    {
-      target: PRIME,
-      signature: "addMarket(address,address,uint256,uint256)",
-      params: [COMPTROLLER, vUSDT, ethers.utils.parseEther("2"), ethers.utils.parseEther("4")],
     },
     {
       target: PRIME,

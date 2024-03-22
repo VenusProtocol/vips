@@ -74,7 +74,7 @@ forking(5533300, () => {
     });
 
     it("prime markets", async () => {
-      expect((await prime.getAllMarkets()).length).to.equal(4);
+      expect((await prime.getAllMarkets()).length).to.equal(0);
     });
 
     it("prime address", async () => {
