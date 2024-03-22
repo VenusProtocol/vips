@@ -163,17 +163,59 @@ export const CORE_MARKETS = [
 export const vipGateway = () => {
   const meta = {
     version: "v2",
-    title:
-      "VIP-Gateway Update VToken and comptroller implementation in IL and Core Pool and introduces the NativeTokenGateway contract",
-    description: `
-    This VIP does the following:
-    1. Updates the implementation of all VTokens and Comptroller market facet in Core Pool
-    2. Updates the implementation of VTokens and Comptrollers in IL
-    3. Accepts the ownership of the NativeTokenGateway contract
-    4. Gives call permissions to Timelocks for seizeVenus function
-    5. Gives call permissions to Timelocks for setLastRewardingBlocks function of RewardsDistributor
-    6. Executes seizeVenus
-    7. Sets XVS and vXVS address in unitroller`,
+    title: "VIP-276 Recover XVS rewards from bad debtors and enable the NativeTokenGateway on the WBNB market",
+    description: `#### Summary
+
+Following this [Community’s proposal](https://community.venus.io/t/proposal-bnb-bridge-exploiter-account-remediation/3974), if this VIP passes, it will perform the following actions:
+
+- Upgrade the implementations of the Comptroller and VTokens in the core pool, and the Comptrollers and the VTokens in the Isolated pools, adding the following features:
+    - Allow the Venus Community to recover XVS rewards allocated to wallets
+    - Integration of the NativeTokenGateway contracts, which will allow users to interact with "wrap markets" (like WBNB) using the native token (i.e. BNB)
+- Recover all XVS rewards from 6 wallets whose bad debt was removed in the [VIP-244](https://app.venus.io/#/governance/proposal/244), for an estimated total of 254,000 XVS.
+- Enable the NativeTokenGateway contract for the WBNB market on the [Liquid Staked BNB](https://app.venus.io/#/isolated-pools/pool/0xd933909A4a2b7A4638903028f44D1d38ce27c352?chainId=56) pool
+
+#### Description
+
+In [VIP-244](https://app.venus.io/#/governance/proposal/244), the bad debt of 19 accounts was moved from their balances. These accounts accrued XVS rewards in the past. This VIP will recover the XVS rewards allocated to 6 of these accounts. In a different VIP (due to gas cost limitations), the XVS rewards of the rest of the accounts involved in the VIP-244 will be recovered.
+
+The recovered XVS (around 254K) will be sent to the [XVS Distributor contract](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384), on BNB Chain.
+
+Wrapped tokens of the native tokens (for example WBNB for BNB on BNB Chain, or WETH for ETH on Ethereum) are usual on DeFi protocols. They introduce an extra step for the users, who have to wrap the native token into the wrapped version before interacting with the protocol. The new [NativeTokenGateway](https://github.com/VenusProtocol/isolated-pools/blob/main/contracts/Gateway/NativeTokenGateway.sol) contract (one per "wrap market") will simplify this process, allowing the users to interact with the WBNB market, for example, directly using BNBs. The following flows are available:
+
+1. **Supply native tokens to the "wrap market"**. For example, the user will be able to supply BNB into the WBNB market
+2. **Withdraw native tokens from a "wrap market"**. For example, the user will be able to receive directly BNB withdrawing from the WBNB market
+3. **Borrow native tokens from a "wrap market"**. For example, the user will be able to receive directly BNB borrowing from the WBNB market
+4. **Repay with native tokens debt in a "wrap market"**. For example, the user will be able to repay with BNB the debt on the WBNB market
+
+The NativeTokenGateway contract uses a new feature available in the new Comptrollers (Core pool and Isolated pools): **approve delegates**, who will be authorized to borrow and redeem on behalf of the original wallet. The NativeTokenGateway contracts must be authorized by the user (flow integrated in the [official Venus UI](https://app.venus.io/)), before enabling flows 2 and 3 previously mentioned.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Quantstamp](https://quantstamp.com/), [Certik](https://www.certik.com/), and [Pessimistic](https://pessimistic.io/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the upgrades are performed as expected, and the new features are available
+- **Deployment on testnet**: the same upgrades have been performed on BNB testnet, and used in the Venus Protocol testnet environment
+
+#### Audit reports
+
+- [Quantstamp audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/0ec94f4636e51d68197fe6918df096864acd0a23/audits/096_nativeTokenGateway_quantstamp_20240301.pdf) (2024/03/01)
+- [Certik audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/652459fed7269dab84628f70c44d8fa56b34203e/audits/092_nativeTokenGateway_certik_20240226.pdf) (2024/02/26)
+- [Pessimistic audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/652459fed7269dab84628f70c44d8fa56b34203e/audits/095_nativeTokenGateway_pessimistic_20240229.pdf) (2024/02/29)
+
+#### Deployed contracts
+
+- [NativeTokenGateway for the WBNB market in the Liquid Staked BNB pool](https://bscscan.com/address/0x24896601A4bf1b6a27E51Cb3eff750Bd9FE00d08)
+- [New implementation of the Comptroller in the Core pool](https://bscscan.com/address/0x347ba9559fFC65A94af0F6a513037Cd4982b7b18)
+- [New implementation of the VTokens in the Core pool](https://bscscan.com/address/0x6E5cFf66C7b671fA1D5782866D80BD15955d79F6)
+- [New implementation of the Comptrollers in the Isolated pools](https://bscscan.com/address/0x011a2ED16EBCbcAE5CC97B1d4c7319d19a9fad06)
+- [New implementation of the VTokens in the Isolated pools](https://bscscan.com/address/0x1EC822383805FfDb9dC2Ae456DF8C0Ca2Bf14d7d)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/195)
+- [Documentation](https://docs-v4.venus.io/technical-reference/reference-technical-articles/native-token-gateway)
+- [NativeTokenGateway source code](https://github.com/VenusProtocol/isolated-pools/blob/main/contracts/Gateway/NativeTokenGateway.sol)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
