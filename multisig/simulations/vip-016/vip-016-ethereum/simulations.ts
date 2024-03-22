@@ -1,88 +1,101 @@
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { setMaxStalePeriod } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { vip016 } from "../../../proposals/vip-016/vip-016-sepolia";
+import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
+import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
+import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
-const PRIME_LIQUIDITY_PROVIDER = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
-const PRIME = "0x27A8ca2aFa10B9Bc1E57FC4Ca610d9020Aab3739";
-const USER = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+const PRIME_LIQUIDITY_PROVIDER = "0x15242a55Ad1842A1aEa09c59cf8366bD2f3CE9B4";
+const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
+const USER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+const RESILIENT_ORACLE = "0x8000eca36201dddf5805Aa4BeFD73d1EB4D23264";
 
-const ETH = "0x700868CAbb60e90d77B6588ce072d9859ec8E281";
-const BTC = "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b";
-const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
-const USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
-
-forking(5530357, () => {
+forking(5533300, () => {
   describe("Pre-VIP behavior", () => {
-    let primeLiquidityProvider: Contract;
     let prime: Contract;
+    let primeLiquidityProvider: Contract;
+    let resilientOracle: Contract;
 
     before(async () => {
-      impersonateAccount(USER);
-      primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      await impersonateAccount(USER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
+
+      setMaxStalePeriod(resilientOracle, "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9");
     });
 
-
-    it("speeds", async () => {
-      let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
-      expect(speed).to.deep.equal("24438657407407");
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
-      expect(speed).to.deep.equal("126");
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
-      expect(speed).to.deep.equal("36881");
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
-      expect(speed).to.deep.equal("87191");
+    it("prime markets", async () => {
+      expect((await prime.getAllMarkets()).length).to.equal(0);
     });
 
-    it("paused", async () => {
-      const paused = await primeLiquidityProvider.paused();
-      expect(paused).to.be.equal(false);
+    it("prime address", async () => {
+      expect(await primeLiquidityProvider.prime()).to.equal("0x0000000000000000000000000000000000000000");
+    });
 
-      const primePaused = await prime.paused();
-      expect(primePaused).to.be.equal(false);
+    it("claim prime token", async () => {
+      await expect(prime.claim()).to.be.reverted;
+    });
+
+    it("is paused", async () => {
+      expect(await prime.paused()).to.be.equal(true);
     });
   });
 
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
+    let xvsVault: Contract;
+    let xvs: Contract;
 
     before(async () => {
       await pretendExecutingVip(vip016());
 
-      prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+      await impersonateAccount(USER);
+      const accounts = await ethers.getSigners();
+      await accounts[0].sendTransaction({ to: USER, value: parseUnits("10") });
+
+      const signer = await ethers.getSigner(USER);
+      prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+      xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY, signer);
+      xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
     });
 
-    it("speeds", async () => {
-      let speed = await primeLiquidityProvider.tokenDistributionSpeeds(ETH);
-      expect(speed).to.deep.equal(0);
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(BTC);
-      expect(speed).to.deep.equal(0);
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
-      expect(speed).to.deep.equal(0);
-
-      speed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
-      expect(speed).to.deep.equal(0);
+    it("prime markets", async () => {
+      expect((await prime.getAllMarkets()).length).to.equal(4);
     });
 
-    it("paused", async () => {
-      const paused = await primeLiquidityProvider.paused();
-      expect(paused).to.be.equal(true);
+    it("prime address", async () => {
+      expect(await primeLiquidityProvider.prime()).to.equal(PRIME);
+    });
 
-      const primePaused = await prime.paused();
-      expect(primePaused).to.be.equal(true);
+    it("is paused", async () => {
+      expect(await prime.paused()).to.be.equal(true);
+      expect(await primeLiquidityProvider.paused()).to.be.equal(true);
+    });
+
+    it("claim prime token", async () => {
+      await xvs.approve(xvsVault.address, parseUnits("1000", 18));
+      await xvsVault.deposit(XVS, 0, parseUnits("1000", 18));
+
+      await mine(10000);
+      await expect(prime.claim()).to.be.reverted;
+    });
+
+    describe("generic tests", async () => {
+      checkXVSVault();
     });
   });
 });
