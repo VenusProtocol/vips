@@ -16,8 +16,8 @@ import {
   vUSDC_CORE,
   vUSDT_GAMEFI,
   vWBETH_CORE,
-  vip276,
-} from "../../vips/vip-276/bscmainnet";
+  vip277,
+} from "../../vips/vip-277/bscmainnet";
 import SETTER_FACET_ABI from "./abi/SetterFacet.json";
 
 forking(37186111, () => {
@@ -62,7 +62,7 @@ forking(37186111, () => {
     });
   });
 
-  testVip("VIP-276", vip276(), {
+  testVip("VIP-277", vip277(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewBorrowCap", "NewSupplyCap"], [4, 3]);
     },

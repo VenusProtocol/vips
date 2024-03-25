@@ -23,10 +23,10 @@ export const vFDUSD_SUPPLY_CAP = parseUnits("30000000", 18);
 export const vTWT_SUPPLY_CAP = parseUnits("3000000", 18);
 export const vUSDT_BORROW_CAP = parseUnits("1100000", 18);
 
-export const vip276 = () => {
+export const vip277 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-276 Risk Parameters Adjustments (UNI, WBETH, ETH, USDC, FDUSD, TWT, USDT)",
+    title: "VIP-277 Risk Parameters Adjustments (UNI, WBETH, ETH, USDC, FDUSD, TWT, USDT)",
     description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Risk Parameter Updates 03/21/2024](https://community.venus.io/t/chaos-labs-risk-parameter-updates-03-21-24/4218).
 
 - [UNI (Core pool)](https://bscscan.com/address/0x27FF564707786720C71A2e5c1490A63266683612)
@@ -86,4 +86,4 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/242](https://github.
   );
 };
 
-export default vip276;
+export default vip277;
