@@ -27,8 +27,6 @@ export const VWETH_LST = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
 export const VWSTETH_LST = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
 export const CRV = "0xD533a949740bb3306d119CC777fa900bA034cd52";
 export const WSTETH = "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0";
-const TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
-
 // REWARDS TO TRANSFER FOR EACH REWARD DISTRIBUTOR
 // CORE  - RD0: 51000 XVS, RD1: 125000 CRV
 // CURVE - RD0: 7500 XVS, RD1: 125000 CRV
@@ -48,35 +46,35 @@ export const vip006 = () => {
     },
     // CORE POOL REWARDS
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, parseUnits("51000", 18), REWARD_DISTRIBUTOR_CORE_0],
     },
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [CRV, parseUnits("125000", 18), REWARD_DISTRIBUTOR_CORE_1],
     },
     // CURVE POOL REWARDS
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, parseUnits("7500", 18), REWARD_DISTRIBUTOR_CURVE_0],
     },
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [CRV, parseUnits("125000", 18), REWARD_DISTRIBUTOR_CURVE_1],
     },
 
     // LIQUID STAKED ETH POOL REWARDS
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, parseUnits("69400", 18), REWARD_DISTRIBUTOR_LST_0],
     },
     {
-      target: TREASURY,
+      target: ETHEREUM_TREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [WSTETH, parseUnits("15.4", 18), REWARD_DISTRIBUTOR_LST_1],
     },
