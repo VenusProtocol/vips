@@ -116,8 +116,8 @@ forking(34778191, () => {
         ["NewPrime", "MintOnlyForPrimeHolder", "NewVAIBaseRate", "NewVAIMintCap"],
         [1, 1, 1, 1],
       );
-      expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVAIMintRate"], [1]);
-      expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVAIMintRate"], [1]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
     },
   });
 

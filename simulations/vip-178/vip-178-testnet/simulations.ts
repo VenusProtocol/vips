@@ -42,8 +42,8 @@ forking(33737831, () => {
     vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
   });
 
-  describe("Contracts setup", () => {
-    checkVToken(VagEUR_Stablecoins, {
+  describe("Contracts setup", async () => {
+    await checkVToken(VagEUR_Stablecoins, {
       name: "Venus agEUR (Stablecoins)",
       symbol: "vagEUR_Stablecoins",
       decimals: 8,

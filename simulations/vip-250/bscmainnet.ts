@@ -18,7 +18,7 @@ forking(35893074, () => {
   let resilientOracle: ethers.Contract;
 
   before(async () => {
-    impersonateAccount(CRITICAL_TIMELOCK);
+    await impersonateAccount(CRITICAL_TIMELOCK);
 
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, await ethers.getSigner(CRITICAL_TIMELOCK));
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);

@@ -107,7 +107,7 @@ forking(33770465, () => {
     let primeProxy: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       await impersonateAccount(DEFAULT_PROXY_ADMIN);
       const signer = await ethers.getSigner(STAKED_USER);
 

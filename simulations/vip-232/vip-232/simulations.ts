@@ -102,8 +102,8 @@ forking(34769469, () => {
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
-      expect(
-        await bridge
+      await expect(
+        bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,

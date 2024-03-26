@@ -20,7 +20,7 @@ forking(35926690, () => {
   let vSnbnb: ethers.Contract;
 
   before(async () => {
-    impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(NORMAL_TIMELOCK);
 
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);

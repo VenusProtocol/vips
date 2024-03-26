@@ -3,12 +3,11 @@ import Ajv from "ajv";
 import { BigNumber } from "ethers";
 import fs from "fs/promises";
 import { network } from "hardhat";
+import readline from "readline-sync";
 
 import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../src/multisig/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
 import { getCalldatas, proposalSchema } from "../src/utils";
-
-const readline = require("readline-sync");
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
 
@@ -116,4 +115,4 @@ const createProposal = async () => {
   await fs.writeFile(`${transactionType}.json`, result);
 };
 
-createProposal();
+export default createProposal();

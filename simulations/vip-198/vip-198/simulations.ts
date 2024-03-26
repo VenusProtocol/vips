@@ -45,8 +45,8 @@ forking(33253419, () => {
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
   });
 
-  describe("Contracts setup", () => {
-    checkVToken(VPLANET_DEFI, {
+  describe("Contracts setup", async () => {
+    await checkVToken(VPLANET_DEFI, {
       name: "Venus PLANET (DeFi)",
       symbol: "vPLANET_DeFi",
       decimals: 8,

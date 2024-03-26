@@ -8,6 +8,7 @@ import { NETWORK_ADDRESSES } from "../networkAddresses";
 const DEFAULT_OPERATION = 0; // Call
 
 export const loadMultisigTx = async (multisigVipPath: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const vip = require(`../../multisig/proposals/${multisigVipPath}`).default;
   return vip();
 };

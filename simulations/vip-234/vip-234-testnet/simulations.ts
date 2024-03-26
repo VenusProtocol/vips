@@ -43,7 +43,7 @@ forking(36724768, () => {
 
   testVip("VIP-213 Send XVS to Dest Chain", vip234Testnet(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
+      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },
   });
 

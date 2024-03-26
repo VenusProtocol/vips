@@ -40,7 +40,7 @@ forking(31162125, () => {
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -90,7 +90,7 @@ forking(31162125, () => {
       });
     };
 
-    checkVToken(VTWT_DeFi, {
+    await checkVToken(VTWT_DeFi, {
       name: "Venus TWT (DeFi)",
       symbol: "vTWT_DeFi",
       decimals: 8,

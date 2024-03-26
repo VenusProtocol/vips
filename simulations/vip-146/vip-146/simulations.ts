@@ -45,7 +45,7 @@ forking(30066043, () => {
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "USDD");
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -95,7 +95,7 @@ forking(30066043, () => {
       });
     };
 
-    checkVToken(vankrBNB_DeFi, {
+    await checkVToken(vankrBNB_DeFi, {
       name: "Venus ankrBNB (DeFi)",
       symbol: "vankrBNB_DeFi",
       decimals: 8,

@@ -17,8 +17,6 @@ import {
   VWSTETH_LST,
 } from "../vip-006/vip-006-sepolia";
 
-const ANY_TARGET_CONTRACT = "0x0000000000000000000000000000000000000000";
-
 // Start block considered Multisig tx executed https://sepolia.etherscan.io/tx/0x9785ef7f2eed457a934b194c5697bb94e060774e3deeecf5e26d58d37c764bff
 const REWARDS_START_BLOCK = 5530143;
 const REWARDS_END_BLOCK_90_DAYS = REWARDS_START_BLOCK + 648000;

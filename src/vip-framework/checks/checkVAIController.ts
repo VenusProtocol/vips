@@ -39,7 +39,7 @@ export const checkVAIController = () => {
     let vai: Contract;
 
     before(async () => {
-      impersonateAccount(ACCOUNT);
+      await impersonateAccount(ACCOUNT);
       const signer = await ethers.getSigner(ACCOUNT);
 
       vaiController = await ethers.getContractAt(VAI_CONTROLLER_ABI, VAI_UNITROLLER, signer);

@@ -438,7 +438,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     vTokenReceiver: TREASURY,
   },
 
-  //Pool Liquid Staked BNB
+  // Pool Liquid Staked BNB
   vankrBNB_LiquidStakedBNB: {
     borrowCap: "5600",
     supplyCap: "8000",
@@ -603,7 +603,7 @@ forking(31152370, () => {
     }
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       { name, symbol, decimals, underlying, exchangeRate, comptroller }: VTokenState,
@@ -642,7 +642,7 @@ forking(31152370, () => {
     };
 
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 
