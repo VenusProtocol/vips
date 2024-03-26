@@ -397,3 +397,10 @@ export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: str
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
 };
+export const networkChainIds = {
+  ethereum: 101,
+  sepolia: 10161,
+  arbitrum_goerli: 10143,
+  bsctestnet: 10102,
+  bscmainnet: 102,
+};

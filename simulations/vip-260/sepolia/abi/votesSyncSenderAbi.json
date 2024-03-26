@@ -1,0 +1,187 @@
+[
+  {
+    "inputs": [
+      { "internalType": "contract ILayerZeroEndpoint", "name": "lzEndpoint_", "type": "address" },
+      { "internalType": "contract IAccessControlManagerV8", "name": "accessControlManager_", "type": "address" },
+      { "internalType": "uint16", "name": "dstChainId_", "type": "uint16" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "ZeroAddressNotAllowed", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "failedNonce", "type": "uint256" },
+      { "indexed": false, "internalType": "bytes32", "name": "hash", "type": "bytes32" }
+    ],
+    "name": "ClearPayload",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint16", "name": "remoteChainId", "type": "uint16" },
+      { "indexed": false, "internalType": "bytes", "name": "payload", "type": "bytes" },
+      { "indexed": false, "internalType": "bytes", "name": "adapterParams", "type": "bytes" }
+    ],
+    "name": "ExecuteSyncVotes",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }],
+    "name": "Paused",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint16", "name": "remoteChainId", "type": "uint16" },
+      { "indexed": false, "internalType": "bytes", "name": "remoteAddress", "type": "bytes" }
+    ],
+    "name": "SetTrustedRemoteAddress",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "votesSync", "type": "uint256" },
+      { "indexed": false, "internalType": "uint16", "name": "remoteChainId", "type": "uint16" },
+      { "indexed": false, "internalType": "bytes", "name": "payload", "type": "bytes" },
+      { "indexed": false, "internalType": "bytes", "name": "adapterParams", "type": "bytes" },
+      { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" },
+      { "indexed": false, "internalType": "bytes", "name": "reason", "type": "bytes" }
+    ],
+    "name": "StorePayload",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "uint16", "name": "chainId", "type": "uint16" }],
+    "name": "TrustedRemoteRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }],
+    "name": "Unpaused",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BSC_CHAIN_ID",
+    "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "LZ_ENDPOINT",
+    "outputs": [{ "internalType": "contract ILayerZeroEndpoint", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [{ "internalType": "contract IAccessControlManagerV8", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes", "name": "payload", "type": "bytes" },
+      { "internalType": "bytes", "name": "adapterParams", "type": "bytes" }
+    ],
+    "name": "estimateFee",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nonce",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "paused",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  { "inputs": [], "name": "removeTrustedRemote", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "failedNonce", "type": "uint256" },
+      { "internalType": "bytes", "name": "payload", "type": "bytes" },
+      { "internalType": "bytes", "name": "adapterParams", "type": "bytes" },
+      { "internalType": "uint256", "name": "originalValue", "type": "uint256" }
+    ],
+    "name": "retrySyncVotes",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes", "name": "remoteAddress", "type": "bytes" }],
+    "name": "setTrustedRemoteAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "storedExecutionHashes",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "bytes", "name": "payload", "type": "bytes" },
+      { "internalType": "bytes", "name": "adapterParams", "type": "bytes" }
+    ],
+    "name": "syncVotes",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
+    "name": "trustedRemoteLookup",
+    "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
