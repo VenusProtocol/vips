@@ -37,7 +37,7 @@ forking(36760588, () => {
   let ilComptroller: ethers.Contract;
 
   before(async () => {
-    impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(NORMAL_TIMELOCK);
 
     comptroller = await ethers.getContractAt(SETTER_FACET_ABI, COMPTROLLER, await ethers.getSigner(NORMAL_TIMELOCK));
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);

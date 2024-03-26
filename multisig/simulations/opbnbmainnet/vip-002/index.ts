@@ -230,9 +230,9 @@ forking(16775600, () => {
     oldCommunityWalletBalance = await fdusd.balanceOf(COMMUNITY_WALLET);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 

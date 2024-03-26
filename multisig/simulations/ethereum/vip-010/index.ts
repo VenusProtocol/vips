@@ -135,9 +135,9 @@ forking(19276500, () => {
     wstETHNonEquivalentOracle = await ethers.getContractAt(WSTETH_ORACLE_ABI, WSTETH_NONEQUIVALENCE_ORACLE);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 

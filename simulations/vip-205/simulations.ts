@@ -34,7 +34,6 @@ forking(33570600, () => {
   let vDAI: ethers.Contract;
   let vTUSD: ethers.Contract;
   let vTUSD_OLD: ethers.Contract;
-  let vPLANET_DEFI: ethers.Contract;
   let vUSDT_Stablecoins_IR: ethers.Contract;
 
   const provider = ethers.provider;

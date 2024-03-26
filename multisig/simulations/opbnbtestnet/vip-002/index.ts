@@ -194,9 +194,9 @@ forking(16885889, () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 

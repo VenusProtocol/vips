@@ -40,7 +40,7 @@ forking(32725445, () => {
     await binanceOracle.connect(signer).setDirectPrice(USDD, "10000000000");
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -90,7 +90,7 @@ forking(32725445, () => {
       });
     };
 
-    checkVToken(VTWT_DeFi, {
+    await checkVToken(VTWT_DeFi, {
       name: "Venus TWT (DeFi)",
       symbol: "vTWT_DeFi",
       decimals: 8,

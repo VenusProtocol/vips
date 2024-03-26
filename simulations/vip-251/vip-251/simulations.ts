@@ -97,8 +97,8 @@ forking(35898604, () => {
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
       const bridgeBalPrev = await xvs.balanceOf(XVSProxyOFTSrc);
-      expect(
-        await bridge
+      await expect(
+        bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,

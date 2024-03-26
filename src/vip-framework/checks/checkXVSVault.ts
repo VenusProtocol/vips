@@ -23,8 +23,8 @@ export const checkXVSVault = () => {
     let xvsVault: Contract;
 
     before(async () => {
-      impersonateAccount(ACCOUNT);
-      impersonateAccount(NORMAL_TIMELOCK);
+      await impersonateAccount(ACCOUNT);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(ACCOUNT);
 
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);

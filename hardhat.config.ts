@@ -5,6 +5,7 @@ import { HardhatUserConfig, task } from "hardhat/config";
 
 import "./type-extensions";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 require("dotenv").config();
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
@@ -29,6 +30,7 @@ task("propose", "Propose proposal")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments) {
     const { proposalPath } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const proposeVip = require("./scripts/proposeVIP").default;
     await proposeVip(proposalPath);
   });
@@ -37,6 +39,7 @@ task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments) {
     const { proposalPath } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const executeMultiSigTx = require("./scripts/executeMultiSigTx.ts").default;
     await executeMultiSigTx(proposalPath);
   });

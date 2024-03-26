@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../../src/networkAddresses";
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { makeProposal } from "../../../../src/utils";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;

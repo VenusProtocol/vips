@@ -2,9 +2,8 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { FORKED_NETWORK, ethers } from "hardhat";
+import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
@@ -59,9 +58,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   let supplyUnderlying: Contract;
   let borrowUnderlying: Contract;
 
-  impersonateAccount(poolSupplier);
+  await impersonateAccount(poolSupplier);
   await setBalance(poolSupplier, ethers.utils.parseEther("5"));
-  impersonateAccount(NORMAL_TIMELOCK);
+  await impersonateAccount(NORMAL_TIMELOCK);
   const signer: Signer = await ethers.getSigner(poolSupplier);
   const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
 

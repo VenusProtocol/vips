@@ -37,7 +37,7 @@ forking(33682900, () => {
     rewardsDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARD_DISTRIBUTOR_SnBNB);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -87,7 +87,7 @@ forking(33682900, () => {
       });
     };
 
-    checkVToken(vSnBNB_LiquidStakedBNB, {
+    await checkVToken(vSnBNB_LiquidStakedBNB, {
       name: "Venus SnBNB (Liquid Staked BNB)",
       symbol: "vSnBNB_LiquidStakedBNB",
       decimals: 8,
