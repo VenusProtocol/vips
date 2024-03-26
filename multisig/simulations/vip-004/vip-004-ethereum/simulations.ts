@@ -13,7 +13,6 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
 
 forking(18890306, () => {
@@ -21,7 +20,7 @@ forking(18890306, () => {
   let xvsStore: Contract;
 
   before(async () => {
-    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY);
+    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, ethereum.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
     await pretendExecutingVip(vip004());
   });
