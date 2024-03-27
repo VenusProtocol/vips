@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../src/utils";
+import { makeProposal } from "../../../../src/utils";
 import {
   REWARD_DISTRIBUTOR_CORE_0,
   REWARD_DISTRIBUTOR_CORE_1,
@@ -15,7 +15,7 @@ import {
   VWETH_CORE,
   VWETH_LST,
   VWSTETH_LST,
-} from "../vip-006/vip-006-sepolia";
+} from "../vip-006";
 
 // Start block considered Multisig tx executed https://sepolia.etherscan.io/tx/0x9785ef7f2eed457a934b194c5697bb94e060774e3deeecf5e26d58d37c764bff
 const REWARDS_START_BLOCK = 5530143;
@@ -61,7 +61,7 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
   },
 ];
 
-export const vip016 = () => {
+const vip016 = () => {
   return makeProposal([
     ...lastRewardBlockConfig.map(config => {
       const lastRewardBlockArray = new Array(config.vTokens.length).fill(config.lastRewardBlock);
@@ -73,3 +73,5 @@ export const vip016 = () => {
     }),
   ]);
 };
+
+export default vip016;
