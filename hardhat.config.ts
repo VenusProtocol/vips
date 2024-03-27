@@ -1,12 +1,12 @@
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
+import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import { HardhatUserConfig, task } from "hardhat/config";
 
 import "./type-extensions";
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require("dotenv").config();
+dotenv.config();
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {

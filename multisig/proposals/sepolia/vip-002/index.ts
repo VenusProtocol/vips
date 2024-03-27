@@ -27,7 +27,6 @@ export const POOL_REGISTRY = "0x758f5715d817e02857Ba40889251201A5aE3E186";
 export const RESILIENT_ORACLE = "0xEF4e53a9A4565ef243A2f0ee9a7fc2410E1aA623";
 export const VTREASURY = "0x3370915301E8a6A6baAe6f461af703e2498409F3";
 
-
 // IL configuration
 const vip002 = () => {
   return makeProposal([
@@ -220,15 +219,7 @@ const vip002 = () => {
       target: POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [
-          VWBTC_CORE,
-          "750000000000000000",
-          "800000000000000000",
-          "30000000",
-          VTREASURY,
-          "30000000000",
-          "25000000000",
-        ],
+        [VWBTC_CORE, "750000000000000000", "800000000000000000", "30000000", VTREASURY, "30000000000", "25000000000"],
       ],
     },
     {

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumberish, BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
@@ -8,36 +8,36 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import vip002, {
-  VWBTC_CORE,
-  VWETH_CORE,
-  VUSDT_CORE,
-  VUSDC_CORE,
-  VCRVUSD_CORE,
-  VCRV_CORE,
-  VUSDC_STABLECOINS,
-  VUSDT_STABLECOINS,
-  VCRVUSD_STABLECOINS,
-  VCRVUSD_CURVE,
-  VCRV_CURVE,
+  COMPTROLLER_CORE,
+  COMPTROLLER_CURVE,
+  COMPTROLLER_STABLECOINS,
+  MOCK_CRV,
+  MOCK_USDC,
+  MOCK_USDT,
   MOCK_WBTC,
   MOCK_WETH,
-  MOCK_USDT,
-  MOCK_USDC,
-  MOCK_CRV,
   MOCK_crvUSD,
-  COMPTROLLER_CORE,
-  RESILIENT_ORACLE,
   POOL_REGISTRY,
+  RESILIENT_ORACLE,
+  VCRVUSD_CORE,
+  VCRVUSD_CURVE,
+  VCRVUSD_STABLECOINS,
+  VCRV_CORE,
+  VCRV_CURVE,
   VTREASURY,
-  COMPTROLLER_STABLECOINS,
-  COMPTROLLER_CURVE,
+  VUSDC_CORE,
+  VUSDC_STABLECOINS,
+  VUSDT_CORE,
+  VUSDT_STABLECOINS,
+  VWBTC_CORE,
+  VWETH_CORE,
 } from "../../../proposals/sepolia/vip-002";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const BLOCKS_PER_YEAR = BigNumber.from('2252571'); // assuming a block is mined every 14 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("2252571"); // assuming a block is mined every 14 seconds
 const GUARDIAN = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 
 type VTokenSymbol =
@@ -346,9 +346,9 @@ forking(4783370, () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 
