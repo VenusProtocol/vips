@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,8 +22,8 @@ const FAIRYPROOF_RECEIVER = "0x060a08fff78aedba4eef712533a324272bf68119";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 forking(36192027, () => {
-  let usdt: ethers.Contract;
-  let eth: ethers.Contract;
+  let usdt: Contract;
+  let eth: Contract;
   let prevBalancePessimistic: BigNumber;
   let prevBalanceFairyproof: BigNumber;
   let prevUSDTBalanceCommunityWallet: BigNumber;

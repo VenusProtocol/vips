@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -10,7 +11,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
 forking(36351188, () => {
-  let usdc: ethers.Contract;
+  let usdc: Contract;
   let prevBalanceBinance: BigNumber;
 
   before(async () => {

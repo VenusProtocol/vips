@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,8 +22,8 @@ forking(29848811, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
-    let comptroller: ethers.Contract;
-    let vBIFI_DeFi: ethers.Contract;
+    let comptroller: Contract;
+    let vBIFI_DeFi: Contract;
 
     before(async () => {
       comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
@@ -58,8 +59,8 @@ forking(29848811, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    let comptroller: ethers.Contract;
-    let vBIFI_DeFi: ethers.Contract;
+    let comptroller: Contract;
+    let vBIFI_DeFi: Contract;
 
     before(async () => {
       comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);

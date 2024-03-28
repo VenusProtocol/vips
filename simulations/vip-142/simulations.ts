@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -57,33 +57,33 @@ const vUSDT_Tron_Rate_Model = "0x009cdFB248e021f58A34B50dc2A7601EA72d14Ac";
 const vUSDD_Tron_Rate_Model = "0xD9d10f63d736dc2D5271Ce7E94C4B07E114D7c76";
 
 forking(29870474, () => {
-  let DeFi_Pool_Comptroller: ethers.Contract;
-  let GameFi_Pool_Comptroller: ethers.Contract;
-  let LiquidStakedBNB_Pool_Comptroller: ethers.Contract;
-  let StableCoin_Pool_Comptroller: ethers.Contract;
-  let Tron_Pool_Comptroller: ethers.Contract;
+  let DeFi_Pool_Comptroller: Contract;
+  let GameFi_Pool_Comptroller: Contract;
+  let LiquidStakedBNB_Pool_Comptroller: Contract;
+  let StableCoin_Pool_Comptroller: Contract;
+  let Tron_Pool_Comptroller: Contract;
 
-  let vBSW_DeFi: ethers.Contract;
-  let vALPACA_DeFi: ethers.Contract;
-  let vUSDT_DeFi: ethers.Contract;
-  let vUSDD_DeFi: ethers.Contract;
+  let vBSW_DeFi: Contract;
+  let vALPACA_DeFi: Contract;
+  let vUSDT_DeFi: Contract;
+  let vUSDD_DeFi: Contract;
 
-  let vUSDT_GameFi: ethers.Contract;
-  let vUSDD_GameFi: ethers.Contract;
+  let vUSDT_GameFi: Contract;
+  let vUSDD_GameFi: Contract;
 
-  let vBNBx_LiquidStakedBNB: ethers.Contract;
-  let vWBNB_LiquidStakedBNB: ethers.Contract;
+  let vBNBx_LiquidStakedBNB: Contract;
+  let vWBNB_LiquidStakedBNB: Contract;
 
-  let vHAY_Stablecoins: ethers.Contract;
-  let vUSDT_Stablecoins: ethers.Contract;
-  let vUSDD_Stablecoins: ethers.Contract;
+  let vHAY_Stablecoins: Contract;
+  let vUSDT_Stablecoins: Contract;
+  let vUSDD_Stablecoins: Contract;
 
-  let vWIN_Tron: ethers.Contract;
-  let vTRX_Tron: ethers.Contract;
-  let vUSDT_Tron: ethers.Contract;
-  let vUSDD_Tron: ethers.Contract;
+  let vWIN_Tron: Contract;
+  let vTRX_Tron: Contract;
+  let vUSDT_Tron: Contract;
+  let vUSDD_Tron: Contract;
 
-  let rateModel: ethers.Contract;
+  let rateModel: Contract;
   const provider = ethers.provider;
 
   const toBlockRate = (ratePerYear: BigNumber): BigNumber => {

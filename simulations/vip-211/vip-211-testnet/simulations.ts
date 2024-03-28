@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -24,9 +25,9 @@ const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 
 forking(34311500, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let defaultProxyAdmin: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let defaultProxyAdmin: Contract;
+  let boundValidator: Contract;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);

@@ -120,7 +120,10 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vwstETH_LiquidStakedETH: "",
+  vWETH_LiquidStakedETH: "",
+};
 
 forking(5140150, () => {
   let poolRegistry: Contract;

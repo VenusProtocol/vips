@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
@@ -10,7 +10,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const VToken_vWBNB_Core_IRM = "0x0b7cdC617bFE8e63D7861AbC1139811b61DbC869";
 const VToken_vWBNB_Core_IRM_Old = "0x05D0567aa5dDB9179D353871CDc93ece31927026";
 const VToken_vWBNB_Core = "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672";
-const BLOCKS_PER_YEAR = 31_536_000;
+const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 
 forking(17345636, () => {
   let vWBNB: Contract;

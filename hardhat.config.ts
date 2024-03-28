@@ -53,10 +53,8 @@ task("test", "Update fork config")
           allowUnlimitedContractSize: false,
           loggingEnabled: false,
           forking: {
-            url: process.env[`ARCHIVE_NODE_${fork}`],
-          },
-          accounts: {
-            accountsBalance: "100000000000000000000000",
+            enabled: true,
+            url: process.env[`ARCHIVE_NODE_${fork}`] as string,
           },
           gas: "auto" as const,
           blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],

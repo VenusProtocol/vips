@@ -337,7 +337,19 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vWBTC_Core: "",
+  vWETH_Core: "",
+  vUSDT_Core: "",
+  vUSDC_Core: "",
+  vcrvUSD_Core: "",
+  vCRV_Core: "",
+  vUSDC_Stablecoins: "",
+  vUSDT_Stablecoins: "",
+  vcrvUSD_Stablecoins: "",
+  vcrvUSD_Curve: "",
+  vCRV_Curve: "",
+};
 
 forking(4783370, () => {
   let poolRegistry: Contract;

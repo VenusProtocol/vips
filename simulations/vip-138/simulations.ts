@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -20,8 +21,8 @@ const FAIRYPROOF_AMOUNT = parseUnits("20000", 18);
 const OZ_AMOUNT = parseUnits("277200", 18);
 
 forking(29726604, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
   let prevBalancePeckShield: BigNumber;
   let prevBalanceCertik: BigNumber;
   let prevBalanceFairyproof: BigNumber;

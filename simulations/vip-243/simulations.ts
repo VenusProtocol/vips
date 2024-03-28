@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -16,7 +17,7 @@ const CERTIK_AMOUNT = parseUnits("19000", 18);
 const CHAOS_LABS_AMOUNT = parseUnits("130000", 18);
 
 forking(35259895, () => {
-  let usdt: ethers.Contract;
+  let usdt: Contract;
   let prevBalanceCertik: BigNumber;
   let prevBalanceChaosLabs: BigNumber;
 

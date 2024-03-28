@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
@@ -12,8 +13,8 @@ const MARKET_BNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
 const MARKET_HAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
 
 forking(31715160, () => {
-  let hayRewardsDistributor: ethers.Contract;
-  let sdRewardsDistributor: ethers.Contract;
+  let hayRewardsDistributor: Contract;
+  let sdRewardsDistributor: Contract;
   const provider = ethers.provider;
 
   before(async () => {

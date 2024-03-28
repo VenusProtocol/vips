@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
@@ -28,15 +29,15 @@ const VRACA_GAMEFI = "0xE5FE5527A5b76C75eedE77FdFA6B80D52444A465";
 const VANKRBNB_LIQUIDSTAKEDBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
 const VBTT_TRON = "0x49c26e12959345472E2Fd95E5f79F8381058d3Ee";
 
-function matchValues(array1: string[], array2: string[]) {
+function matchValues(array1: (string | boolean)[], array2: string[]) {
   for (let i = 0; i < array1.length; i++) {
     expect(array1[i]).to.equal(array2[i]);
   }
 }
 
 async function verifyAccessControlPermissions(
-  accessControlManager: ethers.Contract,
-  comptrollerSigner: ethers.Signer,
+  accessControlManager: Contract,
+  comptrollerSigner: Signer,
   values: string[],
 ) {
   const returnValues = [];
@@ -50,7 +51,7 @@ async function verifyAccessControlPermissions(
   return returnValues;
 }
 
-async function verifySetForcedLiquidation(signers: ethers.Signer[], comptroller: ethers.Contract, vToken: string) {
+async function verifySetForcedLiquidation(signers: Signer[], comptroller: Contract, vToken: string) {
   for (let i = 0; i < signers.length; i++) {
     await comptroller.connect(signers[i]).setForcedLiquidation(vToken, true);
     expect(await comptroller.isForcedLiquidationEnabled(vToken)).to.be.equal(true);
@@ -59,12 +60,12 @@ async function verifySetForcedLiquidation(signers: ethers.Signer[], comptroller:
 
 forking(32567583, () => {
   const provider = ethers.provider;
-  let comptrollerBeacon: ethers.Contract;
-  let comptrollerStableCoin: ethers.Contract;
-  let comptrollerDefi: ethers.Contract;
-  let comptrollerGameFi: ethers.Contract;
-  let comptrollerLiquidStakedBnb: ethers.Contract;
-  let comptrollerTron: ethers.Contract;
+  let comptrollerBeacon: Contract;
+  let comptrollerStableCoin: Contract;
+  let comptrollerDefi: Contract;
+  let comptrollerGameFi: Contract;
+  let comptrollerLiquidStakedBnb: Contract;
+  let comptrollerTron: Contract;
   let closeFactorMantissa: BigNumber;
   let markets: string[];
   let isComptroller: boolean;
@@ -105,17 +106,17 @@ forking(32567583, () => {
 
   describe("Post-VIP behavior", () => {
     const timeLockArray: string[] = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
-    const boolArray: bool[] = [true, true, true];
-    let accessControlManager: ethers.Contract;
-    let comptrollerStableCoinSigner: ethers.Signer;
-    let comptrollerDefiSigner: ethers.Signer;
-    let comptrollerGameFiSigner: ethers.Signer;
-    let comptrollerLiquidStakedBnbSigner: ethers.Signer;
-    let comptrollerTronSigner: ethers.Signer;
-    let normalTimeLockSigner: ethers.Signer;
-    let fastTrackTimeLockSigner: ethers.Signer;
-    let criticalTimeLockSigner: ethers.Signer;
-    let timeLockSignersArray: ethers.Signer[];
+    const boolArray: boolean[] = [true, true, true];
+    let accessControlManager: Contract;
+    let comptrollerStableCoinSigner: Signer;
+    let comptrollerDefiSigner: Signer;
+    let comptrollerGameFiSigner: Signer;
+    let comptrollerLiquidStakedBnbSigner: Signer;
+    let comptrollerTronSigner: Signer;
+    let normalTimeLockSigner: Signer;
+    let fastTrackTimeLockSigner: Signer;
+    let criticalTimeLockSigner: Signer;
+    let timeLockSignersArray: Signer[];
 
     before(async () => {
       accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);

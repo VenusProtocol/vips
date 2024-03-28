@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -82,10 +83,10 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
 
 forking(4744200, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let redstoneOracle: ethers.Contract;
-  let chainLinkOracle: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let redstoneOracle: Contract;
+  let chainLinkOracle: Contract;
+  let boundValidator: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {

@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEventWithParams, expectEvents } from "../../src/utils";
@@ -13,7 +14,7 @@ const IR_NEW = "0xF558Be24F2CACb65a4BB41A155631C83B15388F1";
 const IR_OLD = "0x8B5351D0568CEEFa9BfC71C7a11C01179B736d99";
 
 forking(36584000, () => {
-  let vBNB: ethers.Contract;
+  let vBNB: Contract;
 
   before(async () => {
     vBNB = new ethers.Contract(VBNB_CORE, VBEP20_DELEGATOR_ABI, ethers.provider);

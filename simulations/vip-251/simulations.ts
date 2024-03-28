@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -13,7 +14,7 @@ const DESTINATION_ADDRESS = "0x6657911F7411765979Da0794840D671Be55bA273";
 const WITDRAW_AMOUNT = "125281198522370512074148";
 
 forking(34286000, () => {
-  let busd: ethers.Contract;
+  let busd: Contract;
   let prevBalance: any;
 
   before(async () => {

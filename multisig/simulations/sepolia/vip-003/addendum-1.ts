@@ -11,8 +11,8 @@ import vip003, {
   SRC_CHAIN_ID,
   XVS_MINT_CAP,
 } from "../../../proposals/sepolia/vip-003/addendum-2";
-import XVS_ABI from "./vip-003-sepolia-2/abi/xvs.json";
-import XVS_BRIDGE_ABI from "./vip-003-sepolia-2/abi/xvsProxyOFTDest.json";
+import XVS_ABI from "./abi/xvs.json";
+import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";

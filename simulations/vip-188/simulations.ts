@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
@@ -15,9 +16,9 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
 forking(32715679, () => {
   const provider = ethers.provider;
-  let xvsVault: ethers.Contract;
+  let xvsVault: Contract;
   let xvsVaultSigner: Signer;
-  let accessControlManager: ethers.Contract;
+  let accessControlManager: Contract;
 
   before(async () => {
     xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);

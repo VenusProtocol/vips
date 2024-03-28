@@ -1,3 +1,4 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
@@ -32,7 +33,7 @@ export interface TestingOptions {
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
-  callbackAfterExecution?: Func;
+  callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
 const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
@@ -77,7 +78,10 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
-    governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
+    governorProxy = await ethers.getContractAt(
+      (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
+      GOVERNOR_PROXY,
+    );
   };
 
   describe(`${description} commands`, () => {
@@ -132,7 +136,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);

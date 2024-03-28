@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -34,17 +34,17 @@ forking(25918391, () => {
 
 // Ressetting the fork to prevent oracle prices from getting stale
 forking(25918391, () => {
-  let comptroller: ethers.Contract;
-  let busd: ethers.Contract;
-  let usdt: ethers.Contract;
-  let btc: ethers.Contract;
-  let vBUSD: ethers.Contract;
-  let vUSDC: ethers.Contract;
-  let vUSDT: ethers.Contract;
-  let vBTC: ethers.Contract;
-  let vETH: ethers.Contract;
-  let swapDebtDelegate: ethers.Contract;
-  let oracle: ethers.Contract;
+  let comptroller: Contract;
+  let busd: Contract;
+  let usdt: Contract;
+  let btc: Contract;
+  let vBUSD: Contract;
+  let vUSDC: Contract;
+  let vUSDT: Contract;
+  let vBTC: Contract;
+  let vETH: Contract;
+  let swapDebtDelegate: Contract;
+  let oracle: Contract;
 
   before(async () => {
     const provider = ethers.provider;
@@ -55,7 +55,7 @@ forking(25918391, () => {
       }),
     );
     [busd, , usdt, btc] = await Promise.all(
-      [vBUSD, vUSDC, vUSDT, vBTC, vETH].map(async (vToken: ethers.Contract) => {
+      [vBUSD, vUSDC, vUSDT, vBTC, vETH].map(async (vToken: Contract) => {
         const underlying = await vToken.underlying();
         return new ethers.Contract(underlying, IERC20_UPGRADABLE_ABI, provider);
       }),

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -28,10 +29,10 @@ const VTRXOLD_RATE_MODEL_CURR = "0x8B831e2c6f184F552Fb4c2CB7c01Ff76FeC93881";
 const VSXP_RATE_MODEL_CURR = "0x32450305D6c692269B3cBf9730d99104f80fce23";
 
 forking(29288200, () => {
-  let comptroller: ethers.Contract;
-  let rateModel: ethers.Contract;
-  let vSxp: ethers.Contract;
-  let vTrxOld: ethers.Contract;
+  let comptroller: Contract;
+  let rateModel: Contract;
+  let vSxp: Contract;
+  let vTrxOld: Contract;
   const provider = ethers.provider;
 
   const toBlockRate = (ratePerYear: BigNumber): BigNumber => {

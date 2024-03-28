@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -22,10 +22,10 @@ import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
 forking(36990775, () => {
-  let xvsBridge: ethers.Contract;
-  let xvs: ethers.Contract;
-  let eth: ethers.Contract;
-  let veth: ethers.Contract;
+  let xvsBridge: Contract;
+  let xvs: Contract;
+  let eth: Contract;
+  let veth: Contract;
   let oldCirculatingSupply: BigNumber;
   let oldXVSBal: BigNumber;
   let prevBalanceCommunityWallet: BigNumber;

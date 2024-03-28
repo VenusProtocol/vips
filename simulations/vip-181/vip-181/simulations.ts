@@ -22,8 +22,8 @@ const USER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 // Added function signature for venusInitialIndex to market facet as cut param to diamond proxy
 // This fork block contains tests for venusInitialIndex only.
 forking(32159070, async () => {
-  let diamondUnitroller: ethers.Contract;
-  let venusLens: ethers.Contract;
+  let diamondUnitroller: Contract;
+  let venusLens: Contract;
 
   before(async () => {
     diamondUnitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);

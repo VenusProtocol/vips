@@ -1,5 +1,5 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
-import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
+import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
 import { Proposal, SUPPORTED_NETWORKS } from "../../src/types";
@@ -13,7 +13,7 @@ export const loadMultisigTx = async (multisigVipPath: string) => {
   return vip();
 };
 
-export const getSafeAddress = (networkName: SUPPORTED_NETWORKS): string => {
+export const getSafeAddress = (networkName: Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">): string => {
   return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 

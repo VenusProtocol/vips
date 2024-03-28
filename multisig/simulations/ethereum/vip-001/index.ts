@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
@@ -54,10 +55,10 @@ const assetConfigs: AssetConfig[] = [
 
 forking(18733570, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let redstoneOracle: ethers.Contract;
-  let chainLinkOracle: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let redstoneOracle: Contract;
+  let chainLinkOracle: Contract;
+  let boundValidator: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {

@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -33,7 +33,7 @@ const COMPTROLLER_NEW_IMPL = "0xA693FbB4C5F479142e4Fb253B06FC113E5EB1536";
 const VTOKEN_NEW_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
 const COMPTROLLER_BEACON = "0x2020BDa1F931E07B14C9d346E2f6D5943b4cd56D";
 const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
-const BLOCKS_PER_YEAR = 31_536_000; // assuming a block is mined every 1 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // assuming a block is mined every 1 seconds
 
 type VTokenSymbol = "vBTCB_Core" | "vETH_Core" | "vUSDT_Core" | "vWBNB_Core";
 
@@ -185,7 +185,12 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vBTCB_Core: "",
+  vETH_Core: "",
+  vUSDT_Core: "",
+  vWBNB_Core: "",
+};
 
 forking(16885889, () => {
   let poolRegistry: Contract;

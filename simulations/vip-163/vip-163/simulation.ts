@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -49,9 +50,9 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
 };
 
 forking(31166657, () => {
-  let comptrollerBeacon: ethers.Contract;
-  let hayRewardsDistributor: ethers.Contract;
-  let sdRewardsDistributor: ethers.Contract;
+  let comptrollerBeacon: Contract;
+  let hayRewardsDistributor: Contract;
+  let sdRewardsDistributor: Contract;
   const provider = ethers.provider;
 
   before(async () => {

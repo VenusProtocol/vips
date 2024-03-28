@@ -21,8 +21,8 @@ import {
   VWSTETH_LST,
 } from "../../../proposals/sepolia/vip-006";
 import vip016 from "../../../proposals/sepolia/vip-016";
-import REWARDS_DISTRIBUTOR_ABI from "../../vip-016/vip-016-sepolia/abi/rewardsDistributor.json";
-import VTOKEN_ABI from "../../vip-016/vip-016-sepolia/abi/vToken.json";
+import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
+import VTOKEN_ABI from "./abi/vToken.json";
 
 // Start block considered Multisig tx executed https://sepolia.etherscan.io/tx/0x9785ef7f2eed457a934b194c5697bb94e060774e3deeecf5e26d58d37c764bff
 const REWARDS_START_BLOCK = 5530143;

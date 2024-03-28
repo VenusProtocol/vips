@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -29,12 +30,12 @@ const VAI_HOLDER = "0xd24d881ff77a47188f40b2a0c36ecb6973b5f2a4";
 
 forking(32091802, () => {
   const provider = ethers.provider;
-  let vai: ethers.Contract;
-  let vaiControllerProxy: ethers.Contract;
-  let accessControlManager: ethers.Contract;
-  let resilientOracle: ethers.Contract;
-  let usdt: ethers.Contract;
-  let psm: ethers.Contract;
+  let vai: Contract;
+  let vaiControllerProxy: Contract;
+  let accessControlManager: Contract;
+  let resilientOracle: Contract;
+  let usdt: Contract;
+  let psm: Contract;
   let psmSigner: Signer;
   let tokenHolder: Signer;
   let vaiHolder: Signer;

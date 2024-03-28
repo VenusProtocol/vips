@@ -1,6 +1,8 @@
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
-import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet.json";
-import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet.json";
+import mainnetGov from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
+import testnetGov from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
+import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
+import testnet from "@venusprotocol/venus-protocol/deployments/bsctestnet_addresses.json";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -21,14 +23,14 @@ const UNITROLLER = getForkedNetworkAddress("UNITROLLER");
 const VAI = getForkedNetworkAddress("VAI");
 const CHAINLINK_ORACLE = getForkedNetworkAddress("CHAINLINK_ORACLE");
 const RESILIENT_ORACLE = getForkedNetworkAddress("RESILIENT_ORACLE");
-let NORMAL_TIMELOCK = mainnet.contracts.NormalTimelock.address;
-let vBNB = mainnet.contracts.vBNB.address;
-let WBNB = mainnet.contracts.WBNB.address;
+let NORMAL_TIMELOCK = mainnetGov.addresses.NormalTimelock;
+let vBNB = mainnet.addresses.vBNB;
+let WBNB = mainnet.addresses.WBNB;
 
 if (FORKED_NETWORK === "bsctestnet") {
-  NORMAL_TIMELOCK = testnet.contracts.NormalTimelock.address;
-  vBNB = testnet.contracts.vBNB.address;
-  WBNB = testnet.contracts.WBNB.address;
+  NORMAL_TIMELOCK = testnetGov.addresses.NormalTimelock;
+  vBNB = testnet.addresses.vBNB;
+  WBNB = testnet.addresses.WBNB;
 }
 
 export const checkVAIController = () => {

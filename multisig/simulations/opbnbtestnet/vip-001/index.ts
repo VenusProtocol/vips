@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
@@ -58,10 +59,10 @@ const assetConfigs: AssetConfig[] = [
 
 forking(16003453, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let binanceOracle: ethers.Contract;
-  let boundValidator: ethers.Contract;
-  let defaultProxyAdmin: ethers.Contract;
+  let resilientOracle: Contract;
+  let binanceOracle: Contract;
+  let boundValidator: Contract;
+  let defaultProxyAdmin: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {

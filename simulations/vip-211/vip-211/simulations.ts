@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -33,10 +34,10 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
 forking(33548990, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let redStoneOracle: ethers.Contract;
-  let defaultProxyAdmin: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let redStoneOracle: Contract;
+  let defaultProxyAdmin: Contract;
+  let boundValidator: Contract;
   let preTRXPrice: BigNumber;
   let preTRX_OLDPrice: BigNumber;
   let preBNBPrice: BigNumber;

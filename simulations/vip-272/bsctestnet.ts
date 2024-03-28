@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -10,8 +10,8 @@ import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
 forking(36724865, () => {
-  let xvsBridge: ethers.Contract;
-  let xvs: ethers.Contract;
+  let xvsBridge: Contract;
+  let xvs: Contract;
   let oldCirculatingSupply: BigNumber;
   let oldXVSBal: BigNumber;
 

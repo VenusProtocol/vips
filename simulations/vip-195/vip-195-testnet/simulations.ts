@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -24,11 +25,11 @@ const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 
 forking(34650257, () => {
-  let comptroller: ethers.Contract;
-  let uni: ethers.Contract;
-  let vUni: ethers.Contract;
-  let oracle: ethers.Contract;
-  let usdt: ethers.Contract;
+  let comptroller: Contract;
+  let uni: Contract;
+  let vUni: Contract;
+  let oracle: Contract;
+  let usdt: Contract;
   let communityBalanceBefore: any;
   const provider = ethers.provider;
 

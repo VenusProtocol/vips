@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -11,7 +12,7 @@ const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
 
 forking(33668728, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

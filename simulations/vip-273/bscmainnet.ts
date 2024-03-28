@@ -1,5 +1,7 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -30,8 +32,8 @@ const OLD_MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
 
 forking(36955530, () => {
   const provider = ethers.provider;
-  let xvsBridge: ethers.Contract;
-  let xvs: ethers.Contract;
+  let xvsBridge: Contract;
+  let xvs: Contract;
   let xvsHolderSigner: SignerWithAddress;
   let receiver: SignerWithAddress;
   let receiverAddressBytes32: string;

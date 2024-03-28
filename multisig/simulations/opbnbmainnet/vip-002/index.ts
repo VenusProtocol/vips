@@ -37,7 +37,7 @@ const COMPTROLLER_IMPL = "0x557C69aDf4bB12305F00F62f1Ab71CAe9BFa3D46";
 const VTOKEN_BEACON = "0xfeD1d3a13597c5aBc893Af41ED5cb17e64c847c7";
 const VTOKEN_IMPL = "0x227c4D4176604908755be2B513A2b7bcA6f54a1F";
 const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const BLOCKS_PER_YEAR = 31_536_000; // assuming a block is mined every 1 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // assuming a block is mined every 1 seconds
 
 const CORE_POOL_SUPPLIER = "0xa7e84de1f48743143223ba17153ea88732490cd2";
 
@@ -217,7 +217,13 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vBTCB_Core: "",
+  vETH_Core: "",
+  vUSDT_Core: "",
+  vWBNB_Core: "",
+  vFDUSD_Core: "",
+};
 
 forking(16775600, () => {
   let poolRegistry: Contract;

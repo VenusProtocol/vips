@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -28,13 +29,13 @@ const RATE_MODEL_NEW_CORE_POOL = "0x8c2651590ECE4FFe8E722ef6F80cc7407f537bBa";
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
 forking(33570600, () => {
-  let comptroller: ethers.Contract;
-  let vUSDT: ethers.Contract;
-  let vUSDC: ethers.Contract;
-  let vDAI: ethers.Contract;
-  let vTUSD: ethers.Contract;
-  let vTUSD_OLD: ethers.Contract;
-  let vUSDT_Stablecoins_IR: ethers.Contract;
+  let comptroller: Contract;
+  let vUSDT: Contract;
+  let vUSDC: Contract;
+  let vDAI: Contract;
+  let vTUSD: Contract;
+  let vTUSD_OLD: Contract;
+  let vUSDT_Stablecoins_IR: Contract;
 
   const provider = ethers.provider;
 
@@ -50,7 +51,6 @@ forking(33570600, () => {
       vTUSD = new ethers.Contract(VTUSD, VBEP20_DELEGATOR_ABI, ethers.provider);
       vTUSD_OLD = new ethers.Contract(VTUSD_OLD, VBEP20_DELEGATOR_ABI, ethers.provider);
       vUSDT = new ethers.Contract(VUSDT, VBEP20_DELEGATOR_ABI, ethers.provider);
-      vPLANET_DEFI = new ethers.Contract(VPLANET_DEFI, VBEP20_DELEGATOR_ABI, ethers.provider);
       vUSDT_Stablecoins_IR = new ethers.Contract(VUSDT_Stablecoins_IR, RATE_MODEL_ABI, ethers.provider);
     });
 

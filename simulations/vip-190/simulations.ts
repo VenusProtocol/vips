@@ -12,7 +12,7 @@ forking(32774106, () => {
   let underlying: Contract;
   let prevBnbBal: BigNumberish;
   const provider = ethers.provider;
-  const prevBal = [];
+  const prevBal: number[] = [];
   before(async () => {
     VTOKEN_SNAPSHOT.forEach(async object => {
       if (object.symbol == "vBNB") {
