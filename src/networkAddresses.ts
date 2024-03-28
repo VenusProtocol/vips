@@ -1,5 +1,5 @@
-import govBscmainnetContracts from "@venusprotocol/governance-contracts/deployments/bscmainnet.json";
-import govBsctestnetContracts from "@venusprotocol/governance-contracts/deployments/bsctestnet.json";
+import govBscmainnetContracts from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
+import govBsctestnetContracts from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
 import ilBscmainnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
 import ilBsctestnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import ilEthereumDeployedContracts from "@venusprotocol/isolated-pools/deployments/ethereum_addresses.json";
@@ -25,8 +25,8 @@ export const ZERO_ADDRESS = ethers.constants.AddressZero;
 export const NETWORK_ADDRESSES = {
   bscmainnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
-    GOVERNOR_PROXY: govBscmainnetContracts.contracts.GovernorBravoDelegator,
-    NORMAL_TIMELOCK: govBscmainnetContracts.contracts.NormalTimelock,
+    GOVERNOR_PROXY: govBscmainnetContracts.addresses.GovernorBravoDelegator,
+    NORMAL_TIMELOCK: govBscmainnetContracts.addresses.NormalTimelock,
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: oracleBscmainnetContracts.addresses.ChainlinkOracle,
@@ -45,8 +45,8 @@ export const NETWORK_ADDRESSES = {
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
-    GOVERNOR_PROXY: govBsctestnetContracts.contracts.GovernorBravoDelegator,
-    NORMAL_TIMELOCK: govBsctestnetContracts.contracts.NormalTimelock,
+    GOVERNOR_PROXY: govBsctestnetContracts.addresses.GovernorBravoDelegator,
+    NORMAL_TIMELOCK: govBsctestnetContracts.addresses.NormalTimelock,
     ETH_CHAINLINK_FEED: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
     USDT_CHAINLINK_FEED: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
     CHAINLINK_ORACLE: oracleBsctestnetContracts.addresses.ChainlinkOracle,

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -14,7 +15,7 @@ const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 forking(34925177, () => {
-  let xvs: ethers.Contract;
+  let xvs: Contract;
   before(async () => {
     const provider = ethers.provider;
     xvs = new ethers.Contract(XVS, ERC20_ABI, provider);

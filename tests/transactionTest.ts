@@ -34,27 +34,27 @@ describe("proposeVIP", () => {
   it("should match calldata without proposal type", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.calldata).equal(mockCalldata);
   });
 
   it("should match calldata with proposal type", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput1);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.calldata).equal(mockCalldataWithType);
   });
   it("should return default governor address if not provided", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.target).equal(DEFAULT_GOVERNOR_PROXY);
   });
   it("should return provided governor address if provided", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     const governorAddress = "0x295e26495CEF6F69dFA69911d9D8e4F3bBadB89B";
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1, governorAddress);
+    const result = await transaction.proposeVIP("1", governorAddress);
     expect(result.target).equal(governorAddress);
   });
 });

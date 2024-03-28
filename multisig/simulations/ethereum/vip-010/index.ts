@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,7 +19,7 @@ import WSTETH_ORACLE_ABI from "./abi/wstETHOracle.json";
 const { ethereum } = NETWORK_ADDRESSES;
 
 const GUARDIAN = ethereum.GUARDIAN;
-const BLOCKS_PER_YEAR = 2628000; // assuming a block is mined every 12 seconds
+const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 const LIQUID_STAKED_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 const VWSTETH = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
 const VWETH = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
@@ -124,7 +124,10 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vwstETH_LiquidStakedETH: "",
+  vWETH_LiquidStakedETH: "",
+};
 
 forking(19276500, () => {
   let poolRegistry: Contract;

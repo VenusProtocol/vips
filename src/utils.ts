@@ -1,9 +1,9 @@
-import { defaultAbiCoder } from "@ethersproject/abi";
+import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { ContractInterface } from "ethers";
+import { Contract } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
@@ -150,15 +150,16 @@ export const setMaxStalePeriod = async (
 
 export const expectEvents = async (
   txResponse: TransactionResponse,
-  abis: ContractInterface[],
+  abis: (string | JsonFragment[])[],
   expectedEvents: string[],
   expectedCounts: number[],
 ) => {
   const receipt = await txResponse.wait();
-  const getNamedEvents = (abi: ContractInterface) => {
+  const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
+    // @ts-expect-error @TODO type is wrong
     return receipt.events
-      .map(it => {
+      .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;
         } catch (error) {
@@ -180,7 +181,7 @@ export const expectEvents = async (
 
 export const expectEventWithParams = async (
   txResponse: TransactionResponse,
-  abi: ContractInterface,
+  abi: string | JsonFragment[],
   expectedEvent: string,
   expectedParams: any[], // Array of expected parameters
 ) => {
@@ -188,23 +189,36 @@ export const expectEventWithParams = async (
   const iface = new ethers.utils.Interface(abi);
 
   // Extract the events that match the expected event name
+  // @ts-expect-error @TODO type is wrong
   const matchingEvents = receipt.events
-    .map(event => {
+    .map((event: { topics: string[]; data: string }) => {
       try {
         return iface.parseLog(event);
       } catch (error) {
         return null; // Ignore events that do not match the ABI
       }
     })
-    .filter(parsedEvent => parsedEvent && parsedEvent.name === expectedEvent);
+    .filter(
+      (parsedEvent: { topics: string[]; data: string; name: string }) =>
+        parsedEvent && parsedEvent.name === expectedEvent,
+    );
 
   // Check each event's parameters
-  matchingEvents.forEach((event, index) => {
-    expect(
-      event.args[index],
-      `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
-    ).to.deep.equal(expectedParams[index]);
-  });
+  matchingEvents.forEach(
+    (
+      event: {
+        topics: string[];
+        data: string;
+        args: [];
+      },
+      index: number,
+    ) => {
+      expect(
+        event.args[index],
+        `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
+      ).to.deep.equal(expectedParams[index]);
+    },
+  );
 };
 
 export const proposalSchema = {

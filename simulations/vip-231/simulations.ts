@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { formatEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -146,7 +147,7 @@ const TOKENS: Token[] = [
 ];
 
 forking(34945549, () => {
-  let resilientOracle: ethers.Contract;
+  let resilientOracle: Contract;
 
   before(async () => {
     const provider = ethers.provider;

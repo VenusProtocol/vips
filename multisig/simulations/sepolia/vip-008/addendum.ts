@@ -1,9 +1,10 @@
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip008 from "../../../proposals/sepolia/vip-008/addendum-1";
-import ERC20_ABI from "./vip-008-addendum-sepolia/abis/ERC20.json";
+import ERC20_ABI from "./abis/ERC20.json";
 
 const PLP = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 
@@ -20,10 +21,10 @@ const USDC_AMOUNT = "61329430000";
 const USDT_AMOUNT = "150666500000";
 
 forking(5096713, () => {
-  let btc: ethers.Contract;
-  let eth: ethers.Contract;
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
+  let btc: Contract;
+  let eth: Contract;
+  let usdc: Contract;
+  let usdt: Contract;
   let oldBTCBal: BigNumber;
   let oldETHBal: BigNumber;
   let oldUSDCBal: BigNumber;

@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -30,11 +31,11 @@ const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
 
 forking(36760588, () => {
-  let comptroller: ethers.Contract;
-  let resilientOracle: ethers.Contract;
-  let tusdContract: ethers.Contract;
-  let vTUSDContract: ethers.Contract;
-  let ilComptroller: ethers.Contract;
+  let comptroller: Contract;
+  let resilientOracle: Contract;
+  let tusdContract: Contract;
+  let vTUSDContract: Contract;
+  let ilComptroller: Contract;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);

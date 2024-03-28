@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -14,8 +15,8 @@ const vHAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
 
 forking(35893074, () => {
   const provider = ethers.provider;
-  let binanceOracle: ethers.Contract;
-  let resilientOracle: ethers.Contract;
+  let binanceOracle: Contract;
+  let resilientOracle: Contract;
 
   before(async () => {
     await impersonateAccount(CRITICAL_TIMELOCK);

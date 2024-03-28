@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -17,8 +18,8 @@ const WETH_USD_PRICE_DENOMINATOR = parseUnits("1", 18);
 
 forking(5113339, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let wstETH: ethers.Contract;
+  let resilientOracle: Contract;
+  let wstETH: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {

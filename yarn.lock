@@ -2556,6 +2556,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/sinon@npm:^17.0.3":
+  version: 17.0.3
+  resolution: "@types/sinon@npm:17.0.3"
+  dependencies:
+    "@types/sinonjs__fake-timers": "*"
+  checksum: c8e9956d9c90fe1ec1cc43085ae48897f93f9ea86e909ab47f255ea71f5229651faa070393950fb6923aef426c84e92b375503f9f8886ef44668b82a8ee49e9a
+  languageName: node
+  linkType: hard
+
+"@types/sinonjs__fake-timers@npm:*":
+  version: 8.1.5
+  resolution: "@types/sinonjs__fake-timers@npm:8.1.5"
+  checksum: 7e3c08f6c13df44f3ea7d9a5155ddf77e3f7314c156fa1c5a829a4f3763bafe2f75b1283b887f06e6b4296996a2f299b70f64ff82625f9af5885436e2524d10c
+  languageName: node
+  linkType: hard
+
 "@typescript-eslint/eslint-plugin@npm:^5.44.0":
   version: 5.62.0
   resolution: "@typescript-eslint/eslint-plugin@npm:5.62.0"
@@ -2850,6 +2866,7 @@ __metadata:
     "@types/mocha": ^10.0.0
     "@types/node": ^18.11.9
     "@types/readline-sync": ^1.4.8
+    "@types/sinon": ^17.0.3
     "@typescript-eslint/eslint-plugin": ^5.44.0
     "@typescript-eslint/parser": ^5.44.0
     "@venusprotocol/governance-contracts": ^1.4.0

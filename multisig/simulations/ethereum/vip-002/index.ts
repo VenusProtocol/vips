@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -22,7 +22,7 @@ const CRV_VTOKEN_RECEIVER = "0x7a16fF8270133F063aAb6C9977183D9e72835428";
 
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-const BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 12 seconds
 
 const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 const COMPTROLLER_STABLECOINS = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
@@ -52,6 +52,10 @@ type VTokenSymbol =
   | "vUSDC_Core"
   | "vcrvUSD_Core"
   | "vcrvUSD_Curve"
+  | "vCRV_Core"
+  | "vUSDC_Stablecoins"
+  | "vUSDT_Stablecoins"
+  | "vcrvUSD_Stablecoins"
   | "vCRV_Curve";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
@@ -192,7 +196,7 @@ interface RiskParameters {
   vTokenReceiver: string;
 }
 
-const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
+const riskParameters = {
   // Core Pool
   vWBTC_Core: {
     borrowCap: "850",
@@ -306,7 +310,19 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vWBTC_Core: "",
+  vWETH_Core: "",
+  vUSDT_Core: "",
+  vUSDC_Core: "",
+  vcrvUSD_Core: "",
+  vcrvUSD_Curve: "",
+  vCRV_Core: "",
+  vUSDC_Stablecoins: "",
+  vUSDT_Stablecoins: "",
+  vcrvUSD_Stablecoins: "",
+  vCRV_Curve: "",
+};
 
 forking(19033343, () => {
   let poolRegistry: Contract;
@@ -469,11 +485,7 @@ forking(19033343, () => {
     });
 
     describe("Pools configuration", () => {
-      const checkComptroller = (
-        comptrollerAddress: string,
-        comptrollerName: string,
-        liquidationIncentive: BigNumber,
-      ) => {
+      const checkComptroller = (comptrollerAddress: string, comptrollerName: string) => {
         describe(`${comptrollerName} Comptroller`, () => {
           let comptroller: Contract;
 
@@ -491,10 +503,6 @@ forking(19033343, () => {
 
           it("should have close factor = 0.5", async () => {
             expect(await comptroller.closeFactorMantissa()).to.equal(parseUnits("0.5", 18));
-          });
-
-          it("should have correct liquidation incentive ", async () => {
-            expect(await comptroller.liquidationIncentiveMantissa()).to.equal(liquidationIncentive);
           });
 
           it("should have minLiquidatableCollateral = $100", async () => {

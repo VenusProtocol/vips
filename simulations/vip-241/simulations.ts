@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -26,10 +27,10 @@ import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import VTreasurer_ABI from "./abi/VTreasury.json";
 
 forking(35355081, () => {
-  let btc: ethers.Contract;
-  let eth: ethers.Contract;
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
+  let btc: Contract;
+  let eth: Contract;
+  let usdc: Contract;
+  let usdt: Contract;
   let oldBTCBal: BigNumber;
   let oldETHBal: BigNumber;
   let oldUSDCBal: BigNumber;
@@ -38,7 +39,7 @@ forking(35355081, () => {
   let oldETHBalTreasury: BigNumber;
   let oldUSDCBalTreasury: BigNumber;
   let oldUSDTBalTreasury: BigNumber;
-  let plp: ethers.Contract;
+  let plp: Contract;
 
   before(async () => {
     btc = new ethers.Contract(BTC, ERC20_ABI, ethers.provider);

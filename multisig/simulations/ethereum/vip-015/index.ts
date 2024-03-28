@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip015, { COMMUNITY_WALLET, TREASURY, XVS } from "../../../proposals/ethereum/vip-015";
-import XVS_ABI from "../../vip-015/vip-015-ethereum/abi/XVS.json";
+import XVS_ABI from "./abi/XVS.json";
 
 forking(19474280, () => {
   let xvs: Contract;

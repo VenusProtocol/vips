@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -25,8 +26,8 @@ import COMTROLLER_ABI from "./abi/comptroller.json";
 
 forking(35700072, () => {
   const provider = ethers.provider;
-  let corePoolComptroller: ethers.Contract;
-  let ilDefiComptroller: ethers.Contract;
+  let corePoolComptroller: Contract;
+  let ilDefiComptroller: Contract;
 
   before(async () => {
     corePoolComptroller = new ethers.Contract(COMPTROLLER, COMTROLLER_ABI, provider);

@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
@@ -16,9 +17,9 @@ const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
 forking(31942719, () => {
-  let accessControlManager: ethers.Contract;
-  let comptroller: ethers.Contract;
-  let liquidator: ethers.Contract;
+  let accessControlManager: Contract;
+  let comptroller: Contract;
+  let liquidator: Contract;
   const provider = ethers.provider;
   let impersonatedLiquidator: any;
 
