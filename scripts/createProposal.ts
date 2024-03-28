@@ -3,17 +3,17 @@ import Ajv from "ajv";
 import { BigNumber } from "ethers";
 import fs from "fs/promises";
 import { network } from "hardhat";
+import readline from "readline-sync";
 
 import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../src/multisig/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
+import { SUPPORTED_NETWORKS } from "../src/types";
 import { getCalldatas, proposalSchema } from "../src/utils";
-
-const readline = require("readline-sync");
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
 
 let vipPath: string;
-let governorAddress: string | null;
+let governorAddress: string;
 let transactionType: string;
 
 function processInputs(): Promise<void> {
@@ -24,7 +24,7 @@ function processInputs(): Promise<void> {
     transactionType = readline.question("Type of the proposal txBuilder/venusApp/bsc/gnosisTXBuilder => ");
     governorAddress = readline.question("Address of the governance contract (optional, press enter to skip) => ");
     if (!governorAddress) {
-      governorAddress = null;
+      governorAddress = "";
     }
     resolve();
   });
@@ -61,11 +61,13 @@ const processTxBuilder = async () => {
 };
 
 const processGnosisTxBuilder = async () => {
-  const safeAddress = getSafeAddress(network.name);
+  const safeAddress = getSafeAddress(network.name as Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">);
 
-  const txID = readline.question("Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => ");
+  const multisigVipPath = readline.question(
+    "Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ",
+  );
 
-  const proposal = await loadMultisigTx(txID, network.name);
+  const proposal = await loadMultisigTx(multisigVipPath);
   const multisigTx = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
 
@@ -110,8 +112,9 @@ const createProposal = async () => {
   } else {
     result = await processBscProposal();
   }
-  console.log(result);
-  await fs.writeFile(`${transactionType}.json`, result);
+  if (result) {
+    await fs.writeFile(`${transactionType}.json`, result);
+  }
 };
 
-createProposal();
+export default createProposal();

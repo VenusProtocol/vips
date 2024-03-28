@@ -4,18 +4,17 @@ import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../networkAddresses";
-import { setMaxStalePeriod } from "../../utils";
+import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
 import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-const DEFAULT_SUPPLIER = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].VTREASURY;
-const POOL_REGISTRY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].POOL_REGISTRY;
-const RESILIENT_ORACLE = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].RESILIENT_ORACLE;
+const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK");
+const DEFAULT_SUPPLIER = getForkedNetworkAddress("VTREASURY");
+const POOL_REGISTRY = getForkedNetworkAddress("POOL_REGISTRY");
+const RESILIENT_ORACLE = getForkedNetworkAddress("RESILIENT_ORACLE");
 
 interface PoolMetadata {
   name: string;
@@ -54,14 +53,14 @@ const calculateBorrowableAmount = async (
 
 const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   console.log(`${pool.name} > generic comptroller checks for pool`);
-  let supplyMarket: Contract;
-  let borrowMarket: Contract;
-  let supplyUnderlying: Contract;
-  let borrowUnderlying: Contract;
+  let supplyMarket: Contract | undefined = undefined;
+  let borrowMarket: Contract | undefined = undefined;
+  let supplyUnderlying: Contract | undefined = undefined;
+  let borrowUnderlying: Contract | undefined = undefined;
 
-  impersonateAccount(poolSupplier);
+  await impersonateAccount(poolSupplier);
   await setBalance(poolSupplier, ethers.utils.parseEther("5"));
-  impersonateAccount(NORMAL_TIMELOCK);
+  await impersonateAccount(NORMAL_TIMELOCK);
   const signer: Signer = await ethers.getSigner(poolSupplier);
   const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
 
@@ -88,8 +87,8 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     }
   }
 
-  await setMaxStalePeriod(resilientOracle, supplyUnderlying);
-  await setMaxStalePeriod(resilientOracle, borrowUnderlying);
+  await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
+  await setMaxStalePeriod(resilientOracle, borrowUnderlying as Contract);
 
   console.log(`${pool.name} > check if comptroller`);
   expect(await comptroller.isComptroller()).to.equal(true);
@@ -97,44 +96,44 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   console.log(
     `${
       pool.name
-    } > operations - supplying ${await supplyUnderlying.symbol()} | borrowing ${await borrowUnderlying.symbol()}`,
+    } > operations - supplying ${await supplyUnderlying?.symbol()} | borrowing ${await borrowUnderlying?.symbol()}`,
   );
-  const supplyUnderlyingDecimals = await supplyUnderlying.decimals();
+  const supplyUnderlyingDecimals = await supplyUnderlying?.decimals();
   const initialSupplyAmount = parseUnits("0.05", supplyUnderlyingDecimals);
-  const balance = await supplyUnderlying.balanceOf(poolSupplier);
+  const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
-  const originalSupplyMarketBalance = await supplyMarket.balanceOf(poolSupplier);
+  const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
 
-  await supplyUnderlying.approve(supplyMarket.address, supplyAmountScaled);
-  await supplyMarket.mint(supplyAmountScaled);
+  await supplyUnderlying?.approve(supplyMarket?.address, supplyAmountScaled);
+  await supplyMarket?.mint(supplyAmountScaled);
 
-  expect(await supplyMarket.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
+  expect(await supplyMarket?.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
 
-  await comptroller.enterMarkets([borrowMarket.address, supplyMarket.address]);
+  await comptroller.enterMarkets([borrowMarket?.address, supplyMarket?.address]);
 
-  let borrowUnderlyingBalance = await borrowUnderlying.balanceOf(poolSupplier);
-  const borrowUnderlyingDecimals = await borrowUnderlying.decimals();
+  let borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
+  const borrowUnderlyingDecimals = await borrowUnderlying?.decimals();
 
   let borrowAmount = await calculateBorrowableAmount(
     comptroller,
     resilientOracle,
-    supplyMarket,
-    borrowMarket,
+    supplyMarket as Contract,
+    borrowMarket as Contract,
     borrowUnderlyingDecimals,
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
-  await borrowMarket.borrow(borrowAmount);
-  expect(await borrowUnderlying.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
+  await borrowMarket?.borrow(borrowAmount);
+  expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
-  borrowUnderlyingBalance = await borrowUnderlying.balanceOf(poolSupplier);
-  await borrowUnderlying.approve(borrowMarket.address, borrowAmount);
-  await borrowMarket.repayBorrow(borrowAmount);
-  expect(await borrowUnderlying.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
+  borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
+  await borrowUnderlying?.approve(borrowMarket?.address, borrowAmount);
+  await borrowMarket?.repayBorrow(borrowAmount);
+  expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
 
-  const supplyUnderlyingBalance = await supplyUnderlying.balanceOf(poolSupplier);
-  await supplyMarket.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
-  expect(await supplyUnderlying.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
+  const supplyUnderlyingBalance = await supplyUnderlying?.balanceOf(poolSupplier);
+  await supplyMarket?.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
+  expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
   console.log(`${pool.name} > set storage`);
   const originalOracle = await comptroller.oracle();

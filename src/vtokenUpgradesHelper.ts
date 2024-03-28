@@ -1,32 +1,31 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
-export interface storageLayout {
-  name: string;
-  symbol: string;
-  decimals: number;
-  owner: string;
-  comptroller: string;
-  interestRateModel: string;
-  reserveFactorMantissa: BigNumber;
-  accrualBlockNumber: BigNumber;
-  borrowIndex: BigNumber;
-  totalBorrows: BigNumber;
-  totalSupply: BigNumber;
-  totalReserves: BigNumber;
-  underlying: string;
-  accountBalance: BigNumber;
-  borrowBalance: BigNumber;
-  borrowRatePerBlock: BigNumber;
-  pendingOwner: string;
-  protocolShareReserve: string;
-  shortfall: string;
-  supplyRatePerBlock: BigNumber;
+export interface StorageLayout {
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  owner?: string;
+  comptroller?: string;
+  interestRateModel?: string;
+  reserveFactorMantissa?: BigNumber;
+  accrualBlockNumber?: BigNumber;
+  borrowIndex?: BigNumber;
+  totalBorrows?: BigNumber;
+  totalSupply?: BigNumber;
+  totalReserves?: BigNumber;
+  underlying?: string;
+  accountBalance?: BigNumber;
+  borrowBalance?: BigNumber;
+  borrowRatePerBlock?: BigNumber;
+  pendingOwner?: string;
+  supplyRatePerBlock?: BigNumber;
 }
 
-export const fetchVTokenStorageIL = async (vToken: ethers.Contract, user: string) => {
+export const fetchVTokenStorageIL = async (vToken: Contract, user: string) => {
   const name = await vToken.name();
   const symbol = await vToken.symbol();
   const decimals = await vToken.decimals();
@@ -72,7 +71,7 @@ export const fetchVTokenStorageIL = async (vToken: ethers.Contract, user: string
   };
 };
 
-export const fetchVTokenStorageCore = async (vToken: ethers.Contract, user: string) => {
+export const fetchVTokenStorageCore = async (vToken: Contract, user: string): Promise<StorageLayout> => {
   const name = await vToken.name();
   const symbol = await vToken.symbol();
   const decimals = await vToken.decimals();
@@ -121,8 +120,8 @@ export const performVTokenBasicActions = async (
   borrowAmount: BigNumber,
   repayAmount: BigNumber,
   redeemAmount: BigNumber,
-  vToken: ethers.Contract,
-  underlying: ethers.Contract,
+  vToken: Contract,
+  underlying: Contract,
   isUnderlyingMock: boolean,
 ) => {
   const underlyingDecimals = await underlying.decimals();

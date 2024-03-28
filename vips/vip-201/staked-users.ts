@@ -10,7 +10,7 @@ const stakedAt: any = [];
 const buildList = () => {
   for (const address in users) {
     addresses.push(address);
-    stakedAt.push(users[address]);
+    stakedAt.push(users[address as keyof typeof users]);
   }
 };
 

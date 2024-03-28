@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -42,12 +43,12 @@ const BASE_RATE_BEFORE_VIP = parseUnits("0.01", 18);
 
 forking(30501836, () => {
   const provider = ethers.provider;
-  let vai: ethers.Contract;
-  let vaiControllerProxy: ethers.Contract;
-  let accessControlManager: ethers.Contract;
-  let resilientOracle: ethers.Contract;
-  let usdt: ethers.Contract;
-  let psm: ethers.Contract;
+  let vai: Contract;
+  let vaiControllerProxy: Contract;
+  let accessControlManager: Contract;
+  let resilientOracle: Contract;
+  let usdt: Contract;
+  let psm: Contract;
   let psmSigner: Signer;
   let tokenHolder: Signer;
   let vaiHolder: Signer;

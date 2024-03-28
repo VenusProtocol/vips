@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -32,15 +33,15 @@ const BNB_RATE_MODEL_CURR = "0x1B047f9717154EA5EC59674273d50a137212cBb4";
 const MATIC_RATE_MODEL_CURR = "0xC6F3f4D5421E70CB6C32C7402E51C8894A40F29a";
 
 forking(28541594, () => {
-  let comptroller: ethers.Contract;
-  let rateModel: ethers.Contract;
-  let vEth: ethers.Contract;
-  let vBtc: ethers.Contract;
-  let vLink: ethers.Contract;
-  let vLtc: ethers.Contract;
-  let vMatic: ethers.Contract;
-  let vXrp: ethers.Contract;
-  let vBnb: ethers.Contract;
+  let comptroller: Contract;
+  let rateModel: Contract;
+  let vEth: Contract;
+  let vBtc: Contract;
+  let vLink: Contract;
+  let vLtc: Contract;
+  let vMatic: Contract;
+  let vXrp: Contract;
+  let vBnb: Contract;
   const provider = ethers.provider;
 
   const toBlockRate = (ratePerYear: BigNumber): BigNumber => {

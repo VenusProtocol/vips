@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -12,8 +12,8 @@ import VTreasurey_ABI from "./abi/VTreasury.json";
 forking(36789065, () => {
   let treasuryWBNBBalPrev: BigNumber;
   let timelockVBNBBalPrev: BigNumber;
-  let wbnbContract: ethers.Contract;
-  let vbnbContract: ethers.Contract;
+  let wbnbContract: Contract;
+  let vbnbContract: Contract;
 
   before(async () => {
     wbnbContract = new ethers.Contract(WBNB, IERC20_ABI, ethers.provider);

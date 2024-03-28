@@ -1,7 +1,7 @@
 import { loadFixture, mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, BigNumberish } from "ethers";
+import { BigNumber, BigNumberish, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 
@@ -31,8 +31,8 @@ forking(24265539, () => {
   describe("VIP-80 Post-upgrade behavior", async () => {
     const BLOCKS_PER_YEAR = 10512000n;
     const interestPerBlock = parseUnits("0.01", 18).div(BLOCKS_PER_YEAR);
-    let comptroller: ethers.Contract;
-    let vaiController: ethers.Contract;
+    let comptroller: Contract;
+    let vaiController: Contract;
     let vaiUser: SignerWithAddress;
 
     // Computes simple interest taking rounding into account

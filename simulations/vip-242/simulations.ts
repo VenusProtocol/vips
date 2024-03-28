@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -9,7 +10,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import SETTER_FACET_ABI from "./abi/SetterFacet.json";
 
 forking(35215431, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);

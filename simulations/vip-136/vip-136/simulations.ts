@@ -440,7 +440,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     vTokenReceiver: treasuries["Tron Ecosystem"],
   },
 
-  //Pool Liquid Staked BNB
+  // Pool Liquid Staked BNB
   vankrBNB_LiquidStakedBNB: {
     borrowCap: "5600",
     supplyCap: "8000",
@@ -582,7 +582,7 @@ forking(29562000, () => {
     await governor.connect(admin)._setProposalMaxOperations(200);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       { name, symbol, decimals, underlying, exchangeRate, comptroller }: VTokenState,
@@ -621,7 +621,7 @@ forking(29562000, () => {
     };
 
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      checkVToken(address, vTokenState[symbol]);
+      await checkVToken(address, vTokenState[symbol]);
     }
   });
 

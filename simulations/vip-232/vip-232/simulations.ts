@@ -1,5 +1,7 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -29,9 +31,9 @@ const XVS_FEED = "0xBF63F430A79D4036A5900C19818aFf1fa710f206";
 
 forking(34769469, () => {
   const provider = ethers.provider;
-  let bridge: ethers.Contract;
-  let bridgeAdmin: ethers.Contract;
-  let xvs: ethers.Contract;
+  let bridge: Contract;
+  let bridgeAdmin: Contract;
+  let xvs: Contract;
   let xvsHolderSigner: SignerWithAddress;
   let receiver: SignerWithAddress;
   let receiverAddressBytes32: string;
@@ -102,8 +104,8 @@ forking(34769469, () => {
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
-      expect(
-        await bridge
+      await expect(
+        bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,

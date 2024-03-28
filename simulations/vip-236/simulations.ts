@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -19,9 +20,9 @@ import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
 forking(35116910, () => {
-  let btc: ethers.Contract;
-  let eth: ethers.Contract;
-  let usdt: ethers.Contract;
+  let btc: Contract;
+  let eth: Contract;
+  let usdt: Contract;
   let oldBTCBal: BigNumber;
   let oldETHBal: BigNumber;
   let oldUSDTBal: BigNumber;

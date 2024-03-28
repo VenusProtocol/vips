@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Signer } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../src/utils";
@@ -23,10 +24,10 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 forking(30622030, async () => {
   const provider = ethers.provider;
-  let xvsVault: ethers.Contract;
-  let vaiVault: ethers.Contract;
-  let vrtVault: ethers.Contract;
-  let accessControlManager: ethers.Contract;
+  let xvsVault: Contract;
+  let vaiVault: Contract;
+  let vrtVault: Contract;
+  let accessControlManager: Contract;
   let xvsVaultSigner: Signer;
   let vaiVaultSigner: Signer;
   let vrtVaultSigner: Signer;

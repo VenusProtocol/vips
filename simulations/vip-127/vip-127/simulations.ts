@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Signer } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
@@ -29,11 +30,11 @@ const LAST_ACCRUING_BLOCK = "29108355";
 
 forking(29007919, async () => {
   const provider = ethers.provider;
-  let xvsVault: ethers.Contract;
-  let vaiVault: ethers.Contract;
-  let vrtVault: ethers.Contract;
-  let accessControlManager: ethers.Contract;
-  let vrtVaultProxy: ethers.Contract;
+  let xvsVault: Contract;
+  let vaiVault: Contract;
+  let vrtVault: Contract;
+  let accessControlManager: Contract;
+  let vrtVaultProxy: Contract;
   let xvsVaultSigner: Signer;
   let vaiVaultSigner: Signer;
   let vrtVaultSigner: Signer;

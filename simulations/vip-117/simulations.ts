@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,9 +22,9 @@ const VSXP_RESERVES_NOT_REDUCED = "69458726743711838972";
 const SXP_TREASURY_BALANCE = "25610823482588636519545";
 
 forking(28148357, () => {
-  let comptroller: ethers.Contract;
-  let sxpContract: ethers.Contract;
-  let vsxpContract: ethers.Contract;
+  let comptroller: Contract;
+  let sxpContract: Contract;
+  let vsxpContract: Contract;
   const provider = ethers.provider;
 
   before(async () => {

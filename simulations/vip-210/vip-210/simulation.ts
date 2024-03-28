@@ -26,6 +26,13 @@ const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 
+interface vTokenConfig {
+  name: string;
+  assetAddress: string;
+  marketAddress: string;
+  feed: string;
+}
+
 const vTokens: vTokenConfig[] = [
   {
     name: "vUSDC",
@@ -107,7 +114,7 @@ forking(33770465, () => {
     let primeProxy: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       await impersonateAccount(DEFAULT_PROXY_ADMIN);
       const signer = await ethers.getSigner(STAKED_USER);
 

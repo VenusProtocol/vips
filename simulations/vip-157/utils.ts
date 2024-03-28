@@ -1,17 +1,17 @@
 import { expect } from "chai";
 import { BigNumber, Signer } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 
 const MANTISSA_ONE = parseUnits("1", 18);
 const BASIS_POINT_DIVISOR = BigNumber.from(10000);
 export async function swapStableForVAIAndValidate(
-  psm: ethers.Contract,
-  stableToken: ethers.Contract,
+  psm: Contract,
+  stableToken: Contract,
   stableTokenPrice: BigNumber,
   tokenSigner: Signer,
   tokenHolder: string,
-  VAI: ethers.Contract,
+  VAI: Contract,
   feeIn: BigNumber,
   tokenDecimals: number,
   oneDollar: BigNumber,
@@ -32,12 +32,12 @@ export async function swapStableForVAIAndValidate(
 }
 
 export async function swapVAIForStableAndValidate(
-  psm: ethers.Contract,
+  psm: Contract,
   stableTokenPrice: BigNumber,
-  VAI: ethers.Contract,
+  VAI: Contract,
   vaiSigner: Signer,
   feeOut: BigNumber,
-  stableToken: ethers.Contract,
+  stableToken: Contract,
   tokenDecimals: number,
   oneDollar: BigNumber,
 ) {

@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
 
-const transaction = require("../src/transactions");
+import * as transaction from "../src/transactions";
+
 const mockCalldata =
   "0xda95691a00000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000000000022000000000000000000000000000000000000000000000000000000000000000010000000000000000000000002d56dc077072b53571b8252008c60e945108c75a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000157465737446756e6374696f6e2875696e7432353629000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000003e800000000000000000000000000000000000000000000000000000000000000197b226465736372697074696f6e223a2274657374696e67227d00000000000000";
 
@@ -33,27 +34,27 @@ describe("proposeVIP", () => {
   it("should match calldata without proposal type", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.calldata).equal(mockCalldata);
   });
 
   it("should match calldata with proposal type", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput1);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.calldata).equal(mockCalldataWithType);
   });
   it("should return default governor address if not provided", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1);
+    const result = await transaction.proposeVIP("1");
     expect(result.target).equal(DEFAULT_GOVERNOR_PROXY);
   });
   it("should return provided governor address if provided", async () => {
     const loadProposalStub = sinon.stub().returns(mockedInput);
     const governorAddress = "0x295e26495CEF6F69dFA69911d9D8e4F3bBadB89B";
     sinon.replace(transaction, "loadProposal", loadProposalStub);
-    const result = await transaction.proposeVIP(1, governorAddress);
+    const result = await transaction.proposeVIP("1", governorAddress);
     expect(result.target).equal(governorAddress);
   });
 });

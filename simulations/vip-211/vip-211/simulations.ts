@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -23,7 +24,6 @@ const BNB_PRICE_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
 const VAI_ADDRESS = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
 const TRX_OLD = "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B";
-const CHAINLINK_TRX_FEED = "0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be";
 const REDSTONE_TRX_FEED = "0xa17362dd9ad6d0af646d7c8f8578fddbfc90b916";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -34,10 +34,10 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
 forking(33548990, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let redStoneOracle: ethers.Contract;
-  let defaultProxyAdmin: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let redStoneOracle: Contract;
+  let defaultProxyAdmin: Contract;
+  let boundValidator: Contract;
   let preTRXPrice: BigNumber;
   let preTRX_OLDPrice: BigNumber;
   let preBNBPrice: BigNumber;

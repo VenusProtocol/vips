@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
@@ -14,8 +15,8 @@ const VENUS_DEPLOYER = "0x1ca3Ac3686071be692be7f1FBeCd668641476D7e";
 
 forking(27430345, () => {
   const provider = ethers.provider;
-  let vai: ethers.Contract;
-  let vaiControllerProxy: ethers.Contract;
+  let vai: Contract;
+  let vaiControllerProxy: Contract;
 
   before(async () => {
     vai = new ethers.Contract(VAI, VAI_ABI, provider);

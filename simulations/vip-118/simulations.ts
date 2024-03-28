@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,7 +20,7 @@ forking(28140349, () => {
 // reset the fork to reduce the required tolerance.
 forking(28140349, () => {
   describe("Post-VIP behavior", async () => {
-    let vToken: ethers.Contract;
+    let vToken: Contract;
     let prevBalance: BigNumber;
 
     before(async () => {

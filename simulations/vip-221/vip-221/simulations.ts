@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -20,7 +21,7 @@ const NEW_XVS_SUPPLY_CAP = parseUnits("1750000", 18);
 const OLD_XVS_SUPPLY_CAP = parseUnits("1500000", 18);
 
 forking(34516215, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

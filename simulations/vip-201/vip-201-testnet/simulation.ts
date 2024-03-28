@@ -57,7 +57,7 @@ forking(34867069, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       const signer = await ethers.getSigner(STAKED_USER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
@@ -91,7 +91,7 @@ forking(34867069, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       const signer = await ethers.getSigner(STAKED_USER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);

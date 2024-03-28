@@ -1,3 +1,4 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
@@ -43,8 +44,8 @@ forking(32162545, () => {
     vagEUR = await ethers.getContractAt(VTOKEN_ABI, VagEUR_Stablecoins);
   });
 
-  describe("Contracts setup", () => {
-    checkVToken(VagEUR_Stablecoins, {
+  describe("Contracts setup", async () => {
+    await checkVToken(VagEUR_Stablecoins, {
       name: "Venus agEUR (Stablecoins)",
       symbol: "vagEUR_Stablecoins",
       decimals: 8,
@@ -211,7 +212,7 @@ forking(32162545, () => {
     });
 
     describe("Token prices", () => {
-      let resilientOracle: ethers.Contract;
+      let resilientOracle: Contract;
 
       before(async () => {
         resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, await comptroller.oracle());

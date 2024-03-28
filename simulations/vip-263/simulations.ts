@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -29,16 +30,16 @@ import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
 forking(36530861, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
-  let xvs: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
+  let xvs: Contract;
   let prevUSDTBalanceOfCertik: BigNumber;
   let prevUSDCBalanceOfQuantstamp: BigNumber;
   let prevBNBBalanceOfTreasury: BigNumber;
   let prevUSDTBalanceOfCommunity: BigNumber;
   let prevXVSBalanceOfXVSReceiver: BigNumber;
   let prevBNBBalanceOfCommunity: BigNumber;
-  let xvsBridge: ethers.Contract;
+  let xvsBridge: Contract;
   let oldCirculatingSupply: BigNumber;
   let oldXVSBalance: BigNumber;
 

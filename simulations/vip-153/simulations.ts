@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -16,8 +17,8 @@ import {
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(30505308, () => {
-  let gamefiComptroller: ethers.Contract;
-  let lstComptroller: ethers.Contract;
+  let gamefiComptroller: Contract;
+  let lstComptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

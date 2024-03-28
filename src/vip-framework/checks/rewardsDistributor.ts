@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { NORMAL_TIMELOCK } from "..";
@@ -16,6 +16,34 @@ export interface RewardsDistributorConfig {
   supplySpeed: BigNumberish;
   totalRewardsToDistribute: BigNumberish;
 }
+
+type RewardsDistributorId =
+  | "RewardsDistributor_BSW_DeFi"
+  | "RewardsDistributor_FLOKI_GameFi"
+  | "RewardsDistributor_HAY_Stablecoins"
+  | "RewardsDistributor_RACA_GameFi"
+  | "RewardsDistributor_BTT_Tron"
+  | "RewardsDistributor_TRX_Tron"
+  | "RewardsDistributor_USDD_Tron"
+  | "RewardsDistributor_WIN_Tron"
+  | "RewardsDistributor_ankrBNB_LiquidStakedBNB"
+  | "RewardsDistributor_stkBNB_LiquidStakedBNB"
+  | "RewardsDistributor_ST_LiquidStakedBNB"
+  | "RewardsDistributor_PLANET_DeFi"
+  | "RewardsDistributor_agEUR_Stablecoins"
+  | "RewardsDistributor_SD_LiquidStakedBNB"
+  | "RewardsDistributor_Core_0_WETH"
+  | "RewardsDistributor_Core_0_VWBTC"
+  | "RewardsDistributor_Core_0_USDT"
+  | "RewardsDistributor_Core_0_USDC"
+  | "RewardsDistributor_Core_0_CRVUSD"
+  | "RewardsDistributor_Core_1"
+  | "RewardsDistributor_Curve_0_CRV"
+  | "RewardsDistributor_Curve_0_CRVUSD"
+  | "RewardsDistributor_Curve_1_CRVUSD"
+  | "RewardsDistributor_LST_0_WSTETH"
+  | "RewardsDistributor_LST_0_WETH"
+  | "RewardsDistributor_LST_1_WSTETH";
 
 export const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {
   describe(id, () => {

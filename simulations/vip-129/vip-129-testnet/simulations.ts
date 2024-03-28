@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -20,11 +21,11 @@ const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
 forking(30680185, () => {
-  let comptroller: ethers.Contract;
-  let tusd: ethers.Contract;
-  let vTusdOld: ethers.Contract;
-  let vTusd: ethers.Contract;
-  let oracle: ethers.Contract;
+  let comptroller: Contract;
+  let tusd: Contract;
+  let vTusdOld: Contract;
+  let vTusd: Contract;
+  let oracle: Contract;
   const provider = ethers.provider;
 
   before(async () => {

@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,9 +20,9 @@ import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
 forking(36506196, () => {
-  let vUSDCContract: ethers.Contract;
-  let vUSDTContract: ethers.Contract;
-  let vETHContract: ethers.Contract;
+  let vUSDCContract: Contract;
+  let vUSDTContract: Contract;
+  let vETHContract: Contract;
   let prevUSDCBalance: BigNumber;
   let prevUSDTBalance: BigNumber;
   let prevETHBalance: BigNumber;
