@@ -5,12 +5,12 @@ export const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 export const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
 export const TEMP_VTOKEN_IMPL = "0xD2E69514F33111093586a25D75A306B66f75F658";
 export const vagEUR = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
-export const VTOKEN_IMPL = "0x9A8ADe92b2D71497b6F19607797F2697cF30f03A";
+export const VTOKEN_IMPL = "0x1EC822383805FfDb9dC2Ae456DF8C0Ca2Bf14d7d";
 
-export const vip276 = () => {
+export const vip278 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-276 Rebrand agEUR into EURA (2/2)",
+    title: "VIP-278 Rebrand agEUR into EURA (2/2)",
     description: `#### Summary
 
 If passed, this VIP will perform the following actions:
@@ -19,7 +19,7 @@ If passed, this VIP will perform the following actions:
     - vagEUR_StableCoins -> vEURA_Stablecoins
 - Update the name of the same VToken:
     - Venus agEUR (Stable Coins) -> Venus EURA (Stablecoins)
-- Configure the price feeds of the EROA token, using the [BinanceOracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820)
+- Configure the price feeds of the EURA token, using the [BinanceOracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820)
 
 #### Details
 
@@ -72,4 +72,4 @@ Angle Protocol rebranded agEUR into EURA ([snapshot](https://snapshot.org/#/angl
   );
 };
 
-export default vip276;
+export default vip278;

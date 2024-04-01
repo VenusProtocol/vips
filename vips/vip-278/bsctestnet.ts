@@ -7,10 +7,10 @@ export const TEMP_VTOKEN_IMPL = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 export const vagEUR = "0x4E1D35166776825402d50AfE4286c500027211D1";
 export const VTOKEN_IMPL = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
 
-export const vip276 = () => {
+export const vip278 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-276",
+    title: "VIP-278",
     description: "",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -50,4 +50,4 @@ export const vip276 = () => {
   );
 };
 
-export default vip276;
+export default vip278;
