@@ -38,7 +38,7 @@ If passed this VIP will perform the following actions:
 **Certik - retainer program**
 
 - Auditor: Certik ([https://certik.com](https://certik.com/))
-- Concept: Retainer program - monthly payment of March 2024. Scheduled audits by Certik in March: custom oracles for Liquid Staked Tokens and unlist market feature
+- Concept: Retainer program - monthly payment of April 2024. Scheduled audits by Certik in April: mesh pattern for the XVS bridges
 - Cost: 19,000 USDT, to be sent to the BEP20 address 0x4cf605b238e9c3c72d0faed64d12426e4a54ee12
 
 **Quantstamp - retainer program**
