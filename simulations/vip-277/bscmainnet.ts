@@ -4,8 +4,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import vip276 from "../../vips/vip-276/bscmainnet";
+import { forking, testVip } from "../../src/vip-framework";
 import { UNITROLLER, vip277 } from "../../vips/vip-277/bscmainnet";
 import { accounts3, accounts4, accounts5, accounts6 } from "../../vips/vip-277/users";
 import CORE_POOL_ABI from "./abi/CorePoolComptroller.json";
@@ -15,11 +14,9 @@ const accounts = [...accounts3, ...accounts4, ...accounts5, ...accounts6];
 const provider = ethers.provider;
 let unitroller: Contract;
 
-forking(36962090, () => {
+forking(37478158, () => {
   before(async () => {
     unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
-
-    await pretendExecutingVip(vip276());
   });
 
   testVip("VIP-SeizeVenus", vip277(), {
