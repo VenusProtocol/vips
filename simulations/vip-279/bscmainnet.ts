@@ -5,8 +5,8 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { UNITROLLER, vip277 } from "../../vips/vip-277/bscmainnet";
-import { accounts3, accounts4, accounts5, accounts6 } from "../../vips/vip-277/users";
+import { UNITROLLER, vip279 } from "../../vips/vip-279/bscmainnet";
+import { accounts3, accounts4, accounts5, accounts6 } from "../../vips/vip-279/users";
 import CORE_POOL_ABI from "./abi/CorePoolComptroller.json";
 
 const accounts = [...accounts3, ...accounts4, ...accounts5, ...accounts6];
@@ -19,7 +19,7 @@ forking(37478158, () => {
     unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
   });
 
-  testVip("VIP-SeizeVenus", vip277(), {
+  testVip("VIP-279", vip279(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_POOL_ABI], ["VenusSeized", "VenusGranted"], [12, 4]);
     },
