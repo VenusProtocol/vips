@@ -14,7 +14,7 @@ The recovered XVS will be sent to the [XVS Distributor contract](https://bscscan
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/195/files#diff-e998ae710cbf17219ac8c4ab6e7a6ff27964cf21188515798c0d0bffff089627)`,
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/195)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
