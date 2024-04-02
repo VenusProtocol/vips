@@ -44,7 +44,7 @@ forking(19420533, () => {
 
       await network.provider.send("hardhat_setCode", [XVS_ADMIN, "0x"]);
 
-      await accounts[0].sendTransaction({ to: XVS_ADMIN, value: parseUnits("1") });
+      await accounts[0].sendTransaction({ to: XVS_ADMIN, value: parseUnits("4") });
       await xvs.mint(GENERIC_TEST_USER_ACCOUNT, parseUnits("1000", 18));
     });
 
