@@ -18,8 +18,8 @@ import {
 } from "../vip-006/vip-006-ethereum";
 
 // TODO: Input the correct REWARDS_START_BLOCK
-// Start block considered Multisig tx executed <ethereum tx for reward config>
-const REWARDS_START_BLOCK = 1;
+// Start block considered Multisig tx executed https://etherscan.io/tx/0x832d6510cb2d9595d04216436a5fb6248fd2820fd33d0a147497fc3bac07e2f9
+const REWARDS_START_BLOCK = 19562819;
 const REWARDS_END_BLOCK_90_DAYS = REWARDS_START_BLOCK + 648000;
 const REWARDS_END_BLOCK_30_DAYS = REWARDS_START_BLOCK + 216000;
 
