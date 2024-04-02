@@ -57,7 +57,7 @@ forking(29441800, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, USDT, USDT_FEED, NORMAL_TIMELOCK);
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -107,7 +107,7 @@ forking(29441800, () => {
       });
     };
 
-    checkVToken(VHAY_STABLECOINS, {
+    await checkVToken(VHAY_STABLECOINS, {
       name: "Venus HAY (Stablecoins)",
       symbol: "vHAY_Stablecoins",
       decimals: 8,
@@ -115,7 +115,7 @@ forking(29441800, () => {
       exchangeRate: parseUnits("1", 28),
     });
 
-    checkVToken(VUSDT_STABLECOINS, {
+    await checkVToken(VUSDT_STABLECOINS, {
       name: "Venus USDT (Stablecoins)",
       symbol: "vUSDT_Stablecoins",
       decimals: 8,
@@ -123,7 +123,7 @@ forking(29441800, () => {
       exchangeRate: parseUnits("1", 28),
     });
 
-    checkVToken(VUSDD_STABLECOINS, {
+    await checkVToken(VUSDD_STABLECOINS, {
       name: "Venus USDD (Stablecoins)",
       symbol: "vUSDD_Stablecoins",
       decimals: 8,

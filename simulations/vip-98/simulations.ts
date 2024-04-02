@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -23,11 +24,11 @@ forking(25892445, () => {
 });
 
 forking(25892445, () => {
-  let comptroller: ethers.Contract;
-  let trx: ethers.Contract;
-  let vTrxOld: ethers.Contract;
-  let vTrx: ethers.Contract;
-  let oracle: ethers.Contract;
+  let comptroller: Contract;
+  let trx: Contract;
+  let vTrxOld: Contract;
+  let vTrx: Contract;
+  let oracle: Contract;
   const provider = ethers.provider;
 
   before(async () => {

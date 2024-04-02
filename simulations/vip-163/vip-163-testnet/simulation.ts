@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -24,8 +25,6 @@ const STABLE_COINS_POOL = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 const LIQUID_STAKED_BNB_POOL = "0x596B11acAACF03217287939f88d63b51d3771704";
 const HAY_TOKEN = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
 const SD_TOKEN = "0xac7D6B77EBD1DB8C5a9f0896e5eB5d485CB677b3";
-const HAY_AMOUNT = "2000000000000000000000";
-const SD_AMOUNT = "2000000000000000000000";
 const MARKET_BNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
 const MARKET_HAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -51,9 +50,9 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
 };
 
 forking(32763372, () => {
-  let comptrollerBeacon: ethers.Contract;
-  let hayRewardsDistributor: ethers.Contract;
-  let sdRewardsDistributor: ethers.Contract;
+  let comptrollerBeacon: Contract;
+  let hayRewardsDistributor: Contract;
+  let sdRewardsDistributor: Contract;
   const provider = ethers.provider;
 
   before(async () => {

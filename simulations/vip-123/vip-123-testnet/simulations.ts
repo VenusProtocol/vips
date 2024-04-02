@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -256,7 +257,7 @@ forking(30247983, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
-    let priceOracle: ethers.Contract;
+    let priceOracle: Contract;
 
     before(async () => {
       priceOracle = new ethers.Contract(PRICE_ORACLE, PRICE_ORACLE_ABI, provider);
@@ -286,9 +287,9 @@ forking(30247983, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    let resilientOracle: ethers.Contract;
-    let comptroller: ethers.Contract;
-    let mockVToken: ethers.Contract;
+    let resilientOracle: Contract;
+    let comptroller: Contract;
+    let mockVToken: Contract;
 
     describe("Core Pool/IL VTokens", async () => {
       before(async () => {

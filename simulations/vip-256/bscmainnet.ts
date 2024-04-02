@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -14,13 +15,13 @@ import TEMP_VTOKEN_ABI from "./abi/tempVToken.json";
 
 forking(35926690, () => {
   const provider = ethers.provider;
-  let binanceOracle: ethers.Contract;
-  let resilientOracle: ethers.Contract;
-  let vHay: ethers.Contract;
-  let vSnbnb: ethers.Contract;
+  let binanceOracle: Contract;
+  let resilientOracle: Contract;
+  let vHay: Contract;
+  let vSnbnb: Contract;
 
   before(async () => {
-    impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(NORMAL_TIMELOCK);
 
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);

@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -9,7 +10,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
 type UnderlyingTokenContracts = {
-  [key: string]: ethers.Contract;
+  [key: string]: Contract;
 };
 
 const markets: MarketInformation[] = [

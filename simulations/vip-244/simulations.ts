@@ -8,10 +8,10 @@ import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
 import { vip244 } from "../../vips/vip-244";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import MOVE_DEBT_DELEGATE_ABI from "./abi/moveDebtDelegate.json";
-import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const MOVE_DEBT_DELEGATE = "0x89621C48EeC04A85AfadFD37d32077e65aFe2226";
