@@ -72,7 +72,7 @@ If passed this VIP will perform the following actions:
 
 - Provider: NodeReal ([https://nodereal.io](https://nodereal.io/))
 - Service: Meganode Enterprise ([https://nodereal.io/meganode](https://nodereal.io/meganode)) for 11 months (April 2023 - February 2024). The Web3 RPC endpoints provided by NodeReal are used by the [official Venus UI](https://app.venus.io/) and several backend services to collect data from the different blockchains (BNB Chain, Ethereum, opBNB).
-- Cost: 26,730 USDT (2,430 USDT per month)
+- Cost: 26,730 USDT (2,430 USDT per month), to be sent to the BEP20 address 0x3266be0289c57e09f18db689cfc34ed3efe995e8
 
 #### References
 
