@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -23,8 +24,8 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
 forking(35928235, () => {
-  let accessControlManager: ethers.Contract;
-  let liquidator: ethers.Contract;
+  let accessControlManager: Contract;
+  let liquidator: Contract;
   const provider = ethers.provider;
   let impersonatedLiquidator: any;
 
@@ -231,17 +232,17 @@ forking(35928235, () => {
   });
 
   describe("Reduce Reserves and Force VAI Debt Tests", async () => {
-    let tusd: ethers.Contract;
+    let tusd: Contract;
     let liquidatorSigner: SignerWithAddress;
     let usdtHolderSigner: SignerWithAddress;
-    let oracle: ethers.Contract;
+    let oracle: Contract;
     let impersonatedTimelock: any;
-    let comptroller: ethers.Contract;
-    let btc: ethers.Contract;
-    let vaiController: ethers.Contract;
-    let vai: ethers.Contract;
-    let usdt: ethers.Contract;
-    let vtusd: ethers.Contract;
+    let comptroller: Contract;
+    let btc: Contract;
+    let vaiController: Contract;
+    let vai: Contract;
+    let usdt: Contract;
+    let vtusd: Contract;
 
     const USER = "0x8E3c1fe7c4B890e2Aa96A3F6a5813E6de8e12Fe9";
     const LIQUIDATOR_USER = "0xf977814e90da44bfa03b6295a0616a897441acec";

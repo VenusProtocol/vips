@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,11 +20,11 @@ const OLD_VTUSDOLD_INTEREST_RATE_MODEL = "0x7bDDFe540e86f1A6Da69D5d94240c6Cd6724
 const VTUSDOLD_INTEREST_RATE_MODEL = "0xfB14Dd85A26e41E4fD62b3B142b17f279c7Bb8B0";
 
 forking(32697381, () => {
-  let comptroller: ethers.Contract;
-  let defi_comptroller: ethers.Contract;
-  let rateModel: ethers.Contract;
-  let vbusd: ethers.Contract;
-  let vtusdold: ethers.Contract;
+  let comptroller: Contract;
+  let defi_comptroller: Contract;
+  let rateModel: Contract;
+  let vbusd: Contract;
+  let vtusdold: Contract;
   const provider = ethers.provider;
 
   const toBlockRate = (ratePerYear: BigNumber): BigNumber => {

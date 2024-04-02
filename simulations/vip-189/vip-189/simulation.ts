@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
@@ -44,9 +45,9 @@ forking(32659660, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
-    let vBNB: ethers.Contract;
-    let psr: ethers.Contract;
-    let riskFund: ethers.Contract;
+    let vBNB: Contract;
+    let psr: Contract;
+    let riskFund: Contract;
 
     before(async () => {
       vBNB = new ethers.Contract(vBNB_ADDRESS, vBNB_ABI, provider);
@@ -81,13 +82,13 @@ forking(32659660, () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    let vBNB: ethers.Contract;
-    let psr: ethers.Contract;
-    let vBNBAdmin: ethers.Contract;
-    let WBNB: ethers.Contract;
-    let proxyAdmin: ethers.Contract;
-    let riskFund: ethers.Contract;
-    let vBNBFallback: ethers.Contract;
+    let vBNB: Contract;
+    let psr: Contract;
+    let vBNBAdmin: Contract;
+    let WBNB: Contract;
+    let proxyAdmin: Contract;
+    let riskFund: Contract;
+    let vBNBFallback: Contract;
 
     before(async () => {
       await impersonateAccount(RANDOM_ADDRESS);

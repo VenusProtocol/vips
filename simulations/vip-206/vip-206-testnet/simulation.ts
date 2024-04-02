@@ -21,6 +21,13 @@ const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
 
+interface vTokenConfig {
+  name: string;
+  assetAddress: string;
+  feed: string;
+  marketAddress: string;
+}
+
 const vTokens: vTokenConfig[] = [
   {
     name: "vUSDC",
@@ -83,7 +90,7 @@ forking(34891729, () => {
     let prime: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       const signer = await ethers.getSigner(STAKED_USER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME, signer);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);

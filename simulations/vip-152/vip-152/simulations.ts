@@ -1,8 +1,10 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
+import { StorageLayout } from "../../../src/vtokenUpgradesHelper";
 import { vip152 } from "../../../vips/vip-152/vip-152";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -24,11 +26,11 @@ const BSW_FEED = "0x08E70777b982a58D23D05E3D7714f44837c06A21";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 forking(30362200, () => {
-  let comptroller: ethers.Contract;
-  let poolRegistry: ethers.Contract;
-  let beacon: ethers.Contract;
-  let expectedComptrollerStorage;
-  let expectedPoolStorage;
+  let comptroller: Contract;
+  let poolRegistry: Contract;
+  let beacon: Contract;
+  let expectedComptrollerStorage: StorageLayout;
+  let expectedPoolStorage: StorageLayout;
   const provider = ethers.provider;
 
   async function fetchPoolRegistryStorage() {
@@ -60,7 +62,7 @@ forking(30362200, () => {
     const closeFactorMantissa = await comptroller.closeFactorMantissa();
     const accountLiquidity = await comptroller.getAccountLiquidity(VBSW_USER);
     let allMarketsAfter = await comptroller.getAllMarkets();
-    allMarketsAfter = allMarketsAfter.filter(item => item !== VBIFI);
+    allMarketsAfter = allMarketsAfter.filter((item: string) => item !== VBIFI);
     allMarketsAfter.sort();
     const assetsIn = await comptroller.getAssetsIn(VBSW_USER);
     const borrowingPower = await comptroller.getBorrowingPower(VBSW_USER);

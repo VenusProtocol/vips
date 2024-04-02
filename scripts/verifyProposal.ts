@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 import { proposeVIP } from "../src/transactions";
 
-export async function getTransactionData(vip: number, txHash: string, networkId: number) {
+export async function getTransactionData(vip: string, txHash: string, networkId: number) {
   // create an Ethers.js provider based on the network ID
   const provider = ethers.getDefaultProvider(getNetworkName(networkId));
   // get the transaction object using the provider and transaction hash
