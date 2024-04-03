@@ -125,28 +125,25 @@ export const setMaxStalePeriod = async (
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  let binanceOracle: string;
-  let chainlinkOracle: string;
-  let redstoneOracle: string;
+  let binanceOracle: string = ethers.constants.AddressZero;
+  let chainlinkOracle: string = ethers.constants.AddressZero;
+  let redstoneOracle: string = ethers.constants.AddressZero;
 
   try {
     binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
   } catch {
-    binanceOracle = ethers.constants.AddressZero;
     console.log(`Binance Oracle is not available on ${FORKED_NETWORK}`);
   }
 
   try {
     chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
   } catch {
-    chainlinkOracle = ethers.constants.AddressZero;
     console.log(`Chainlink Oracle is not available on ${FORKED_NETWORK}`);
   }
 
   try {
     redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
   } catch {
-    redstoneOracle = ethers.constants.AddressZero;
     console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
   }
 

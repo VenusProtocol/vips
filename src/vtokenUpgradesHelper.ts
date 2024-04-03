@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { FORKED_NETWORK } from "hardhat";
 
 export interface StorageLayout {
   name?: string;
@@ -113,22 +114,16 @@ export const fetchVTokenStorageCore = async (vToken: Contract, user: string): Pr
   };
 };
 
-export const performVTokenBasicAndBehalfActions = async (
-  marketAddress: string,
+const calculateAmount = async (
   user: SignerWithAddress,
-  trustee: SignerWithAddress,
   mintAmount: BigNumber,
   borrowAmount: BigNumber,
   repayAmount: BigNumber,
   redeemAmount: BigNumber,
-  vToken: Contract,
   underlying: Contract,
-  unitroller: Contract,
-  isUnderlyingMock: boolean,
-) => {
+): Promise<{ mintAmount: BigNumber; borrowAmount: BigNumber; repayAmount: BigNumber; redeemAmount: BigNumber }> => {
   const underlyingDecimals = await underlying.decimals();
   const symbol = await underlying.symbol();
-  const redeemVTokenAmount = parseUnits("1", 8);
 
   if (symbol === "WBNB") {
     mintAmount = parseUnits("1", 18);
@@ -151,8 +146,30 @@ export const performVTokenBasicAndBehalfActions = async (
     repayAmount = parseUnits("25", 8);
     redeemAmount = parseUnits("50", 8);
   }
+  return { mintAmount, borrowAmount, repayAmount, redeemAmount };
+};
 
-  const network = process.env.FORKED_NETWORK;
+export const performVTokenBasicActions = async (
+  marketAddress: string,
+  user: SignerWithAddress,
+  mintAmount: BigNumber,
+  borrowAmount: BigNumber,
+  repayAmount: BigNumber,
+  redeemAmount: BigNumber,
+  vToken: Contract,
+  underlying: Contract,
+  isUnderlyingMock: boolean,
+) => {
+  ({ mintAmount, borrowAmount, repayAmount, redeemAmount } = await calculateAmount(
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    underlying,
+  ));
+
+  const network = FORKED_NETWORK;
   if ((network === "bsctestnet" || network === "sepolia" || network === "opbnbtestnet") && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
@@ -184,10 +201,47 @@ export const performVTokenBasicAndBehalfActions = async (
   // Redeem underlying tokens
   await vToken.connect(user).redeemUnderlying(redeemAmount);
   expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+};
+
+export const performVTokenBasicAndBehalfActions = async (
+  marketAddress: string,
+  user: SignerWithAddress,
+  trustee: SignerWithAddress,
+  mintAmount: BigNumber,
+  borrowAmount: BigNumber,
+  repayAmount: BigNumber,
+  redeemAmount: BigNumber,
+  vToken: Contract,
+  underlying: Contract,
+  unitroller: Contract,
+  isUnderlyingMock: boolean,
+) => {
+  const redeemVTokenAmount = parseUnits("1", 8);
+  ({ mintAmount, borrowAmount, repayAmount, redeemAmount } = await calculateAmount(
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    underlying,
+  ));
+
+  await performVTokenBasicActions(
+    marketAddress,
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    vToken,
+    underlying,
+    isUnderlyingMock,
+  );
 
   if (await unitroller.approvedDelegates(user.address, trustee.address)) {
     await unitroller.connect(user).updateDelegate(trustee.address, false);
   }
+  const previousBalance = await vToken.balanceOf(user.address);
 
   // reverting when trustee is not allowed to perform actions on behalf of user.
   await expect(vToken.connect(trustee).redeemUnderlyingBehalf(user.address, redeemAmount)).to.be.reverted;
