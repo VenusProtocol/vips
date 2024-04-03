@@ -1,12 +1,13 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal } from "../types";
+import { Proposal, SUPPORTED_NETWORKS } from "../types";
 import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
@@ -15,10 +16,9 @@ const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  ? NETWORK_CONFIG[process.env.FORKED_NETWORK]
-  : 0;
+  NETWORK_ADDRESSES[FORKED_NETWORK as "bsctestnet" | "bscmainnet"] || {};
+
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
 export const forking = (blockNumber: number, fn: () => void) => {
   describe(`At block #${blockNumber}`, () => {
@@ -33,7 +33,7 @@ export interface TestingOptions {
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
-  callbackAfterExecution?: Func;
+  callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
 const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
@@ -75,10 +75,13 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
-    governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
+    governorProxy = await ethers.getContractAt(
+      (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
+      GOVERNOR_PROXY,
+    );
   };
 
   describe(`${description} commands`, () => {
@@ -133,7 +136,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);

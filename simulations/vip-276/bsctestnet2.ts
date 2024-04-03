@@ -38,7 +38,6 @@ import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP_20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
 import VEBEP_20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
-import VTOKEN_ABI from "./abi/VToken.json";
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0xE1Ac99E486EBEcD40Ab4C9FF29Fe4d28be244D33";
 const OLD_VTOKEN_IMPLEMENTATION = "0xF83362aF1722b1762e21369225901B90D9b980d9";

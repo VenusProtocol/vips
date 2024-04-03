@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -17,7 +18,7 @@ const NEW_COLLATERAL_FACTOR = parseUnits("0.72", 18);
 const OLD_COLLATERAL_FACT0R = parseUnits("0.825", 18);
 
 forking(34455610, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -16,7 +17,7 @@ import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 
 forking(36987461, () => {
   const provider = ethers.provider;
-  let vaiControllerProxy: ethers.Contract;
+  let vaiControllerProxy: Contract;
   before(async () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);
     await pretendExecutingVip(vip246());
@@ -31,7 +32,7 @@ forking(36987461, () => {
 
 forking(36987461, () => {
   const provider = ethers.provider;
-  let vaiControllerProxy: ethers.Contract;
+  let vaiControllerProxy: Contract;
 
   before(async () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);

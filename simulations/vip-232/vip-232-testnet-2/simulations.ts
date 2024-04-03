@@ -1,4 +1,6 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
@@ -17,7 +19,7 @@ const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 
 forking(36784416, () => {
   const provider = ethers.provider;
-  let bridge: ethers.Contract;
+  let bridge: Contract;
 
   beforeEach(async () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVSProxyOFTSrc_ABI, provider);
