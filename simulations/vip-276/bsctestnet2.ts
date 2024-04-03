@@ -64,11 +64,11 @@ const NEW_POLICY_FACET = "0x7b17b28687B817158c20e3d1bf100106fBE794cf";
 const provider = ethers.provider;
 let user1: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
-let comptroller: ethers.Contract;
-let unitroller: ethers.Contract;
-let comptrollerBeacon: ethers.Contract;
-let vtokenBeacon: ethers.Contract;
-let nativeTokenGateway: ethers.Contract;
+let comptroller: Contract;
+let unitroller: Contract;
+let comptrollerBeacon: Contract;
+let vtokenBeacon: Contract;
+let nativeTokenGateway: Contract;
 
 let accessControlManager: string;
 let closeFactorMantissa: BigNumber;
@@ -227,8 +227,8 @@ forking(38508666, () => {
 
 // core pool vToken tests
 forking(38508666, () => {
-  let vToken: ethers.Contract;
-  let underlying: ethers.Contract;
+  let vToken: Contract;
+  let underlying: Contract;
   let user: SignerWithAddress;
   const mintAmount = parseUnits("200", 18);
   const borrowAmount = parseUnits("50", 18);

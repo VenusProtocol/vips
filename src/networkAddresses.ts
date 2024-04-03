@@ -79,6 +79,7 @@ export const NETWORK_ADDRESSES = {
     GUARDIAN: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB",
     CHAINLINK_ORACLE: oracleSepoliaContracts.addresses.ChainlinkOracle,
     RESILIENT_ORACLE: oracleSepoliaContracts.addresses.ResilientOracle,
+    REDSTONE_ORACLE: oracleSepoliaContracts.addresses.RedStoneOracle,
     XVS: tokenBridgeSepoliaContracts.addresses.XVS,
     POOL_REGISTRY: ilSepoliaDeployedContracts.addresses.PoolRegistry,
     VTREASURY: sepoliaDeployedContracts.addresses.VTreasuryV8,

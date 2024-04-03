@@ -1,7 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -55,15 +55,15 @@ const provider = ethers.provider;
 let user1: SignerWithAddress;
 let user2: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
-let comptroller: ethers.Contract;
-let unitroller: ethers.Contract;
-let vWbnb: ethers.Contract;
-let vBnbx: ethers.Contract;
-let bnbx: ethers.Contract;
-let wbnb: ethers.Contract;
-let comptrollerBeacon: ethers.Contract;
-let vtokenBeacon: ethers.Contract;
-let nativeTokenGateway: ethers.Contract;
+let comptroller: Contract;
+let unitroller: Contract;
+let vWbnb: Contract;
+let vBnbx: Contract;
+let bnbx: Contract;
+let wbnb: Contract;
+let comptrollerBeacon: Contract;
+let vtokenBeacon: Contract;
+let nativeTokenGateway: Contract;
 
 let accessControlManager: string;
 let closeFactorMantissa: BigNumber;
@@ -265,8 +265,8 @@ forking(38305470, () => {
 
 // core pool vToken tests
 forking(38305470, () => {
-  let vToken: ethers.Contract;
-  let underlying: ethers.Contract;
+  let vToken: Contract;
+  let underlying: Contract;
   let user: SignerWithAddress;
   const mintAmount = parseUnits("200", 18);
   const borrowAmount = parseUnits("50", 18);

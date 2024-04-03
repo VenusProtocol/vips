@@ -334,8 +334,8 @@ forking(36962054, () => {
 
 // core pool vToken tests
 forking(36962054, () => {
-  let vToken: ethers.Contract;
-  let underlying: ethers.Contract;
+  let vToken: Contract;
+  let underlying: Contract;
   let user: SignerWithAddress;
   const mintAmount = parseUnits("200", 18);
   const borrowAmount = parseUnits("50", 18);

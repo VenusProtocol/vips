@@ -92,11 +92,6 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   admin: string,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  const networkSpecificChainlinkOracle = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].CHAINLINK_ORACLE;
-
-  // skip execution of this function if input oracle address is really not of chainlinkOracleAddress
-  if (chainlinkOracleAddress != networkSpecificChainlinkOracle) return;
-
   const provider = ethers.provider;
 
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
@@ -130,9 +125,31 @@ export const setMaxStalePeriod = async (
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  const binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
-  const chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
-  const redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
+  let binanceOracle: string;
+  let chainlinkOracle: string;
+  let redstoneOracle: string;
+
+  try {
+    binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
+  } catch {
+    binanceOracle = ethers.constants.AddressZero;
+    console.log(`Binance Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
+  } catch {
+    chainlinkOracle = ethers.constants.AddressZero;
+    console.log(`Chainlink Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
+  } catch {
+    redstoneOracle = ethers.constants.AddressZero;
+    console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
   const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
