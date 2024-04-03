@@ -21,7 +21,7 @@ forking(35949601, () => {
   let oldBNBBalance: BigNumber;
 
   before(async () => {
-    impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(NORMAL_TIMELOCK);
     oldBNBBalance = await ethers.provider.getBalance(BINANCE);
     oldBalances = {};
     for (const token of BEP20Transfers) {
