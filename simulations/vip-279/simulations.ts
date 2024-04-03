@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -23,8 +23,8 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
 forking(37477733, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
   let prevUSDTBalanceOfCertik: BigNumber;
   let prevUSDCBalanceOfQuantstamp: BigNumber;
   let prevUSDTBalanceOfFairyproof: BigNumber;
@@ -32,8 +32,8 @@ forking(37477733, () => {
   let prevUSDTBalanceOfNodereal: BigNumber;
 
   before(async () => {
-    usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
-    usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
+    usdc = new Contract(USDC, IERC20_ABI, ethers.provider);
+    usdt = new Contract(USDT, IERC20_ABI, ethers.provider);
 
     prevUSDTBalanceOfCertik = await usdt.balanceOf(CERTIK_RECEIVER);
     prevUSDCBalanceOfQuantstamp = await usdc.balanceOf(QUANTSTAMP_RECEIVER);
