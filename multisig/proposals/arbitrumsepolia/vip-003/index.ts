@@ -1,7 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { makeProposal } from "../../../src/utils";
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -9,7 +9,7 @@ const XVS_BRIDGE_ADMIN_PROXY = "0x0DC3d6717727FD5a023e41bA8134640ca18f3E48";
 const XVS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
 const XVS_BRIDGE_DEST = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
 
-export const vip003 = () => {
+const vip003 = () => {
   return makeProposal([
     {
       target: arbitrumsepolia.ACM,
@@ -173,3 +173,5 @@ export const vip003 = () => {
     },
   ]);
 };
+
+export default vip003;

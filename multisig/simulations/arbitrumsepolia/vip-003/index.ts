@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip003 } from "../../../proposals/vip-003/vip-003-arbitrum-sepolia";
+import vip003 from "../../../proposals/arbitrumsepolia/vip-003";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
@@ -21,7 +21,7 @@ const TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
 const XVS_BRIDGE = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(29215079, () => {
+forking(29808974, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
