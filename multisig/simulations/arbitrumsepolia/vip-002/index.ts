@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { BigNumberish } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -20,7 +20,7 @@ const RESILIENT_ORACLE = arbitrumsepolia.RESILIENT_ORACLE;
 const GUARDIAN = arbitrumsepolia.GUARDIAN;
 const POOL_REGISTRY = arbitrumsepolia.POOL_REGISTRY;
 
-const BLOCKS_PER_YEAR = 31_536_000; // equal to seconds in a year as it is timebased deployment
+const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
 type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vUSDC_Core" | "vARB_Core";
 
@@ -177,7 +177,13 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
+const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
+  vWBTC_Core: "",
+  vWETH_Core: "",
+  vUSDT_Core: "",
+  vUSDC_Core: "",
+  vARB_Core: "",
+};
 
 forking(29814583, () => {
   let poolRegistry: Contract;
