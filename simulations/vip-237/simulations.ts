@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -17,7 +18,7 @@ const DAI = "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3";
 const DAI_AMOUNT = parseUnits("296719.647459765628937553", 18);
 
 forking(35215431, () => {
-  let dai: ethers.Contract;
+  let dai: Contract;
   let oldDAIBal: BigNumber;
   let oldDAIBalTreasury: BigNumber;
 
@@ -29,7 +30,7 @@ forking(35215431, () => {
 
   testVip("VIP-237", vip237(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [1]);
+      await expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },
   });
 

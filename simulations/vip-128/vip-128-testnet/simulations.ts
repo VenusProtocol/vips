@@ -1,6 +1,7 @@
 import { getImplementationAddress } from "@openzeppelin/upgrades-core";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -30,11 +31,11 @@ const toBlockRate = (ratePerYear: BigNumber): BigNumber => {
 };
 
 forking(30720569, () => {
-  let comptroller: ethers.Contract;
-  let wbeth: ethers.Contract;
-  let vWbeth: ethers.Contract;
-  let oracle: ethers.Contract;
-  let rateModel: ethers.Contract;
+  let comptroller: Contract;
+  let wbeth: Contract;
+  let vWbeth: Contract;
+  let oracle: Contract;
+  let rateModel: Contract;
   const provider = ethers.provider;
 
   before(async () => {
