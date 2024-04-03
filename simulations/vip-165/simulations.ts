@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,7 +22,7 @@ const CHAINLINKADDRESS = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 forking(31358000, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

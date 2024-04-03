@@ -9,12 +9,12 @@ import { initMainnetUser } from "../../src/utils";
 import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip224 } from "../../vips/vip-224";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidator.json";
 import MOVE_DEBT_DELEGATE_ABI from "./abi/moveDebtDelegate.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracleAbi.json";
-import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const LIQUIDATOR_CONTRACT = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";

@@ -1,4 +1,6 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -14,10 +16,10 @@ const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 
 forking(38683734, () => {
   const provider = ethers.provider;
-  let binanceOracle: ethers.Contract;
-  let resilientOracle: ethers.Contract;
-  let vagEURContract: ethers.Contract;
-  let beacon: ethers.Contract;
+  let binanceOracle: Contract;
+  let resilientOracle: Contract;
+  let vagEURContract: Contract;
+  let beacon: Contract;
 
   before(async () => {
     binanceOracle = new ethers.Contract(BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
