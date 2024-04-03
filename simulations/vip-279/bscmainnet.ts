@@ -84,5 +84,7 @@ forking(37533772, () => {
     it("check XVS distribution speed", async () => {
       expect(await xvsVault.rewardTokenAmountsPerBlock(XVS)).to.be.equal(XVS_DISTRIBUTION_SPEED);
     });
+
+    checkXVSVault();
   });
 });
