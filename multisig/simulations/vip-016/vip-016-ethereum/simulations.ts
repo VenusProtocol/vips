@@ -75,7 +75,6 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
   },
 ];
 
-//TOOD: change block to be any one after the multisig tx for configuring the rewards
 forking(19562820, () => {
   describe("Post-Execution state", () => {
     before(async () => {
