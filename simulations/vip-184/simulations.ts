@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -29,9 +30,9 @@ const CHAOSLABS_AMOUNT = parseUnits("200000", 18);
 const STEAKHOUSE_AMOUNT = parseUnits("50000", 18);
 
 forking(32516199, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
-  let vai: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
+  let vai: Contract;
 
   let prevBalancePeckShield: BigNumber;
   let prevBalanceCertik: BigNumber;

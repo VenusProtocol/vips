@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../../src/utils";
@@ -15,13 +16,13 @@ import {
   USDT_AMOUNT,
   vip234Testnet,
 } from "../../../vips/vip-234/vip-234-testnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import VTreasurey_ABI from "./abi/VTreasury.json";
+import ERC20_ABI from "../abi/ERC20.json";
+import VTreasurey_ABI from "../abi/VTreasury.json";
 
 forking(36724768, () => {
-  let btc: ethers.Contract;
-  let eth: ethers.Contract;
-  let usdt: ethers.Contract;
+  let btc: Contract;
+  let eth: Contract;
+  let usdt: Contract;
   let oldBTCBal: BigNumber;
   let oldETHBal: BigNumber;
   let oldUSDTBal: BigNumber;
@@ -43,7 +44,7 @@ forking(36724768, () => {
 
   testVip("VIP-213 Send XVS to Dest Chain", vip234Testnet(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
+      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },
   });
 

@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -10,7 +11,7 @@ const PAIR = "0xD94FeFc80a7d10d4708b140c7210569061a7eddb";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 forking(27255735, () => {
-  let pair: ethers.Contract;
+  let pair: Contract;
   const provider = ethers.provider;
   const currentLiquidityUsdt = parseUnits("90.294422022310547114", 18);
   const currentLiquidityVai = parseUnits("87.950866165080484144", 18);

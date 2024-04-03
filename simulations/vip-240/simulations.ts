@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -15,8 +16,8 @@ const TUSD_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 
 forking(35315117, () => {
   const provider = ethers.provider;
-  let comptroller: ethers.Contract;
-  let vTUSD: ethers.Contract;
+  let comptroller: Contract;
+  let vTUSD: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
