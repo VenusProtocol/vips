@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { vip002 } from "../../../proposals/vip-002/vip-002-arbitrum-sepolia";
+import vip002 from "../../../proposals/arbitrumsepolia/vip-002";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -179,7 +179,7 @@ const interestRateModels: InterestRateModelSpec[] = [
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {};
 
-forking(29516233, () => {
+forking(29814583, () => {
   let poolRegistry: Contract;
 
   before(async () => {

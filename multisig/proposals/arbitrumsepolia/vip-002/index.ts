@@ -1,12 +1,12 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../src/networkAddresses";
-import { makeProposal } from "../../../src/utils";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../../src/networkAddresses";
+import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 // IL configuration
-export const vip002 = () => {
+const vip002 = () => {
   return makeProposal([
     {
       target: arbitrumsepolia.ACM,
@@ -353,3 +353,5 @@ export const vip002 = () => {
     },
   ]);
 };
+
+export default vip002;
