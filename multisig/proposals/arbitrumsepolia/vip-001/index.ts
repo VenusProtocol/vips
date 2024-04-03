@@ -1,5 +1,5 @@
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { makeProposal } from "../../../src/utils";
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -9,7 +9,7 @@ const CHAINLINK_USDC_FEED = "0x0153002d20B96532C639313c2d54c3dA09109309";
 const CHAINLINK_USDT_FEED = "0x80EDee6f667eCc9f63a0a6f55578F870651f06A4";
 const CHAINLINK_ARB_FEED = "0xD1092a65338d049DB68D7Be6bD89d17a0929945e";
 
-export const vip001 = () => {
+const vip001 = () => {
   return makeProposal([
     {
       target: arbitrumsepolia.ACM,
@@ -168,3 +168,5 @@ export const vip001 = () => {
     },
   ]);
 };
+
+export default vip001;
