@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../src/utils";
+import { makeProposal } from "../../../../src/utils";
 import {
   REWARD_DISTRIBUTOR_CORE_0,
   REWARD_DISTRIBUTOR_CORE_1,
@@ -15,7 +15,7 @@ import {
   VWETH_CORE,
   VWETH_LST,
   VWSTETH_LST,
-} from "../vip-006/vip-006-ethereum";
+} from "../vip-006/index";
 
 // TODO: Input the correct REWARDS_START_BLOCK
 // Start block considered Multisig tx executed https://etherscan.io/tx/0x832d6510cb2d9595d04216436a5fb6248fd2820fd33d0a147497fc3bac07e2f9
@@ -63,8 +63,8 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
 ];
 
 export const vip016 = () => {
-  return makeProposal([
-    ...lastRewardBlockConfig.map(config => {
+  return makeProposal(
+    lastRewardBlockConfig.map(config => {
       const lastRewardBlockArray = new Array(config.vTokens.length).fill(config.lastRewardBlock);
       return {
         target: config.distributor,
@@ -72,5 +72,5 @@ export const vip016 = () => {
         params: [config.vTokens, lastRewardBlockArray, lastRewardBlockArray],
       };
     }),
-  ]);
+  );
 };

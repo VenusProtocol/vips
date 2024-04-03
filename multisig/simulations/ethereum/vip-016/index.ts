@@ -19,8 +19,8 @@ import {
   VWETH_CORE,
   VWETH_LST,
   VWSTETH_LST,
-} from "../../../proposals/vip-006/vip-006-ethereum";
-import { vip016 } from "../../../proposals/vip-016/vip-016-ethereum";
+} from "../../../proposals/ethereum/vip-006/index";
+import { vip016 } from "../../../proposals/ethereum/vip-016";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
