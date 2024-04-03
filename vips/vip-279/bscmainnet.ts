@@ -1,4 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
+
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -11,7 +12,7 @@ export const DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 
 export const XVS_FOR_XVS_STORE = parseUnits("72905.06", 18);
 export const XVS_FOR_V_TREASURY = parseUnits("21789.17", 18);
-export const XVS_DISTRIBUTION_SPEED = "62500000000000000";
+export const XVS_DISTRIBUTION_SPEED = parseUnits("0.0625", 18);
 
 export const vip279 = () => {
   const meta = {
@@ -44,7 +45,7 @@ export const vip279 = () => {
         target: XVS_VAULT_TREASURY,
         signature: "sweepToken(address,address,uint256)",
         params: [XVS, VTREASURY, XVS_FOR_V_TREASURY],
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,
