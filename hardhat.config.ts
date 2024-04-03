@@ -24,6 +24,8 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   ethereum: 30000000,
   opbnbtestnet: 100000000,
   opbnbmainnet: 100000000,
+  arbitrumsepolia: 30000000,
+  arbitrumone: 30000000,
 };
 
 task("propose", "Propose proposal")
