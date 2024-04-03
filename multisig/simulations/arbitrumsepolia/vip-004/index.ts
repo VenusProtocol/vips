@@ -9,7 +9,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { vip004 } from "../../../proposals/vip-004/vip-004-arbitrum-sepolia";
+import vip004 from "../../../proposals/arbitrumsepolia/vip-004";
 import ACM_ABI from "./abi/acm.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -20,7 +20,7 @@ const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const XVS_STORE = "0x3c49eB8FaDD3FdB0a4Bbb40F8A7e3ce821298607";
 const XVS_BRIDGE = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
 
-forking(29555973, () => {
+forking(29803872, () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;
@@ -28,8 +28,6 @@ forking(29555973, () => {
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, arbitrumsepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-
-    // await pretendExecutingVip(vip003()); // executing thi vip as it's not executed yet
 
     await pretendExecutingVip(vip004());
   });

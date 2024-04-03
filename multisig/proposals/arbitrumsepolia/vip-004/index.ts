@@ -1,11 +1,11 @@
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { makeProposal } from "../../../src/utils";
+import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 const XVS_STORE = "0x3c49eB8FaDD3FdB0a4Bbb40F8A7e3ce821298607";
 
-export const vip004 = () => {
+const vip004 = () => {
   return makeProposal([
     {
       target: arbitrumsepolia.XVS_VAULT_PROXY,
@@ -80,3 +80,5 @@ export const vip004 = () => {
     },
   ]);
 };
+
+export default vip004;
