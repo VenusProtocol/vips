@@ -29,6 +29,9 @@ jobs:
       - name: "Lint the code"
         run: "yarn lint"
 
+      - name: Code compiles
+        run: yarn tsc --noEmit
+
       - name: "Add lint summary"
         run: |
           echo "## Lint results" >> $GITHUB_STEP_SUMMARY

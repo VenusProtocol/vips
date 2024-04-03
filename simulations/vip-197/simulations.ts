@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -17,7 +18,7 @@ const CAKE = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82";
 const CAKE_FEED = "0xb6064ed41d4f67e353768aa239ca86f4f73665a1";
 
 forking(33133129, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
 
   const provider = ethers.provider;
   before(async () => {

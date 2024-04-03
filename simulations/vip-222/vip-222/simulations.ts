@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -33,11 +34,11 @@ const RESERVE_FACTOR = parseUnits("0.1", 18);
 const RATE_MODEL = "0xB105F9B511836cc7dF9F3dD0Ec4873766b5b6660";
 
 forking(34573350, () => {
-  let comptroller: ethers.Contract;
-  let fdusd: ethers.Contract;
-  let vFdusd: ethers.Contract;
-  let oracle: ethers.Contract;
-  let usdt: ethers.Contract;
+  let comptroller: Contract;
+  let fdusd: Contract;
+  let vFdusd: Contract;
+  let oracle: Contract;
+  let usdt: Contract;
   let communityBalanceBefore: any;
   const provider = ethers.provider;
 

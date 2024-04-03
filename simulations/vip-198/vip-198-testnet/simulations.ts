@@ -49,8 +49,8 @@ forking(34765100, () => {
     await oracle.connect(impersonatedTimelock).setDirectPrice(USDD, "10000000000");
   });
 
-  describe("Contracts setup", () => {
-    checkVToken(VPLANET_DEFI, {
+  describe("Contracts setup", async () => {
+    await checkVToken(VPLANET_DEFI, {
       name: "Venus PLANET (DeFi)",
       symbol: "vPLANET_DeFi",
       decimals: 8,

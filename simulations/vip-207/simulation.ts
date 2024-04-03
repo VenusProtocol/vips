@@ -11,16 +11,10 @@ import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
 import users from "../../vips/vip-207/users";
 import { vip207 } from "../../vips/vip-207/vip-207";
 import PRIME_ABI from "./abis/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
-const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
 const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
-const STAKED_USER_1 = "0x66f32ea3ba3f99a2fc1f99ad6cecef6ce6571f5e";
-const STAKED_USER_2 = "0x4d13142d94a831d8bf3a18c68103c5c986a8ee9f";
-const STAKED_USER_3 = "0x8a927f06382412a979f323b66a510162af09d532";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const UNSTAKED_USER = "0x0dfd2198d86eaf362bcfae45ed10323187e2847d";
 
 interface vTokenConfig {
   name: string;
@@ -66,7 +60,7 @@ forking(33663461, () => {
         ...users.stakeClaimableUsers,
         ...users.unstakeUsers,
       }) {
-        impersonateAccount(userAddress);
+        await impersonateAccount(userAddress);
         await setBalance(userAddress, ethers.utils.parseEther("5"));
       }
 

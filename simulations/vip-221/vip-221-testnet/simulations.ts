@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -20,7 +21,7 @@ const NEW_XVS_SUPPLY_CAP = parseUnits("3750000", 18);
 const OLD_XVS_SUPPLY_CAP = ethers.BigNumber.from("2").pow(256).sub(1); // max uint256
 
 forking(36119257, () => {
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {

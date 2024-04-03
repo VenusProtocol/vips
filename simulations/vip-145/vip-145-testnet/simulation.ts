@@ -1,6 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Signer } from "ethers";
+import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -76,12 +76,12 @@ forking(31522791, () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
-    let resilientOracleProxy: ethers.Contract;
-    let chainlinkOracleProxy: ethers.Contract;
-    let boundValidatorProxy: ethers.Contract;
-    let binanceOracleProxy: ethers.Contract;
-    let twapOracleProxy: ethers.Contract;
-    let pythOracleProxy: ethers.Contract;
+    let resilientOracleProxy: Contract;
+    let chainlinkOracleProxy: Contract;
+    let boundValidatorProxy: Contract;
+    let binanceOracleProxy: Contract;
+    let twapOracleProxy: Contract;
+    let pythOracleProxy: Contract;
 
     before(async () => {
       await impersonateAccount(PROXY_ADMIN);
@@ -108,16 +108,16 @@ forking(31522791, () => {
   testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet());
 
   describe("Post-VIP behavior", async () => {
-    let resilientOracleProxy: ethers.Contract;
-    let chainlinkOracleProxy: ethers.Contract;
-    let boundValidatorProxy: ethers.Contract;
-    let binanceOracleProxy: ethers.Contract;
-    let twapOracleProxy: ethers.Contract;
-    let pythOracleProxy: ethers.Contract;
-    let mockVToken: ethers.Contract;
-    let resilientOracle: ethers.Contract;
-    let comptroller: ethers.Contract;
-    let binanceOracle: ethers.Contract;
+    let resilientOracleProxy: Contract;
+    let chainlinkOracleProxy: Contract;
+    let boundValidatorProxy: Contract;
+    let binanceOracleProxy: Contract;
+    let twapOracleProxy: Contract;
+    let pythOracleProxy: Contract;
+    let mockVToken: Contract;
+    let resilientOracle: Contract;
+    let comptroller: Contract;
+    let binanceOracle: Contract;
     let timelockSigner: Signer;
 
     before(async () => {
