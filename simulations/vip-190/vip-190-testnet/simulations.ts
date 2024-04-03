@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -22,9 +23,9 @@ const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
 forking(34366000, () => {
   const provider = ethers.provider;
-  let resilientOracle: ethers.Contract;
-  let redStoneOracle: ethers.Contract;
-  let boundValidator: ethers.Contract;
+  let resilientOracle: Contract;
+  let redStoneOracle: Contract;
+  let boundValidator: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {

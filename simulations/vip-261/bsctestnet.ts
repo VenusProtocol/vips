@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -9,7 +10,7 @@ import { abi as DIAMOND_CONSOLIDATED_ABI } from "./abi/DiamondConsolidated.json"
 
 forking(37940238, () => {
   const provider = ethers.provider;
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, DIAMOND_CONSOLIDATED_ABI, provider);
   });
@@ -35,7 +36,7 @@ forking(37940238, () => {
 
 forking(37940238, () => {
   const provider = ethers.provider;
-  let comptroller: ethers.Contract;
+  let comptroller: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, DIAMOND_CONSOLIDATED_ABI, provider);

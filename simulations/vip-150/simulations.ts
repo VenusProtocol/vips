@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -26,13 +26,13 @@ const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
 forking(30354172, () => {
-  let rateModel: ethers.Contract;
-  let vTusdOld: ethers.Contract;
-  let vTrxOld: ethers.Contract;
-  let vSxp: ethers.Contract;
-  let lstComptroller: ethers.Contract;
-  let tronComptroller: ethers.Contract;
-  let coreComptroller: ethers.Contract;
+  let rateModel: Contract;
+  let vTusdOld: Contract;
+  let vTrxOld: Contract;
+  let vSxp: Contract;
+  let lstComptroller: Contract;
+  let tronComptroller: Contract;
+  let coreComptroller: Contract;
   const provider = ethers.provider;
 
   const toBlockRate = (ratePerYear: BigNumber): BigNumber => {

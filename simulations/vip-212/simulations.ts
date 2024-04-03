@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -19,7 +20,7 @@ const BINANCE_AMOUNT = parseUnits("36000", 18);
 const COMMUNITY_AMOUNT = parseUnits("15000", 18);
 
 forking(33968239, () => {
-  let usdt: ethers.Contract;
+  let usdt: Contract;
   let prevBalanceCertik: BigNumber;
   let prevBalancecommunity: any;
   let prevBalanceBinance: any;

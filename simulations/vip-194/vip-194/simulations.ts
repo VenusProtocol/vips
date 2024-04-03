@@ -1,12 +1,13 @@
 import { mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { fetchVTokenStorageIL, performVTokenBasicActions, storageLayout } from "../../../src/vtokenUpgradesHelper";
+import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { IL_MARKETS, vip194 } from "../../../vips/vip-194/vip-194";
 import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
@@ -18,12 +19,12 @@ const NEW_IMPL_VTOKEN = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-let vToken: ethers.Contract;
-let underlying: ethers.Contract;
+let vToken: Contract;
+let underlying: Contract;
 let user: SignerWithAddress;
 let impersonatedTimelock: SignerWithAddress;
-const postVipStorage: storageLayout[] = [];
-const preVipStorage: storageLayout[] = [];
+const postVipStorage: StorageLayout[] = [];
+const preVipStorage: StorageLayout[] = [];
 const provider = ethers.provider;
 const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);

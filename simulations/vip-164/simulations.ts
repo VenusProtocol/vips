@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -25,8 +26,8 @@ const PECKSHIELD_AMOUNT = parseUnits("12000", 18);
 const CERTIK_AMOUNT = parseUnits("19000", 18);
 
 forking(31298100, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
   let prevBalanceQuantStamp: BigNumber;
   let prevBalanceFairyproof: BigNumber;
   let prevBalancePeckShield: BigNumber;

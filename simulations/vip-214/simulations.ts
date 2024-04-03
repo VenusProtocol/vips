@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -14,7 +15,7 @@ const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const COMMUNITY_AMOUNT = parseUnits("300000", 18);
 
 forking(34241740, () => {
-  let usdt: ethers.Contract;
+  let usdt: Contract;
   let prevBalanceCommunity: any;
 
   before(async () => {

@@ -159,7 +159,7 @@ forking(36680347, () => {
   });
 
   it("checks that 5% of the repaid amount is sent to the PSR, as underlying tokens", async () => {
-    //Liquidation Test requisite
+    // Liquidation Test requisite
     const LIQUIDATOR = "0x1934057d1de58cf65fb59277a91f26ac9f8a4282";
     const BORROWER = "0x489a8756c18c0b8b24ec2a2b9ff3d4d447f79bec";
     const wBNB_ADDRESS = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
