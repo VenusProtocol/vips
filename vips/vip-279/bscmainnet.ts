@@ -20,7 +20,7 @@ export const USDT_BORROW_CAP = parseUnits("450000000", 18);
 export const OLD_WBETH_BORROW_CAP = parseUnits("8000", 18);
 export const WBETH_BORROW_CAP = parseUnits("16000", 18);
 
-export const vip279 = () => {
+const vip279 = () => {
   const meta = {
     version: "v2",
     title: "VIP-279 Risk Parameters Adjustments",
