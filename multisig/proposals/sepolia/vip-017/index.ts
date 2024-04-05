@@ -10,6 +10,9 @@ export const weETH = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 export const eETH = "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3";
 export const CHAINLINK_ETH_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
 export const LIQUIDITY_POOL = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
+export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+export const vweETH = "0x6089B1F477e13459C4d1D1f767c974e5A72a541F";
+
 export const CHAINLINK_STALE_PERIOD = "86400";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18)
 
@@ -64,38 +67,38 @@ export const vip017 = () => {
     {
       target: weETH,
       signature: "transfer(address,uint256)",
-      params: ["0x4116CA92960dF77756aAAc3aFd91361dB657fbF8", "5000000000000000000"]
+      params: [VTREASURY, "5000000000000000000"]
     },
     {
-      target: "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8",
+      target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [
-        "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0",
+        weETH,
         "5000000000000000000",
-        "0x94fa6078b6b8a26f0b6edffbe6501b22a10470fb"
+        sepolia.NORMAL_TIMELOCK
       ],
       value: "0"
     },
     {
-      target: "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0",
+      target: weETH,
       signature: "approve(address,uint256)",
       params: [
-        "0x758f5715d817e02857Ba40889251201A5aE3E186",
+        sepolia.POOL_REGISTRY,
         0
       ],
       value: "0"
     },
     {
-      target: "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0",
+      target: weETH,
       signature: "approve(address,uint256)",
       params: [
-        "0x758f5715d817e02857Ba40889251201A5aE3E186",
+        sepolia.POOL_REGISTRY,
         "5000000000000000000"
       ],
       value: "0"
     },
     {
-      target: "0x6089B1F477e13459C4d1D1f767c974e5A72a541F",
+      target: vweETH,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: [
         "7200"
@@ -103,15 +106,15 @@ export const vip017 = () => {
       value: "0"
     },
     {
-      target: "0x758f5715d817e02857Ba40889251201A5aE3E186",
+      target: sepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
         [
-          "0x6089B1F477e13459C4d1D1f767c974e5A72a541F",
+          vweETH,
           "900000000000000000",
           "930000000000000000",
           "5000000000000000000",
-          "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8",
+          VTREASURY,
           "7500000000000000000000",
           "750000000000000000000"
         ]
@@ -125,7 +128,7 @@ export const vip017 = () => {
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
       params: [
         [
-          "0x6089B1F477e13459C4d1D1f767c974e5A72a541F"
+          vweETH
         ],
         [
           "5787037037000000"

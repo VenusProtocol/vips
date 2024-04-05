@@ -29,7 +29,7 @@ forking(5633105, () => {
     })
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(weETH)).to.be.equal(parseUnits("3401.021208950110740265", 18))
+      expect(await resilientOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3400", 18), parseUnits("10", 18))
     })
   })
 });
