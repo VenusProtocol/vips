@@ -20,10 +20,10 @@ export const USDT_BORROW_CAP = parseUnits("450000000", 18);
 export const OLD_WBETH_BORROW_CAP = parseUnits("8000", 18);
 export const WBETH_BORROW_CAP = parseUnits("16000", 18);
 
-const vip279 = () => {
+const vip284 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-279 Risk Parameters Adjustments",
+    title: "VIP-284 Risk Parameters Adjustments (FDUSD, USDT, WBETH)",
     description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Risk Parameter Updates 04/01/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-04-01-24/4238).
 
 - [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
@@ -32,10 +32,11 @@ const vip279 = () => {
     - Increase supply cap, from 400M USDT to 500M USDT
     - Increase borrow cap, from 300M USDT to 450M USDT
 - [WBETH (Core pool)](https://bscscan.com/address/0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0)
-    - Increase borrow cap, from 8000 WBETH to 16000 WBETH
+    - Increase borrow cap, from 8K WBETH to 16K WBETH
 
 Complete analysis and details of these recommendations are available in the above publication.
-`,
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/254](https://github.com/VenusProtocol/vips/pull/254)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -62,4 +63,4 @@ Complete analysis and details of these recommendations are available in the abov
   );
 };
 
-export default vip279;
+export default vip284;

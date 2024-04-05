@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip279, {
+import vip284, {
   COMPTROLLER,
   FDUSD_BORROW_CAP,
   OLD_FDUSD_BORROW_CAP,
@@ -18,7 +18,7 @@ import vip279, {
   vFDUSD,
   vUSDT,
   vWBETH,
-} from "../../vips/vip-279/bscmainnet";
+} from "../../vips/vip-284/bscmainnet";
 import COMTROLLER_ABI from "./abi/comptroller.json";
 
 forking(37530700, () => {
@@ -48,7 +48,7 @@ forking(37530700, () => {
     });
   });
 
-  testVip("VIP-279 Chaos Labs Recommendations", vip279(), {
+  testVip("VIP-284 Chaos Labs Recommendations", vip284(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 3]);
     },
