@@ -6,7 +6,8 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
-import { vip279 } from "../../vips/vip-279/bscmainnet";
+import vip279 from "../../vips/vip-279/bscmainnet";
+import vip280 from "../../vips/vip-280/bscmainnet";
 import {
   VTREASURY,
   XVS,
@@ -14,7 +15,6 @@ import {
   XVS_FOR_V_TREASURY,
   XVS_FOR_XVS_STORE,
   XVS_VAULT,
-  vip280,
 } from "../../vips/vip-280/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";

@@ -12,7 +12,7 @@ export const XVS_FOR_XVS_STORE = parseUnits("72905.06", 18);
 export const XVS_FOR_V_TREASURY = parseUnits("21789.17", 18);
 export const XVS_DISTRIBUTION_SPEED = parseUnits("0.063888888888888888", 18); // 1,840 XVS/day
 
-export const vip280 = () => {
+const vip280 = () => {
   const meta = {
     version: "v2",
     title: "VIP-280",

@@ -8,8 +8,8 @@ import {
   DEFAULT_PROXY_ADMIN,
   XVS_VAULT_TREASURY,
   XVS_VAULT_TREASURY_NEW_IMPLEMENTATION,
-  vip279,
 } from "../../vips/vip-279/bscmainnet";
+import vip279 from "../../vips/vip-279/bscmainnet";
 import PROXY_ABI from "./abi/XVSVaultTreasuryProxy.json";
 
 const XVS_VAULT_TREASURY_OLD_IMPLEMENTATION = "0xCA59D9e8889Bc6034CCD749c4Ddd09c865432bA8";

@@ -11,7 +11,7 @@ export const DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 
 export const XVS_FOR_V_TREASURY = parseUnits("490", 18);
 
-export const vip280 = () => {
+const vip280 = () => {
   const meta = {
     version: "v2",
     title: "VIP-280",
