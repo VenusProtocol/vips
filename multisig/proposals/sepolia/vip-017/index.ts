@@ -1,7 +1,8 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { makeProposal } from "../../../../src/utils";
-import { parseUnits } from "ethers/lib/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
@@ -14,7 +15,7 @@ export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const vweETH = "0x6089B1F477e13459C4d1D1f767c974e5A72a541F";
 
 export const CHAINLINK_STALE_PERIOD = "86400";
-export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18)
+export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
 
 export const vip017 = () => {
   return makeProposal([
@@ -22,13 +23,7 @@ export const vip017 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [
-        [
-          eETH,
-          CHAINLINK_ETH_FEED,
-          CHAINLINK_STALE_PERIOD
-        ],
-      ],
+      params: [[eETH, CHAINLINK_ETH_FEED, CHAINLINK_STALE_PERIOD]],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
@@ -45,65 +40,49 @@ export const vip017 = () => {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
-        [
-          weETH,
-          [WeETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-          [true, false, false],
-        ],
+        [weETH, [WeETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
       ],
     },
     {
       target: LIQUIDITY_POOL,
       signature: "setAmountPerShare(uint256)",
-      params: [AMOUNT_FOR_SHARE]
+      params: [AMOUNT_FOR_SHARE],
     },
 
     // Add Market
     {
       target: weETH,
       signature: "faucet(uint256)",
-      params: ["5000000000000000000"]
+      params: ["5000000000000000000"],
     },
     {
       target: weETH,
       signature: "transfer(address,uint256)",
-      params: [VTREASURY, "5000000000000000000"]
+      params: [VTREASURY, "5000000000000000000"],
     },
     {
       target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [
-        weETH,
-        "5000000000000000000",
-        sepolia.NORMAL_TIMELOCK
-      ],
-      value: "0"
+      params: [weETH, "5000000000000000000", sepolia.NORMAL_TIMELOCK],
+      value: "0",
     },
     {
       target: weETH,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        0
-      ],
-      value: "0"
+      params: [sepolia.POOL_REGISTRY, 0],
+      value: "0",
     },
     {
       target: weETH,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        "5000000000000000000"
-      ],
-      value: "0"
+      params: [sepolia.POOL_REGISTRY, "5000000000000000000"],
+      value: "0",
     },
     {
       target: vweETH,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: [
-        "7200"
-      ],
-      value: "0"
+      params: ["7200"],
+      value: "0",
     },
     {
       target: sepolia.POOL_REGISTRY,
@@ -116,29 +95,19 @@ export const vip017 = () => {
           "5000000000000000000",
           VTREASURY,
           "7500000000000000000000",
-          "750000000000000000000"
-        ]
+          "750000000000000000000",
+        ],
       ],
-      value: "0"
+      value: "0",
     },
 
     // Add Rewards
     {
       target: "0x4597B9287fE0DF3c5513D66886706E0719bD270f",
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [
-        [
-          vweETH
-        ],
-        [
-          "5787037037000000"
-        ],
-        [
-          "0"
-        ]
-      ],
-      value: "0"
-    }
+      params: [[vweETH], ["5787037037000000"], ["0"]],
+      value: "0",
+    },
   ]);
 };
 
