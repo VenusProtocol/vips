@@ -1,18 +1,14 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
-export const VTREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
-export const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+export const XVS_VAULT_TREASURY_NEW_IMPLEMENTATION = "0x7c7DcD99889ADe9caaA07026a699a4E7Da05A524";
+export const DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 
-export const XVS_FOR_V_TREASURY = parseUnits("490", 18);
-
-const vip280 = () => {
+const vip282 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-280",
+    title: "VIP-282",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -22,9 +18,9 @@ const vip280 = () => {
   return makeProposal(
     [
       {
-        target: XVS_VAULT_TREASURY,
-        signature: "sweepToken(address,address,uint256)",
-        params: [XVS, VTREASURY, XVS_FOR_V_TREASURY],
+        target: DEFAULT_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_NEW_IMPLEMENTATION],
       },
     ],
     meta,
@@ -32,4 +28,4 @@ const vip280 = () => {
   );
 };
 
-export default vip280;
+export default vip282;
