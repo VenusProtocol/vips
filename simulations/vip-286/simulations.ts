@@ -1,6 +1,6 @@
 import { forking, testVip } from "../../src/vip-framework";
-import vip285 from "../../vips/vip-285/bscmainnet";
+import vip286 from "../../vips/vip-286/bscmainnet";
 
 forking(37675391, () => {
-  testVip("VIP-285", vip285(), {});
+  testVip("VIP-286", vip286(), {});
 });
