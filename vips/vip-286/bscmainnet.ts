@@ -1,7 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 
 const vip286 = () => {
   const meta = {
@@ -26,10 +26,10 @@ Simulation of the multisig transaction: [https://github.com/VenusProtocol/vips/p
   return makeProposal(
     [
       {
-        target: NORMAL_TIMELOCK,
+        target: FAST_TRACK_TIMELOCK,
         signature: "",
         params: [],
-        value: "0",
+        value: "1",
       },
     ],
     meta,
