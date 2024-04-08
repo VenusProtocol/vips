@@ -61,7 +61,7 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
   },
 ];
 
-export const vip016 = () => {
+export const vip017 = () => {
   return makeProposal(
     lastRewardBlockConfig.map(config => {
       const lastRewardBlockArray = new Array(config.vTokens.length).fill(config.lastRewardBlock);
@@ -74,4 +74,4 @@ export const vip016 = () => {
   );
 };
 
-export default vip016;
+export default vip017;

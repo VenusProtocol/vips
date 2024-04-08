@@ -20,7 +20,7 @@ import {
   VWETH_LST,
   VWSTETH_LST,
 } from "../../../proposals/ethereum/vip-006/index";
-import { vip016 } from "../../../proposals/ethereum/vip-016";
+import { vip017 } from "../../../proposals/ethereum/vip-017";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -78,7 +78,7 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
 forking(19562820, () => {
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip016());
+      await pretendExecutingVip(vip017());
     });
 
     const checkLastRewardingBlock = (
