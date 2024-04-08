@@ -35,6 +35,8 @@ export const checkXVSVault = () => {
     });
 
     it("deposit and withdraw", async () => {
+      await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
+
       let originalBalance = await xvs.balanceOf(ACCOUNT);
 
       await xvs.approve(xvsVault.address, parseUnits("1", 18));
