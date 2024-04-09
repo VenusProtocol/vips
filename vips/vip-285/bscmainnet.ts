@@ -15,9 +15,9 @@ const VUSDC_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
 const VDAI_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
 const VFDUSD_IR = "0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B";
 const VTUSD_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
-const VUSDT_StableCoin_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
-const VUSDT_GameFi_IR = "0x81908BBaad3f6fC74093540Ab2E9B749BB62aA0d";
-const VUSDT_DeFi_IR = "0x81908BBaad3f6fC74093540Ab2E9B749BB62aA0d";
+const VUSDT_StableCoin_IR = "0x2ba0F45f7368d2A56d0c9e5a29af363987BE1d02";
+const VUSDT_GameFi_IR = "0x5ECa0FBBc5e7bf49dbFb1953a92784F8e4248eF6";
+const VUSDT_DeFi_IR = "0x5ECa0FBBc5e7bf49dbFb1953a92784F8e4248eF6";
 
 export const vip285 = () => {
   const meta = {
@@ -28,7 +28,7 @@ export const vip285 = () => {
     - USDC (Core pool) : update multiplier from 0.0687 to 0.1.
     - DAI (Core pool) : update multiplier from 0.0687 to 0.1.
     - TUSD (Core pool) : update multiplier from 0.0687 to 0.1.
-    - FDUSD (Core pool) : update multiplier from 0.0687 to 0.1 and jump multiplier from 2.5 to 0.5.
+    - FDUSD (Core pool) : update multiplier from 0.0687 to 0.1 and jump multiplier from 2.5 to 5.
     - USDT (StableCoin pool) : update multiplier from 0.0687 to 0.1.
     - USDT (GameFi pool) : update multiplier from 0.10 to 0.15.
     - USDT (DeFi pool) : update multiplier from 0.10 to 0.15. 

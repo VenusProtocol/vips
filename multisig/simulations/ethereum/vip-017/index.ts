@@ -55,7 +55,7 @@ forking(19612715, () => {
       expect(await vcurusdCore.interestRateModel()).equals(NEW_IR);
       expect(await vcurvusdCurve.interestRateModel()).equals(NEW_IR);
     });
-    it("should have old parameters", async () => {
+    it("should have updated parameters", async () => {
       checkInterestRate(
         NEW_IR,
         "vusdc_core",
