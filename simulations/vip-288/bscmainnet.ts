@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import { vip285 } from "../../vips/vip-285/bscmainnet";
+import { vip288 } from "../../vips/vip-288/bscmainnet";
 import VTOKEN_IL_ABI from "./abi/VtokenIL.json";
 import VTOKEN_CORE_POOL_ABI from "./abi/vTokenCorePool.json";
 
@@ -126,7 +126,7 @@ forking(37700898, () => {
     });
   });
 
-  testVip("VIP-285 Chaos lab recommendation", vip285(), {
+  testVip("VIP-288 Chaos lab recommendation", vip288(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_IL_ABI], ["NewMarketInterestRateModel"], [3]);
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [5]);
