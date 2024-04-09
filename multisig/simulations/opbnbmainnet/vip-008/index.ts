@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip006 from "../../../proposals/opbnbmainnet/vip-006";
+import vip008 from "../../../proposals/opbnbmainnet/vip-008";
 import VTOKEN_IL_ABI from "./abi/VtokenIL.json";
 
 const vFDUSD_CORE = "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917";
@@ -38,7 +38,7 @@ forking(20848424, () => {
   });
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip006());
+      await pretendExecutingVip(vip008());
     });
     it("Should have new interest rate model", async () => {
       expect(await vfdusd.interestRateModel()).equals(NEW_IR);

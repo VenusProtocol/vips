@@ -6,7 +6,7 @@ const vCURUSD_CORE = "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202";
 const vCURUSD_CURVE = "0x2d499800239C4CD3012473Cb1EAE33562F0A6933";
 
 const NEW_IR = "0xd7fbFD2A36b8b388E6d04C7a05956Df91862E146";
-const vip016 = () => {
+const vip018 = () => {
   return makeProposal([
     { target: vUSDC_CORE, signature: "setInterestRateModel(address)", params: [NEW_IR] },
     { target: vUSDT_CORE, signature: "setInterestRateModel(address)", params: [NEW_IR] },
@@ -15,4 +15,4 @@ const vip016 = () => {
   ]);
 };
 
-export default vip016;
+export default vip018;

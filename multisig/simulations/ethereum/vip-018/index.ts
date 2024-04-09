@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip017 from "../../../proposals/ethereum/vip-017";
+import vip018 from "../../../proposals/ethereum/vip-018";
 import VTOKEN_IL_ABI from "./abi/VtokenIL.json";
 
 const vUSDC_CORE = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
@@ -19,7 +19,7 @@ forking(19612715, () => {
   let vusdc: Contract;
   let vusdt: Contract;
   let vcurusdCore: Contract;
-  let vcurvusdCurve: Contract;
+  let vcurusdCurve: Contract;
 
   const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
@@ -27,14 +27,14 @@ forking(19612715, () => {
     vusdc = await ethers.getContractAt(VTOKEN_IL_ABI, vUSDC_CORE);
     vusdt = await ethers.getContractAt(VTOKEN_IL_ABI, vUSDT_CORE);
     vcurusdCore = await ethers.getContractAt(VTOKEN_IL_ABI, vCURUSD_CORE);
-    vcurvusdCurve = await ethers.getContractAt(VTOKEN_IL_ABI, vCURUSD_CURVE);
+    vcurusdCurve = await ethers.getContractAt(VTOKEN_IL_ABI, vCURUSD_CURVE);
   });
   describe("Pre-Execution state", () => {
     it("Should have old interest rate model", async () => {
       expect(await vusdc.interestRateModel()).equals(OLD_IR);
       expect(await vusdt.interestRateModel()).equals(OLD_IR);
       expect(await vcurusdCore.interestRateModel()).equals(OLD_IR);
-      expect(await vcurvusdCurve.interestRateModel()).equals(OLD_IR);
+      expect(await vcurusdCurve.interestRateModel()).equals(OLD_IR);
     });
     it("should have old parameters", async () => {
       checkInterestRate(
@@ -47,13 +47,13 @@ forking(19612715, () => {
   });
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(vip018());
     });
     it("Should have new interest rate model", async () => {
       expect(await vusdc.interestRateModel()).equals(NEW_IR);
       expect(await vusdt.interestRateModel()).equals(NEW_IR);
       expect(await vcurusdCore.interestRateModel()).equals(NEW_IR);
-      expect(await vcurvusdCurve.interestRateModel()).equals(NEW_IR);
+      expect(await vcurusdCurve.interestRateModel()).equals(NEW_IR);
     });
     it("should have updated parameters", async () => {
       checkInterestRate(

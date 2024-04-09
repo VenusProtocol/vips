@@ -84,6 +84,6 @@ export const vip285 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
