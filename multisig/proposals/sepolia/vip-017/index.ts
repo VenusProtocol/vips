@@ -12,7 +12,7 @@ export const eETH = "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3";
 export const CHAINLINK_ETH_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
 export const LIQUIDITY_POOL = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
 export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
-export const vweETH = "0x6089B1F477e13459C4d1D1f767c974e5A72a541F";
+export const vweETH = "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b";
 
 export const CHAINLINK_STALE_PERIOD = "86400";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
@@ -105,7 +105,7 @@ export const vip017 = () => {
     {
       target: "0x4597B9287fE0DF3c5513D66886706E0719bD270f",
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[vweETH], ["5787037037000000"], ["0"]],
+      params: [[vweETH], ["23148148148148148"], ["0"]],
       value: "0",
     },
   ]);
