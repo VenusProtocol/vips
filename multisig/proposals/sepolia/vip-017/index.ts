@@ -6,11 +6,11 @@ import { makeProposal } from "../../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-export const WeETH_ORACLE = "0xdDeF173bbf37F689bf84d877e2Af4625eC9c22c6";
+export const WeETH_ORACLE = "0xc7b78b5c1433C81c455CD1e9A68FF18764acbCe1";
 export const weETH = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 export const eETH = "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3";
 export const CHAINLINK_ETH_FEED = "0x694AA1769357215DE4FAC081bf1f309aDC325306";
-export const LIQUIDITY_POOL = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
+export const LIQUIDITY_POOL = "0x4634Cc129ec46DbBab6a7E2b5c73c1b991be6cfC";
 export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const vweETH = "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b";
 

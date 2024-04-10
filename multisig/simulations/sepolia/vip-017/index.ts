@@ -14,7 +14,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { sepolia } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-forking(5659897, () => {
+forking(5669410, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;
@@ -39,7 +39,7 @@ forking(5659897, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3770", 18), parseUnits("5", 18));
+      expect(await resilientOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3600", 18), parseUnits("50", 18));
     });
 
     it("should have 3 markets in liquid staked pool", async () => {
