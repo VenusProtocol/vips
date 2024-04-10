@@ -8,7 +8,19 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import vip002 from "../../../proposals/arbitrumsepolia/vip-002";
+import vip002, {
+  COMPTROLLER_CORE,
+  MOCK_ARB,
+  MOCK_USDC,
+  MOCK_USDT,
+  MOCK_WBTC,
+  MOCK_WETH,
+  VARB_CORE,
+  VUSDC_CORE,
+  VUSDT_CORE,
+  VWBTC_CORE,
+  VWETH_CORE,
+} from "../../../proposals/arbitrumsepolia/vip-002";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -25,19 +37,19 @@ const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a yea
 type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vUSDC_Core" | "vARB_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
-  vWBTC_Core: arbitrumsepolia.VWBTC_CORE,
-  vWETH_Core: arbitrumsepolia.VWETH_CORE,
-  vUSDT_Core: arbitrumsepolia.VUSDT_CORE,
-  vUSDC_Core: arbitrumsepolia.VUSDC_CORE,
-  vARB_Core: arbitrumsepolia.VARB_CORE,
+  vWBTC_Core: VWBTC_CORE,
+  vWETH_Core: VWETH_CORE,
+  vUSDT_Core: VUSDT_CORE,
+  vUSDC_Core: VUSDC_CORE,
+  vARB_Core: VARB_CORE,
 };
 
 const tokens = {
-  WBTC: arbitrumsepolia.MOCK_WBTC,
-  WETH: arbitrumsepolia.MOCK_WETH,
-  USDT: arbitrumsepolia.MOCK_USDT,
-  USDC: arbitrumsepolia.MOCK_USDC,
-  ARB: arbitrumsepolia.MOCK_ARB,
+  WBTC: MOCK_WBTC,
+  WETH: MOCK_WETH,
+  USDT: MOCK_USDT,
+  USDC: MOCK_USDC,
+  ARB: MOCK_ARB,
 };
 
 interface VTokenState {
@@ -56,8 +68,8 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     symbol: "vWBTC_Core",
     decimals: 8,
     underlying: tokens.WBTC,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: arbitrumsepolia.COMPTROLLER_CORE,
+    exchangeRate: parseUnits("1", 18),
+    comptroller: COMPTROLLER_CORE,
   },
   vWETH_Core: {
     name: "Venus WETH (Core)",
@@ -65,23 +77,23 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.WETH,
     exchangeRate: parseUnits("1", 28),
-    comptroller: arbitrumsepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
   vUSDT_Core: {
     name: "Venus USDT (Core)",
     symbol: "vUSDT_Core",
     decimals: 8,
     underlying: tokens.USDT,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: arbitrumsepolia.COMPTROLLER_CORE,
+    exchangeRate: parseUnits("1", 16),
+    comptroller: COMPTROLLER_CORE,
   },
   vUSDC_Core: {
     name: "Venus USDC (Core)",
     symbol: "vUSDC_Core",
     decimals: 8,
     underlying: tokens.USDC,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: arbitrumsepolia.COMPTROLLER_CORE,
+    exchangeRate: parseUnits("1", 16),
+    comptroller: COMPTROLLER_CORE,
   },
   vARB_Core: {
     name: "Venus ARB (Core)",
@@ -89,7 +101,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.ARB,
     exchangeRate: parseUnits("1", 28),
-    comptroller: arbitrumsepolia.COMPTROLLER_CORE,
+    comptroller: COMPTROLLER_CORE,
   },
 };
 
@@ -129,7 +141,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.77",
     reserveFactor: "0.1",
-    initialSupply: "1800.00000001",
+    initialSupply: "1800",
     vTokenReceiver: arbitrumsepolia.VTREASURY,
   },
   vUSDT_Core: {
@@ -138,7 +150,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.77",
     reserveFactor: "0.1",
-    initialSupply: "1800.00000001",
+    initialSupply: "1800",
     vTokenReceiver: arbitrumsepolia.VTREASURY,
   },
   vARB_Core: {
@@ -185,7 +197,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vARB_Core: "",
 };
 
-forking(29814583, () => {
+forking(32190799, () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -226,11 +238,11 @@ forking(29814583, () => {
         const pool = registeredPools[0];
         expect(pool.name).to.equal("Core");
         expect(pool.creator).to.equal(GUARDIAN);
-        expect(pool.comptroller).to.equal(arbitrumsepolia.COMPTROLLER_CORE);
+        expect(pool.comptroller).to.equal(COMPTROLLER_CORE);
       });
 
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
-        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, arbitrumsepolia.COMPTROLLER_CORE);
+        const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
         expect(poolVTokens).to.have.lengthOf(5);
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
@@ -360,7 +372,7 @@ forking(29814583, () => {
         });
       };
 
-      checkComptroller(arbitrumsepolia.COMPTROLLER_CORE, "Core");
+      checkComptroller(COMPTROLLER_CORE, "Core");
     });
 
     it("Interest rates", async () => {
