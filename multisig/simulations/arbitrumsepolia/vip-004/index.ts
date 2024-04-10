@@ -9,7 +9,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip004 from "../../../proposals/arbitrumsepolia/vip-004";
+import vip004, { ACM } from "../../../proposals/arbitrumsepolia/vip-004";
 import ACM_ABI from "./abi/acm.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -35,7 +35,7 @@ forking(29803872, () => {
   describe("Post tx checks", () => {
     describe("Generic checks", async () => {
       before(async () => {
-        const acm: Contract = await ethers.getContractAt(ACM_ABI, arbitrumsepolia.ACM);
+        const acm: Contract = await ethers.getContractAt(ACM_ABI, ACM);
         const xvs: Contract = await ethers.getContractAt(XVS_ABI, arbitrumsepolia.XVS);
         xvsMinter = await initMainnetUser(XVS_BRIDGE, ethers.utils.parseEther("1"));
         const admin = await initMainnetUser(arbitrumsepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));

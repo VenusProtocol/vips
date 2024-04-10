@@ -4,6 +4,7 @@ import { makeProposal } from "../../../../src/utils";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 const XVS_STORE = "0x3c49eB8FaDD3FdB0a4Bbb40F8A7e3ce821298607";
+export const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
 const vip004 = () => {
   return makeProposal([
@@ -22,23 +23,23 @@ const vip004 = () => {
     {
       target: arbitrumsepolia.XVS_VAULT_PROXY,
       signature: "setAccessControl(address)",
-      params: [arbitrumsepolia.ACM],
+      params: [ACM],
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [arbitrumsepolia.XVS_VAULT_PROXY, "pause()", arbitrumsepolia.NORMAL_TIMELOCK],
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [arbitrumsepolia.XVS_VAULT_PROXY, "resume()", arbitrumsepolia.NORMAL_TIMELOCK],
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
         arbitrumsepolia.XVS_VAULT_PROXY,
@@ -48,13 +49,13 @@ const vip004 = () => {
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [arbitrumsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
         arbitrumsepolia.XVS_VAULT_PROXY,
@@ -64,7 +65,7 @@ const vip004 = () => {
     },
 
     {
-      target: arbitrumsepolia.ACM,
+      target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
         arbitrumsepolia.XVS_VAULT_PROXY,
