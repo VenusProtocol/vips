@@ -15,6 +15,7 @@ import vip002, {
   MOCK_USDT,
   MOCK_WBTC,
   MOCK_WETH,
+  PSR,
   VARB_CORE,
   VUSDC_CORE,
   VUSDT_CORE,
@@ -273,7 +274,7 @@ forking(32190799, () => {
       for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
         it(`should set PSR for ${symbol}`, async () => {
           const vToken = await ethers.getContractAt(VTOKEN_ABI, address);
-          expect(await vToken.protocolShareReserve()).to.equal(arbitrumsepolia.PSR);
+          expect(await vToken.protocolShareReserve()).to.equal(PSR);
         });
       }
     });
