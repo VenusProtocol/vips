@@ -54,8 +54,8 @@ export const checkCorePoolComptroller = () => {
     let xvs: Contract;
 
     before(async () => {
-      await await impersonateAccount(ACCOUNT);
-      await await impersonateAccount(NORMAL_TIMELOCK);
+      await impersonateAccount(ACCOUNT);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(ACCOUNT);
       timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 
