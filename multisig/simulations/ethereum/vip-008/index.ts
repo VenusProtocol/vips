@@ -4,14 +4,14 @@ import { ethers } from "hardhat";
 
 import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import vip017, {
+import vip008, {
   COMPTROLLER_BEACON,
   NATIVE_TOKEN_GATEWAY_VWETH_CORE,
   NATIVE_TOKEN_GATEWAY_VWETH_LST,
   NEW_COMPTROLLER_IMPLEMENTATION,
   NEW_VTOKEN_IMPLEMENTATION,
   VTOKEN_BEACON,
-} from "../../../proposals/ethereum/vip-017";
+} from "../../../proposals/ethereum/vip-008";
 import BEACON_ABI from "./abi/Beacon.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
@@ -83,7 +83,7 @@ forking(19447800, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(vip008());
     });
 
     it("comptroller should have new implementation", async () => {

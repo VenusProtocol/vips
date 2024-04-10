@@ -11,7 +11,7 @@ export const NATIVE_TOKEN_GATEWAY_VWETH_CORE = "0x044dd75b9E043ACFD2d6EB56b6BB81
 export const NATIVE_TOKEN_GATEWAY_VWETH_LST = "0xBC1471308eb2287eBE137420Eb1664A964895D21";
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 
-const vip017 = () => {
+const vip008 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
@@ -41,4 +41,4 @@ const vip017 = () => {
   ]);
 };
 
-export default vip017;
+export default vip008;
