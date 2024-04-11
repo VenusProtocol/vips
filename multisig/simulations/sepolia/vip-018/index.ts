@@ -79,7 +79,7 @@ forking(5673551, () => {
     });
 
     it("check reward speed", async () => {
-      expect(await rewardDistributor.rewardTokenSupplySpeeds(vweETH)).to.equal("23148148148148148");
+      expect(await rewardDistributor.rewardTokenSupplySpeeds(vweETH)).to.equal("23148");
     });
 
     it("check rewards distributor ownership", async () => {
