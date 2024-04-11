@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { REWARDS_DISTRIBUTOR, vip017, vweETH, weETH } from "../../../proposals/sepolia/vip-017";
+import { REWARDS_DISTRIBUTOR, vip018, vweETH, weETH } from "../../../proposals/sepolia/vip-018";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
@@ -39,7 +39,7 @@ forking(5673551, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(vip018());
     });
 
     it("check price", async () => {

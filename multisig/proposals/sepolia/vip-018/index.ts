@@ -20,7 +20,7 @@ export const CHAINLINK_STALE_PERIOD = "86400";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
 export const REWARD_SPEED = "23148148148148148";
 
-export const vip017 = () => {
+export const vip018 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -124,4 +124,4 @@ export const vip017 = () => {
   ]);
 };
 
-export default vip017;
+export default vip018;
