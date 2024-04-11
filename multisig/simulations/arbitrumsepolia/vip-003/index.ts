@@ -1,35 +1,44 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip003 from "../../../proposals/arbitrumsepolia/vip-003";
+import vip003, {
+  BNB_TESTNET_ENDPOINT_ID,
+  BNB_TESTNET_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  MAX_DAILY_SEND_LIMIT,
+  MIN_DEST_GAS,
+  OPBNB_TESTNET_ENDPOINT_ID,
+  OPBNB_TESTNET_TRUSTED_REMOTE,
+  SEPOLIA_ENDPOINT_ID,
+  SEPOLIA_TRUSTED_REMOTE,
+  SINGLE_RECEIVE_LIMIT,
+  SINGLE_SEND_LIMIT,
+  XVS,
+  XVS_BRIDGE_ADMIN_PROXY,
+  XVS_BRIDGE_DEST,
+  XVS_MINT_LIMIT,
+} from "../../../proposals/arbitrumsepolia/vip-003";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
-
-const XVS_BRIDGE_ADMIN = "0x0DC3d6717727FD5a023e41bA8134640ca18f3E48";
-const XVS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
-const SRC_CHAIN_ID = "10102";
-const XVS_MINT_LIMIT = parseUnits("500000", 18);
-const TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
-const XVS_BRIDGE = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(29808974, () => {
+forking(32523518, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
 
   before(async () => {
     xvs = await ethers.getContractAt(XVS_ABI, XVS);
-    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN);
-    xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
+    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
+    xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE_DEST);
   });
 
   describe("Pre-Execution state", () => {
@@ -38,12 +47,20 @@ forking(29808974, () => {
       expect(owner).not.equal(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
-    it("Trusted remote should not exist", async () => {
-      await expect(xvsBridge.getTrustedRemoteAddress(SRC_CHAIN_ID)).to.be.revertedWith("LzApp: no trusted path record");
+    it("Trusted remote should not exist for any network(bsctestnet, opbnbtestnet, sepolia)", async () => {
+      await expect(xvsBridge.getTrustedRemoteAddress(BNB_TESTNET_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
+      await expect(xvsBridge.getTrustedRemoteAddress(OPBNB_TESTNET_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
+      await expect(xvsBridge.getTrustedRemoteAddress(SEPOLIA_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
     });
 
     it("Mint limit = 0", async () => {
-      const cap = await xvs.minterToCap(XVS_BRIDGE);
+      const cap = await xvs.minterToCap(XVS_BRIDGE_DEST);
       expect(cap).equals(0);
     });
   });
@@ -58,13 +75,19 @@ forking(29808974, () => {
       expect(owner).equals(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
-    it("Should set trusted remote address in bridge", async () => {
-      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(SRC_CHAIN_ID);
-      expect(trustedRemote).equals(TRUSTED_REMOTE);
+    it("Should set trusted remote address in bridge for all three networks", async () => {
+      let trustedRemote = await xvsBridge.getTrustedRemoteAddress(BNB_TESTNET_ENDPOINT_ID);
+      expect(trustedRemote).equals(BNB_TESTNET_TRUSTED_REMOTE);
+
+      trustedRemote = await xvsBridge.getTrustedRemoteAddress(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(trustedRemote).equals(OPBNB_TESTNET_TRUSTED_REMOTE);
+
+      trustedRemote = await xvsBridge.getTrustedRemoteAddress(SEPOLIA_ENDPOINT_ID);
+      expect(trustedRemote).equals(SEPOLIA_TRUSTED_REMOTE);
     });
 
     it("Should set minting limit in XVS token", async () => {
-      const cap = await xvs.minterToCap(XVS_BRIDGE);
+      const cap = await xvs.minterToCap(XVS_BRIDGE_DEST);
       expect(cap).equals(XVS_MINT_LIMIT);
     });
 
@@ -73,24 +96,59 @@ forking(29808974, () => {
       expect(token).equals(XVS);
     });
 
-    it("Should set correct max daily limit", async () => {
-      const token = await xvsBridge.chainIdToMaxDailyLimit(SRC_CHAIN_ID);
-      expect(token).equals("50000000000000000000000");
+    it("Should set correct max daily limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxDailyLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
     });
 
-    it("Should set correct max single limit", async () => {
-      const token = await xvsBridge.chainIdToMaxSingleTransactionLimit(SRC_CHAIN_ID);
-      expect(token).equals("10000000000000000000000");
+    it("Should set correct max single limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
     });
 
-    it("Should set correct max daily receive limit", async () => {
-      const token = await xvsBridge.chainIdToMaxDailyReceiveLimit(SRC_CHAIN_ID);
-      expect(token).equals("50000000000000000000000");
+    it("Should set correct max daily receive limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should set correct max single receive limit", async () => {
-      const token = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(SRC_CHAIN_ID);
-      expect(token).equals("10000000000000000000000");
+    it("Should set correct max single receive limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals("10000000000000000000000");
+
+      limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals("10000000000000000000000");
+    });
+
+    it("Should set correct min destination gas", async () => {
+      let limit = await xvsBridge.minDstGasLookup(BNB_TESTNET_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
+
+      limit = await xvsBridge.minDstGasLookup(OPBNB_TESTNET_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
+
+      limit = await xvsBridge.minDstGasLookup(SEPOLIA_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
     });
   });
 
