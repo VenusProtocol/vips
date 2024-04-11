@@ -120,7 +120,7 @@ export const vip018 = () => {
     {
       target: REWARDS_DISTRIBUTOR,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[vweETH], ["23148148148148148"], ["0"]],
+      params: [[vweETH], [REWARD_SPEED], ["0"]],
       value: "0",
     },
     {
