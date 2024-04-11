@@ -13,7 +13,7 @@ import {
   vweETH,
   weETH,
 } from "../../../proposals/sepolia/vip-018";
-import ERC20_ABI from "./abi/ERC20.json";
+import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
