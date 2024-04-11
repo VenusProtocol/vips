@@ -19,7 +19,7 @@ export const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 
 export const CHAINLINK_STALE_PERIOD = "86400";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
-export const REWARD_SPEED = "23148148148148148";
+export const REWARD_SPEED = "23148";
 export const USDC_REWARD_TRANSFER = parseUnits("5000", 6);
 
 export const vip018 = () => {
