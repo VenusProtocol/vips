@@ -103,7 +103,7 @@ export const vip017 = () => {
 
     // Add Rewards
     {
-      target: "0x4597B9287fE0DF3c5513D66886706E0719bD270f",
+      target: "0x92e8E3C202093A495e98C10f9fcaa5Abe288F74A",
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
       params: [[vweETH], ["23148148148148148"], ["0"]],
       value: "0",
