@@ -15,10 +15,12 @@ export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const vweETH = "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b";
 export const REWARDS_DISTRIBUTOR = "0x92e8E3C202093A495e98C10f9fcaa5Abe288F74A";
 export const COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
+export const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 
 export const CHAINLINK_STALE_PERIOD = "86400";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
 export const REWARD_SPEED = "23148148148148148";
+export const USDC_REWARD_TRANSFER = parseUnits("5000", 6);
 
 export const vip018 = () => {
   return makeProposal([
@@ -120,6 +122,16 @@ export const vip018 = () => {
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
       params: [[vweETH], ["23148148148148148"], ["0"]],
       value: "0",
+    },
+    {
+      target: USDC,
+      signature: "faucet(uint256)",
+      params: [USDC_REWARD_TRANSFER],
+    },
+    {
+      target: USDC,
+      signature: "transfer(address,uint256)",
+      params: [REWARDS_DISTRIBUTOR, USDC_REWARD_TRANSFER],
     },
   ]);
 };
