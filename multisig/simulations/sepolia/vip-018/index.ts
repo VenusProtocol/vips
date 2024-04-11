@@ -36,7 +36,6 @@ forking(5673833, () => {
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-    console.log(defaultAdapterParams);
   });
 
   describe("Post-Execution state", () => {
