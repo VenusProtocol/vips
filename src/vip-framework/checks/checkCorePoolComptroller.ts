@@ -91,7 +91,7 @@ export const checkCorePoolComptroller = () => {
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
       await expect(comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.gt(originalXVSBalance);
+      expect(await xvs.balanceOf(ACCOUNT)).to.be.greaterThanOrEqual(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));

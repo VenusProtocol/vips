@@ -79,11 +79,13 @@ export const NETWORK_ADDRESSES = {
     GUARDIAN: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB",
     CHAINLINK_ORACLE: oracleSepoliaContracts.addresses.ChainlinkOracle,
     RESILIENT_ORACLE: oracleSepoliaContracts.addresses.ResilientOracle,
+    REDSTONE_ORACLE: oracleSepoliaContracts.addresses.RedStoneOracle,
     XVS: tokenBridgeSepoliaContracts.addresses.XVS,
     POOL_REGISTRY: ilSepoliaDeployedContracts.addresses.PoolRegistry,
     VTREASURY: sepoliaDeployedContracts.addresses.VTreasuryV8,
     XVS_VAULT_PROXY: sepoliaDeployedContracts.addresses.XVSVaultProxy,
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    WETH: "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9",
   },
   opbnbtestnet: {
     NORMAL_TIMELOCK: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
