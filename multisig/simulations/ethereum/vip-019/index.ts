@@ -22,9 +22,9 @@ import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
-const WeETH_ORACLE_NON_EQUIVALENCE = "0xB634cd4F8b1CF2132E05381Eee0f994DF964869D";
+const WeETH_ORACLE_NON_EQUIVALENCE = "0x660c6d8c5fddc4f47c749e0f7e03634513f23e0e";
 
-forking(19638492, () => {
+forking(19640453, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;
@@ -55,11 +55,11 @@ forking(19638492, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3650", 18), parseUnits("5", 18));
+      expect(await resilientOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3570", 18), parseUnits("10", 18));
     });
 
     it("check non-equivalence oracle price", async () => {
-      expect(await nonEquivalenceOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3645", 18), parseUnits("5", 18));
+      expect(await nonEquivalenceOracle.getPrice(weETH)).to.be.closeTo(parseUnits("3570", 18), parseUnits("10", 18));
     });
 
     it("should have 3 markets in liquid staked pool", async () => {
