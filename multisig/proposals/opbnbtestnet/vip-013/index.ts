@@ -3,6 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { makeProposal } from "../../../../src/utils";
 
 const XVS_BRIDGE_ADMIN_PROXY = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+export const OPBNB_TREASURY = "0x3370915301E8a6A6baAe6f461af703e2498409F3";
 export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
@@ -43,6 +44,7 @@ const vip013 = () => {
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
       params: [SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
+    { target: XVS_BRIDGE_ADMIN_PROXY, signature: "setWhitelist(address,bool)", params: [OPBNB_TREASURY, true] },
   ]);
 };
 

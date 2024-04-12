@@ -7,6 +7,7 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip016, {
+  ETHEREUM_MULTISIG,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   OP_BNB_ENDPOINT_ID,
@@ -20,6 +21,7 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const XVS_HOLDER = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
+const ETHEREUM_TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 
 forking(19574618, () => {
   let xvs: Contract;
@@ -64,6 +66,13 @@ forking(19574618, () => {
 
     it("Should match max daily receive limit", async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+    });
+
+    it("Should whitelist MULTISIG and TREASURY", async () => {
+      let res = await xvsBridge.whitelist(ETHEREUM_MULTISIG);
+      expect(res).equals(true);
+      res = await xvsBridge.whitelist(ETHEREUM_TREASURY);
+      expect(res).equals(true);
     });
 
     it("Should emit an event on successful bridging of XVS (Ethereum -> opBNB)", async () => {

@@ -20,6 +20,8 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const XVS_HOLDER = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const SEPOLIA_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+const SEPOLIA_MULTISIG = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
 forking(5618902, () => {
   let xvs: Contract;
@@ -64,6 +66,13 @@ forking(5618902, () => {
 
     it("Should match max daily receive limit", async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+    });
+
+    it("Should whitelist MULTISIG and TREASURY", async () => {
+      let res = await xvsBridge.whitelist(SEPOLIA_MULTISIG);
+      expect(res).equals(true);
+      res = await xvsBridge.whitelist(SEPOLIA_TREASURY);
+      expect(res).equals(true);
     });
 
     it("Should emit an event on successful bridging of XVS (Sepolia -> opBNB Testnet)", async () => {

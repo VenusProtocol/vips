@@ -3,6 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { makeProposal } from "../../../../src/utils";
 
 const XVS_BRIDGE_ADMIN_PROXY = "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831";
+export const OPBNB_TREASURY = "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52";
 export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
@@ -42,6 +43,11 @@ const vip012 = () => {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
       params: [ETHEREUM_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setWhitelist(address,bool)",
+      params: [OPBNB_TREASURY, true],
     },
   ]);
 };

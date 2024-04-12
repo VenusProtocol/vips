@@ -11,6 +11,7 @@ import vip012, {
   ETHEREUM_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
+  OPBNB_TREASURY,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
 } from "../../../proposals/opbnbmainnet/vip-012";
@@ -20,6 +21,7 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 const XVS_BRIDGE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
 const XVS_HOLDER = "0xc27Bac74AAbbE19A346660E1F5fd4602F2D54E93";
+const OPBNB_MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
 forking(20387710, () => {
   let xvs: Contract;
@@ -64,6 +66,13 @@ forking(20387710, () => {
 
     it("Should match max daily receive limit", async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(ETHEREUM_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+    });
+
+    it("Should whitelist MULTISIG and TREASURY", async () => {
+      let res = await xvsBridge.whitelist(OPBNB_MULTISIG);
+      expect(res).equals(true);
+      res = await xvsBridge.whitelist(OPBNB_TREASURY);
+      expect(res).equals(true);
     });
 
     it("Should emit an event on successful bridging of XVS (opBNB -> ETHEREUM)", async () => {
