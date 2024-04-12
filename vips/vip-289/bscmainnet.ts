@@ -43,7 +43,7 @@ There will be one more VIP in the following weeks to perform the rest of the cha
 
 Complete analysis and details of these recommendations are available in the above publications.
 
-VIP simulation: []()`,
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/260](https://github.com/VenusProtocol/vips/pull/260)`,
 
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",

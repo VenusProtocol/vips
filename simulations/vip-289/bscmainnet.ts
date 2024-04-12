@@ -40,8 +40,8 @@ async function checkIRModelAddress(market: Contract, expectedIR: string) {
   const IR = await market.interestRateModel();
   expect(IR).equals(expectedIR);
 }
-// TODO: change block number after 1st VIP executed
-forking(37700898, () => {
+
+forking(37774366, () => {
   let vusdt: Contract;
   let vusdc: Contract;
   let vdai: Contract;
