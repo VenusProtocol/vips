@@ -88,8 +88,6 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     if (supplyMarket && borrowMarket) break; // Exit the loop if both supplyMarket and borrowMarket are initialized
   }
 
-  console.log(supplyUnderlying?.address, borrowUnderlying?.address);
-
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
   await setMaxStalePeriod(resilientOracle, borrowUnderlying as Contract);
 
