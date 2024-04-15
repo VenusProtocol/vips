@@ -88,8 +88,6 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     }
   }
 
-  console.log(borrowMarket?.address, "asdasdasdasdasdasdasdasdasdzxxxx");
-
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
   await setMaxStalePeriod(resilientOracle, borrowUnderlying as Contract);
 
