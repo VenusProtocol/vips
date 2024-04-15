@@ -22,10 +22,13 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const WeETH_ORACLE_NON_EQUIVALENCE = "0x660c6d8c5fddc4f47c749e0f7e03634513f23e0e";
 const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
+const LIQUID_STAKED_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
+const WSTETH_HOLDER = "0x5fEC2f34D80ED82370F733043B6A536d7e9D7f8d";
 
 interface RiskParameters {
   borrowCap: string;
@@ -201,6 +204,12 @@ forking(19640453, () => {
           },
           BLOCKS_PER_YEAR,
         );
+      });
+    });
+
+    describe("generic tests", async () => {
+      checkIsolatedPoolsComptrollers({
+        [LIQUID_STAKED_COMPTROLLER]: WSTETH_HOLDER,
       });
     });
   });
