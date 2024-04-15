@@ -21,12 +21,6 @@ const vip004 = () => {
     },
 
     {
-      target: arbitrumsepolia.XVS_VAULT_PROXY,
-      signature: "setAccessControl(address)",
-      params: [ACM],
-    },
-
-    {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [arbitrumsepolia.XVS_VAULT_PROXY, "pause()", arbitrumsepolia.NORMAL_TIMELOCK],
