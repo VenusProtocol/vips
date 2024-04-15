@@ -14,6 +14,7 @@ export const vweETH = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";
 export const REWARDS_DISTRIBUTOR = "0xDCB0CfA130496c749738Acbe2d6aA06C7C320f06";
 export const COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+export const MULTISIG = "0xF6C612c745Ba4546075DB62902c1Eb3255CdAe28";
 
 // 24 hours stale period as per https://data.chain.link/feeds/ethereum/mainnet/weeth-eth
 export const CHAINLINK_STALE_PERIOD = "86400";
@@ -75,7 +76,7 @@ export const vip019 = () => {
           "900000000000000000",
           "930000000000000000",
           WEETH_AMOUNT,
-          VTREASURY,
+          MULTISIG,
           "7500000000000000000000",
           "750000000000000000000",
         ],
