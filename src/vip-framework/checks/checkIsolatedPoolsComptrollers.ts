@@ -80,12 +80,15 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
         supplyMarket = undefined;
         continue;
       }
-    } else if (!borrowMarket) {
+    }
+    if (!borrowMarket) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
-      break; // Exit the loop if both supplyMarket and borrowMarket are initialized
+      // break; // Exit the loop if both supplyMarket and borrowMarket are initialized
     }
   }
+
+  console.log(borrowMarket?.address, "asdasdasdasdasdasdasdasdasdzxxxx");
 
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
   await setMaxStalePeriod(resilientOracle, borrowUnderlying as Contract);
