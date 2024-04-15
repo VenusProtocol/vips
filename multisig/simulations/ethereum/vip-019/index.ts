@@ -4,16 +4,18 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
   COMPTROLLER,
+  MULTISIG,
   REWARDS_DISTRIBUTOR,
   USDC,
   USDC_REWARD_TRANSFER,
   vip019,
   vweETH,
   weETH,
-  MULTISIG
 } from "../../../proposals/ethereum/vip-019";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -21,8 +23,6 @@ import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const WeETH_ORACLE_NON_EQUIVALENCE = "0x660c6d8c5fddc4f47c749e0f7e03634513f23e0e";
@@ -40,7 +40,7 @@ interface RiskParameters {
   vTokenReceiver: string;
 }
 
-const riskParameters: RiskParameters  = {
+const riskParameters: RiskParameters = {
   borrowCap: "750",
   supplyCap: "7500",
   collateralFactor: "0.9",
@@ -181,15 +181,11 @@ forking(19640453, () => {
       });
 
       it(`check supply cap`, async () => {
-        expect(await comptroller.supplyCaps(vweETH)).to.equal(
-          parseUnits(riskParameters.supplyCap, underlyingDecimals),
-        );
+        expect(await comptroller.supplyCaps(vweETH)).to.equal(parseUnits(riskParameters.supplyCap, underlyingDecimals));
       });
 
       it(`check borrow cap`, async () => {
-        expect(await comptroller.borrowCaps(vweETH)).to.equal(
-          parseUnits(riskParameters.borrowCap, underlyingDecimals),
-        );
+        expect(await comptroller.borrowCaps(vweETH)).to.equal(parseUnits(riskParameters.borrowCap, underlyingDecimals));
       });
 
       it("Interest rates", async () => {
