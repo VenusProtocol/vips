@@ -17,7 +17,7 @@ export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const MULTISIG = "0xF6C612c745Ba4546075DB62902c1Eb3255CdAe28";
 
 // 24 hours stale period as per https://data.chain.link/feeds/ethereum/mainnet/weeth-eth
-export const CHAINLINK_STALE_PERIOD = "86400";
+export const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 export const REWARD_SPEED = "23148";
 export const USDC_REWARD_TRANSFER = parseUnits("5000", 6);
 export const WEETH_AMOUNT = parseUnits("2.761910220333160209", 18);
@@ -28,7 +28,7 @@ export const vip019 = () => {
     {
       target: ethereum.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[weETH, CHAINLINK_WEETH_FEED, CHAINLINK_STALE_PERIOD]],
+      params: [[weETH, CHAINLINK_WEETH_FEED, STALE_PERIOD_26H]],
     },
     {
       target: ethereum.RESILIENT_ORACLE,

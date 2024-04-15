@@ -13,6 +13,7 @@ import {
   vip019,
   vweETH,
   weETH,
+  MULTISIG
 } from "../../../proposals/ethereum/vip-019";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -78,7 +79,7 @@ forking(19640453, () => {
 
     it("check supply", async () => {
       const expectedSupply = parseUnits("2.76191022", 8);
-      expect(await vweETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+      expect(await vweETHContract.balanceOf(MULTISIG)).to.equal(expectedSupply);
     });
 
     it("check reward token", async () => {
