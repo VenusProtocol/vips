@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import {
   checkRewardsDistributor,
@@ -207,14 +208,23 @@ forking(19640453, () => {
       });
     });
 
-    describe("generic IL tests", async () => {
-      checkIsolatedPoolsComptrollers({
+    it("generic IL tests", async () => {
+      await checkIsolatedPoolsComptrollers({
         [LIQUID_STAKED_COMPTROLLER]: WEETH_HOLDER,
+      });
+
+      await checkVToken(vweETH, {
+        name: "Venus weETH (Liquid Staked ETH)",
+        symbol: "vweETH_LiquidStakedETH",
+        decimals: 8,
+        underlying: weETH,
+        exchangeRate: parseUnits("10000000036.747831323259998399", 18),
+        comptroller: COMPTROLLER,
       });
     });
 
-    describe("generic reward tests", async () => {
-      checkRewardsDistributor("RewardsDistributor_LST_2_WEETH", {
+    it("generic reward tests", async () => {
+      await checkRewardsDistributor("RewardsDistributor_LST_2_WEETH", {
         pool: LIQUID_STAKED_COMPTROLLER,
         address: REWARDS_DISTRIBUTOR,
         token: USDC,
@@ -224,7 +234,7 @@ forking(19640453, () => {
         totalRewardsToDistribute: parseUnits("5000", 6),
       });
 
-      checkRewardsDistributorPool(LIQUID_STAKED_COMPTROLLER, 3);
+      await checkRewardsDistributorPool(LIQUID_STAKED_COMPTROLLER, 3);
     });
   });
 });
