@@ -7,13 +7,16 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip016, {
+  BNB_ENDPOINT_ID,
   ETHEREUM_MULTISIG,
-  MAX_DAILY_RECEIVE_LIMIT,
-  MAX_DAILY_SEND_LIMIT,
+  MAX_DAILY_RECEIVE_LIMIT_BNB,
+  MAX_DAILY_RECEIVE_LIMIT_OP_BNB,
+  MAX_DAILY_SEND_LIMIT_OP_BNB,
   OP_BNB_ENDPOINT_ID,
   OP_BNB_TRUSTED_REMOTE,
-  SINGLE_RECEIVE_LIMIT,
-  SINGLE_SEND_LIMIT,
+  SINGLE_RECEIVE_LIMIT_BNB,
+  SINGLE_RECEIVE_LIMIT_OP_BNB,
+  SINGLE_SEND_LIMIT_OP_BNB,
 } from "../../../proposals/ethereum/vip-016";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
@@ -51,21 +54,27 @@ forking(19574618, () => {
     });
 
     it("Should match single send transaction limit", async () => {
-      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(OP_BNB_ENDPOINT_ID)).to.equal(SINGLE_SEND_LIMIT);
+      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(OP_BNB_ENDPOINT_ID)).to.equal(SINGLE_SEND_LIMIT_OP_BNB);
     });
 
     it("Should match single receive transaction limit", async () => {
       expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(OP_BNB_ENDPOINT_ID)).to.equal(
-        SINGLE_RECEIVE_LIMIT,
+        SINGLE_RECEIVE_LIMIT_OP_BNB,
+      );
+      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(BNB_ENDPOINT_ID)).to.equal(
+        SINGLE_RECEIVE_LIMIT_BNB,
       );
     });
 
     it("Should match max daily send limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT_OP_BNB);
     });
 
     it("Should match max daily receive limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(OP_BNB_ENDPOINT_ID)).to.equal(
+        MAX_DAILY_RECEIVE_LIMIT_OP_BNB,
+      );
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT_BNB);
     });
 
     it("Should whitelist MULTISIG and TREASURY", async () => {

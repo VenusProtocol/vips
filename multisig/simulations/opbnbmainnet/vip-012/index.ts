@@ -7,6 +7,7 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip012, {
+  BNB_ENDPOINT_ID,
   ETHEREUM_ENDPOINT_ID,
   ETHEREUM_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
@@ -58,6 +59,7 @@ forking(20387710, () => {
       expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ETHEREUM_ENDPOINT_ID)).to.equal(
         SINGLE_RECEIVE_LIMIT,
       );
+      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(BNB_ENDPOINT_ID)).to.equal(SINGLE_RECEIVE_LIMIT);
     });
 
     it("Should match max daily send limit", async () => {
@@ -66,6 +68,7 @@ forking(20387710, () => {
 
     it("Should match max daily receive limit", async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(ETHEREUM_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
     it("Should whitelist MULTISIG and TREASURY", async () => {
