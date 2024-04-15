@@ -89,6 +89,11 @@ export const vip019 = () => {
       signature: "setProtocolShareReserve(address)",
       params: [PROTOCOL_SHARE_RESERVE],
     },
+    {
+      target: vweETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: ["10000000000000000"],
+    },
 
     // Add Rewards
     {
