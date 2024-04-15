@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,9 +21,11 @@ import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const WeETH_ORACLE_NON_EQUIVALENCE = "0x660c6d8c5fddc4f47c749e0f7e03634513f23e0e";
+const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 
 interface RiskParameters {
   borrowCap: string;
@@ -43,6 +45,22 @@ const riskParameters: RiskParameters  = {
   reserveFactor: "0.20",
   initialSupply: "2.76191022",
   vTokenReceiver: MULTISIG,
+};
+
+interface InterestRateModelSpec {
+  vToken: string;
+  kink: string;
+  base: string;
+  multiplier: string;
+  jump: string;
+}
+
+const interestRateModel: InterestRateModelSpec = {
+  vToken: "vweETH_LiquidStakedETH",
+  kink: "0.45",
+  base: "0",
+  multiplier: "0.09",
+  jump: "0.75",
 };
 
 forking(19640453, () => {
@@ -168,6 +186,20 @@ forking(19640453, () => {
       it(`check borrow cap`, async () => {
         expect(await comptroller.borrowCaps(vweETH)).to.equal(
           parseUnits(riskParameters.borrowCap, underlyingDecimals),
+        );
+      });
+
+      it("Interest rates", async () => {
+        checkInterestRate(
+          await vweETHContract.interestRateModel(),
+          interestRateModel.vToken,
+          {
+            base: interestRateModel.base,
+            multiplier: interestRateModel.multiplier,
+            jump: interestRateModel.jump,
+            kink: interestRateModel.kink,
+          },
+          BLOCKS_PER_YEAR,
         );
       });
     });
