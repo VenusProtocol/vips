@@ -80,7 +80,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
       }
     }
 
-    if (!borrowMarket) {
+    if (!borrowMarket && !(supplyMarket && supplyMarket.address === market)) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
     }
