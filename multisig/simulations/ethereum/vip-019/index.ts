@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
+import { checkRewardsDistributor } from "../../../../src/vip-framework/checks/rewardsDistributor";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
   COMPTROLLER,
@@ -203,9 +204,21 @@ forking(19640453, () => {
       });
     });
 
-    describe("generic tests", async () => {
+    describe("generic IL tests", async () => {
       checkIsolatedPoolsComptrollers({
         [LIQUID_STAKED_COMPTROLLER]: WEETH_HOLDER,
+      });
+    });
+
+    describe("generic reward tests", async () => {
+      checkRewardsDistributor("RewardsDistributor_LST_2_WEETH", {
+        pool: LIQUID_STAKED_COMPTROLLER,
+        address: REWARDS_DISTRIBUTOR,
+        token: USDC,
+        vToken: vweETH,
+        borrowSpeed: "0",
+        supplySpeed: "23148",
+        totalRewardsToDistribute: parseUnits("5000", 6),
       });
     });
   });
