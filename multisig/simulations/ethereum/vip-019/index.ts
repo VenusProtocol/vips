@@ -6,7 +6,10 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { checkRewardsDistributor } from "../../../../src/vip-framework/checks/rewardsDistributor";
+import {
+  checkRewardsDistributor,
+  checkRewardsDistributorPool,
+} from "../../../../src/vip-framework/checks/rewardsDistributor";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
   COMPTROLLER,
@@ -220,6 +223,8 @@ forking(19640453, () => {
         supplySpeed: "23148",
         totalRewardsToDistribute: parseUnits("5000", 6),
       });
+
+      checkRewardsDistributorPool(LIQUID_STAKED_COMPTROLLER, 3);
     });
   });
 });
