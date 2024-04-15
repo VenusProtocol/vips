@@ -15,6 +15,7 @@ export const REWARDS_DISTRIBUTOR = "0xDCB0CfA130496c749738Acbe2d6aA06C7C320f06";
 export const COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const MULTISIG = "0xF6C612c745Ba4546075DB62902c1Eb3255CdAe28";
+export const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
 // 24 hours stale period as per https://data.chain.link/feeds/ethereum/mainnet/weeth-eth
 export const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
@@ -82,6 +83,11 @@ export const vip019 = () => {
         ],
       ],
       value: "0",
+    },
+    {
+      target: vweETH,
+      signature: "setProtocolShareReserve(address)",
+      params: [PROTOCOL_SHARE_RESERVE],
     },
 
     // Add Rewards
