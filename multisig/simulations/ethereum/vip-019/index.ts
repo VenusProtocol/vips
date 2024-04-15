@@ -25,6 +25,26 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { ethereum } = NETWORK_ADDRESSES;
 const WeETH_ORACLE_NON_EQUIVALENCE = "0x660c6d8c5fddc4f47c749e0f7e03634513f23e0e";
 
+interface RiskParameters {
+  borrowCap: string;
+  supplyCap: string;
+  collateralFactor: string;
+  liquidationThreshold: string;
+  reserveFactor: string;
+  initialSupply: string;
+  vTokenReceiver: string;
+}
+
+const riskParameters: RiskParameters  = {
+  borrowCap: "750",
+  supplyCap: "7500",
+  collateralFactor: "0.9",
+  liquidationThreshold: "0.93",
+  reserveFactor: "0.20",
+  initialSupply: "2.76191022",
+  vTokenReceiver: MULTISIG,
+};
+
 forking(19640453, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
@@ -100,6 +120,56 @@ forking(19640453, () => {
 
     it(`should be registered in Comptroller`, async () => {
       expect(await comptroller.getRewardDistributors()).to.contain(rewardDistributor.address);
+    });
+
+    it(`should mint initial supply`, async () => {
+      const expectedSupply = parseUnits(riskParameters.initialSupply, 8);
+      const vToken = await ethers.getContractAt(VTOKEN_ABI, vweETH);
+      expect(await vToken.balanceOf(riskParameters.vTokenReceiver)).to.equal(expectedSupply);
+    });
+
+    describe(`check risk parameters`, () => {
+      let vToken: Contract;
+      let comptroller: Contract;
+      let underlyingDecimals: number;
+
+      before(async () => {
+        vToken = await ethers.getContractAt(VTOKEN_ABI, vweETH);
+        comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
+        const underlyingAddress = weETH;
+        const underlying = await ethers.getContractAt(ERC20_ABI, underlyingAddress);
+        underlyingDecimals = await underlying.decimals();
+      });
+
+      it(`check reserve factor`, async () => {
+        expect(await vToken.reserveFactorMantissa()).to.equal(parseUnits(riskParameters.reserveFactor, 18));
+      });
+
+      it(`check CF`, async () => {
+        const market = await comptroller.markets(vweETH);
+        expect(market.collateralFactorMantissa).to.equal(parseUnits(riskParameters.collateralFactor, 18));
+      });
+
+      it(`check liquidation threshold`, async () => {
+        const market = await comptroller.markets(vweETH);
+        expect(market.liquidationThresholdMantissa).to.equal(parseUnits(riskParameters.liquidationThreshold, 18));
+      });
+
+      it(`check protocol seize share`, async () => {
+        expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.01", 18));
+      });
+
+      it(`check supply cap`, async () => {
+        expect(await comptroller.supplyCaps(vweETH)).to.equal(
+          parseUnits(riskParameters.supplyCap, underlyingDecimals),
+        );
+      });
+
+      it(`check borrow cap`, async () => {
+        expect(await comptroller.borrowCaps(vweETH)).to.equal(
+          parseUnits(riskParameters.borrowCap, underlyingDecimals),
+        );
+      });
     });
   });
 });
