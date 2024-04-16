@@ -3,10 +3,10 @@ import { makeProposal } from "../../src/utils";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-const vip289 = () => {
+const vip290 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-289 Ethereum: new weETH market in the Liquid Staked ETH pool",
+    title: "VIP-290 Ethereum: new weETH market in the Liquid Staked ETH pool",
     description: `#### Summary
 
 If passed, following the Community proposal “[Proposal: Support weETH collateral on Venus on ETH Mainnet](https://community.venus.io/t/proposal-support-weeth-collateral-on-venus-on-eth-mainnet/4128)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x8bbdf216c0326b3ad55b75a7c171232f38309675536113e7746cfb021f409807), this VIP adds a market for the [weETH](https://etherscan.io/token/0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee) token into the Liquid Staked ETH pool on Ethereum.
@@ -66,7 +66,7 @@ We applied the following security procedures for this upgrade:
 
 #### Disclaimer for Ethereum VIPs
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this multisig transaction](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xc7bd6ff3a85ff86c5b72458cced7d1aabc82c48e81077cf11d49af0c87216c3d) will be executed. Otherwise, it will be rejected.`,
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this multisig transaction](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x27a9da650b3e95a1ea56938d93004df27f9a5388a8378fa85822c41d98dc9d5c) will be executed. Otherwise, it will be rejected.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -86,4 +86,4 @@ Privilege commands on Ethereum will be executed by the [Guardian wallet](https:/
   );
 };
 
-export default vip289;
+export default vip290;
