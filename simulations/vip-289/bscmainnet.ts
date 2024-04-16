@@ -46,6 +46,7 @@ forking(37874421, () => {
   describe("Post-Execution", () => {
     it("should update the distribution config", async () => {
       const distributionsLength = await psr.totalDistributions();
+      expect(distributionsLength).to.be.equal(distributionTargets.length);
 
       for (let i = 0; i < distributionsLength; i++) {
         const target = await psr.distributionTargets(i);
