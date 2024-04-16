@@ -19,6 +19,10 @@ const XVS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
 const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
 
+const STALE_PERIOD_3M = 60 * 3; // 3 minutes (for pricefeeds with heartbeat of 2 mins)
+const STALE_PERIOD_100M = 60 * 100; // 100 minutes (for pricefeeds with heartbeat of 1 hr)
+const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+
 const vip001 = () => {
   return makeProposal([
     {
@@ -79,7 +83,7 @@ const vip001 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_WBTC, CHAINLINK_BTC_FEED, 144000]],
+      params: [[MOCK_WBTC, CHAINLINK_BTC_FEED, STALE_PERIOD_3M]],
     },
     {
       target: arbitrumsepolia.RESILIENT_ORACLE,
@@ -99,7 +103,7 @@ const vip001 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_WETH, CHAINLINK_ETH_FEED, 144000]],
+      params: [[MOCK_WETH, CHAINLINK_ETH_FEED, STALE_PERIOD_3M]],
     },
     {
       target: arbitrumsepolia.RESILIENT_ORACLE,
@@ -119,7 +123,7 @@ const vip001 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_USDC, CHAINLINK_USDC_FEED, 144000]],
+      params: [[MOCK_USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_26H]],
     },
     {
       target: arbitrumsepolia.RESILIENT_ORACLE,
@@ -139,7 +143,7 @@ const vip001 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_USDT, CHAINLINK_USDT_FEED, 144000]],
+      params: [[MOCK_USDT, CHAINLINK_USDT_FEED, STALE_PERIOD_26H]],
     },
     {
       target: arbitrumsepolia.RESILIENT_ORACLE,
@@ -159,7 +163,7 @@ const vip001 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_ARB, CHAINLINK_ARB_FEED, 144000]],
+      params: [[MOCK_ARB, CHAINLINK_ARB_FEED, STALE_PERIOD_100M]],
     },
     {
       target: arbitrumsepolia.RESILIENT_ORACLE,
