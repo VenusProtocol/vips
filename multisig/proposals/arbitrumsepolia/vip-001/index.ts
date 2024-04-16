@@ -14,6 +14,7 @@ const MOCK_WETH = "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73";
 const MOCK_USDT = "0xf3118a17863996B9F2A073c9A66Faaa664355cf8";
 const MOCK_USDC = "0x86f096B1D970990091319835faF3Ee011708eAe8";
 const MOCK_ARB = "0x4371bb358aB5cC192E481543417D2F67b8781731";
+const XVS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
 
 const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
@@ -166,6 +167,26 @@ const vip001 = () => {
       params: [
         [
           MOCK_ARB,
+          [
+            arbitrumsepolia.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [true, false, false],
+        ],
+      ],
+    },
+    {
+      target: arbitrumsepolia.CHAINLINK_ORACLE,
+      signature: "setDirectPrice(address,uint256)",
+      params: [XVS, "10000000000000000000"],
+    },
+    {
+      target: arbitrumsepolia.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          XVS,
           [
             arbitrumsepolia.CHAINLINK_ORACLE,
             "0x0000000000000000000000000000000000000000",
