@@ -1,8 +1,6 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const VDAI = "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1";
 const VFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
 const VTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
@@ -10,8 +8,6 @@ const VUSDT_StableCoin = "0x5e3072305F9caE1c7A82F6Fe9E38811c74922c3B";
 const VUSDT_GameFi = "0x4978591f17670A846137d9d613e333C38dc68A37";
 const VUSDT_DeFi = "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854";
 
-const VUSDT_IR = "0x1485A27D95D3d2878a6641055dD3a643F296CCf6";
-const VUSDC_IR = "0x1485A27D95D3d2878a6641055dD3a643F296CCf6";
 const VDAI_IR = "0x1485A27D95D3d2878a6641055dD3a643F296CCf6";
 const VFDUSD_IR = "0x9Fca5d66Cc0DF990080825051E825A8104a7ffA4";
 const VTUSD_IR = "0x1485A27D95D3d2878a6641055dD3a643F296CCf6";
@@ -52,16 +48,6 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/260](https://github.
 
   return makeProposal(
     [
-      {
-        target: VUSDT,
-        signature: "_setInterestRateModel(address)",
-        params: [VUSDT_IR],
-      },
-      {
-        target: VUSDC,
-        signature: "_setInterestRateModel(address)",
-        params: [VUSDC_IR],
-      },
       {
         target: VDAI,
         signature: "_setInterestRateModel(address)",
