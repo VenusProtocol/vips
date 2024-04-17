@@ -18,6 +18,14 @@ export const ankrBNBOracle = "0x00ea3D7Abe2f04004Ce71f9ef5C04F5f8Dce2f55";
 export const WBETH_EXCHANGE_RATE = parseUnits("1.036711601665", "18");
 export const ankrBNB_EXCHANGE_RATE = parseUnits("1.080640588742602582", "18");
 
+export const TEMP_POOL_REGISTRY_IMP = "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3";
+export const ORIGINAL_POOL_REGISTRY_IMP = "0xc4953e157D057941A9a71273B0aF4d4477ED2770";
+export const PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
+export const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
+export const OLD_ankrBNB = "0x167F1F9EF531b3576201aa3146b13c57dbEda514";
+export const COMPTROLLER_ADDRESS = "0x596B11acAACF03217287939f88d63b51d3771704";
+export const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
+
 const vip289 = () => {
   const meta = {
     version: "v2",
@@ -36,11 +44,7 @@ const vip289 = () => {
         params: [
           [
             BNBx,
-            [
-              BNBxOracle,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [BNBxOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
             [true, false, false],
           ],
         ],
@@ -51,11 +55,7 @@ const vip289 = () => {
         params: [
           [
             SlisBNB,
-            [
-              SlisBNBOracle,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [SlisBNBOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
             [true, false, false],
           ],
         ],
@@ -66,11 +66,7 @@ const vip289 = () => {
         params: [
           [
             StkBNB,
-            [
-              StkBNBOracle,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [StkBNBOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
             [true, false, false],
           ],
         ],
@@ -86,11 +82,7 @@ const vip289 = () => {
         params: [
           [
             WBETH,
-            [
-              WBETHOracle,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [WBETHOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
             [true, false, false],
           ],
         ],
@@ -106,14 +98,25 @@ const vip289 = () => {
         params: [
           [
             ankrBNB,
-            [
-              ankrBNBOracle,
-              "0x0000000000000000000000000000000000000000",
-              "0x0000000000000000000000000000000000000000",
-            ],
+            [ankrBNBOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
             [true, false, false],
           ],
         ],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [POOL_REGISTRY, TEMP_POOL_REGISTRY_IMP],
+      },
+      {
+        target: POOL_REGISTRY,
+        signature: "updateUnderlying(address,address,address,address)",
+        params: [OLD_ankrBNB, ankrBNB, COMPTROLLER_ADDRESS, vankrBNB],
+      },
+      {
+        target: PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP],
       },
     ],
     meta,
