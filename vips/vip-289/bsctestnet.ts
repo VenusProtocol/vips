@@ -28,6 +28,10 @@ export const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 export const TEMP_VTOKEN_IMP = "0xbd3AAd064295dcA0f45fab4C6A5adFb0D23a19D2";
 export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const VTOKEN_IMP = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
+export const OLD_WBETH = "0xf9F98365566F4D55234f24b99caA1AfBE6428D44";
+export const vWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
+export const WBETH_VTOKEN_IMPL = "0xad6aa8bb4829560412a94aa930745f407bf8000b";
+export const WBETH_TEMP_VTOKEN_IMPL = "0x9ac3C79de233952bEBdf88A932c52fC24dD6ebcf";
 
 // Holders Data from: https://testnet.bscscan.com/token/0x167F1F9EF531b3576201aa3146b13c57dbEda514#balances
 export const ankrBNB_TOKEN_HOLDERS = [
@@ -173,17 +177,6 @@ const vip289 = () => {
         params: [WBETH_EXCHANGE_RATE],
       },
       {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            WBETH,
-            [WBETHOracle, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
-            [true, false, false],
-          ],
-        ],
-      },
-      {
         target: ankrBNB,
         signature: "setSharesToBonds(uint256)",
         params: [ankrBNB_EXCHANGE_RATE],
@@ -213,6 +206,21 @@ const vip289 = () => {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP],
+      },
+      {
+        target: vWBETH,
+        signature: "_setImplementation(address,bool,bytes)",
+        params: [WBETH_TEMP_VTOKEN_IMPL, false, "0x"],
+      },
+      {
+        target: vWBETH,
+        signature: "updateUnderlying(address)",
+        params: [WBETH],
+      },
+      {
+        target: vWBETH,
+        signature: "_setImplementation(address,bool,bytes)",
+        params: [WBETH_VTOKEN_IMPL, false, "0x"],
       },
       {
         target: VTOKEN_BEACON,

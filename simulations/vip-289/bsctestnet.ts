@@ -18,6 +18,7 @@ import vip289, {
   VTOKEN_BEACON,
   VTOKEN_IMP,
   WBETH,
+  WBETHOracle,
   ankrBNB,
 } from "../../vips/vip-289/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -31,12 +32,13 @@ const vBNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
 const vstkBNB = "0x75aa42c832a8911B77219DbeBABBB40040d16987";
 const vslisBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 
-forking(39546962, () => {
+forking(39552976, () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
   let proxyAdmin: Contract;
   let vTokenBeaconContract: Contract;
   let poolRegistry: Contract;
+  let wbethContract: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -44,6 +46,7 @@ forking(39546962, () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
     vTokenBeaconContract = new ethers.Contract(VTOKEN_BEACON, VTOKEN_BEACON_ABI, ethers.provider);
     poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, ethers.provider);
+    wbethContract = new ethers.Contract(WBETHOracle, RESILIENT_ORACLE_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -63,7 +66,8 @@ forking(39546962, () => {
     });
 
     it("check WBETH price", async () => {
-      await expect(resilientOracle.getPrice(WBETH)).to.be.reverted;
+      const price = await wbethContract.getPrice(WBETH);
+      expect(price).to.be.equal("0");
     });
 
     it("check ankrBNB price", async () => {
@@ -78,7 +82,7 @@ forking(39546962, () => {
 
   testVip("VIP-289", vip289(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
     },
   });
 
@@ -102,7 +106,7 @@ forking(39546962, () => {
     });
 
     it("check WBETH price", async () => {
-      const price = await resilientOracle.getPrice(WBETH);
+      const price = await wbethContract.getPrice(WBETH);
       expect(price).to.be.equal(parseUnits("3171.1719262411480405", "18"));
     });
 
