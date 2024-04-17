@@ -12,8 +12,11 @@ export const StkBNBOracle = "0x78c1248c07c3724fe7D6FbD0e8D9859eF206B6d0";
 export const StkBNB = "0x2999C176eBf66ecda3a646E70CeB5FF4d5fCFb8C";
 export const WBETHOracle = "0x80f80ad1d963673819752c234339901fa19fA7cb";
 export const WBETH = "0x9c37E59Ba22c4320547F00D4f1857AF1abd1Dd6f";
+export const ankrBNB = "0x5269b7558D3d5E113010Ef1cFF0901c367849CC9";
+export const ankrBNBOracle = "0x00ea3D7Abe2f04004Ce71f9ef5C04F5f8Dce2f55";
 
 export const WBETH_EXCHANGE_RATE = parseUnits("1.036711601665", "18");
+export const ankrBNB_EXCHANGE_RATE = parseUnits("1.080640588742602582", "18");
 
 const vip289 = () => {
   const meta = {
@@ -85,6 +88,26 @@ const vip289 = () => {
             WBETH,
             [
               WBETHOracle,
+              "0x0000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000",
+            ],
+            [true, false, false],
+          ],
+        ],
+      },
+      {
+        target: ankrBNB,
+        signature: "setSharesToBonds(uint256)",
+        params: [ankrBNB_EXCHANGE_RATE],
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            ankrBNB,
+            [
+              ankrBNBOracle,
               "0x0000000000000000000000000000000000000000",
               "0x0000000000000000000000000000000000000000",
             ],

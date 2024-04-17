@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import vip289, {RESILIENT_ORACLE, BNBx, SlisBNB, StkBNB, WBETH} from "../../vips/vip-289/bsctestnet";
+import vip289, {RESILIENT_ORACLE, BNBx, SlisBNB, StkBNB, WBETH, ankrBNB} from "../../vips/vip-289/bsctestnet";
 import { forking, testVip } from "../../src/vip-framework";
 
 forking(39540656, () => {
@@ -34,11 +34,15 @@ forking(39540656, () => {
     it("check WBETH price", async () => {
       await expect(resilientOracle.getPrice(WBETH)).to.be.reverted;
     })
+
+    it("check ankrBNB price", async () => {
+      await expect(resilientOracle.getPrice(ankrBNB)).to.be.reverted;
+    })
   });
 
   testVip("VIP-189", vip289(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
     },
   });
 
@@ -61,6 +65,11 @@ forking(39540656, () => {
     it("check WBETH price", async () => {
       const price = await resilientOracle.getPrice(WBETH);
       expect(price).to.be.equal(parseUnits("3205.63805656681001445", "18"));
+    })
+
+    it("check ankrBNB price", async () => {
+      const price = await resilientOracle.getPrice(ankrBNB);
+      expect(price).to.be.equal(parseUnits("587.230852111249510215", "18"));
     })
   });
 });
