@@ -125,7 +125,7 @@ const TRANSFER_COMMANDS = ankrBNB_TOKEN_HOLDERS.map(holder => {
 const vip289 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-283",
+    title: "VIP-289 Set custom oracles for markets with LST tokens (ankrBNB, BNBx, stkBNB, and slisBNB)",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
