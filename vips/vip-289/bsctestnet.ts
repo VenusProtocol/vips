@@ -73,7 +73,7 @@ const vip289 = () => {
         ],
       },
       {
-        target: WBETHOracle,
+        target: WBETH,
         signature: "setExchangeRate(uint256)",
         params: [WBETH_EXCHANGE_RATE],
       },

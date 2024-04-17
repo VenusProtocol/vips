@@ -8,7 +8,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import vip289, {RESILIENT_ORACLE, BNBx, SlisBNB, StkBNB, WBETH} from "../../vips/vip-289/bsctestnet";
 import { forking, testVip } from "../../src/vip-framework";
 
-forking(39540184, () => {
+forking(39540656, () => {
   let resilientOracle: Contract;
 
   before(async () => {
@@ -18,7 +18,6 @@ forking(39540184, () => {
   describe("Pre-VIP behavior", async () => {
     it("check BNBx price", async () => {
       const price = await resilientOracle.getPrice(BNBx);
-      console.log(price)
       expect(price).to.be.equal(parseUnits("342.50005266", "18"));
     })
 
@@ -46,22 +45,22 @@ forking(39540184, () => {
   describe("Post-VIP behavior", async () => {
     it("check BNBx price", async () => {
       const price = await resilientOracle.getPrice(BNBx);
-      expect(price).to.be.equal(parseUnits("1009.963489981467902562", "18"));
+      expect(price).to.be.equal(parseUnits("1009.594241515682316144", "18"));
     })
 
     it("check SlisBNB price", async () => {
       const price = await resilientOracle.getPrice(SlisBNB);
-      expect(price).to.be.equal(parseUnits("2279.277716470571684865", "18"));
+      expect(price).to.be.equal(parseUnits("2278.444399416782466662", "18"));
     })
 
     it("check StkBNB price", async () => {
       const price = await resilientOracle.getPrice(StkBNB);
-      expect(price).to.be.equal(parseUnits("549.222693655270241816", "18"));
+      expect(price).to.be.equal(parseUnits("549.021894676872956494", "18"));
     })
 
     it("check WBETH price", async () => {
       const price = await resilientOracle.getPrice(WBETH);
-      expect(price).to.be.equal(parseUnits("0.000000000000000001", "18"));
+      expect(price).to.be.equal(parseUnits("3205.63805656681001445", "18"));
     })
   });
 });
