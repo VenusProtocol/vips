@@ -5,10 +5,26 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip289, { POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP, BNBx, OLD_ankrBNB, RESILIENT_ORACLE, SlisBNB, StkBNB, WBETH, ankrBNB, PROXY_ADMIN } from "../../vips/vip-289/bsctestnet";
+import vip289, {
+  BNBx,
+  COMPTROLLER_ADDRESS,
+  OLD_ankrBNB,
+  ORIGINAL_POOL_REGISTRY_IMP,
+  POOL_REGISTRY,
+  PROXY_ADMIN,
+  RESILIENT_ORACLE,
+  SlisBNB,
+  StkBNB,
+  VTOKEN_BEACON,
+  VTOKEN_IMP,
+  WBETH,
+  ankrBNB,
+} from "../../vips/vip-289/bsctestnet";
+import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
+import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
+import VTOKEN_BEACON_ABI from "./abi/vTokenBeacon.json";
 
 const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 const vBNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
@@ -19,11 +35,15 @@ forking(39546962, () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
   let proxyAdmin: Contract;
+  let vTokenBeaconContract: Contract;
+  let poolRegistry: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     vankrBNBContract = new ethers.Contract(vankrBNB, VTOKEN_ABI, ethers.provider);
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
+    vTokenBeaconContract = new ethers.Contract(VTOKEN_BEACON, VTOKEN_BEACON_ABI, ethers.provider);
+    poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -53,7 +73,7 @@ forking(39546962, () => {
     it("check underlying", async () => {
       const underlying = await vankrBNBContract.underlying();
       expect(underlying).to.be.equal(OLD_ankrBNB);
-    })
+    });
   });
 
   testVip("VIP-189", vip289(), {
@@ -65,8 +85,8 @@ forking(39546962, () => {
   describe("Post-VIP behavior", async () => {
     it("check BNBx price", async () => {
       const price = parseUnits("995.066590121060748618", "18");
-      expect( await resilientOracle.getPrice(BNBx)).to.be.equal(price);
-      expect( await resilientOracle.getUnderlyingPrice(vBNBx)).to.be.equal(price);
+      expect(await resilientOracle.getPrice(BNBx)).to.be.equal(price);
+      expect(await resilientOracle.getUnderlyingPrice(vBNBx)).to.be.equal(price);
     });
 
     it("check SlisBNB price", async () => {
@@ -95,10 +115,21 @@ forking(39546962, () => {
     it("check underlying", async () => {
       const underlying = await vankrBNBContract.underlying();
       expect(underlying).to.be.equal(ankrBNB);
-    })
+    });
 
     it("pool registry should have original implementation", async () => {
       expect(await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).to.equal(ORIGINAL_POOL_REGISTRY_IMP);
+    });
+
+    it("vTokenBeacon should have original implementation", async () => {
+      expect(await vTokenBeaconContract.implementation()).to.equal(VTOKEN_IMP);
+    });
+
+    it("getVTokenForAsset should return vankrBNB address for ankrBNB and zero_address for old ankrBNB ", async () => {
+      expect(await poolRegistry.getVTokenForAsset(COMPTROLLER_ADDRESS, ankrBNB)).to.be.equal(vankrBNB);
+      expect(await poolRegistry.getVTokenForAsset(COMPTROLLER_ADDRESS, OLD_ankrBNB)).to.be.equal(
+        ethers.constants.AddressZero,
+      );
     });
   });
 });
