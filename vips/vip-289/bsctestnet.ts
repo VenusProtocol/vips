@@ -26,6 +26,99 @@ export const OLD_ankrBNB = "0x167F1F9EF531b3576201aa3146b13c57dbEda514";
 export const COMPTROLLER_ADDRESS = "0x596B11acAACF03217287939f88d63b51d3771704";
 export const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 
+// Holders Data from: https://testnet.bscscan.com/token/0x167F1F9EF531b3576201aa3146b13c57dbEda514#balances
+export const ankrBNB_TOKEN_HOLDERS = [
+  {
+    address: "0xcd2a514f04241b7c9A0d5d54441e92E4611929CF",
+    amount: parseUnits("199999900", "18"),
+  },
+  {
+    address: "0xA3c9ad26Fb87ec864624730C45f5d11A4F37fAcE",
+    amount: parseUnits("110000", "18"),
+  },
+  {
+    address: "0x03862dFa5D0be8F64509C001cb8C6188194469DF",
+    amount: parseUnits("672.1", "18"),
+  },
+  {
+    address: "0xDd704A44866AE9C387CfC687fa642a222b84f0D3",
+    amount: parseUnits("316", "18"),
+  },
+  {
+    address: "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9",
+    amount: parseUnits("277", "18"),
+  },
+  {
+    address: "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6",
+    amount: parseUnits("242.000000001060475973", "18"),
+  },
+  {
+    address: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    amount: parseUnits("179", "18"),
+  },
+  {
+    address: "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f",
+    amount: parseUnits("158", "18"),
+  },
+  {
+    address: "0x6f057A858171e187124ddEDF034dAc63De5dE5dB",
+    amount: parseUnits("101.090351001623470241", "18"),
+  },
+  {
+    address: "0x2EF706339560Ffd848c04bcD1b611edE0a0b79b7",
+    amount: parseUnits("98", "18"),
+  },
+  {
+    address: "0x6eACe20E1F89D0B24e5B295Af1802dfBc730B37D",
+    amount: parseUnits("79", "18"),
+  },
+  {
+    address: "0x7E8c214B0862885EFf707F827d1171C6D7FbBf5F",
+    amount: parseUnits("79", "18"),
+  },
+  {
+    address: "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47",
+    amount: parseUnits("37.686205910410599126", "18"),
+  },
+  {
+    address: "0xbcC32d0729043259594C36Ac53c3D2f94CD61860",
+    amount: parseUnits("29.576315531093403723", "18"),
+  },
+  {
+    address: "0x7df11563c6b6b8027aE619FD9644A647dED5893B",
+    amount: parseUnits("15.333333466222650063", "18"),
+  },
+  {
+    address: "0xC8E2d418dAE56DcC9fa05A1c67AfeD876F04e553",
+    amount: parseUnits("10", "18"),
+  },
+  {
+    address: "0xD4a9F68DEbed2F8D7cE0115d415cc992AB0BFbcc",
+    amount: parseUnits("1", "18"),
+  },
+  {
+    address: "0x9CeF4778267400D921271f0BC9434C3f9a73d826",
+    amount: parseUnits("1", "18"),
+  },
+  {
+    address: "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3",
+    amount: parseUnits("0.313794089589400874", "18"),
+  },
+];
+
+let MINT_TOTAL = parseUnits("0", "18");
+ankrBNB_TOKEN_HOLDERS.forEach(holder => {
+  MINT_TOTAL = MINT_TOTAL.add(holder.amount);
+});
+
+const TRANSFER_COMMANDS = ankrBNB_TOKEN_HOLDERS.map(holder => {
+  return {
+    target: ankrBNB,
+    signature: "transfer(address,uint256)",
+    params: [holder.address, holder.amount],
+  };
+});
+
 const vip289 = () => {
   const meta = {
     version: "v2",
@@ -118,6 +211,12 @@ const vip289 = () => {
         signature: "upgrade(address,address)",
         params: [POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP],
       },
+      {
+        target: ankrBNB,
+        signature: "faucet(uint256)",
+        params: [MINT_TOTAL],
+      },
+      ...TRANSFER_COMMANDS,
     ],
     meta,
     ProposalType.REGULAR,
