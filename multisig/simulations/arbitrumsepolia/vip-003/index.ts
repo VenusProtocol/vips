@@ -30,7 +30,7 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(32523518, () => {
+forking(34547195, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -73,6 +73,14 @@ forking(32523518, () => {
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
       expect(owner).equals(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("Should whitelist MULTISIG and TREASURY", async () => {
+      let res = await xvsBridge.whitelist(arbitrumsepolia.NORMAL_TIMELOCK);
+      expect(res).equals(true);
+
+      res = await xvsBridge.whitelist(arbitrumsepolia.VTREASURY);
+      expect(res).equals(true);
     });
 
     it("Should set trusted remote address in bridge for all three networks", async () => {

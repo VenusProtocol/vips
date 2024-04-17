@@ -245,6 +245,11 @@ const vip003 = () => {
       params: [arbitrumsepolia.VTREASURY, true],
     },
     {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setWhitelist(address,bool)",
+      params: [arbitrumsepolia.NORMAL_TIMELOCK, true],
+    },
+    {
       target: XVS,
       signature: "setMintCap(address,uint256)",
       params: [XVS_BRIDGE_DEST, XVS_MINT_LIMIT],
