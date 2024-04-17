@@ -76,7 +76,7 @@ forking(39546962, () => {
     });
   });
 
-  testVip("VIP-189", vip289(), {
+  testVip("VIP-289", vip289(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
     },
