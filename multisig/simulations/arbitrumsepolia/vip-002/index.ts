@@ -198,16 +198,16 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vARB_Core: "",
 };
 
-forking(32190799, () => {
+forking(34636653, () => {
   let poolRegistry: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
   });
 
-  describe("Contracts setup", async () => {
+  describe("Contracts setup", () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
-      await checkVToken(address, vTokenState[symbol]);
+      checkVToken(address, vTokenState[symbol]);
     }
   });
 
