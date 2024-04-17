@@ -5,9 +5,10 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip289, { BNBx, OLD_ankrBNB, RESILIENT_ORACLE, SlisBNB, StkBNB, WBETH, ankrBNB } from "../../vips/vip-289/bsctestnet";
+import vip289, { POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP, BNBx, OLD_ankrBNB, RESILIENT_ORACLE, SlisBNB, StkBNB, WBETH, ankrBNB, PROXY_ADMIN } from "../../vips/vip-289/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 
 const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 const vBNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
@@ -17,10 +18,12 @@ const vslisBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 forking(39546962, () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
+  let proxyAdmin: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     vankrBNBContract = new ethers.Contract(vankrBNB, VTOKEN_ABI, ethers.provider);
+    proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -93,5 +96,9 @@ forking(39546962, () => {
       const underlying = await vankrBNBContract.underlying();
       expect(underlying).to.be.equal(ankrBNB);
     })
+
+    it("pool registry should have original implementation", async () => {
+      expect(await proxyAdmin.getProxyImplementation(POOL_REGISTRY)).to.equal(ORIGINAL_POOL_REGISTRY_IMP);
+    });
   });
 });
