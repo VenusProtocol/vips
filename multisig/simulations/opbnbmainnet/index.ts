@@ -6,3 +6,4 @@ import "./vip-004";
 import "./vip-005";
 import "./vip-008";
 import "./vip-011";
+import "./vip-018";
