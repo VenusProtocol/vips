@@ -25,6 +25,9 @@ export const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 export const OLD_ankrBNB = "0x167F1F9EF531b3576201aa3146b13c57dbEda514";
 export const COMPTROLLER_ADDRESS = "0x596B11acAACF03217287939f88d63b51d3771704";
 export const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
+export const TEMP_VTOKEN_IMP = "0xbd3AAd064295dcA0f45fab4C6A5adFb0D23a19D2";
+export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
+export const VTOKEN_IMP = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
 
 // Holders Data from: https://testnet.bscscan.com/token/0x167F1F9EF531b3576201aa3146b13c57dbEda514#balances
 export const ankrBNB_TOKEN_HOLDERS = [
@@ -210,6 +213,21 @@ const vip289 = () => {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [POOL_REGISTRY, ORIGINAL_POOL_REGISTRY_IMP],
+      },
+      {
+        target: VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [TEMP_VTOKEN_IMP],
+      },
+      {
+        target: vankrBNB,
+        signature: "updateUnderlying(address)",
+        params: [ankrBNB],
+      },
+      {
+        target: VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [VTOKEN_IMP],
       },
       {
         target: ankrBNB,
