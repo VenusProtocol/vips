@@ -114,7 +114,7 @@ export const ankrBNB_TOKEN_HOLDERS = [
 ];
 
 // Holders Data from: https://testnet.bscscan.com/token/0xf9F98365566F4D55234f24b99caA1AfBE6428D44#balances
-let WBETH_TOKEN_HOLDERS = [
+const WBETH_TOKEN_HOLDERS = [
   {
     address: "0x6f057A858171e187124ddEDF034dAc63De5dE5dB",
     amount: parseUnits("994.500057", "18"),

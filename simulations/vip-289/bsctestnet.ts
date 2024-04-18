@@ -19,7 +19,6 @@ import vip289, {
   VTOKEN_IMP,
   WBETH,
   WBETHOracle,
-  WBETH_TEMP_VTOKEN_IMPL,
   WBETH_VTOKEN_IMPL,
   ankrBNB,
   vWBETH,
