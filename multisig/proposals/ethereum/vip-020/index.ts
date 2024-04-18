@@ -23,7 +23,7 @@ export const REWARD_SPEED = "23148";
 export const USDC_REWARD_TRANSFER = parseUnits("5000", 6);
 export const WEETH_AMOUNT = parseUnits("2.761910220333160209", 18);
 
-export const vip019 = () => {
+export const vip020 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -121,4 +121,4 @@ export const vip019 = () => {
   ]);
 };
 
-export default vip019;
+export default vip020;

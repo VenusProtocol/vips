@@ -18,10 +18,10 @@ import {
   REWARDS_DISTRIBUTOR,
   USDC,
   USDC_REWARD_TRANSFER,
-  vip019,
+  vip020,
   vweETH,
   weETH,
-} from "../../../proposals/ethereum/vip-019";
+} from "../../../proposals/ethereum/vip-020";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
@@ -98,7 +98,7 @@ forking(19640453, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip019());
+      await pretendExecutingVip(vip020());
     });
 
     it("check price", async () => {
