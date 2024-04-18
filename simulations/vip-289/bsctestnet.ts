@@ -89,11 +89,16 @@ forking(39571114, () => {
     it("check vBETH implementation", async () => {
       expect(await vwbethProxy.implementation()).to.equal(WBETH_VTOKEN_IMPL);
     });
+
+    it("check vBETH price", async () => {
+      const price = await resilientOracle.getUnderlyingPrice(vWBETH);
+      expect(price).to.be.equal(parseUnits("3078.66802652", "18"));
+    });
   });
 
   testVip("VIP-289", vip289(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
     },
   });
 
@@ -154,6 +159,11 @@ forking(39571114, () => {
     it("check vwbeth underlying", async () => {
       const underlying = await vwbethContract.underlying();
       expect(underlying).to.be.equal(WBETH);
+    });
+
+    it("check vBETH price", async () => {
+      const price = await resilientOracle.getUnderlyingPrice(vWBETH);
+      expect(price).to.be.equal(parseUnits("3078.66802652", "18"));
     });
   });
 });
