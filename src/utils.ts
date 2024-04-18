@@ -1,6 +1,6 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
 import { Contract } from "ethers";
@@ -105,12 +105,11 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     }
   }
 
-  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+  await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  await tx.wait();
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
@@ -126,9 +125,28 @@ export const setMaxStalePeriod = async (
   underlyingAsset: Contract,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
 ) => {
-  const binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
-  const chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
-  const redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
+  let binanceOracle: string = ethers.constants.AddressZero;
+  let chainlinkOracle: string = ethers.constants.AddressZero;
+  let redstoneOracle: string = ethers.constants.AddressZero;
+
+  try {
+    binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
+  } catch {
+    console.log(`Binance Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
+  } catch {
+    console.log(`Chainlink Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
+  } catch {
+    console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
   const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
@@ -146,6 +164,7 @@ export const setMaxStalePeriod = async (
       );
     }
   }
+  await mine(100);
 };
 
 export const expectEvents = async (

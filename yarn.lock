@@ -2879,6 +2879,7 @@ __metadata:
     commitizen: ^4.2.5
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
+    decimal.js: ^10.4.3
     dotenv: ^16.0.3
     eslint: ^8.28.0
     eslint-config-prettier: ^8.5.0
@@ -4624,6 +4625,13 @@ __metadata:
   version: 4.0.0
   resolution: "decamelize@npm:4.0.0"
   checksum: b7d09b82652c39eead4d6678bb578e3bebd848add894b76d0f6b395bc45b2d692fb88d977e7cfb93c4ed6c119b05a1347cef261174916c2e75c0a8ca57da1809
+  languageName: node
+  linkType: hard
+
+"decimal.js@npm:^10.4.3":
+  version: 10.4.3
+  resolution: "decimal.js@npm:10.4.3"
+  checksum: 796404dcfa9d1dbfdc48870229d57f788b48c21c603c3f6554a1c17c10195fc1024de338b0cf9e1efe0c7c167eeb18f04548979bcc5fdfabebb7cc0ae3287bae
   languageName: node
   linkType: hard
 
