@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip289, {
+import vip291, {
   BTC,
   BTC_DISTRIBUTION_SPEED,
   ETH,
@@ -17,11 +17,11 @@ import vip289, {
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_DISTRIBUTION_SPEED,
-} from "../../vips/vip-289/bscmainnet";
+} from "../../vips/vip-291/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
-forking(37874421, () => {
+forking(37969921, () => {
   let psr: Contract;
   let plp: Contract;
   const distributionTargets: object[] = [];
@@ -36,7 +36,7 @@ forking(37874421, () => {
     }
   });
 
-  testVip("VIP-289 Prime Adjustment", vip289(), {
+  testVip("VIP-291 Prime Adjustment", vip291(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [2]);
       await expectEvents(txResponse, [PLP_ABI], ["TokenDistributionSpeedUpdated"], [4]);
