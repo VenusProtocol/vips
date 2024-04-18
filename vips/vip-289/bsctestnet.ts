@@ -30,8 +30,8 @@ export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const VTOKEN_IMP = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
 export const OLD_WBETH = "0xf9F98365566F4D55234f24b99caA1AfBE6428D44";
 export const vWBETH = "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b";
-export const WBETH_VTOKEN_IMPL = "0xad6aa8bb4829560412a94aa930745f407bf8000b";
-export const WBETH_TEMP_VTOKEN_IMPL = "0x9ac3C79de233952bEBdf88A932c52fC24dD6ebcf";
+export const WBETH_VTOKEN_IMPL = "0xad6aa8Bb4829560412A94AA930745f407BF8000B";
+export const WBETH_TEMP_VTOKEN_IMPL = "0x437Af2bbE2f88C14ac7067C99F7825375A10a244";
 
 // Holders Data from: https://testnet.bscscan.com/token/0x167F1F9EF531b3576201aa3146b13c57dbEda514#balances
 export const ankrBNB_TOKEN_HOLDERS = [
@@ -113,6 +113,22 @@ export const ankrBNB_TOKEN_HOLDERS = [
   },
 ];
 
+// Holders Data from: https://testnet.bscscan.com/token/0xf9F98365566F4D55234f24b99caA1AfBE6428D44#balances
+let WBETH_TOKEN_HOLDERS = [
+  {
+    address: "0x6f057A858171e187124ddEDF034dAc63De5dE5dB",
+    amount: parseUnits("994.500057", "18"),
+  },
+  {
+    address: "0x7E3114fCbc1d529Fd96DE61D65D4a03071609C56",
+    amount: parseUnits("5", "18"),
+  },
+  {
+    address: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
+    amount: parseUnits("0.499943", "18"),
+  },
+];
+
 let MINT_TOTAL = parseUnits("0", "18");
 ankrBNB_TOKEN_HOLDERS.forEach(holder => {
   MINT_TOTAL = MINT_TOTAL.add(holder.amount);
@@ -121,6 +137,19 @@ ankrBNB_TOKEN_HOLDERS.forEach(holder => {
 const TRANSFER_COMMANDS = ankrBNB_TOKEN_HOLDERS.map(holder => {
   return {
     target: ankrBNB,
+    signature: "transfer(address,uint256)",
+    params: [holder.address, holder.amount],
+  };
+});
+
+let WBETH_MINT_TOTAL = parseUnits("0", "18");
+WBETH_TOKEN_HOLDERS.forEach(holder => {
+  WBETH_MINT_TOTAL = WBETH_MINT_TOTAL.add(holder.amount);
+});
+
+const WBETH_TRANSFER_COMMANDS = WBETH_TOKEN_HOLDERS.map(holder => {
+  return {
+    target: WBETH,
     signature: "transfer(address,uint256)",
     params: [holder.address, holder.amount],
   };
@@ -243,6 +272,12 @@ const vip289 = () => {
         params: [MINT_TOTAL],
       },
       ...TRANSFER_COMMANDS,
+      {
+        target: WBETH,
+        signature: "faucet(uint256)",
+        params: [WBETH_MINT_TOTAL],
+      },
+      ...WBETH_TRANSFER_COMMANDS,
     ],
     meta,
     ProposalType.REGULAR,

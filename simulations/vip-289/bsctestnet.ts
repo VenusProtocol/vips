@@ -19,26 +19,32 @@ import vip289, {
   VTOKEN_IMP,
   WBETH,
   WBETHOracle,
+  WBETH_TEMP_VTOKEN_IMPL,
+  WBETH_VTOKEN_IMPL,
   ankrBNB,
+  vWBETH,
 } from "../../vips/vip-289/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vTokenBeacon.json";
+import VTOKEN_PROXY_ABI from "./abi/vTokenProxy.json";
 
 const vankrBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 const vBNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
 const vstkBNB = "0x75aa42c832a8911B77219DbeBABBB40040d16987";
 const vslisBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 
-forking(39552976, () => {
+forking(39571114, () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
   let proxyAdmin: Contract;
   let vTokenBeaconContract: Contract;
   let poolRegistry: Contract;
-  let wbethContract: Contract;
+  let wbethOracleContract: Contract;
+  let vwbethProxy: Contract;
+  let vwbethContract: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -46,7 +52,9 @@ forking(39552976, () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, PROXY_ADMIN_ABI, ethers.provider);
     vTokenBeaconContract = new ethers.Contract(VTOKEN_BEACON, VTOKEN_BEACON_ABI, ethers.provider);
     poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, ethers.provider);
-    wbethContract = new ethers.Contract(WBETHOracle, RESILIENT_ORACLE_ABI, ethers.provider);
+    wbethOracleContract = new ethers.Contract(WBETHOracle, RESILIENT_ORACLE_ABI, ethers.provider);
+    vwbethProxy = new ethers.Contract(vWBETH, VTOKEN_PROXY_ABI, ethers.provider);
+    vwbethContract = new ethers.Contract(vWBETH, VTOKEN_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -66,7 +74,7 @@ forking(39552976, () => {
     });
 
     it("check WBETH price", async () => {
-      const price = await wbethContract.getPrice(WBETH);
+      const price = await wbethOracleContract.getPrice(WBETH);
       expect(price).to.be.equal("0");
     });
 
@@ -74,9 +82,13 @@ forking(39552976, () => {
       await expect(resilientOracle.getPrice(ankrBNB)).to.be.reverted;
     });
 
-    it("check underlying", async () => {
+    it("check ankrBNB underlying", async () => {
       const underlying = await vankrBNBContract.underlying();
       expect(underlying).to.be.equal(OLD_ankrBNB);
+    });
+
+    it("check vBETH implementation", async () => {
+      expect(await vwbethProxy.implementation()).to.equal(WBETH_VTOKEN_IMPL);
     });
   });
 
@@ -88,35 +100,35 @@ forking(39552976, () => {
 
   describe("Post-VIP behavior", async () => {
     it("check BNBx price", async () => {
-      const price = parseUnits("995.066590121060748618", "18");
+      const price = parseUnits("1008.126597189750850728", "18");
       expect(await resilientOracle.getPrice(BNBx)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vBNBx)).to.be.equal(price);
     });
 
     it("check SlisBNB price", async () => {
-      const price = parseUnits("2245.658509208987773191", "18");
+      const price = parseUnits("2275.132231164184104561", "18");
       expect(await resilientOracle.getPrice(SlisBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vslisBNB)).to.be.equal(price);
     });
 
     it("check StkBNB price", async () => {
-      const price = parseUnits("541.121692431358905295", "18");
+      const price = parseUnits("548.223783083719481705", "18");
       expect(await resilientOracle.getPrice(StkBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vstkBNB)).to.be.equal(price);
     });
 
     it("check WBETH price", async () => {
-      const price = await wbethContract.getPrice(WBETH);
-      expect(price).to.be.equal(parseUnits("3171.1719262411480405", "18"));
+      const price = await wbethOracleContract.getPrice(WBETH);
+      expect(price).to.be.equal(parseUnits("3085.544819622113507025", "18"));
     });
 
     it("check ankrBNB price", async () => {
-      const price = parseUnits("578.780838475245337708", "18");
+      const price = parseUnits("586.377196263511013044", "18");
       expect(await resilientOracle.getPrice(ankrBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vankrBNB)).to.be.equal(price);
     });
 
-    it("check underlying", async () => {
+    it("check vankrBNB underlying", async () => {
       const underlying = await vankrBNBContract.underlying();
       expect(underlying).to.be.equal(ankrBNB);
     });
@@ -134,6 +146,15 @@ forking(39552976, () => {
       expect(await poolRegistry.getVTokenForAsset(COMPTROLLER_ADDRESS, OLD_ankrBNB)).to.be.equal(
         ethers.constants.AddressZero,
       );
+    });
+
+    it("check vWBETH implementation", async () => {
+      expect(await vwbethProxy.implementation()).to.equal(WBETH_VTOKEN_IMPL);
+    });
+
+    it("check vwbeth underlying", async () => {
+      const underlying = await vwbethContract.underlying();
+      expect(underlying).to.be.equal(WBETH);
     });
   });
 });
