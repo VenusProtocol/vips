@@ -46,6 +46,7 @@ forking(19689000, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
+      // This trasaction will be removed once Vtreasury on ethereum has enough funds
       const impersonatedDaiHolder = await initMainnetUser(
         "0x2D86e074C34e1FF2D33e8049Ee28e21Ce3A9Aa16",
         parseUnits("1", 18),
