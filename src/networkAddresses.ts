@@ -79,11 +79,13 @@ export const NETWORK_ADDRESSES = {
     GUARDIAN: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB",
     CHAINLINK_ORACLE: oracleSepoliaContracts.addresses.ChainlinkOracle,
     RESILIENT_ORACLE: oracleSepoliaContracts.addresses.ResilientOracle,
+    REDSTONE_ORACLE: oracleSepoliaContracts.addresses.RedStoneOracle,
     XVS: tokenBridgeSepoliaContracts.addresses.XVS,
     POOL_REGISTRY: ilSepoliaDeployedContracts.addresses.PoolRegistry,
     VTREASURY: sepoliaDeployedContracts.addresses.VTreasuryV8,
     XVS_VAULT_PROXY: sepoliaDeployedContracts.addresses.XVSVaultProxy,
     GENERIC_TEST_USER_ACCOUNT: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    WETH: "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9",
   },
   opbnbtestnet: {
     NORMAL_TIMELOCK: "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf",
@@ -111,6 +113,8 @@ export const NETWORK_ADDRESSES = {
   arbitrumsepolia: {
     NORMAL_TIMELOCK: "0x1426A5Ae009c4443188DA8793751024E358A61C2", // arbitrumsepolia Multisig
     GUARDIAN: "0x1426A5Ae009c4443188DA8793751024E358A61C2",
+    CHAINLINK_ORACLE: "0xeDd02c7FfA31490b4107e8f2c25e9198a04F9E45",
+    RESILIENT_ORACLE: "0x6708bAd042916B47311c8078b29d7f432342102F",
   },
   arbitrumone: {
     NORMAL_TIMELOCK: "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0", // arbitrumone Multisig
