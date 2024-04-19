@@ -6,13 +6,17 @@ import { ethers } from "hardhat";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip289, {
+  Actions,
   BNBx,
+  LST_COMPTROLLER,
   RESILIENT_ORACLE,
+  STABLECOIN_COMPTROLLER,
   SlisBNB,
   StkBNB,
   WBETH,
   WBETHOracle,
   ankrBNB,
+  vEURA,
   vslisBNB,
   vstkBNB,
 } from "../../vips/vip-289/bscmainnet";
@@ -32,10 +36,14 @@ const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 forking(37991548, () => {
   let resilientOracle: Contract;
   let wbethOracleContract: Contract;
+  let stablecoinComptroller: Contract;
+  let stakedBNBComptroller: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     wbethOracleContract = new ethers.Contract(WBETHOracle, WBETH_ORACLE_ABI, ethers.provider);
+    stablecoinComptroller = new ethers.Contract(STABLECOIN_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+    stakedBNBComptroller = new ethers.Contract(LST_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -62,6 +70,24 @@ forking(37991548, () => {
     it("check ankrBNB price", async () => {
       const price = await resilientOracle.getPrice(ankrBNB);
       expect(price).to.be.equal(parseUnits("598.9378593", "18"));
+    });
+
+    it("mint paused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.MINT)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.MINT)).to.equal(true);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.MINT)).to.equal(true);
+    });
+
+    it("borrow paused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.BORROW)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.BORROW)).to.equal(true);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.BORROW)).to.equal(true);
+    });
+
+    it("enter market paused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.ENTER_MARKET)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.ENTER_MARKET)).to.equal(true);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.ENTER_MARKET)).to.equal(true);
     });
   });
 
@@ -105,6 +131,24 @@ forking(37991548, () => {
       const price = parseUnits("600.626009762391317954", "18");
       expect(await resilientOracle.getPrice(ankrBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vankrBNB)).to.be.equal(price);
+    });
+
+    it("mint unpaused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.MINT)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.MINT)).to.equal(false);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.MINT)).to.equal(false);
+    });
+
+    it("borrow unpaused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.BORROW)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.BORROW)).to.equal(false);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.BORROW)).to.equal(false);
+    });
+
+    it("enter market unpaused", async () => {
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.ENTER_MARKET)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.ENTER_MARKET)).to.equal(false);
+      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.ENTER_MARKET)).to.equal(false);
     });
   });
 });
