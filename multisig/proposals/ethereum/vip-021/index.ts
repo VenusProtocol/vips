@@ -15,7 +15,7 @@ export const BNB_ENDPOINT_ID = 102;
 export const OP_BNB_TRUSTED_REMOTE = "0x100d331c1b5dcd41eacb1eced0e83dcebf3498b2";
 export const MIN_DEST_GAS = "300000";
 
-const vip016 = () => {
+const vip021 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -66,4 +66,4 @@ const vip016 = () => {
   ]);
 };
 
-export default vip016;
+export default vip021;

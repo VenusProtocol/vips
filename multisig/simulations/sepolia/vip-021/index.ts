@@ -6,24 +6,24 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip013, {
+import vip021, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
-  OPBNB_TREASURY,
-  SEPOLIA_ENDPOINT_ID,
-  SEPOLIA_TRUSTED_REMOTE,
+  OP_BNB_ENDPOINT_ID,
+  OP_BNB_TRUSTED_REMOTE,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/opbnbtestnet/vip-013";
+} from "../../../proposals/sepolia/vip-021";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
-const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
-const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
-const OPBNB_MULTISIG = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
+const XVS_HOLDER = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
+const SEPOLIA_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+const SEPOLIA_MULTISIG = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-forking(25254212, () => {
+forking(5618902, () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -42,49 +42,43 @@ forking(25254212, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip013());
+      await pretendExecutingVip(vip021());
     });
 
     it("Should match trusted remote address", async () => {
-      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(SEPOLIA_ENDPOINT_ID);
-      expect(trustedRemote).equals(SEPOLIA_TRUSTED_REMOTE);
+      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(OP_BNB_ENDPOINT_ID);
+      expect(trustedRemote).equals(OP_BNB_TRUSTED_REMOTE);
     });
 
     it("Should match single send transaction limit", async () => {
-      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(SEPOLIA_ENDPOINT_ID)).to.equal(SINGLE_SEND_LIMIT);
+      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(OP_BNB_ENDPOINT_ID)).to.equal(SINGLE_SEND_LIMIT);
     });
 
     it("Should match single receive transaction limit", async () => {
-      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(SEPOLIA_ENDPOINT_ID)).to.equal(
+      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(OP_BNB_ENDPOINT_ID)).to.equal(
         SINGLE_RECEIVE_LIMIT,
       );
     });
 
     it("Should match max daily send limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyLimit(SEPOLIA_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
     });
 
     it("Should match max daily receive limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(SEPOLIA_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(OP_BNB_ENDPOINT_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
     it("Should whitelist MULTISIG and TREASURY", async () => {
-      let res = await xvsBridge.whitelist(OPBNB_MULTISIG);
+      let res = await xvsBridge.whitelist(SEPOLIA_MULTISIG);
       expect(res).equals(true);
-      res = await xvsBridge.whitelist(OPBNB_TREASURY);
+      res = await xvsBridge.whitelist(SEPOLIA_TREASURY);
       expect(res).equals(true);
     });
 
-    it("Should emit an event on successful bridging of XVS (opBNB Testnet -> Sepolia)", async () => {
+    it("Should emit an event on successful bridging of XVS (Sepolia -> opBNB Testnet)", async () => {
       const amount = parseUnits("1", 18);
       const nativeFee = (
-        await xvsBridge.estimateSendFee(
-          SEPOLIA_ENDPOINT_ID,
-          receiverAddressBytes32,
-          amount,
-          false,
-          defaultAdapterParams,
-        )
+        await xvsBridge.estimateSendFee(OP_BNB_ENDPOINT_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
       const circulatingSupplyBefore = await xvsBridge.circulatingSupply();
@@ -96,7 +90,7 @@ forking(25254212, () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            SEPOLIA_ENDPOINT_ID,
+            OP_BNB_ENDPOINT_ID,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -104,7 +98,7 @@ forking(25254212, () => {
           ),
       )
         .to.be.emit(xvsBridge, "SendToChain")
-        .withArgs(SEPOLIA_ENDPOINT_ID, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(OP_BNB_ENDPOINT_ID, XVS_HOLDER, receiverAddressBytes32, amount);
 
       const circulatingSupplyAfter = await xvsBridge.circulatingSupply();
       const totalSupplyAfter = await xvs.totalSupply();

@@ -12,7 +12,7 @@ export const SEPOLIA_ENDPOINT_ID = 10161;
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
 export const MIN_DEST_GAS = "300000";
 
-const vip013 = () => {
+const vip009 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -48,4 +48,4 @@ const vip013 = () => {
   ]);
 };
 
-export default vip013;
+export default vip009;

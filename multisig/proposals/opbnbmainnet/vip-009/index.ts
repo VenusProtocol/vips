@@ -13,7 +13,7 @@ export const BNB_ENDPOINT_ID = 102;
 export const ETHEREUM_TRUSTED_REMOTE = "0x888e317606b4c590bbad88653863e8b345702633";
 export const MIN_DEST_GAS = "300000";
 
-const vip012 = () => {
+const vip009 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -64,4 +64,4 @@ const vip012 = () => {
   ]);
 };
 
-export default vip012;
+export default vip009;
