@@ -10,4 +10,5 @@ import "./vip-009";
 // import './vip-010' // passes when run separately
 import "./vip-013";
 import "./vip-016";
+import "./vip-018";
 import "./vip-019";
