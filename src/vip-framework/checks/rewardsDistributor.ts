@@ -43,7 +43,8 @@ type RewardsDistributorId =
   | "RewardsDistributor_Curve_1_CRVUSD"
   | "RewardsDistributor_LST_0_WSTETH"
   | "RewardsDistributor_LST_0_WETH"
-  | "RewardsDistributor_LST_1_WSTETH";
+  | "RewardsDistributor_LST_1_WSTETH"
+  | "RewardsDistributor_LST_2_WEETH";
 
 export const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {
   describe(id, () => {
