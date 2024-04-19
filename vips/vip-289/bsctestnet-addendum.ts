@@ -17,7 +17,7 @@ export const VTOKEN_IMP = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
 const vip289Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-289 Set custom oracle for market DeFi ankrBNB and Upgrade Underlying",
+    title: "VIP-289 Upgrade Underlying of ankrBNB market in DeFi pool",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
