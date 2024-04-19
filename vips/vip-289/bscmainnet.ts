@@ -12,6 +12,17 @@ export const WBETHOracle = "0x739db790c656E54590957Ed4d6B94665bCcb3456";
 export const WBETH = "0xa2e3356610840701bdf5611a53974510ae27e2e1";
 export const ankrBNB = "0x52f24a5e03aee338da5fd9df68d2b6fae1178827";
 export const ankrBNBOracle = "0xb0FCf0d45C15235D4ebC30d3c01d7d0D72Fd44AB";
+export const vstkBNB = "0xcc5D9e502574cda17215E70bC0B4546663785227";
+export const vslisBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
+export const LST_COMPTROLLER = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
+export const STABLECOIN_COMPTROLLER = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+export const vEURA = "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F";
+
+const Actions = {
+  MINT: 0,
+  BORROW: 2,
+  ENTER_MARKET: 7,
+};
 
 const vip289 = () => {
   const meta = {
@@ -68,6 +79,16 @@ const vip289 = () => {
             [true, false, false],
           ],
         ],
+      },
+      {
+        target: LST_COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[vslisBNB, vstkBNB], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], false],
+      },
+      {
+        target: STABLECOIN_COMPTROLLER,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[vEURA], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], false],
       },
     ],
     meta,

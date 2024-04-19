@@ -13,14 +13,15 @@ import vip289, {
   WBETH,
   WBETHOracle,
   ankrBNB,
+  vslisBNB,
+  vstkBNB,
 } from "../../vips/vip-289/bscmainnet";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WBETH_ORACLE_ABI from "./abi/wbethOracle.json";
 
 const vankrBNB = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
 const vBNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
-const vstkBNB = "0xcc5D9e502574cda17215E70bC0B4546663785227";
-const vslisBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
@@ -67,6 +68,7 @@ forking(37991548, () => {
   testVip("VIP-289", vip289(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [9]);
     },
   });
 
