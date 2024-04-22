@@ -17,6 +17,7 @@ import VTOKEN_ABI from "./abi/VTokenAbi.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
+const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
 forking(19709153, () => {
   let resilientOracle: Contract;
@@ -63,11 +64,19 @@ forking(19709153, () => {
     it("check ownership", async () => {
       expect(await vdai.owner()).to.equal(ethereum.GUARDIAN);
     });
-
+    it("check protocol share reserve", async () => {
+      expect(await vdai.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+    });
+    it("check reserve factor", async () => {
+      expect(await vdai.reserveFactorMantissa()).equals(parseUnits("0.1", 18));
+    });
+    it("check protocolSeizeShare", async () => {
+      expect(await vdai.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+    });
     it("check supply of Vtreasury", async () => {
       expect(await vdai.balanceOf(ethereum.VTREASURY)).to.equal(parseUnits("5000", 8));
     });
-    it("should return supply and borrow caps", async () => {
+    it("check supply and borrow caps", async () => {
       expect(await comptroller.borrowCaps(vDAI)).equals(BORROW_CAP);
       expect(await comptroller.supplyCaps(vDAI)).equals(SUPPLY_CAP);
     });

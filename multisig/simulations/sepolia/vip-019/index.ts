@@ -1,10 +1,12 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip019 from "../../../proposals/sepolia/vip-019";
 import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/sepolia/vip-019";
@@ -15,6 +17,7 @@ import VTOKEN_ABI from "./abi/VTokenAbi.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
 forking(5730900, () => {
   let resilientOracle: Contract;
@@ -64,6 +67,15 @@ forking(5730900, () => {
     it("check supply of Vtreasury", async () => {
       expect(await vdai.balanceOf(sepolia.VTREASURY)).to.equal(parseUnits("5000", 8));
     });
+    it("check protocol share reserve", async () => {
+      expect(await vdai.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+    });
+    it("check reserve factor", async () => {
+      expect(await vdai.reserveFactorMantissa()).equals(parseUnits("0.1", 18));
+    });
+    it("check protocolSeizeShare", async () => {
+      expect(await vdai.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+    });
 
     it("should return supply and borrow caps", async () => {
       expect(await comptroller.borrowCaps(vDAI)).equals(BORROW_CAP);
@@ -78,6 +90,18 @@ forking(5730900, () => {
         exchangeRate: parseUnits("1", 28),
         comptroller: COMPTROLLER,
       });
+    });
+    it("check IR", async () => {
+      const IR = await vdai.interestRateModel();
+      checkInterestRate(
+        IR,
+        "vDAI_Core",
+        { base: "0", multiplier: "0.15", jump: "2.5", kink: "0.8" },
+        BigNumber.from(2628000),
+      );
+    });
+    it("check Pool", async () => {
+      checkIsolatedPoolsComptrollers({ comptroller: COMPTROLLER });
     });
   });
 });
