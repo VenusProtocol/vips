@@ -17,10 +17,10 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-const XVS_STORE = "0x3c49eB8FaDD3FdB0a4Bbb40F8A7e3ce821298607";
-const XVS_BRIDGE = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
+const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
+const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 
-forking(29803872, () => {
+forking(36285340, () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;

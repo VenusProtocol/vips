@@ -3,7 +3,7 @@ import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-const XVS_STORE = "0x3c49eB8FaDD3FdB0a4Bbb40F8A7e3ce821298607";
+const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 export const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
 const vip004 = () => {
