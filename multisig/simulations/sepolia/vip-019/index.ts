@@ -77,6 +77,9 @@ forking(5744100, () => {
       expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
       expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.77", 18));
     });
+    it("check protocol seize share", async () => {
+      expect(await vtusd.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+    });
     it("check vToken", async () => {
       await checkVToken(vTUSD, {
         name: "Venus TUSD (Core)",

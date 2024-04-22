@@ -90,6 +90,9 @@ forking(19708766, () => {
     it("check reserve factor", async () => {
       expect(await vtusd.reserveFactorMantissa()).equals(parseUnits("0.1", 18));
     });
+    it("check protocol seize share", async () => {
+      expect(await vtusd.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+    });
 
     it("check vToken", async () => {
       await checkVToken(vTUSD, {
