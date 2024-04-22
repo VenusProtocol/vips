@@ -7,10 +7,10 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip006, { NATIVE_TOKEN_GATEWAY_CORE_POOL } from "../../../proposals/arbitrumsepolia/vip-006";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 
-const VWETH = "0xed78d7FD8DBbF59B7b38eD53514e017a2F461bCb";
+const VWETH = "0xef6DF2bE5d6Ad0291eDb1160fEf7a4ED2528fAfb";
 const WETH = "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73";
 
-forking(29822387, () => {
+forking(36361635, () => {
   let nativeTokenGateway: Contract;
 
   before(async () => {
