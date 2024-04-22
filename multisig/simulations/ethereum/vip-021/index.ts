@@ -1,36 +1,33 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip021 from "../../../proposals/ethereum/vip-021";
-import { BORROW_CAP, DAI, INITIAL_SUPPLY, SUPPLY_CAP, vDAI } from "../../../proposals/ethereum/vip-021";
+import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/ethereum/vip-021";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistryAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracleAbi.json";
 import VTOKEN_ABI from "./abi/VTokenAbi.json";
-import ERC20_ABI from "./abi/erc20Abi.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
-forking(19689000, () => {
+forking(19709153, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vdai: Contract;
-  let dai: Contract;
   let comptroller: Contract;
 
   before(async () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
     vdai = await ethers.getContractAt(VTOKEN_ABI, vDAI);
-    dai = await ethers.getContractAt(ERC20_ABI, DAI);
-
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
   });
 
@@ -46,17 +43,11 @@ forking(19689000, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      // This trasaction will be removed once Vtreasury on ethereum has enough funds
-      const impersonatedDaiHolder = await initMainnetUser(
-        "0x2D86e074C34e1FF2D33e8049Ee28e21Ce3A9Aa16",
-        parseUnits("1", 18),
-      );
-      await dai.connect(impersonatedDaiHolder).transfer(ethereum.VTREASURY, INITIAL_SUPPLY);
       await pretendExecutingVip(vip021());
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(DAI)).to.equals("1000048880000000000");
+      expect(await resilientOracle.getPrice(DAI)).to.equals("1000428390000000000");
     });
 
     it("should have 7 markets in core pool", async () => {
@@ -80,7 +71,11 @@ forking(19689000, () => {
       expect(await comptroller.borrowCaps(vDAI)).equals(BORROW_CAP);
       expect(await comptroller.supplyCaps(vDAI)).equals(SUPPLY_CAP);
     });
-
+    it("should set vDAI collateral factor to 75% and Liquidation threshold to 77%", async () => {
+      const market = await comptroller.markets(vDAI);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
+      expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.77", 18));
+    });
     it("check vToken", async () => {
       await checkVToken(vDAI, {
         name: "Venus DAI (Core)",
@@ -90,6 +85,18 @@ forking(19689000, () => {
         exchangeRate: parseUnits("1", 28),
         comptroller: COMPTROLLER,
       });
+    });
+    it("check IR", async () => {
+      const IR = await vdai.interestRateModel();
+      checkInterestRate(
+        IR,
+        "vDAI_Core",
+        { base: "0", multiplier: "0.15", jump: "2.5", kink: "0.8" },
+        BigNumber.from(2628000),
+      );
+    });
+    it("check Pool", async () => {
+      checkIsolatedPoolsComptrollers({ comptroller: COMPTROLLER });
     });
   });
 });

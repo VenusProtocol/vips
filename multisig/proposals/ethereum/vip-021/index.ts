@@ -11,7 +11,6 @@ const CHAINLINK_STALE_PERIOD = 100 * 60;
 
 export const DAI = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 export const vDAI = "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657";
-export const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 export const INITIAL_SUPPLY = parseUnits("5000", 18);
 export const REDUCE_RESERVE_BLOCK = 7200;
 export const CF = parseUnits("0.75", 18);
