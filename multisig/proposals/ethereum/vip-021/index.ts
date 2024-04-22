@@ -7,7 +7,7 @@ import { makeProposal } from "../../../../src/utils";
 const { ethereum } = NETWORK_ADDRESSES;
 
 const CHAINLINK_DAI_FEED = "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9";
-const CHAINLINK_STALE_PERIOD = 100 * 60;
+const CHAINLINK_STALE_PERIOD_100M = 100 * 60; // 100 minutes
 
 export const DAI = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
 export const vDAI = "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657";
@@ -24,7 +24,7 @@ const vip021 = () => {
     {
       target: ethereum.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[DAI, CHAINLINK_DAI_FEED, CHAINLINK_STALE_PERIOD]],
+      params: [[DAI, CHAINLINK_DAI_FEED, CHAINLINK_STALE_PERIOD_100M]],
     },
     {
       target: ethereum.RESILIENT_ORACLE,

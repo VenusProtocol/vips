@@ -7,7 +7,7 @@ import { makeProposal } from "../../../../src/utils";
 const { sepolia } = NETWORK_ADDRESSES;
 
 export const CHAINLINK_DAI_FEED = "0x14866185B1962B63C3Ea9E03Bc1da838bab34C19";
-const CHAINLINK_STALE_PERIOD = 26 * 60 * 60;
+const CHAINLINK_STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours, we cannot set it to 100 minutes as it is already set to 24 hours on feed
 
 export const DAI = "0x75236711d42D0f7Ba91E03fdCe0C9377F5b76c07";
 export const vDAI = "0xfe050f628bF5278aCfA1e7B13b59fF207e769235";
@@ -54,7 +54,7 @@ const vip019 = () => {
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[DAI, CHAINLINK_DAI_FEED, CHAINLINK_STALE_PERIOD]],
+      params: [[DAI, CHAINLINK_DAI_FEED, CHAINLINK_STALE_PERIOD_26H]],
     },
 
     {
