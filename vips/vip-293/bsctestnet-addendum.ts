@@ -14,10 +14,10 @@ export const TEMP_VTOKEN_IMP = "0xbd3AAd064295dcA0f45fab4C6A5adFb0D23a19D2";
 export const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const VTOKEN_IMP = "0xa60b28FDDaAB87240C3AF319892e7A4ad6FbF41F";
 
-const vip289Addendum = () => {
+const vip293Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-289 Upgrade Underlying of ankrBNB market in DeFi pool",
+    title: "VIP-293 Upgrade Underlying of ankrBNB market in DeFi pool",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -62,4 +62,4 @@ const vip289Addendum = () => {
   );
 };
 
-export default vip289Addendum;
+export default vip293Addendum;

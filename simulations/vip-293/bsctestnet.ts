@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip289, {
+import vip293, {
   BNBx,
   COMPTROLLER_ADDRESS,
   OLD_ankrBNB,
@@ -22,7 +22,7 @@ import vip289, {
   WBETH_VTOKEN_IMPL,
   ankrBNB,
   vWBETH,
-} from "../../vips/vip-289/bsctestnet";
+} from "../../vips/vip-293/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -96,7 +96,7 @@ forking(39571114, () => {
     });
   });
 
-  testVip("VIP-289", vip289(), {
+  testVip("VIP-293", vip293(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
     },

@@ -156,10 +156,10 @@ const WBETH_TRANSFER_COMMANDS = WBETH_TOKEN_HOLDERS.map(holder => {
   };
 });
 
-const vip289 = () => {
+const vip293 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-289 Set custom oracles for markets with LST tokens (ankrBNB, BNBx, stkBNB, and slisBNB)",
+    title: "VIP-293 Set custom oracles for markets with LST tokens (ankrBNB, BNBx, stkBNB, and slisBNB)",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -300,4 +300,4 @@ const vip289 = () => {
   );
 };
 
-export default vip289;
+export default vip293;

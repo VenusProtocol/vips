@@ -1,42 +1,40 @@
 import { expect } from "chai";
-import { Contract, BigNumberish } from "ethers";
+import { BigNumberish, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip289, {
+import vip293, {
+  ANKRBNB_BORROW,
+  ANKRBNB_SUPPLY,
   Actions,
+  BNBX_BORROW,
+  BNBX_SUPPLY,
   BNBx,
   LST_COMPTROLLER,
   RESILIENT_ORACLE,
+  SLISBNB_BORROW,
+  SLISBNB_SUPPLY,
+  STKBNB_BORROW,
+  STKBNB_SUPPLY,
   SlisBNB,
   StkBNB,
   WBETH,
   WBETHOracle,
+  WBNB_BORROW,
+  WBNB_SUPPLY,
   ankrBNB,
+  vBNBx_LiquidStakedBNB,
+  vWBNB_LiquidStakedBNB,
+  vankrBNB_LiquidStakedBNB,
   vslisBNB_LiquidStakedBNB,
   vstkBNB_LiquidStakedBNB,
-  vWBNB_LiquidStakedBNB,
-  vBNBx_LiquidStakedBNB,
-  vankrBNB_LiquidStakedBNB,
-  WBNB_SUPPLY,
-  SLISBNB_SUPPLY,
-  BNBX_SUPPLY,
-  ANKRBNB_SUPPLY,
-  STKBNB_SUPPLY,
-  WBNB_BORROW,
-  SLISBNB_BORROW,
-  BNBX_BORROW,
-  ANKRBNB_BORROW,
-  STKBNB_BORROW,
-} from "../../vips/vip-289/bscmainnet";
+} from "../../vips/vip-293/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WBETH_ORACLE_ABI from "./abi/wbethOracle.json";
 
-const vankrBNB_LiquidStakedBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
-const vBNBx_LiquidStakedBNB = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
 const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
@@ -47,12 +45,12 @@ const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 type TokenSymbol = "WBNB" | "slisBNB" | "BNBx" | "ankrBNB" | "stkBNB";
 
 interface CapObject {
-  [vTokenAddress: string]: string,
-  [oldSupplyCap: string]: BigNumberish,
-  [oldBorrowCap: string]: BigNumberish,
-  [newSupplyCap: string]: BigNumberish,
-  [newBorrowCap: string]: BigNumberish,
-};
+  vTokenAddress: string;
+  oldSupplyCap: BigNumberish;
+  oldBorrowCap: BigNumberish;
+  newSupplyCap: BigNumberish;
+  newBorrowCap: BigNumberish;
+}
 
 const caps: { [key in TokenSymbol]: CapObject } = {
   WBNB: {
@@ -92,7 +90,7 @@ const caps: { [key in TokenSymbol]: CapObject } = {
   },
 };
 
-forking(37991548, () => {
+forking(38086764, () => {
   let resilientOracle: Contract;
   let wbethOracleContract: Contract;
   let stakedBNBComptroller: Contract;
@@ -106,27 +104,27 @@ forking(37991548, () => {
   describe("Pre-VIP behavior", async () => {
     it("check BNBx price", async () => {
       const price = await resilientOracle.getPrice(BNBx);
-      expect(price).to.be.equal(parseUnits("604.34915467", "18"));
+      expect(price).to.be.equal(parseUnits("647.08914856", "18"));
     });
 
     it("check SlisBNB price", async () => {
       const price = await resilientOracle.getPrice(SlisBNB);
-      expect(price).to.be.equal(parseUnits("562.93032605", "18"));
+      expect(price).to.be.equal(parseUnits("603.53342056", "18"));
     });
 
     it("check StkBNB price", async () => {
       const price = await resilientOracle.getPrice(StkBNB);
-      expect(price).to.be.equal(parseUnits("579.89308933", "18"));
+      expect(price).to.be.equal(parseUnits("620.42526659", "18"));
     });
 
     it("check WBETH price", async () => {
       const price = await wbethOracleContract.getPrice(WBETH);
-      expect(price).to.be.equal(parseUnits("3197.94495589512767", "18"));
+      expect(price).to.be.equal(parseUnits("3303.129983074985825366", "18"));
     });
 
     it("check ankrBNB price", async () => {
       const price = await resilientOracle.getPrice(ankrBNB);
-      expect(price).to.be.equal(parseUnits("598.9378593", "18"));
+      expect(price).to.be.equal(parseUnits("640.92514063", "18"));
     });
 
     it("mint paused", async () => {
@@ -144,20 +142,20 @@ forking(37991548, () => {
       expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(true);
     });
 
-    for (const underlying in caps) {
+    for (const [underlying, capObject] of Object.entries(caps) as [TokenSymbol, CapObject][]) {
       it(`Verify old ${underlying} supply caps`, async () => {
-        const supplyCap = await stakedBNBComptroller.supplyCaps(caps[underlying].vTokenAddress);
-        expect(supplyCap).equals(caps[underlying].oldSupplyCap);
+        const supplyCap = await stakedBNBComptroller.supplyCaps(capObject.vTokenAddress);
+        expect(supplyCap).equals(capObject.oldSupplyCap);
       });
 
       it(`Verify old ${underlying} borrow caps`, async () => {
-        const borrowCap = await stakedBNBComptroller.borrowCaps(caps[underlying].vTokenAddress);
-        expect(borrowCap).equals(caps[underlying].oldBorrowCap);
+        const borrowCap = await stakedBNBComptroller.borrowCaps(capObject.vTokenAddress);
+        expect(borrowCap).equals(capObject.oldBorrowCap);
       });
     }
   });
 
-  testVip("VIP-289", vip289(), {
+  testVip("VIP-293", vip293(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [6]);
@@ -173,30 +171,30 @@ forking(37991548, () => {
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, ETH, ETH_FEED, NORMAL_TIMELOCK);
     });
     it("check BNBx price", async () => {
-      const price = parseUnits("603.254726719532584917", "18");
+      const price = parseUnits("645.808867516154432921", "18");
       expect(await resilientOracle.getPrice(BNBx)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vBNBx_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check SlisBNB price", async () => {
-      const price = parseUnits("565.791947184022163579", "18");
+      const price = parseUnits("605.790759108013727641", "18");
       expect(await resilientOracle.getPrice(SlisBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vslisBNB_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check StkBNB price", async () => {
-      const price = parseUnits("581.47544522170253081", "18");
+      const price = parseUnits("623.983379139425787596", "18");
       expect(await resilientOracle.getPrice(StkBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vstkBNB_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check WBETH price", async () => {
       const price = await wbethOracleContract.getPrice(WBETH);
-      expect(price).to.be.equal(parseUnits("3197.94495589512767", "18"));
+      expect(price).to.be.equal(parseUnits("3303.129983074985825366", "18"));
     });
 
     it("check ankrBNB price", async () => {
-      const price = parseUnits("600.626009762391317954", "18");
+      const price = parseUnits("643.268150660710340204", "18");
       expect(await resilientOracle.getPrice(ankrBNB)).to.be.equal(price);
       expect(await resilientOracle.getUnderlyingPrice(vankrBNB_LiquidStakedBNB)).to.be.equal(price);
     });
@@ -216,15 +214,15 @@ forking(37991548, () => {
       expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(false);
     });
 
-    for (const underlying in caps) {
+    for (const [underlying, capObject] of Object.entries(caps) as [TokenSymbol, CapObject][]) {
       it(`Verify new ${underlying} supply caps`, async () => {
-        const supplyCap = await stakedBNBComptroller.supplyCaps(caps[underlying].vTokenAddress);
-        expect(supplyCap).equals(caps[underlying].newSupplyCap);
+        const supplyCap = await stakedBNBComptroller.supplyCaps(capObject.vTokenAddress);
+        expect(supplyCap).equals(capObject.newSupplyCap);
       });
 
       it(`Verify new ${underlying} borrow caps`, async () => {
-        const borrowCap = await stakedBNBComptroller.borrowCaps(caps[underlying].vTokenAddress);
-        expect(borrowCap).equals(caps[underlying].newBorrowCap);
+        const borrowCap = await stakedBNBComptroller.borrowCaps(capObject.vTokenAddress);
+        expect(borrowCap).equals(capObject.newBorrowCap);
       });
     }
   });

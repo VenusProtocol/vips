@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import vip289Addendum, {
+import vip293Addendum, {
   COMPTROLLER_ADDRESS,
   OLD_ankrBNB,
   ORIGINAL_POOL_REGISTRY_IMP,
@@ -15,7 +15,7 @@ import vip289Addendum, {
   VTOKEN_IMP,
   ankrBNB,
   vankrBNB,
-} from "../../vips/vip-289/bsctestnet-addendum";
+} from "../../vips/vip-293/bsctestnet-addendum";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -44,7 +44,7 @@ forking(39580376, () => {
     });
   });
 
-  testVip("VIP-289", vip289Addendum(), {});
+  testVip("VIP-293", vip293Addendum(), {});
 
   describe("Post-VIP behavior", async () => {
     it("check ankrBNB price", async () => {
