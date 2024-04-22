@@ -19,6 +19,7 @@ import ERC20_ABI from "./abi/erc20Abi.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
+const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
 forking(19708766, () => {
   let resilientOracle: Contract;
@@ -73,7 +74,7 @@ forking(19708766, () => {
     it("check supply of Vtreasury", async () => {
       expect(await vtusd.balanceOf(ethereum.VTREASURY)).to.equal(parseUnits("1000000", 8));
     });
-    it("should return supply and borrow caps", async () => {
+    it("check borrow and supply caps", async () => {
       expect(await comptroller.borrowCaps(vTUSD)).equals(BORROW_CAP);
       expect(await comptroller.supplyCaps(vTUSD)).equals(SUPPLY_CAP);
     });
@@ -81,6 +82,13 @@ forking(19708766, () => {
       const market = await comptroller.markets(vTUSD);
       expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
       expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.77", 18));
+    });
+
+    it("check protocol share reserve", async () => {
+      expect(await vtusd.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+    });
+    it("check reserve factor", async () => {
+      expect(await vtusd.reserveFactorMantissa()).equals(parseUnits("0.1", 18));
     });
 
     it("check vToken", async () => {

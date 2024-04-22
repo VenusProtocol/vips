@@ -17,6 +17,7 @@ import VTOKEN_ABI from "./abi/VTokenAbi.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
 forking(5744100, () => {
   let resilientOracle: Contract;
@@ -67,7 +68,7 @@ forking(5744100, () => {
       expect(await vtusd.balanceOf(sepolia.VTREASURY)).to.equal(parseUnits("1000000", 8));
     });
 
-    it("should return supply and borrow caps", async () => {
+    it("check borrow and supply caps", async () => {
       expect(await comptroller.borrowCaps(vTUSD)).equals(BORROW_CAP);
       expect(await comptroller.supplyCaps(vTUSD)).equals(SUPPLY_CAP);
     });
@@ -85,6 +86,12 @@ forking(5744100, () => {
         exchangeRate: parseUnits("1", 28),
         comptroller: COMPTROLLER,
       });
+    });
+    it("check protocol share reserve", async () => {
+      expect(await vtusd.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+    });
+    it("check reserve factor", async () => {
+      expect(await vtusd.reserveFactorMantissa()).equals(parseUnits("0.1", 18));
     });
     it("check IR", async () => {
       const IR = await vtusd.interestRateModel();
