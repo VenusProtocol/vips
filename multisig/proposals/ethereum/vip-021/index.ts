@@ -7,7 +7,7 @@ import { makeProposal } from "../../../../src/utils";
 const { ethereum } = NETWORK_ADDRESSES;
 
 export const CHAINLINK_TUSD_FEED = "0xec746eCF986E2927Abd291a2A1716c940100f8Ba";
-const CHAINLINK_STALE_PERIOD = 26 * 60 * 60;
+const CHAINLINK_STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours
 
 export const TUSD = "0x0000000000085d4780B73119b644AE5ecd22b376";
 export const vTUSD = "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b";
@@ -43,7 +43,7 @@ const vip021 = () => {
     {
       target: ethereum.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[TUSD, CHAINLINK_TUSD_FEED, CHAINLINK_STALE_PERIOD]],
+      params: [[TUSD, CHAINLINK_TUSD_FEED, CHAINLINK_STALE_PERIOD_26H]],
     },
     {
       target: ethereum.RESILIENT_ORACLE,
