@@ -1,7 +1,16 @@
+import { parseUnits } from "ethers/lib/utils";
+
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+const XVS_BRIDGE_ADMIN_PROXY = "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21";
+export const BNB_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+export const SINGLE_RECEIVE_LIMIT_OP_BNB = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT_OP_BNB = parseUnits("51000", 18);
+export const SINGLE_RECEIVE_LIMIT_ETHEREUM = parseUnits("102000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT_ETHEREUM = parseUnits("1020000", 18);
+export const OP_BNB_ENDPOINT_ID = 202;
+export const ETHEREUM_ENDPOINT_ID = 101;
 
 const vip292 = () => {
   const meta = {
@@ -16,14 +25,37 @@ const vip292 = () => {
   return makeProposal(
     [
       {
-        target: FAST_TRACK_TIMELOCK,
-        signature: "",
-        params: [],
-        value: "1",
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setWhitelist(address,bool)",
+        params: [BNB_TREASURY, true],
+      },
+
+      // opBNB Configuration
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+        params: [OP_BNB_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT_OP_BNB],
+      },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+        params: [OP_BNB_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT_OP_BNB],
+      },
+
+      // Ethereum configuration
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+        params: [ETHEREUM_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT_ETHEREUM],
+      },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+        params: [ETHEREUM_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT_ETHEREUM],
       },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.REGULAR,
   );
 };
 
