@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
@@ -9,15 +9,10 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip003, {
   BNB_TESTNET_ENDPOINT_ID,
   BNB_TESTNET_TRUSTED_REMOTE,
-  MAX_DAILY_RECEIVE_LIMIT,
-  MAX_DAILY_SEND_LIMIT,
-  MIN_DEST_GAS,
   OPBNB_TESTNET_ENDPOINT_ID,
   OPBNB_TESTNET_TRUSTED_REMOTE,
   SEPOLIA_ENDPOINT_ID,
   SEPOLIA_TRUSTED_REMOTE,
-  SINGLE_RECEIVE_LIMIT,
-  SINGLE_SEND_LIMIT,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
@@ -30,7 +25,14 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(34547195, () => {
+const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
+const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
+const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
+const MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
+
+const MIN_DEST_GAS = "300000";
+
+forking(36242118, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;

@@ -10,7 +10,7 @@ export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
 export const MIN_DEST_GAS = "300000";
 
 export const ARBITRUM_SEPOLIA_ENDPOINT_ID = 10231;
-export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xe9b66800e63888de29c4c9131faadbdbdcfae917";
+export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 
 const vip018 = () => {
   return makeProposal([
