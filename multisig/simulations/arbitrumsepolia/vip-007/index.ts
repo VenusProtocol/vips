@@ -21,9 +21,9 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const GENERIC_TEST_USER_ACCOUNT = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
-const XVS_ADMIN = "0xE9B66800E63888DE29c4c9131faadbDbDCfae917";
+const XVS_ADMIN = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 
-forking(34955117, () => {
+forking(36347077, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
