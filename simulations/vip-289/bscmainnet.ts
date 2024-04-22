@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { Contract, BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -10,22 +10,33 @@ import vip289, {
   BNBx,
   LST_COMPTROLLER,
   RESILIENT_ORACLE,
-  STABLECOIN_COMPTROLLER,
   SlisBNB,
   StkBNB,
   WBETH,
   WBETHOracle,
   ankrBNB,
-  vEURA,
-  vslisBNB,
-  vstkBNB,
+  vslisBNB_LiquidStakedBNB,
+  vstkBNB_LiquidStakedBNB,
+  vWBNB_LiquidStakedBNB,
+  vBNBx_LiquidStakedBNB,
+  vankrBNB_LiquidStakedBNB,
+  WBNB_SUPPLY,
+  SLISBNB_SUPPLY,
+  BNBX_SUPPLY,
+  ANKRBNB_SUPPLY,
+  STKBNB_SUPPLY,
+  WBNB_BORROW,
+  SLISBNB_BORROW,
+  BNBX_BORROW,
+  ANKRBNB_BORROW,
+  STKBNB_BORROW,
 } from "../../vips/vip-289/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WBETH_ORACLE_ABI from "./abi/wbethOracle.json";
 
-const vankrBNB = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
-const vBNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
+const vankrBNB_LiquidStakedBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
+const vBNBx_LiquidStakedBNB = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
 const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
@@ -33,16 +44,62 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const ETH_FEED = "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e";
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
+type TokenSymbol = "WBNB" | "slisBNB" | "BNBx" | "ankrBNB" | "stkBNB";
+
+interface CapObject {
+  [vTokenAddress: string]: string,
+  [oldSupplyCap: string]: BigNumberish,
+  [oldBorrowCap: string]: BigNumberish,
+  [newSupplyCap: string]: BigNumberish,
+  [newBorrowCap: string]: BigNumberish,
+};
+
+const caps: { [key in TokenSymbol]: CapObject } = {
+  WBNB: {
+    vTokenAddress: vWBNB_LiquidStakedBNB,
+    oldSupplyCap: parseUnits("24000", 18),
+    oldBorrowCap: parseUnits("16000", 18),
+    newSupplyCap: WBNB_SUPPLY,
+    newBorrowCap: WBNB_BORROW,
+  },
+  slisBNB: {
+    vTokenAddress: vslisBNB_LiquidStakedBNB,
+    oldSupplyCap: parseUnits("3000", 18),
+    oldBorrowCap: parseUnits("800", 18),
+    newSupplyCap: SLISBNB_SUPPLY,
+    newBorrowCap: SLISBNB_BORROW,
+  },
+  BNBx: {
+    vTokenAddress: vBNBx_LiquidStakedBNB,
+    oldSupplyCap: parseUnits("9600", 18),
+    oldBorrowCap: parseUnits("1920", 18),
+    newSupplyCap: BNBX_SUPPLY,
+    newBorrowCap: BNBX_BORROW,
+  },
+  ankrBNB: {
+    vTokenAddress: vankrBNB_LiquidStakedBNB,
+    oldSupplyCap: parseUnits("8000", 18),
+    oldBorrowCap: parseUnits("1600", 18),
+    newSupplyCap: ANKRBNB_SUPPLY,
+    newBorrowCap: ANKRBNB_BORROW,
+  },
+  stkBNB: {
+    vTokenAddress: vstkBNB_LiquidStakedBNB,
+    oldSupplyCap: parseUnits("2900", 18),
+    oldBorrowCap: parseUnits("580", 18),
+    newSupplyCap: STKBNB_SUPPLY,
+    newBorrowCap: STKBNB_BORROW,
+  },
+};
+
 forking(37991548, () => {
   let resilientOracle: Contract;
   let wbethOracleContract: Contract;
-  let stablecoinComptroller: Contract;
   let stakedBNBComptroller: Contract;
 
   before(async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     wbethOracleContract = new ethers.Contract(WBETHOracle, WBETH_ORACLE_ABI, ethers.provider);
-    stablecoinComptroller = new ethers.Contract(STABLECOIN_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
     stakedBNBComptroller = new ethers.Contract(LST_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   });
 
@@ -73,28 +130,39 @@ forking(37991548, () => {
     });
 
     it("mint paused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.MINT)).to.equal(true);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.MINT)).to.equal(true);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.MINT)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.MINT)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.MINT)).to.equal(true);
     });
 
     it("borrow paused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.BORROW)).to.equal(true);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.BORROW)).to.equal(true);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.BORROW)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.BORROW)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.BORROW)).to.equal(true);
     });
 
     it("enter market paused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.ENTER_MARKET)).to.equal(true);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.ENTER_MARKET)).to.equal(true);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.ENTER_MARKET)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(true);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(true);
     });
+
+    for (const underlying in caps) {
+      it(`Verify old ${underlying} supply caps`, async () => {
+        const supplyCap = await stakedBNBComptroller.supplyCaps(caps[underlying].vTokenAddress);
+        expect(supplyCap).equals(caps[underlying].oldSupplyCap);
+      });
+
+      it(`Verify old ${underlying} borrow caps`, async () => {
+        const borrowCap = await stakedBNBComptroller.borrowCaps(caps[underlying].vTokenAddress);
+        expect(borrowCap).equals(caps[underlying].oldBorrowCap);
+      });
+    }
   });
 
   testVip("VIP-289", vip289(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
-      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [9]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [6]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [5]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap"], [5]);
     },
   });
 
@@ -107,19 +175,19 @@ forking(37991548, () => {
     it("check BNBx price", async () => {
       const price = parseUnits("603.254726719532584917", "18");
       expect(await resilientOracle.getPrice(BNBx)).to.be.equal(price);
-      expect(await resilientOracle.getUnderlyingPrice(vBNBx)).to.be.equal(price);
+      expect(await resilientOracle.getUnderlyingPrice(vBNBx_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check SlisBNB price", async () => {
       const price = parseUnits("565.791947184022163579", "18");
       expect(await resilientOracle.getPrice(SlisBNB)).to.be.equal(price);
-      expect(await resilientOracle.getUnderlyingPrice(vslisBNB)).to.be.equal(price);
+      expect(await resilientOracle.getUnderlyingPrice(vslisBNB_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check StkBNB price", async () => {
       const price = parseUnits("581.47544522170253081", "18");
       expect(await resilientOracle.getPrice(StkBNB)).to.be.equal(price);
-      expect(await resilientOracle.getUnderlyingPrice(vstkBNB)).to.be.equal(price);
+      expect(await resilientOracle.getUnderlyingPrice(vstkBNB_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("check WBETH price", async () => {
@@ -130,25 +198,34 @@ forking(37991548, () => {
     it("check ankrBNB price", async () => {
       const price = parseUnits("600.626009762391317954", "18");
       expect(await resilientOracle.getPrice(ankrBNB)).to.be.equal(price);
-      expect(await resilientOracle.getUnderlyingPrice(vankrBNB)).to.be.equal(price);
+      expect(await resilientOracle.getUnderlyingPrice(vankrBNB_LiquidStakedBNB)).to.be.equal(price);
     });
 
     it("mint unpaused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.MINT)).to.equal(false);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.MINT)).to.equal(false);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.MINT)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.MINT)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.MINT)).to.equal(false);
     });
 
     it("borrow unpaused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.BORROW)).to.equal(false);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.BORROW)).to.equal(false);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.BORROW)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.BORROW)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.BORROW)).to.equal(false);
     });
 
     it("enter market unpaused", async () => {
-      expect(await stakedBNBComptroller.actionPaused(vslisBNB, Actions.ENTER_MARKET)).to.equal(false);
-      expect(await stakedBNBComptroller.actionPaused(vstkBNB, Actions.ENTER_MARKET)).to.equal(false);
-      expect(await stablecoinComptroller.actionPaused(vEURA, Actions.ENTER_MARKET)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vslisBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(false);
+      expect(await stakedBNBComptroller.actionPaused(vstkBNB_LiquidStakedBNB, Actions.ENTER_MARKET)).to.equal(false);
     });
+
+    for (const underlying in caps) {
+      it(`Verify new ${underlying} supply caps`, async () => {
+        const supplyCap = await stakedBNBComptroller.supplyCaps(caps[underlying].vTokenAddress);
+        expect(supplyCap).equals(caps[underlying].newSupplyCap);
+      });
+
+      it(`Verify new ${underlying} borrow caps`, async () => {
+        const borrowCap = await stakedBNBComptroller.borrowCaps(caps[underlying].vTokenAddress);
+        expect(borrowCap).equals(caps[underlying].newBorrowCap);
+      });
+    }
   });
 });
