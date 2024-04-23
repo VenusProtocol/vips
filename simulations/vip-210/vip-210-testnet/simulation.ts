@@ -7,7 +7,7 @@ import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
 import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
-import { vip296Testnet } from "../../../vips/vip-296/vip-296-testnet";
+import { vip210Testnet } from "../../../vips/vip-210/vip-210-testnet";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
@@ -20,6 +20,13 @@ const PRIME_LIQUIDITY_PROVIDER = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
 
 const BTC = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
 const vBTC = "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe";
+
+interface vTokenConfig {
+  name: string;
+  assetAddress: string;
+  feed: string;
+  marketAddress: string;
+}
 
 const vTokens: vTokenConfig[] = [
   {
@@ -54,7 +61,7 @@ forking(34920008, () => {
     let prime: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       const signer = await ethers.getSigner(STAKED_USER);
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
@@ -70,7 +77,7 @@ forking(34920008, () => {
     });
   });
 
-  testVip("VIP-296 Prime Program", vip296Testnet(), {});
+  testVip("VIP-296 Prime Program", vip210Testnet(), {});
 
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;
@@ -78,7 +85,7 @@ forking(34920008, () => {
     let btc: Contract;
 
     before(async () => {
-      impersonateAccount(STAKED_USER);
+      await impersonateAccount(STAKED_USER);
       const signer = await ethers.getSigner(STAKED_USER);
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);

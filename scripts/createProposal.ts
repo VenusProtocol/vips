@@ -3,26 +3,28 @@ import Ajv from "ajv";
 import { BigNumber } from "ethers";
 import fs from "fs/promises";
 import { network } from "hardhat";
+import readline from "readline-sync";
 
 import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../src/multisig/utils";
 import { loadProposal, proposeVIP } from "../src/transactions";
+import { SUPPORTED_NETWORKS } from "../src/types";
 import { getCalldatas, proposalSchema } from "../src/utils";
-
-const readline = require("readline-sync");
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
 
-let vipNumber: string;
-let governorAddress: string | null;
+let vipPath: string;
+let governorAddress: string;
 let transactionType: string;
 
 function processInputs(): Promise<void> {
   return new Promise(resolve => {
-    vipNumber = readline.question("Number of the VIP to propose (if using gnosisTXBuilder press enter to skip ) => ");
+    vipPath = readline.question(
+      "Path relative to ./vips directory to the VIP to propose e.g. vip-244/bscmainnet (if using gnosisTXBuilder press enter to skip ) => ",
+    );
     transactionType = readline.question("Type of the proposal txBuilder/venusApp/bsc/gnosisTXBuilder => ");
     governorAddress = readline.question("Address of the governance contract (optional, press enter to skip) => ");
     if (!governorAddress) {
-      governorAddress = null;
+      governorAddress = "";
     }
     resolve();
   });
@@ -46,7 +48,7 @@ const processJson = async (data: JsonObject) => {
 };
 
 const processTxBuilder = async () => {
-  const result = await proposeVIP(vipNumber, governorAddress);
+  const result = await proposeVIP(vipPath, governorAddress);
   const transactions = [
     {
       to: result.target,
@@ -59,11 +61,13 @@ const processTxBuilder = async () => {
 };
 
 const processGnosisTxBuilder = async () => {
-  const safeAddress = getSafeAddress(network.name);
+  const safeAddress = getSafeAddress(network.name as Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">);
 
-  const txID = readline.question("Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => ");
+  const multisigVipPath = readline.question(
+    "Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ",
+  );
 
-  const proposal = await loadMultisigTx(txID, network.name);
+  const proposal = await loadMultisigTx(multisigVipPath);
   const multisigTx = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
 
@@ -71,7 +75,7 @@ const processGnosisTxBuilder = async () => {
 };
 
 const processVenusAppProposal = async () => {
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await loadProposal(vipPath);
   const validate = new Ajv().compile(proposalSchema);
   const isValid = validate(proposal);
 
@@ -83,7 +87,7 @@ const processVenusAppProposal = async () => {
 };
 
 const processBscProposal = async () => {
-  const proposal = await loadProposal(vipNumber);
+  const proposal = await loadProposal(vipPath);
   const data = {
     targets: proposal.targets,
     signatures: proposal.signatures,
@@ -108,8 +112,9 @@ const createProposal = async () => {
   } else {
     result = await processBscProposal();
   }
-  console.log(result);
-  await fs.writeFile(`${transactionType}.json`, result);
+  if (result) {
+    await fs.writeFile(`${transactionType}.json`, result);
+  }
 };
 
-createProposal();
+export default createProposal();

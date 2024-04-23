@@ -1,12 +1,13 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract, ContractInterface } from "ethers";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal } from "../types";
+import { Proposal, SUPPORTED_NETWORKS } from "../types";
 import { getCalldatas, getPayload, initMainnetUser, setForkBlock } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainExecutor.json";
@@ -21,8 +22,8 @@ const LZ_LIBRARY = "0x3acaaf60502791d199a5a5f0b173d78229ebfe32";
 const VOTING_PERIOD = 28800;
 
 export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[process.env.FORKED_NETWORK];
-export const { DELAY_BLOCKS } = NETWORK_CONFIG[process.env.FORKED_NETWORK];
+  NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
+export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
 export const forking = (blockNumber: number, fn: () => void) => {
   console.log(`At block #${blockNumber}`);
@@ -36,7 +37,7 @@ export interface TestingOptions {
   governorAbi?: ContractInterface;
   proposer?: string;
   supporter?: string;
-  callbackAfterExecution?: Func;
+  callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
 const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
@@ -61,9 +62,8 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 };
 
 export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("1.0"));
+  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
-    console.log(`Executing ${proposal.signatures[i]}`);
     await executeCommand(impersonatedTimelock, proposal, i);
   }
 };
@@ -79,10 +79,13 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("10.0"));
+    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
-    governorProxy = await ethers.getContractAt(options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI, GOVERNOR_PROXY);
+    governorProxy = await ethers.getContractAt(
+      (options.governorAbi ?? GOVERNOR_BRAVO_DELEGATE_ABI) as string,
+      GOVERNOR_PROXY,
+    );
   };
 
   describe(`${description} commands`, () => {
@@ -122,7 +125,9 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be voteable", async () => {
-      await mine(150);
+      const proposalConfig = await governorProxy.proposalConfigs(proposal.type);
+      const votingDelay = await proposalConfig.votingDelay;
+      await mine(votingDelay);
       await expect(governorProxy.connect(proposer).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
       await expect(governorProxy.connect(supporter).castVote(proposalId, 1)).to.emit(governorProxy, "VoteCast");
     });
@@ -134,7 +139,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposal.type || 0]);
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);

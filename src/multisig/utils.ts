@@ -1,20 +1,19 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
-import { MetaTransactionData } from "@safe-global/safe-core-sdk-types";
+import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 
-import { Proposal } from "../../src/types";
+import { Proposal, SUPPORTED_NETWORKS } from "../../src/types";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
-
-const readline = require("readline-sync");
 
 const DEFAULT_OPERATION = 0; // Call
 
-export const loadMultisigTx = async (txID: string, networkName: string) => {
-  const x = await import(`../../multisig/proposals/vip-${txID}/vip-${txID}-${networkName}.ts`);
-  return x[`vip${txID}`]();
+export const loadMultisigTx = async (multisigVipPath: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const vip = require(`../../multisig/proposals/${multisigVipPath}`).default;
+  return vip();
 };
 
-export const getSafeAddress = (networkName: string): string => {
+export const getSafeAddress = (networkName: Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">): string => {
   return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 
@@ -35,10 +34,12 @@ export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransacti
   return safeTransactionData;
 };
 
-export const createGnosisTx = async (ethAdapter: EthersAdapter, safeSdk: Safe): Promise<SafeTransaction> => {
-  const txID = readline.question("Multisig VIP ID to execute => ");
-
-  const proposal = await loadMultisigTx(txID, network.name);
+export const createGnosisTx = async (
+  ethAdapter: EthersAdapter,
+  safeSdk: Safe,
+  multisigVipPath: string,
+): Promise<SafeTransaction> => {
+  const proposal = await loadMultisigTx(multisigVipPath);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 
@@ -59,6 +60,30 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         signMessageLibAddress: "0xaF838B48F16728169E78985Cc8eB1bda25D75B29",
         createCallAddress: "0x6B95D96C78F6433992A5F81aEcF82bAE449016Df",
         simulateTxAccessorAddress: "0x249b0178432e34320D7d30A4A9699cAf23Bcf04c",
+      },
+    },
+    opbnbtestnet: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xE2CF742b554F466d5E7a37C371FD47C786d2FBc0",
+        safeProxyFactoryAddress: "0x9fea7F7C69f14aa1a7d62cC9D468fEB2F9371CB3",
+        multiSendAddress: "0xDeB0467cCfAda493902C8D279A2F41f26b813AC9",
+        multiSendCallOnlyAddress: "0xC33224E130C702808e12299eCaBC16148a5B3d0B",
+        fallbackHandlerAddress: "0x40B30946045a876ffD68CaF008f94eeAAD50F855",
+        signMessageLibAddress: "0x6ACe153bF757b4999c7D6f0F3dFb1043dC67d61a",
+        createCallAddress: "0x392e2F66c3BBF0046c861e0065fB7C7917b18078",
+        simulateTxAccessorAddress: "0xd77D8020bEa6Aad4f5D636b1EB1FB3B9d08bbb7F",
+      },
+    },
+    arbitrumsepolia: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xc40483C21728BF342e4C0d1Ca693AdDC6c0b6dbA",
+        safeProxyFactoryAddress: "0x9E52EFCAD3db5191B4Cb69CaBdCe4F356119F8d8",
+        multiSendAddress: "0x6B02AbB69337C8dF8Ad312D6c5C2D58711736a36",
+        multiSendCallOnlyAddress: "0x50542C494932F79FcB15Ab0e25CA08BB8610b03f",
+        fallbackHandlerAddress: "0xE0C5C79D9CB5Bfa096b10396B1AE9FbBFc860fA6",
+        signMessageLibAddress: "0x37942Af543F6E8E8e8E2784fb3C989c957FE4097",
+        createCallAddress: "0xD79AcAdDC21A2e7A9D15Fff711Ec47def7259DD3",
+        simulateTxAccessorAddress: "0xd55A98150e0F9f5e3F6280FC25617A5C93d96007",
       },
     },
     // Add more networks as needed

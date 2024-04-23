@@ -1,5 +1,7 @@
 import { BigNumberish } from "ethers";
 
+export type SUPPORTED_NETWORKS = "bsctestnet" | "bscmainnet" | "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
+
 export interface ProposalMeta {
   version: string;
   title: string;
@@ -30,4 +32,10 @@ export interface Command {
   params: any[];
   value?: string;
   dstChainId?: number;
+}
+
+export interface TokenConfig {
+  asset: string;
+  oracles: string[];
+  enableFlagsForOracles: boolean[];
 }

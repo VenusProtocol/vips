@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -9,8 +10,8 @@ import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, 
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
 forking(32403700, () => {
-  let stableCoinComptroller: ethers.Contract;
-  let liquidStakeBnbComptroller: ethers.Contract;
+  let stableCoinComptroller: Contract;
+  let liquidStakeBnbComptroller: Contract;
 
   const provider = ethers.provider;
 

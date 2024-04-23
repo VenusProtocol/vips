@@ -1,12 +1,13 @@
-import { defaultAbiCoder } from "@ethersproject/abi";
+import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { ContractInterface } from "ethers";
-import { ethers, network } from "hardhat";
+import { Contract } from "ethers";
+import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
-import { Command, Proposal, ProposalMeta, ProposalType } from "./types";
+import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
 import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
@@ -16,14 +17,21 @@ import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 const BSCTESTNET_OMICHANNEL_SENDER = "0x02d188Be98CF7676Cd98b03C8470f059fD7799Da";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
-export const networkChainIds = {
+interface NetworkChainIds {
+  sepolia: number;
+  ethereum: number;
+  opbnbtestnet: number;
+  opbnbmainnet: number;
+}
+export const networkChainIds: NetworkChainIds = {
   ethereum: 101,
   sepolia: 10161,
-  arbitrum_goerli: 10143,
+  opbnbtestnet: 10202,
+  opbnbmainnet: 202,
 };
 
-const currentChainId = () => {
-  return networkChainIds[process.env.FORKED_NETWORK];
+const currentChainId = (): number => {
+  return networkChainIds[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"];
 };
 
 export const getPayload = (proposal: Proposal) => {
@@ -46,7 +54,7 @@ export async function setForkBlock(blockNumber: number) {
     params: [
       {
         forking: {
-          jsonRpcUrl: process.env[`ARCHIVE_NODE_${process.env.FORKED_NETWORK}`],
+          jsonRpcUrl: config.networks.hardhat.forking?.url,
           blockNumber: blockNumber,
         },
       },
@@ -102,7 +110,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
     provider,
   );
   let fee;
-  if (process.env.FORKED_NETWORK === "bsctestnet") {
+  if (FORKED_NETWORK === "bsctestnet") {
     fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams))[0].toString();
   } else {
     fee = ethers.BigNumber.from("1");
@@ -150,7 +158,7 @@ export const makeProposalV2 = async (
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
       proposal.targets.push(
-        process.env.FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
+        FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);
@@ -184,6 +192,11 @@ export const setMaxStalePeriodInBinanceOracle = async (
 ) => {
   const oracle = await ethers.getContractAt(BINANCE_ORACLE_ABI, binanceOracleAddress);
   const oracleAdmin = await initMainnetUser(await oracle.owner(), ethers.utils.parseEther("1.0"));
+  const overrideSymbol = await oracle.symbols(assetSymbol);
+
+  if (overrideSymbol.length > 0) {
+    assetSymbol = overrideSymbol;
+  }
 
   const tx = await oracle.connect(oracleAdmin).setMaxStalePeriod(assetSymbol, maxStalePeriodInSeconds);
   await tx.wait();
@@ -201,25 +214,88 @@ export const setMaxStalePeriodInChainlinkOracle = async (
   const oracle = new ethers.Contract(chainlinkOracleAddress, CHAINLINK_ORACLE_ABI, provider);
   const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
 
-  const tx = await oracle.connect(oracleAdmin).setTokenConfig({
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await oracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
+  await oracle.connect(oracleAdmin).setTokenConfig({
     asset,
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
-  await tx.wait();
+};
+
+export const getForkedNetworkAddress = (contractName: string) => {
+  const FORKED_NETWORK_ADDRESSES = FORKED_NETWORK && NETWORK_ADDRESSES[FORKED_NETWORK];
+  if (FORKED_NETWORK_ADDRESSES && Object.prototype.hasOwnProperty.call(FORKED_NETWORK_ADDRESSES, contractName)) {
+    return FORKED_NETWORK_ADDRESSES[contractName as keyof typeof FORKED_NETWORK_ADDRESSES];
+  }
+  throw new Error(`${contractName} address not found on forked ${FORKED_NETWORK}`);
+};
+
+export const setMaxStalePeriod = async (
+  resilientOracle: Contract,
+  underlyingAsset: Contract,
+  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+) => {
+  let binanceOracle: string = ethers.constants.AddressZero;
+  let chainlinkOracle: string = ethers.constants.AddressZero;
+  let redstoneOracle: string = ethers.constants.AddressZero;
+
+  try {
+    binanceOracle = getForkedNetworkAddress("BINANCE_ORACLE");
+  } catch {
+    console.log(`Binance Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    chainlinkOracle = getForkedNetworkAddress("CHAINLINK_ORACLE");
+  } catch {
+    console.log(`Chainlink Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  try {
+    redstoneOracle = getForkedNetworkAddress("REDSTONE_ORACLE");
+  } catch {
+    console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
+  }
+
+  const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
+  const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
+  if (tokenConfig.asset !== ethers.constants.AddressZero) {
+    const mainOracle = tokenConfig.oracles[0];
+    if (mainOracle === binanceOracle) {
+      const symbol = await underlyingAsset.symbol();
+      await setMaxStalePeriodInBinanceOracle(binanceOracle, symbol, maxStalePeriodInSeconds);
+    } else if (mainOracle === chainlinkOracle || mainOracle === redstoneOracle) {
+      await setMaxStalePeriodInChainlinkOracle(
+        mainOracle,
+        underlyingAsset.address,
+        ethers.constants.AddressZero,
+        normalTimelock,
+        maxStalePeriodInSeconds,
+      );
+    }
+  }
+  await mine(100);
 };
 
 export const expectEvents = async (
   txResponse: TransactionResponse,
-  abis: ContractInterface[],
+  abis: (string | JsonFragment[])[],
   expectedEvents: string[],
   expectedCounts: number[],
 ) => {
   const receipt = await txResponse.wait();
-  const getNamedEvents = (abi: ContractInterface) => {
+  const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
+    // @ts-expect-error @TODO type is wrong
     return receipt.events
-      .map(it => {
+      .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;
         } catch (error) {
@@ -241,7 +317,7 @@ export const expectEvents = async (
 
 export const expectEventWithParams = async (
   txResponse: TransactionResponse,
-  abi: ContractInterface,
+  abi: string | JsonFragment[],
   expectedEvent: string,
   expectedParams: any[], // Array of expected parameters
 ) => {
@@ -249,23 +325,36 @@ export const expectEventWithParams = async (
   const iface = new ethers.utils.Interface(abi);
 
   // Extract the events that match the expected event name
+  // @ts-expect-error @TODO type is wrong
   const matchingEvents = receipt.events
-    .map(event => {
+    .map((event: { topics: string[]; data: string }) => {
       try {
         return iface.parseLog(event);
       } catch (error) {
         return null; // Ignore events that do not match the ABI
       }
     })
-    .filter(parsedEvent => parsedEvent && parsedEvent.name === expectedEvent);
+    .filter(
+      (parsedEvent: { topics: string[]; data: string; name: string }) =>
+        parsedEvent && parsedEvent.name === expectedEvent,
+    );
 
   // Check each event's parameters
-  matchingEvents.forEach((event, index) => {
-    expect(
-      event.args[index],
-      `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
-    ).to.deep.equal(expectedParams[index]);
-  });
+  matchingEvents.forEach(
+    (
+      event: {
+        topics: string[];
+        data: string;
+        args: [];
+      },
+      index: number,
+    ) => {
+      expect(
+        event.args[index],
+        `Parameters of event ${expectedEvent} did not match at instance ${index + 1}`,
+      ).to.deep.equal(expectedParams[index]);
+    },
+  );
 };
 
 export const proposalSchema = {
@@ -453,6 +542,11 @@ const BNB_MAINNET_ASSETS: AssetConfig[] = [
     name: "TUSD_NEW",
     address: "0x40af3827f39d0eacbf4a168f8d4ee67c121d11c9",
     feed: "0xa3334A9762090E827413A7495AfeCE76F41dFc06",
+  },
+  {
+    name: "FDUSD",
+    address: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+    feed: "0x390180e80058A8499930F0c13963AD3E0d86Bfc9",
   },
 ];
 
