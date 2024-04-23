@@ -9,10 +9,10 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-export const vip293 = () => {
+export const vip294 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-293 Ethereum: add support for DAI market on Venus Core Pool",
+    title: "VIP-294 Ethereum: add support for DAI market on Venus Core Pool",
     description: `#### Summary
 
 If passed, following the Community proposal “[DAI Listing Proposal for Venus Protocol on Ethereum Mainnet](https://community.venus.io/t/dai-listing-proposal-for-venus-protocol-on-ethereum-mainnet/4244)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x9388cc2d4225246771a3cc89d887e7544b9d4aacb693deb8a4293b7d31ee02c5), this VIP adds a market for the [DAI token](https://etherscan.io/token/0x6b175474e89094c44da98b954eedeac495271d0f) into the [Venus Core Pool on Ethereum](https://etherscan.io/address/0x687a01ecF6d3907658f7A7c714749fAC32336D1B).
@@ -82,4 +82,4 @@ Privilege commands on Ethereum will be executed by the [Guardian wallet](https:/
   );
 };
 
-export default vip293;
+export default vip294;
