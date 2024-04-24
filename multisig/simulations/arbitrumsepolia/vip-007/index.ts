@@ -1,13 +1,15 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip007, {
+  POOL_REGISTRY,
   PRIME,
   PRIME_LIQUIDITY_PROVIDER,
   XVS,
@@ -22,8 +24,9 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const GENERIC_TEST_USER_ACCOUNT = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const XVS_ADMIN = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
+const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 
-forking(36347077, () => {
+forking(37059276, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -92,6 +95,12 @@ forking(36347077, () => {
         await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT),
       );
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT));
+      const impersonateTimelock = await ethers.getSigner(arbitrumsepolia.NORMAL_TIMELOCK);
+      await xvsVault.connect(impersonateTimelock).resume();
+    });
+
+    it("prime should have correct pool registry address", async () => {
+      expect(await prime.poolRegistry()).to.be.equal(POOL_REGISTRY);
     });
 
     it("prime address", async () => {
@@ -116,6 +125,17 @@ forking(36347077, () => {
     });
 
     describe("generic tests", async () => {
+      before(async () => {
+        const xvsMinter = await initMainnetUser(XVS_ADMIN, ethers.utils.parseEther("1"));
+        const xvsHolder = await initMainnetUser(
+          arbitrumsepolia.GENERIC_TEST_USER_ACCOUNT,
+          ethers.utils.parseEther("1"),
+        );
+
+        await xvs.connect(xvsMinter).mint(arbitrumsepolia.GENERIC_TEST_USER_ACCOUNT, parseEther("10"));
+        await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
+      });
+
       checkXVSVault();
     });
   });
