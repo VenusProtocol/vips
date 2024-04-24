@@ -9,10 +9,12 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip003, {
   BNB_TESTNET_ENDPOINT_ID,
   BNB_TESTNET_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
   OPBNB_TESTNET_ENDPOINT_ID,
   OPBNB_TESTNET_TRUSTED_REMOTE,
   SEPOLIA_ENDPOINT_ID,
   SEPOLIA_TRUSTED_REMOTE,
+  SINGLE_RECEIVE_LIMIT,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
@@ -27,12 +29,10 @@ const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
 const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
-const MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
 
 const MIN_DEST_GAS = "300000";
 
-forking(36242118, () => {
+forking(36944975, () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -144,10 +144,10 @@ forking(36242118, () => {
       expect(limit).equals(SINGLE_RECEIVE_LIMIT);
 
       limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(OPBNB_TESTNET_ENDPOINT_ID);
-      expect(limit).equals("10000000000000000000000");
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
 
       limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(SEPOLIA_ENDPOINT_ID);
-      expect(limit).equals("10000000000000000000000");
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
     });
 
     it("Should set correct min destination gas", async () => {

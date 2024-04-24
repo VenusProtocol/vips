@@ -11,13 +11,17 @@ export const XVS_BRIDGE_ADMIN_PROXY = "0xc94578caCC89a29B044a0a1D54d20d48A645E5C
 export const XVS = "0x877Dc896e7b13096D3827872e396927BbE704407";
 export const XVS_BRIDGE_DEST = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 
-export const BNB_TESTNET_ENDPOINT_ID = "10102";
+export const BNB_TESTNET_ENDPOINT_ID = 10102;
 export const SEPOLIA_ENDPOINT_ID = 10161;
 export const OPBNB_TESTNET_ENDPOINT_ID = 10202;
 
 export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e331a70ea3";
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
 export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
+
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 
 const vip003 = () => {
@@ -174,13 +178,43 @@ const vip003 = () => {
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [BNB_TESTNET_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [BNB_TESTNET_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [OPBNB_TESTNET_ENDPOINT_ID, OPBNB_TESTNET_TRUSTED_REMOTE],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [OPBNB_TESTNET_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [OPBNB_TESTNET_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [SEPOLIA_ENDPOINT_ID, SEPOLIA_TRUSTED_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [SEPOLIA_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,

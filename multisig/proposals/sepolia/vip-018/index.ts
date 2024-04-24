@@ -5,8 +5,8 @@ import { makeProposal } from "../../../../src/utils";
 const XVS_BRIDGE_ADMIN_PROXY = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
 export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 export const MIN_DEST_GAS = "300000";
 
 export const ARBITRUM_SEPOLIA_ENDPOINT_ID = 10231;

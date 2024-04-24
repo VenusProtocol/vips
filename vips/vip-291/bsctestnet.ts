@@ -8,8 +8,8 @@ const XVS_BRIDGE_ADMIN = "0xB164Cb262328Ca44a806bA9e3d4094931E658513";
 export const MIN_DST_GAS = "300000";
 export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 export const ARBITRUM_SEPOLIA_CHAIN_ID = 10231;
 const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 
