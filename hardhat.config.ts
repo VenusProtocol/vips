@@ -21,6 +21,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   bsctestnet: 140000000,
   bscmainnet: 140000000,
   sepolia: 30000000,
+  arbitrumsepolia: 30000000,
   ethereum: 30000000,
   opbnbtestnet: 100000000,
   opbnbmainnet: 100000000,
@@ -111,7 +112,7 @@ const config: HardhatUserConfig = {
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbtestnet,
     },
     opbnbmainnet: {
-      url: process.env.ARCHIVE_NODE_opbnbtestnet || "https://opbnb-mainnet-rpc.bnbchain.org",
+      url: process.env.ARCHIVE_NODE_opbnbmainnet || "https://opbnb-mainnet-rpc.bnbchain.org",
       chainId: 204,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbmainnet,
