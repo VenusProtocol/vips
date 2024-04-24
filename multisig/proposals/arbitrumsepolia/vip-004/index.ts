@@ -73,6 +73,11 @@ const vip004 = () => {
       signature: "add(address,uint256,address,uint256,uint256)",
       params: [arbitrumsepolia.XVS, 100, arbitrumsepolia.XVS, "0", 604800],
     },
+    {
+      target: arbitrumsepolia.XVS_VAULT_PROXY,
+      signature: "pause()",
+      params: [],
+    },
   ]);
 };
 

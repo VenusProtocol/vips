@@ -44,7 +44,7 @@ forking(36285340, () => {
           ethers.utils.parseEther("1"),
         );
         await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(arbitrumsepolia.XVS, "61805555555555555");
-
+        await xvsVault.connect(admin).resume();
         // Giving call permissions to call the functions as xvs bridge vip is not executed now.
         await acm.connect(admin).giveCallPermission(arbitrumsepolia.XVS, "mint(address,uint256)", XVS_BRIDGE);
         await acm.connect(admin).giveCallPermission(arbitrumsepolia.XVS, "setMintCap(address,uint256)", admin.address);
