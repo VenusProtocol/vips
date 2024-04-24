@@ -6,14 +6,14 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip018, {
+import vip019, {
   ARBITRUM_SEPOLIA_ENDPOINT_ID,
   ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/sepolia/vip-018";
+} from "../../../proposals/sepolia/vip-019";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
@@ -40,7 +40,7 @@ forking(5673833, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(vip019());
     });
 
     it("Should match trusted remote address", async () => {
