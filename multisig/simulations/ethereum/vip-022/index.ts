@@ -8,26 +8,26 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip019 from "../../../proposals/sepolia/vip-019";
-import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/sepolia/vip-019";
+import vip022 from "../../../proposals/ethereum/vip-022";
+import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/ethereum/vip-022";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistryAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracleAbi.json";
 import VTOKEN_ABI from "./abi/VTokenAbi.json";
 
-const { sepolia } = NETWORK_ADDRESSES;
-const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
-const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
+const { ethereum } = NETWORK_ADDRESSES;
+const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
+const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
-forking(5730900, () => {
+forking(19709153, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vdai: Contract;
   let comptroller: Contract;
 
   before(async () => {
-    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
-    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
+    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
     vdai = await ethers.getContractAt(VTOKEN_ABI, vDAI);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
   });
@@ -38,22 +38,22 @@ forking(5730900, () => {
     });
     it("should have 6 markets in core pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.have.lengthOf(6);
+      expect(poolVTokens).to.have.lengthOf(5);
     });
   });
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip019());
+      await pretendExecutingVip(vip022());
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(DAI)).to.equals("999799150000000000");
+      expect(await resilientOracle.getPrice(DAI)).to.equals("1000428390000000000");
     });
 
     it("should have 7 markets in core pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.have.lengthOf(7);
+      expect(poolVTokens).to.have.lengthOf(6);
     });
 
     it("should add vDAI to the pool", async () => {
@@ -62,10 +62,7 @@ forking(5730900, () => {
     });
 
     it("check ownership", async () => {
-      expect(await vdai.owner()).to.equal(sepolia.GUARDIAN);
-    });
-    it("check supply of Vtreasury", async () => {
-      expect(await vdai.balanceOf(sepolia.VTREASURY)).to.equal(parseUnits("5000", 8));
+      expect(await vdai.owner()).to.equal(ethereum.GUARDIAN);
     });
     it("check protocol share reserve", async () => {
       expect(await vdai.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
@@ -76,10 +73,17 @@ forking(5730900, () => {
     it("check protocolSeizeShare", async () => {
       expect(await vdai.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
     });
-
-    it("should return supply and borrow caps", async () => {
+    it("check supply of Vtreasury", async () => {
+      expect(await vdai.balanceOf(ethereum.VTREASURY)).to.equal(parseUnits("5000", 8));
+    });
+    it("check supply and borrow caps", async () => {
       expect(await comptroller.borrowCaps(vDAI)).equals(BORROW_CAP);
       expect(await comptroller.supplyCaps(vDAI)).equals(SUPPLY_CAP);
+    });
+    it("should set vDAI collateral factor to 75% and Liquidation threshold to 77%", async () => {
+      const market = await comptroller.markets(vDAI);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.75", 18));
+      expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.77", 18));
     });
     it("check vToken", async () => {
       await checkVToken(vDAI, {

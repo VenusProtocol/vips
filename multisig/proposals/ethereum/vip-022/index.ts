@@ -18,7 +18,7 @@ export const LT = parseUnits("0.77", 18);
 export const SUPPLY_CAP = parseUnits("50000000", 18);
 export const BORROW_CAP = parseUnits("45000000", 18);
 
-const vip021 = () => {
+const vip022 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -66,4 +66,4 @@ const vip021 = () => {
   ]);
 };
 
-export default vip021;
+export default vip022;

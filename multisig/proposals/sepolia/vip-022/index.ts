@@ -18,7 +18,7 @@ export const LT = parseUnits("0.77", 18);
 export const SUPPLY_CAP = parseUnits("50000000", 18);
 export const BORROW_CAP = parseUnits("45000000", 18);
 
-const vip019 = () => {
+const vip022 = () => {
   return makeProposal([
     {
       target: DAI,
@@ -76,4 +76,4 @@ const vip019 = () => {
   ]);
 };
 
-export default vip019;
+export default vip022;
