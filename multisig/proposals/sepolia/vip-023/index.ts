@@ -11,6 +11,7 @@ export const PTweETH = "0x56107201d3e4b7Db92dEa0Edb9e0454346AEb8B5";
 export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const vPTweETH = "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1";
 export const COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
+export const INITIAL_SUPPLY = parseUnits("1.799618792392372642", 18);
 
 export const MOCK_PENDLE_PT_ORACLE = "0xF5B307640435D38A5A8eE8b6665d24Bb098F11db";
 export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
@@ -25,11 +26,7 @@ export const vip023 = () => {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
-        [
-          PTweETH,
-          [PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-          [true, false, false],
-        ],
+        [PTweETH, [PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
       ],
     },
     {
@@ -39,56 +36,54 @@ export const vip023 = () => {
     },
 
     // Add Market
-    // {
-    //   target: weETH,
-    //   signature: "faucet(uint256)",
-    //   params: ["5000000000000000000"],
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "transfer(address,uint256)",
-    //   params: [VTREASURY, "5000000000000000000"],
-    // },
-    // {
-    //   target: VTREASURY,
-    //   signature: "withdrawTreasuryToken(address,uint256,address)",
-    //   params: [weETH, "5000000000000000000", sepolia.NORMAL_TIMELOCK],
-    //   value: "0",
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [sepolia.POOL_REGISTRY, 0],
-    //   value: "0",
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [sepolia.POOL_REGISTRY, "5000000000000000000"],
-    //   value: "0",
-    // },
-    // {
-    //   target: vweETH,
-    //   signature: "setReduceReservesBlockDelta(uint256)",
-    //   params: ["7200"],
-    //   value: "0",
-    // },
-    // {
-    //   target: sepolia.POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       vweETH,
-    //       "900000000000000000",
-    //       "930000000000000000",
-    //       "5000000000000000000",
-    //       VTREASURY,
-    //       "7500000000000000000000",
-    //       "750000000000000000000",
-    //     ],
-    //   ],
-    //   value: "0",
-    // },
+    {
+      target: PTweETH,
+      signature: "faucet(uint256)",
+      params: [INITIAL_SUPPLY],
+    },
+    {
+      target: PTweETH,
+      signature: "transfer(address,uint256)",
+      params: [VTREASURY, INITIAL_SUPPLY],
+    },
+    {
+      target: VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [PTweETH, INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
+      value: "0",
+    },
+    {
+      target: PTweETH,
+      signature: "approve(address,uint256)",
+      params: [sepolia.POOL_REGISTRY, 0],
+      value: "0",
+    },
+    {
+      target: PTweETH,
+      signature: "approve(address,uint256)",
+      params: [sepolia.POOL_REGISTRY, INITIAL_SUPPLY],
+      value: "0",
+    },
+    {
+      target: vPTweETH,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: ["7200"],
+    },
+    {
+      target: "0x758f5715d817e02857Ba40889251201A5aE3E186",
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          vPTweETH,
+          "750000000000000000",
+          "800000000000000000",
+          INITIAL_SUPPLY,
+          VTREASURY,
+          "3750000000000000000000",
+          "375000000000000000000",
+        ],
+      ],
+    },
   ]);
 };
 
