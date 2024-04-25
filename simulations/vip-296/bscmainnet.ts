@@ -15,8 +15,8 @@ import {
   vCAKE,
   vUNI,
   vUSDT_GAMEFI,
-  vip295,
-} from "../../vips/vip-295/bscmainnet";
+  vip296,
+} from "../../vips/vip-296/bscmainnet";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
@@ -47,7 +47,7 @@ forking(38167059, () => {
     });
   });
 
-  testVip("VIP-295 Update Supply and Borrow Cap", vip295(), {
+  testVip("VIP-296 Update Supply and Borrow Cap", vip296(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [3, 1]);
     },
