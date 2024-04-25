@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR, vip019, vweETH } from "../../../proposals/sepolia/vip-019";
+import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR, vip023, vweETH } from "../../../proposals/sepolia/vip-023";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
 forking(5760823, () => {
@@ -15,7 +15,7 @@ forking(5760823, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip019());
+      await pretendExecutingVip(vip023());
     });
 
     it("check last reward block", async () => {
