@@ -11,7 +11,7 @@ const CHAINLINK_STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours
 
 export const TUSD = "0x0000000000085d4780B73119b644AE5ecd22b376";
 export const vTUSD = "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b";
-export const INITIAL_SUPPLY = parseUnits("1000000", 18);
+export const INITIAL_SUPPLY = parseUnits("5000", 18);
 export const REDUCE_RESERVE_BLOCK = 7200;
 export const CF = parseUnits("0.75", 18);
 export const LT = parseUnits("0.77", 18);

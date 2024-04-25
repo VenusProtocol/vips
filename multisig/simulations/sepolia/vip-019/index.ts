@@ -65,7 +65,7 @@ forking(5744100, () => {
       expect(await vtusd.owner()).to.equal(sepolia.GUARDIAN);
     });
     it("check supply of Vtreasury", async () => {
-      expect(await vtusd.balanceOf(sepolia.VTREASURY)).to.equal(parseUnits("1000000", 8));
+      expect(await vtusd.balanceOf(sepolia.VTREASURY)).to.equal(parseUnits("5000", 8));
     });
 
     it("check borrow and supply caps", async () => {

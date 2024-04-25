@@ -8,7 +8,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 
 export const TUSD = "0x78b292069da1661b7C12B6E766cB506C220b987a";
 export const vTUSD = "0xE23A1fC1545F1b072308c846a38447b23d322Ee2";
-export const INITIAL_SUPPLY = parseUnits("1000000", 18);
+export const INITIAL_SUPPLY = parseUnits("5000", 18);
 export const REDUCE_RESERVE_BLOCK = 7200;
 export const CF = parseUnits("0.75", 18);
 export const LT = parseUnits("0.77", 18);
