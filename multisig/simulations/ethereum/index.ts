@@ -14,4 +14,7 @@ import "./vip-016";
 import "./vip-018";
 import "./vip-019";
 import "./vip-020";
+import "./vip-021";
+import "./vip-022";
+import "./vip-023";
 import "./vip-024";
