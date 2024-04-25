@@ -4,10 +4,13 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { makeProposal } from "../../../../src/utils";
 
-const { sepolia } = NETWORK_ADDRESSES;
+const { ethereum } = NETWORK_ADDRESSES;
 
-export const TUSD = "0x78b292069da1661b7C12B6E766cB506C220b987a";
-export const vTUSD = "0xE23A1fC1545F1b072308c846a38447b23d322Ee2";
+export const CHAINLINK_TUSD_FEED = "0xec746eCF986E2927Abd291a2A1716c940100f8Ba";
+const CHAINLINK_STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours
+
+export const TUSD = "0x0000000000085d4780B73119b644AE5ecd22b376";
+export const vTUSD = "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b";
 export const INITIAL_SUPPLY = parseUnits("5000", 18);
 export const REDUCE_RESERVE_BLOCK = 7200;
 export const CF = parseUnits("0.75", 18);
@@ -15,33 +18,22 @@ export const LT = parseUnits("0.77", 18);
 export const SUPPLY_CAP = parseUnits("2000000", 18);
 export const BORROW_CAP = parseUnits("1800000", 18);
 
-const vip019 = () => {
+const vip024 = () => {
   return makeProposal([
     {
-      target: TUSD,
-      signature: "faucet(uint256)",
-      params: [INITIAL_SUPPLY],
-    },
-    {
-      target: TUSD,
-      signature: "transfer(address,uint256)",
-      params: [sepolia.VTREASURY, INITIAL_SUPPLY],
-    },
-
-    {
-      target: sepolia.VTREASURY,
+      target: ethereum.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [TUSD, INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
+      params: [TUSD, INITIAL_SUPPLY, ethereum.NORMAL_TIMELOCK],
     },
     {
       target: TUSD,
       signature: "approve(address,uint256)",
-      params: [sepolia.POOL_REGISTRY, 0],
+      params: [ethereum.POOL_REGISTRY, 0],
     },
     {
       target: TUSD,
       signature: "approve(address,uint256)",
-      params: [sepolia.POOL_REGISTRY, INITIAL_SUPPLY],
+      params: [ethereum.POOL_REGISTRY, INITIAL_SUPPLY],
     },
     {
       target: vTUSD,
@@ -49,27 +41,27 @@ const vip019 = () => {
       params: [REDUCE_RESERVE_BLOCK],
     },
     {
-      target: sepolia.CHAINLINK_ORACLE,
-      signature: "setDirectPrice(address,uint256)",
-      params: [TUSD, parseUnits("1", 18)],
+      target: ethereum.CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[TUSD, CHAINLINK_TUSD_FEED, CHAINLINK_STALE_PERIOD_26H]],
     },
     {
-      target: sepolia.RESILIENT_ORACLE,
+      target: ethereum.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
           TUSD,
-          [sepolia.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+          [ethereum.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
           [true, false, false],
         ],
       ],
     },
     {
-      target: sepolia.POOL_REGISTRY,
+      target: ethereum.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [[vTUSD, CF, LT, INITIAL_SUPPLY, sepolia.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
+      params: [[vTUSD, CF, LT, INITIAL_SUPPLY, ethereum.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
     },
   ]);
 };
 
-export default vip019;
+export default vip024;

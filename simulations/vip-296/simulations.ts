@@ -7,7 +7,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { COMMUNITY_WALLET, USDT, vip291 } from "../../vips/vip-291/bscmainnet";
+import { COMMUNITY_WALLET, USDT, vip296 } from "../../vips/vip-296/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 import USDT_ABI from "./abi/usdtAbi.json";
 
@@ -30,7 +30,7 @@ forking(38171617, () => {
     });
   });
 
-  testVip("VIP-291 Transfer USDT to Community wallet", vip291(), {
+  testVip("VIP-296 Transfer USDT to Community wallet", vip296(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

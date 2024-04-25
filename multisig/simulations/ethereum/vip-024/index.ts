@@ -8,8 +8,8 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip021 from "../../../proposals/ethereum/vip-021";
-import { BORROW_CAP, SUPPLY_CAP, TUSD, vTUSD } from "../../../proposals/ethereum/vip-021";
+import vip024 from "../../../proposals/ethereum/vip-024";
+import { BORROW_CAP, SUPPLY_CAP, TUSD, vTUSD } from "../../../proposals/ethereum/vip-024";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistryAbi.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracleAbi.json";
@@ -45,7 +45,7 @@ forking(19732900, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip021());
+      await pretendExecutingVip(vip024());
     });
     it("check price", async () => {
       expect(await resilientOracle.getPrice(TUSD)).to.equals("1001575890000000000");
