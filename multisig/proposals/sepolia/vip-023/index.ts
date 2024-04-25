@@ -70,7 +70,7 @@ export const vip023 = () => {
       params: ["7200"],
     },
     {
-      target: "0x758f5715d817e02857Ba40889251201A5aE3E186",
+      target: sepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
         [
