@@ -1,9 +1,15 @@
+import { parseUnits } from "ethers/lib/utils";
+
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-const vip291 = () => {
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+
+export const vip291 = () => {
   const meta = {
     version: "v2",
     title: "VIP-291 Ethereum: add TUSD market to core pool",
@@ -16,14 +22,13 @@ const vip291 = () => {
   return makeProposal(
     [
       {
-        target: FAST_TRACK_TIMELOCK,
-        signature: "",
-        params: [],
-        value: "1",
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("5000", 18), COMMUNITY_WALLET],
       },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.REGULAR,
   );
 };
 
