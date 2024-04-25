@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip018 from "../../../proposals/opbnbtestnet/vip-018";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
 
-const XVS_VAULT_PROXY = "0xe4DE4460c93Af011DC0624bc7Ce4a2Bf40feE4ea";
+const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const XVS_ADDRESS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 const POOL_ID = 1;
 const MAPPING_STORAGE_SLOT = 18;
