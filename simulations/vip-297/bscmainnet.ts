@@ -24,8 +24,10 @@ import {
   REDEEM_USDT_AMOUNT,
   SKYNET,
   SKYNET_USDT_AMOUNT_DIRECT,
+  SKYNET_XVS_AMOUNT,
   USDC,
   USDT,
+  XVS,
   vip297,
 } from "../../vips/vip-297/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -34,9 +36,10 @@ import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38201134, () => {
+forking(38205248, () => {
   let usdt: Contract;
   let usdc: Contract;
+  let xvs: Contract;
   let prevUSDCBalanceTreasury: BigNumber;
   let prevUSDTBalanceTreasury: BigNumber;
   let prevCertikBalance: BigNumber;
@@ -45,11 +48,13 @@ forking(38201134, () => {
   let prevFairyproofBalance: BigNumber;
   let prevChaosLabsBalance: BigNumber;
   let prevCommunityWalletBalance: BigNumber;
-  let prevSkynetBalance: BigNumber;
+  let prevSkynetUSDTBalance: BigNumber;
+  let prevSkynetXVSBalance: BigNumber;
 
   before(async () => {
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
+    xvs = await ethers.getContractAt(ERC20_ABI, XVS);
     prevUSDTBalanceTreasury = await usdt.balanceOf(bscmainnet.VTREASURY);
     prevUSDCBalanceTreasury = await usdc.balanceOf(bscmainnet.VTREASURY);
     prevCertikBalance = await usdt.balanceOf(CERTIK);
@@ -57,8 +62,9 @@ forking(38201134, () => {
     prevPessimisticBalance = await usdt.balanceOf(PESSIMISTIC);
     prevFairyproofBalance = await usdt.balanceOf(FAIRYPROOF);
     prevChaosLabsBalance = await usdc.balanceOf(CHAOS_LABS);
-    prevCommunityWalletBalance = await usdt.balanceOf(COMMUNITY_WALLET);
-    prevSkynetBalance = await usdt.balanceOf(SKYNET);
+    prevCommunityWalletBalance = await usdc.balanceOf(COMMUNITY_WALLET);
+    prevSkynetUSDTBalance = await usdt.balanceOf(SKYNET);
+    prevSkynetXVSBalance = await xvs.balanceOf(SKYNET);
   });
 
   testVip("VIP-297", vip297(), {
@@ -75,11 +81,10 @@ forking(38201134, () => {
           .sub(CERTIK_AMOUNT)
           .sub(PESSIMISTIC_AMOUNT)
           .sub(FAIRYPROOF_AMOUNT)
-          .sub(COMMUNITY_WALLET_AMOUNT)
           .sub(SKYNET_USDT_AMOUNT_DIRECT),
       );
       expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(
-        prevUSDCBalanceTreasury.sub(QUANTSTAMP_AMOUNT).sub(CHAOS_LABS_AMOUNT),
+        prevUSDCBalanceTreasury.sub(QUANTSTAMP_AMOUNT).sub(CHAOS_LABS_AMOUNT).sub(COMMUNITY_WALLET_AMOUNT),
       );
     });
 
@@ -106,15 +111,19 @@ forking(38201134, () => {
       );
     });
 
-    it("check Community Wallet balance after execution", async () => {
-      expect(await usdt.balanceOf(COMMUNITY_WALLET)).to.equal(prevCommunityWalletBalance.add(COMMUNITY_WALLET_AMOUNT));
+    it("check Community Wallet USDC balance after execution", async () => {
+      expect(await usdc.balanceOf(COMMUNITY_WALLET)).to.equal(prevCommunityWalletBalance.add(COMMUNITY_WALLET_AMOUNT));
     });
 
-    it("check skynet balance after execution", async () => {
+    it("check skynet USDT balance after execution", async () => {
       expect(await usdt.balanceOf(SKYNET)).to.closeTo(
-        prevSkynetBalance.add(SKYNET_USDT_AMOUNT_DIRECT).add(REDEEM_USDT_AMOUNT),
+        prevSkynetUSDTBalance.add(SKYNET_USDT_AMOUNT_DIRECT).add(REDEEM_USDT_AMOUNT),
         parseUnits("600", 18),
       );
+    });
+
+    it("check skynet XVS balance after execution", async () => {
+      expect(await xvs.balanceOf(SKYNET)).to.equal(prevSkynetXVSBalance.add(SKYNET_XVS_AMOUNT));
     });
   });
 });
