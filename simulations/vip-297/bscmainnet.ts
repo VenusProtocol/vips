@@ -21,10 +21,10 @@ import {
   QUANTSTAMP_AMOUNT,
   USDC,
   USDT,
-  vip296,
-} from "../../vips/vip-296/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
+  vip297,
+} from "../../vips/vip-297/bscmainnet";
+import ERC20_ABI from "../vip-297/abi/ERC20.json";
+import VTREASURY_ABI from "../vip-297/abi/VTreasuryAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -53,7 +53,7 @@ forking(38195704, () => {
     prevCommunityWalletBalance = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-296", vip296(), {
+  testVip("VIP-297", vip297(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [6]);
     },
