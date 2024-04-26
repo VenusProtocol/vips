@@ -20,3 +20,4 @@ import "./vip-020";
 import "./vip-021";
 import "./vip-022";
 import "./vip-023";
+import "./vip-024";
