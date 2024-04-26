@@ -19,12 +19,14 @@ import {
   PESSIMISTIC_AMOUNT,
   QUANTSTAMP,
   QUANTSTAMP_AMOUNT,
+  SKYNET_USDT_AMOUNT_DIRECT,
   USDC,
   USDT,
   vip297,
 } from "../../vips/vip-297/bscmainnet";
-import ERC20_ABI from "../vip-297/abi/ERC20.json";
-import VTREASURY_ABI from "../vip-297/abi/VTreasuryAbi.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
+import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -55,7 +57,8 @@ forking(38195704, () => {
 
   testVip("VIP-297", vip297(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [6]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [8]);
+      await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
     },
   });
 
@@ -67,7 +70,8 @@ forking(38195704, () => {
           .sub(PESSIMISTIC_AMOUNT)
           .sub(FAIRYPROOF_AMOUNT)
           .sub(COMMUNITY_WALLET_AMOUNT)
-          .sub(CHAOS_LABS_AMOUNT),
+          .sub(CHAOS_LABS_AMOUNT)
+          .sub(SKYNET_USDT_AMOUNT_DIRECT),
       );
       expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(prevUSDCBalanceTreasury.sub(QUANTSTAMP_AMOUNT));
     });
