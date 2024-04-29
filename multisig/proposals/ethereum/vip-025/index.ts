@@ -7,7 +7,7 @@ export const vcrvUSD_CURVE = "0x2d499800239C4CD3012473Cb1EAE33562F0A6933";
 export const SUPPLY_CAP = parseUnits("5000000", 18);
 export const BORROW_CAP = parseUnits("4000000", 18);
 
-export const vip024 = () => {
+export const vip025 = () => {
   return makeProposal([
     {
       target: CURVE_COMPTROLLER,
@@ -22,4 +22,4 @@ export const vip024 = () => {
   ]);
 };
 
-export default vip024;
+export default vip025;

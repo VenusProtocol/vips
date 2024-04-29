@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { BORROW_CAP, CURVE_COMPTROLLER, SUPPLY_CAP, vcrvUSD_CURVE, vip024 } from "../../../proposals/ethereum/vip-024";
+import { BORROW_CAP, CURVE_COMPTROLLER, SUPPLY_CAP, vcrvUSD_CURVE, vip025 } from "../../../proposals/ethereum/vip-025";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
 forking(19732098, () => {
@@ -27,7 +27,7 @@ forking(19732098, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip024());
+      await pretendExecutingVip(vip025());
     });
     it("new borrow cap", async () => {
       const cap = await comptroller.borrowCaps(vcrvUSD_CURVE);
