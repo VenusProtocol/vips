@@ -6,6 +6,7 @@ import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip018 from "../../../proposals/opbnbtestnet/vip-018";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 
 const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const XVS_ADDRESS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
@@ -28,6 +29,7 @@ forking(27063104, async () => {
   describe("Post-VIP behavior", async () => {
     before(async () => {
       await pretendExecutingVip(vip018());
+      checkXVSVault();
     });
     it("Compare pending withdrawals state before and after upgrade", async () => {
       const pendingWithdrawalsAfter: BigNumber = await xvsVaultProxy.totalPendingWithdrawals(XVS_ADDRESS, POOL_ID);

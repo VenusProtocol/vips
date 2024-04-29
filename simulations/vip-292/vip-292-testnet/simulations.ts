@@ -7,13 +7,14 @@ import { forking, testVip } from "../../../src/vip-framework";
 import vip292 from "../../../vips/vip-292/bsctestnet";
 import XVSVaultProxy_ABI from "./abi/XVSVaultProxy_ABI.json";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
+import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const XVS_ADDRESS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const POOL_ID = 1;
 const MAPPING_STORAGE_SLOT = 18;
 
-forking(39714124, async () => {
+forking(39890700, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let pendingWithdrawalsBefore: BigNumber;
@@ -32,6 +33,7 @@ forking(39714124, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    checkXVSVault();
     it("Compare pending withdrawals state before and after upgrade", async () => {
       const pendingWithdrawalsAfter: BigNumber = await xvsVaultProxy.totalPendingWithdrawals(XVS_ADDRESS, POOL_ID);
       expect(pendingWithdrawalsBefore).to.equal(pendingWithdrawalsAfter);

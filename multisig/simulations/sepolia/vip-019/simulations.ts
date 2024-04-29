@@ -6,6 +6,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip019 from "../../../proposals/sepolia/vip-019";
 import { calculateMappingStorageSlot } from "./../../../../src/utils";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
+import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 
 const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const XVS_ADDRESS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
@@ -22,6 +23,7 @@ forking(5765590, async () => {
     const storageSlot = calculateMappingStorageSlot(XVS_ADDRESS, POOL_ID, MAPPING_STORAGE_SLOT);
     const value = await provider.getStorageAt(XVS_VAULT_PROXY, storageSlot);
     pendingWithdrawalsBefore = BigNumber.from(ethers.constants.HashZero === value ? 0 : utils.stripZeros(value));
+    checkXVSVault();
   });
 
   describe("Post-VIP behavior", async () => {
