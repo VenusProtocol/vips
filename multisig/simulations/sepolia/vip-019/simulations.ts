@@ -16,6 +16,8 @@ const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const XVS_ADDRESS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
+const NEW_XVS_IMPLEMENTATION = "0xA6814c7c8Da831214b5488e57d11b1a1071761c9";
+
 
 forking(5765590, async () => {
   const provider = ethers.provider;
@@ -36,6 +38,9 @@ forking(5765590, async () => {
       await pretendExecutingVip(vip019());
     });
     checkXVSVault();
+    it("Check implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
+    });
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
         await accessControlManager.hasPermission(
@@ -47,7 +52,6 @@ forking(5765590, async () => {
     });
     it("Compare pending withdrawals state before and after upgrade", async () => {
       const pendingWithdrawalsAfter: BigNumber = await xvsVaultProxy.totalPendingWithdrawals(XVS_ADDRESS, POOL_ID);
-      console.log(pendingWithdrawalsAfter);
       expect(pendingWithdrawalsBefore).to.equal(pendingWithdrawalsAfter);
     });
   });

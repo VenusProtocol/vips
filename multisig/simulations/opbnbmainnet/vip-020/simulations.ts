@@ -17,6 +17,7 @@ const XVS_VAULT_PROXY = "0x7dc969122450749A8B0777c0e324522d67737988";
 const XVS_ADDRESS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
+const NEW_XVS_IMPLEMENTATION = "0x5C0594564e6067AdF13a9A89e5f759Cb73C2E645";
 
 // NOTE: cannot find any pending rewards for XVS on this chain neither with PoolID = 0 or with PoolID = 1
 forking(22188379, async () => {
@@ -40,6 +41,9 @@ forking(22188379, async () => {
       const xvsVaultAdmin = await initMainnetUser(opbnbmainnet.NORMAL_TIMELOCK, parseEther("1"));
       await xvsVaultProxy.connect(xvsVaultAdmin).resume();
       checkXVSVault();
+    });
+    it("Check implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
     });
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(

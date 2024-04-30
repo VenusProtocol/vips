@@ -19,6 +19,7 @@ const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const XVS_ADDRESS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const POOL_ID = 1;
 const MAPPING_STORAGE_SLOT = 18;
+const NEW_XVS_IMPLEMENTATION = "0x1D29d396c75d309baa90fBc57c0B70E156c49f04";
 
 forking(39890700, async () => {
   const provider = ethers.provider;
@@ -43,6 +44,9 @@ forking(39890700, async () => {
 
   describe("Post-VIP behavior", async () => {
     checkXVSVault();
+    it("Check implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
+    });
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
         await accessControlManager.isAllowedToCall(

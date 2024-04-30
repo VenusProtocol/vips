@@ -17,6 +17,7 @@ const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const XVS_ADDRESS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 const POOL_ID = 1;
 const MAPPING_STORAGE_SLOT = 18;
+const NEW_XVS_IMPLEMENTATION = "0xe4DE4460c93Af011DC0624bc7Ce4a2Bf40feE4ea";
 
 // NOTE: cannot find any pending rewards for XVS on this chain neither with PoolID = 0 or with PoolID = 1
 forking(27063104, async () => {
@@ -37,6 +38,9 @@ forking(27063104, async () => {
     before(async () => {
       await pretendExecutingVip(vip018());
       checkXVSVault();
+    });
+    it("Check implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
     });
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
