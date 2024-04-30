@@ -28,7 +28,7 @@ forking(39020341, () => {
       vToken: VUSDT_CORE,
       borrowSpeed: "2893",
       supplySpeed: "2893",
-      totalRewardsToDistribute: parseUnits("500", 6),
+      totalRewardsToDistribute: parseUnits("365000", 6),
     };
     checkRewardsDistributor("RewardsDistributor_Core_0_USDT", usdtRewardsDistributorConfig);
   });

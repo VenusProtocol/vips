@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../../src/networkAddresses";
 import { makeProposal } from "../../../../src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
@@ -18,26 +17,18 @@ const vip008 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [
-        ethers.constants.AddressZero,
-        "setLastRewardingBlocks(address[],uint32[],uint32[])",
-        arbitrumsepolia.NORMAL_TIMELOCK,
-      ],
+      params: [ZERO_ADDRESS, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumsepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumsepolia.NORMAL_TIMELOCK],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
-        ethers.constants.AddressZero,
-        "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        arbitrumsepolia.NORMAL_TIMELOCK,
-      ],
-    },
-    {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [
-        ethers.constants.AddressZero,
+        ZERO_ADDRESS,
         "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
         arbitrumsepolia.NORMAL_TIMELOCK,
       ],
@@ -46,7 +37,7 @@ const vip008 = () => {
     {
       target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDT, parseUnits("500", 6), REWARD_DISTRIBUTOR_CORE_0],
+      params: [USDT, parseUnits("365000", 6), REWARD_DISTRIBUTOR_CORE_0],
     },
     { target: REWARD_DISTRIBUTOR_CORE_0, signature: "acceptOwnership()", params: [] },
     {
