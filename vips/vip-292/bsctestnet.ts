@@ -1,8 +1,13 @@
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+const { bsctestnet } = NETWORK_ADDRESSES;
+
+const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const NEW_XVS_IMPLEMENTATION = "0x1D29d396c75d309baa90fBc57c0B70E156c49f04";
+const BNB_BLOCKS_PER_YEAR = 10_512_000; // assuming a block is mined every 3 seconds
 
 const vip292 = () => {
   const meta = {
@@ -25,6 +30,16 @@ const vip292 = () => {
         target: NEW_XVS_IMPLEMENTATION,
         signature: "_become(address)",
         params: [XVS_VAULT_PROXY],
+      },
+      {
+        target: XVS_VAULT_PROXY,
+        signature: "initializeTimeManager(bool,uint256)",
+        params: [false, BNB_BLOCKS_PER_YEAR],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", bsctestnet.NORMAL_TIMELOCK],
       },
     ],
     meta,
