@@ -13,7 +13,7 @@ import vip009, {
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
 import XVS_ABI from "./abi/xvs.json";
 
-forking(39376217, () => {
+forking(39472113, () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
   let xvs: Contract;
