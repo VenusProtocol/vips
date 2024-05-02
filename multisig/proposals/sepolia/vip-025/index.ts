@@ -78,32 +78,32 @@ export const vip025 = () => {
       ],
     },
     {
-      "target": FRAX,
-      "signature": "approve(address,uint256)",
-      "params": [
+      target: FRAX,
+      signature: "approve(address,uint256)",
+      params: [
         sepolia.POOL_REGISTRY,
         0
       ],
     },
     {
-      "target": FRAX,
-      "signature": "approve(address,uint256)",
-      "params": [
+      target: FRAX,
+      signature: "approve(address,uint256)",
+      params: [
         sepolia.POOL_REGISTRY,
         FRAX_INITIAL_SUPPLY
       ],
     },
     {
-      "target": vFRAX,
-      "signature": "setReduceReservesBlockDelta(uint256)",
-      "params": [
+      target: vFRAX,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: [
         "7200"
       ],
     },
     {
-      "target": sepolia.POOL_REGISTRY,
-      "signature": "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      "params": [
+      target: sepolia.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
         [
           vFRAX,
           "750000000000000000",
@@ -137,32 +137,32 @@ export const vip025 = () => {
       ],
     },
     {
-      "target": sFRAX,
-      "signature": "approve(address,uint256)",
-      "params": [
+      target: sFRAX,
+      signature: "approve(address,uint256)",
+      params: [
         sepolia.POOL_REGISTRY,
         0
       ],
     },
     {
-      "target": sFRAX,
-      "signature": "approve(address,uint256)",
-      "params": [
+      target: sFRAX,
+      signature: "approve(address,uint256)",
+      params: [
         sepolia.POOL_REGISTRY,
         sFRAX_INITIAL_SUPPLY
       ],
     },
     {
-      "target": vsFRAX,
-      "signature": "setReduceReservesBlockDelta(uint256)",
-      "params": [
+      target: vsFRAX,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: [
         "7200"
       ],
     },
     {
-      "target": sepolia.POOL_REGISTRY,
-      "signature": "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      "params": [
+      target: sepolia.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
         [
           vsFRAX,
           "750000000000000000",
@@ -176,22 +176,32 @@ export const vip025 = () => {
     },
 
     // Add FRAX Market Rewards
+    // {
+    //   target: XVS,
+    //   signature: "setMintCap(address,uint256)",
+    //   params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
+    // },
+    // {
+    //   target: XVS,
+    //   signature: "mint(address,uint256)",
+    //   params: [REWARDS_DISTRIBUTOR_vFRAX, XVS_REWARD_TRANSFER],
+    // },
     {
-      "target": REWARDS_DISTRIBUTOR_vFRAX,
-      "signature": "acceptOwnership()",
-      "params": [],
+      target: REWARDS_DISTRIBUTOR_vFRAX,
+      signature: "acceptOwnership()",
+      params: [],
     },
     {
-      "target": COMPTROLLER,
-      "signature": "addRewardsDistributor(address)",
-      "params": [
+      target: COMPTROLLER,
+      signature: "addRewardsDistributor(address)",
+      params: [
         REWARDS_DISTRIBUTOR_vFRAX
       ],
     },
     {
-      "target": REWARDS_DISTRIBUTOR_vFRAX,
-      "signature": "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      "params": [
+      target: REWARDS_DISTRIBUTOR_vFRAX,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [
         [
           vFRAX
         ],
@@ -205,22 +215,32 @@ export const vip025 = () => {
     },
 
     // Add sFRAX Market Rewards
+    // {
+    //   target: XVS,
+    //   signature: "setMintCap(address,uint256)",
+    //   params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
+    // },
+    // {
+    //   target: XVS,
+    //   signature: "mint(address,uint256)",
+    //   params: [REWARDS_DISTRIBUTOR_vsFRAX, XVS_REWARD_TRANSFER],
+    // },
     {
-      "target": REWARDS_DISTRIBUTOR_vsFRAX,
-      "signature": "acceptOwnership()",
-      "params": [],
+      target: REWARDS_DISTRIBUTOR_vsFRAX,
+      signature: "acceptOwnership()",
+      params: [],
     },
     {
-      "target": COMPTROLLER,
-      "signature": "addRewardsDistributor(address)",
-      "params": [
+      target: COMPTROLLER,
+      signature: "addRewardsDistributor(address)",
+      params: [
         REWARDS_DISTRIBUTOR_vsFRAX
       ],
     },
     {
-      "target": REWARDS_DISTRIBUTOR_vsFRAX,
-      "signature": "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      "params": [
+      target: REWARDS_DISTRIBUTOR_vsFRAX,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [
         [
           vsFRAX
         ],
