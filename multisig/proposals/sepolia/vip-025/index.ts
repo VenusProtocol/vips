@@ -10,6 +10,7 @@ export const sFRAXOracle = "0x163cA9Eb6340643154F8691C5DAd3aC844266717";
 export const sFRAX = "0xd85FfECdB4287587BC53c1934D548bF7480F11C4";
 export const FRAX = "0x10630d59848547c9F59538E2d8963D63B912C075";
 export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
 export const vFRAX = "0x33942B932159A67E3274f54bC4082cbA4A704340";
 export const vsFRAX = "0x18995825f033F33fa30CF59c117aD21ff6BdB48c";
@@ -176,16 +177,25 @@ export const vip025 = () => {
     },
 
     // Add FRAX Market Rewards
-    // {
-    //   target: XVS,
-    //   signature: "setMintCap(address,uint256)",
-    //   params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
-    // },
-    // {
-    //   target: XVS,
-    //   signature: "mint(address,uint256)",
-    //   params: [REWARDS_DISTRIBUTOR_vFRAX, XVS_REWARD_TRANSFER],
-    // },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [
+        XVS,
+        "mint(address,uint256)",
+        sepolia.NORMAL_TIMELOCK
+      ],
+    },
+    {
+      target: XVS,
+      signature: "setMintCap(address,uint256)",
+      params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
+    },
+    {
+      target: XVS,
+      signature: "mint(address,uint256)",
+      params: [REWARDS_DISTRIBUTOR_vFRAX, XVS_REWARD_TRANSFER],
+    },
     {
       target: REWARDS_DISTRIBUTOR_vFRAX,
       signature: "acceptOwnership()",
