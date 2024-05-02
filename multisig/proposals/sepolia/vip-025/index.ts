@@ -11,18 +11,19 @@ export const sFRAX = "0xd85FfECdB4287587BC53c1934D548bF7480F11C4";
 export const FRAX = "0x10630d59848547c9F59538E2d8963D63B912C075";
 export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 
-// export const vweETH = "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b";
-// export const REWARDS_DISTRIBUTOR = "0x92e8E3C202093A495e98C10f9fcaa5Abe288F74A";
-// export const COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
-// export const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
+export const vFRAX = "0x33942B932159A67E3274f54bC4082cbA4A704340";
+export const vsFRAX = "0x18995825f033F33fa30CF59c117aD21ff6BdB48c";
+export const REWARDS_DISTRIBUTOR_vFRAX = "0xE165caf9ecBB8bf6A63EFf3d71A0A4516e516567";
+export const REWARDS_DISTRIBUTOR_vsFRAX = "0x912c97B168286F550fd7b9588b2069319F1C88a2";
+export const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 
 export const FRAX_PRICE = parseUnits("1", 18);
 export const SFRAX_TO_FRAX_RATE = parseUnits("1.041208475916013035", 18);
 
-// export const CHAINLINK_STALE_PERIOD = "86400";
-// export const AMOUNT_FOR_SHARE = parseUnits("1.035397719468640492", 18);
-// export const REWARD_SPEED = "23148";
-// export const USDC_REWARD_TRANSFER = parseUnits("5000", 6);
+export const XVS_REWARD_TRANSFER = parseUnits("2400", 18);
+export const FRAX_INITIAL_SUPPLY = parseUnits("5000", 18);
+export const sFRAX_INITIAL_SUPPLY = parseUnits("4800", 18);
 
 export const vip025 = () => {
   return makeProposal([
@@ -56,85 +57,181 @@ export const vip025 = () => {
       params: [SFRAX_TO_FRAX_RATE],
     },
 
-    // Add Market
-    // {
-    //   target: weETH,
-    //   signature: "faucet(uint256)",
-    //   params: ["5000000000000000000"],
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "transfer(address,uint256)",
-    //   params: [VTREASURY, "5000000000000000000"],
-    // },
-    // {
-    //   target: VTREASURY,
-    //   signature: "withdrawTreasuryToken(address,uint256,address)",
-    //   params: [weETH, "5000000000000000000", sepolia.NORMAL_TIMELOCK],
-    //   value: "0",
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [sepolia.POOL_REGISTRY, 0],
-    //   value: "0",
-    // },
-    // {
-    //   target: weETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [sepolia.POOL_REGISTRY, "5000000000000000000"],
-    //   value: "0",
-    // },
-    // {
-    //   target: vweETH,
-    //   signature: "setReduceReservesBlockDelta(uint256)",
-    //   params: ["7200"],
-    //   value: "0",
-    // },
-    // {
-    //   target: sepolia.POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       vweETH,
-    //       "900000000000000000",
-    //       "930000000000000000",
-    //       "5000000000000000000",
-    //       VTREASURY,
-    //       "7500000000000000000000",
-    //       "750000000000000000000",
-    //     ],
-    //   ],
-    //   value: "0",
-    // },
+    // Add FRAX Market
+    {
+      target: FRAX,
+      signature: "faucet(uint256)",
+      params: [FRAX_INITIAL_SUPPLY],
+    },
+    {
+      target: FRAX,
+      signature: "transfer(address,uint256)",
+      params: [VTREASURY, FRAX_INITIAL_SUPPLY],
+    },
+    {
+      target: VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [
+        FRAX,
+        FRAX_INITIAL_SUPPLY,
+        sepolia.NORMAL_TIMELOCK
+      ],
+    },
+    {
+      "target": FRAX,
+      "signature": "approve(address,uint256)",
+      "params": [
+        sepolia.POOL_REGISTRY,
+        0
+      ],
+    },
+    {
+      "target": FRAX,
+      "signature": "approve(address,uint256)",
+      "params": [
+        sepolia.POOL_REGISTRY,
+        FRAX_INITIAL_SUPPLY
+      ],
+    },
+    {
+      "target": vFRAX,
+      "signature": "setReduceReservesBlockDelta(uint256)",
+      "params": [
+        "7200"
+      ],
+    },
+    {
+      "target": sepolia.POOL_REGISTRY,
+      "signature": "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      "params": [
+        [
+          vFRAX,
+          "750000000000000000",
+          "800000000000000000",
+          "5000000000000000000000",
+          VTREASURY,
+          "10000000000000000000000000",
+          "8000000000000000000000000"
+        ]
+      ],
+    },    
 
-    // // Add Rewards
-    // {
-    //   target: REWARDS_DISTRIBUTOR,
-    //   signature: "acceptOwnership()",
-    //   params: [],
-    // },
-    // {
-    //   target: COMPTROLLER,
-    //   signature: "addRewardsDistributor(address)",
-    //   params: [REWARDS_DISTRIBUTOR],
-    // },
-    // {
-    //   target: REWARDS_DISTRIBUTOR,
-    //   signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-    //   params: [[vweETH], [REWARD_SPEED], ["0"]],
-    //   value: "0",
-    // },
-    // {
-    //   target: USDC,
-    //   signature: "faucet(uint256)",
-    //   params: [USDC_REWARD_TRANSFER],
-    // },
-    // {
-    //   target: USDC,
-    //   signature: "transfer(address,uint256)",
-    //   params: [REWARDS_DISTRIBUTOR, USDC_REWARD_TRANSFER],
-    // },
+    // Add sFRAX Market
+    {
+      target: sFRAX,
+      signature: "faucet(uint256)",
+      params: [sFRAX_INITIAL_SUPPLY],
+    },
+    {
+      target: sFRAX,
+      signature: "transfer(address,uint256)",
+      params: [VTREASURY, sFRAX_INITIAL_SUPPLY],
+    },
+    {
+      target: VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [
+        sFRAX,
+        sFRAX_INITIAL_SUPPLY,
+        sepolia.NORMAL_TIMELOCK
+      ],
+    },
+    {
+      "target": sFRAX,
+      "signature": "approve(address,uint256)",
+      "params": [
+        sepolia.POOL_REGISTRY,
+        0
+      ],
+    },
+    {
+      "target": sFRAX,
+      "signature": "approve(address,uint256)",
+      "params": [
+        sepolia.POOL_REGISTRY,
+        sFRAX_INITIAL_SUPPLY
+      ],
+    },
+    {
+      "target": vsFRAX,
+      "signature": "setReduceReservesBlockDelta(uint256)",
+      "params": [
+        "7200"
+      ],
+    },
+    {
+      "target": sepolia.POOL_REGISTRY,
+      "signature": "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      "params": [
+        [
+          vsFRAX,
+          "750000000000000000",
+          "800000000000000000",
+          "4800000000000000000000",
+          VTREASURY,
+          "10000000000000000000000000",
+          "1000000000000000000000000"
+        ]
+      ],
+    },
+
+    // Add FRAX Market Rewards
+    {
+      "target": REWARDS_DISTRIBUTOR_vFRAX,
+      "signature": "acceptOwnership()",
+      "params": [],
+    },
+    {
+      "target": COMPTROLLER,
+      "signature": "addRewardsDistributor(address)",
+      "params": [
+        REWARDS_DISTRIBUTOR_vFRAX
+      ],
+    },
+    {
+      "target": REWARDS_DISTRIBUTOR_vFRAX,
+      "signature": "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      "params": [
+        [
+          vFRAX
+        ],
+        [
+          "1481481481481481"
+        ],
+        [
+          "2222222222222222"
+        ]
+      ],
+    },
+
+    // Add sFRAX Market Rewards
+    {
+      "target": REWARDS_DISTRIBUTOR_vsFRAX,
+      "signature": "acceptOwnership()",
+      "params": [],
+    },
+    {
+      "target": COMPTROLLER,
+      "signature": "addRewardsDistributor(address)",
+      "params": [
+        REWARDS_DISTRIBUTOR_vsFRAX
+      ],
+    },
+    {
+      "target": REWARDS_DISTRIBUTOR_vsFRAX,
+      "signature": "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      "params": [
+        [
+          vsFRAX
+        ],
+        [
+          "2222222222222222"
+        ],
+        [
+          "1481481481481481"
+        ]
+      ],
+    },
   ]);
 };
 

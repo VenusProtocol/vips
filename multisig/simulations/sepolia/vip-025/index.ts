@@ -19,7 +19,6 @@ import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
-const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
 forking(5821158, () => {
   let resilientOracle: Contract;
