@@ -10,15 +10,18 @@ export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const vip300 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-300 Update supply and borrow caps",
-    description: `#### Summary
-      This VIP will update supply and borrow caps of following markets
-      FDUSD(Core) : 
-        supply cap to  40,000,000, 
-        borrow cap to 34,000,000
-      FIL(Core) : 
-        supply cap to 1,200,000
- `,
+    title: "VIP-300 Risk Parameters Adjustments (FDUSD, FIL)",
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Chaos Labs - Risk Parameter Updates - 04/30/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-04-30-24/4306).
+
+- [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba)
+    - Increase supply cap, from 30M to 40M FDUSD
+    - Increase borrow cap, from 24M to 34M FDUSD
+- [FIL (Core pool)](https://bscscan.com/address/0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343)
+    - Increase supply cap, from 908,500 to 1.2M FIL
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/276](https://github.com/VenusProtocol/vips/pull/276)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -42,7 +45,7 @@ export const vip300 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
