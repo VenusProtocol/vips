@@ -72,34 +72,22 @@ export const vip025 = () => {
     {
       target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [
-        FRAX,
-        FRAX_INITIAL_SUPPLY,
-        sepolia.NORMAL_TIMELOCK
-      ],
+      params: [FRAX, FRAX_INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
     },
     {
       target: FRAX,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        0
-      ],
+      params: [sepolia.POOL_REGISTRY, 0],
     },
     {
       target: FRAX,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        FRAX_INITIAL_SUPPLY
-      ],
+      params: [sepolia.POOL_REGISTRY, FRAX_INITIAL_SUPPLY],
     },
     {
       target: vFRAX,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: [
-        "7200"
-      ],
+      params: ["7200"],
     },
     {
       target: sepolia.POOL_REGISTRY,
@@ -112,10 +100,10 @@ export const vip025 = () => {
           "5000000000000000000000",
           VTREASURY,
           "10000000000000000000000000",
-          "8000000000000000000000000"
-        ]
+          "8000000000000000000000000",
+        ],
       ],
-    },    
+    },
 
     // Add sFRAX Market
     {
@@ -131,34 +119,22 @@ export const vip025 = () => {
     {
       target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [
-        sFRAX,
-        sFRAX_INITIAL_SUPPLY,
-        sepolia.NORMAL_TIMELOCK
-      ],
+      params: [sFRAX, sFRAX_INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
     },
     {
       target: sFRAX,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        0
-      ],
+      params: [sepolia.POOL_REGISTRY, 0],
     },
     {
       target: sFRAX,
       signature: "approve(address,uint256)",
-      params: [
-        sepolia.POOL_REGISTRY,
-        sFRAX_INITIAL_SUPPLY
-      ],
+      params: [sepolia.POOL_REGISTRY, sFRAX_INITIAL_SUPPLY],
     },
     {
       target: vsFRAX,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: [
-        "7200"
-      ],
+      params: ["7200"],
     },
     {
       target: sepolia.POOL_REGISTRY,
@@ -171,32 +147,13 @@ export const vip025 = () => {
           "4800000000000000000000",
           VTREASURY,
           "10000000000000000000000000",
-          "1000000000000000000000000"
-        ]
+          "1000000000000000000000000",
+        ],
       ],
     },
 
     // Add FRAX Market Rewards
     {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [
-        XVS,
-        "mint(address,uint256)",
-        sepolia.NORMAL_TIMELOCK
-      ],
-    },
-    {
-      target: XVS,
-      signature: "setMintCap(address,uint256)",
-      params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
-    },
-    {
-      target: XVS,
-      signature: "mint(address,uint256)",
-      params: [REWARDS_DISTRIBUTOR_vFRAX, XVS_REWARD_TRANSFER],
-    },
-    {
       target: REWARDS_DISTRIBUTOR_vFRAX,
       signature: "acceptOwnership()",
       params: [],
@@ -204,37 +161,20 @@ export const vip025 = () => {
     {
       target: COMPTROLLER,
       signature: "addRewardsDistributor(address)",
-      params: [
-        REWARDS_DISTRIBUTOR_vFRAX
-      ],
+      params: [REWARDS_DISTRIBUTOR_vFRAX],
     },
     {
       target: REWARDS_DISTRIBUTOR_vFRAX,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [
-        [
-          vFRAX
-        ],
-        [
-          "1481481481481481"
-        ],
-        [
-          "2222222222222222"
-        ]
-      ],
+      params: [[vFRAX], ["1481481481481481"], ["2222222222222222"]],
+    },
+    {
+      target: VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_vFRAX],
     },
 
     // Add sFRAX Market Rewards
-    // {
-    //   target: XVS,
-    //   signature: "setMintCap(address,uint256)",
-    //   params: [sepolia.NORMAL_TIMELOCK, XVS_REWARD_TRANSFER],
-    // },
-    // {
-    //   target: XVS,
-    //   signature: "mint(address,uint256)",
-    //   params: [REWARDS_DISTRIBUTOR_vsFRAX, XVS_REWARD_TRANSFER],
-    // },
     {
       target: REWARDS_DISTRIBUTOR_vsFRAX,
       signature: "acceptOwnership()",
@@ -243,24 +183,17 @@ export const vip025 = () => {
     {
       target: COMPTROLLER,
       signature: "addRewardsDistributor(address)",
-      params: [
-        REWARDS_DISTRIBUTOR_vsFRAX
-      ],
+      params: [REWARDS_DISTRIBUTOR_vsFRAX],
     },
     {
       target: REWARDS_DISTRIBUTOR_vsFRAX,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [
-        [
-          vsFRAX
-        ],
-        [
-          "2222222222222222"
-        ],
-        [
-          "1481481481481481"
-        ]
-      ],
+      params: [[vsFRAX], ["2222222222222222"], ["1481481481481481"]],
+    },
+    {
+      target: VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_vsFRAX],
     },
   ]);
 };

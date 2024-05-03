@@ -6,17 +6,17 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
-  vip025,
-  FRAX,
-  sFRAX,
-  SFRAX_TO_FRAX_RATE,
-  vFRAX,
-  vsFRAX,
   COMPTROLLER,
+  FRAX,
   REWARDS_DISTRIBUTOR_vFRAX,
   REWARDS_DISTRIBUTOR_vsFRAX,
+  SFRAX_TO_FRAX_RATE,
   XVS,
-  XVS_REWARD_TRANSFER
+  XVS_REWARD_TRANSFER,
+  sFRAX,
+  vFRAX,
+  vip025,
+  vsFRAX,
 } from "../../../proposals/sepolia/vip-025";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -24,11 +24,10 @@ import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(5821158, () => {
+forking(5827248, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vFRAXContract: Contract;
@@ -39,8 +38,6 @@ forking(5821158, () => {
   let xvs: Contract;
 
   before(async () => {
-    impersonateAccount(sepolia.GUARDIAN);
-
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vFRAXContract = await ethers.getContractAt(VTOKEN_ABI, vFRAX);
@@ -48,7 +45,7 @@ forking(5821158, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
     rewardDistributorFrax = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_vFRAX);
     rewardDistributorSFrax = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_vsFRAX);
-    xvs = await ethers.getContractAt(ERC20_ABI, XVS, await ethers.getSigner(sepolia.GUARDIAN));
+    xvs = await ethers.getContractAt(ERC20_ABI, XVS);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -64,7 +61,6 @@ forking(5821158, () => {
   describe("Post-VIP behavior", async () => {
     before(async () => {
       await pretendExecutingVip(vip025());
-      await xvs.mint(rewardDistributorFrax.address, parseUnits("1", 18));
     });
 
     it("check FRAX price", async () => {
@@ -73,7 +69,7 @@ forking(5821158, () => {
 
     it("check sFRAX price", async () => {
       expect(await resilientOracle.getPrice(sFRAX)).to.equal(SFRAX_TO_FRAX_RATE);
-    })
+    });
 
     it("should have 10 markets in core pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
@@ -124,13 +120,13 @@ forking(5821158, () => {
       expect(await rewardDistributorSFrax.owner()).to.equal(sepolia.GUARDIAN);
     });
 
-    // it(`vFRAX rewards distributor should have balance`, async () => {
-    //   expect(await xvs.balanceOf(rewardDistributorFrax.address)).to.equal(XVS_REWARD_TRANSFER);
-    // });
+    it(`vFRAX rewards distributor should have balance`, async () => {
+      expect(await xvs.balanceOf(rewardDistributorFrax.address)).to.equal(XVS_REWARD_TRANSFER);
+    });
 
-    // it(`vsFRAX rewards distributor should have balance`, async () => {
-    //   expect(await xvs.balanceOf(rewardDistributorSFrax.address)).to.equal(XVS_REWARD_TRANSFER);
-    // });
+    it(`vsFRAX rewards distributor should have balance`, async () => {
+      expect(await xvs.balanceOf(rewardDistributorSFrax.address)).to.equal(XVS_REWARD_TRANSFER);
+    });
 
     it(`vFRAX rewards distributor should be registered in Comptroller`, async () => {
       expect(await comptroller.getRewardDistributors()).to.contain(rewardDistributorFrax.address);
