@@ -8,8 +8,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework/inde
 import {
   COMPTROLLER,
   FRAX,
-  REWARDS_DISTRIBUTOR_vFRAX,
-  REWARDS_DISTRIBUTOR_vsFRAX,
+  REWARDS_DISTRIBUTOR_XVS,
   SFRAX_TO_FRAX_RATE,
   XVS,
   XVS_REWARD_TRANSFER,
@@ -33,8 +32,7 @@ forking(5827248, () => {
   let vFRAXContract: Contract;
   let vsFRAXContract: Contract;
   let comptroller: Contract;
-  let rewardDistributorFrax: Contract;
-  let rewardDistributorSFrax: Contract;
+  let rewardDistributor: Contract;
   let xvs: Contract;
 
   before(async () => {
@@ -43,8 +41,7 @@ forking(5827248, () => {
     vFRAXContract = await ethers.getContractAt(VTOKEN_ABI, vFRAX);
     vsFRAXContract = await ethers.getContractAt(VTOKEN_ABI, vsFRAX);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
-    rewardDistributorFrax = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_vFRAX);
-    rewardDistributorSFrax = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_vsFRAX);
+    rewardDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_XVS);
     xvs = await ethers.getContractAt(ERC20_ABI, XVS);
   });
 
@@ -104,36 +101,12 @@ forking(5827248, () => {
       expect(await vsFRAXContract.totalSupply()).to.equal(expectedSupply);
     });
 
-    it("check vFRAX reward token", async () => {
-      expect(await rewardDistributorFrax.rewardToken()).to.equal(XVS);
+    it("check reward token", async () => {
+      expect(await rewardDistributor.rewardToken()).to.equal(XVS);
     });
 
-    it("check vsFRAX reward token", async () => {
-      expect(await rewardDistributorSFrax.rewardToken()).to.equal(XVS);
-    });
-
-    it("check vFRAX rewards distributor ownership", async () => {
-      expect(await rewardDistributorFrax.owner()).to.equal(sepolia.GUARDIAN);
-    });
-
-    it("check vsFRAX rewards distributor ownership", async () => {
-      expect(await rewardDistributorSFrax.owner()).to.equal(sepolia.GUARDIAN);
-    });
-
-    it(`vFRAX rewards distributor should have balance`, async () => {
-      expect(await xvs.balanceOf(rewardDistributorFrax.address)).to.equal(XVS_REWARD_TRANSFER);
-    });
-
-    it(`vsFRAX rewards distributor should have balance`, async () => {
-      expect(await xvs.balanceOf(rewardDistributorSFrax.address)).to.equal(XVS_REWARD_TRANSFER);
-    });
-
-    it(`vFRAX rewards distributor should be registered in Comptroller`, async () => {
-      expect(await comptroller.getRewardDistributors()).to.contain(rewardDistributorFrax.address);
-    });
-
-    it(`vsFRAX rewards distributor should be registered in Comptroller`, async () => {
-      expect(await comptroller.getRewardDistributors()).to.contain(rewardDistributorSFrax.address);
+    it(`rewards distributor should have balance`, async () => {
+      expect(await xvs.balanceOf(rewardDistributor.address)).to.gte(XVS_REWARD_TRANSFER);
     });
   });
 });

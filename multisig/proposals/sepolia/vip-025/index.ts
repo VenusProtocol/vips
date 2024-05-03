@@ -14,15 +14,14 @@ export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
 export const vFRAX = "0x33942B932159A67E3274f54bC4082cbA4A704340";
 export const vsFRAX = "0x18995825f033F33fa30CF59c117aD21ff6BdB48c";
-export const REWARDS_DISTRIBUTOR_vFRAX = "0xE165caf9ecBB8bf6A63EFf3d71A0A4516e516567";
-export const REWARDS_DISTRIBUTOR_vsFRAX = "0x912c97B168286F550fd7b9588b2069319F1C88a2";
+export const REWARDS_DISTRIBUTOR_XVS = "0xB60666395bEFeE02a28938b75ea620c7191cA77a";
 export const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 
 export const FRAX_PRICE = parseUnits("1", 18);
 export const SFRAX_TO_FRAX_RATE = parseUnits("1.041208475916013035", 18);
 
-export const XVS_REWARD_TRANSFER = parseUnits("2400", 18);
+export const XVS_REWARD_TRANSFER = parseUnits("4800", 18);
 export const FRAX_INITIAL_SUPPLY = parseUnits("5000", 18);
 export const sFRAX_INITIAL_SUPPLY = parseUnits("4800", 18);
 
@@ -152,48 +151,20 @@ export const vip025 = () => {
       ],
     },
 
-    // Add FRAX Market Rewards
+    // Add FRAX and sFrax Market Rewards
     {
-      target: REWARDS_DISTRIBUTOR_vFRAX,
-      signature: "acceptOwnership()",
-      params: [],
-    },
-    {
-      target: COMPTROLLER,
-      signature: "addRewardsDistributor(address)",
-      params: [REWARDS_DISTRIBUTOR_vFRAX],
-    },
-    {
-      target: REWARDS_DISTRIBUTOR_vFRAX,
+      target: REWARDS_DISTRIBUTOR_XVS,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[vFRAX], ["1481481481481481"], ["2222222222222222"]],
+      params: [
+        [vFRAX, vsFRAX],
+        ["1481481481481481", "2222222222222222"],
+        ["2222222222222222", "1481481481481481"],
+      ],
     },
     {
       target: VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_vFRAX],
-    },
-
-    // Add sFRAX Market Rewards
-    {
-      target: REWARDS_DISTRIBUTOR_vsFRAX,
-      signature: "acceptOwnership()",
-      params: [],
-    },
-    {
-      target: COMPTROLLER,
-      signature: "addRewardsDistributor(address)",
-      params: [REWARDS_DISTRIBUTOR_vsFRAX],
-    },
-    {
-      target: REWARDS_DISTRIBUTOR_vsFRAX,
-      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[vsFRAX], ["2222222222222222"], ["1481481481481481"]],
-    },
-    {
-      target: VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_vsFRAX],
+      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_XVS],
     },
   ]);
 };
