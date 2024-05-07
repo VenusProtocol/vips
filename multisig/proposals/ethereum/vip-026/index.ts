@@ -22,6 +22,7 @@ export const XVS_REWARD_TRANSFER = parseUnits("4800", 18);
 export const FRAX_INITIAL_SUPPLY = parseUnits("5000", 18);
 export const sFRAX_INITIAL_SUPPLY = parseUnits("4800", 18);
 export const CHAINLINK_FRAX_FEED = "0xB9E1E3A9feFf48998E45Fa90847ed4D467E8BcfD";
+export const VTOKEN_RECIEVER = "0x6e74053a3798e0fC9a9775F7995316b27f21c4D2";
 
 export const vip026 = () => {
   return makeProposal([
@@ -80,7 +81,7 @@ export const vip026 = () => {
           "750000000000000000",
           "800000000000000000",
           "5000000000000000000000",
-          VTREASURY,
+          VTOKEN_RECIEVER,
           "10000000000000000000000000",
           "8000000000000000000000000",
         ],
@@ -117,7 +118,7 @@ export const vip026 = () => {
           "750000000000000000",
           "800000000000000000",
           "4800000000000000000000",
-          VTREASURY,
+          VTOKEN_RECIEVER,
           "10000000000000000000000000",
           "1000000000000000000000000",
         ],
