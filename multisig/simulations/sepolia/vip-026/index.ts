@@ -17,14 +17,14 @@ import {
   COMPTROLLER,
   FRAX,
   REWARDS_DISTRIBUTOR_XVS,
-  VTOKEN_RECIEVER,
+  SFRAX_TO_FRAX_RATE,
   XVS,
   XVS_REWARD_TRANSFER,
   sFRAX,
   vFRAX,
   vip026,
   vsFRAX,
-} from "../../../proposals/ethereum/vip-026";
+} from "../../../proposals/sepolia/vip-026";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
@@ -32,7 +32,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { ethereum } = NETWORK_ADDRESSES;
+const { sepolia } = NETWORK_ADDRESSES;
 const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 
 interface RiskParameters {
@@ -42,6 +42,7 @@ interface RiskParameters {
   liquidationThreshold: string;
   reserveFactor: string;
   initialSupply: string;
+  vTokenReceiver: string;
 }
 
 const vFrax_riskParameters: RiskParameters = {
@@ -51,6 +52,7 @@ const vFrax_riskParameters: RiskParameters = {
   liquidationThreshold: "0.80",
   reserveFactor: "0.1",
   initialSupply: "5000",
+  vTokenReceiver: sepolia.VTREASURY,
 };
 
 const vsFrax_riskParameters: RiskParameters = {
@@ -60,6 +62,7 @@ const vsFrax_riskParameters: RiskParameters = {
   liquidationThreshold: "0.80",
   reserveFactor: "0.1",
   initialSupply: "4800",
+  vTokenReceiver: sepolia.VTREASURY,
 };
 
 interface InterestRateModelSpec {
@@ -86,7 +89,7 @@ const vsFrax_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(19812613, () => {
+forking(5827248, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vFRAXContract: Contract;
@@ -94,15 +97,19 @@ forking(19812613, () => {
   let comptroller: Contract;
   let rewardDistributor: Contract;
   let xvs: Contract;
+  let frax: Contract;
 
   before(async () => {
-    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
-    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
+    await impersonateAccount(sepolia.NORMAL_TIMELOCK);
+
+    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vFRAXContract = await ethers.getContractAt(VTOKEN_ABI, vFRAX);
     vsFRAXContract = await ethers.getContractAt(VTOKEN_ABI, vsFRAX);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
     rewardDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR_XVS);
     xvs = await ethers.getContractAt(ERC20_ABI, XVS);
+    frax = await ethers.getContractAt(ERC20_ABI, FRAX, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
   });
 
   describe("Pre-VIP behavior", () => {
@@ -121,16 +128,16 @@ forking(19812613, () => {
     });
 
     it("check FRAX price", async () => {
-      expect(await resilientOracle.getPrice(FRAX)).to.equal(parseUnits("0.99838881", 18));
+      expect(await resilientOracle.getPrice(FRAX)).to.equal(parseUnits("1", 18));
     });
 
     it("check sFRAX price", async () => {
-      expect(await resilientOracle.getPrice(sFRAX)).to.equal(parseUnits("1.041281810007921301", 18));
+      expect(await resilientOracle.getPrice(sFRAX)).to.equal(SFRAX_TO_FRAX_RATE);
     });
 
-    it("should have 9 markets in core pool", async () => {
+    it("should have 10 markets in core pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.have.lengthOf(9);
+      expect(poolVTokens).to.have.lengthOf(10);
     });
 
     it("should add vFRAX to the pool", async () => {
@@ -144,16 +151,16 @@ forking(19812613, () => {
     });
 
     it("check vFRAX ownership", async () => {
-      expect(await vFRAXContract.owner()).to.equal(ethereum.GUARDIAN);
+      expect(await vFRAXContract.owner()).to.equal(sepolia.GUARDIAN);
     });
 
     it("check vsFRAX ownership", async () => {
-      expect(await vsFRAXContract.owner()).to.equal(ethereum.GUARDIAN);
+      expect(await vsFRAXContract.owner()).to.equal(sepolia.GUARDIAN);
     });
 
     it("check vFRAX supply", async () => {
       const expectedSupply = parseUnits("5", 11);
-      expect(await vFRAXContract.balanceOf(VTOKEN_RECIEVER)).to.equal(expectedSupply);
+      expect(await vFRAXContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
 
     it("check vsFRAX supply", async () => {
@@ -240,11 +247,9 @@ forking(19812613, () => {
     });
 
     it("generic IL tests", async () => {
-      const FRAX_HOLDER = "0xcE6431D21E3fb1036CE9973a3312368ED96F5CE7";
-      await impersonateAccount(FRAX_HOLDER);
-
+      await frax.faucet(parseUnits("10000", 18));
       await checkIsolatedPoolsComptrollers({
-        [COMPTROLLER]: FRAX_HOLDER,
+        [COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
 
       await checkVToken(vFRAX, {
