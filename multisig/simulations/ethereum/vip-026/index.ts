@@ -17,6 +17,7 @@ import {
   COMPTROLLER,
   FRAX,
   REWARDS_DISTRIBUTOR_XVS,
+  VTOKEN_RECIEVER,
   XVS,
   XVS_REWARD_TRANSFER,
   sFRAX,
@@ -155,7 +156,7 @@ forking(19812613, () => {
 
     it("check vFRAX supply", async () => {
       const expectedSupply = parseUnits("5", 11);
-      expect(await vFRAXContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+      expect(await vFRAXContract.balanceOf(VTOKEN_RECIEVER)).to.equal(expectedSupply);
     });
 
     it("check vsFRAX supply", async () => {
