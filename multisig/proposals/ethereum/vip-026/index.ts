@@ -23,6 +23,7 @@ export const FRAX_INITIAL_SUPPLY = parseUnits("5000", 18);
 export const sFRAX_INITIAL_SUPPLY = parseUnits("4800", 18);
 export const CHAINLINK_FRAX_FEED = "0xB9E1E3A9feFf48998E45Fa90847ed4D467E8BcfD";
 export const VTOKEN_RECIEVER = "0x6e74053a3798e0fC9a9775F7995316b27f21c4D2";
+export const STALE_PERIOD_100M = 60 * 100; // 100 minutes (for pricefeeds with heartbeat of 1 hr)
 
 export const vip026 = () => {
   return makeProposal([
@@ -30,7 +31,7 @@ export const vip026 = () => {
     {
       target: ethereum.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[FRAX, CHAINLINK_FRAX_FEED, 3600]],
+      params: [[FRAX, CHAINLINK_FRAX_FEED, STALE_PERIOD_100M]],
     },
     {
       target: ethereum.RESILIENT_ORACLE,
