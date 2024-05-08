@@ -8,7 +8,7 @@ import { FORKED_NETWORK, ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal, SUPPORTED_NETWORKS } from "../types";
-import { getCalldatas, getPayload, initMainnetUser, setForkBlock } from "../utils";
+import { getCalldatas, getPayload, getSourceChainId, initMainnetUser, setForkBlock } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
@@ -173,11 +173,13 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
         ["address", "address"],
         [OMNICHAIN_PROPOSAL_SENDER, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
       );
-      const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(10102, srcAddress);
+      const srcChainId = getSourceChainId(FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet");
+      const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
+
       const tx = await executor
         .connect(impersonatedEndpoint)
         .lzReceive(
-          10102,
+          srcChainId,
           srcAddress,
           inboundNonce.add(1),
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),

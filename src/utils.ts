@@ -60,6 +60,16 @@ export async function setForkBlock(blockNumber: number) {
   });
 }
 
+export const getSourceChainId = async (network: "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet") => {
+  const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
+  const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
+  if (testnetNetworks.includes(network as string)) {
+    return 10102;
+  } else if (mainnetNetworks.includes(network as string)) {
+    return 102;
+  }
+};
+
 export const makePayload = (targets: any, values: any, signatures: any, calldatas: any, proposalType: ProposalType) => {
   const payload = ethers.utils.defaultAbiCoder.encode(
     ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
