@@ -26,11 +26,10 @@ const GENERIC_TEST_USER_ACCOUNT = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const XVS_ADMIN = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 
-forking(37059276, () => {
+forking(41798687, () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
-    let xvsVault: Contract;
     let xvs: Contract;
 
     before(async () => {
@@ -40,11 +39,6 @@ forking(37059276, () => {
 
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
-      xvsVault = await ethers.getContractAt(
-        XVS_VAULT_ABI,
-        XVS_VAULT_PROXY,
-        await ethers.getSigner(arbitrumsepolia.NORMAL_TIMELOCK),
-      );
       xvs = await ethers.getContractAt(XVS_ABI, XVS, await ethers.getSigner(XVS_ADMIN));
 
       const accounts = await ethers.getSigners();
@@ -72,10 +66,6 @@ forking(37059276, () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
     });
-
-    it("xvs vault is paused", async () => {
-      expect(await xvsVault.vaultPaused()).to.be.equal(true);
-    });
   });
 
   describe("Post-VIP behavior", async () => {
@@ -95,8 +85,6 @@ forking(37059276, () => {
         await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT),
       );
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, await ethers.getSigner(GENERIC_TEST_USER_ACCOUNT));
-      const impersonateTimelock = await ethers.getSigner(arbitrumsepolia.NORMAL_TIMELOCK);
-      await xvsVault.connect(impersonateTimelock).resume();
     });
 
     it("prime should have correct pool registry address", async () => {
