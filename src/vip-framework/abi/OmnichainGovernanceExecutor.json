@@ -130,6 +130,15 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": false, "internalType": "address", "name": "", "type": "address" },
+      { "indexed": false, "internalType": "uint8", "name": "", "type": "uint8" }
+    ],
+    "name": "SetTimelockPendingAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": false, "internalType": "uint16", "name": "_remoteChainId", "type": "uint16" },
       { "indexed": false, "internalType": "bytes", "name": "_path", "type": "bytes" }
     ],
@@ -374,10 +383,10 @@
   { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   {
     "inputs": [
-      { "internalType": "uint16", "name": "_srcChainId", "type": "uint16" },
-      { "internalType": "bytes", "name": "_srcAddress", "type": "bytes" },
-      { "internalType": "uint64", "name": "_nonce", "type": "uint64" },
-      { "internalType": "bytes", "name": "_payload", "type": "bytes" }
+      { "internalType": "uint16", "name": "srcChainId_", "type": "uint16" },
+      { "internalType": "bytes", "name": "srcAddress_", "type": "bytes" },
+      { "internalType": "uint64", "name": "nonce_", "type": "uint64" },
+      { "internalType": "bytes", "name": "payload_", "type": "bytes" }
     ],
     "name": "retryMessage",
     "outputs": [],
@@ -448,6 +457,16 @@
   {
     "inputs": [{ "internalType": "uint16", "name": "srcChainId_", "type": "uint16" }],
     "name": "setSrcChainId",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "pendingAdmin_", "type": "address" },
+      { "internalType": "uint8", "name": "proposalType_", "type": "uint8" }
+    ],
+    "name": "setTimelockPendingAdmin",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

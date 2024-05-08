@@ -3,11 +3,17 @@ import { ProposalType } from "../../src/types";
 import { makeProposalV2 } from "../../src/utils";
 
 const { bsctestnet, sepolia } = NETWORK_ADDRESSES;
+export const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSC_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
-export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const BSC_FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const BSC_CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+
+export const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
+export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
+export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
+export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const SEPOLIA_CHAIN_ID = 10161;
+
 export const vip295Testnet = () => {
   const meta = {
     version: "v2",
@@ -23,245 +29,270 @@ export const vip295Testnet = () => {
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes,address)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "setTrustedRemoteAddress(uint16,bytes)",
+          OMNICHAIN_PROPOSAL_SENDER,
+          "retryExecute(uint256,uint16,bytes,bytes,address,uint256)",
           bsctestnet.NORMAL_TIMELOCK,
         ],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", bsctestnet.NORMAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "pause()", bsctestnet.NORMAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", bsctestnet.NORMAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "unpause()", bsctestnet.NORMAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "retryExecute(uint256,uint16,bytes,bytes,uint256)",
-          bsctestnet.NORMAL_TIMELOCK,
-        ],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", bsctestnet.NORMAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "pause()", bsctestnet.NORMAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", bsctestnet.NORMAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "unpause()", bsctestnet.NORMAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", bsctestnet.NORMAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "setConfig(uint16,uint16,uint256,bytes)",
-          bsctestnet.NORMAL_TIMELOCK,
-        ],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_FASTTRACK_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_FASTTRACK_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", BSC_FASTTRACK_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes,address)", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "retryExecute(uint256,uint16,bytes,bytes,uint256)",
+          OMNICHAIN_PROPOSAL_SENDER,
+          "retryExecute(uint256,uint16,bytes,bytes,address,uint256)",
           BSC_FASTTRACK_TIMELOCK,
         ],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "pause()", BSC_FASTTRACK_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "pause()", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_FASTTRACK_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", BSC_FASTTRACK_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", BSC_FASTTRACK_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", BSC_FASTTRACK_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_CRITICAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_CRITICAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes,address)", BSC_CRITICAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "setConfig(uint16,uint16,uint256,bytes)",
-          BSC_FASTTRACK_TIMELOCK,
-        ],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_CRITICAL_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_CRITICAL_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "execute(uint16,bytes,bytes)", BSC_CRITICAL_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-          "retryExecute(uint256,uint16,bytes,bytes,uint256)",
+          OMNICHAIN_PROPOSAL_SENDER,
+          "retryExecute(uint256,uint16,bytes,bytes,address,uint256)",
           BSC_CRITICAL_TIMELOCK,
         ],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "pause()", BSC_CRITICAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "pause()", BSC_CRITICAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_CRITICAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_CRITICAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", BSC_CRITICAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setSendVersion(uint16)", BSC_CRITICAL_TIMELOCK],
       },
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bsctestnet.OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", BSC_CRITICAL_TIMELOCK],
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", BSC_CRITICAL_TIMELOCK],
       },
       {
-        target: bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
+        target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setMaxDailyLimit(uint16,uint256)",
         params: [SEPOLIA_CHAIN_ID, 100],
       },
       {
-        target: bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
+        target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [SEPOLIA_CHAIN_ID, sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR],
+        params: [SEPOLIA_CHAIN_ID, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setOracle(address)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint16,uint256)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "pause()", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "pause()", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "pause()", sepolia.GUARDIAN],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "unpause()", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "unpause()", sepolia.GUARDIAN],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", sepolia.GUARDIAN],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", sepolia.NORMAL_TIMELOCK],
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "pause()", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "unpause()", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", sepolia.GUARDIAN],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", sepolia.GUARDIAN],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
     ],

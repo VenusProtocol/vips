@@ -10,13 +10,13 @@ import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal, SUPPORTED_NETWORKS } from "../types";
 import { getCalldatas, getPayload, initMainnetUser, setForkBlock } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
-import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainExecutor.json";
+import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
 const ENDPOINT = "0xae92d5aD7583AD66E49A0c67BAd18F6ba52dDDc1";
-const OMNICHAIN_PROPOSAL_SENDER = "0x02d188Be98CF7676Cd98b03C8470f059fD7799Da";
-const OMNICHAIN_GOVERNANCE_EXECUTOR = "0xE09E4784C2Dd7B0f2Db5bf9B00E101a4dC8CC9EB";
+const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
+const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
 const LZ_LIBRARY = "0x3acaaf60502791d199a5a5f0b173d78229ebfe32";
 
 const VOTING_PERIOD = 28800;
@@ -159,7 +159,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
 
   describe(`${description} execution`, () => {
     before(async () => {
-      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
+      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR);
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
       proposalId++;
@@ -169,9 +169,11 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
       const impersonatedLibrary = await initMainnetUser(LZ_LIBRARY, ethers.utils.parseEther("100"));
       const impersonatedEndpoint = await initMainnetUser(ENDPOINT, ethers.utils.parseEther("100"));
       const endpoint = new ethers.Contract(ENDPOINT, ENDPOINT_ABI, provider);
-      const srcAddress = OMNICHAIN_PROPOSAL_SENDER + OMNICHAIN_GOVERNANCE_EXECUTOR.slice(2);
+      const srcAddress = ethers.utils.solidityPack(
+        ["address", "address"],
+        [OMNICHAIN_PROPOSAL_SENDER, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
+      );
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(10102, srcAddress);
-
       const tx = await executor
         .connect(impersonatedEndpoint)
         .lzReceive(
@@ -189,7 +191,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
         ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
         payload,
       );
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[(proposalType as 0) || 1 || 2]);
       const blockchainProposal = await executor.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await executor.execute(proposalId);

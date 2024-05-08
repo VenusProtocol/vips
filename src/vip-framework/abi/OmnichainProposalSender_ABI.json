@@ -151,6 +151,7 @@
     "inputs": [
       { "internalType": "uint16", "name": "remoteChainId_", "type": "uint16" },
       { "internalType": "bytes", "name": "payload_", "type": "bytes" },
+      { "internalType": "bool", "name": "useZro_", "type": "bool" },
       { "internalType": "bytes", "name": "adapterParams_", "type": "bytes" }
     ],
     "name": "estimateFees",
@@ -165,7 +166,8 @@
     "inputs": [
       { "internalType": "uint16", "name": "remoteChainId_", "type": "uint16" },
       { "internalType": "bytes", "name": "payload_", "type": "bytes" },
-      { "internalType": "bytes", "name": "adapterParams_", "type": "bytes" }
+      { "internalType": "bytes", "name": "adapterParams_", "type": "bytes" },
+      { "internalType": "address", "name": "zroPaymentAddress_", "type": "address" }
     ],
     "name": "execute",
     "outputs": [],
@@ -233,6 +235,7 @@
       { "internalType": "uint16", "name": "remoteChainId_", "type": "uint16" },
       { "internalType": "bytes", "name": "payload_", "type": "bytes" },
       { "internalType": "bytes", "name": "adapterParams_", "type": "bytes" },
+      { "internalType": "address", "name": "zroPaymentAddress_", "type": "address" },
       { "internalType": "uint256", "name": "originalValue_", "type": "uint256" }
     ],
     "name": "retryExecute",

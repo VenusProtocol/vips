@@ -2,24 +2,21 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { expectEvents, networkChainIds } from "../../../src/utils";
 import { forking, testVip } from "../../../src/vip-framework";
-import { vip295Testnet } from "../../../vips/vip-295/vip-295-testnet";
+import {
+  OMNICHAIN_PROPOSAL_SENDER,
+  SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
+  vip295Testnet,
+} from "../../../vips/vip-295/vip-295-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "../abi/OmnichainProposalSender.json";
 
-const { bsctestnet, sepolia } = NETWORK_ADDRESSES;
-
-forking(37874227, async () => {
+forking(40149880, async () => {
   let omnichainProposalSender: Contract;
   const provider = ethers.provider;
   before(async () => {
-    omnichainProposalSender = new ethers.Contract(
-      bsctestnet.OMNICHAIN_PROPOSAL_SENDER,
-      OMNICHAIN_PROPOSAL_SENDER_ABI,
-      provider,
-    );
+    omnichainProposalSender = new ethers.Contract(OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_PROPOSAL_SENDER_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -31,7 +28,7 @@ forking(37874227, async () => {
     });
   });
 
-  testVip("vip214Testnet give permissions to timelock", await vip295Testnet(), {
+  testVip("vip295Testnet give permissions to timelock", await vip295Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -51,7 +48,7 @@ forking(37874227, async () => {
       expect(await omnichainProposalSender.trustedRemoteLookup(networkChainIds["sepolia"])).to.be.equals(
         ethers.utils.solidityPack(
           ["address", "address"],
-          [sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, bsctestnet.OMNICHAIN_PROPOSAL_SENDER],
+          [SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
         ),
       );
     });

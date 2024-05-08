@@ -14,7 +14,7 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMICHANNEL_SENDER = "0x02d188Be98CF7676Cd98b03C8470f059fD7799Da";
+const BSCTESTNET_OMICHANNEL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
 interface NetworkChainIds {
@@ -36,18 +36,16 @@ const currentChainId = (): number => {
 
 export const getPayload = (proposal: Proposal) => {
   for (let j = proposal.targets.length - 1; j > 0; j--) {
-    if (proposal.params[j][0] === currentChainId() && proposal.signatures[j] === "execute(uint16,bytes,bytes)") {
+    if (
+      proposal.params[j][0] === currentChainId() &&
+      proposal.signatures[j] === "execute(uint16,bytes,bytes,address)"
+    ) {
       return proposal.params[j][1];
     }
   }
 };
 
-const gasUsedPerCommand = {
-  101: 0,
-  10161: 300000,
-  10143: 300000,
-} as { [key: number]: number };
-
+const gasUsedPerCommand = 300000;
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
@@ -98,7 +96,7 @@ export const makeProposal = (commands: Command[], meta: ProposalMeta, type: Prop
 };
 
 const getAdapterParam = (chainId: number, noOfCommands: number): string => {
-  const requiredGas = 600000 + gasUsedPerCommand[chainId] * noOfCommands;
+  const requiredGas = 600000 + gasUsedPerCommand * noOfCommands;
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
   return adapterParam;
 };
@@ -111,7 +109,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   );
   let fee;
   if (FORKED_NETWORK === "bsctestnet") {
-    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, adapterParams))[0].toString();
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].toString();
   } else {
     fee = ethers.BigNumber.from("1");
   }
@@ -120,7 +118,7 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
 
 export const makeProposalV2 = async (
   commands: Command[],
-  meta?: ProposalMeta,
+  meta: ProposalMeta,
   type: ProposalType,
 ): Promise<Proposal> => {
   const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
@@ -162,8 +160,8 @@ export const makeProposalV2 = async (
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);
-      proposal.signatures.push("execute(uint16,bytes,bytes)");
-      proposal.params.push([key, remoteParam, remoteAdapterParam]);
+      proposal.signatures.push("execute(uint16,bytes,bytes,address)");
+      proposal.params.push([key, remoteParam, remoteAdapterParam, ethers.constants.AddressZero]);
     } else {
       throw "Chain Id is not supported";
     }
