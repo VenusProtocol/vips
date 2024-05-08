@@ -2,19 +2,17 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVipV2 } from "../../../src/vip-framework";
-import {
-  SEPOLIA_ACM,
-  SEPOLIA_NORMAL_TIMELOCK,
-  SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
-  vip295Testnet,
-} from "../../../vips/vip-295/vip-295-testnet";
-import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager_ABI.json";
-import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "../abi/OmnichainGovernanceExecutor_ABI.json";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { expectEvents, initMainnetUser } from "../../src/utils";
+import { forking, testVipV2 } from "../../src/vip-framework";
+import { SEPOLIA_ACM, vip303 } from "../../vips/vip-303/bsctestnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
+const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
+const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
+
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 forking(5860538, async () => {
@@ -32,9 +30,9 @@ forking(5860538, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, SEPOLIA_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testVipV2("vip214Testnet configures bridge", await vip295Testnet(), {
+  testVipV2("vip303 configures bridge", await vip303(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [21]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [14]);
     },
   });
 

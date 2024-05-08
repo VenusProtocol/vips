@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposalV2 } from "../../src/utils";
 
-const { bsctestnet, sepolia } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSC_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const BSC_FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
@@ -14,10 +14,10 @@ export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9e
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const SEPOLIA_CHAIN_ID = 10161;
 
-export const vip295Testnet = () => {
+export const vip302 = () => {
   const meta = {
     version: "v2",
-    title: "vip295 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
+    title: "vip302 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on local chain and OmnichainProposalExecutor on remote chain`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -168,6 +168,7 @@ export const vip295Testnet = () => {
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [SEPOLIA_CHAIN_ID, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
       },
+
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -178,12 +179,6 @@ export const vip295Testnet = () => {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", SEPOLIA_NORMAL_TIMELOCK],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
@@ -244,55 +239,6 @@ export const vip295Testnet = () => {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", SEPOLIA_NORMAL_TIMELOCK],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "pause()", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "unpause()", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", sepolia.GUARDIAN],
-        dstChainId: SEPOLIA_CHAIN_ID,
-      },
-      {
-        target: SEPOLIA_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", sepolia.GUARDIAN],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
     ],

@@ -2,15 +2,15 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, networkChainIds } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents, networkChainIds } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
 import {
   OMNICHAIN_PROPOSAL_SENDER,
   SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
-  vip295Testnet,
-} from "../../../vips/vip-295/vip-295-testnet";
-import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManager_ABI.json";
-import OMNICHAIN_PROPOSAL_SENDER_ABI from "../abi/OmnichainProposalSender.json";
+  vip302,
+} from "../../vips/vip-302/bsctestnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(40149880, async () => {
   let omnichainProposalSender: Contract;
@@ -28,7 +28,7 @@ forking(40149880, async () => {
     });
   });
 
-  testVip("vip295Testnet give permissions to timelock", await vip295Testnet(), {
+  testVip("vip302 give permissions to timelock", await vip302(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

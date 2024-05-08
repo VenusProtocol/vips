@@ -75,7 +75,7 @@ export const NETWORK_ADDRESSES = {
     CHAINLINK_ORACLE: oracleEthereumContracts.addresses.ChainlinkOracle,
   },
   sepolia: {
-    NORMAL_TIMELOCK: "0x51f560a018b89A470f8fcE6BF22f3a9F3a4789e5",
+    NORMAL_TIMELOCK: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB", // Sepolia Multisig
     GUARDIAN: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB",
     CHAINLINK_ORACLE: oracleSepoliaContracts.addresses.ChainlinkOracle,
     RESILIENT_ORACLE: oracleSepoliaContracts.addresses.ResilientOracle,

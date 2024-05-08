@@ -14,7 +14,7 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMICHANNEL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
+const BSCTESTNET_OMNICHANNEL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
 
 interface NetworkChainIds {
@@ -35,7 +35,7 @@ const currentChainId = (): number => {
 };
 
 export const getPayload = (proposal: Proposal) => {
-  for (let j = proposal.targets.length - 1; j > 0; j--) {
+  for (let j = proposal.targets.length - 1; j >= 0; j--) {
     if (
       proposal.params[j][0] === currentChainId() &&
       proposal.signatures[j] === "execute(uint16,bytes,bytes,address)"
@@ -103,7 +103,7 @@ const getAdapterParam = (chainId: number, noOfCommands: number): string => {
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
   const provider = ethers.provider;
   const OmnichainProposalSender = new ethers.Contract(
-    BSCTESTNET_OMICHANNEL_SENDER,
+    BSCTESTNET_OMNICHANNEL_SENDER,
     OmnichainProposalSender_ABI,
     provider,
   );
@@ -156,7 +156,7 @@ export const makeProposalV2 = async (
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
       proposal.targets.push(
-        FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMICHANNEL_SENDER : BSCMAINNET_OMNICHANNEL_SENDER,
+        FORKED_NETWORK === "bscmainnet" ? BSCMAINNET_OMNICHANNEL_SENDER : BSCTESTNET_OMNICHANNEL_SENDER,
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);
