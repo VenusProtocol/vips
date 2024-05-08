@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip019 from "../../../proposals/sepolia/vip-019";
-import { calculateMappingStorageSlot } from "./../../../../src/utils";
+import { calculateMappingStorageSlot, initMainnetUser } from "./../../../../src/utils";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 
@@ -16,10 +16,9 @@ const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const XVS_ADDRESS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0xA6814c7c8Da831214b5488e57d11b1a1071761c9";
+const NEW_XVS_IMPLEMENTATION = "0x76157A0d0e6Dd08e75D49635990fA9c27DEb2049";
 
-
-forking(5765590, async () => {
+forking(5861396, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let accessControlManager: Contract;

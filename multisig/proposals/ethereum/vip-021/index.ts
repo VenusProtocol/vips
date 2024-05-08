@@ -4,7 +4,7 @@ import { makeProposal } from "../../../../src/utils";
 const { ethereum } = NETWORK_ADDRESSES;
 
 const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
-const NEW_XVS_IMPLEMENTATION = "0x43E5e72515140c147a72FB21021CF11dA1eBCe9a";
+const NEW_XVS_IMPLEMENTATION = "0xa831C72a9D4387A52AaACeAADfaC816c0bC83450";
 const ETHEREUM_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 

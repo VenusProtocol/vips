@@ -4,7 +4,7 @@ import { makeProposal } from "../../../../src/utils";
 const { sepolia } = NETWORK_ADDRESSES;
 
 const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
-const NEW_XVS_IMPLEMENTATION = "0xA6814c7c8Da831214b5488e57d11b1a1071761c9";
+const NEW_XVS_IMPLEMENTATION = "0x76157A0d0e6Dd08e75D49635990fA9c27DEb2049";
 const SEPOLIA_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
