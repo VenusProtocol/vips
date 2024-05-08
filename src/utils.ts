@@ -16,6 +16,7 @@ import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
 const BSCTESTNET_OMNICHANNEL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHANNEL_SENDER = "";
+export let gaslimit: number;
 
 interface NetworkChainIds {
   sepolia: number;
@@ -60,7 +61,7 @@ export async function setForkBlock(blockNumber: number) {
   });
 }
 
-export const getSourceChainId = async (network: "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet") => {
+export const getSourceChainId = (network: "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet") => {
   const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
   const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
   if (testnetNetworks.includes(network as string)) {
@@ -108,6 +109,7 @@ export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: Pr
 const getAdapterParam = (chainId: number, noOfCommands: number): string => {
   const requiredGas = 600000 + gasUsedPerCommand * noOfCommands;
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
+  gaslimit = requiredGas;
   return adapterParam;
 };
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
