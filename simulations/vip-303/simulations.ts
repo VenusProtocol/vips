@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -21,8 +22,8 @@ import COMPROLLER_ABI from "./abi/Comptroller.json";
 
 forking(38567077, () => {
   const provider = ethers.provider;
-  let coreComptroller: ethers.Contract;
-  let gameFiComptroller: ethers.Contract;
+  let coreComptroller: Contract;
+  let gameFiComptroller: Contract;
 
   before(async () => {
     coreComptroller = new ethers.Contract(CORE_COMPTROLLER, COMPROLLER_ABI, provider);
