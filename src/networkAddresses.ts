@@ -17,6 +17,7 @@ import bsctestnetDeployedContracts from "@venusprotocol/venus-protocol/deploymen
 import ethereumDeployedContracts from "@venusprotocol/venus-protocol/deployments/ethereum_addresses.json";
 import opbnbmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbmainnet_addresses.json";
 import opbnbtestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbtestnet_addresses.json";
+
 import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import { ethers } from "ethers";
 
@@ -115,6 +116,10 @@ export const NETWORK_ADDRESSES = {
     GUARDIAN: "0x1426A5Ae009c4443188DA8793751024E358A61C2",
     CHAINLINK_ORACLE: "0xeDd02c7FfA31490b4107e8f2c25e9198a04F9E45",
     RESILIENT_ORACLE: "0x6708bAd042916B47311c8078b29d7f432342102F",
+    XVS: "0x877Dc896e7b13096D3827872e396927BbE704407",
+    XVS_VAULT_PROXY: "0x407507DC2809D3aa31D54EcA3BEde5C5c4C8A17F",
+    VTREASURY: "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB",
+    GENERIC_TEST_USER_ACCOUNT: "0x6f057A858171e187124ddEDF034dAc63De5dE5dB",
   },
   arbitrumone: {
     NORMAL_TIMELOCK: "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0", // arbitrumone Multisig

@@ -4,6 +4,8 @@ import { makeProposal } from "../../src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
+const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
+const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const NEW_XVS_IMPLEMENTATION = "0x1Fb5fcE0b05B84852290B3bd54b968CCff7559f0";
@@ -40,6 +42,16 @@ const vip292 = () => {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", CRITICAL_TIMELOCK],
       },
     ],
     meta,

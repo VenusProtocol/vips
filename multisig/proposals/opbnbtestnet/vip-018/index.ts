@@ -6,6 +6,7 @@ const { opbnbtestnet } = NETWORK_ADDRESSES;
 const ACM = "0x049f77f7046266d27c3bc96376f53c17ef09c986";
 const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 const NEW_XVS_IMPLEMENTATION = "0xe4DE4460c93Af011DC0624bc7Ce4a2Bf40feE4ea";
+const BLOCKS_PER_YEAR = 31_536_000; // 1 block per second
 
 const vip018 = () => {
   return makeProposal([
@@ -22,7 +23,7 @@ const vip018 = () => {
     {
       target: XVS_VAULT_PROXY,
       signature: "initializeTimeManager(bool,uint256)",
-      params: [true, 0],
+      params: [false, BLOCKS_PER_YEAR],
     },
     {
       target: ACM,
