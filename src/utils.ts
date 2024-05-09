@@ -14,8 +14,8 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMNICHANNEL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
-const BSCMAINNET_OMNICHANNEL_SENDER = "";
+const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
+const BSCMAINNET_OMNICHAIN_SENDER = "";
 export let gaslimit: number;
 
 interface NetworkChainIds {
@@ -115,7 +115,7 @@ const getAdapterParam = (chainId: number, noOfCommands: number): string => {
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
   const provider = ethers.provider;
   const OmnichainProposalSender = new ethers.Contract(
-    BSCTESTNET_OMNICHANNEL_SENDER,
+    BSCTESTNET_OMNICHAIN_SENDER,
     OmnichainProposalSender_ABI,
     provider,
   );
@@ -168,7 +168,7 @@ export const makeProposalV2 = async (
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
       proposal.targets.push(
-        FORKED_NETWORK === "bscmainnet" ? BSCMAINNET_OMNICHANNEL_SENDER : BSCTESTNET_OMNICHANNEL_SENDER,
+        FORKED_NETWORK === "bscmainnet" ? BSCMAINNET_OMNICHAIN_SENDER : BSCTESTNET_OMNICHAIN_SENDER,
       );
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);

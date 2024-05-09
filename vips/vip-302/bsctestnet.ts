@@ -12,6 +12,7 @@ export const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF193
 export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
 export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+export const SEPOLIA_MAX_DAILY_LIMIT = 100;
 const SEPOLIA_CHAIN_ID = 10161;
 
 export const vip302 = () => {
@@ -161,7 +162,7 @@ export const vip302 = () => {
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [SEPOLIA_CHAIN_ID, 100],
+        params: [SEPOLIA_CHAIN_ID, SEPOLIA_MAX_DAILY_LIMIT],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,

@@ -6,6 +6,7 @@ import { expectEvents, networkChainIds } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   OMNICHAIN_PROPOSAL_SENDER,
+  SEPOLIA_MAX_DAILY_LIMIT,
   SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
   vip302,
 } from "../../vips/vip-302/bsctestnet";
@@ -41,7 +42,9 @@ forking(40149880, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("Daily limit should be 100", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(networkChainIds["sepolia"])).to.equals(100);
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(networkChainIds["sepolia"])).to.equals(
+        SEPOLIA_MAX_DAILY_LIMIT,
+      );
     });
 
     it("Trusted remote should be set", async () => {
