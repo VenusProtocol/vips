@@ -7,7 +7,7 @@ export const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C90
 const BSC_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const BSC_FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const BSC_CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
-
+const BSC_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 export const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
 export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
 export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
@@ -20,7 +20,7 @@ export const vip302 = () => {
     version: "v2",
     title: "vip302 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
     description: `#### Description
-    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on local chain and OmnichainProposalExecutor on remote chain`,
+    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA chain`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -74,11 +74,6 @@ export const vip302 = () => {
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_FASTTRACK_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_FASTTRACK_TIMELOCK],
       },
       {
@@ -118,11 +113,6 @@ export const vip302 = () => {
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OMNICHAIN_PROPOSAL_SENDER, "setTrustedRemoteAddress(uint16,bytes)", BSC_CRITICAL_TIMELOCK],
-      },
-      {
-        target: BSC_ACM,
-        signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_CRITICAL_TIMELOCK],
       },
       {
@@ -158,6 +148,26 @@ export const vip302 = () => {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", BSC_CRITICAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "retryExecute(uint256,uint16,bytes,bytes,address,uint256)", BSC_GUARDIAN],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_GUARDIAN],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "pause()", BSC_GUARDIAN],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_GUARDIAN],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,

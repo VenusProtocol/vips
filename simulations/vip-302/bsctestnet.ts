@@ -35,7 +35,7 @@ forking(40149880, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["PermissionGranted", "SetMaxDailyLimit", "SetTrustedRemoteAddress", "Failure"],
-        [24, 1, 1, 0],
+        [26, 1, 1, 0],
       );
     },
   });
