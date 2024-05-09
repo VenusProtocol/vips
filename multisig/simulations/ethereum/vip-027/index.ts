@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { LST_POOL_COMPTROLLER, LST_POOL_VWEETH, VWEETH_BORROW_CAP, vip027 } from "../../../proposals/ethereum/vip-027";
+import vip027, { LST_POOL_COMPTROLLER, LST_POOL_VWEETH, VWEETH_BORROW_CAP } from "../../../proposals/ethereum/vip-027";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(19831582, () => {
