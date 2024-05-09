@@ -8,14 +8,30 @@ import { FORKED_NETWORK, ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
 import { Proposal, SUPPORTED_NETWORKS } from "../types";
-import { gaslimit, getCalldatas, getPayload, getSourceChainId, initMainnetUser, setForkBlock } from "../utils";
+import {
+  gaslimit,
+  getCalldatas,
+  getPayload,
+  getSourceChainId,
+  initMainnetUser,
+  setForkBlock,
+  testnetNetworks,
+} from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
-const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
+const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
+const BSCMAINNET_OMNICHAIN_SENDER = "";
+const OMNICHAIN_PROPOSAL_SENDER = testnetNetworks.includes(
+  FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet",
+)
+  ? BSCTESTNET_OMNICHAIN_SENDER
+  : BSCMAINNET_OMNICHAIN_SENDER;
+const OMNICHAIN_GOVERNANCE_EXECUTOR =
+  NETWORK_ADDRESSES[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"]
+    .OMNICHAIN_GOVERNANCE_EXECUTOR;
 
 const VOTING_PERIOD = 28800;
 
@@ -157,7 +173,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
 
   describe(`${description} execution`, () => {
     before(async () => {
-      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR);
+      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
       proposalId++;
@@ -175,7 +191,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
       );
       const srcAddress = ethers.utils.solidityPack(
         ["address", "address"],
-        [OMNICHAIN_PROPOSAL_SENDER, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
+        [OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_GOVERNANCE_EXECUTOR],
       );
       const srcChainId = getSourceChainId(FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet");
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
@@ -185,7 +201,7 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
         .receivePayload(
           srcChainId,
           srcAddress,
-          SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
+          OMNICHAIN_GOVERNANCE_EXECUTOR,
           inboundNonce.add(1),
           gaslimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),

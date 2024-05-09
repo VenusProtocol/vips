@@ -14,8 +14,12 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
+export const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
+const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
 const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHAIN_SENDER = "";
+const OMNICHAIN_PROPOSAL_SENDER =
+  FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMNICHAIN_SENDER : BSCMAINNET_OMNICHAIN_SENDER;
 export let gaslimit: number;
 
 interface NetworkChainIds {
@@ -62,8 +66,6 @@ export async function setForkBlock(blockNumber: number) {
 }
 
 export const getSourceChainId = (network: "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet") => {
-  const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
-  const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
   if (testnetNetworks.includes(network as string)) {
     return 10102;
   } else if (mainnetNetworks.includes(network as string)) {
@@ -114,13 +116,9 @@ const getAdapterParam = (chainId: number, noOfCommands: number): string => {
 };
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
   const provider = ethers.provider;
-  const OmnichainProposalSender = new ethers.Contract(
-    BSCTESTNET_OMNICHAIN_SENDER,
-    OmnichainProposalSender_ABI,
-    provider,
-  );
+  const OmnichainProposalSender = new ethers.Contract(OMNICHAIN_PROPOSAL_SENDER, OmnichainProposalSender_ABI, provider);
   let fee;
-  if (FORKED_NETWORK === "bsctestnet") {
+  if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
     fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].toString();
   } else {
     fee = ethers.BigNumber.from("1");
@@ -167,9 +165,7 @@ export const makeProposalV2 = async (
       );
       const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
 
-      proposal.targets.push(
-        FORKED_NETWORK === "bscmainnet" ? BSCMAINNET_OMNICHAIN_SENDER : BSCTESTNET_OMNICHAIN_SENDER,
-      );
+      proposal.targets.push(OMNICHAIN_PROPOSAL_SENDER);
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);
       proposal.signatures.push("execute(uint16,bytes,bytes,address)");
