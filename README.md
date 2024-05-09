@@ -56,26 +56,6 @@ Procedure for Propose vip
 npx hardhat run scripts/proposeVIP.ts
 ```
 
-### Make Proposal for multiple networks
-
-Procedure to make vip
-
-In .env `FORKED_NETWORK` must contain name of the network on which proposal needs to be executed.
-
-Make sure to update `dstChainId` field with chain Id of desired network in commands.
-
-### Simulations for multiple networks proposal
-
-In .env update `ARCHIVE_NODE_<NETWORK_NAME>` with the URL of desired network.
-
-Make different simulations for different networks.
-
-To run simulations use this command
-
-```
-npx hardhat test simulations/<desired-network-simulations>.ts
-```
-
 ### Execute VIP (via Multisig)
 
 Script to execute a VIP through the Gnosis Safe Multisig
@@ -117,3 +97,22 @@ Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => 000
 ```
 
 The script should output a file `gnosisTXBuilder.json` that you can import in your Gnosis Safe UI.
+
+### Make proposal for multiple networks
+
+Procedure to make vip:
+
+- Use `makeProposalV2` to create VIP.
+- For remote commands add one more field of `dstChainId` specifying layer zero chain id of desired remote chain for instance `dstChainId = 101` for Ethereum.
+
+### Simulations for multiple networks proposal
+
+In .env update `ARCHIVE_NODE_<NETWORK_NAME>` with the URL of desired network.
+
+Make different simulations for different networks. Use `testVipV2` to simulate remote proposal.
+
+To run simulations use this command
+
+```
+npx hardhat test simulations/<simulation-path> --fork <network>
+```
