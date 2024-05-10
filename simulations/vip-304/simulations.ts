@@ -13,8 +13,8 @@ import {
   ETH_AMOUNT,
   USDT,
   USDT_AMOUNT,
-  vip303,
-} from "../../vips/vip-303/bscmainnet";
+  vip304,
+} from "../../vips/vip-304/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
@@ -39,7 +39,7 @@ forking(38569600, () => {
     oldUSDTBalTreasury = await usdt.balanceOf(BNB_TREASURY);
   });
 
-  testVip("VIP-236 VIP to refund the Community Wallet", vip303(), {
+  testVip("VIP-304 Refund of expenses to the Community Wallet", vip304(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [2, 1]);
     },
