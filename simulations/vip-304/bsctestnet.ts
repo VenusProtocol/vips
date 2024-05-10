@@ -32,7 +32,7 @@ forking(40208623, () => {
   describe("Post-VIP state", () => {
     it("check price", async () => {
       const price = await oracle.getPrice(BABYDOGE);
-      expect(price).to.be.eq(parseUnits("1.785007649", 18));
+      expect(price).to.be.eq(parseUnits("0.000000001785007649000000000", 27));
     })
   });
 });
