@@ -24,9 +24,11 @@ import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 const { bsctestnet } = NETWORK_ADDRESSES;
+const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 
 interface RiskParameters {
   borrowCap: string;
@@ -83,7 +85,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
 };
 
 
-forking(40208623, () => {
+forking(40289920, () => {
   const provider = ethers.provider;
   let oracle: Contract
   let poolRegistry: Contract
@@ -159,6 +161,76 @@ forking(40208623, () => {
 
     it(`rewards distributor should have balance`, async () => {
       expect(await babyDoge.balanceOf(rewardDistributor.address)).to.gte(REWARDS_AMOUNT);
+    });
+
+    describe(`check risk parameters`, () => {
+      it(`check reserve factor`, async () => {
+        expect(await vBabyDoge.reserveFactorMantissa()).to.equal(
+          parseUnits(vBabyDoge_riskParameters.reserveFactor, 18),
+        );
+        expect(await Vusdt.reserveFactorMantissa()).to.equal(
+          parseUnits(vUSDT_riskParameters.reserveFactor, 18),
+        );
+      });
+
+      it(`check CF`, async () => {
+        let market = await comptroller.markets(VBABYDOGE);
+        expect(market.collateralFactorMantissa).to.equal(parseUnits(vBabyDoge_riskParameters.collateralFactor, 18));
+
+        market = await comptroller.markets(VUSDT);
+        expect(market.collateralFactorMantissa).to.equal(parseUnits(vUSDT_riskParameters.collateralFactor, 18));
+      });
+
+      it(`check liquidation threshold`, async () => {
+        let market = await comptroller.markets(VBABYDOGE);
+        expect(market.liquidationThresholdMantissa).to.equal(parseUnits(vBabyDoge_riskParameters.liquidationThreshold, 18));
+
+        market = await comptroller.markets(VUSDT);
+        expect(market.liquidationThresholdMantissa).to.equal(
+          parseUnits(vUSDT_riskParameters.liquidationThreshold, 18),
+        );
+      });
+
+      it(`check protocol seize share`, async () => {
+        expect(await vBabyDoge.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+        expect(await Vusdt.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+      });
+
+      it(`check supply cap`, async () => {
+        expect(await comptroller.supplyCaps(VBABYDOGE)).to.equal(parseUnits(vBabyDoge_riskParameters.supplyCap, 18));
+        expect(await comptroller.supplyCaps(VUSDT)).to.equal(parseUnits(vUSDT_riskParameters.supplyCap, 18));
+      });
+
+      it(`check borrow cap`, async () => {
+        expect(await comptroller.borrowCaps(VBABYDOGE)).to.equal(parseUnits(vBabyDoge_riskParameters.borrowCap, 18));
+        expect(await comptroller.borrowCaps(VUSDT)).to.equal(parseUnits(vUSDT_riskParameters.borrowCap, 18));
+      });
+
+      it("Interest rates", async () => {
+        checkInterestRate(
+          await vBabyDoge.interestRateModel(),
+          vBabyDoge_interestRateModel.vToken,
+          {
+            base: vBabyDoge_interestRateModel.base,
+            multiplier: vBabyDoge_interestRateModel.multiplier,
+            jump: vBabyDoge_interestRateModel.jump,
+            kink: vBabyDoge_interestRateModel.kink,
+          },
+          BLOCKS_PER_YEAR,
+        );
+
+        checkInterestRate(
+          await Vusdt.interestRateModel(),
+          vUSDT_interestRateModel.vToken,
+          {
+            base: vUSDT_interestRateModel.base,
+            multiplier: vUSDT_interestRateModel.multiplier,
+            jump: vUSDT_interestRateModel.jump,
+            kink: vUSDT_interestRateModel.kink,
+          },
+          BLOCKS_PER_YEAR,
+        );
+      });
     });
   });
 });
