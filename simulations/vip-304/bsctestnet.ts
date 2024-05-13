@@ -88,7 +88,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
 };
 
 
-forking(40289920, () => {
+forking(40289919, () => {
   const provider = ethers.provider;
   let oracle: Contract
   let poolRegistry: Contract
@@ -99,7 +99,7 @@ forking(40289920, () => {
   let rewardDistributor: Contract
 
   before(async () => {
-    oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, BINANCE_ORACLE)
+    oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE)
     poolRegistry = new ethers.Contract(bsctestnet.POOL_REGISTRY, POOL_REGISTRY_ABI, provider)
     vBabyDoge = await ethers.getContractAt(VTOKEN_ABI, VBABYDOGE)
     Vusdt = await ethers.getContractAt(VTOKEN_ABI, VUSDT)
