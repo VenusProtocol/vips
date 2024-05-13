@@ -20,6 +20,70 @@ export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
 export const USDT_SUPPLY = parseUnits("5000", 6);
 export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9);
 
+export const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+export const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
+export const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+export const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
+export const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
+export const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+export const BaseAssets = [
+  "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c", // USDT RiskFundConverter BaseAsset
+  "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c", // USDT USDTTokenConverter BaseAsset
+  "0x16227D60f7a0e586C66B005219dfc887D13C9531", // USDC USDCTokenConverter BaseAsset
+  "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4", // BTCB BTCBTokenConverter BaseAsset
+  "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7", // ETH ETHTokenConverter BaseAsset
+  "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff", // XVS XVSTokenConverter BaseAsset
+];
+export const Assets = [BABYDOGE];
+const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
+export const RiskFundConverterTokenOuts = filterAssets(Assets, BaseAssets[0]);
+export const USDTPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
+export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
+export const BTCBPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
+export const ETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
+export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[5]);
+
+type IncentiveAndAccessibility = [number, number];
+export const incentiveAndAccessibilityForRiskFundConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForBTCBPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForETHPrimeConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = [];
+
+function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
+  const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
+
+  // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
+  // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
+  if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
+    return [0, 2]; // ONLY_FOR_CONVERTERS
+  } else {
+    return [0, 1]; // ALL
+  }
+}
+
+for (let i = 0; i < RiskFundConverterTokenOuts.length; i++) {
+  incentiveAndAccessibilityForRiskFundConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[0], RiskFundConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForUSDTPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[1], USDTPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForUSDCPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[2], USDCPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForBTCBPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[3], BTCBPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForETHPrimeConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[4], ETHPrimeConverterTokenOuts[i]),
+  );
+  incentiveAndAccessibilityForXVSVaultConverter.push(
+    getIncentiveAndAccessibility(BaseAssets[5], XVSVaultConverterTokenOuts[i]),
+  );
+}
+
 const vip304 = () => {
   const meta = {
     version: "v2",
@@ -177,6 +241,38 @@ const vip304 = () => {
         target: REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
         params: [[VBABYDOGE], ["12134623477230768"], ["12134623477230768"]],
+      },
+
+      // Conversions Config
+      {
+        target: RISK_FUND_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[0], RiskFundConverterTokenOuts, incentiveAndAccessibilityForRiskFundConverter],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[1], USDTPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDTPrimeConverter],
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[2], USDCPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDCPrimeConverter],
+      },
+      {
+        target: BTCB_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[3], BTCBPrimeConverterTokenOuts, incentiveAndAccessibilityForBTCBPrimeConverter],
+      },
+      {
+        target: ETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[4], ETHPrimeConverterTokenOuts, incentiveAndAccessibilityForETHPrimeConverter],
+      },
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[5], XVSVaultConverterTokenOuts, incentiveAndAccessibilityForXVSVaultConverter],
       },
     ],
     meta,
