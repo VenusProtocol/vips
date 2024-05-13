@@ -238,10 +238,10 @@ forking(40208623, () => {
     });
 
     it("generic IL tests", async () => {
-      await babyDoge.faucet(parseUnits("100000000000000", 9));
-      // await checkIsolatedPoolsComptrollers({
-      //   [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
-      // });
+      await babyDoge.faucet(parseUnits("100000000000000000000", 9));
+      await checkIsolatedPoolsComptrollers({
+        [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
+      });
 
       await checkVToken(VBABYDOGE, {
         name: "Venus BabyDoge (Meme)",
