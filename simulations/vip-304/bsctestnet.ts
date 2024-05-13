@@ -26,9 +26,9 @@ import vip304, {
 } from "../../vips/vip-304/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
-import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
