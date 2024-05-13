@@ -124,7 +124,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
-  await borrowMarket?.borrow(parseUnits("10", borrowUnderlyingDecimals));
+  await borrowMarket?.borrow(borrowAmount);
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
   borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
