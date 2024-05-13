@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-import { expectEvents, networkChainIds } from "../../src/utils";
+import { LzChainId } from "../../src/types";
+import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   OMNICHAIN_PROPOSAL_SENDER,
@@ -22,10 +23,10 @@ forking(40149880, async () => {
 
   describe("Pre-VIP behaviour", async () => {
     it("Daily limit should be 0", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(networkChainIds["sepolia"])).to.equals(0);
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId["sepolia"])).to.equals(0);
     });
     it("Trusted remote should not be set", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(networkChainIds["sepolia"])).to.be.equals("0x");
+      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId["sepolia"])).to.be.equals("0x");
     });
   });
 
@@ -42,13 +43,13 @@ forking(40149880, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("Daily limit should be 100", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(networkChainIds["sepolia"])).to.equals(
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId["sepolia"])).to.equals(
         SEPOLIA_MAX_DAILY_LIMIT,
       );
     });
 
     it("Trusted remote should be set", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(networkChainIds["sepolia"])).to.be.equals(
+      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId["sepolia"])).to.be.equals(
         ethers.utils.solidityPack(
           ["address", "address"],
           [SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],

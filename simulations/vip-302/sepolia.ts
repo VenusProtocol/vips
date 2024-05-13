@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVipV2 } from "../../src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import {
   SEPOLIA_ACM,
   SEPOLIA_NORMAL_TIMELOCK,
@@ -32,7 +32,7 @@ forking(5860538, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, SEPOLIA_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testVipV2("vip302 configures bridge", await vip302(), {
+  testForkedNetworkVipCommands("vip302 configures bridge", await vip302(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
     },

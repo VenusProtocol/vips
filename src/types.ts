@@ -2,6 +2,8 @@ import { BigNumberish } from "ethers";
 
 export type SUPPORTED_NETWORKS = "bsctestnet" | "bscmainnet" | "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
 
+export type REMOTE_NETWORKS = "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
+
 export interface ProposalMeta {
   version: string;
   title: string;
@@ -31,11 +33,20 @@ export interface Command {
   signature: string;
   params: any[];
   value?: string;
-  dstChainId?: number;
+  dstChainId?: LzChainId;
 }
 
 export interface TokenConfig {
   asset: string;
   oracles: string[];
   enableFlagsForOracles: boolean[];
+}
+
+export enum LzChainId {
+  bscmainnet = 102,
+  bsctestnet = 10102,
+  ethereum = 101,
+  sepolia = 10161,
+  opbnbmainnet = 202,
+  opbnbtestnet = 10202,
 }

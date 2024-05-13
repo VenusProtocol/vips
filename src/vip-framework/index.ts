@@ -7,31 +7,24 @@ import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal, SUPPORTED_NETWORKS } from "../types";
+import { Proposal, REMOTE_NETWORKS, SUPPORTED_NETWORKS } from "../types";
 import {
-  gaslimit,
+  calculateGasForAdapterParam,
   getCalldatas,
+  getOmnichainProposalSenderAddress,
   getPayload,
   getSourceChainId,
   initMainnetUser,
   setForkBlock,
-  testnetNetworks,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
-const BSCMAINNET_OMNICHAIN_SENDER = "";
-const OMNICHAIN_PROPOSAL_SENDER = testnetNetworks.includes(
-  FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet",
-)
-  ? BSCTESTNET_OMNICHAIN_SENDER
-  : BSCMAINNET_OMNICHAIN_SENDER;
+const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
-  NETWORK_ADDRESSES[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"]
-    .OMNICHAIN_GOVERNANCE_EXECUTOR;
+  NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
 
 const VOTING_PERIOD = 28800;
 
@@ -165,7 +158,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   });
 };
 
-export const testVipV2 = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
+export const testForkedNetworkVipCommands = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
   let executor: Contract;
   let payload: string;
   let proposalId: number;
@@ -181,11 +174,11 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
 
     it("should be queued succesfully", async () => {
       const impersonatedLibrary = await initMainnetUser(
-        NETWORK_ADDRESSES[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"].LZ_LIBRARY,
+        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
         ethers.utils.parseEther("100"),
       );
       const endpoint = new ethers.Contract(
-        NETWORK_ADDRESSES[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"].ENDPOINT,
+        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].ENDPOINT,
         ENDPOINT_ABI,
         provider,
       );
@@ -193,9 +186,13 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
         ["address", "address"],
         [OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_GOVERNANCE_EXECUTOR],
       );
-      const srcChainId = getSourceChainId(FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet");
+      const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
-
+      const [targets, , , ,] = ethers.utils.defaultAbiCoder.decode(
+        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+        payload,
+      );
+      const gasLimit = calculateGasForAdapterParam(targets.length);
       const tx = await endpoint
         .connect(impersonatedLibrary)
         .receivePayload(
@@ -203,9 +200,9 @@ export const testVipV2 = (description: string, proposal: Proposal, options: Test
           srcAddress,
           OMNICHAIN_GOVERNANCE_EXECUTOR,
           inboundNonce.add(1),
-          gaslimit,
+          gasLimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
-          { gasLimit: gaslimit },
+          { gasLimit: gasLimit },
         );
       await tx.wait();
       expect(await executor.queued(proposalId)).to.be.true;

@@ -1,4 +1,4 @@
-import { ProposalType } from "../../src/types";
+import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposalV2 } from "../../src/utils";
 
 const SEPOLIA_FASTTRACK_TIMELOCK = "0xB2Cd2b51919160FC57a788e1D3B15BCe2F591b0f";
@@ -7,7 +7,7 @@ export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C28257
 export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_MAX_DAILY_LIMIT = 100;
-const SEPOLIA_CHAIN_ID = 10161;
+const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 
 export const vip303 = () => {
   const meta = {

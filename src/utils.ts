@@ -7,42 +7,28 @@ import { Contract } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
-import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
+import { Command, LzChainId, Proposal, ProposalMeta, ProposalType, REMOTE_NETWORKS, TokenConfig } from "./types";
 import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-export const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
+const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
 const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
 const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHAIN_SENDER = "";
-const OMNICHAIN_PROPOSAL_SENDER =
-  FORKED_NETWORK === "bsctestnet" ? BSCTESTNET_OMNICHAIN_SENDER : BSCMAINNET_OMNICHAIN_SENDER;
-export let gaslimit: number;
 
-interface NetworkChainIds {
-  sepolia: number;
-  ethereum: number;
-  opbnbtestnet: number;
-  opbnbmainnet: number;
-}
-export const networkChainIds: NetworkChainIds = {
-  ethereum: 101,
-  sepolia: 10161,
-  opbnbtestnet: 10202,
-  opbnbmainnet: 202,
-};
-
-const currentChainId = (): number => {
-  return networkChainIds[FORKED_NETWORK as "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet"];
+export const getOmnichainProposalSenderAddress = () => {
+  if (FORKED_NETWORK === "bscmainnet" || mainnetNetworks.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
+    return BSCMAINNET_OMNICHAIN_SENDER;
+  } else return BSCTESTNET_OMNICHAIN_SENDER;
 };
 
 export const getPayload = (proposal: Proposal) => {
   for (let j = proposal.targets.length - 1; j >= 0; j--) {
     if (
-      proposal.params[j][0] === currentChainId() &&
+      proposal.params[j][0] === LzChainId[FORKED_NETWORK as REMOTE_NETWORKS] &&
       proposal.signatures[j] === "execute(uint16,bytes,bytes,address)"
     ) {
       return proposal.params[j][1];
@@ -65,11 +51,11 @@ export async function setForkBlock(blockNumber: number) {
   });
 }
 
-export const getSourceChainId = (network: "ethereum" | "sepolia" | "opbnbtestnet" | "opbnbmainnet") => {
-  if (testnetNetworks.includes(network as string)) {
-    return 10102;
-  } else if (mainnetNetworks.includes(network as string)) {
-    return 102;
+export const getSourceChainId = (network: REMOTE_NETWORKS) => {
+  if (mainnetNetworks.includes(network as string)) {
+    return LzChainId.bscmainnet;
+  } else if (testnetNetworks.includes(network as string)) {
+    return LzChainId.bsctestnet;
   }
 };
 
@@ -108,15 +94,23 @@ export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: Pr
   };
 };
 
-const getAdapterParam = (chainId: number, noOfCommands: number): string => {
-  const requiredGas = 600000 + gasUsedPerCommand * noOfCommands;
+const getAdapterParam = (noOfCommands: number): string => {
+  const requiredGas = calculateGasForAdapterParam(noOfCommands);
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
-  gaslimit = requiredGas;
   return adapterParam;
+};
+
+export const calculateGasForAdapterParam = (noOfCommands: number): number => {
+  const requiredGas = 600000 + gasUsedPerCommand * noOfCommands;
+  return requiredGas;
 };
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
   const provider = ethers.provider;
-  const OmnichainProposalSender = new ethers.Contract(OMNICHAIN_PROPOSAL_SENDER, OmnichainProposalSender_ABI, provider);
+  const OmnichainProposalSender = new ethers.Contract(
+    getOmnichainProposalSenderAddress(),
+    OmnichainProposalSender_ABI,
+    provider,
+  );
   let fee;
   if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
     fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].toString();
@@ -163,9 +157,9 @@ export const makeProposalV2 = async (
         }),
         type,
       );
-      const remoteAdapterParam = getAdapterParam(key, chainCommands.map(cmd => cmd.target).length);
+      const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
 
-      proposal.targets.push(OMNICHAIN_PROPOSAL_SENDER);
+      proposal.targets.push(getOmnichainProposalSenderAddress());
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
       proposal.values.push(value);
       proposal.signatures.push("execute(uint16,bytes,bytes,address)");
