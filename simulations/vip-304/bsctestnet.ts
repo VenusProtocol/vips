@@ -1,35 +1,36 @@
-import { TransactionResponse } from "@ethersproject/providers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { BigNumber, Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { forking, testVip } from "../../src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
+import {
+  checkRewardsDistributor,
+  checkRewardsDistributorPool,
+} from "../../src/vip-framework/checks/rewardsDistributor";
 import vip304, {
-  RESILIENT_ORACLE, 
-  BABYDOGE, 
+  BABYDOGE,
+  COMPTROLLER,
+  RESILIENT_ORACLE,
+  REWARDS_AMOUNT,
+  REWARDS_DISTRIBUTOR,
   TREASURY,
+  USDT,
   VBABYDOGE,
   VUSDT,
-  COMPTROLLER,
-  REWARDS_DISTRIBUTOR,
-  USDT,
-  REWARDS_AMOUNT,
 } from "../../vips/vip-304/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { BigNumber, Contract } from "ethers";
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../src/vip-framework/checks/checkVToken";
-import { checkRewardsDistributor, checkRewardsDistributorPool } from "../../src/vip-framework/checks/rewardsDistributor";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+
 const { bsctestnet } = NETWORK_ADDRESSES;
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 
@@ -87,44 +88,40 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-
 forking(40208623, () => {
   const provider = ethers.provider;
-  let oracle: Contract
-  let poolRegistry: Contract
-  let vBabyDoge: Contract
-  let Vusdt: Contract
-  let comptroller: Contract
-  let babyDoge: Contract
-  let rewardDistributor: Contract
+  let oracle: Contract;
+  let poolRegistry: Contract;
+  let vBabyDoge: Contract;
+  let Vusdt: Contract;
+  let comptroller: Contract;
+  let babyDoge: Contract;
+  let rewardDistributor: Contract;
 
   before(async () => {
-    impersonateAccount(bsctestnet.NORMAL_TIMELOCK);
-    oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE)
-    poolRegistry = new ethers.Contract(bsctestnet.POOL_REGISTRY, POOL_REGISTRY_ABI, provider)
-    vBabyDoge = await ethers.getContractAt(VTOKEN_ABI, VBABYDOGE)
-    Vusdt = await ethers.getContractAt(VTOKEN_ABI, VUSDT)
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER)
-    rewardDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR)
-    babyDoge = await ethers.getContractAt(ERC20_ABI, BABYDOGE, await ethers.getSigner(bsctestnet.NORMAL_TIMELOCK))
+    await impersonateAccount(bsctestnet.NORMAL_TIMELOCK);
+    oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
+    poolRegistry = new ethers.Contract(bsctestnet.POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
+    vBabyDoge = await ethers.getContractAt(VTOKEN_ABI, VBABYDOGE);
+    Vusdt = await ethers.getContractAt(VTOKEN_ABI, VUSDT);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
+    rewardDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR);
+    babyDoge = await ethers.getContractAt(ERC20_ABI, BABYDOGE, await ethers.getSigner(bsctestnet.NORMAL_TIMELOCK));
   });
 
   describe("Pre-VIP state", () => {
     it("check price", async () => {
-      await expect(oracle.getPrice(BABYDOGE)).to.be.reverted
-    })
+      await expect(oracle.getPrice(BABYDOGE)).to.be.reverted;
+    });
   });
 
-  testVip("Add Meme Pool", vip304(), {
-    callbackAfterExecution: async (txResponse: TransactionResponse) => {
-    },
-  });
+  testVip("Add Meme Pool", vip304());
 
   describe("Post-VIP state", () => {
     it("check price", async () => {
       const price = await oracle.getPrice(BABYDOGE);
       expect(price).to.be.eq(parseUnits("0.000000001785007649000000000", 27));
-    })
+    });
 
     it("should have 2 markets in meme pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
@@ -139,7 +136,7 @@ forking(40208623, () => {
     it("should add vUSDT to the pool", async () => {
       const registeredVToken = await poolRegistry.getVTokenForAsset(comptroller.address, USDT);
       expect(registeredVToken).to.equal(Vusdt.address);
-    })
+    });
 
     it("check vBabyDoge ownership", async () => {
       expect(await vBabyDoge.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
@@ -172,9 +169,7 @@ forking(40208623, () => {
         expect(await vBabyDoge.reserveFactorMantissa()).to.equal(
           parseUnits(vBabyDoge_riskParameters.reserveFactor, 18),
         );
-        expect(await Vusdt.reserveFactorMantissa()).to.equal(
-          parseUnits(vUSDT_riskParameters.reserveFactor, 18),
-        );
+        expect(await Vusdt.reserveFactorMantissa()).to.equal(parseUnits(vUSDT_riskParameters.reserveFactor, 18));
       });
 
       it(`check CF`, async () => {
@@ -187,12 +182,12 @@ forking(40208623, () => {
 
       it(`check liquidation threshold`, async () => {
         let market = await comptroller.markets(VBABYDOGE);
-        expect(market.liquidationThresholdMantissa).to.equal(parseUnits(vBabyDoge_riskParameters.liquidationThreshold, 18));
+        expect(market.liquidationThresholdMantissa).to.equal(
+          parseUnits(vBabyDoge_riskParameters.liquidationThreshold, 18),
+        );
 
         market = await comptroller.markets(VUSDT);
-        expect(market.liquidationThresholdMantissa).to.equal(
-          parseUnits(vUSDT_riskParameters.liquidationThreshold, 18),
-        );
+        expect(market.liquidationThresholdMantissa).to.equal(parseUnits(vUSDT_riskParameters.liquidationThreshold, 18));
       });
 
       it(`check protocol seize share`, async () => {
@@ -272,7 +267,6 @@ forking(40208623, () => {
         supplySpeed: "12134623477230768",
         totalRewardsToDistribute: parseUnits("2400", 18),
       });
-
 
       await checkRewardsDistributorPool(COMPTROLLER, 1);
     });

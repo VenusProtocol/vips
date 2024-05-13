@@ -1,4 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
+
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -15,9 +16,9 @@ export const REWARDS_DISTRIBUTOR = "0x34e14e4A5f5de28f8e58aeD296068ce5c3C25C4c";
 export const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 
 export const STALE_PERIOD = 60 * 60 * 24; // 24 hour
-export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9)
-export const USDT_SUPPLY = parseUnits("5000", 6)
-export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9)
+export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
+export const USDT_SUPPLY = parseUnits("5000", 6);
+export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9);
 
 const vip304 = () => {
   const meta = {
@@ -30,23 +31,17 @@ const vip304 = () => {
   };
 
   return makeProposal(
-    [ 
+    [
       // Set Oracle Config for BabyDoge
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: [
-          "BABYDOGE",
-          STALE_PERIOD
-        ],
+        params: ["BABYDOGE", STALE_PERIOD],
       },
       {
         target: BINANCE_ORACLE,
         signature: "setSymbolOverride(string,string)",
-        params: [
-          "BabyDoge",
-          "BABYDOGE"
-        ],
+        params: ["BabyDoge", "BABYDOGE"],
       },
       {
         target: RESILIENT_ORACLE,
@@ -73,69 +68,44 @@ const vip304 = () => {
       {
         target: COMPTROLLER,
         signature: "setPriceOracle(address)",
-        params: [
-          RESILIENT_ORACLE
-        ],
+        params: [RESILIENT_ORACLE],
       },
       {
         target: POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
-        params: [
-          "Meme",
-          COMPTROLLER,
-          "500000000000000000",
-          "1100000000000000000",
-          "100000000000000000000"
-        ],
+        params: ["Meme", COMPTROLLER, "500000000000000000", "1100000000000000000", "100000000000000000000"],
       },
 
       // Add BabyDoge Market
       {
         target: BABYDOGE,
         signature: "faucet(uint256)",
-        params: [
-          BABYDOGE_SUPPLY
-        ],
+        params: [BABYDOGE_SUPPLY],
       },
       {
         target: BABYDOGE,
         signature: "transfer(address,uint256)",
-        params: [
-          TREASURY,
-          BABYDOGE_SUPPLY
-        ],
+        params: [TREASURY, BABYDOGE_SUPPLY],
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [
-          BABYDOGE,
-          BABYDOGE_SUPPLY,
-          NORMAL_TIMELOCK
-        ],
+        params: [BABYDOGE, BABYDOGE_SUPPLY, NORMAL_TIMELOCK],
       },
       {
         target: BABYDOGE,
         signature: "approve(address,uint256)",
-        params: [
-          POOL_REGISTRY,
-          0
-        ],
+        params: [POOL_REGISTRY, 0],
       },
       {
         target: BABYDOGE,
         signature: "approve(address,uint256)",
-        params: [
-          POOL_REGISTRY,
-          BABYDOGE_SUPPLY
-        ],
+        params: [POOL_REGISTRY, BABYDOGE_SUPPLY],
       },
       {
         target: VBABYDOGE,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: [
-          "100"
-        ],
+        params: ["100"],
       },
       {
         target: POOL_REGISTRY,
@@ -148,8 +118,8 @@ const vip304 = () => {
             BABYDOGE_SUPPLY,
             TREASURY,
             "1600000000000000000000000",
-            "800000000000000000000000"
-          ]
+            "800000000000000000000000",
+          ],
         ],
       },
 
@@ -157,48 +127,28 @@ const vip304 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [
-          USDT,
-          USDT_SUPPLY,
-          NORMAL_TIMELOCK
-        ],
+        params: [USDT, USDT_SUPPLY, NORMAL_TIMELOCK],
       },
       {
         target: USDT,
         signature: "approve(address,uint256)",
-        params: [
-          POOL_REGISTRY,
-          0
-        ],
+        params: [POOL_REGISTRY, 0],
       },
       {
         target: USDT,
         signature: "approve(address,uint256)",
-        params: [
-          POOL_REGISTRY,
-          USDT_SUPPLY
-        ],
+        params: [POOL_REGISTRY, USDT_SUPPLY],
       },
       {
         target: VUSDT,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: [
-          "100"
-        ],
+        params: ["100"],
       },
       {
         target: POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
-          [
-            VUSDT,
-            "750000000000000000",
-            "770000000000000000",
-            USDT_SUPPLY,
-            TREASURY,
-            "1000000000000",
-            "900000000000"
-          ]
+          [VUSDT, "750000000000000000", "770000000000000000", USDT_SUPPLY, TREASURY, "1000000000000", "900000000000"],
         ],
       },
 
@@ -206,17 +156,12 @@ const vip304 = () => {
       {
         target: BABYDOGE,
         signature: "faucet(uint256)",
-        params: [
-          REWARDS_AMOUNT
-        ],
+        params: [REWARDS_AMOUNT],
       },
       {
         target: BABYDOGE,
         signature: "transfer(address,uint256)",
-        params: [
-          REWARDS_DISTRIBUTOR,
-          REWARDS_AMOUNT
-        ],
+        params: [REWARDS_DISTRIBUTOR, REWARDS_AMOUNT],
       },
       {
         target: REWARDS_DISTRIBUTOR,
@@ -226,25 +171,13 @@ const vip304 = () => {
       {
         target: COMPTROLLER,
         signature: "addRewardsDistributor(address)",
-        params: [
-          REWARDS_DISTRIBUTOR
-        ],
+        params: [REWARDS_DISTRIBUTOR],
       },
       {
         target: REWARDS_DISTRIBUTOR,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [
-            VBABYDOGE
-          ],
-          [
-            "12134623477230768"
-          ],
-          [
-            "12134623477230768"
-          ]
-        ],
-      }
+        params: [[VBABYDOGE], ["12134623477230768"], ["12134623477230768"]],
+      },
     ],
     meta,
     ProposalType.REGULAR,
