@@ -27,6 +27,9 @@ import VTOKEN_ABI from "./abi/vToken.json";
 import { BigNumber, Contract } from "ethers";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
+import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "../../src/vip-framework/checks/checkVToken";
+import { checkRewardsDistributor, checkRewardsDistributorPool } from "../../src/vip-framework/checks/rewardsDistributor";
 const { bsctestnet } = NETWORK_ADDRESSES;
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 
@@ -231,6 +234,46 @@ forking(40289920, () => {
           BLOCKS_PER_YEAR,
         );
       });
+    });
+
+    it("generic IL tests", async () => {
+      await babyDoge.faucet(parseUnits("10000", 9));
+      await checkIsolatedPoolsComptrollers({
+        [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
+      });
+
+      await checkVToken(VBABYDOGE, {
+        name: "Venus BabyDoge (Meme)",
+        symbol: "vBabyDoge_Meme",
+        decimals: 8,
+        underlying: BABYDOGE,
+        exchangeRate: parseUnits("10000000000", 18),
+        comptroller: COMPTROLLER,
+      });
+
+      await checkVToken(VUSDT, {
+        name: "Venus USDT (Meme)",
+        symbol: "vUSDT_Meme",
+        decimals: 8,
+        underlying: USDT,
+        exchangeRate: parseUnits("10000000000", 18),
+        comptroller: COMPTROLLER,
+      });
+    });
+
+    it("generic reward tests", async () => {
+      await checkRewardsDistributor("RewardsDistributor_MEME_0_BABYDOGE", {
+        pool: COMPTROLLER,
+        address: REWARDS_DISTRIBUTOR,
+        token: BABYDOGE,
+        vToken: VBABYDOGE,
+        borrowSpeed: "12134623477230768",
+        supplySpeed: "12134623477230768",
+        totalRewardsToDistribute: parseUnits("2400", 18),
+      });
+
+
+      await checkRewardsDistributorPool(COMPTROLLER, 1);
     });
   });
 });
