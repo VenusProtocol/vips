@@ -244,22 +244,7 @@ const vip304 = () => {
             "12134623477230768"
           ]
         ],
-      },
-      {
-        target: BABYDOGE,
-        signature: "faucet(uint256)",
-        params: [
-          BABYDOGE_SUPPLY
-        ],
-      },
-      {
-        target: BABYDOGE,
-        signature: "transfer(address,uint256)",
-        params: [
-          TREASURY,
-          BABYDOGE_SUPPLY
-        ],
-      },
+      }
     ],
     meta,
     ProposalType.REGULAR,
