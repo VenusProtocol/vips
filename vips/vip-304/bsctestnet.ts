@@ -17,6 +17,7 @@ export const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 export const STALE_PERIOD = 60 * 60 * 24; // 24 hour
 export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9)
 export const USDT_SUPPLY = parseUnits("5000", 6)
+export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9)
 
 const vip304 = () => {
   const meta = {
@@ -203,6 +204,21 @@ const vip304 = () => {
 
       // Add Rewards Distributor
       {
+        target: BABYDOGE,
+        signature: "faucet(uint256)",
+        params: [
+          REWARDS_AMOUNT
+        ],
+      },
+      {
+        target: BABYDOGE,
+        signature: "transfer(address,uint256)",
+        params: [
+          REWARDS_DISTRIBUTOR,
+          REWARDS_AMOUNT
+        ],
+      },
+      {
         target: REWARDS_DISTRIBUTOR,
         signature: "acceptOwnership()",
         params: [],
@@ -228,7 +244,22 @@ const vip304 = () => {
             "12134623477230768"
           ]
         ],
-      }
+      },
+      {
+        target: BABYDOGE,
+        signature: "faucet(uint256)",
+        params: [
+          BABYDOGE_SUPPLY
+        ],
+      },
+      {
+        target: BABYDOGE,
+        signature: "transfer(address,uint256)",
+        params: [
+          TREASURY,
+          BABYDOGE_SUPPLY
+        ],
+      },
     ],
     meta,
     ProposalType.REGULAR,
