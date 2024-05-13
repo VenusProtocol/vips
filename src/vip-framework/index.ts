@@ -7,7 +7,7 @@ import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal, REMOTE_NETWORKS, SUPPORTED_NETWORKS } from "../types";
+import { Proposal, ProposalType, REMOTE_NETWORKS, SUPPORTED_NETWORKS } from "../types";
 import {
   calculateGasForAdapterParam,
   getCalldatas,
@@ -162,6 +162,8 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let executor: Contract;
   let payload: string;
   let proposalId: number;
+  let targets: any[];
+  let proposalType: number;
   const provider = ethers.provider;
 
   describe(`${description} execution`, () => {
@@ -170,6 +172,10 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
       proposalId++;
+      [targets, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
+        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+        payload,
+      );
     });
 
     it("should be queued succesfully", async () => {
@@ -188,10 +194,6 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       );
       const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
-      const [targets, , , ,] = ethers.utils.defaultAbiCoder.decode(
-        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
-        payload,
-      );
       const gasLimit = calculateGasForAdapterParam(targets.length);
       const tx = await endpoint
         .connect(impersonatedLibrary)
@@ -209,11 +211,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
     });
 
     it("should be executed successfully", async () => {
-      const [, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
-        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
-        payload,
-      );
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[(proposalType as 0) || 1 || 2]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType as ProposalType]);
       const blockchainProposal = await executor.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await executor.execute(proposalId);
