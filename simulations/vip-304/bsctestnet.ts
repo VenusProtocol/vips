@@ -277,7 +277,7 @@ forking(40208623, () => {
         vToken: VBABYDOGE,
         borrowSpeed: "12134623477230768",
         supplySpeed: "12134623477230768",
-        totalRewardsToDistribute: parseUnits("2400", 18),
+        totalRewardsToDistribute: parseUnits("15726472026491.075844320", 9),
       });
 
       await checkRewardsDistributorPool(COMPTROLLER, 1);
