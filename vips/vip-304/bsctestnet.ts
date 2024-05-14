@@ -34,55 +34,6 @@ export const BaseAssets = [
   "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7", // ETH ETHTokenConverter BaseAsset
   "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff", // XVS XVSTokenConverter BaseAsset
 ];
-export const Assets = [BABYDOGE];
-const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
-export const RiskFundConverterTokenOuts = filterAssets(Assets, BaseAssets[0]);
-export const USDTPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
-export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
-export const BTCBPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
-export const ETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
-export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[5]);
-
-type IncentiveAndAccessibility = [number, number];
-export const incentiveAndAccessibilityForRiskFundConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForBTCBPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForETHPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = [];
-
-function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
-  const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
-
-  // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
-  // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
-  if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
-    return [0, 2]; // ONLY_FOR_CONVERTERS
-  } else {
-    return [0, 1]; // ALL
-  }
-}
-
-for (let i = 0; i < RiskFundConverterTokenOuts.length; i++) {
-  incentiveAndAccessibilityForRiskFundConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[0], RiskFundConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForUSDTPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[1], USDTPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForUSDCPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[2], USDCPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForBTCBPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[3], BTCBPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForETHPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[4], ETHPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForXVSVaultConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[5], XVSVaultConverterTokenOuts[i]),
-  );
-}
 
 const vip304 = () => {
   const meta = {
@@ -237,32 +188,32 @@ const vip304 = () => {
       {
         target: RISK_FUND_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], RiskFundConverterTokenOuts, incentiveAndAccessibilityForRiskFundConverter],
+        params: [BaseAssets[0], [BABYDOGE], [[0, 1]]],
       },
       {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], USDTPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDTPrimeConverter],
+        params: [BaseAssets[1], [BABYDOGE], [[0, 1]]],
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], USDCPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDCPrimeConverter],
+        params: [BaseAssets[2], [BABYDOGE], [[0, 1]]],
       },
       {
         target: BTCB_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], BTCBPrimeConverterTokenOuts, incentiveAndAccessibilityForBTCBPrimeConverter],
+        params: [BaseAssets[3], [BABYDOGE], [[0, 1]]],
       },
       {
         target: ETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], ETHPrimeConverterTokenOuts, incentiveAndAccessibilityForETHPrimeConverter],
+        params: [BaseAssets[4], [BABYDOGE], [[0, 1]]],
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[5], XVSVaultConverterTokenOuts, incentiveAndAccessibilityForXVSVaultConverter],
+        params: [BaseAssets[5], [BABYDOGE], [[0, 1]]],
       },
     ],
     meta,
