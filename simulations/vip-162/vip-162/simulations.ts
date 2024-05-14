@@ -27,7 +27,7 @@ const VTOKEN_RECEIVER_TWT = "0x0848dB7cB495E7b9aDA1D4dC972b9A526D014D84";
 const VTWT_DeFi = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(31162125, () => {
+forking(31162125, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTWT: Contract;
@@ -99,7 +99,7 @@ forking(31162125, () => {
     });
   });
 
-  testVip("VIP-162 Add Markets", vip162(24 * 60 * 60 * 3), {
+  testVip("VIP-162 Add Markets", await vip162(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

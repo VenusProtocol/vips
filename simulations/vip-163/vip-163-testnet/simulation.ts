@@ -49,7 +49,7 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
   totalRewardsToDistribute: parseUnits("2000", 18),
 };
 
-forking(32763372, () => {
+forking(32763372, async () => {
   let comptrollerBeacon: Contract;
   let hayRewardsDistributor: Contract;
   let sdRewardsDistributor: Contract;
@@ -71,7 +71,7 @@ forking(32763372, () => {
     });
   });
 
-  testVip("VIP-163 HAY and SD Rewards", vip163Testnet(), {
+  testVip("VIP-163 HAY and SD Rewards", await vip163Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

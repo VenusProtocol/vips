@@ -31,7 +31,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -79,7 +79,7 @@ forking(34541821, () => {
   });
 });
 
-forking(34541821, () => {
+forking(34541821, async () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -101,7 +101,7 @@ forking(34541821, () => {
       type: "event",
     },
   ];
-  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", vip193Testnet(), {
+  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", await vip193Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -116,7 +116,7 @@ forking(34541821, () => {
 forking(34541821, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193Testnet());
+      await pretendExecutingVip(await vip193Testnet());
       [user] = await ethers.getSigners();
     });
 
@@ -172,10 +172,10 @@ forking(34541821, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193Testnet());
+      await pretendExecutingVip(await vip193Testnet());
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
 

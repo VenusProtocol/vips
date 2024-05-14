@@ -12,7 +12,7 @@ const VWBETH = "0x6cfdec747f37daf3b87a35a1d9c8ad3063a1a8a0";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 
-forking(29989714, () => {
+forking(29989714, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -32,7 +32,7 @@ forking(29989714, () => {
     });
   });
 
-  testVip("VIP-143 Risk Parameters Update", vip143(), {
+  testVip("VIP-143 Risk Parameters Update", await vip143(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap", "Failure"], [1, 1, 0]);
     },

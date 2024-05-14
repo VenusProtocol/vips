@@ -9,8 +9,8 @@ import {
   OMNICHAIN_PROPOSAL_SENDER,
   SEPOLIA_MAX_DAILY_LIMIT,
   SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
-  vip302,
-} from "../../vips/vip-302/bsctestnet";
+  vip304,
+} from "../../vips/vip-304/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -30,7 +30,7 @@ forking(40149880, async () => {
     });
   });
 
-  testVip("vip302 give permissions to timelock", await vip302(), {
+  testVip("vip304 give permissions to timelock", await vip304(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

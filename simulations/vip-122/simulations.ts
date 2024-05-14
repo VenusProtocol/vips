@@ -32,7 +32,7 @@ const LINK_LTC_XRP_RATE_MODEL_CURR = "0x32450305D6c692269B3cBf9730d99104f80fce23
 const BNB_RATE_MODEL_CURR = "0x1B047f9717154EA5EC59674273d50a137212cBb4";
 const MATIC_RATE_MODEL_CURR = "0xC6F3f4D5421E70CB6C32C7402E51C8894A40F29a";
 
-forking(28541594, () => {
+forking(28541594, async () => {
   let comptroller: Contract;
   let rateModel: Contract;
   let vEth: Contract;
@@ -163,7 +163,7 @@ forking(28541594, () => {
     });
   });
 
-  testVip("VIP-122 Risk Parameters Update", vip122(), {
+  testVip("VIP-122 Risk Parameters Update", await vip122(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap", "Failure"], [2, 2, 0]);
     },

@@ -65,7 +65,7 @@ const vTokens: vTokenConfig[] = [
 
 forking(5007188, () => {
   before(async () => {
-    await pretendExecutingVip(vip007());
+    await pretendExecutingVip(await vip007());
   });
 
   describe("Pre-VIP behavior", () => {
@@ -105,7 +105,7 @@ forking(5007188, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
 
       await impersonateAccount(USER);
       const accounts = await ethers.getSigners();

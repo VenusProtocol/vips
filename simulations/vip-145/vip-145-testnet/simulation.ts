@@ -72,7 +72,7 @@ const ilPoolTokens: ILVTokenConfig[] = [
   },
 ];
 
-forking(31522791, () => {
+forking(31522791, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -105,7 +105,7 @@ forking(31522791, () => {
     });
   });
 
-  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145Testnet());
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", await vip145Testnet());
 
   describe("Post-VIP behavior", async () => {
     let resilientOracleProxy: Contract;

@@ -187,7 +187,7 @@ const OLD_SPEEDS: SpeedRecord[] = [
   },
 ];
 
-forking(31758000, () => {
+forking(31758000, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -213,7 +213,7 @@ forking(31758000, () => {
     }
   });
 
-  testVip("Decrease XVS distribution speeds", vip171(), {
+  testVip("Decrease XVS distribution speeds", await vip171(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

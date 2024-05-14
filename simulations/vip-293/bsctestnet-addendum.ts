@@ -22,7 +22,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vTokenBeacon.json";
 
-forking(39580376, () => {
+forking(39580376, async () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
   let proxyAdmin: Contract;
@@ -44,7 +44,7 @@ forking(39580376, () => {
     });
   });
 
-  testVip("VIP-293", vip293Addendum(), {});
+  testVip("VIP-293", await vip293Addendum(), {});
 
   describe("Post-VIP behavior", async () => {
     it("check ankrBNB price", async () => {

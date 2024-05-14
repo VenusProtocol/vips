@@ -12,7 +12,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-forking(34772092, () => {
+forking(34772092, async () => {
   let comptroller: Contract;
   before(async () => {
     const provider = ethers.provider;
@@ -33,7 +33,7 @@ forking(34772092, () => {
     checkCorePoolComptroller();
   });
 
-  testVip("VIP-227 Venus Recommend Parameters", vip227(), {
+  testVip("VIP-227 Venus Recommend Parameters", await vip227(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },

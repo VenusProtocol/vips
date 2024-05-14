@@ -20,7 +20,7 @@ import VTOKEN_ABI from "./abi/VBep20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const blockNumber = 37541463;
-forking(blockNumber, () => {
+forking(blockNumber, async () => {
   let usdt: Contract;
   let prevUSDTBalanceOfCommunityWallet: BigNumber;
 
@@ -37,7 +37,7 @@ forking(blockNumber, () => {
     prevUSDTBalanceOfCommunityWallet = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-281", vip281(), {
+  testVip("VIP-281", await vip281(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [33]);
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [9]);

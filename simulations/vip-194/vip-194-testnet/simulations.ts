@@ -72,8 +72,8 @@ forking(34543167, () => {
   });
 });
 
-forking(34543167, () => {
-  testVip("VIP-194 IL VToken Upgrade of AIA", vip194Testnet(), {
+forking(34543167, async () => {
+  testVip("VIP-194 IL VToken Upgrade of AIA", await vip194Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [2, 27]);
     },
@@ -83,7 +83,7 @@ forking(34543167, () => {
 forking(34543167, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip194Testnet());
+      await pretendExecutingVip(await vip194Testnet());
       [user] = await ethers.getSigners();
     });
 
@@ -138,7 +138,7 @@ forking(34543167, () => {
 forking(34543167, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip194Testnet());
+      await pretendExecutingVip(await vip194Testnet());
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
 

@@ -27,8 +27,8 @@ const BUSD_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(34258500, () => {
-  testVip("VIP-215", vip215());
+forking(34258500, async () => {
+  testVip("VIP-215", await vip215());
 });
 
 // Ressetting the fork to prevent oracle prices from getting stale
@@ -60,7 +60,7 @@ forking(34258500, () => {
     oracle = new ethers.Contract(oracleAddress, PRICE_ORACLE_ABI, provider);
     moveDebtDelegate = new ethers.Contract(MOVE_DEBT_DELEGATE, MOVE_DEBT_DELEGATE_ABI, provider);
     busdHolder = await initMainnetUser(BUSD_HOLDER, parseEther("1"));
-    await pretendExecutingVip(vip215());
+    await pretendExecutingVip(await vip215());
   });
 
   describe("Post-VIP contracts status", async () => {

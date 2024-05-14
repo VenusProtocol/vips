@@ -16,7 +16,7 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 
-forking(37062000, () => {
+forking(37062000, async () => {
   const provider = ethers.provider;
   let binanceOracle: Contract;
   let resilientOracle: Contract;
@@ -35,7 +35,7 @@ forking(37062000, () => {
     });
   });
 
-  testVip("VIP-274", vip274(), {
+  testVip("VIP-274", await vip274(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [1]);
     },

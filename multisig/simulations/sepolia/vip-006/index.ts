@@ -33,7 +33,7 @@ import vip006, {
 forking(5523471, () => {
   describe("Generic checks", async () => {
     before(async () => {
-      await pretendExecutingVip(vip006());
+      await pretendExecutingVip(await vip006());
     });
 
     checkRewardsDistributorPool(COMPTROLLER_CORE, 2);

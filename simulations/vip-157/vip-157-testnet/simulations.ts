@@ -28,7 +28,7 @@ const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 const STABLE_TOKEN_HOLDER = "0xd9a851794184869fba26ae2417008cb09c9195f1";
 const VAI_HOLDER = "0xd24d881ff77a47188f40b2a0c36ecb6973b5f2a4";
 
-forking(32091802, () => {
+forking(32091802, async () => {
   const provider = ethers.provider;
   let vai: Contract;
   let vaiControllerProxy: Contract;
@@ -53,7 +53,7 @@ forking(32091802, () => {
     vaiHolder = await initMainnetUser(VAI_HOLDER, ethers.utils.parseEther("1"));
   });
 
-  testVip("VIP-157 Add Peg Stability (USDT)", vip157Testnet());
+  testVip("VIP-157 Add Peg Stability (USDT)", await vip157Testnet());
 
   describe("Post-VIP behavior", async () => {
     it("Verify PSM_USDT is admin of VAI contract", async () => {

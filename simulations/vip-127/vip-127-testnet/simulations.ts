@@ -43,7 +43,7 @@ forking(30622030, async () => {
     accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
   });
 
-  testVip("VIP-127-testnet Change Vault Implementation Testnet", vip127Testnet());
+  testVip("VIP-127-testnet Change Vault Implementation Testnet", await vip127Testnet());
 
   describe("Post-VIP behavior", async () => {
     it("Owner of XVSVault is NORMAL TIMELOCK", async () => {

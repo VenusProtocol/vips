@@ -46,7 +46,7 @@ forking(19483115, () => {
       const impersonateBridge = await initMainnetUser(XVS_PROXY_OFT_DEST, ethers.utils.parseEther("2"));
       await xvs.connect(impersonateBridge).mint(ETHEREUM_TREASURY, XVS_REWARD_AMOUNT);
       xvsStoreBalPrev = await xvs.balanceOf(XVS_STORE);
-      await pretendExecutingVip(vip006());
+      await pretendExecutingVip(await vip006());
     });
 
     it("Should increase XVSStore balance", async () => {

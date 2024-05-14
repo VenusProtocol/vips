@@ -21,7 +21,7 @@ const PESSIMISTIC_RECEIVER = "0x1B3bCe9Bd90cF6598bCc0321cC10b48bfD6Cf12f";
 const FAIRYPROOF_RECEIVER = "0x060a08fff78aedba4eef712533a324272bf68119";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(36192027, () => {
+forking(36192027, async () => {
   let usdt: Contract;
   let eth: Contract;
   let prevBalancePessimistic: BigNumber;
@@ -41,7 +41,7 @@ forking(36192027, () => {
     console.log({ prevBNBBalanceCommunityWallet });
   });
 
-  testVip("VIP-259 Payments Issuance for audits", vip259(), {
+  testVip("VIP-259 Payments Issuance for audits", await vip259(), {
     supporter: "0x55a9f5374af30e3045fb491f1da3c2e8a74d168d",
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [4, 1]);

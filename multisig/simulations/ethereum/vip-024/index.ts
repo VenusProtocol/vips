@@ -45,7 +45,7 @@ forking(19732900, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip024());
+      await pretendExecutingVip(await vip024());
     });
     it("check price", async () => {
       expect(await resilientOracle.getPrice(TUSD)).to.equals("1001575890000000000");

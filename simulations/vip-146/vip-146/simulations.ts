@@ -30,7 +30,7 @@ const vankrBNB_DeFi = "0x53728FD51060a85ac41974C6C3Eb1DaE42776723";
 const REWARD_DISTRIBUTOR = "0x14d9A428D0f35f81A30ca8D8b2F3974D3CccB98B";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(30066043, () => {
+forking(30066043, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vankrBNB: Contract;
@@ -104,7 +104,7 @@ forking(30066043, () => {
     });
   });
 
-  testVip("VIP-146 Add Market", vip146(), {
+  testVip("VIP-146 Add Market", await vip146(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

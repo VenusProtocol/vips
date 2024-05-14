@@ -87,7 +87,7 @@ let policyFacetFunctionSelectors: string[];
 let rewardFacetFuntionSelectors: string[];
 let setterFacetFuntionSelectors: string[];
 
-forking(38508666, () => {
+forking(38508666, async () => {
   before(async () => {
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
@@ -134,7 +134,7 @@ forking(38508666, () => {
     });
   });
 
-  testVip("VIP-Gateway", vip276(), {
+  testVip("VIP-Gateway", await vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
@@ -242,7 +242,7 @@ forking(38508666, () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276());
     });
 
     for (const market of CORE_MARKETS) {
@@ -292,7 +292,7 @@ forking(38508666, () => {
     let user: SignerWithAddress;
 
     before(async () => {
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276());
       deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
       user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
 
@@ -318,7 +318,7 @@ forking(38508666, () => {
 // xvs setter tests
 forking(38508666, () => {
   beforeEach(async () => {
-    await pretendExecutingVip(vip276());
+    await pretendExecutingVip(await vip276());
   });
 
   it("Should return correct xvs and xvs vtoken addresses", async () => {
@@ -461,7 +461,7 @@ forking(38508666, async () => {
       );
     }
 
-    await pretendExecutingVip(vip276());
+    await pretendExecutingVip(await vip276());
   });
 
   describe("Verify Storage slots after VIP execution", async () => {

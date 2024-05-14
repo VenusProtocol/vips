@@ -24,7 +24,7 @@ const VBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
 const BUSD_BORROWER = "0x36D023d3Bb82b3ee3BCa30701f2C61329572b688";
 const BUSD_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 
-forking(31850000, () => {
+forking(31850000, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -33,7 +33,7 @@ forking(31850000, () => {
     await setMaxStaleCoreAssets(CHAINLINK_ADDRESS, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-172 Forced liquidations", vip172(), {
+  testVip("VIP-172 Forced liquidations", await vip172(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

@@ -1,5 +1,5 @@
 import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposalV2 } from "../../src/utils";
+import { makeProposal } from "../../src/utils";
 
 const SEPOLIA_FASTTRACK_TIMELOCK = "0xB2Cd2b51919160FC57a788e1D3B15BCe2F591b0f";
 const SEPOLIA_CRITICAL_TIMELOCK = "0x542bd864DCFDD6031F4EEa35C602B564f952c442";
@@ -9,17 +9,17 @@ export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_MAX_DAILY_LIMIT = 100;
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 
-export const vip303 = () => {
+export const vip305 = () => {
   const meta = {
     version: "v2",
-    title: "vip303 give permission of OmnichainGovernanceExecutor to sepolia fasttrack and critical timelock",
+    title: "vip305 give permission of OmnichainGovernanceExecutor to sepolia fasttrack and critical timelock",
     description: `#### Description
     This VIP will grant permission to timelocks of OmnichainProposalExecutor on SEPOLIA chain`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
-  return makeProposalV2(
+  return makeProposal(
     [
       {
         target: SEPOLIA_ACM,

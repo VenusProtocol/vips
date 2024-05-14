@@ -13,7 +13,7 @@ const DESTINATION_ADDRESS = "0x6657911F7411765979Da0794840D671Be55bA273";
 
 const WITDRAW_AMOUNT = "125281198522370512074148";
 
-forking(34286000, () => {
+forking(34286000, async () => {
   let busd: Contract;
   let prevBalance: any;
 
@@ -22,7 +22,7 @@ forking(34286000, () => {
     prevBalance = await busd.balanceOf(DESTINATION_ADDRESS);
   });
 
-  testVip("VIP-216", vip216(), {
+  testVip("VIP-216", await vip216(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "Failure"], [1, 0]);
     },

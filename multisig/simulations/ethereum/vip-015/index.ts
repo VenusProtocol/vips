@@ -23,7 +23,7 @@ forking(19474280, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip015());
+      await pretendExecutingVip(await vip015());
     });
 
     it("check xvs balance", async () => {

@@ -38,7 +38,7 @@ forking(20848424, () => {
   });
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
     });
     it("Should have new interest rate model", async () => {
       expect(await vfdusd.interestRateModel()).equals(NEW_IR);

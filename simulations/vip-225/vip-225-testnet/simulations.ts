@@ -43,7 +43,7 @@ const NEW_IL_VTOKEN_IMPLEMENTATION = "0xE21251bC79Ee0abebA71FaABDC2Ad36762A0b82F
 const OLD_IL_VTOKEN_IMPLEMENTATION = "0xcA408D716011169645Aa94ddc5665043C33df814";
 const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 
-forking(36064000, () => {
+forking(36064000, async () => {
   const provider = ethers.provider;
   let oldPrime: Contract;
   let newPrime: Contract;
@@ -101,7 +101,7 @@ forking(36064000, () => {
     });
   });
 
-  testVip("vip225Testnet", vip225(), {
+  testVip("vip225Testnet", await vip225(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

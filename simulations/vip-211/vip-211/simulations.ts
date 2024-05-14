@@ -32,7 +32,7 @@ const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
 const PRICE_LOWER_BOUND = parseUnits("0.99", 18);
 const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
-forking(33548990, () => {
+forking(33548990, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redStoneOracle: Contract;
@@ -93,7 +93,7 @@ forking(33548990, () => {
     });
   });
 
-  testVip("vip211", vip211(24 * 60 * 60 * 365), {
+  testVip("vip211", await vip211(24 * 60 * 60 * 365), {
     proposer: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async txResponse => {

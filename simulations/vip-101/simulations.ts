@@ -53,8 +53,8 @@ forking(26107552, () => {
   });
 });
 
-forking(26107552, () => {
-  testVip("VIP-101 Venus Recommend Parameters", vip101());
+forking(26107552, async () => {
+  testVip("VIP-101 Venus Recommend Parameters", await vip101());
 });
 
 forking(26107552, () => {
@@ -63,7 +63,7 @@ forking(26107552, () => {
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    await pretendExecutingVip(vip101());
+    await pretendExecutingVip(await vip101());
   });
 
   describe("Post-VIP behavior", async () => {

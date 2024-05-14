@@ -37,7 +37,7 @@ const VUSDD_STABLECOINS = "0xc3a45ad8812189cAb659aD99E64B1376f6aCD035";
 const VHAY_RECEIVER = "0x09702Ea135d9D707DD51f530864f2B9220aAD87B";
 const VUSDD_RECEIVER = "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296";
 
-forking(29441800, () => {
+forking(29441800, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let swapRouter: Contract;
@@ -132,7 +132,7 @@ forking(29441800, () => {
     });
   });
 
-  testVip("VIP-134 IL", vip134());
+  testVip("VIP-134 IL", await vip134());
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {

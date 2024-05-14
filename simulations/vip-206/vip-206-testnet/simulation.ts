@@ -55,7 +55,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34891729, () => {
+forking(34891729, async () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
@@ -83,7 +83,7 @@ forking(34891729, () => {
     });
   });
 
-  testVip("VIP-206 Prime Program", vip206Testnet(), {});
+  testVip("VIP-206 Prime Program", await vip206Testnet(), {});
 
   describe("Post-VIP behavior", async () => {
     let primeLiquidityProvider: Contract;

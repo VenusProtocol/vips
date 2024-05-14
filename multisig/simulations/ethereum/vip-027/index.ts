@@ -23,7 +23,7 @@ forking(19831582, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip027());
+      await pretendExecutingVip(await vip027());
     });
 
     it("check borrow cap", async () => {

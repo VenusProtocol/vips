@@ -20,7 +20,7 @@ const NEW_TUSD = "0xB32171ecD878607FFc4F8FC0bCcE6852BB3149E0";
 const VTOKEN_RECEIVER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(30680185, () => {
+forking(30680185, async () => {
   let comptroller: Contract;
   let tusd: Contract;
   let vTusdOld: Contract;
@@ -37,7 +37,7 @@ forking(30680185, () => {
     vTusd = new ethers.Contract(NEW_VTUSD, VTUSD_ABI, provider);
   });
 
-  testVip("VIP-129-testnet TUSD Contract Migration", vip129Testnet(), {
+  testVip("VIP-129-testnet TUSD Contract Migration", await vip129Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

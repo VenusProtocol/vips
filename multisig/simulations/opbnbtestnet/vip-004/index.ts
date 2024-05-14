@@ -24,7 +24,7 @@ forking(16716512, () => {
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, opbnbtestnet.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-    await pretendExecutingVip(vip004());
+    await pretendExecutingVip(await vip004());
   });
 
   describe("Post tx checks", () => {

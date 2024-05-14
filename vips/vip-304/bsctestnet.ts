@@ -1,6 +1,6 @@
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposalV2 } from "../../src/utils";
+import { makeProposal } from "../../src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
@@ -15,17 +15,17 @@ export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_MAX_DAILY_LIMIT = 100;
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 
-export const vip302 = () => {
+export const vip304 = () => {
   const meta = {
     version: "v2",
-    title: "vip302 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
+    title: "vip304 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA chain`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
-  return makeProposalV2(
+  return makeProposal(
     [
       {
         target: BSC_ACM,

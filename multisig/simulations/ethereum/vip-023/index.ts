@@ -15,7 +15,7 @@ forking(19718702, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip021());
+      await pretendExecutingVip(await vip021());
     });
 
     it("check last reward block", async () => {

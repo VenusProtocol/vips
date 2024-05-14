@@ -28,7 +28,7 @@ forking(5072312, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(await vip003());
     });
     it("Should match single send transaction limit", async () => {
       expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(SRC_CHAIN_ID)).to.equal(SINGLE_SEND_LIMIT);

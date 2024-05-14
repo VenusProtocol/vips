@@ -80,7 +80,7 @@ forking(34517682, () => {
   });
 });
 
-forking(34517682, () => {
+forking(34517682, async () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -102,7 +102,7 @@ forking(34517682, () => {
       type: "event",
     },
   ];
-  testVip("VIP-192 Core  VToken Upgrade of AIA Part - 1", vip192Testnet(), {
+  testVip("VIP-192 Core  VToken Upgrade of AIA Part - 1", await vip192Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -117,7 +117,7 @@ forking(34517682, () => {
 forking(34517682, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip192Testnet());
+      await pretendExecutingVip(await vip192Testnet());
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       [user] = await ethers.getSigners();
     });
@@ -179,7 +179,7 @@ forking(34517682, () => {
 forking(34517682, () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip192Testnet());
+      await pretendExecutingVip(await vip192Testnet());
     });
 
     for (const market of CORE_MARKETS) {

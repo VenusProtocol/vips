@@ -42,7 +42,7 @@ forking(25254212, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(await vip009());
     });
 
     it("Should match trusted remote address", async () => {

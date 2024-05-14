@@ -18,7 +18,7 @@ const CHAINLINK = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 
 const EXPECTED_WITHDRAWAL = parseUnits("113492.004770858319552357", 18);
 
-forking(38402400, () => {
+forking(38402400, async () => {
   const provider = ethers.provider;
   const comptroller = new ethers.Contract(COMPTROLLER, COMPROLLER_ABI, provider);
   const vaiController = new ethers.Contract(VAI_UNITROLLER, VAI_CONTROLLER_ABI, provider);
@@ -33,7 +33,7 @@ forking(38402400, () => {
     treasuryBalanceBefore = await vai.balanceOf(TREASURY);
   });
 
-  testVip("VAI repayment", vip301(), {
+  testVip("VAI repayment", await vip301(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [shortfallAccounts.length]);
     },

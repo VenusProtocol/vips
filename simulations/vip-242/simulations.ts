@@ -9,14 +9,14 @@ import { COMPTROLLER, caps, vip242 } from "../../vips/vip-242";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import SETTER_FACET_ABI from "./abi/SetterFacet.json";
 
-forking(35215431, () => {
+forking(35215431, async () => {
   let comptroller: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
   });
 
-  testVip("VIP-242", vip242(), {
+  testVip("VIP-242", await vip242(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewBorrowCap"], [13]);
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewSupplyCap"], [11]);

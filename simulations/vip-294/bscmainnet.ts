@@ -14,7 +14,7 @@ import USDT_ABI from "./abi/usdtAbi.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const USDT_AMOUNT = parseUnits("5000", 18);
 
-forking(37996309, () => {
+forking(37996309, async () => {
   let usdt: Contract;
   let prevBalanceTreasury: BigNumber;
 
@@ -30,7 +30,7 @@ forking(37996309, () => {
     });
   });
 
-  testVip("VIP-294 Transfer USDT to Community wallet", vip294(), {
+  testVip("VIP-294 Transfer USDT to Community wallet", await vip294(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

@@ -30,7 +30,7 @@ const toBlockRate = (ratePerYear: BigNumber): BigNumber => {
   return ratePerYear.div(BLOCKS_PER_YEAR);
 };
 
-forking(29131121, () => {
+forking(29131121, async () => {
   let comptroller: Contract;
   let wbeth: Contract;
   let vWbeth: Contract;
@@ -53,7 +53,7 @@ forking(29131121, () => {
     });
   });
 
-  testVip("VIP-128 Add WBETH Market", vip128(24 * 60 * 60 * 3), {
+  testVip("VIP-128 Add WBETH Market", await vip128(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

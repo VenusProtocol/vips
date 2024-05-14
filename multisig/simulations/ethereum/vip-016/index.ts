@@ -24,7 +24,7 @@ forking(19609700, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip016());
+      await pretendExecutingVip(await vip016());
     });
 
     it("Should set minting limit in XVS token", async () => {

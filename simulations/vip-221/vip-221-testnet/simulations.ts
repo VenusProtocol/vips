@@ -20,7 +20,7 @@ const OLD_BUSD_COLLATERAL_FACT0R = parseUnits("0.72", 18);
 const NEW_XVS_SUPPLY_CAP = parseUnits("3750000", 18);
 const OLD_XVS_SUPPLY_CAP = ethers.BigNumber.from("2").pow(256).sub(1); // max uint256
 
-forking(36119257, () => {
+forking(36119257, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -41,7 +41,7 @@ forking(36119257, () => {
     });
   });
 
-  testVip("VIP-221Testnet Risk Parameters Adjustments (BUSD, XVS)", vip221Testnet(), {
+  testVip("VIP-221Testnet Risk Parameters Adjustments (BUSD, XVS)", await vip221Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewSupplyCap", "Failure"], [1, 1, 0]);
     },

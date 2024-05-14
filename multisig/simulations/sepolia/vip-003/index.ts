@@ -45,7 +45,7 @@ forking(4936291, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(await vip003());
     });
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();

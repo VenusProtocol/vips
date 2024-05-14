@@ -59,7 +59,7 @@ const PROTOCOL_SHARE_RESERVE_PROXY = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446
 const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x5108E5F903Ecc5e3a2dA20171527aCe96CB3c7f8";
 const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x86a2a5EB77984E923E7B5Af45819A8c8f870f061";
 
-forking(35781703, () => {
+forking(35781703, async () => {
   const provider = ethers.provider;
   let riskFund: Contract;
   let proxyAdmin: Contract;
@@ -116,7 +116,7 @@ forking(35781703, () => {
     });
   });
 
-  testVip("VIP-248", vip248(), {
+  testVip("VIP-248", await vip248(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(

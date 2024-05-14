@@ -10,7 +10,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VCAKE = "0x86aC3974e2BD0d60825230fa6F355fF11409df5c";
 
-forking(34348500, () => {
+forking(34348500, async () => {
   let comptroller: Contract;
 
   const provider = ethers.provider;
@@ -24,7 +24,7 @@ forking(34348500, () => {
       expect(oldCap).to.equal(parseUnits("14000000", 18));
     });
   });
-  testVip("VIP-218 Chaos labs recommendations for the week December 13th, 2023", vip218());
+  testVip("VIP-218 Chaos labs recommendations for the week December 13th, 2023", await vip218());
 
   describe("Post-VIP behavior", async () => {
     it("Increase CAKE supply cap to 21,000,000", async () => {

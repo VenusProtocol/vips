@@ -24,7 +24,7 @@ const VENUS_TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 
-forking(34650257, () => {
+forking(34650257, async () => {
   let comptroller: Contract;
   let uni: Contract;
   let vUni: Contract;
@@ -42,7 +42,7 @@ forking(34650257, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-195-testnet Add UNI Market", vip195Testnet(), {
+  testVip("VIP-195-testnet Add UNI Market", await vip195Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

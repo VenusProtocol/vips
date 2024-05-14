@@ -77,7 +77,7 @@ forking(29007919, async () => {
     });
   });
 
-  testVip("VIP-vip127 Change Vault Implementation", vip127(), {
+  testVip("VIP-vip127 Change Vault Implementation", await vip127(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

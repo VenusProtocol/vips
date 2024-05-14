@@ -40,7 +40,7 @@ const markets: MarketInformation[] = [
   },
 ];
 
-forking(34340570, () => {
+forking(34340570, async () => {
   const underlyingTokenContracts: UnderlyingTokenContracts = {};
 
   before(async () => {
@@ -59,7 +59,7 @@ forking(34340570, () => {
     });
   });
 
-  testVip("VIP-217 Restore bad debt", vip217(), {
+  testVip("VIP-217 Restore bad debt", await vip217(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

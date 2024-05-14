@@ -17,7 +17,7 @@ const DAI = "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3";
 
 const DAI_AMOUNT = parseUnits("296719.647459765628937553", 18);
 
-forking(35215431, () => {
+forking(35215431, async () => {
   let dai: Contract;
   let oldDAIBal: BigNumber;
   let oldDAIBalTreasury: BigNumber;
@@ -28,7 +28,7 @@ forking(35215431, () => {
     oldDAIBalTreasury = await dai.balanceOf(BNB_TREASURY);
   });
 
-  testVip("VIP-237", vip237(), {
+  testVip("VIP-237", await vip237(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

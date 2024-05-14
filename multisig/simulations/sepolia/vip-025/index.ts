@@ -45,7 +45,7 @@ forking(5860538, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip025());
+      await pretendExecutingVip(await vip025());
     });
     it("Normal Timelock has default admin role", async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, SEPOLIA_NORMAL_TIMELOCK);

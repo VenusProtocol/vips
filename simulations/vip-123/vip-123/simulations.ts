@@ -226,7 +226,7 @@ const directVTokens: DirectVTokenConfig[] = [
   },
 ];
 
-forking(28526142, () => {
+forking(28526142, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -252,7 +252,7 @@ forking(28526142, () => {
     });
   });
 
-  testVip("VIP-123 Change Oracle and Configure Resilient Oracle", vip123(), {
+  testVip("VIP-123 Change Oracle and Configure Resilient Oracle", await vip123(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);
       await expectEvents(

@@ -19,7 +19,7 @@ const VANKRBNB_DEFI = "0xe507B30C41E9e375BCe05197c1e09fc9ee40c0f6";
 const OLD_VTUSDOLD_INTEREST_RATE_MODEL = "0x7bDDFe540e86f1A6Da69D5d94240c6Cd67243C15";
 const VTUSDOLD_INTEREST_RATE_MODEL = "0xfB14Dd85A26e41E4fD62b3B142b17f279c7Bb8B0";
 
-forking(32697381, () => {
+forking(32697381, async () => {
   let comptroller: Contract;
   let defi_comptroller: Contract;
   let rateModel: Contract;
@@ -90,7 +90,7 @@ forking(32697381, () => {
     });
   });
 
-  testVip("VIP-161 Risk Parameters Update", vip161Testnet(), {
+  testVip("VIP-161 Risk Parameters Update", await vip161Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

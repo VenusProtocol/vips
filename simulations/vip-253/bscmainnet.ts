@@ -16,7 +16,7 @@ import {
 import BEP20_ABI from "./abi/BEP20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
-forking(35949601, () => {
+forking(35949601, async () => {
   let oldBalances: any;
   let oldBNBBalance: BigNumber;
 
@@ -32,7 +32,7 @@ forking(35949601, () => {
     }
   });
 
-  testVip("VIP-253", vip253(), {
+  testVip("VIP-253", await vip253(), {
     callbackAfterExecution: async txResponse => {
       // We are adding 2 for WBNB and vBNB withdrawals.
       await expectEvents(

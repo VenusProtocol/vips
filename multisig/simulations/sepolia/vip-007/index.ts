@@ -95,7 +95,7 @@ forking(5060107, () => {
     let resilientOracle: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip007());
+      await pretendExecutingVip(await vip007());
 
       await impersonateAccount(USER);
       const accounts = await ethers.getSigners();

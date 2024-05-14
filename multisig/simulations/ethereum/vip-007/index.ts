@@ -76,7 +76,7 @@ forking(19420533, () => {
     let xvs: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip007());
+      await pretendExecutingVip(await vip007());
 
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);

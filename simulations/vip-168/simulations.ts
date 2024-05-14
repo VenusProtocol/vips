@@ -12,7 +12,7 @@ import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 const CHAINLINKADDRESS = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(31505400, () => {
+forking(31505400, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -53,7 +53,7 @@ forking(31505400, () => {
     });
   });
 
-  testVip("VIP-168 Risk Parameters Update", vip168(), {
+  testVip("VIP-168 Risk Parameters Update", await vip168(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

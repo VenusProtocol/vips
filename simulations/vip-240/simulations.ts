@@ -14,7 +14,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
 const TUSD_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 
-forking(35315117, () => {
+forking(35315117, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let vTUSD: Contract;
@@ -60,7 +60,7 @@ forking(35315117, () => {
     });
   });
 
-  testVip("VIP-240 Start TUSD deprecation", vip240(), {
+  testVip("VIP-240 Start TUSD deprecation", await vip240(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

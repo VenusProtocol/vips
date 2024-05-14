@@ -14,7 +14,7 @@ forking(18990579, () => {
 
   before(async () => {
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
-    await pretendExecutingVip(vip013());
+    await pretendExecutingVip(await vip013());
   });
 
   describe("Post tx checks", () => {

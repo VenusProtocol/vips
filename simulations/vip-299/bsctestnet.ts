@@ -18,7 +18,7 @@ const ACCOUNT_TO_REPAY_ON_BEHALF = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
 const CHAINLINK = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 
-forking(39893340, () => {
+forking(39893340, async () => {
   const provider = ethers.provider;
   const vaiController = new ethers.Contract(VAI_UNITROLLER, VAI_CONTROLLER_ABI, provider);
   const vai = new ethers.Contract(VAI, ERC20_ABI, provider);
@@ -36,7 +36,7 @@ forking(39893340, () => {
     });
   });
 
-  testVip("VAIController upgrade VIP", vip299(), {
+  testVip("VAIController upgrade VIP", await vip299(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewImplementation"], [1]);
     },

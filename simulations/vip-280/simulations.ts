@@ -24,7 +24,7 @@ import {
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(37477733, () => {
+forking(37477733, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let prevUSDTBalanceOfCertik: BigNumber;
@@ -46,7 +46,7 @@ forking(37477733, () => {
     prevUSDCBalanceOfCommunityWallet = await usdc.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-280", vip280(), {
+  testVip("VIP-280", await vip280(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [6]);
     },

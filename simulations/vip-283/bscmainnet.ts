@@ -22,7 +22,7 @@ import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
 const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 
-forking(37533772, () => {
+forking(37533772, async () => {
   const provider = ethers.provider;
   let xvs: Contract;
   let xvsVault: Contract;
@@ -30,7 +30,7 @@ forking(37533772, () => {
   let previousVTreasuryBalance: BigNumber;
 
   before(async () => {
-    await pretendExecutingVip(vip282());
+    await pretendExecutingVip(await vip282());
 
     xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
     xvsVault = new ethers.Contract(XVS_VAULT, XVS_VAULT_ABI, provider);
@@ -39,7 +39,7 @@ forking(37533772, () => {
     previousVTreasuryBalance = await xvs.balanceOf(VTREASURY);
   });
 
-  testVip("VIP-283", vip283(), {
+  testVip("VIP-283", await vip283(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["SweepToken", "FundsTransferredToXVSStore"], [1, 1]);
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);

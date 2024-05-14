@@ -9,7 +9,7 @@ import { forking, testVip } from "../../src/vip-framework";
 import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, vip185 } from "../../vips/vip-185";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
-forking(32403700, () => {
+forking(32403700, async () => {
   let stableCoinComptroller: Contract;
   let liquidStakeBnbComptroller: Contract;
 
@@ -42,7 +42,7 @@ forking(32403700, () => {
     });
   });
 
-  testVip("VIP-185 Risk Parameters Update", vip185(), {
+  testVip("VIP-185 Risk Parameters Update", await vip185(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [2, 2, 0]);
     },

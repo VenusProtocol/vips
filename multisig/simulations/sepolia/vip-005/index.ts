@@ -73,7 +73,7 @@ forking(4972540, () => {
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     psrSigner = await initMainnetUser(PROTOCOL_SHARE_RESERVE, ethers.utils.parseEther("1"));
-    await pretendExecutingVip(vip005());
+    await pretendExecutingVip(await vip005());
   });
 
   describe("Post tx checks", () => {

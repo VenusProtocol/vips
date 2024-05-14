@@ -19,7 +19,7 @@ const CERTIK_AMOUNT = parseUnits("19000", 18);
 const QUANTSTAMP_AMOUNT = parseUnits("32500", 18);
 const COMMUNITY_AMOUNT = parseUnits("23000", 18);
 
-forking(35865925, () => {
+forking(35865925, async () => {
   let usdt: Contract;
   let usdc: Contract;
   let prevBalanceCertik: BigNumber;
@@ -34,7 +34,7 @@ forking(35865925, () => {
     prevBalanceCommunity = await usdt.balanceOf(COMMUNITY_RECEIVER);
   });
 
-  testVip("VIP-252 Payments Issuance for audits & Refunds to Community Wallet", vip252(), {
+  testVip("VIP-252 Payments Issuance for audits & Refunds to Community Wallet", await vip252(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },

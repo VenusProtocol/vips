@@ -66,7 +66,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33770465, () => {
+forking(33770465, async () => {
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
     let prime: Contract;
@@ -100,7 +100,7 @@ forking(33770465, () => {
     });
   });
 
-  testVip("VIP-210 Prime Program", vip210(), {
+  testVip("VIP-210 Prime Program", await vip210(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["Unpaused"], [2]);
       await expectEvents(txResponse, [PRIME_PROXY_ABI], ["Upgraded"], [1]);

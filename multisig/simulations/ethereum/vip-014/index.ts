@@ -49,7 +49,7 @@ forking(19431701, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip013());
+      await pretendExecutingVip(await vip013());
     });
 
     it("Should match single send transaction limit", async () => {

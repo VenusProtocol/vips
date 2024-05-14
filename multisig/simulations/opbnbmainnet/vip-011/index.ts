@@ -42,7 +42,7 @@ forking(17345636, () => {
 
   describe("Post tx checks", () => {
     before(async () => {
-      await pretendExecutingVip(vip011());
+      await pretendExecutingVip(await vip011());
     });
     it("Validate new IRM address", async () => {
       const currIRM = await vWBNB.interestRateModel();

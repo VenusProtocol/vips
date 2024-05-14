@@ -83,17 +83,6 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
-  return {
-    signatures: commands.map(cmd => cmd.signature),
-    targets: commands.map(cmd => cmd.target),
-    params: commands.map(cmd => cmd.params),
-    values: commands.map(cmd => cmd.value ?? "0"),
-    meta,
-    type,
-  };
-};
-
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
@@ -120,10 +109,10 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   return fee;
 };
 
-export const makeProposalV2 = async (
+export const makeProposal = async (
   commands: Command[],
-  meta: ProposalMeta,
-  type: ProposalType,
+  meta?: ProposalMeta,
+  type?: ProposalType,
 ): Promise<Proposal> => {
   const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
   const map = new Map<number, Command[]>();
@@ -155,7 +144,7 @@ export const makeProposalV2 = async (
           signatures: chainCommands.map(cmd => cmd.signature),
           params: chainCommands.map(cmd => cmd.params),
         }),
-        type,
+        type as ProposalType,
       );
       const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
 

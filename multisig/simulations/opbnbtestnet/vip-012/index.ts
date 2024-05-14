@@ -43,7 +43,7 @@ forking(22766514, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip012());
+      await pretendExecutingVip(await vip012());
     });
 
     it("vtoken impl address", async () => {

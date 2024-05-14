@@ -14,12 +14,12 @@ const accounts = [...accounts3, ...accounts4, ...accounts5, ...accounts6];
 const provider = ethers.provider;
 let unitroller: Contract;
 
-forking(37478158, () => {
+forking(37478158, async () => {
   before(async () => {
     unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
   });
 
-  testVip("VIP-279", vip279(), {
+  testVip("VIP-279", await vip279(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_POOL_ABI], ["VenusSeized", "VenusGranted"], [12, 4]);
     },

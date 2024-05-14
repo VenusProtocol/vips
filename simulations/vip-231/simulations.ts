@@ -146,7 +146,7 @@ const TOKENS: Token[] = [
   },
 ];
 
-forking(34945549, () => {
+forking(34945549, async () => {
   let resilientOracle: Contract;
 
   before(async () => {
@@ -168,7 +168,7 @@ forking(34945549, () => {
     });
   });
 
-  testVip("VIP-231", vip231(), {
+  testVip("VIP-231", await vip231(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [16]);
     },

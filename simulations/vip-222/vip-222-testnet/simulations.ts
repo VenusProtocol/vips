@@ -33,7 +33,7 @@ const RESERVES_BLOCK_DELTA = 100;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const RATE_MODEL = "0xf59B7f2733a549dCF82b804d69d9c6a38985B90B";
 
-forking(36131280, () => {
+forking(36131280, async () => {
   let comptroller: Contract;
   let fdusd: Contract;
   let vFdusd: Contract;
@@ -51,7 +51,7 @@ forking(36131280, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-222-testnet Add FDUSD Market", vip222Testnet(), {
+  testVip("VIP-222-testnet Add FDUSD Market", await vip222Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

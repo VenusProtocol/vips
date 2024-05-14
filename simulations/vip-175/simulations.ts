@@ -9,7 +9,7 @@ import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, VTUSD, vip175 } from "../../vips/vip-175";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
-forking(31934930, () => {
+forking(31934930, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -29,7 +29,7 @@ forking(31934930, () => {
     });
   });
 
-  testVip("VIP-175 Risk Parameters Update", vip175(), {
+  testVip("VIP-175 Risk Parameters Update", await vip175(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [1, 1, 0]);
     },

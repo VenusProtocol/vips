@@ -21,7 +21,7 @@ forking(5470354, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(await vip017());
     });
 
     it("timelock should be the owner of NativeTokenGateway contract for core pool market", async () => {

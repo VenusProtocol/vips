@@ -19,7 +19,7 @@ const CERTIK_AMOUNT = parseUnits("19000", 18);
 const BINANCE_AMOUNT = parseUnits("36000", 18);
 const COMMUNITY_AMOUNT = parseUnits("15000", 18);
 
-forking(33968239, () => {
+forking(33968239, async () => {
   let usdt: Contract;
   let prevBalanceCertik: BigNumber;
   let prevBalancecommunity: any;
@@ -32,7 +32,7 @@ forking(33968239, () => {
     prevBalanceBinance = await usdt.balanceOf(BINANCE_ORACLE_RECEIVER);
   });
 
-  testVip("VIP-212 Payments for auditors", vip212(), {
+  testVip("VIP-212 Payments for auditors", await vip212(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "Failure"], [3, 0]);
     },

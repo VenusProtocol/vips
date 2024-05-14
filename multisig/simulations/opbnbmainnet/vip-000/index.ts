@@ -14,7 +14,7 @@ forking(10892659, () => {
 
   before(async () => {
     treasury = await ethers.getContractAt(TREASURY_ABI, VTREASURY);
-    await pretendExecutingVip(vip000());
+    await pretendExecutingVip(await vip000());
   });
 
   describe("Post tx checks", () => {

@@ -11,7 +11,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller_ABI.json";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const VUNI = "0x171B468b52d7027F12cEF90cd065d6776a25E24e";
 
-forking(35291468, () => {
+forking(35291468, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -26,7 +26,7 @@ forking(35291468, () => {
       expect(await comptroller.borrowCaps(VUNI)).to.equals(parseUnits("30000", 18));
     });
   });
-  testVip("VIP-208-testnet Update Risk Parameters", vip208Testnet(), {
+  testVip("VIP-208-testnet Update Risk Parameters", await vip208Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [1, 1, 0]);
     },

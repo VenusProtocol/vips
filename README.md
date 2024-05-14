@@ -102,8 +102,7 @@ The script should output a file `gnosisTXBuilder.json` that you can import in yo
 
 Procedure to make vip:
 
-- Use `makeProposalV2` to create VIP.
-- For remote commands add one more field of `dstChainId` specifying layer zero chain id of desired remote chain for instance `dstChainId = 101` for Ethereum.
+For remote commands add one more field of `dstChainId` specifying layer zero chain id of desired remote chain for instance `dstChainId = 101` for Ethereum. Lz chain ids can be retrieve from `LzChainId` enum present in types.
 
 ### Simulations for multiple networks proposal
 

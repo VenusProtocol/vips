@@ -27,7 +27,7 @@ forking(19732098, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip025());
+      await pretendExecutingVip(await vip025());
     });
     it("new borrow cap", async () => {
       const cap = await comptroller.borrowCaps(vcrvUSD_CURVE);

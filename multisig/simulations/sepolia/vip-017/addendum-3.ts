@@ -13,7 +13,7 @@ let acm: Contract;
 forking(5470354, () => {
   before(async () => {
     acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
-    await pretendExecutingVip(vip017());
+    await pretendExecutingVip(await vip017());
   });
 
   it("vip executes successfully", async () => {

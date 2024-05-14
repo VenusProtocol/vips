@@ -11,7 +11,7 @@ import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 
-forking(34901100, () => {
+forking(34901100, async () => {
   let vaiController: Contract;
   let comptroller: Contract;
 
@@ -20,7 +20,7 @@ forking(34901100, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
   });
 
-  testVip("vip229", vip229());
+  testVip("vip229", await vip229());
 
   describe("Post-VIP behavior", () => {
     it("sets mintCap to 10M VAI", async () => {

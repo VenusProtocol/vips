@@ -5,13 +5,17 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import { SEPOLIA_ACM, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, vip303 } from "../../vips/vip-303/bsctestnet";
+import {
+  SEPOLIA_ACM,
+  SEPOLIA_NORMAL_TIMELOCK,
+  SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
+  vip304,
+} from "../../vips/vip-304/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
 
 forking(5860538, async () => {
   const provider = ethers.provider;
@@ -28,9 +32,9 @@ forking(5860538, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, SEPOLIA_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip303 configures bridge", await vip303(), {
+  testForkedNetworkVipCommands("vip302 configures bridge", await vip304(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [16]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
     },
   });
 

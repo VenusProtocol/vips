@@ -17,7 +17,7 @@ import XVSProxyOFTSrc_ABI from "./abi/XVSProxyOFTSrc.json";
 
 const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 
-forking(36862380, () => {
+forking(36862380, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
 
@@ -25,7 +25,7 @@ forking(36862380, () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVSProxyOFTSrc_ABI, provider);
   });
 
-  testVip("vip251Testnet-2", vip251Testnet(), {
+  testVip("vip251Testnet-2", await vip251Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

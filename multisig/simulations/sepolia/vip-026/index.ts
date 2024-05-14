@@ -124,7 +124,7 @@ forking(5827248, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip026());
+      await pretendExecutingVip(await vip026());
     });
 
     it("check FRAX price", async () => {

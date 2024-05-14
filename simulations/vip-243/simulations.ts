@@ -16,7 +16,7 @@ const CHAOS_LABS_RECEIVER = "0xfb1912af5b9d3fb678f801bf764e98f1c217ef35";
 const CERTIK_AMOUNT = parseUnits("19000", 18);
 const CHAOS_LABS_AMOUNT = parseUnits("130000", 18);
 
-forking(35259895, () => {
+forking(35259895, async () => {
   let usdt: Contract;
   let prevBalanceCertik: BigNumber;
   let prevBalanceChaosLabs: BigNumber;
@@ -27,7 +27,7 @@ forking(35259895, () => {
     prevBalanceChaosLabs = await usdt.balanceOf(CHAOS_LABS_RECEIVER);
   });
 
-  testVip("VIP-243 Payments for auditors", vip243(), {
+  testVip("VIP-243 Payments for auditors", await vip243(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
     },

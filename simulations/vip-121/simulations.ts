@@ -12,8 +12,8 @@ import VBEP20_ABI from "./abi/VBep20Abi.json";
 const vBTC = "0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b";
 const BORROWER = "0xef044206db68e40520bfa82d45419d498b4bc7bf";
 
-forking(28538732, () => {
-  testVip("VIP-121 Repay BTC debt on behalf", vip121(), {
+forking(28538732, async () => {
+  testVip("VIP-121 Repay BTC debt on behalf", await vip121(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VBEP20_ABI], ["RepayBorrow", "Failure"], [1, 0]);
     },
@@ -28,7 +28,7 @@ forking(28538732, () => {
     before(async () => {
       vToken = new ethers.Contract(vBTC, VBEP20_ABI, ethers.provider);
       prevBalance = await vToken.callStatic.borrowBalanceCurrent(BORROWER);
-      await pretendExecutingVip(vip121());
+      await pretendExecutingVip(await vip121());
     });
 
     it("Should decrese Borrow Balance Stored", async () => {

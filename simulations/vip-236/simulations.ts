@@ -19,7 +19,7 @@ import {
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(35116910, () => {
+forking(35116910, async () => {
   let btc: Contract;
   let eth: Contract;
   let usdt: Contract;
@@ -42,7 +42,7 @@ forking(35116910, () => {
     oldUSDTBalTreasury = await usdt.balanceOf(BNB_TREASURY);
   });
 
-  testVip("VIP-236 Bootstrap liquidity for the Ethereum deployment", vip236(), {
+  testVip("VIP-236 Bootstrap liquidity for the Ethereum deployment", await vip236(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [3]);
     },

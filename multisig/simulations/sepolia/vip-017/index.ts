@@ -139,7 +139,7 @@ forking(5367150, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(await vip017());
     });
 
     it("pool registry should have original implementation", async () => {

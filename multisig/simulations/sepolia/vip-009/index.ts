@@ -32,7 +32,7 @@ forking(5113339, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(await vip009());
     });
     it("should return correct wstETH price", async () => {
       const WETH_USD_PRICE = await resilientOracle.getPrice(WETH_ADDRESS);

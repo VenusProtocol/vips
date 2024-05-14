@@ -83,7 +83,7 @@ forking(19447800, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
     });
 
     it("comptroller should have new implementation", async () => {

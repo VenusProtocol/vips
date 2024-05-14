@@ -87,7 +87,7 @@ forking(16003453, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
     it("Binance Oracle should have new implementation", async () => {
       const implementation = await defaultProxyAdmin.getProxyImplementation(BINANCE_ORACLE);

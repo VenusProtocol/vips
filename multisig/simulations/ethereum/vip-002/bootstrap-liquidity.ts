@@ -32,7 +32,7 @@ forking(19032429, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
     });
 
     it("should transfer BBTC out of treasury", async () => {

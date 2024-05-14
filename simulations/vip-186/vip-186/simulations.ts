@@ -58,7 +58,7 @@ async function verifySetForcedLiquidation(signers: Signer[], comptroller: Contra
   }
 }
 
-forking(32567583, () => {
+forking(32567583, async () => {
   const provider = ethers.provider;
   let comptrollerBeacon: Contract;
   let comptrollerStableCoin: Contract;
@@ -97,7 +97,7 @@ forking(32567583, () => {
     });
   });
 
-  testVip("vip186", vip186(), {
+  testVip("vip186", await vip186(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [15]);

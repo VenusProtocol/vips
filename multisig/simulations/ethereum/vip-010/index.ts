@@ -152,7 +152,7 @@ forking(19276500, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip010());
+      await pretendExecutingVip(await vip010());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

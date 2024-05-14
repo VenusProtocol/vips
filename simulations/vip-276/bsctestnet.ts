@@ -79,7 +79,7 @@ let poolRegistry: string;
 let prime: string;
 let marketFacetSelectors: string[];
 
-forking(38305470, () => {
+forking(38305470, async () => {
   before(async () => {
     user1 = await initMainnetUser(USER_1, parseUnits("2"));
     user2 = await initMainnetUser(USER_2, parseUnits("2"));
@@ -126,7 +126,7 @@ forking(38305470, () => {
     });
   });
 
-  testVip("VIP-Gateway", vip276(), {
+  testVip("VIP-Gateway", await vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
       await expectEvents(txResponse, [NATIVE_TOKEN_GATEWAY_ABI], ["OwnershipTransferred"], [1]);
@@ -280,7 +280,7 @@ forking(38305470, () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276());
     });
 
     for (const market of CORE_MARKETS) {

@@ -20,7 +20,7 @@ const CERTIK_AMOUNT = parseUnits("19000", 18);
 const FAIRYPROOF_AMOUNT = parseUnits("20000", 18);
 const OZ_AMOUNT = parseUnits("277200", 18);
 
-forking(29726604, () => {
+forking(29726604, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let prevBalancePeckShield: BigNumber;
@@ -37,7 +37,7 @@ forking(29726604, () => {
     prevBalanceOZ = await usdc.balanceOf(OZ_RECEIVER);
   });
 
-  testVip("VIP-138 Payments for auditors", vip138(), {
+  testVip("VIP-138 Payments for auditors", await vip138(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });

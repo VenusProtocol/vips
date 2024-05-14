@@ -22,7 +22,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const TREASURY = "0x8b293600C50D6fbdc6Ed4251cc75ECe29880276f";
 const vBNB_ADDRESS = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-forking(34112000, () => {
+forking(34112000, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -47,7 +47,7 @@ forking(34112000, () => {
     });
   });
 
-  testVip("VIP-189", vip189Testnet(), {
+  testVip("VIP-189", await vip189Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigAdded"], [4]);
       await expectEvents(txResponse, [PSR_ABI], ["PoolRegistryUpdated"], [1]);

@@ -8,7 +8,7 @@ import VTOKEN_IL_ABI from "./abi/VToken_il.json";
 const vETH = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8";
 const vUSDT_Stablecoins = "0x5e3072305F9caE1c7A82F6Fe9E38811c74922c3B";
 
-forking(32681348, () => {
+forking(32681348, async () => {
   describe("Pre-VIP behavior", async () => {
     it("Check current interest rate model", async () => {
       await checkInterestRate(vETH, "vETH", {
@@ -27,7 +27,7 @@ forking(32681348, () => {
     });
   });
 
-  testVip("VIP-187 Risk Parameters Update", vip187(), {
+  testVip("VIP-187 Risk Parameters Update", await vip187(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

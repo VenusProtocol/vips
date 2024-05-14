@@ -48,7 +48,7 @@ forking(5673551, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(await vip018());
     });
 
     it("check price", async () => {
