@@ -14,6 +14,7 @@ export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 export const VUSDT = "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1";
 export const REWARDS_DISTRIBUTOR = "0x34e14e4A5f5de28f8e58aeD296068ce5c3C25C4c";
 export const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
+export const SWAP_ROUTER = "0x18995825f033F33fa30CF59c117aD21ff6BdB48c";
 
 export const STALE_PERIOD = 60 * 60 * 26; // 26 hour
 export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
@@ -72,6 +73,13 @@ const vip304 = () => {
             [true, false, false],
           ],
         ],
+      },
+
+      // Swap router
+      {
+        target: SWAP_ROUTER,
+        signature: "acceptOwnership()",
+        params: [],
       },
 
       // Add Meme Pool
