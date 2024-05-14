@@ -15,7 +15,7 @@ export const VUSDT = "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1";
 export const REWARDS_DISTRIBUTOR = "0x34e14e4A5f5de28f8e58aeD296068ce5c3C25C4c";
 export const BINANCE_ORACLE = "0xB58BFDCE610042311Dc0e034a80Cc7776c1D68f5";
 
-export const STALE_PERIOD = 60 * 60 * 24; // 24 hour
+export const STALE_PERIOD = 60 * 60 * 26; // 26 hour
 export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
 export const USDT_SUPPLY = parseUnits("5000", 6);
 export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9);
@@ -145,16 +145,6 @@ const vip304 = () => {
         target: BABYDOGE,
         signature: "faucet(uint256)",
         params: [BABYDOGE_SUPPLY],
-      },
-      {
-        target: BABYDOGE,
-        signature: "transfer(address,uint256)",
-        params: [TREASURY, BABYDOGE_SUPPLY],
-      },
-      {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [BABYDOGE, BABYDOGE_SUPPLY, NORMAL_TIMELOCK],
       },
       {
         target: BABYDOGE,
