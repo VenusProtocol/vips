@@ -4,14 +4,15 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { PTweETH, vPTweETH, vip023, COMPTROLLER, VTREASURY, INITIAL_SUPPLY } from "../../../proposals/ethereum/vip-023";
+import { COMPTROLLER, INITIAL_SUPPLY, PTweETH, VTREASURY, vPTweETH, vip023 } from "../../../proposals/ethereum/vip-023";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -34,7 +35,6 @@ const riskParameters: RiskParameters = {
   initialSupply: INITIAL_SUPPLY.toString(),
   vTokenReceiver: VTREASURY,
 };
-
 
 interface InterestRateModelSpec {
   vToken: string;
@@ -107,9 +107,7 @@ forking(19867748, () => {
 
     describe(`check risk parameters`, () => {
       it(`check reserve factor`, async () => {
-        expect(await vweETHContract.reserveFactorMantissa()).to.equal(
-          parseUnits(riskParameters.reserveFactor, 18),
-        );
+        expect(await vweETHContract.reserveFactorMantissa()).to.equal(parseUnits(riskParameters.reserveFactor, 18));
       });
 
       it(`check CF`, async () => {
@@ -119,9 +117,7 @@ forking(19867748, () => {
 
       it(`check liquidation threshold`, async () => {
         const market = await comptroller.markets(vPTweETH);
-        expect(market.liquidationThresholdMantissa).to.equal(
-          parseUnits(riskParameters.liquidationThreshold, 18),
-        );
+        expect(market.liquidationThresholdMantissa).to.equal(parseUnits(riskParameters.liquidationThreshold, 18));
       });
 
       it(`check protocol seize share`, async () => {
@@ -152,9 +148,10 @@ forking(19867748, () => {
     });
 
     it("generic IL tests", async () => {
-      // await checkIsolatedPoolsComptrollers({
-      //   [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
-      // });
+      const PTweETH_Holder = "0x38D43a6Cb8DA0E855A42fB6b0733A0498531d774";
+      await checkIsolatedPoolsComptrollers({
+        [COMPTROLLER]: PTweETH_Holder,
+      });
 
       await checkVToken(vPTweETH, {
         name: "Venus PT-wETH-26DEC2024 (Liquid Staked ETH)",
