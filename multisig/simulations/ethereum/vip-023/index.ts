@@ -1,17 +1,58 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { PTweETH, vPTweETH, vip023, COMPTROLLER } from "../../../proposals/ethereum/vip-023";
+import { PTweETH, vPTweETH, vip023, COMPTROLLER, VTREASURY, INITIAL_SUPPLY } from "../../../proposals/ethereum/vip-023";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
+import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 
 const { ethereum } = NETWORK_ADDRESSES;
+
+interface RiskParameters {
+  borrowCap: string;
+  supplyCap: string;
+  collateralFactor: string;
+  liquidationThreshold: string;
+  reserveFactor: string;
+  initialSupply: string;
+  vTokenReceiver: string;
+}
+
+const riskParameters: RiskParameters = {
+  borrowCap: "0",
+  supplyCap: parseUnits("1200", 18).toString(),
+  collateralFactor: "0.75",
+  liquidationThreshold: "0.80",
+  reserveFactor: "0.20",
+  initialSupply: INITIAL_SUPPLY.toString(),
+  vTokenReceiver: VTREASURY,
+};
+
+
+interface InterestRateModelSpec {
+  vToken: string;
+  kink: string;
+  base: string;
+  multiplier: string;
+  jump: string;
+}
+
+const interestRateModel: InterestRateModelSpec = {
+  vToken: "vPT-weETH-26DEC2024_LiquidStakedETH",
+  kink: "0.45",
+  base: "0",
+  multiplier: "0.09",
+  jump: "0.75",
+};
+
+const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 12 seconds
 
 forking(19867748, () => {
   let resilientOracle: Contract;
@@ -62,6 +103,67 @@ forking(19867748, () => {
     it("check supply", async () => {
       const expectedSupply = parseUnits("1.79961879", 8);
       expect(await vweETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+    });
+
+    describe(`check risk parameters`, () => {
+      it(`check reserve factor`, async () => {
+        expect(await vweETHContract.reserveFactorMantissa()).to.equal(
+          parseUnits(riskParameters.reserveFactor, 18),
+        );
+      });
+
+      it(`check CF`, async () => {
+        const market = await comptroller.markets(vPTweETH);
+        expect(market.collateralFactorMantissa).to.equal(parseUnits(riskParameters.collateralFactor, 18));
+      });
+
+      it(`check liquidation threshold`, async () => {
+        const market = await comptroller.markets(vPTweETH);
+        expect(market.liquidationThresholdMantissa).to.equal(
+          parseUnits(riskParameters.liquidationThreshold, 18),
+        );
+      });
+
+      it(`check protocol seize share`, async () => {
+        expect(await vweETHContract.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+      });
+
+      it(`check supply cap`, async () => {
+        expect(await comptroller.supplyCaps(vPTweETH)).to.equal(riskParameters.supplyCap);
+      });
+
+      it(`check borrow cap`, async () => {
+        expect(await comptroller.borrowCaps(vPTweETH)).to.equal(riskParameters.borrowCap);
+      });
+
+      it("Interest rates", async () => {
+        checkInterestRate(
+          await vweETHContract.interestRateModel(),
+          interestRateModel.vToken,
+          {
+            base: interestRateModel.base,
+            multiplier: interestRateModel.multiplier,
+            jump: interestRateModel.jump,
+            kink: interestRateModel.kink,
+          },
+          BLOCKS_PER_YEAR,
+        );
+      });
+    });
+
+    it("generic IL tests", async () => {
+      // await checkIsolatedPoolsComptrollers({
+      //   [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
+      // });
+
+      await checkVToken(vPTweETH, {
+        name: "Venus PT-wETH-26DEC2024 (Liquid Staked ETH)",
+        symbol: "vPT-weETH-26DEC2024_LiquidStakedETH",
+        decimals: 8,
+        underlying: PTweETH,
+        exchangeRate: parseUnits("10000000013.293774522103094956", 18),
+        comptroller: COMPTROLLER,
+      });
     });
   });
 });
