@@ -163,7 +163,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let payload: string;
   let proposalId: number;
   let targets: any[];
-  let proposalType: number;
+  let proposalType: ProposalType;
   const provider = ethers.provider;
 
   describe(`${description} execution`, () => {
@@ -211,7 +211,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType as ProposalType]);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
       const blockchainProposal = await executor.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await executor.execute(proposalId);

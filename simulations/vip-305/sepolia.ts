@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import { SEPOLIA_ACM, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, vip305 } from "../../vips/vip-305/bsctestnet";
+import { SEPOLIA_ACM, vip305 } from "../../vips/vip-305/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
@@ -21,7 +21,7 @@ forking(5860538, async () => {
   let multisig: any;
 
   before(async () => {
-    executor = new ethers.Contract(SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
     acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
     multisig = await initMainnetUser(sepolia.GUARDIAN, ethers.utils.parseEther("1"));

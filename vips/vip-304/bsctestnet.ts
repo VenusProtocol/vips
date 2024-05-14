@@ -8,19 +8,29 @@ const BSC_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const BSC_FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const BSC_CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const BSC_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+
+const { sepolia, opbnbtestnet } = NETWORK_ADDRESSES;
 export const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
 export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
-export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = "0x92c6f22d9059d50bac82cd9eb1aa72142a76339a";
+export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR;
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-export const SEPOLIA_MAX_DAILY_LIMIT = 100;
+
+export const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8aA824CCBeF8A0a3eCdF87c3523D8Fd49Dc93aE";
+export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x233eFd8aFd8C164A8d5e54f649E948F823f0a425";
+export const OPBNBTESTNET_OMNICHAIN_GOVERNANCE_EXECUTOR = opbnbtestnet.OMNICHAIN_GOVERNANCE_EXECUTOR;
+export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+export const MAX_DAILY_LIMIT = 100;
+
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
+const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 
 export const vip304 = () => {
   const meta = {
     version: "v2",
-    title: "vip304 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia",
+    title:
+      "vip304 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia and opbnbtestnet",
     description: `#### Description
-    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA chain`,
+    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA & OPBNBTESTNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -172,14 +182,30 @@ export const vip304 = () => {
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [SEPOLIA_CHAIN_ID, SEPOLIA_MAX_DAILY_LIMIT],
+        params: [SEPOLIA_CHAIN_ID, MAX_DAILY_LIMIT],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [SEPOLIA_CHAIN_ID, SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR],
       },
+      {
+        target: OMNICHAIN_PROPOSAL_SENDER,
+        signature: "setMaxDailyLimit(uint16,uint256)",
+        params: [OPBNBTESTNET_CHAIN_ID, MAX_DAILY_LIMIT],
+      },
+      {
+        target: OMNICHAIN_PROPOSAL_SENDER,
+        signature: "setTrustedRemoteAddress(uint16,bytes)",
+        params: [OPBNBTESTNET_CHAIN_ID, OPBNBTESTNET_OMNICHAIN_GOVERNANCE_EXECUTOR],
+      },
 
+      {
+        target: SEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -251,6 +277,112 @@ export const vip304 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", SEPOLIA_NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", OPBNBTESTNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", OPBNBTESTNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setMaxDailyReceiveLimit(uint256)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "pause()", OPBNBTESTNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", OPBNBTESTNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setMinDstGas(uint16,uint16,uint256)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setPayloadSizeLimit(uint16,uint256)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setConfig(uint16,uint16,uint256,bytes)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", OPBNBTESTNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setTrustedRemoteAddress(uint16,bytes)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "setTimelockPendingAdmin(address,uint8)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
+          "retryMessage(uint16,bytes,uint64,bytes)",
+          OPBNBTESTNET_NORMAL_TIMELOCK,
+        ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
       },
     ],
     meta,
