@@ -23,40 +23,22 @@ export const checkXVSVault = () => {
     let xvsVault: Contract;
 
     before(async () => {
-      console.log(1);
       await impersonateAccount(ACCOUNT);
-      console.log(ACCOUNT);
-      console.log(2);
       await impersonateAccount(NORMAL_TIMELOCK);
-      console.log(NORMAL_TIMELOCK);
-      console.log(3);
       const signer = await ethers.getSigner(ACCOUNT);
-      console.log(4);
-
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
       xvsVault = await ethers.getContractAt(XVSVault_ABI, XVS_VAULT_PROXY, signer);
-      console.log(5);
 
       const accounts = await ethers.getSigners();
       await accounts[0].sendTransaction({ to: ACCOUNT, value: parseUnits("10") });
     });
 
     it("deposit and withdraw", async () => {
-      console.log(6);
-      console.log(ACCOUNT)
-      console.log(xvs.address)
-      console.log(POOL_ID)
-
       await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
-      console.log(7);
-
       let originalBalance = await xvs.balanceOf(ACCOUNT);
-      console.log(8);
-
       await xvs.approve(xvsVault.address, parseUnits("1", 18));
       await expect(xvsVault.deposit(xvs.address, POOL_ID, parseUnits("1", 18))).to.be.not.reverted;
       expect(await xvs.balanceOf(ACCOUNT)).to.be.lt(originalBalance);
-      console.log(9);
       originalBalance = await xvs.balanceOf(ACCOUNT);
       await xvsVault.requestWithdrawal(xvs.address, POOL_ID, parseUnits("1", 18));
       await mine(10000);

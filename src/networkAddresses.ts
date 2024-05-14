@@ -17,7 +17,6 @@ import bsctestnetDeployedContracts from "@venusprotocol/venus-protocol/deploymen
 import ethereumDeployedContracts from "@venusprotocol/venus-protocol/deployments/ethereum_addresses.json";
 import opbnbmainnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbmainnet_addresses.json";
 import opbnbtestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbtestnet_addresses.json";
-
 import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import { ethers } from "ethers";
 
@@ -72,7 +71,7 @@ export const NETWORK_ADDRESSES = {
     RESILIENT_ORACLE: oracleEthereumContracts.addresses.ResilientOracle,
     XVS: tokenBridgeEthereumContracts.addresses.XVS,
     XVS_VAULT_PROXY: ethereumDeployedContracts.addresses.XVSVaultProxy,
-    GENERIC_TEST_USER_ACCOUNT: "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc",
+    GENERIC_TEST_USER_ACCOUNT: "0x7DA84eBd39F995a701B891139146a5f77682A127", // XVS Holder
     CHAINLINK_ORACLE: oracleEthereumContracts.addresses.ChainlinkOracle,
   },
   sepolia: {

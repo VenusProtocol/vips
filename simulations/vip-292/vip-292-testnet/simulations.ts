@@ -19,9 +19,9 @@ const XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
 const XVS_ADDRESS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const POOL_ID = 1;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0x1Fb5fcE0b05B84852290B3bd54b968CCff7559f0";
+const NEW_XVS_IMPLEMENTATION = "0x4384b8186963Ee506D2dC4bf3fF80998A550D2Ee";
 
-forking(40149458, async () => {
+forking(40318034, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let pendingWithdrawalsBefore: BigNumber;

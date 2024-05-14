@@ -17,9 +17,9 @@ const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const XVS_ADDRESS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0xa831C72a9D4387A52AaACeAADfaC816c0bC83450";
+const NEW_XVS_IMPLEMENTATION = "0x246c6e6cABF0dC008773176C4893e65Bd5fbB51E";
 
-forking(19824530, async () => {
+forking(19866634, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let pendingWithdrawalsBefore: BigNumber;
@@ -29,7 +29,7 @@ forking(19824530, async () => {
     xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVSVault_ABI, provider);
     const storageSlot = calculateMappingStorageSlot(XVS_ADDRESS, POOL_ID, MAPPING_STORAGE_SLOT);
     const value = await provider.getStorageAt(XVS_VAULT_PROXY, storageSlot);
-    pendingWithdrawalsBefore = BigNumber.from(utils.stripZeros(value));
+    pendingWithdrawalsBefore = BigNumber.from(ethers.constants.HashZero === value ? 0 : utils.stripZeros(value));
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
   });
 

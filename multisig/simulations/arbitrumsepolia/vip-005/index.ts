@@ -1,15 +1,15 @@
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { calculateMappingStorageSlot, initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
+import vip005 from "../../../proposals/arbitrumsepolia/vip-005";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
 import ACM_ABI from "./abi/accessControlManager.json";
-import { parseEther } from "ethers/lib/utils";
-import vip005 from "../../../proposals/arbitrumsepolia/vip-005";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -18,9 +18,10 @@ const XVS_VAULT_PROXY = "0x407507DC2809D3aa31D54EcA3BEde5C5c4C8A17F";
 const XVS_ADDRESS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0xBac8Bb6008d7BBD5cdC4BfC745B3b8664Bca14BC";
+const NEW_XVS_IMPLEMENTATION = "0x07d5030Ea2aBC20c76Be405541010eA374696c3E";
+
 // NOTE: cannot find any pending rewards for XVS on this chain neither with PoolID = 0 or with PoolID = 1
-forking(42200900, async () => {
+forking(43878957, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let accessControlManager: Contract;

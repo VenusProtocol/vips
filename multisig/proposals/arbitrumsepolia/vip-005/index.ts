@@ -1,7 +1,7 @@
 import { makeProposal } from "../../../../src/utils";
 
 const XVS_VAULT_PROXY = "0x407507DC2809D3aa31D54EcA3BEde5C5c4C8A17F";
-const NEW_XVS_IMPLEMENTATION = "0xBac8Bb6008d7BBD5cdC4BfC745B3b8664Bca14BC";
+const NEW_XVS_IMPLEMENTATION = "0x07d5030Ea2aBC20c76Be405541010eA374696c3E";
 
 const vip005 = () => {
   return makeProposal([
