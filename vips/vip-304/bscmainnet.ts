@@ -138,29 +138,19 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
 
       // Add USDT Market
       {
-        "target": TREASURY,
-        "signature": "withdrawTreasuryBEP20(address,uint256,address)",
-        "params": [
-          USDT,
-          USDT_SUPPLY,
-          NORMAL_TIMELOCK
-        ],
+        target: TREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, USDT_SUPPLY, NORMAL_TIMELOCK],
       },
       {
-        "target": USDT,
-        "signature": "approve(address,uint256)",
-        "params": [
-          POOL_REGISTRY,
-          0
-        ],
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [POOL_REGISTRY, 0],
       },
       {
-        "target": USDT,
-        "signature": "approve(address,uint256)",
-        "params": [
-          POOL_REGISTRY,
-          USDT_SUPPLY
-        ],
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [POOL_REGISTRY, USDT_SUPPLY],
       },
       {
         target: VUSDT,
@@ -170,7 +160,7 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
       {
         target: POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-        "params": [
+        params: [
           [
             VUSDT,
             "750000000000000000",
@@ -178,8 +168,8 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
             USDT_SUPPLY,
             TREASURY,
             "1000000000000000000000000",
-            "900000000000000000000000"
-          ]
+            "900000000000000000000000",
+          ],
         ],
       },
 
