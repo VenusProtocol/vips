@@ -15,8 +15,9 @@ export const VUSDT = "0x4a9613D06a241B76b81d3777FCe3DDd1F61D4Bd0";
 export const REWARDS_DISTRIBUTOR = "0xC1044437AbfD8592150d612185581c5600851d44";
 export const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 export const SWAP_ROUTER = "0x9Db0CBD9A73339949f98C5E6a51e036d0dEaFf21";
+export const VBABYDOGE_RECEIVER = "0x866c1B85a0257e8C49a8Bfd3c1Bcc143DDB3EA37";
 
-export const STALE_PERIOD = 60 * 60 * 26; // 26 hour
+export const STALE_PERIOD = 60 * 25; // 25 minutes
 export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
 export const USDT_SUPPLY = parseUnits("5000", 18);
 export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9);
@@ -118,7 +119,7 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
       {
         target: VBABYDOGE,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["100"],
+        params: ["28800"],
       },
       {
         target: POOL_REGISTRY,
@@ -129,7 +130,7 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
             "300000000000000000",
             "400000000000000000",
             BABYDOGE_SUPPLY,
-            TREASURY,
+            "0x866c1B85a0257e8C49a8Bfd3c1Bcc143DDB3EA37",
             "1600000000000000000000000",
             "800000000000000000000000",
           ],
@@ -155,7 +156,7 @@ const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
       {
         target: VUSDT,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["100"],
+        params: ["28800"],
       },
       {
         target: POOL_REGISTRY,

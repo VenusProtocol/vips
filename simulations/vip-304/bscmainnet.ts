@@ -24,6 +24,7 @@ import vip304, {
   USDT,
   USDT_PRIME_CONVERTER,
   VBABYDOGE,
+  VBABYDOGE_RECEIVER,
   VUSDT,
 } from "../../vips/vip-304/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -56,7 +57,7 @@ const vBabyDoge_riskParameters: RiskParameters = {
   liquidationThreshold: "0.4",
   reserveFactor: "0.25",
   initialSupply: parseUnits("27917365987868.178893572", 9).toString(),
-  vTokenReceiver: TREASURY,
+  vTokenReceiver: VBABYDOGE_RECEIVER,
 };
 
 const vUSDT_riskParameters: RiskParameters = {
@@ -170,7 +171,7 @@ forking(38742886, () => {
 
     it("check vBabyDoge supply", async () => {
       const expectedSupply = parseUnits("27917365987868.17889357", 8);
-      expect(await vBabyDoge.balanceOf(TREASURY)).to.equal(expectedSupply);
+      expect(await vBabyDoge.balanceOf(VBABYDOGE_RECEIVER)).to.equal(expectedSupply);
     });
 
     it("check vUSDT supply", async () => {
