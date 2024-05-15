@@ -33,7 +33,7 @@ import SINGLE_TOKEN_CONVERTER from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { setMaxStalePeriod } from "../../src/utils";
+import { setMaxStaleCoreAssets, setMaxStalePeriod } from "../../src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
@@ -92,6 +92,8 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
+const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+
 forking(38742886, () => {
   const provider = ethers.provider;
   let oracle: Contract;
@@ -123,6 +125,7 @@ forking(38742886, () => {
     );
 
     await setMaxStalePeriod(oracle, usdt);
+    await setMaxStaleCoreAssets(CHAINLINK_ORACLE, bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", () => {
@@ -131,7 +134,7 @@ forking(38742886, () => {
     });
   });
 
-  testVip("Add Meme Pool", vip304());
+  testVip("Add Meme Pool", vip304(31536000));
 
   describe("Post-VIP state", () => {
     it("check price", async () => {
@@ -249,10 +252,10 @@ forking(38742886, () => {
     });
 
     it("generic IL tests", async () => {
-      // await babyDoge.faucet(parseUnits("100000000000000000000", 9));
-      // await checkIsolatedPoolsComptrollers({
-      //   [COMPTROLLER]: bscmainnet.NORMAL_TIMELOCK,
-      // });
+      const HOLDER = "0xB7b0eB5d4FE3C4bC0d822D775D87a2C5080DB761";
+      await checkIsolatedPoolsComptrollers({
+        [COMPTROLLER]: HOLDER,
+      });
 
       await checkVToken(VBABYDOGE, {
         name: "Venus BabyDoge (Meme)",
