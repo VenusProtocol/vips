@@ -13,7 +13,7 @@ import vip008, {
   VUSDT_CORE,
 } from "../../../proposals/arbitrumsepolia/vip-008";
 
-forking(39020341, () => {
+forking(44291286, () => {
   describe("Generic checks", async () => {
     before(async () => {
       await pretendExecutingVip(vip008());
