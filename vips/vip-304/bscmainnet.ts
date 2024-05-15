@@ -16,7 +16,7 @@ export const REWARDS_DISTRIBUTOR = "0xC1044437AbfD8592150d612185581c5600851d44";
 export const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 export const SWAP_ROUTER = "0x9Db0CBD9A73339949f98C5E6a51e036d0dEaFf21";
 
-export const STALE_PERIOD = 60 * 60 * 26; // 26 hour
+export const STALE_PERIOD = 60 * 60 * 60; // 26 hour
 export const BABYDOGE_SUPPLY = parseUnits("27917365987868.178893572", 9);
 export const USDT_SUPPLY = parseUnits("5000", 18);
 export const REWARDS_AMOUNT = parseUnits("15726472026491.075844320", 9);
@@ -138,19 +138,29 @@ const vip304 = () => {
 
       // Add USDT Market
       {
-        target: TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_SUPPLY, NORMAL_TIMELOCK],
+        "target": TREASURY,
+        "signature": "withdrawTreasuryBEP20(address,uint256,address)",
+        "params": [
+          USDT,
+          USDT_SUPPLY,
+          NORMAL_TIMELOCK
+        ],
       },
       {
-        target: USDT,
-        signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, 0],
+        "target": USDT,
+        "signature": "approve(address,uint256)",
+        "params": [
+          POOL_REGISTRY,
+          0
+        ],
       },
       {
-        target: USDT,
-        signature: "approve(address,uint256)",
-        params: [POOL_REGISTRY, USDT_SUPPLY],
+        "target": USDT,
+        "signature": "approve(address,uint256)",
+        "params": [
+          POOL_REGISTRY,
+          USDT_SUPPLY
+        ],
       },
       {
         target: VUSDT,
@@ -160,8 +170,16 @@ const vip304 = () => {
       {
         target: POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-        params: [
-          [VUSDT, "750000000000000000", "770000000000000000", USDT_SUPPLY, TREASURY, "1000000000000000000000000", "900000000000000000000000"],
+        "params": [
+          [
+            VUSDT,
+            "750000000000000000",
+            "770000000000000000",
+            USDT_SUPPLY,
+            TREASURY,
+            "1000000000000000000000000",
+            "900000000000000000000000"
+          ]
         ],
       },
 
