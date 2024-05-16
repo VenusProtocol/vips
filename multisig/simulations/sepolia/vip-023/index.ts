@@ -17,13 +17,13 @@ const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 forking(5773190, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
-  let vweETHContract: Contract;
+  let vPTweETHContract: Contract;
   let comptroller: Contract;
 
   before(async () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
-    vweETHContract = await ethers.getContractAt(VTOKEN_ABI, vPTweETH);
+    vPTweETHContract = await ethers.getContractAt(VTOKEN_ABI, vPTweETH);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, LIQUID_STAKED_COMPTROLLER);
   });
 
@@ -51,18 +51,18 @@ forking(5773190, () => {
       expect(poolVTokens).to.have.lengthOf(4);
     });
 
-    it("should add vweETH to the pool", async () => {
+    it("should add vPTweETH to the pool", async () => {
       const registeredVToken = await poolRegistry.getVTokenForAsset(comptroller.address, PTweETH);
       expect(registeredVToken).to.equal(vPTweETH);
     });
 
     it("check ownership", async () => {
-      expect(await vweETHContract.owner()).to.equal(sepolia.GUARDIAN);
+      expect(await vPTweETHContract.owner()).to.equal(sepolia.GUARDIAN);
     });
 
     it("check supply", async () => {
       const expectedSupply = parseUnits("1.79961879", 8);
-      expect(await vweETHContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
+      expect(await vPTweETHContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
   });
 });

@@ -57,13 +57,13 @@ const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined 
 forking(19882072, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
-  let vweETHContract: Contract;
+  let vPTweETHContract: Contract;
   let comptroller: Contract;
 
   before(async () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
-    vweETHContract = await ethers.getContractAt(VTOKEN_ABI, vPTweETH);
+    vPTweETHContract = await ethers.getContractAt(VTOKEN_ABI, vPTweETH);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
   });
 
@@ -91,23 +91,23 @@ forking(19882072, () => {
       expect(poolVTokens).to.have.lengthOf(4);
     });
 
-    it("should add vweETH to the pool", async () => {
+    it("should add vPTweETH to the pool", async () => {
       const registeredVToken = await poolRegistry.getVTokenForAsset(comptroller.address, PTweETH);
       expect(registeredVToken).to.equal(vPTweETH);
     });
 
     it("check ownership", async () => {
-      expect(await vweETHContract.owner()).to.equal(ethereum.GUARDIAN);
+      expect(await vPTweETHContract.owner()).to.equal(ethereum.GUARDIAN);
     });
 
     it("check supply", async () => {
       const expectedSupply = parseUnits("1.79961879", 8);
-      expect(await vweETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+      expect(await vPTweETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
     });
 
     describe(`check risk parameters`, () => {
       it(`check reserve factor`, async () => {
-        expect(await vweETHContract.reserveFactorMantissa()).to.equal(parseUnits(riskParameters.reserveFactor, 18));
+        expect(await vPTweETHContract.reserveFactorMantissa()).to.equal(parseUnits(riskParameters.reserveFactor, 18));
       });
 
       it(`check CF`, async () => {
@@ -121,7 +121,7 @@ forking(19882072, () => {
       });
 
       it(`check protocol seize share`, async () => {
-        expect(await vweETHContract.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+        expect(await vPTweETHContract.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
       });
 
       it(`check supply cap`, async () => {
@@ -134,7 +134,7 @@ forking(19882072, () => {
 
       it("Interest rates", async () => {
         checkInterestRate(
-          await vweETHContract.interestRateModel(),
+          await vPTweETHContract.interestRateModel(),
           interestRateModel.vToken,
           {
             base: interestRateModel.base,
