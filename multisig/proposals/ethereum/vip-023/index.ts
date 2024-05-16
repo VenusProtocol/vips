@@ -6,7 +6,7 @@ import { makeProposal } from "../../../../src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-export const PENDLE_ORACLE = "0x16D54113De89ACE580918D15653e9C0d1DE05C35";
+export const PENDLE_ORACLE = "0xA1eA3cB0FeA73a6c53aB07CcC703Dc039D8EAFb4";
 export const PTweETH = "0x6ee2b5E19ECBa773a352E5B21415Dc419A700d1d";
 export const VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 export const vPTweETH = "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C";

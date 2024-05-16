@@ -54,7 +54,7 @@ const interestRateModel: InterestRateModelSpec = {
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 12 seconds
 
-forking(19867748, () => {
+forking(19882072, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;
@@ -79,9 +79,9 @@ forking(19867748, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(PTweETH)).to.be.closeTo(parseUnits("2664", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(PTweETH)).to.be.closeTo(parseUnits("2755", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vPTweETH)).to.be.closeTo(
-        parseUnits("2664", 18),
+        parseUnits("2755", 18),
         parseUnits("1", 18),
       );
     });
