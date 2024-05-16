@@ -11,6 +11,11 @@ export const vip023Addendum = () => {
       signature: "setMarketBorrowCaps(address[],uint256[])",
       params: [[vPTweETH], [0]],
     },
+    {
+      target: COMPTROLLER,
+      signature: "setActionsPaused(address[],uint8[],bool)",
+      params: [[vPTweETH], [2], true],
+    }
   ]);
 };
 
