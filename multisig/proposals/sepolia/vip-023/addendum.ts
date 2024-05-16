@@ -9,7 +9,7 @@ export const vip023Addendum = () => {
     {
       target: COMPTROLLER,
       signature: "setMarketBorrowCaps(address[],uint256[])",
-      params: [[[vPTweETH], [0]]],
+      params: [[vPTweETH], [0]],
     },
   ]);
 };
