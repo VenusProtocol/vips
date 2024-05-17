@@ -37,7 +37,7 @@ const erc20At = (tokenAddress: string): Contract => {
   return new Contract(tokenAddress, ERC20_ABI, ethers.provider);
 };
 
-forking(38740240, () => {
+forking(38804650, () => {
   const usdt = erc20At(USDT);
   let prevUSDTBalanceOfCommunityWallet: BigNumber;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);

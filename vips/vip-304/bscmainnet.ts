@@ -4,7 +4,7 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-export const TOKEN_REDEEMER = "0x167C5a73019f64aF1AC56F7ECEC1f395f04C049C";
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 
