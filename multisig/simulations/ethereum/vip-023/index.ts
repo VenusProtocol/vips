@@ -8,7 +8,15 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { COMPTROLLER, INITIAL_SUPPLY, PTweETH, VTREASURY, vPTweETH, vip023 } from "../../../proposals/ethereum/vip-023";
+import {
+  COMPTROLLER,
+  INITIAL_SUPPLY,
+  PTweETH,
+  REDUCE_RESERVES_BLOCK_DELTA,
+  VTREASURY,
+  vPTweETH,
+  vip023,
+} from "../../../proposals/ethereum/vip-023";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -134,6 +142,10 @@ forking(19882072, () => {
 
       it(`check borrow cap`, async () => {
         expect(await comptroller.borrowCaps(vPTweETH)).to.equal(riskParameters.borrowCap);
+      });
+
+      it("check reduce reserves block delta", async () => {
+        expect(await vPTweETHContract.reduceReservesBlockDelta()).equals(REDUCE_RESERVES_BLOCK_DELTA);
       });
 
       it("Interest rates", async () => {

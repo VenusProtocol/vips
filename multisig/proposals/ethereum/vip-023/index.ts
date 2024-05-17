@@ -12,7 +12,7 @@ export const VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 export const vPTweETH = "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C";
 export const COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 export const INITIAL_SUPPLY = parseUnits("1.799618792392372642", 18);
-
+export const REDUCE_RESERVES_BLOCK_DELTA = 7200;
 
 export const vip023 = () => {
   return makeProposal([
@@ -44,7 +44,7 @@ export const vip023 = () => {
     {
       target: vPTweETH,
       signature: "setReduceReservesBlockDelta(uint256)",
-      params: ["7200"],
+      params: [REDUCE_RESERVES_BLOCK_DELTA],
     },
     {
       target: ethereum.POOL_REGISTRY,
