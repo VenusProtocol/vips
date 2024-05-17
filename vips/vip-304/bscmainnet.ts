@@ -25,7 +25,6 @@ export const USDC_AMOUNT_ON_TREASURY = parseUnits("16777", 18);
 export const REMAINING_USDC_AMOUNT = parseUnits("334623", 18);
 
 export const BNB_TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
-export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 export const ETH_AMOUNT_COMMUNITY_WALLET = parseUnits("1.188225443", 18);
 export const USDT_AMOUNT_COMMUNITY_WALLET = parseUnits("10518.73", 18);
@@ -97,21 +96,20 @@ export const vip304 = () => {
         params: [BTC, BTC_AMOUNT_DEV_FUND, DEV_WALLET],
       },
 
-      // Refund to Community wallet
       {
         target: BNB_TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [ETH, ETH_AMOUNT_COMMUNITY_WALLET, COMMUNITY_WALLET],
+        params: [ETH, ETH_AMOUNT_COMMUNITY_WALLET, DEV_WALLET],
       },
       {
         target: BNB_TREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_AMOUNT_COMMUNITY_WALLET, COMMUNITY_WALLET],
+        params: [USDT, USDT_AMOUNT_COMMUNITY_WALLET, DEV_WALLET],
       },
       {
         target: BNB_TREASURY,
         signature: "withdrawTreasuryBNB(uint256,address)",
-        params: [BNB_AMOUNT_COMMUNITY_WALLET, COMMUNITY_WALLET],
+        params: [BNB_AMOUNT_COMMUNITY_WALLET, DEV_WALLET],
       },
     ],
     meta,

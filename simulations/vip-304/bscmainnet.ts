@@ -11,7 +11,6 @@ import {
   BNB_TREASURY,
   BTC,
   BTC_AMOUNT_DEV_FUND,
-  COMMUNITY_WALLET,
   DEV_WALLET,
   ETH,
   ETH_AMOUNT_COMMUNITY_WALLET,
@@ -41,9 +40,6 @@ forking(38796645, () => {
   let oldUsdtBalance: BigNumber;
   let oldBtcBalance: BigNumber;
   let oldBnbBalance: BigNumber;
-  let oldBNBBal: BigNumber;
-  let oldETHBal: BigNumber;
-  let oldUSDTBal: BigNumber;
   let oldTreasuryUsdtBalance: BigNumber;
   let oldTreasuryEthBalance: BigNumber;
   let oldTreasuryUsdcBalance: BigNumber;
@@ -74,10 +70,6 @@ forking(38796645, () => {
     oldBtcBalance = await btc.balanceOf(DEV_WALLET);
     oldBnbBalance = await ethers.provider.getBalance(DEV_WALLET);
 
-    oldBNBBal = await ethers.provider.getBalance(COMMUNITY_WALLET);
-    oldETHBal = await eth.balanceOf(COMMUNITY_WALLET);
-    oldUSDTBal = await usdt.balanceOf(COMMUNITY_WALLET);
-
     oldTreasuryUsdcBalance = await usdc.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryUsdtBalance = await usdt.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryEthBalance = await eth.balanceOf(bscmainnet.VTREASURY);
@@ -91,7 +83,6 @@ forking(38796645, () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [8, 1]);
     },
-    supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });
 
   describe("Post-VIP behavior", async () => {
@@ -122,20 +113,10 @@ forking(38796645, () => {
       const balance = await ethers.provider.getBalance(DEV_WALLET);
 
       expect(newUsdcBalance).equals(oldUsdcBalance.add(USDC_AMOUNT_ON_TREASURY.add(REMAINING_USDC_AMOUNT)));
-      expect(newEthBalance).equals(oldEthBalance.add(ETH_AMOUNT_DEV_FUND));
+      expect(newEthBalance).equals(oldEthBalance.add(ETH_AMOUNT_DEV_FUND.add(ETH_AMOUNT_COMMUNITY_WALLET)));
       expect(newBtcBalance).equals(oldBtcBalance.add(BTC_AMOUNT_DEV_FUND));
-      expect(newUsdtBalance).equals(oldUsdtBalance.add(USDT_AMOUNT_DEV_FUND));
-      expect(balance).to.be.equal(oldBnbBalance.add(WBNB_AMOUNT_DEV_FUND));
-    });
-
-    it("Check new balance of Community Wallet", async () => {
-      const currBNBBal = await ethers.provider.getBalance(COMMUNITY_WALLET);
-      const currETHBal = await eth.balanceOf(COMMUNITY_WALLET);
-      const currUSDTBal = await usdt.balanceOf(COMMUNITY_WALLET);
-
-      expect(currBNBBal.sub(oldBNBBal)).equals(BNB_AMOUNT_COMMUNITY_WALLET);
-      expect(currETHBal.sub(oldETHBal)).equals(ETH_AMOUNT_COMMUNITY_WALLET);
-      expect(currUSDTBal.sub(oldUSDTBal)).equals(USDT_AMOUNT_COMMUNITY_WALLET);
+      expect(newUsdtBalance).equals(oldUsdtBalance.add(USDT_AMOUNT_DEV_FUND.add(USDT_AMOUNT_COMMUNITY_WALLET)));
+      expect(balance).to.be.equal(oldBnbBalance.add(WBNB_AMOUNT_DEV_FUND.add(BNB_AMOUNT_COMMUNITY_WALLET)));
     });
 
     it("Token Redeemer should have no left USDC", async () => {
