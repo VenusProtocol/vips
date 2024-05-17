@@ -7,20 +7,28 @@ import { Contract } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
-import { Command, LzChainId, Proposal, ProposalMeta, ProposalType, REMOTE_NETWORKS, TokenConfig } from "./types";
+import {
+  Command,
+  LzChainId,
+  Proposal,
+  ProposalMeta,
+  ProposalType,
+  REMOTE_MAINNET_NETWORKS,
+  REMOTE_NETWORKS,
+  REMOTE_TESTNET_NETWORKS,
+  TokenConfig,
+} from "./types";
 import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const testnetNetworks = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
-const mainnetNetworks = ["ethereum", "opbnbmainnet", "arbitrumone"];
 const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
 const BSCMAINNET_OMNICHAIN_SENDER = "";
 
 export const getOmnichainProposalSenderAddress = () => {
-  if (FORKED_NETWORK === "bscmainnet" || mainnetNetworks.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
+  if (FORKED_NETWORK === "bscmainnet" || REMOTE_MAINNET_NETWORKS.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
     return BSCMAINNET_OMNICHAIN_SENDER;
   } else return BSCTESTNET_OMNICHAIN_SENDER;
 };
@@ -52,9 +60,9 @@ export async function setForkBlock(blockNumber: number) {
 }
 
 export const getSourceChainId = (network: REMOTE_NETWORKS) => {
-  if (mainnetNetworks.includes(network as string)) {
+  if (REMOTE_MAINNET_NETWORKS.includes(network as string)) {
     return LzChainId.bscmainnet;
-  } else if (testnetNetworks.includes(network as string)) {
+  } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
     return LzChainId.bsctestnet;
   }
 };
@@ -102,7 +110,9 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
   );
   let fee;
   if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
-    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].add(ethers.utils.parseEther("0.1"));
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].add(
+      ethers.utils.parseEther("0.1"),
+    );
   } else {
     fee = ethers.BigNumber.from("1");
   }

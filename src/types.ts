@@ -4,6 +4,8 @@ export type SUPPORTED_NETWORKS = "bsctestnet" | "bscmainnet" | "sepolia" | "ethe
 
 export type REMOTE_NETWORKS = "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
 
+export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet"];
+export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet"];
 export interface ProposalMeta {
   version: string;
   title: string;

@@ -17,8 +17,12 @@ import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(40149880, async () => {
   const provider = ethers.provider;
-  const omnichainProposalSender = new ethers.Contract(OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_PROPOSAL_SENDER_ABI, provider);
-  
+  const omnichainProposalSender = new ethers.Contract(
+    OMNICHAIN_PROPOSAL_SENDER,
+    OMNICHAIN_PROPOSAL_SENDER_ABI,
+    provider,
+  );
+
   describe("Pre-VIP behaviour", () => {
     it("Daily limit should be 0", async () => {
       expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.sepolia)).to.equals(0);
