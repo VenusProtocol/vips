@@ -40,8 +40,104 @@ export const BaseAssets = [
 const vip304 = (babyDogeMaxStalePeriodInSeconds: number = STALE_PERIOD) => {
   const meta = {
     version: "v2",
-    title: "Meme Pool",
-    description: ``,
+    title: "VIP-304 Add Meme pool to BNB chain",
+    description: `#### Summary
+
+If passed, this VIP will perform the following actions:
+
+- Add pool "Meme" to the [PoolRegistry contract](https://bscscan.com/address/0x9F7b01A536aFA00EF10310A162877fd792cD0666) on BNB chain
+- Add the following markets to the new pool, following the [Chaos labs recommendations](https://community.venus.io/t/isolated-lending-market-for-babydoge-on-venus/4155/12):
+    - [BabyDoge](https://bscscan.com/token/0xc748673057861a797275CD8A068AbB95A902e8de)
+    - [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955)
+
+#### Description
+
+Initial risk parameters for the new pool (similar to the ones used in the Core pool):
+
+- Close factor: 50%
+- Liquidation incentive: 10%
+
+#### Risk parameters of the new markets
+
+Underlying token: [BabyDoge](https://bscscan.com/token/0xc748673057861a797275CD8A068AbB95A902e8de)
+
+- Borrow cap: 800,000,000,000,000
+- Supply cap: 1,600,000,000,000,000
+- Collateral factor: 0.3
+- Liquidation threshold: 0.4
+- Reserve factor: 0.25
+- Bootstrap liquidity: 27,917,365,987,868 BabyDoge (around 50K USD) - provided by the [BabyDoge team](https://babydoge.com/)
+- Interest rates:
+    - kink: 0.45
+    - base (yearly): 0.02
+    - multiplier (yearly): 0.2
+    - jump multiplier (yearly): 3
+
+Underlying token: [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955)
+
+- Borrow cap: 1,000,000
+- Supply cap: 900,000
+- Collateral factor: 0.75
+- Liquidation threshold: 0.77
+- Reserve factor: 0.1
+- Bootstrap liquidity: 5000 USDT - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Interest rates:
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.175
+    - jump multiplier (yearly): 2.5
+
+#### Liquidity mining rewards
+
+- 15,726,472,026,491 BabyDoge for the users of the new BabyDoge market
+- For 90 days
+- 50/50 for suppliers and borrowers
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **No changes in the deployed code.** The deployed contracts (markets, rewards, comptroller, etc.) have not been modified. It’s the same codebase used for the rest of the pools on BNB chain.
+- **Audit**: Certik, Peckshield, Hacken and Code4rena have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the markets are properly added to the pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same pool has been deployed to testnet, and used in the Venus Protocol testnet deployment
+- **Fork tests**: in a simulation environment, verifying the main actions of the protocol are executable as expected with real data
+
+The ownership of every contract has been transferred to Governance.
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+#### Contracts on mainnet
+
+- Comptroller: [0x33B6fa34cd23e5aeeD1B112d5988B026b8A5567d](https://bscscan.com/address/0x33B6fa34cd23e5aeeD1B112d5988B026b8A5567d)
+- Markets:
+    - vBabyDoge_Meme: [0x52eD99Cd0a56d60451dD4314058854bc0845bbB5](https://bscscan.com/address/0x52eD99Cd0a56d60451dD4314058854bc0845bbB5)
+    - vUSDT_Meme: [0x4a9613D06a241B76b81d3777FCe3DDd1F61D4Bd0](https://bscscan.com/address/0x4a9613D06a241B76b81d3777FCe3DDd1F61D4Bd0)
+- Swap router: [0x9Db0CBD9A73339949f98C5E6a51e036d0dEaFf21](https://bscscan.com/address/0x9Db0CBD9A73339949f98C5E6a51e036d0dEaFf21)
+
+#### Contracts on testnet
+
+- Comptroller: [0x92e8E3C202093A495e98C10f9fcaa5Abe288F74A](https://testnet.bscscan.com/address/0x92e8E3C202093A495e98C10f9fcaa5Abe288F74A)
+- Markets:
+    - vBabyDoge_Meme: [0x73d2F6e0708599a4eA70F6A0c55A4C59196a101c](https://testnet.bscscan.com/address/0x73d2F6e0708599a4eA70F6A0c55A4C59196a101c)
+    - vUSDT_Meme: [0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1](https://testnet.bscscan.com/address/0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1)
+- Swap router: [0x18995825f033F33fa30CF59c117aD21ff6BdB48c](https://testnet.bscscan.com/address/0x18995825f033F33fa30CF59c117aD21ff6BdB48c)
+
+#### References
+
+- [Repository](https://github.com/VenusProtocol/isolated-pools)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/280)
+- [Chaos labs recommendations](https://community.venus.io/t/isolated-lending-market-for-babydoge-on-venus/4155/12)
+- [Community post proposing to add the BabyDoge market](https://community.venus.io/t/isolated-lending-market-for-babydoge-on-venus/4155)
+- Snapshot “[Isolated Lending Market for BABYDOGE on Venus](https://snapshot.org/#/venus-xvs.eth/proposal/0x3827310dd34b8f966cbe1ba5d38a02a864d748f74f33b220b1e858a7a3c52180)”
+- [Community post about Venus V4, introducing Isolated Pools](https://community.venus.io/t/proposing-venus-v4)
+- [Documentation](https://docs.venus.io/whats-new/isolated-pools)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

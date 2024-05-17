@@ -94,7 +94,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(38742886, () => {
+forking(38808005, () => {
   let oracle: Contract;
   let poolRegistry: Contract;
   let vBabyDoge: Contract;
@@ -143,7 +143,7 @@ forking(38742886, () => {
   describe("Post-VIP state", () => {
     it("check price", async () => {
       const price = await oracle.getPrice(BABYDOGE);
-      expect(price).to.be.eq(parseUnits("0.000000001648807806000000000", 27));
+      expect(price).to.be.eq(parseUnits("0.000000001734877762000000000", 27));
     });
 
     it("should have 2 markets in meme pool", async () => {
@@ -317,7 +317,7 @@ forking(38742886, () => {
       const usdtBalanceAfter = await usdt.balanceOf(bscmainnet.NORMAL_TIMELOCK);
       const babyDogeBalanceAfter = await babyDoge.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("82.455805412821927060", 18));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("86.709204418232706918", 18));
       expect(babyDogeBalanceAfter.sub(babyDogeBalanceBefore)).to.be.equal(babyDogeAmount);
     });
   });
