@@ -105,6 +105,10 @@ forking(19882072, () => {
       expect(await vPTweETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
     });
 
+    it("borrow should be paused", async () => {
+      expect(await comptroller.actionPaused(vPTweETH, 2)).to.be.true;
+    });
+
     describe(`check risk parameters`, () => {
       it(`check reserve factor`, async () => {
         expect(await vPTweETHContract.reserveFactorMantissa()).to.equal(parseUnits(riskParameters.reserveFactor, 18));

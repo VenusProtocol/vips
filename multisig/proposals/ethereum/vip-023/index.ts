@@ -62,6 +62,11 @@ export const vip023 = () => {
         ],
       ],
     },
+    {
+      target: COMPTROLLER,
+      signature: "setActionsPaused(address[],uint8[],bool)",
+      params: [[vPTweETH], [2], true],
+    },
   ]);
 };
 

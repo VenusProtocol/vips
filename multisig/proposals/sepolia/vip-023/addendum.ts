@@ -15,7 +15,7 @@ export const vip023Addendum = () => {
       target: COMPTROLLER,
       signature: "setActionsPaused(address[],uint8[],bool)",
       params: [[vPTweETH], [2], true],
-    }
+    },
   ]);
 };
 
