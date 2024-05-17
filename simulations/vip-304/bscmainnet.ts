@@ -56,7 +56,7 @@ forking(38804650, () => {
     });
 
     entries(underlyingWithdrawals).forEach(([vTokenSymbol, amount]) => {
-      it(`has treasury balance >${formatUnits(amount, 8)} ${vTokenSymbol.slice(1)}`, async () => {
+      it(`has treasury balance >${amount} ${vTokenSymbol.slice(1)} units`, async () => {
         const balance = await erc20At(vTokenConfigs[vTokenSymbol].underlying).balanceOf(VTREASURY);
         expect(balance).to.be.gt(amount);
       });
