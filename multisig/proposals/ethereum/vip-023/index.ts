@@ -13,7 +13,6 @@ export const vPTweETH = "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C";
 export const COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 export const INITIAL_SUPPLY = parseUnits("1.799618792392372642", 18);
 
-export const TWAP_DURATION = 1800;
 
 export const vip023 = () => {
   return makeProposal([

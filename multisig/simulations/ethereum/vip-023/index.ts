@@ -86,7 +86,7 @@ forking(19882072, () => {
       );
     });
 
-    it("should have 3 markets in liquid staked pool", async () => {
+    it("should have 4 markets in liquid staked pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
       expect(poolVTokens).to.have.lengthOf(4);
     });
