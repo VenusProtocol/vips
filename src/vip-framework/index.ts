@@ -32,12 +32,11 @@ export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
   NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
-export const forking = (blockNumber: number, fn: () => void) => {
+export const forking = async (blockNumber: number, fn: () => Promise<void>) => {
   console.log(`At block #${blockNumber}`);
-  before(async () => {
-    await setForkBlock(blockNumber);
-  });
-  fn();
+  await setForkBlock(blockNumber);
+  await fn();
+  run();
 };
 
 export interface TestingOptions {
@@ -69,7 +68,7 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
 };
 
 export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2.0"));
+  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("4.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
   }
