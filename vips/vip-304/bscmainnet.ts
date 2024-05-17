@@ -12,16 +12,17 @@ export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 export const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
-const TOKEN_REDEEMER = "0x2367bff367Bc4a83A65EEEe3b9E4D834Ff4f637e";
+export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+export const TOKEN_REDEEMER = "0x2367bff367Bc4a83A65EEEe3b9E4D834Ff4f637e";
 
 export const WBNB_AMOUNT = parseUnits("1472.197705207413945", 18);
-export const USDC_AMOUNT_ON_TREASURY = parseUnits("16777", 18);
-export const REMAINING_USDC_AMOUNT = parseUnits("334623", 18);
-const REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC = parseUnits("14047776.20001050", 8); // closer to 334623 USDC
 export const ETH_AMOUNT = parseUnits("62.069755574301455", 18);
 export const BTC_AMOUNT = parseUnits("1.702705080868696", 18);
 export const USDT_AMOUNT = parseUnits("21100", 18);
+
+export const REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC = parseUnits("14046500", 8);
+export const USDC_AMOUNT_ON_TREASURY = parseUnits("16777", 18);
+export const REMAINING_USDC_AMOUNT = parseUnits("334623", 18);
 
 export const vip304 = () => {
   const meta = {
@@ -66,12 +67,7 @@ export const vip304 = () => {
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [vUSDC, REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC, bscmainnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: vUSDC,
-        signature: "transfer(address,uint256)",
-        params: [TOKEN_REDEEMER, REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC],
+        params: [vUSDC, REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC, TOKEN_REDEEMER],
       },
       {
         target: TOKEN_REDEEMER,

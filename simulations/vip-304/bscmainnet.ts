@@ -1,7 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
@@ -10,41 +12,65 @@ import {
   ETH,
   ETH_AMOUNT,
   REMAINING_USDC_AMOUNT,
+  REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC,
+  TOKEN_REDEEMER,
   USDC,
   USDC_AMOUNT_ON_TREASURY,
   USDT,
   USDT_AMOUNT,
   WALLET,
+  WBNB,
   WBNB_AMOUNT,
+  vUSDC,
   vip304,
 } from "../../vips/vip-304/bscmainnet";
 import BEP20_ABI from "./abi/BEP-20Abi.json";
 import VTREASURY_ABI from "./abi/VtreasuryAbi.json";
+import VTOKEN_ABI from "./abi/vTokenAbi.json";
 
-forking(38777357, () => {
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+forking(38796645, () => {
   let oldUsdcBalance: BigNumber;
   let oldEthBalance: BigNumber;
   let oldUsdtBalance: BigNumber;
   let oldBtcBalance: BigNumber;
   let oldBnbBalance: BigNumber;
+  let oldTreasuryUsdtBalance: BigNumber;
+  let oldTreasuryEthBalance: BigNumber;
+  let oldTreasuryUsdcBalance: BigNumber;
+  let oldTreasuryBtcBalance: BigNumber;
+  let oldTreasuryVUsdcBalance: BigNumber;
+  let oldTreasuryWBnbBalance: BigNumber;
+
   let usdc: Contract;
   let usdt: Contract;
   let eth: Contract;
   let btc: Contract;
+  let vUsdc: Contract;
+  let wbnb: Contract;
   const provider = ethers.provider;
 
   before(async () => {
     usdc = new ethers.Contract(USDC, BEP20_ABI, provider);
     usdt = new ethers.Contract(USDT, BEP20_ABI, provider);
-
+    vUsdc = new ethers.Contract(vUSDC, VTOKEN_ABI, provider);
     eth = new ethers.Contract(ETH, BEP20_ABI, provider);
     btc = new ethers.Contract(BTC, BEP20_ABI, provider);
+    wbnb = new ethers.Contract(WBNB, BEP20_ABI, provider);
+
     oldUsdcBalance = await usdc.balanceOf(WALLET);
     oldUsdtBalance = await usdt.balanceOf(WALLET);
-
     oldEthBalance = await eth.balanceOf(WALLET);
     oldBtcBalance = await btc.balanceOf(WALLET);
     oldBnbBalance = await ethers.provider.getBalance(WALLET);
+
+    oldTreasuryUsdcBalance = await usdc.balanceOf(bscmainnet.VTREASURY);
+    oldTreasuryUsdtBalance = await usdt.balanceOf(bscmainnet.VTREASURY);
+    oldTreasuryEthBalance = await eth.balanceOf(bscmainnet.VTREASURY);
+    oldTreasuryBtcBalance = await btc.balanceOf(bscmainnet.VTREASURY);
+    oldTreasuryVUsdcBalance = await vUsdc.balanceOf(bscmainnet.VTREASURY);
+    oldTreasuryWBnbBalance = await wbnb.balanceOf(bscmainnet.VTREASURY);
   });
 
   testVip("VIP-304", vip304(), {
@@ -67,6 +93,23 @@ forking(38777357, () => {
     it("Verify that the wallet has received the correct amount of BNB", async () => {
       const balance = await ethers.provider.getBalance(WALLET);
       expect(balance).to.be.equal(oldBnbBalance.add(WBNB_AMOUNT));
+    });
+    it("Token Redeemer should have no left USDC", async () => {
+      expect(await usdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
+    });
+    it("Token Redeemer should have no left VUSDC", async () => {
+      expect(await vUsdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
+    });
+    it("Check Treasury balance", async () => {
+      expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryUsdcBalance.sub(USDC_AMOUNT_ON_TREASURY));
+      expect(await usdt.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryUsdtBalance.sub(USDT_AMOUNT));
+      expect(await eth.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryEthBalance.sub(ETH_AMOUNT));
+      expect(await btc.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryBtcBalance.sub(BTC_AMOUNT));
+      expect(await vUsdc.balanceOf(bscmainnet.VTREASURY)).to.closeTo(
+        oldTreasuryVUsdcBalance.sub(REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC),
+        parseUnits("6100", 8),
+      );
+      expect(await wbnb.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryWBnbBalance.sub(WBNB_AMOUNT));
     });
   });
 });
