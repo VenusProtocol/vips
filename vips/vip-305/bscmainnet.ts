@@ -25,10 +25,10 @@ export const NEW_VUSDT_STABLE_COIN_IR = JUMPRATEMODELV2_BASE0BPS_SLOPE1000BPS_JU
 export const NEW_VUSDT_GAMEFI_IR = JUMPRATEMODELV2_BASE200BPS_SLOPE1500BPS_JUMP25000BPS_KINK8000BPS;
 export const NEW_VUSDT_DEFI_IR = JUMPRATEMODELV2_BASE200BPS_SLOPE1500BPS_JUMP25000BPS_KINK8000BPS;
 
-const vip304 = () => {
+const vip305 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-304 Chaos labs recommendations (May 16th, 2024)",
+    title: "VIP-305 Chaos labs recommendations (May 16th, 2024)",
     description: `
 #### Description
 
@@ -98,4 +98,4 @@ Privilege commands on Ethereum will be executed by the Guardian wallets ([Ethere
   );
 };
 
-export default vip304;
+export default vip305;

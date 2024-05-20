@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import vip304, {
+import vip305, {
   NEW_VDAI_IR,
   NEW_VFDUSD_IR,
   NEW_VTUSD_IR,
@@ -22,9 +22,9 @@ import vip304, {
   VUSDT_DEFI,
   VUSDT_GAMEFI,
   VUSDT_STABLE_COIN,
-} from "../../vips/vip-304/bscmainnet";
-import VTOKEN_IL_ABI from "./abi/VtokenIL.json";
-import VTOKEN_CORE_POOL_ABI from "./abi/vTokenCorePool.json";
+} from "../../vips/vip-305/bscmainnet";
+import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
+import VTOKEN_IL_ABI from "./abi/VTokenIL.json";
 
 const OLD_VUSDT_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
 const OLD_VUSDC_IR = "0x9e8fbACBfbD811Fc561af3Af7df8e38dEd4c52F3";
@@ -134,7 +134,7 @@ forking(38800400, () => {
     });
   });
 
-  testVip("VIP-304 Chaos lab recommendation", vip304(), {
+  testVip("VIP-305 Chaos lab recommendation", vip305(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_IL_ABI], ["NewMarketInterestRateModel"], [3]);
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [5]);
