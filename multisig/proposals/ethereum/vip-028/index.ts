@@ -20,6 +20,8 @@ export const CRV_BORROW_CAP = parseUnits("1500000", 18);
 export const ETH_weETH_ADDRESS = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";
 export const ETH_weETH_SUPPLY_CAP = parseUnits("15000", 18);
 export const ETH_weETH_BORROW_CAP = parseUnits("7500", 18);
+export const ETH_wstETH_ADDRESS = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
+export const ETH_wstETH_BORROW_CAP = parseUnits("4000", 18);
 
 export const vip028 = () => {
   return makeProposal([
@@ -57,7 +59,10 @@ export const vip028 = () => {
     {
       target: ETH_COMPTROLLER_ADDRESS,
       signature: "setMarketBorrowCaps(address[],uint256[])",
-      params: [[ETH_weETH_ADDRESS], [ETH_weETH_BORROW_CAP]],
+      params: [
+        [ETH_weETH_ADDRESS, ETH_wstETH_ADDRESS],
+        [ETH_weETH_BORROW_CAP, ETH_wstETH_BORROW_CAP],
+      ],
     },
   ]);
 };

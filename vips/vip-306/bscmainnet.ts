@@ -77,6 +77,7 @@ export const ETH_FRAX_ADDRESS = "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95";
 export const ETH_crvUSD_ADDRESS = "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202";
 export const ETH_CRV_ADDRESS = "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa";
 export const ETH_weETH_ADDRESS = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";
+export const ETH_wstETH_ADDRESS = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
 
 const vip306 = () => {
   const meta = {
@@ -167,6 +168,8 @@ const vip306 = () => {
 - [weETH (Liquid Staking)](https://etherscan.com/address/${ETH_weETH_ADDRESS})
   - Increase supply cap from 7.5K to 15K
   - Increase borrow cap from 1.5K to 7.5K
+- [wstETH (Liquid Staking)](https://etherscan.com/address/${ETH_wstETH_ADDRESS})
+  - Increase borrow cap from 2K to 4K
 
 Complete analysis and details of these recommendations are available in the above publication.
 
@@ -174,7 +177,7 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/289](https://github.
 
 #### Disclaimer for Ethereum VIPs
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xaac3239a48a8874c024f8549fb96fbe45a074f990c9f0d81413bd5334e1489e5) multisig transaction will be executed. Otherwise, it will be rejected.`,
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x24083080b9bcac982011a3d23fdf3f8e6b70b2be72b48f54ef78d6d8d02c2249) multisig transaction will be executed. Otherwise, it will be rejected.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this proposal",

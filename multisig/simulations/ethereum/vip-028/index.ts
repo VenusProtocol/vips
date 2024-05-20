@@ -17,6 +17,8 @@ import vip028, {
   ETH_weETH_ADDRESS,
   ETH_weETH_BORROW_CAP,
   ETH_weETH_SUPPLY_CAP,
+  ETH_wstETH_ADDRESS,
+  ETH_wstETH_BORROW_CAP,
   FRAX_ADDRESS,
   FRAX_BORROW_CAP,
   FRAX_SUPPLY_CAP,
@@ -70,6 +72,9 @@ forking(19884052, () => {
 
       const ethBorrowCap = await ethComptroller.borrowCaps(ETH_weETH_ADDRESS);
       expect(ethBorrowCap).to.equal(parseUnits("1500", 18));
+
+      const wstETHBorrowCap = await ethComptroller.borrowCaps(ETH_wstETH_ADDRESS);
+      expect(wstETHBorrowCap).to.equal(parseUnits("2000", 18));
     });
   });
 
@@ -110,6 +115,9 @@ forking(19884052, () => {
 
       const ethBorrowCap = await ethComptroller.borrowCaps(ETH_weETH_ADDRESS);
       expect(ethBorrowCap).to.equal(ETH_weETH_BORROW_CAP);
+
+      const wstETHBorrowCap = await ethComptroller.borrowCaps(ETH_wstETH_ADDRESS);
+      expect(wstETHBorrowCap).to.equal(ETH_wstETH_BORROW_CAP);
     });
   });
 });
