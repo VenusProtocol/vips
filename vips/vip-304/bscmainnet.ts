@@ -9,7 +9,6 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const DEV_WALLET = "0x48e9d2128321cbf75cd108321459865357c00f15";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 export const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
@@ -18,14 +17,12 @@ export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const WBNB_AMOUNT_DEV_FUND = parseUnits("1472.197705207413945", 18);
 export const ETH_AMOUNT_DEV_FUND = parseUnits("62.069755574301455", 18);
 export const BTC_AMOUNT_DEV_FUND = parseUnits("1.702705080868696", 18);
-export const USDT_AMOUNT_DEV_FUND = parseUnits("21100", 18);
 
-export const REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC = parseUnits("14046500", 8);
-export const USDC_AMOUNT_ON_TREASURY = parseUnits("16777", 18);
-export const REMAINING_USDC_AMOUNT = parseUnits("334623", 18);
+export const REQUIRED_VUSDC_FOR_USDC_DEV_FUND = parseUnits("15629966", 8);
+export const USDC_AMOUNT_DEV_FUND = parseUnits("372500", 18);
 
 export const ETH_AMOUNT_COMMUNITY_WALLET = parseUnits("1.188225443", 18);
-export const USDT_AMOUNT_COMMUNITY_WALLET = parseUnits("10518.73", 18);
+export const USDC_AMOUNT_COMMUNITY_WALLET = parseUnits("10518.73", 18); // Sending USDC instead of USDT
 export const BNB_AMOUNT_COMMUNITY_WALLET = parseUnits("3", 18);
 
 export const vip304 = () => {
@@ -66,27 +63,17 @@ export const vip304 = () => {
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, USDC_AMOUNT_ON_TREASURY, DEV_WALLET],
-      },
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [vUSDC, REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC, TOKEN_REDEEMER],
+        params: [vUSDC, REQUIRED_VUSDC_FOR_USDC_DEV_FUND, TOKEN_REDEEMER],
       },
       {
         target: TOKEN_REDEEMER,
         signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
-        params: [vUSDC, DEV_WALLET, REMAINING_USDC_AMOUNT, bscmainnet.VTREASURY],
+        params: [vUSDC, DEV_WALLET, USDC_AMOUNT_DEV_FUND, bscmainnet.VTREASURY],
       },
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [ETH, ETH_AMOUNT_DEV_FUND, DEV_WALLET],
-      },
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_AMOUNT_DEV_FUND, DEV_WALLET],
       },
       {
         target: bscmainnet.VTREASURY,
@@ -102,7 +89,7 @@ export const vip304 = () => {
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_AMOUNT_COMMUNITY_WALLET, DEV_WALLET],
+        params: [USDC, USDC_AMOUNT_COMMUNITY_WALLET, DEV_WALLET],
       },
       {
         target: bscmainnet.VTREASURY,

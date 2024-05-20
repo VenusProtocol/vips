@@ -14,14 +14,11 @@ import {
   ETH,
   ETH_AMOUNT_COMMUNITY_WALLET,
   ETH_AMOUNT_DEV_FUND,
-  REMAINING_USDC_AMOUNT,
-  REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC,
+  REQUIRED_VUSDC_FOR_USDC_DEV_FUND,
   TOKEN_REDEEMER,
   USDC,
-  USDC_AMOUNT_ON_TREASURY,
-  USDT,
-  USDT_AMOUNT_COMMUNITY_WALLET,
-  USDT_AMOUNT_DEV_FUND,
+  USDC_AMOUNT_COMMUNITY_WALLET,
+  USDC_AMOUNT_DEV_FUND,
   WBNB,
   WBNB_AMOUNT_DEV_FUND,
   vUSDC,
@@ -36,10 +33,8 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 forking(38879158, () => {
   let oldUsdcBalance: BigNumber;
   let oldEthBalance: BigNumber;
-  let oldUsdtBalance: BigNumber;
   let oldBtcBalance: BigNumber;
   let oldBnbBalance: BigNumber;
-  let oldTreasuryUsdtBalance: BigNumber;
   let oldTreasuryEthBalance: BigNumber;
   let oldTreasuryUsdcBalance: BigNumber;
   let oldTreasuryBtcBalance: BigNumber;
@@ -48,7 +43,6 @@ forking(38879158, () => {
   let oldBNBBalTreasury: BigNumber;
 
   let usdc: Contract;
-  let usdt: Contract;
   let eth: Contract;
   let btc: Contract;
   let vUsdc: Contract;
@@ -57,20 +51,17 @@ forking(38879158, () => {
 
   before(async () => {
     usdc = new ethers.Contract(USDC, BEP20_ABI, provider);
-    usdt = new ethers.Contract(USDT, BEP20_ABI, provider);
     vUsdc = new ethers.Contract(vUSDC, VTOKEN_ABI, provider);
     eth = new ethers.Contract(ETH, BEP20_ABI, provider);
     btc = new ethers.Contract(BTC, BEP20_ABI, provider);
     wbnb = new ethers.Contract(WBNB, BEP20_ABI, provider);
 
     oldUsdcBalance = await usdc.balanceOf(DEV_WALLET);
-    oldUsdtBalance = await usdt.balanceOf(DEV_WALLET);
     oldEthBalance = await eth.balanceOf(DEV_WALLET);
     oldBtcBalance = await btc.balanceOf(DEV_WALLET);
     oldBnbBalance = await ethers.provider.getBalance(DEV_WALLET);
 
     oldTreasuryUsdcBalance = await usdc.balanceOf(bscmainnet.VTREASURY);
-    oldTreasuryUsdtBalance = await usdt.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryEthBalance = await eth.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryBtcBalance = await btc.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryVUsdcBalance = await vUsdc.balanceOf(bscmainnet.VTREASURY);
@@ -80,23 +71,22 @@ forking(38879158, () => {
 
   testVip("VIP-304", vip304(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [8, 1]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [6, 1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
     it("Check Treasury balance", async () => {
-      expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryUsdcBalance.sub(USDC_AMOUNT_ON_TREASURY));
-      expect(await usdt.balanceOf(bscmainnet.VTREASURY)).to.equal(
-        oldTreasuryUsdtBalance.sub(USDT_AMOUNT_DEV_FUND.add(USDT_AMOUNT_COMMUNITY_WALLET)),
+      expect(await usdc.balanceOf(bscmainnet.VTREASURY)).to.equal(
+        oldTreasuryUsdcBalance.sub(USDC_AMOUNT_COMMUNITY_WALLET),
       );
       expect(await eth.balanceOf(bscmainnet.VTREASURY)).to.equal(
         oldTreasuryEthBalance.sub(ETH_AMOUNT_DEV_FUND.add(ETH_AMOUNT_COMMUNITY_WALLET)),
       );
       expect(await btc.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryBtcBalance.sub(BTC_AMOUNT_DEV_FUND));
       expect(await vUsdc.balanceOf(bscmainnet.VTREASURY)).to.closeTo(
-        oldTreasuryVUsdcBalance.sub(REQUIRED_VUSDC_AMOUNT_FOR_REMAINING_USDC),
-        parseUnits("6100", 8),
+        oldTreasuryVUsdcBalance.sub(REQUIRED_VUSDC_FOR_USDC_DEV_FUND),
+        parseUnits("9338", 8),
       );
       expect(await wbnb.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryWBnbBalance.sub(WBNB_AMOUNT_DEV_FUND));
       expect(await ethers.provider.getBalance(bscmainnet.VTREASURY)).to.equal(
@@ -108,13 +98,11 @@ forking(38879158, () => {
       const newUsdcBalance = await usdc.balanceOf(DEV_WALLET);
       const newEthBalance = await eth.balanceOf(DEV_WALLET);
       const newBtcBalance = await btc.balanceOf(DEV_WALLET);
-      const newUsdtBalance = await usdt.balanceOf(DEV_WALLET);
       const balance = await ethers.provider.getBalance(DEV_WALLET);
 
-      expect(newUsdcBalance).equals(oldUsdcBalance.add(USDC_AMOUNT_ON_TREASURY.add(REMAINING_USDC_AMOUNT)));
+      expect(newUsdcBalance).equals(oldUsdcBalance.add(USDC_AMOUNT_COMMUNITY_WALLET.add(USDC_AMOUNT_DEV_FUND)));
       expect(newEthBalance).equals(oldEthBalance.add(ETH_AMOUNT_DEV_FUND.add(ETH_AMOUNT_COMMUNITY_WALLET)));
       expect(newBtcBalance).equals(oldBtcBalance.add(BTC_AMOUNT_DEV_FUND));
-      expect(newUsdtBalance).equals(oldUsdtBalance.add(USDT_AMOUNT_DEV_FUND.add(USDT_AMOUNT_COMMUNITY_WALLET)));
       expect(balance).to.be.equal(oldBnbBalance.add(WBNB_AMOUNT_DEV_FUND.add(BNB_AMOUNT_COMMUNITY_WALLET)));
     });
 
