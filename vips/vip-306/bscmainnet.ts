@@ -78,10 +78,10 @@ export const ETH_crvUSD_ADDRESS = "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202";
 export const ETH_CRV_ADDRESS = "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa";
 export const ETH_weETH_ADDRESS = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";
 
-const vip304 = () => {
+const vip306 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-304 Risk Parameters Adjustments",
+    title: "VIP-306 Risk Parameters Adjustments",
     description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ latest recommendations in this Venus community forum publication: [Chaos Labs - Risk Parameter Updates - 05/14/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-05-14-24/4329).
 
 ### BNB Chain
@@ -174,7 +174,7 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/289](https://github.
 
 #### Disclaimer for Ethereum VIPs
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x79ca5d7ef82648f5c52054aa996356da270a60e95a959c595ee3c29defc6a4ca) multisig transaction will be executed. Otherwise, it will be rejected.`,
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xaac3239a48a8874c024f8549fb96fbe45a074f990c9f0d81413bd5334e1489e5) multisig transaction will be executed. Otherwise, it will be rejected.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with this proposal",
@@ -287,4 +287,4 @@ Privilege commands on Ethereum will be executed by the [Guardian wallet](https:/
   );
 };
 
-export default vip304;
+export default vip306;

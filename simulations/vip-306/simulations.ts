@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip304, {
+import vip306, {
   CORE_COMPTROLLER_ADDRESS,
   CORE_TUSD_ADDRESS,
   CORE_TUSD_BORROW_CAP,
@@ -71,7 +71,7 @@ import vip304, {
   TRON_WIN_ADDRESS,
   TRON_WIN_BORROW_CAP,
   TRON_WIN_SUPPLY_CAP,
-} from "../../vips/vip-304/bscmainnet";
+} from "../../vips/vip-306/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/Comptroller.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
 
@@ -211,7 +211,7 @@ forking(38778780, () => {
     });
   });
 
-  testVip("Update Caps", vip304(), {
+  testVip("Update Caps", vip306(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [18, 20]);
     },
