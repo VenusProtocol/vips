@@ -32,11 +32,13 @@ export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
   NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
-export const forking = async (blockNumber: number, fn: () => Promise<void>) => {
-  console.log(`At block #${blockNumber}`);
-  await setForkBlock(blockNumber);
-  await fn();
-  run();
+export const forking = (blockNumber: number, fn: () => Promise<void>) => {
+  (async () => {
+    console.log(`At block #${blockNumber}`);
+    await setForkBlock(blockNumber);
+    await fn();
+    run();
+  })();
 };
 
 export interface TestingOptions {

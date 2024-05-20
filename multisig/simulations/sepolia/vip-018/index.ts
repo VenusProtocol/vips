@@ -23,7 +23,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { sepolia } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-forking(5673551, () => {
+forking(5673551, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;

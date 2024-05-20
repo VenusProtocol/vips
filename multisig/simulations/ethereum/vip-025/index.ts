@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { BORROW_CAP, CURVE_COMPTROLLER, SUPPLY_CAP, vcrvUSD_CURVE, vip025 } from "../../../proposals/ethereum/vip-025";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
-forking(19732098, () => {
+forking(19732098, async () => {
   let comptroller: Contract;
 
   before(async () => {

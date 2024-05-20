@@ -264,7 +264,7 @@ forking(38305470, async () => {
 });
 
 // core pool vToken tests
-forking(38305470, () => {
+forking(38305470, async () => {
   let vToken: Contract;
   let underlying: Contract;
   let user: SignerWithAddress;

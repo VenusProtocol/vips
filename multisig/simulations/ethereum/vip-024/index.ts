@@ -19,7 +19,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
-forking(19732900, () => {
+forking(19732900, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vtusd: Contract;

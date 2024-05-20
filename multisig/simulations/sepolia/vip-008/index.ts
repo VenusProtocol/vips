@@ -63,7 +63,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(5007188, () => {
+forking(5007188, async () => {
   before(async () => {
     await pretendExecutingVip(await vip007());
   });

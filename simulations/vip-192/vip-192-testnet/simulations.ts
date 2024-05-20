@@ -31,7 +31,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34517682, () => {
+forking(34517682, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -114,7 +114,7 @@ forking(34517682, async () => {
   });
 });
 
-forking(34517682, () => {
+forking(34517682, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip192Testnet());
@@ -176,7 +176,7 @@ forking(34517682, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(34517682, () => {
+forking(34517682, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip192Testnet());

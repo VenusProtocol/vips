@@ -19,7 +19,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
-forking(5744100, () => {
+forking(5744100, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vtusd: Contract;

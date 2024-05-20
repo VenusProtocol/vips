@@ -39,7 +39,7 @@ const USER_1 = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const USER_2 = "0x058F25CDeA0B2a66DbDAA51e39f75bd964a0dBe7";
 const WST_ETH_HOLDER = "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D";
 
-forking(5415505, () => {
+forking(5415505, async () => {
   const provider = ethers.provider;
   let wstEthHolder: Signer;
   let comptroller: Contract;

@@ -26,7 +26,7 @@ const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const XVS_HOLDER = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const ETHEREUM_TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 
-forking(19574618, () => {
+forking(19574618, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;

@@ -9,7 +9,7 @@ import vip017, {
 } from "../../../proposals/sepolia/vip-017/addendum-2";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 
-forking(5470354, () => {
+forking(5470354, async () => {
   const provider = ethers.provider;
   let nativeTokenGatewayCore: Contract;
   let nativeTokenGatewayLst: Contract;

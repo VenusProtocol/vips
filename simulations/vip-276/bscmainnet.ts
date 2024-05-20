@@ -236,7 +236,7 @@ forking(36962054, async () => {
   });
 });
 
-forking(36962054, () => {
+forking(36962054, async () => {
   describe("onBehalfTests", () => {
     before(async () => {
       await pretendExecutingVip(await vip276());
@@ -333,7 +333,7 @@ forking(36962054, () => {
 });
 
 // core pool vToken tests
-forking(36962054, () => {
+forking(36962054, async () => {
   let vToken: Contract;
   let underlying: Contract;
   let user: SignerWithAddress;
@@ -383,7 +383,7 @@ forking(36962054, () => {
 });
 
 // seizeVenus vip tests
-forking(36962054, () => {
+forking(36962054, async () => {
   const ACCOUNT_1 = "0x5a52e96bacdabb82fd05763e25335261b270efcb";
   const ACCOUNT_2 = "0xd93Dc91d7527a32199AaF6f8723292e452b871a4";
 
@@ -407,7 +407,7 @@ forking(36962054, () => {
 });
 
 // xvs setter tests
-forking(36962054, () => {
+forking(36962054, async () => {
   beforeEach(async () => {
     await pretendExecutingVip(await vip276());
   });

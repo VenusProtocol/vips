@@ -113,7 +113,7 @@ forking(34541821, async () => {
   });
 });
 
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip193Testnet());

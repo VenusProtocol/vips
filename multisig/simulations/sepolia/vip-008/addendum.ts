@@ -20,7 +20,7 @@ const BTC_AMOUNT = "218000000";
 const USDC_AMOUNT = "61329430000";
 const USDT_AMOUNT = "150666500000";
 
-forking(5096713, () => {
+forking(5096713, async () => {
   let btc: Contract;
   let eth: Contract;
   let usdc: Contract;

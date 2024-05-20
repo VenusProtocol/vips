@@ -16,7 +16,7 @@ const vCURUSD_CURVE = "0x2d499800239C4CD3012473Cb1EAE33562F0A6933";
 const NEW_IR = "0x508a84311d19fb77E603C1d234d560b2374d0791";
 const OLD_IR = "0xd7fbFD2A36b8b388E6d04C7a05956Df91862E146";
 
-forking(19632602, () => {
+forking(19632602, async () => {
   let vusdc: Contract;
   let vusdt: Contract;
   let vcurusdCore: Contract;

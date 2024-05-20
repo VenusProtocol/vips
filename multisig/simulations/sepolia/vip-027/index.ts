@@ -12,7 +12,7 @@ const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(5860538, () => {
+forking(5860538, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

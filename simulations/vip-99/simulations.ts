@@ -33,7 +33,7 @@ forking(25918391, async () => {
 });
 
 // Ressetting the fork to prevent oracle prices from getting stale
-forking(25918391, () => {
+forking(25918391, async () => {
   let comptroller: Contract;
   let busd: Contract;
   let usdt: Contract;

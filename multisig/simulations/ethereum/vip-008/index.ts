@@ -25,7 +25,7 @@ const CORE_POOL = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(19447800, () => {
+forking(19447800, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;

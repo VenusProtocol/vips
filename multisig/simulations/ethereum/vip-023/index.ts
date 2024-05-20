@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR, vip021, vweETH } from "../../../proposals/ethereum/vip-023";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
-forking(19718702, () => {
+forking(19718702, async () => {
   let rewardDistributor: Contract;
 
   before(async () => {

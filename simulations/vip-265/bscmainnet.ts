@@ -118,7 +118,7 @@ forking(36680347, async () => {
 });
 
 // Release Fund tests
-forking(36680347, () => {
+forking(36680347, async () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     await pretendExecutingVip(await vip265(createInitializeData()));
@@ -201,7 +201,7 @@ forking(36680347, () => {
   });
 });
 
-forking(36680347, () => {
+forking(36680347, async () => {
   let liquidator: Contract;
   let proxyAdmin: Contract;
   const provider = ethers.provider;

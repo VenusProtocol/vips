@@ -14,7 +14,7 @@ const XVS_BRIDGE_ADMIN = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
 const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
 const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 
-forking(16382000, () => {
+forking(16382000, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;

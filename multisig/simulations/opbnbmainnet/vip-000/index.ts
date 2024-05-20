@@ -9,7 +9,7 @@ import TREASURY_ABI from "./abi/treasury.json";
 
 const VTREASURY = "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52";
 
-forking(10892659, () => {
+forking(10892659, async () => {
   let treasury: Contract;
 
   before(async () => {

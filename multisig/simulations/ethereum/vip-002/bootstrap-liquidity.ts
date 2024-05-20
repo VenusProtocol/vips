@@ -17,7 +17,7 @@ const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
 const BBTC_AMOUNT = parseUnits("0.3", 8);
 const WBTC_AMOUNT = parseUnits("0.29818818", 8);
 
-forking(19032429, () => {
+forking(19032429, async () => {
   let wbtc: Contract;
   let bbtc: Contract;
   let oldWBTCBalance: BigNumber;

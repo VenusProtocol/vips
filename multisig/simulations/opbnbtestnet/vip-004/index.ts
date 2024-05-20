@@ -17,7 +17,7 @@ const { opbnbtestnet } = NETWORK_ADDRESSES;
 const XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
 const NORMAL_TIMELOCK = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 
-forking(16716512, () => {
+forking(16716512, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 

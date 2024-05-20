@@ -81,7 +81,7 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
   },
 ];
 
-forking(4744200, () => {
+forking(4744200, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;

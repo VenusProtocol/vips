@@ -75,7 +75,7 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
   },
 ];
 
-forking(19562820, () => {
+forking(19562820, async () => {
   describe("Post-Execution state", () => {
     before(async () => {
       await pretendExecutingVip(await vip017());

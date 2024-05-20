@@ -12,7 +12,7 @@ const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8aA824CCBeF8A0a3eCdF87c3523D8Fd49Dc93aE";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(28821437, () => {
+forking(28821437, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

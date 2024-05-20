@@ -37,7 +37,7 @@ import XVS_ABI from "./abi/xvs.json";
 
 const XVS_PROXY_OFT_DEST = "0x888E317606b4c590BBAD88653863e8B345702633";
 
-forking(19483115, () => {
+forking(19483115, async () => {
   let xvs: Contract;
   let xvsStoreBalPrev: BigNumber;
   describe("Generic checks", async () => {

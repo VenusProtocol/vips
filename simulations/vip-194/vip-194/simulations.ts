@@ -30,7 +30,7 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
-forking(32940330, () => {
+forking(32940330, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
@@ -79,7 +79,7 @@ forking(32940330, async () => {
   });
 });
 
-forking(32940330, () => {
+forking(32940330, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip194());
@@ -134,7 +134,7 @@ forking(32940330, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(32940330, () => {
+forking(32940330, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip194());

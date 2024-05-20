@@ -57,7 +57,7 @@ const assetConfigs: AssetConfig[] = [
   },
 ];
 
-forking(16003453, () => {
+forking(16003453, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let binanceOracle: Contract;

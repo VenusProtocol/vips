@@ -17,7 +17,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
 
-forking(4961243, () => {
+forking(4961243, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 

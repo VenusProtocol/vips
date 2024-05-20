@@ -23,7 +23,7 @@ forking(25892445, async () => {
   testVip("VIP-98 TRON Contract Migration", await vip98());
 });
 
-forking(25892445, () => {
+forking(25892445, async () => {
   let comptroller: Contract;
   let trx: Contract;
   let vTrxOld: Contract;

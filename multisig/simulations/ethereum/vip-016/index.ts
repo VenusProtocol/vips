@@ -8,7 +8,7 @@ import vip016 from "../../../proposals/ethereum/vip-016";
 import { XVS, XVS_BRIDGE_DEST, XVS_MINT_LIMIT } from "../../../proposals/ethereum/vip-016";
 import XVS_ABI from "./abi/xvs.json";
 
-forking(19609700, () => {
+forking(19609700, async () => {
   let xvs: Contract;
 
   before(async () => {

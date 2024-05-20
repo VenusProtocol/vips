@@ -93,7 +93,7 @@ forking(34775900, async () => {
   testVip("VIP-224 Forced liquidations for user", await vip224());
 });
 
-forking(34775900, () => {
+forking(34775900, async () => {
   let comptroller: Contract;
   let liquidatorContract: Contract;
   let moveDebtDelegate: Contract;

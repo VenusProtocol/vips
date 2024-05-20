@@ -72,7 +72,7 @@ const directAssetPriceConfig: AssetDirectPriceConfig = {
   price: "10000000000000000000",
 };
 
-forking(34266466, () => {
+forking(34266466, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let chainLinkOracle: Contract;

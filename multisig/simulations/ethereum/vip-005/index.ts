@@ -17,7 +17,7 @@ import ACM_ABI from "./abi/accessControlManager.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-forking(19368107, () => {
+forking(19368107, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;

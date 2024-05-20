@@ -17,7 +17,7 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
 const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 
-forking(18417812, () => {
+forking(18417812, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
 

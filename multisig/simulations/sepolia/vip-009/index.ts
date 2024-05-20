@@ -16,7 +16,7 @@ const WETH_ADDRESS = "0x700868CAbb60e90d77B6588ce072d9859ec8E281";
 const WSTETH_ADDRESS = "0x9b87ea90fdb55e1a0f17fbeddcf7eb0ac4d50493";
 const WETH_USD_PRICE_DENOMINATOR = parseUnits("1", 18);
 
-forking(5113339, () => {
+forking(5113339, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let wstETH: Contract;

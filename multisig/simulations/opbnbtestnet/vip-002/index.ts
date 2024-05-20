@@ -192,7 +192,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWBNB_Core: "",
 };
 
-forking(16885889, () => {
+forking(16885889, async () => {
   let poolRegistry: Contract;
 
   before(async () => {

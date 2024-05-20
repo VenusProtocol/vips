@@ -18,7 +18,7 @@ forking(28140349, async () => {
 // Testing the execution of a VIP in this framework spans about 200k blocks, which
 // would require about 2.5 ETH tolerance due to the accumulated interest. Here we
 // reset the fork to reduce the required tolerance.
-forking(28140349, () => {
+forking(28140349, async () => {
   describe("Post-VIP behavior", async () => {
     let vToken: Contract;
     let prevBalance: BigNumber;

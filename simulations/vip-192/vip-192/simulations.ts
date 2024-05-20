@@ -24,7 +24,7 @@ const postVipStorage: StorageLayout[] = [];
 const preVipStorage: StorageLayout[] = [];
 const provider = ethers.provider;
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -84,7 +84,7 @@ forking(32915411, async () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       await pretendExecutingVip(await vip192());
@@ -122,7 +122,7 @@ forking(32915411, () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));

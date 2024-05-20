@@ -13,7 +13,7 @@ const vUSDT_CORE = "0xb7a01Ba126830692238521a1aA7E7A7509410b8e";
 
 const NEW_IR = "0xaf6862b20280818FA24fA6D17097517608Fe65d4";
 const OLD_IR = "0x2Af5a31ee1DaeF1122E6cC1750977952c6f09935";
-forking(20848424, () => {
+forking(20848424, async () => {
   let vfdusd: Contract;
   let vusdt: Contract;
   const BLOCKS_PER_YEAR = BigNumber.from("31536000");

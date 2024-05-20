@@ -71,7 +71,7 @@ const interestRateModel: InterestRateModelSpec = {
   jump: "0.75",
 };
 
-forking(19640453, () => {
+forking(19640453, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;

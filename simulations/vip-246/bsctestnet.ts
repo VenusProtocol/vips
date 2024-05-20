@@ -15,7 +15,7 @@ import {
 } from "../../vips/vip-246/bsctestnet";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 
-forking(36987461, () => {
+forking(36987461, async () => {
   const provider = ethers.provider;
   let vaiControllerProxy: Contract;
   before(async () => {

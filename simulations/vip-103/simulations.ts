@@ -18,7 +18,7 @@ forking(26544741, async () => {
   testVip("VIP-103 Gauntlet Rrecommendations", await vip103());
 });
 
-forking(26544741, () => {
+forking(26544741, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 

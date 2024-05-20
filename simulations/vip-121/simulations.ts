@@ -20,7 +20,7 @@ forking(28538732, async () => {
   });
 });
 
-forking(28538732, () => {
+forking(28538732, async () => {
   describe("Post-VIP behavior", async () => {
     let vToken: Contract;
     let prevBalance: BigNumber;

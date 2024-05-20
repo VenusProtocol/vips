@@ -8,7 +8,7 @@ import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_BORROW_CAP, OLD_BORROW_CAP, WBETH_VTOKEN, vip261 } from "../../vips/vip-261/bsctestnet";
 import { abi as DIAMOND_CONSOLIDATED_ABI } from "./abi/DiamondConsolidated.json";
 
-forking(37940238, () => {
+forking(37940238, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   before(async () => {

@@ -86,7 +86,7 @@ const vsFrax_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(19812613, () => {
+forking(19812613, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vFRAXContract: Contract;

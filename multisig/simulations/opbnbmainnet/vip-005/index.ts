@@ -42,7 +42,7 @@ const MARKETS: VenusMarket[] = [
   },
 ];
 
-forking(17382200, () => {
+forking(17382200, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;

@@ -24,7 +24,7 @@ const XVS_BRIDGE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
 const XVS_HOLDER = "0xc27Bac74AAbbE19A346660E1F5fd4602F2D54E93";
 const OPBNB_MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
-forking(20387710, () => {
+forking(20387710, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;

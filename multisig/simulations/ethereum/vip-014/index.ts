@@ -20,7 +20,7 @@ const OLD_MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 const OLD_SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
 const OLD_MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
 
-forking(19431701, () => {
+forking(19431701, async () => {
   let xvsBridge: Contract;
 
   before(async () => {

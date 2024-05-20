@@ -30,7 +30,7 @@ import vip006, {
   XVS,
 } from "../../../proposals/sepolia/vip-006";
 
-forking(5523471, () => {
+forking(5523471, async () => {
   describe("Generic checks", async () => {
     before(async () => {
       await pretendExecutingVip(await vip006());

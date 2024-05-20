@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework/inde
 import vip027, { LST_POOL_COMPTROLLER, LST_POOL_VWEETH, VWEETH_BORROW_CAP } from "../../../proposals/ethereum/vip-027";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(19831582, () => {
+forking(19831582, async () => {
   let comptroller: Contract;
 
   before(async () => {

@@ -226,7 +226,7 @@ forking(38508666, async () => {
 });
 
 // core pool vToken tests
-forking(38508666, () => {
+forking(38508666, async () => {
   let vToken: Contract;
   let underlying: Contract;
   let user: SignerWithAddress;
@@ -280,7 +280,7 @@ forking(38508666, () => {
 });
 
 // seizeVenus vip tests
-forking(38508666, () => {
+forking(38508666, async () => {
   const ACCOUNT_1 = "0xa0747a72C329377C2CE4F0F3165197B3a5359EfE";
   const ACCOUNT_2 = "0x6997901e20D83ED40F7A46213814EeC15af6B09f";
   const ACCOUNT_3 = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
@@ -316,7 +316,7 @@ forking(38508666, () => {
 });
 
 // xvs setter tests
-forking(38508666, () => {
+forking(38508666, async () => {
   beforeEach(async () => {
     await pretendExecutingVip(await vip276());
   });

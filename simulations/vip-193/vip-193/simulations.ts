@@ -30,7 +30,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();

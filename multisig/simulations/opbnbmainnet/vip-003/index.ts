@@ -16,7 +16,7 @@ const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 const SRC_CHAIN_ID = "102";
 const TRUSTED_REMOTE = "0xf8f46791e3db29a029ec6c9d946226f3c613e854";
 
-forking(14442236, () => {
+forking(14442236, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
