@@ -4,10 +4,11 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
-export const TOKEN_REDEEMER = "0x13fFde8050fa0Ef5A6f3c28B500c9267ec8A2C46";
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
-const VUSDC_AMOUNT = parseUnits("1049500", 8); // (close to 25000 USDC, taking into account 1 USDC = 41.9 vUSDC)
+export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+export const VUSDC_AMOUNT = parseUnits("1048900", 8); // (close to 25000 USDC, taking into account 1 USDC = 41.9 vUSDC)
+const USDC_AMOUNT = parseUnits("25000", 18);
 
 const vip306 = () => {
   const meta = {
@@ -28,8 +29,8 @@ const vip306 = () => {
       },
       {
         target: TOKEN_REDEEMER,
-        signature: "redeemAndTransfer(address,address)",
-        params: [VUSDC, COMMUNITY_WALLET],
+        signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
+        params: [VUSDC, COMMUNITY_WALLET, USDC_AMOUNT, TREASURY],
       },
     ],
     meta,
