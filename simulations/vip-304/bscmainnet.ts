@@ -8,7 +8,6 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import {
   BNB_AMOUNT_COMMUNITY_WALLET,
-  BNB_TREASURY,
   BTC,
   BTC_AMOUNT_DEV_FUND,
   DEV_WALLET,
@@ -34,7 +33,7 @@ import VTOKEN_ABI from "./abi/vTokenAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38796645, () => {
+forking(38879158, () => {
   let oldUsdcBalance: BigNumber;
   let oldEthBalance: BigNumber;
   let oldUsdtBalance: BigNumber;
@@ -76,7 +75,7 @@ forking(38796645, () => {
     oldTreasuryBtcBalance = await btc.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryVUsdcBalance = await vUsdc.balanceOf(bscmainnet.VTREASURY);
     oldTreasuryWBnbBalance = await wbnb.balanceOf(bscmainnet.VTREASURY);
-    oldBNBBalTreasury = await ethers.provider.getBalance(BNB_TREASURY);
+    oldBNBBalTreasury = await ethers.provider.getBalance(bscmainnet.VTREASURY);
   });
 
   testVip("VIP-304", vip304(), {
@@ -100,7 +99,7 @@ forking(38796645, () => {
         parseUnits("6100", 8),
       );
       expect(await wbnb.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryWBnbBalance.sub(WBNB_AMOUNT_DEV_FUND));
-      expect(await ethers.provider.getBalance(BNB_TREASURY)).to.equal(
+      expect(await ethers.provider.getBalance(bscmainnet.VTREASURY)).to.equal(
         oldBNBBalTreasury.sub(BNB_AMOUNT_COMMUNITY_WALLET),
       );
     });
