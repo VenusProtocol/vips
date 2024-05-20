@@ -14,7 +14,7 @@ export const COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 export const INITIAL_SUPPLY = parseUnits("1.799618792392372642", 18);
 export const REDUCE_RESERVES_BLOCK_DELTA = 7200;
 
-export const vip023 = () => {
+export const vip029 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -69,4 +69,4 @@ export const vip023 = () => {
   ]);
 };
 
-export default vip023;
+export default vip029;

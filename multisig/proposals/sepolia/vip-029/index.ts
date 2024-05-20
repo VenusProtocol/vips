@@ -19,7 +19,7 @@ export const PTweETH_MARKET = "0x0000000000000000000000000000000000000001";
 export const TWAP_DURATION = 1800;
 export const EXCHANGE_RATE = parseUnits("0.953250807232573837", 18);
 
-export const vip023 = () => {
+export const vip029 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -87,4 +87,4 @@ export const vip023 = () => {
   ]);
 };
 
-export default vip023;
+export default vip029;

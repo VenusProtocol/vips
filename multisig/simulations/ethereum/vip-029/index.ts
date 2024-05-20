@@ -15,8 +15,8 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   VTREASURY,
   vPTweETH,
-  vip023,
-} from "../../../proposals/ethereum/vip-023";
+  vip029,
+} from "../../../proposals/ethereum/vip-029";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -83,7 +83,7 @@ forking(19882072, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip023());
+      await pretendExecutingVip(vip029());
     });
 
     it("check price", async () => {

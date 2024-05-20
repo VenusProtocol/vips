@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { PTweETH, vPTweETH, vip023 } from "../../../proposals/sepolia/vip-023";
+import { PTweETH, vPTweETH, vip029 } from "../../../proposals/sepolia/vip-029";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -35,7 +35,7 @@ forking(5773190, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip023());
+      await pretendExecutingVip(vip029());
     });
 
     it("check price", async () => {
