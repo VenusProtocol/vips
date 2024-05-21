@@ -6,18 +6,20 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import vip030 from "../../../proposals/ethereum/vip-030";
-import XVSVault_ABI from "./abi/XVSVault_ABI.json";
-import ACM_ABI from "./abi/accessControlManager.json";
+import vip030, {
+  ACM,
+  ETHEREUM_BLOCKS_PER_YEAR,
+  NEW_XVS_IMPLEMENTATION,
+  XVS_VAULT_PROXY,
+} from "../../../proposals/ethereum/vip-030";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const XVS_ADDRESS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0x246c6e6cABF0dC008773176C4893e65Bd5fbB51E";
 
 forking(19866634, async () => {
   const provider = ethers.provider;
@@ -26,21 +28,40 @@ forking(19866634, async () => {
   let accessControlManager: Contract;
 
   before(async () => {
-    xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVSVault_ABI, provider);
+    xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
+    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
+
     const storageSlot = calculateMappingStorageSlot(XVS_ADDRESS, POOL_ID, MAPPING_STORAGE_SLOT);
     const value = await provider.getStorageAt(XVS_VAULT_PROXY, storageSlot);
     pendingWithdrawalsBefore = BigNumber.from(ethers.constants.HashZero === value ? 0 : utils.stripZeros(value));
-    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
   });
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
       await pretendExecutingVip(vip030());
-      checkXVSVault();
     });
+
+    checkXVSVault();
+
     it("Check implementation", async () => {
       expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
     });
+
+    it("Xvs vault should be block based with correct number of blocks", async () => {
+      expect(await xvsVaultProxy.isTimeBased()).to.be.equal(false);
+      expect(await xvsVaultProxy.blocksOrSecondsPerYear()).to.be.equal(ETHEREUM_BLOCKS_PER_YEAR);
+    });
+
+    it("Check permission for setRewardAmountPerBlock", async () => {
+      expect(
+        await accessControlManager.hasPermission(
+          ethereum.GUARDIAN,
+          XVS_VAULT_PROXY,
+          "setRewardAmountPerBlock(address,uint256)",
+        ),
+      ).to.equal(false);
+    });
+
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
         await accessControlManager.hasPermission(
@@ -50,6 +71,7 @@ forking(19866634, async () => {
         ),
       ).to.equal(true);
     });
+
     it("Compare pending withdrawals state before and after upgrade", async () => {
       const pendingWithdrawalsAfter: BigNumber = await xvsVaultProxy.totalPendingWithdrawals(XVS_ADDRESS, POOL_ID);
       expect(pendingWithdrawalsBefore).to.equal(pendingWithdrawalsAfter);

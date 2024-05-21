@@ -42,6 +42,7 @@ forking(40520091, async () => {
   testVip("VIP-308 Upgrade XVSVault Implementation", vip308(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_PROXY_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionRevoked", "PermissionGranted"], [3, 3]);
     },
   });
 

@@ -7,8 +7,8 @@ import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip010, { NEW_XVS_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/arbitrumsepolia/vip-010";
-import XVSVault_ABI from "./abi/XVSVault_ABI.json";
-import ACM_ABI from "./abi/accessControlManager.json";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -26,7 +26,7 @@ forking(46354403, async () => {
   let pendingWithdrawalsBefore: BigNumber;
 
   before(async () => {
-    xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVSVault_ABI, provider);
+    xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
     const storageSlot = calculateMappingStorageSlot(XVS_ADDRESS, POOL_ID, MAPPING_STORAGE_SLOT);
     const value = await provider.getStorageAt(XVS_VAULT_PROXY, storageSlot);

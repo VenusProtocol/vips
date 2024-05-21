@@ -3,10 +3,12 @@ import { makeProposal } from "../../../../src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
-const NEW_XVS_IMPLEMENTATION = "0x246c6e6cABF0dC008773176C4893e65Bd5fbB51E";
-const ETHEREUM_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
-const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
+export const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
+export const NEW_XVS_IMPLEMENTATION = "0x246c6e6cABF0dC008773176C4893e65Bd5fbB51E";
+
+export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
+
+export const ETHEREUM_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
 
 const vip030 = () => {
   return makeProposal([
@@ -24,6 +26,11 @@ const vip030 = () => {
       target: XVS_VAULT_PROXY,
       signature: "initializeTimeManager(bool,uint256)",
       params: [false, ETHEREUM_BLOCKS_PER_YEAR],
+    },
+    {
+      target: ACM,
+      signature: "revokeCallPermission(address,string,address)",
+      params: [XVS_VAULT_PROXY, "setRewardAmountPerBlock(address,uint256)", ethereum.GUARDIAN],
     },
     {
       target: ACM,

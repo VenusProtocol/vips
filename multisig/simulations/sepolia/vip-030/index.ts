@@ -12,8 +12,8 @@ import vip030, {
   SEPOLIA_BLOCKS_PER_YEAR,
   XVS_VAULT_PROXY,
 } from "../../../proposals/sepolia/vip-030";
+import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
-import ACM_ABI from "./abi/accessControlManager.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 

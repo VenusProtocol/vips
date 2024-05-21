@@ -23,7 +23,7 @@ const XVS_ADDRESS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
 
-forking(40520091, async () => {
+forking(38915486, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let pendingWithdrawalsBefore: BigNumber;
@@ -42,6 +42,7 @@ forking(40520091, async () => {
   testVip("VIP-308 Upgrade XVSVault Implementation", vip308(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_PROXY_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleRevoked", "RoleGranted"], [3, 3]);
     },
   });
 

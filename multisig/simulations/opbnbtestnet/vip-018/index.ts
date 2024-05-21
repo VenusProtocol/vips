@@ -43,13 +43,13 @@ forking(29407404, async () => {
 
     checkXVSVault();
 
+    it("Check implementation", async () => {
+      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
+    });
+
     it("Xvs vault should be block based with correct number of blocks", async () => {
       expect(await xvsVaultProxy.isTimeBased()).to.be.equal(false);
       expect(await xvsVaultProxy.blocksOrSecondsPerYear()).to.be.equal(BLOCKS_PER_YEAR);
-    });
-
-    it("Check implementation", async () => {
-      expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
     });
 
     it("Check permission for setRewardAmountPerBlock", async () => {
