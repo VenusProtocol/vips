@@ -14,7 +14,7 @@ export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 export const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 export const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 
-export const MAX_STALE_PERIOD = 60 * 60; // 1 hour
+export const MAX_STALE_PERIOD = 60 * 100; // For 1 hour we use 100 mins
 
 export const BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
 export const BTC_FEED = "0xa51738d1937FFc553d5070f43300B385AA2D9F55";
