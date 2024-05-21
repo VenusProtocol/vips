@@ -25,7 +25,7 @@ export const ETH_AMOUNT_COMMUNITY_WALLET = parseUnits("1.188225443", 18);
 export const USDC_AMOUNT_COMMUNITY_WALLET = parseUnits("10518.73", 18); // Sending USDC instead of USDT
 export const BNB_AMOUNT_COMMUNITY_WALLET = parseUnits("3", 18);
 
-export const vip304 = () => {
+export const vip307 = () => {
   const meta = {
     version: "v2",
     title: "VIP-307 H1-2024 Development Funding",
@@ -50,7 +50,7 @@ The roadmap for Venus Protocol in 2024 includes strategic deployments, enhanceme
 
 #### Highlights of accomplishments so far:
 
-- VIPs: A total of 77 VIPs have been executed in 2024.
+- VIPs: A total of 80 VIPs have been executed in 2024.
 - ETH Mainnet XVS Bridge: Developed and deployed an XVS Bridge, successfully bridging more than 530K XVS.
 - ETH Mainnet Deployment: Successfully deployed on the ETH Mainnet
 - Automatic Allocator: Automated, transparent, and decentralized income distribution following the protocol tokenomics for all chain deployments.
@@ -181,3 +181,5 @@ List of transactions performed by the Community Wallet, funding development oper
     ProposalType.REGULAR,
   );
 };
+
+export default vip307;

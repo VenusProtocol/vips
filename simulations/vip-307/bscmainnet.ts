@@ -22,8 +22,8 @@ import {
   WBNB,
   WBNB_AMOUNT_DEV_FUND,
   vUSDC,
-  vip304,
-} from "../../vips/vip-304/bscmainnet";
+  vip307,
+} from "../../vips/vip-307/bscmainnet";
 import BEP20_ABI from "./abi/BEP-20Abi.json";
 import VTREASURY_ABI from "./abi/VtreasuryAbi.json";
 import VTOKEN_ABI from "./abi/vTokenAbi.json";
@@ -69,7 +69,7 @@ forking(38912650, () => {
     oldBNBBalTreasury = await ethers.provider.getBalance(bscmainnet.VTREASURY);
   });
 
-  testVip("VIP-304", vip304(), {
+  testVip("VIP-307", vip307(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [6, 1]);
     },
