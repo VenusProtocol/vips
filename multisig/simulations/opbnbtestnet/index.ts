@@ -5,4 +5,3 @@ import "./vip-003";
 import "./vip-004";
 import "./vip-005";
 import "./vip-012";
-import "./vip-018";

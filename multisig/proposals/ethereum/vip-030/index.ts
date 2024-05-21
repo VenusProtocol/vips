@@ -8,7 +8,7 @@ const NEW_XVS_IMPLEMENTATION = "0x246c6e6cABF0dC008773176C4893e65Bd5fbB51E";
 const ETHEREUM_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 
-const vip021 = () => {
+const vip030 = () => {
   return makeProposal([
     {
       target: XVS_VAULT_PROXY,
@@ -33,4 +33,4 @@ const vip021 = () => {
   ]);
 };
 
-export default vip021;
+export default vip030;

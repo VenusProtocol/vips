@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import vip021 from "../../../proposals/ethereum/vip-021";
+import vip030 from "../../../proposals/ethereum/vip-030";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 
@@ -35,7 +35,7 @@ forking(19866634, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip021());
+      await pretendExecutingVip(vip030());
       checkXVSVault();
     });
     it("Check implementation", async () => {
