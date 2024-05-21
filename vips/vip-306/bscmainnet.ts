@@ -19,7 +19,7 @@ export const MAX_STALE_PERIOD = 60 * 60; // 1 hour
 export const BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
 export const BTC_FEED = "0xa51738d1937FFc553d5070f43300B385AA2D9F55";
 
-const vip304 = (maxStalePeriod: number) => {
+const vip306 = (maxStalePeriod: number) => {
   const meta = {
     version: "v2",
     title: "VIP-304 Set RedStone as the Main Oracle for BTC and BNB",
@@ -67,4 +67,4 @@ const vip304 = (maxStalePeriod: number) => {
   );
 };
 
-export default vip304;
+export default vip306;

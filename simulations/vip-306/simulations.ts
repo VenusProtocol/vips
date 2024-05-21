@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStalePeriod } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip303, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-304/bscmainnet";
+import vip303, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-306/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import ERC20_ABI from "./abi/erc20.json";
 import REDSTONE_ORACLE_ABI from "./abi/redStoneOracle.json";
