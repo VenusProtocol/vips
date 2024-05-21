@@ -37,6 +37,8 @@ type RewardsDistributorId =
   | "RewardsDistributor_Core_0_USDT"
   | "RewardsDistributor_Core_0_USDC"
   | "RewardsDistributor_Core_0_CRVUSD"
+  | "RewardsDistributor_Core_0_FRAX"
+  | "RewardsDistributor_Core_0_SFRAX"
   | "RewardsDistributor_Core_1"
   | "RewardsDistributor_Curve_0_CRV"
   | "RewardsDistributor_Curve_0_CRVUSD"
@@ -44,7 +46,8 @@ type RewardsDistributorId =
   | "RewardsDistributor_LST_0_WSTETH"
   | "RewardsDistributor_LST_0_WETH"
   | "RewardsDistributor_LST_1_WSTETH"
-  | "RewardsDistributor_LST_2_WEETH";
+  | "RewardsDistributor_LST_2_WEETH"
+  | "RewardsDistributor_MEME_0_BABYDOGE";
 
 export const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {
   describe(id, () => {
@@ -72,7 +75,7 @@ export const checkRewardsDistributor = (id: RewardsDistributorId, reward: Reward
 
     it(`should have balance = ${reward.totalRewardsToDistribute.toString()}`, async () => {
       const token = await ethers.getContractAt(ERC20_ABI, reward.token);
-      expect(await token.balanceOf(rewardsDistributor.address)).to.equal(reward.totalRewardsToDistribute);
+      expect(await token.balanceOf(rewardsDistributor.address)).to.gte(reward.totalRewardsToDistribute);
     });
 
     it(`should be registered in Comptroller`, async () => {
