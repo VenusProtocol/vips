@@ -30,7 +30,7 @@ import VTOKEN_ABI from "./abi/vTokenAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38879158, () => {
+forking(38912650, () => {
   let oldUsdcBalance: BigNumber;
   let oldEthBalance: BigNumber;
   let oldBtcBalance: BigNumber;
@@ -86,7 +86,7 @@ forking(38879158, () => {
       expect(await btc.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryBtcBalance.sub(BTC_AMOUNT_DEV_FUND));
       expect(await vUsdc.balanceOf(bscmainnet.VTREASURY)).to.closeTo(
         oldTreasuryVUsdcBalance.sub(REQUIRED_VUSDC_FOR_USDC_DEV_FUND),
-        parseUnits("9338", 8),
+        parseUnits("16134", 8), // around 390 USDC, due to the current interest rate on the USDC market
       );
       expect(await wbnb.balanceOf(bscmainnet.VTREASURY)).to.equal(oldTreasuryWBnbBalance.sub(WBNB_AMOUNT_DEV_FUND));
       expect(await ethers.provider.getBalance(bscmainnet.VTREASURY)).to.equal(
