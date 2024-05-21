@@ -14,7 +14,7 @@ export const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 
-export const WBNB_AMOUNT_DEV_FUND = parseUnits("1346.029696578437702", 18); // $834,400, assuming 1 BNB = $619.60
+export const WBNB_AMOUNT_DEV_FUND = parseUnits("1346.675274370561653", 18); // $834,400, assuming 1 BNB = $619.60
 export const ETH_AMOUNT_DEV_FUND = parseUnits("48.850456948485718", 18); // $178,800, assuming 1 ETH = $3,660.15
 export const BTC_AMOUNT_DEV_FUND = parseUnits("1.469313741732117", 18); // $104,300, assuming 1 BTC = $70,985.52
 
@@ -33,7 +33,7 @@ export const vip307 = () => {
 
 Following the community post [H1-2024 Development Funding](https://community.venus.io/t/h1-2024-development-funding/4310), and the associated [snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x4092c51400c3fe3128c35c9533b049bfcf85f497094425b147e7b18a8deb063c), if passed, this VIP will transfer the following tokens to the [Development Team](https://bscscan.com/address/0x48e9d2128321cbf75cd108321459865357c00f15):
 
-- 1,349.02 BNB
+- 1,349.67 BNB
 - 383,018.73 USDC
 - 50.038 ETH
 - 1.46 BTC
@@ -76,7 +76,7 @@ Continual maintenance and support for all chains are vital to ensuring the proto
 
 For the reimbursement of efforts during the first quarter of 2024 and the successful execution of the deployments set for the following quarter, a $1,490,000 funding request is needed to cover operational expenses. This amount will be transferred in tokens, based on protocol treasury allocation:
 
-- BNB: 56% ($834,400). 1,346.03 BNB will be transferred, assuming 1 BNB = $619.6
+- BNB: 56% ($834,400). 1,346.67 BNB will be transferred, assuming 1 BNB = $619.6
 - USDC: 16% ($238,400). 372,500 USDC will be transferred, including the USDT part
 - ETH: 13% ($178,800). 48.85 ETH will be transferred, assuming 1 ETH = $3,660.15
 - USDT: 9% ($134,100). 0 USDT will be transferred. It will be replaced with USDC tokens
