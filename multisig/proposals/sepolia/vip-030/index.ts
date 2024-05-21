@@ -7,7 +7,7 @@ const DEFAULT_ADMIN_ROLE = "0x00000000000000000000000000000000000000000000000000
 const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
 const { sepolia } = NETWORK_ADDRESSES;
 
-export const vip027 = () => {
+export const vip030 = () => {
   return makeProposal([
     {
       target: SEPOLIA_ACM,
@@ -88,4 +88,4 @@ export const vip027 = () => {
     },
   ]);
 };
-export default vip027;
+export default vip030;

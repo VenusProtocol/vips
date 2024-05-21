@@ -5,6 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { setMaxStaleCoreAssets, setMaxStalePeriod } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../src/vip-framework/checks/checkVToken";
@@ -23,8 +24,9 @@ import vip304, {
   USDT,
   USDT_PRIME_CONVERTER,
   VBABYDOGE,
+  VBABYDOGE_RECEIVER,
   VUSDT,
-} from "../../vips/vip-304/bsctestnet";
+} from "../../vips/vip-304/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
@@ -33,8 +35,10 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
+const BABY_DOGE_HOLDER = "0xB7b0eB5d4FE3C4bC0d822D775D87a2C5080DB761";
+const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 
 interface RiskParameters {
   borrowCap: string;
@@ -53,16 +57,16 @@ const vBabyDoge_riskParameters: RiskParameters = {
   liquidationThreshold: "0.4",
   reserveFactor: "0.25",
   initialSupply: parseUnits("27917365987868.178893572", 9).toString(),
-  vTokenReceiver: TREASURY,
+  vTokenReceiver: VBABYDOGE_RECEIVER,
 };
 
 const vUSDT_riskParameters: RiskParameters = {
-  borrowCap: parseUnits("900000", 6).toString(),
-  supplyCap: parseUnits("1000000", 6).toString(),
+  borrowCap: parseUnits("900000", 18).toString(),
+  supplyCap: parseUnits("1000000", 18).toString(),
   collateralFactor: "0.75",
   liquidationThreshold: "0.77",
   reserveFactor: "0.1",
-  initialSupply: parseUnits("5000", 6).toString(),
+  initialSupply: parseUnits("5000", 18).toString(),
   vTokenReceiver: TREASURY,
 };
 
@@ -90,8 +94,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(40208623, async () => {
-  const provider = ethers.provider;
+forking(38808005, async () => {
   let oracle: Contract;
   let poolRegistry: Contract;
   let vBabyDoge: Contract;
@@ -103,22 +106,30 @@ forking(40208623, async () => {
   let usdtPrimeConverter: Contract;
 
   before(async () => {
-    await impersonateAccount(bsctestnet.NORMAL_TIMELOCK);
+    await impersonateAccount(bscmainnet.NORMAL_TIMELOCK);
     await impersonateAccount(TREASURY);
+    await impersonateAccount(BABY_DOGE_HOLDER);
     await setBalance(TREASURY, ethers.utils.parseEther("5"));
     oracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
-    poolRegistry = new ethers.Contract(bsctestnet.POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
+    poolRegistry = new ethers.Contract(
+      bscmainnet.POOL_REGISTRY,
+      POOL_REGISTRY_ABI,
+      await ethers.getSigner(bscmainnet.NORMAL_TIMELOCK),
+    );
     vBabyDoge = await ethers.getContractAt(VTOKEN_ABI, VBABYDOGE);
     Vusdt = await ethers.getContractAt(VTOKEN_ABI, VUSDT);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
     rewardDistributor = await ethers.getContractAt(REWARD_DISTRIBUTOR_ABI, REWARDS_DISTRIBUTOR);
-    babyDoge = await ethers.getContractAt(ERC20_ABI, BABYDOGE, await ethers.getSigner(bsctestnet.NORMAL_TIMELOCK));
+    babyDoge = await ethers.getContractAt(ERC20_ABI, BABYDOGE, await ethers.getSigner(BABY_DOGE_HOLDER));
     usdt = await ethers.getContractAt(ERC20_ABI, USDT, await ethers.getSigner(TREASURY));
     usdtPrimeConverter = await ethers.getContractAt(
       SINGLE_TOKEN_CONVERTER,
       USDT_PRIME_CONVERTER,
-      await ethers.getSigner(bsctestnet.NORMAL_TIMELOCK),
+      await ethers.getSigner(bscmainnet.NORMAL_TIMELOCK),
     );
+
+    await setMaxStalePeriod(oracle, usdt);
+    await setMaxStaleCoreAssets(CHAINLINK_ORACLE, bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", () => {
@@ -127,12 +138,12 @@ forking(40208623, async () => {
     });
   });
 
-  testVip("Add Meme Pool", await vip304());
+  testVip("Add Meme Pool", await vip304(31536000));
 
   describe("Post-VIP state", () => {
     it("check price", async () => {
       const price = await oracle.getPrice(BABYDOGE);
-      expect(price).to.be.eq(parseUnits("0.000000001785007649000000000", 27));
+      expect(price).to.be.eq(parseUnits("0.000000001734877762000000000", 27));
     });
 
     it("should have 2 markets in meme pool", async () => {
@@ -151,16 +162,16 @@ forking(40208623, async () => {
     });
 
     it("check vBabyDoge ownership", async () => {
-      expect(await vBabyDoge.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vBabyDoge.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("check vUSDT ownership", async () => {
-      expect(await Vusdt.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await Vusdt.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("check vBabyDoge supply", async () => {
       const expectedSupply = parseUnits("27917365987868.17889357", 8);
-      expect(await vBabyDoge.balanceOf(TREASURY)).to.equal(expectedSupply);
+      expect(await vBabyDoge.balanceOf(VBABYDOGE_RECEIVER)).to.equal(expectedSupply);
     });
 
     it("check vUSDT supply", async () => {
@@ -245,9 +256,8 @@ forking(40208623, async () => {
     });
 
     it("generic IL tests", async () => {
-      await babyDoge.faucet(parseUnits("100000000000000000000", 9));
       await checkIsolatedPoolsComptrollers({
-        [COMPTROLLER]: bsctestnet.NORMAL_TIMELOCK,
+        [COMPTROLLER]: BABY_DOGE_HOLDER,
       });
 
       await checkVToken(VBABYDOGE, {
@@ -264,7 +274,7 @@ forking(40208623, async () => {
         symbol: "vUSDT_Meme",
         decimals: 8,
         underlying: USDT,
-        exchangeRate: parseUnits("0.01", 18),
+        exchangeRate: parseUnits("10000000000", 18),
         comptroller: COMPTROLLER,
       });
     });
@@ -284,31 +294,30 @@ forking(40208623, async () => {
     });
 
     it("BabyDoge conversion", async () => {
-      const usdtAmount = parseUnits("100", 6);
-      await usdt.transfer(bsctestnet.NORMAL_TIMELOCK, usdtAmount);
+      const usdtAmount = parseUnits("100", 18);
+      await usdt.transfer(bscmainnet.NORMAL_TIMELOCK, usdtAmount);
       await usdt
-        .connect(await ethers.getSigner(bsctestnet.NORMAL_TIMELOCK))
+        .connect(await ethers.getSigner(bscmainnet.NORMAL_TIMELOCK))
         .approve(usdtPrimeConverter.address, usdtAmount);
 
       const babyDogeAmount = parseUnits("50000000000", 9);
-      await babyDoge.faucet(babyDogeAmount); // ~$89
       await babyDoge.transfer(usdtPrimeConverter.address, babyDogeAmount);
 
-      const usdtBalanceBefore = await usdt.balanceOf(bsctestnet.NORMAL_TIMELOCK);
-      const babyDogeBalanceBefore = await babyDoge.balanceOf(bsctestnet.NORMAL_TIMELOCK);
+      const usdtBalanceBefore = await usdt.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+      const babyDogeBalanceBefore = await babyDoge.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
       await usdtPrimeConverter.convertForExactTokens(
         usdtAmount,
         babyDogeAmount,
         usdt.address,
         babyDoge.address,
-        bsctestnet.NORMAL_TIMELOCK,
+        bscmainnet.NORMAL_TIMELOCK,
       );
 
-      const usdtBalanceAfter = await usdt.balanceOf(bsctestnet.NORMAL_TIMELOCK);
-      const babyDogeBalanceAfter = await babyDoge.balanceOf(bsctestnet.NORMAL_TIMELOCK);
+      const usdtBalanceAfter = await usdt.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+      const babyDogeBalanceAfter = await babyDoge.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("89.261753", 6));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("86.709204418232706918", 18));
       expect(babyDogeBalanceAfter.sub(babyDogeBalanceBefore)).to.be.equal(babyDogeAmount);
     });
   });

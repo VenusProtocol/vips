@@ -46,7 +46,8 @@ type RewardsDistributorId =
   | "RewardsDistributor_LST_0_WSTETH"
   | "RewardsDistributor_LST_0_WETH"
   | "RewardsDistributor_LST_1_WSTETH"
-  | "RewardsDistributor_LST_2_WEETH";
+  | "RewardsDistributor_LST_2_WEETH"
+  | "RewardsDistributor_MEME_0_BABYDOGE";
 
 export const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {
   describe(id, () => {

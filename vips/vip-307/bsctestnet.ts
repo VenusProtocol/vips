@@ -14,11 +14,11 @@ export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x233eFd8aFd8C164A8d5e54f6
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 
-export const vip305 = () => {
+export const vip307 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip305 give permission of OmnichainGovernanceExecutor to sepolia and opbnbtestnet fasttrack and critical timelock",
+      "vip307 give permission of OmnichainGovernanceExecutor to sepolia and opbnbtestnet fasttrack and critical timelock",
     description: `#### Description
     This VIP will grant permission to timelocks of OmnichainProposalExecutor on SEPOLIA & OPBNBTESTNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
