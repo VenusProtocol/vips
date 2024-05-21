@@ -6,21 +6,20 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import vip018 from "../../../proposals/opbnbtestnet/vip-018";
+import vip010, { NEW_XVS_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/arbitrumsepolia/vip-010";
 import XVSVault_ABI from "./abi/XVSVault_ABI.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 
-const { opbnbtestnet } = NETWORK_ADDRESSES;
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-const ACM = "0x049f77f7046266d27c3bc96376f53c17ef09c986";
-const XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
-const XVS_ADDRESS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
-const POOL_ID = 1;
+const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
+const XVS_ADDRESS = "0x47fA6E9F717c9eB081c4734FfB5a1EcD70508891";
+const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
-const NEW_XVS_IMPLEMENTATION = "0xE4196831bA5471EA9F7F28cf34e5D521A3c98300";
+const SECONDS_PER_YEAR = 31_536_000;
 
 // NOTE: cannot find any pending rewards for XVS on this chain neither with PoolID = 0 or with PoolID = 1
-forking(28799325, async () => {
+forking(46354403, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let accessControlManager: Contract;
@@ -36,21 +35,30 @@ forking(28799325, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
-      checkXVSVault();
+      await pretendExecutingVip(vip010());
     });
+
+    checkXVSVault();
+
     it("Check implementation", async () => {
       expect(await xvsVaultProxy.implementation()).to.equal(NEW_XVS_IMPLEMENTATION);
     });
+
+    it("Xvs vault should be time based with correct number of blocks", async () => {
+      expect(await xvsVaultProxy.isTimeBased()).to.be.equal(true);
+      expect(await xvsVaultProxy.blocksOrSecondsPerYear()).to.be.equal(SECONDS_PER_YEAR);
+    });
+
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
         await accessControlManager.hasPermission(
-          opbnbtestnet.GUARDIAN,
+          arbitrumsepolia.GUARDIAN,
           XVS_VAULT_PROXY,
           "setRewardAmountPerBlockOrSecond(address,uint256)",
         ),
       ).to.equal(true);
     });
+
     it("Compare pending withdrawals state before and after upgrade", async () => {
       const pendingWithdrawalsAfter: BigNumber = await xvsVaultProxy.totalPendingWithdrawals(XVS_ADDRESS, POOL_ID);
       expect(pendingWithdrawalsBefore).to.equal(pendingWithdrawalsAfter);
