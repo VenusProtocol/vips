@@ -8,8 +8,8 @@ import { expectEvents, setMaxStalePeriod } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip303, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-306/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
-import ERC20_ABI from "./abi/erc20.json";
-import REDSTONE_ORACLE_ABI from "./abi/redStoneOracle.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 forking(38912197, () => {
