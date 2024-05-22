@@ -7,8 +7,8 @@ import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip010, { NEW_XVS_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/arbitrumsepolia/vip-010";
-import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import ACM_ABI from "./abi/accessControlManager.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 

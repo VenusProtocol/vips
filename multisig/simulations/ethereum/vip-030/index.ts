@@ -12,8 +12,8 @@ import vip030, {
   NEW_XVS_IMPLEMENTATION,
   XVS_VAULT_PROXY,
 } from "../../../proposals/ethereum/vip-030";
-import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import ACM_ABI from "./abi/accessControlManager.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 

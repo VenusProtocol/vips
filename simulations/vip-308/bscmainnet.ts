@@ -15,9 +15,9 @@ import vip308, {
   NORMAL_TIMELOCK,
   XVS_VAULT_PROXY,
 } from "../../vips/vip-308/bscmainnet";
+import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
-import ACM_ABI from "./abi/accessControlManager.json";
 
 const XVS_ADDRESS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_ID = 0;

@@ -13,8 +13,8 @@ import vip020, {
   NEW_XVS_IMPLEMENTATION,
   XVS_VAULT_PROXY,
 } from "../../../proposals/opbnbmainnet/vip-020";
-import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import ACM_ABI from "./abi/accessControlManager.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
