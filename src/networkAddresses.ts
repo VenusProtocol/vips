@@ -71,7 +71,7 @@ export const NETWORK_ADDRESSES = {
     RESILIENT_ORACLE: oracleEthereumContracts.addresses.ResilientOracle,
     XVS: tokenBridgeEthereumContracts.addresses.XVS,
     XVS_VAULT_PROXY: ethereumDeployedContracts.addresses.XVSVaultProxy,
-    GENERIC_TEST_USER_ACCOUNT: "0x7DA84eBd39F995a701B891139146a5f77682A127", // XVS Holder
+    GENERIC_TEST_USER_ACCOUNT: "0x700E5E41Ee18455540256C4e6F055a4CE9BdBd7C", // XVS Holder
     CHAINLINK_ORACLE: oracleEthereumContracts.addresses.ChainlinkOracle,
   },
   sepolia: {

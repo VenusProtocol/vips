@@ -21,7 +21,7 @@ const XVS_ADDRESS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
 
-forking(19866634, async () => {
+forking(19923613, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let pendingWithdrawalsBefore: BigNumber;
