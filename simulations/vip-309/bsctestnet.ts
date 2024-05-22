@@ -1,15 +1,15 @@
 import { expectEvents } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { vip306 } from "../../vips/vip-306/bsctestnet";
-import { vip307 } from "../../vips/vip-307/bsctestnet";
+import { vip308 } from "../../vips/vip-308/bsctestnet";
+import { vip309 } from "../../vips/vip-309/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(40149880, async () => {
   before(async () => {
-    await pretendExecutingVip(await vip306());
+    await pretendExecutingVip(await vip308());
   });
 
-  testVip("vip307 give permissions to  critical & fasttrack timelock", await vip307(), {
+  testVip("vip309 give permissions to  critical & fasttrack timelock", await vip309(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

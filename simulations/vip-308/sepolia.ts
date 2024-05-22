@@ -5,13 +5,17 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import { SEPOLIA_ACM, vip307 } from "../../vips/vip-307/bsctestnet";
+import {
+  SEPOLIA_ACM,
+  SEPOLIA_NORMAL_TIMELOCK,
+  SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
+  vip308,
+} from "../../vips/vip-308/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
 
 forking(5860538, async () => {
   const provider = ethers.provider;
@@ -21,16 +25,16 @@ forking(5860538, async () => {
   let multisig: any;
 
   before(async () => {
-    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executor = new ethers.Contract(SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
     acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
     multisig = await initMainnetUser(sepolia.GUARDIAN, ethers.utils.parseEther("1"));
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, SEPOLIA_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip307 configures bridge", await vip307(), {
+  testForkedNetworkVipCommands("vip308 configures bridge", await vip308(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [16]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
     },
   });
 
