@@ -1,13 +1,6 @@
 import { BigNumberish } from "ethers";
 
-export type SUPPORTED_NETWORKS =
-  | "bsctestnet"
-  | "bscmainnet"
-  | "sepolia"
-  | "ethereum"
-  | "opbnbtestnet"
-  | "opbnbmainnet"
-  | "xlayertestnet";
+export type SUPPORTED_NETWORKS = "bsctestnet" | "bscmainnet" | "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
 
 export interface ProposalMeta {
   version: string;
