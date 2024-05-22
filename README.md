@@ -108,7 +108,7 @@ For remote commands add one more field of `dstChainId` specifying layer zero cha
 
 In .env update `ARCHIVE_NODE_<NETWORK_NAME>` with the URL of desired network.
 
-Make different simulations for different networks. Use `testVipV2` to simulate remote proposal.
+Make different simulations for different networks. Use `testForkedNetworkVipCommands` to simulate remote proposal.
 
 To run simulations use this command
 
