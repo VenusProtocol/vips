@@ -14,10 +14,13 @@ export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 export const BTC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 export const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 
-export const MAX_STALE_PERIOD = 60 * 100; // For 1 hour we use 100 mins
+export const MAX_STALE_PERIOD = 100;
 
-export const BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
-export const BTC_FEED = "0xa51738d1937FFc553d5070f43300B385AA2D9F55";
+export const BNB_FEED_REDSTONE = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
+export const BTC_FEED_REDSTONE = "0xa51738d1937FFc553d5070f43300B385AA2D9F55";
+
+export const BNB_FEED_CHAINLINK = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
+export const BTC_FEED_CHAINLINK = "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf";
 
 const vip306 = (maxStalePeriod: number) => {
   const meta = {
@@ -34,12 +37,22 @@ const vip306 = (maxStalePeriod: number) => {
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[BTC, BTC_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
+        params: [[BTC, BTC_FEED_REDSTONE, maxStalePeriod || MAX_STALE_PERIOD]],
       },
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[BNB, BNB_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
+        params: [[BNB, BNB_FEED_REDSTONE, maxStalePeriod || MAX_STALE_PERIOD]],
+      },
+      {
+        target: CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[BTC, BTC_FEED_CHAINLINK, maxStalePeriod || MAX_STALE_PERIOD]],
+      },
+      {
+        target: CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[BNB, BNB_FEED_CHAINLINK, maxStalePeriod || MAX_STALE_PERIOD]],
       },
       {
         target: BOUND_VALIDATOR,
