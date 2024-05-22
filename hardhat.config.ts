@@ -26,6 +26,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opbnbmainnet: 100000000,
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
+  xlayertestnet: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -124,6 +125,16 @@ const config: HardhatUserConfig = {
     arbitrumone: {
       url: process.env.ARCHIVE_NODE_arbitrumone || "https://arb1.arbitrum.io/rpc",
       chainId: 42161,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    xlayertestnet: {
+      url: process.env.ARCHIVE_NODE_xlayertestnet || "https://testrpc.xlayer.tech/",
+      chainId: 195,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    xlayermainnet: {
+      url: process.env.ARCHIVE_NODE_xlayermainnet || "https://rpc.xlayer.tech/",
+      chainId: 196,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
   },
