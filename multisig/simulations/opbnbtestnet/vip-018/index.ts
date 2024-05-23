@@ -1,11 +1,11 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip018 } from "../../../proposals/opbnbtestnet/vip-018";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
-import { Contract } from "ethers";
 
 const COMPTROLLER_CORE = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";
 const vUSDT_POOL_STABLECOIN = "0xe3923805f6E117E51f5387421240a86EF1570abC";
