@@ -65,6 +65,11 @@ export const vip308 = () => {
       },
       {
         target: UNITROLLER,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[vLUNA, vUST], [0, 1, 2, 3, 4, 5, 6, 7, 8], true],
+      },
+      {
+        target: UNITROLLER,
         signature: "unlistMarket(address)",
         params: [vLUNA],
       },
