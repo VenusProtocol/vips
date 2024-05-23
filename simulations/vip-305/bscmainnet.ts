@@ -41,7 +41,7 @@ async function checkIRModelAddress(market: Contract, expectedIR: string) {
   expect(IR).equals(expectedIR);
 }
 
-forking(38800400, () => {
+forking(38970500, () => {
   let vusdt: Contract;
   let vusdc: Contract;
   let vdai: Contract;
