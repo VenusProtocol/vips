@@ -14,16 +14,22 @@ yarn install
 
 ```
 
+### Repo structure
+
+The simulations and create commands require the function creating the VIP to be the default export.
+
 ### Run Simulations
 
 ```
-npx hardhat test simulations/<simulation-path>
+npx hardhat test simulations/<simulation-path> --fork <network>
 ```
 
 ### Run Simulations for Multisig
 
+Simulations for multisig transactions can be run individually or sequentially. Running test for proposals can be done by passing in the index file of the network's simulation dir where each proposal test is imported.
+
 ```
-npx hardhat test multisig/simulations/<network>/<path>
+npx hardhat test multisig/simulations/<path> --fork <network>
 ```
 
 ### Create Proposal
@@ -46,10 +52,8 @@ Script to build vip calldata and target.
 
 Procedure for Propose vip
 
-In .env, replace VIP_NUMBER with the number of vip to propose.
-
 ```
-npx hardhat test scripts/proposeVIP.ts
+npx hardhat run scripts/proposeVIP.ts
 ```
 
 ### Execute VIP (via Multisig)
@@ -58,18 +62,12 @@ Script to execute a VIP through the Gnosis Safe Multisig
 
 Procedure for executing VIP
 
-In .env, make sure that `DEPLOYER_PRIVATE_KEY` is the one of the multisig owner on sepolia `0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C`
+In .env, make sure that `DEPLOYER_PRIVATE_KEY` is the one of the multisig owner on the network (e.g. `0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C` on sepolia)
 
 Proceed by executing the following command:
 
 ```
-npx hardhat run scripts/executeMultiSigTx.ts --network sepolia
-```
-
-After executing the command, provide the proposal name to be executed and press enter:
-
-```
-Name of tx file (from ./multisig/<network>/ dir) to execute =>
+npx hardhat multisig <path to multisig vip relative to multisig/proposal> --network <network>
 ```
 
 ### Export Gnosis Safe tx JSON

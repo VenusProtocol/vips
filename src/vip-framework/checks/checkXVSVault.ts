@@ -2,18 +2,20 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { NETWORK_CONFIG } from "../../networkConfig";
+import { getForkedNetworkAddress } from "../../utils";
 import XVSVault_ABI from "../abi/XVSVault.json";
 import ERC20_ABI from "../abi/erc20.json";
 
-const NORMAL_TIMELOCK = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].NORMAL_TIMELOCK;
-const XVS = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS;
-const XVS_VAULT_PROXY = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].XVS_VAULT_PROXY;
-const ACCOUNT = NETWORK_ADDRESSES[process.env.FORKED_NETWORK].GENERIC_TEST_USER_ACCOUNT;
-const POOL_ID = NETWORK_CONFIG[process.env.FORKED_NETWORK].XVS_VAULT_POOL_ID;
+const FORKED_NETWORK_CONFIG = FORKED_NETWORK && NETWORK_CONFIG[FORKED_NETWORK];
+
+const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK");
+const XVS = getForkedNetworkAddress("XVS");
+const XVS_VAULT_PROXY = getForkedNetworkAddress("XVS_VAULT_PROXY");
+const ACCOUNT = getForkedNetworkAddress("GENERIC_TEST_USER_ACCOUNT");
+const POOL_ID = FORKED_NETWORK_CONFIG?.XVS_VAULT_POOL_ID;
 
 export const checkXVSVault = () => {
   describe("generic XVS Vault checks", () => {
@@ -21,8 +23,8 @@ export const checkXVSVault = () => {
     let xvsVault: Contract;
 
     before(async () => {
-      impersonateAccount(ACCOUNT);
-      impersonateAccount(NORMAL_TIMELOCK);
+      await impersonateAccount(ACCOUNT);
+      await impersonateAccount(NORMAL_TIMELOCK);
       const signer = await ethers.getSigner(ACCOUNT);
 
       xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
@@ -33,6 +35,8 @@ export const checkXVSVault = () => {
     });
 
     it("deposit and withdraw", async () => {
+      await xvsVault.claim(ACCOUNT, xvs.address, POOL_ID);
+
       let originalBalance = await xvs.balanceOf(ACCOUNT);
 
       await xvs.approve(xvsVault.address, parseUnits("1", 18));

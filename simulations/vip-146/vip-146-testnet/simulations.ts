@@ -46,7 +46,7 @@ forking(31655347, () => {
     await oracle.connect(siger).setDirectPrice(ankrBNB, "10000000000");
   });
 
-  describe("Contracts setup", () => {
+  describe("Contracts setup", async () => {
     const checkVToken = (
       vTokenAddress: string,
       {
@@ -96,7 +96,7 @@ forking(31655347, () => {
       });
     };
 
-    checkVToken(vankrBNB_DeFi, {
+    await checkVToken(vankrBNB_DeFi, {
       name: "Venus ankrBNB (DeFi)",
       symbol: "vankrBNB_DeFi",
       decimals: 8,
