@@ -38,7 +38,7 @@ forking(38884900, () => {
     it("Should increase USDC balance of the community wallet", async () => {
       const currUSDcBal = await usdc.balanceOf(COMMUNITY_WALLET);
       const delta = currUSDcBal.sub(prevBalanceCommunityWallet);
-      expect(delta).to.be.closeTo(parseUnits("25000", 18), parseUnits("10", 18));
+      expect(delta).to.be.equal(parseUnits("25000", 18));
     });
 
     it("Leaves no USDC in the redeemer helper contract", async () => {
