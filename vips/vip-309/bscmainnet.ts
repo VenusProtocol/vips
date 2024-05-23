@@ -10,10 +10,10 @@ export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const VUSDC_AMOUNT = parseUnits("1048900", 8); // (close to 25000 USDC, taking into account 1 USDC = 41.9 vUSDC)
 const USDC_AMOUNT = parseUnits("25000", 18);
 
-const vip306 = () => {
+const vip309 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-306 VIP to transfer the bootstrap liquidity needed for Arbitrum one to the Community wallet",
+    title: "VIP-309 VIP to transfer the bootstrap liquidity needed for Arbitrum one to the Community wallet",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -38,4 +38,4 @@ const vip306 = () => {
   );
 };
 
-export default vip306;
+export default vip309;

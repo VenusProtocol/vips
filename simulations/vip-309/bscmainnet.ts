@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip306, { COMMUNITY_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-306/bscmainnet";
+import vip309, { COMMUNITY_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-309/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
@@ -24,7 +24,7 @@ forking(38884900, () => {
     prevTreasuryBalance = await vusdc.balanceOf(TREASURY);
   });
 
-  testVip("VIP-306 Transfer bootstrap liquidity needed for Arbitrum one to the Community wallet", vip306(), {
+  testVip("VIP-309 Transfer bootstrap liquidity needed for Arbitrum one to the Community wallet", vip309(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },
