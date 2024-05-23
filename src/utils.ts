@@ -24,7 +24,7 @@ import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-const BSCTESTNET_OMNICHAIN_SENDER = "0x24b4A647B005291e97AdFf7078b912A39C905091";
+const BSCTESTNET_OMNICHAIN_SENDER = "0x7a8e88bA76E6A15De6CEa3fa60a465a2af365173";
 const BSCMAINNET_OMNICHAIN_SENDER = "";
 
 export const getOmnichainProposalSenderAddress = () => {
@@ -108,13 +108,16 @@ const getEstimateFeesForBridge = async (dstChainId: number, payload: string, ada
     OmnichainProposalSender_ABI,
     provider,
   );
+
   let fee;
   if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
-    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payload, false, adapterParams))[0].add(
-      ethers.utils.parseEther("0.1"),
+    const proposalId = await OmnichainProposalSender.proposalCount();
+    const payloadWithId = ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]);
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payloadWithId, false, adapterParams))[0].add(
+      ethers.utils.parseEther("1"),
     );
   } else {
-    fee = ethers.BigNumber.from("1");
+    fee = ethers.BigNumber.from("0");
   }
   return fee;
 };

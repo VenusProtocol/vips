@@ -11,9 +11,9 @@ import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor
 
 const { sepolia } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
+const SEPOLIA_NORMAL_TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
 
-forking(5860538, async () => {
+forking(5961766, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;

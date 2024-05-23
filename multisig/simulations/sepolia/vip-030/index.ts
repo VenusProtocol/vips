@@ -7,12 +7,12 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip030 from "../../../proposals/sepolia/vip-030";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x0E33024CD69530126586186C282573D8BD6783ea";
+const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xe85116507D5F3f3B42e7b6a01a98d33FD3943ceC";
 const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const SEPOLIA_NORMAL_TIMELOCK = "0x9952fc9A06788B0960Db88434Da43EDacDF1935e";
+const SEPOLIA_NORMAL_TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(5860538, async () => {
+forking(5961766, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

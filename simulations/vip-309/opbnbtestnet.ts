@@ -11,9 +11,9 @@ import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8aA824CCBeF8A0a3eCdF87c3523D8Fd49Dc93aE";
+const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8Adf0e83189B3cea99F8ad7320afFa8a66Ba75B";
 
-forking(28821437, async () => {
+forking(29592785, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
