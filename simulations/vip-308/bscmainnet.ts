@@ -111,7 +111,7 @@ forking(38970500, () => {
         kink: "0.8",
       });
 
-      checkInterestRate(OLD_VUSDT_STABLE_COIN_IR, "VTUSD_STABLE_COIN", {
+      checkInterestRate(OLD_VUSDT_STABLE_COIN_IR, "VUSDT_STABLE_COIN", {
         base: "0",
         multiplier: "0.125",
         jump: "2.5",
@@ -175,7 +175,7 @@ forking(38970500, () => {
         kink: "0.8",
       });
 
-      checkInterestRate(NEW_VFDUSD_IR, "vFDUSD_core", {
+      checkInterestRate(NEW_VFDUSD_IR, "VFDUSD_CORE", {
         base: "0",
         multiplier: "0.0875",
         jump: "5.0",
@@ -189,21 +189,21 @@ forking(38970500, () => {
         kink: "0.8",
       });
 
-      checkInterestRate(NEW_VUSDT_STABLE_COIN_IR, "vTUSD_StableCoin", {
+      checkInterestRate(NEW_VUSDT_STABLE_COIN_IR, "VUSDT_StableCoin", {
         base: "0",
         multiplier: "0.1",
         jump: "2.5",
         kink: "0.8",
       });
 
-      checkInterestRate(NEW_VUSDT_GAMEFI_IR, "vUSDT_GameFi", {
+      checkInterestRate(NEW_VUSDT_GAMEFI_IR, "VUSDT_GameFi", {
         base: "0.02",
         multiplier: "0.15",
         jump: "2.5",
         kink: "0.8",
       });
 
-      checkInterestRate(NEW_VUSDT_DEFI_IR, "vUSDT_DeFi", {
+      checkInterestRate(NEW_VUSDT_DEFI_IR, "VUSDT_DeFi", {
         base: "0.02",
         multiplier: "0.15",
         jump: "2.5",
