@@ -65,7 +65,7 @@ forking(38945597, () => {
 
   testVip("VIP-304", vip304(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [94]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [97]);
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [24]);
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [19]);
     },
