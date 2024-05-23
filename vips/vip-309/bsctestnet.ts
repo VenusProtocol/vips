@@ -14,7 +14,7 @@ export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x233eFd8aFd8C164A8d5e54f6
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 
-export const vip309 = () => {
+const vip309 = () => {
   const meta = {
     version: "v2",
     title:
@@ -291,3 +291,4 @@ export const vip309 = () => {
     ProposalType.REGULAR,
   );
 };
+export default vip309;

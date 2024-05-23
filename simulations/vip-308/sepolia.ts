@@ -5,11 +5,10 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import {
+import vip308, {
   SEPOLIA_ACM,
   SEPOLIA_NORMAL_TIMELOCK,
   SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
-  vip308,
 } from "../../vips/vip-308/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";

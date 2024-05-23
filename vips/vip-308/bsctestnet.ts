@@ -24,7 +24,7 @@ export const MAX_DAILY_LIMIT = 100;
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 
-export const vip308 = () => {
+const vip308 = () => {
   const meta = {
     version: "v2",
     title:
@@ -389,3 +389,5 @@ export const vip308 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip308;

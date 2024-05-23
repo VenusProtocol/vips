@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import { OPBNBTESTNET_ACM, OPBNBTESTNET_NORMAL_TIMELOCK, vip308 } from "../../vips/vip-308/bsctestnet";
+import vip308, { OPBNBTESTNET_ACM, OPBNBTESTNET_NORMAL_TIMELOCK } from "../../vips/vip-308/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
