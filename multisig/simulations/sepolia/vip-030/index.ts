@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip009 } from "../../../proposals/vip-009/vip-009-sepolia";
+import { vip030 } from "../../../proposals/sepolia/vip-030";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
 
 const COMPTROLLER_STABLECOIN = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
@@ -15,7 +15,7 @@ forking(5152462, () => {
   let stableCoinPoolComptroller: ethers.Contract;
 
   before(async () => {
-    impersonateAccount(GUARDIAN);
+    await impersonateAccount(GUARDIAN);
 
     stableCoinPoolComptroller = new ethers.Contract(
       COMPTROLLER_STABLECOIN,
@@ -33,7 +33,7 @@ forking(5152462, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(vip030());
     });
 
     it("stablecoin pool market unlisted", async () => {

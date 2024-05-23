@@ -2,10 +2,10 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { STABLECOIN_COMPTROLLER } from "../../../vips/vip-185";
-import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip244 } from "../../../vips/vip-244/bsctestnet";
+import { expectEvents } from "../../src/utils";
+import { forking, testVip } from "../../src/vip-framework";
+import { STABLECOIN_COMPTROLLER } from "../../vips/vip-185";
+import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip308 } from "../../vips/vip-308/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 import UPGRADABLE_BEACON_ABI from "./abi/upgradableBeacon.json";
@@ -20,9 +20,9 @@ forking(37164546, () => {
   let stableCoinPoolComptroller: ethers.Contract;
 
   before(async () => {
-    impersonateAccount(UNITROLLER);
-    impersonateAccount(NORMAL_TIMELOCK);
-    impersonateAccount(vUST_USER);
+    await impersonateAccount(UNITROLLER);
+    await impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(vUST_USER);
 
     comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_FACET_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
     stableCoinPoolComptroller = new ethers.Contract(
@@ -45,16 +45,16 @@ forking(37164546, () => {
     });
   });
 
-  testVip("VIP-244 Unlist Market", vip244(), {
+  testVip("VIP-308 Unlist Market", vip308(), {
     callbackAfterExecution: async txResponse => {
-      expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
-      expectEvents(
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
+      await expectEvents(
         txResponse,
         [COMPTROLLER_FACET_ABI],
         ["NewSupplyCap", "NewBorrowCap", "ActionPausedMarket", "NewCollateralFactor", "MarketUnlisted"],
         [2, 2, 12, 2, 2],
       );
-      expectEvents(txResponse, [UPGRADABLE_BEACON_ABI], ["Upgraded"], [1]);
+      await expectEvents(txResponse, [UPGRADABLE_BEACON_ABI], ["Upgraded"], [1]);
     },
   });
 

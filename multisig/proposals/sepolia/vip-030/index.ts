@@ -1,13 +1,13 @@
 import { ethers } from "hardhat";
 
-import { makeProposal } from "../../../src/utils";
+import { makeProposal } from "../../../../src/utils";
 
 const COMPTROLLER_BEACON = "0x6cE54143a88CC22500D49D744fb6535D66a8294F";
 const NEW_COMPTROLLER_IMPLEMENTATION = "0x3cE617FCeb5e9Ed622F73b483aC7c94053795197";
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-export const vip009 = () => {
+export const vip030 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
