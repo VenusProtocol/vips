@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip030 } from "../../../proposals/sepolia/vip-030";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
+import { Contract } from "ethers";
 
 const COMPTROLLER_STABLECOIN = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
 const vUSDT_POOL_STABLECOIN = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
@@ -12,7 +13,7 @@ const vUSDT_USER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
 forking(5152462, () => {
-  let stableCoinPoolComptroller: ethers.Contract;
+  let stableCoinPoolComptroller: Contract;
 
   before(async () => {
     await impersonateAccount(GUARDIAN);

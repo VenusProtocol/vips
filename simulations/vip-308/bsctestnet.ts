@@ -6,7 +6,7 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { STABLECOIN_COMPTROLLER } from "../../vips/vip-185";
 import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip308 } from "../../vips/vip-308/bsctestnet";
-import ACM_ABI from "./abi/ACM.json";
+import ACM_ABI from "./abi/acm.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 import UPGRADABLE_BEACON_ABI from "./abi/upgradableBeacon.json";
 
