@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -26,9 +27,9 @@ const MESSARI_AMOUNT = parseUnits("95000", 18);
 const GALXE_CAMPAIGN_AMOUNT = parseUnits("25000", 18);
 
 forking(33135500, () => {
-  let usdc: ethers.Contract;
-  let usdt: ethers.Contract;
-  let vai: ethers.Contract;
+  let usdc: Contract;
+  let usdt: Contract;
+  let vai: Contract;
 
   let prevBalanceCertik: BigNumber;
   let prevBalanceUquid: BigNumber;

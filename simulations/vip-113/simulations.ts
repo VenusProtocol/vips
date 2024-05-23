@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -14,7 +15,7 @@ const XVS_VAULT_PROXY = "0x051100480289e704d20e9DB4804837068f3f9204";
 
 forking(27865000, () => {
   const provider = ethers.provider;
-  let xvsVault: ethers.Contract;
+  let xvsVault: Contract;
 
   before(async () => {
     xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);

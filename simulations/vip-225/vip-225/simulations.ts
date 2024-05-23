@@ -1,6 +1,7 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -49,14 +50,14 @@ const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 
 forking(34778191, () => {
   const provider = ethers.provider;
-  let oldPrime: ethers.Contract;
-  let newPrime: ethers.Contract;
-  let vaiController: ethers.Contract;
-  let defaultProxyAdmin: ethers.Contract;
-  let vaiControllerProxy: ethers.Contract;
-  let comptroller: ethers.Contract;
-  let beaconProxyComptroller: ethers.Contract;
-  let beaconProxyVtoken: ethers.Contract;
+  let oldPrime: Contract;
+  let newPrime: Contract;
+  let vaiController: Contract;
+  let defaultProxyAdmin: Contract;
+  let vaiControllerProxy: Contract;
+  let comptroller: Contract;
+  let beaconProxyComptroller: Contract;
+  let beaconProxyVtoken: Contract;
 
   before(async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
@@ -116,8 +117,8 @@ forking(34778191, () => {
         ["NewPrime", "MintOnlyForPrimeHolder", "NewVAIBaseRate", "NewVAIMintCap"],
         [1, 1, 1, 1],
       );
-      expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVAIMintRate"], [1]);
-      expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewVAIMintRate"], [1]);
+      await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);
     },
   });
 

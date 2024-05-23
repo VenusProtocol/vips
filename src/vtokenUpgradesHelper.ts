@@ -1,32 +1,32 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { FORKED_NETWORK } from "hardhat";
 
-export interface storageLayout {
-  name: string;
-  symbol: string;
-  decimals: number;
-  owner: string;
-  comptroller: string;
-  interestRateModel: string;
-  reserveFactorMantissa: BigNumber;
-  accrualBlockNumber: BigNumber;
-  borrowIndex: BigNumber;
-  totalBorrows: BigNumber;
-  totalSupply: BigNumber;
-  totalReserves: BigNumber;
-  underlying: string;
-  accountBalance: BigNumber;
-  borrowBalance: BigNumber;
-  borrowRatePerBlock: BigNumber;
-  pendingOwner: string;
-  protocolShareReserve: string;
-  shortfall: string;
-  supplyRatePerBlock: BigNumber;
+export interface StorageLayout {
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+  owner?: string;
+  comptroller?: string;
+  interestRateModel?: string;
+  reserveFactorMantissa?: BigNumber;
+  accrualBlockNumber?: BigNumber;
+  borrowIndex?: BigNumber;
+  totalBorrows?: BigNumber;
+  totalSupply?: BigNumber;
+  totalReserves?: BigNumber;
+  underlying?: string;
+  accountBalance?: BigNumber;
+  borrowBalance?: BigNumber;
+  borrowRatePerBlock?: BigNumber;
+  pendingOwner?: string;
+  supplyRatePerBlock?: BigNumber;
 }
 
-export const fetchVTokenStorageIL = async (vToken: ethers.Contract, user: string) => {
+export const fetchVTokenStorageIL = async (vToken: Contract, user: string) => {
   const name = await vToken.name();
   const symbol = await vToken.symbol();
   const decimals = await vToken.decimals();
@@ -72,7 +72,7 @@ export const fetchVTokenStorageIL = async (vToken: ethers.Contract, user: string
   };
 };
 
-export const fetchVTokenStorageCore = async (vToken: ethers.Contract, user: string) => {
+export const fetchVTokenStorageCore = async (vToken: Contract, user: string): Promise<StorageLayout> => {
   const name = await vToken.name();
   const symbol = await vToken.symbol();
   const decimals = await vToken.decimals();
@@ -114,17 +114,14 @@ export const fetchVTokenStorageCore = async (vToken: ethers.Contract, user: stri
   };
 };
 
-export const performVTokenBasicActions = async (
-  marketAddress: string,
+const calculateAmount = async (
   user: SignerWithAddress,
   mintAmount: BigNumber,
   borrowAmount: BigNumber,
   repayAmount: BigNumber,
   redeemAmount: BigNumber,
-  vToken: ethers.Contract,
-  underlying: ethers.Contract,
-  isUnderlyingMock: boolean,
-) => {
+  underlying: Contract,
+): Promise<{ mintAmount: BigNumber; borrowAmount: BigNumber; repayAmount: BigNumber; redeemAmount: BigNumber }> => {
   const underlyingDecimals = await underlying.decimals();
   const symbol = await underlying.symbol();
 
@@ -135,6 +132,7 @@ export const performVTokenBasicActions = async (
     redeemAmount = parseUnits("0.5", 18);
     await underlying.connect(user).deposit({ value: mintAmount });
   }
+
   if (underlyingDecimals == 6) {
     mintAmount = parseUnits("200", 6);
     borrowAmount = parseUnits("50", 6);
@@ -148,7 +146,31 @@ export const performVTokenBasicActions = async (
     repayAmount = parseUnits("25", 8);
     redeemAmount = parseUnits("50", 8);
   }
-  if (process.env.FORK_TESTNET === "true" && isUnderlyingMock) {
+  return { mintAmount, borrowAmount, repayAmount, redeemAmount };
+};
+
+export const performVTokenBasicActions = async (
+  marketAddress: string,
+  user: SignerWithAddress,
+  mintAmount: BigNumber,
+  borrowAmount: BigNumber,
+  repayAmount: BigNumber,
+  redeemAmount: BigNumber,
+  vToken: Contract,
+  underlying: Contract,
+  isUnderlyingMock: boolean,
+) => {
+  ({ mintAmount, borrowAmount, repayAmount, redeemAmount } = await calculateAmount(
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    underlying,
+  ));
+
+  const network = FORKED_NETWORK;
+  if ((network === "bsctestnet" || network === "sepolia" || network === "opbnbtestnet") && isUnderlyingMock) {
     try {
       await underlying.connect(user).faucet(mintAmount.add(repayAmount));
     } catch (error) {
@@ -176,7 +198,69 @@ export const performVTokenBasicActions = async (
   await vToken.connect(user).repayBorrow(repayAmount);
   expect(await vToken.borrowBalanceStored(user.address)).to.be.lessThan(previousBorrowBalance);
 
-  // Redeem tokens
+  // Redeem underlying tokens
   await vToken.connect(user).redeemUnderlying(redeemAmount);
   expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+};
+
+export const performVTokenBasicAndBehalfActions = async (
+  marketAddress: string,
+  user: SignerWithAddress,
+  trustee: SignerWithAddress,
+  mintAmount: BigNumber,
+  borrowAmount: BigNumber,
+  repayAmount: BigNumber,
+  redeemAmount: BigNumber,
+  vToken: Contract,
+  underlying: Contract,
+  unitroller: Contract,
+  isUnderlyingMock: boolean,
+) => {
+  const redeemVTokenAmount = parseUnits("1", 8);
+  ({ mintAmount, borrowAmount, repayAmount, redeemAmount } = await calculateAmount(
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    underlying,
+  ));
+
+  await performVTokenBasicActions(
+    marketAddress,
+    user,
+    mintAmount,
+    borrowAmount,
+    repayAmount,
+    redeemAmount,
+    vToken,
+    underlying,
+    isUnderlyingMock,
+  );
+
+  if (await unitroller.approvedDelegates(user.address, trustee.address)) {
+    await unitroller.connect(user).updateDelegate(trustee.address, false);
+  }
+  const previousBalance = await vToken.balanceOf(user.address);
+
+  // reverting when trustee is not allowed to perform actions on behalf of user.
+  await expect(vToken.connect(trustee).redeemUnderlyingBehalf(user.address, redeemAmount)).to.be.reverted;
+  await expect(vToken.connect(trustee).redeemBehalf(user.address, redeemVTokenAmount)).to.be.reverted;
+
+  if (!(await unitroller.approvedDelegates(user.address, trustee.address))) {
+    await unitroller.connect(user).updateDelegate(trustee.address, true);
+  }
+
+  // Redeem underlying tokens behalf
+  const previousUnderlyingTokenBalance = await underlying.balanceOf(trustee.address);
+  await vToken.connect(trustee).redeemUnderlyingBehalf(user.address, redeemAmount);
+  const underlyingTokenBalance = await underlying.balanceOf(trustee.address);
+
+  expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+  expect(underlyingTokenBalance).to.be.greaterThan(previousUnderlyingTokenBalance);
+
+  // Redeem tokens behalf
+  await vToken.connect(trustee).redeemBehalf(user.address, redeemVTokenAmount);
+  expect(await vToken.balanceOf(user.address)).to.be.lessThan(previousBalance);
+  expect(await underlying.balanceOf(trustee.address)).to.be.greaterThan(underlyingTokenBalance);
 };
