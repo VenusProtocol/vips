@@ -1,5 +1,6 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
@@ -16,8 +17,8 @@ const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
 
 forking(37164546, () => {
-  let comptroller: ethers.Contract;
-  let stableCoinPoolComptroller: ethers.Contract;
+  let comptroller: Contract;
+  let stableCoinPoolComptroller: Contract;
 
   before(async () => {
     await impersonateAccount(UNITROLLER);
