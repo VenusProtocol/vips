@@ -1,9 +1,10 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import { UNITROLLER, vip247 } from "../../vips/vip-247/bsctestnet";
+import { UNITROLLER, vip308 } from "../../vips/vip-308/bsctestnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 
@@ -12,12 +13,12 @@ const USER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
 const vETH = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
 
 forking(39001701, () => {
-  let comptroller: ethers.Contract;
-  let vETHContract: ethers.Contract;
+  let comptroller: Contract;
+  let vETHContract: Contract;
 
   before(async () => {
-    impersonateAccount(NORMAL_TIMELOCK);
-    impersonateAccount(USER);
+    await impersonateAccount(NORMAL_TIMELOCK);
+    await impersonateAccount(USER);
 
     comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_FACET_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
     vETHContract = new ethers.Contract(vETH, VTOKEN_ABI, await ethers.getSigner(USER));
@@ -26,16 +27,16 @@ forking(39001701, () => {
   describe("Pre-VIP", () => {
     it("Verify borrow cap 0", async () => {
       await comptroller._setMarketBorrowCaps([vETH], [0]);
-      expect(vETHContract.borrow(10)).to.not.be.reverted;
+      await expect(vETHContract.borrow(10)).to.not.be.reverted;
     });
   });
 
-  testVip("VIP-244 Unlist Market", vip247(), {});
+  testVip("VIP-244 Unlist Market", vip308(), {});
 
   describe("Post-VIP", () => {
     it("Verify borrow cap 0", async () => {
       await comptroller._setMarketBorrowCaps([vETH], [0]);
-      expect(vETHContract.borrow(10)).to.not.be.revertedWith("market borrow cap is 0");
+      await expect(vETHContract.borrow(10)).to.be.revertedWith("market borrow cap is 0");
     });
   });
 });
