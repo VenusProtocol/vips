@@ -8,7 +8,7 @@ export const VCRVUSD_CORE = "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202";
 
 export const NEW_IR = JUMPRATEMODELV2_BASE0BPS_SLOPE875BPS_JUMP25000BPS_KINK8000BPS;
 
-const vip028 = () => {
+const vip030 = () => {
   return makeProposal([
     { target: VUSDC_CORE, signature: "setInterestRateModel(address)", params: [NEW_IR] },
     { target: VUSDT_CORE, signature: "setInterestRateModel(address)", params: [NEW_IR] },
@@ -16,4 +16,4 @@ const vip028 = () => {
   ]);
 };
 
-export default vip028;
+export default vip030;
