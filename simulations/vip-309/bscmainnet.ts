@@ -20,8 +20,8 @@ import {
   vTokenConfigs,
   vTokenWithdrawals,
   vaiDebts,
-  vip304,
-} from "../../vips/vip-304/bscmainnet";
+  vip309,
+} from "../../vips/vip-309/bscmainnet";
 import ERC20_ABI from "./abi/IERC20.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController.json";
 import VTOKEN_ABI from "./abi/VBep20.json";
@@ -63,7 +63,7 @@ forking(38945597, () => {
     });
   });
 
-  testVip("VIP-304", vip304(), {
+  testVip("VIP-309", vip309(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [97]);
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [24]);

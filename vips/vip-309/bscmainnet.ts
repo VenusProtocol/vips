@@ -337,11 +337,41 @@ export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
   return Object.entries(r) as [K, V][];
 };
 
-export const vip304 = () => {
+export const vip309 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-304 Partial shortfall repayment",
-    description: ``,
+    title: "VIP-309 Partial shortfall repayment",
+    description: `#### Description
+
+Following [VIP-281](https://app.venus.io/#/governance/proposal/281?chainId=56), Venus continues to repay old shortfalls with the objective of being 100% debt-free. If passed, this VIP will repay the bad debt for all accounts with debts higher than $100, using the funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+A total of 64 accounts will be repaid, with a total token value of:
+
+- ADA: 268.91146
+- BCH: 0.13035
+- BETH: 0.03772
+- BNB: 3.56497
+- BTC: 0.00557
+- CAKE: 5.54724
+- DAI: 2,613.18047
+- ETH: 0.09636
+- LINK: 6.52902
+- LTC: 0.41386
+- SXP: 23.67372
+- TUSDOLD: 32.98052
+- USDC: 4,280.87815
+- USDT: 8,011.70678
+- XRP: 95.82291
+- VAI: 4,497.56873
+
+With this, the total estimated repayment amount is **$22,966.92**, considering May 21st, 2024 token prices.
+
+The vTreasury has enough assets to repay all markets except DAI. For this, 2,395 DAI will be used for a partial repayment, and the rest of the missing tokens will be transferred in USDT value to the [Community Wallet](https://debank.com/profile/0xc444949e0054A23c44Fc45789738bdF64aed2391) to cover the remainder.
+
+#### References
+
+- [TokenRedeemer contract used to repay the debt](https://bscscan.com/address/0xC53ffda840B51068C64b2E052a5715043f634bcd)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/282)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -385,4 +415,4 @@ export const vip304 = () => {
   );
 };
 
-export default vip304;
+export default vip309;
