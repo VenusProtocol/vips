@@ -16,7 +16,7 @@ const vUSDT_POOL_STABLECOIN = "0x3338988d0beb4419Acb8fE624218754053362D06";
 const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
 
-forking(37164546, () => {
+forking(40582718, () => {
   let comptroller: Contract;
   let stableCoinPoolComptroller: Contract;
 
@@ -48,7 +48,7 @@ forking(37164546, () => {
 
   testVip("VIP-308 Unlist Market", vip308(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [3]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
       await expectEvents(
         txResponse,
         [COMPTROLLER_FACET_ABI],
