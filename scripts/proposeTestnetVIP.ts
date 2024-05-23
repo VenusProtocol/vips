@@ -24,7 +24,8 @@ const proposeTestnetVIP = async (vipPath: string) => {
     JSON.stringify(meta),
     proposal.type,
   );
-  await tx.wait();
+  const receipt = await tx.wait();
+  console.log(`VIP proposed successfully on bsctestnet (txId: ${receipt?.transactionHash})`);
 };
 
 export default proposeTestnetVIP;
