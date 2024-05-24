@@ -1,14 +1,14 @@
 import { makeProposal } from "../../../../src/utils";
 
-export const vFRAX = "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95";
-export const vsFRAX = "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe";
-export const REWARDS_DISTRIBUTOR_XVS = "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8";
+export const vFRAX = "0x33942B932159A67E3274f54bC4082cbA4A704340";
+export const vsFRAX = "0x18995825f033F33fa30CF59c117aD21ff6BdB48c";
+export const REWARDS_DISTRIBUTOR_XVS = "0xB60666395bEFeE02a28938b75ea620c7191cA77a";
 
-// Reward start block can be found here https://etherscan.io/tx/0x261395084b5f1a51d331c72ab2f836d10479b6fbb76b6b8b3094ec440e7de032
-export const REWARD_START_BLOCK = 19861441;
+// Reward start block can be found here https://sepolia.etherscan.io/tx/0x5f31126e305657a54a82182b2a727262941d9e59c5f3158d6da5740d1f037609
+export const REWARD_START_BLOCK = 5848930;
 export const LAST_REWARD_BLOCK = REWARD_START_BLOCK + (90 * 24 * 60 * 60) / 12;
 
-export const vip028 = () => {
+export const vip031 = () => {
   return makeProposal([
     {
       target: REWARDS_DISTRIBUTOR_XVS,
@@ -23,4 +23,4 @@ export const vip028 = () => {
   ]);
 };
 
-export default vip028;
+export default vip031;

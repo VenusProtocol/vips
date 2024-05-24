@@ -3,11 +3,11 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import { REWARDS_DISTRIBUTOR, REWARDS_END_BLOCK_90_DAYS, VBABYDOGE, vip304 } from "../../vips/vip-304/bscmainnet";
+import { REWARDS_DISTRIBUTOR, REWARDS_END_BLOCK_90_DAYS, VBABYDOGE, vip311 } from "../../vips/vip-311/bsctestnet";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 
-forking(38914474, () => {
-  testVip("VIP-304", vip304());
+forking(40378717, () => {
+  testVip("VIP-311", vip311());
 
   describe("Rewards distributors configuration", () => {
     describe("Last Reward Blcok", () => {

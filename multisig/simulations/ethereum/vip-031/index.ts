@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR_XVS, vFRAX, vip028, vsFRAX } from "../../../proposals/ethereum/vip-028";
+import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR_XVS, vFRAX, vip031, vsFRAX } from "../../../proposals/ethereum/vip-031";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
 forking(19881896, () => {
@@ -15,7 +15,7 @@ forking(19881896, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip028());
+      await pretendExecutingVip(vip031());
     });
 
     it("check vFrax last reward block", async () => {
