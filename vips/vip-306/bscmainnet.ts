@@ -25,7 +25,7 @@ export const BTC_FEED_CHAINLINK = "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf";
 const vip306 = (maxStalePeriod: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-304 Set RedStone as the Main Oracle for BTC and BNB",
+    title: "VIP-306 Set RedStone as the Main Oracle for BTC and BNB",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
