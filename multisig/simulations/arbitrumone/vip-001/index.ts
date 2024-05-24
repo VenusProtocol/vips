@@ -35,8 +35,8 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "WBTC",
     address: "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
-    price: "671302697202300000000000000000000",
-    feed: "0xd0C7101eACbB49F3deCcCc166d238410D6D46d57",
+    price: "671364000000000000000000000000000",
+    feed: "0x6ce185860a4963106506C203335A2910413708e9",
     oracle: "chainlink",
   },
   {
