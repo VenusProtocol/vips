@@ -121,5 +121,6 @@ export const NETWORK_ADDRESSES = {
   arbitrumone: {
     NORMAL_TIMELOCK: "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0", // arbitrumone Multisig
     GUARDIAN: "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0",
+    VTREASURY: "0x8a662ceAC418daeF956Bc0e6B2dd417c80CDA631",
   },
 };
