@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip303, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-306/bscmainnet";
+import vip306, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-306/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -29,7 +29,7 @@ forking(38912197, () => {
     });
   });
 
-  testVip("Update BTC and BNB Price Config", vip303(60 * 60 * 24 * 7), {
+  testVip("Update BTC and BNB Price Config", vip306(60 * 60 * 24 * 7), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [REDSTONE_ORACLE_ABI], ["TokenConfigAdded"], [4]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [2]);
