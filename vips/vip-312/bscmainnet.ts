@@ -29,6 +29,30 @@ Apart from the configuration of the Venus Treasury, this VIP configure the Venus
 
 The list of initial markets for Arbitrum one follows the [Chaos labs recommendations](https://community.venus.io/t/vrc-deploy-venus-protocol-on-arbitrum/3721/7).
 
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, checking ownership of the contracts and validating the returned prices
+- **Deployment on testnet**: the same contracts have been deployed to testnet, and used in the Venus Protocol testnet deployment
+- **Audit**:
+    - Certik, Quantstamp and Peckshield have audited the VTreasuryV8 code
+    - Certik, Quantstamp and Fairyproof have audited the code of the oracles on Arbitrum
+
+#### Audit reports
+
+VTreasuryV8:
+
+- [Certik audit report](https://github.com/VenusProtocol/token-bridge/blob/323e95fa3c0167cca2fc1d2807e911e0bae54de9/audits/083_multichain_token_bridge_certik_20231226.pdf) (2023/December/26)
+- [Quantstamp audit report](https://github.com/VenusProtocol/token-bridge/blob/323e95fa3c0167cca2fc1d2807e911e0bae54de9/audits/064_multichain_token_bridge_quantstamp_20231219.pdf) (2023/December/19)
+- [Peckshield audit report](https://github.com/VenusProtocol/token-bridge/blob/04b0a8526bb2fa916785c41eefd94b4f84c12819/audits/079_multichain_token_bridge_peckshield_20231020.pdf) (2023/October/20)
+
+Oracles on Arbitrum:
+
+- [Certik audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/aa1f7ae61b07839231ec16e9c4143905785d7aae/audits/088_timeBased_certik_20240117.pdf) (2024/01/17)
+- [Quantstamp audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/470416836922656783eab52ded54744489e8c345/audits/089_timeBased_quantstamp_20240319.pdf) (2024/03/19)
+- [Fairyproof audit report](https://github.com/VenusProtocol/isolated-pools/blob/aa1f7ae61b07839231ec16e9c4143905785d7aae/audits/094_timeBased_fairyproof_20240304.pdf) (2024/03/04)
+
 #### Deployed contracts on Arbitrum one
 
 - [ResilientOracle](https://arbiscan.io/address/0xd55A98150e0F9f5e3F6280FC25617A5C93d96007)
