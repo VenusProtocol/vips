@@ -13,11 +13,34 @@ const USDC_AMOUNT = parseUnits("150000", 18);
 const vip313 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-313 VIP to transfer funds to the Gitcoin wallet, for the grants",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-313 Allocate funding for the Gitcoin Grants Stack Partnership",
+    description: `#### Summary
+
+If passed, this VIP will allocate $150,000 USDC to Gitcoin.
+
+#### Description
+
+Gitcoin will handle the design, setup, implementation, and management of the rounds atop Gitcoin Grants Stack. The Venus dev team and community will approve grantees, ensuring alignment with strategic goals and ecosystem development priorities.
+
+The funding rounds will focus on projects contributing to the Venus ecosystem’s growth and development within the following themes:
+
+1. Venus Stablecoin Adoption
+2. Lending and Borrowing Innovations
+3. DeFi / Gaming Integrations
+4. Developer Tools and Libraries
+5. Venus Governance and Community Engagement
+
+#### Actions
+
+Send 150,000 USDC to BEP20 wallet address: [0x457990a79f64bBf8f09e090C16d017d5e70d3CB3](https://bscscan.com/address/0x457990a79f64bBf8f09e090C16d017d5e70d3CB3).
+
+#### References
+
+- [Proposal](https://community.venus.io/t/gitcoin-grants-stack-partnership/4187/10)
+- [Snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x9043f38a9cc0ca75ded022c2b2a839d377ed83a4ff133834dd3e119864816fcc)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
