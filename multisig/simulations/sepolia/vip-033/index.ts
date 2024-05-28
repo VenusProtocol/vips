@@ -6,12 +6,12 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { calculateMappingStorageSlot } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import vip030, {
+import vip033, {
   ACM,
   NEW_XVS_IMPLEMENTATION,
   SEPOLIA_BLOCKS_PER_YEAR,
   XVS_VAULT_PROXY,
-} from "../../../proposals/sepolia/vip-030";
+} from "../../../proposals/sepolia/vip-033";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -38,7 +38,7 @@ forking(5947120, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip030());
+      await pretendExecutingVip(vip033());
     });
 
     checkXVSVault();

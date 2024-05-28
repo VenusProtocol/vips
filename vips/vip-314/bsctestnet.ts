@@ -12,7 +12,7 @@ export const NEW_XVS_IMPLEMENTATION = "0x6F869480eEEbB66b58a930892AddC0067Fb43B2
 
 export const BNB_BLOCKS_PER_YEAR = 10_512_000; // assuming a block is mined every 3 seconds
 
-const vip308 = () => {
+const vip314 = () => {
   const meta = {
     version: "v2",
     title: "VIP-308 Update XVSVault Implementation",
@@ -75,4 +75,4 @@ const vip308 = () => {
   );
 };
 
-export default vip308;
+export default vip314;

@@ -1,28 +1,29 @@
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { calculateMappingStorageSlot } from "../../../../src/utils";
+import { calculateMappingStorageSlot, initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import vip018, {
+import vip010, {
   ACM,
   BLOCKS_PER_YEAR,
   NEW_XVS_IMPLEMENTATION,
   XVS_VAULT_PROXY,
-} from "../../../proposals/opbnbtestnet/vip-018";
+} from "../../../proposals/opbnbmainnet/vip-010";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import ACM_ABI from "./abi/accessControlManager.json";
 
-const { opbnbtestnet } = NETWORK_ADDRESSES;
+const { opbnbmainnet } = NETWORK_ADDRESSES;
 
-const XVS_ADDRESS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
-const POOL_ID = 1;
+const XVS_ADDRESS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
+const POOL_ID = 0;
 const MAPPING_STORAGE_SLOT = 18;
 
 // NOTE: cannot find any pending rewards for XVS on this chain neither with PoolID = 0 or with PoolID = 1
-forking(29407404, async () => {
+forking(24537990, async () => {
   const provider = ethers.provider;
   let xvsVaultProxy: Contract;
   let accessControlManager: Contract;
@@ -30,15 +31,18 @@ forking(29407404, async () => {
 
   before(async () => {
     xvsVaultProxy = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
-    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
     const storageSlot = calculateMappingStorageSlot(XVS_ADDRESS, POOL_ID, MAPPING_STORAGE_SLOT);
     const value = await provider.getStorageAt(XVS_VAULT_PROXY, storageSlot);
     pendingWithdrawalsBefore = BigNumber.from(ethers.constants.HashZero === value ? 0 : utils.stripZeros(value));
+    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
   });
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(vip010());
+      // Resume Vault
+      const xvsVaultAdmin = await initMainnetUser(opbnbmainnet.NORMAL_TIMELOCK, parseEther("1"));
+      await xvsVaultProxy.connect(xvsVaultAdmin).resume();
     });
 
     checkXVSVault();
@@ -55,7 +59,7 @@ forking(29407404, async () => {
     it("Check permission for setRewardAmountPerBlock", async () => {
       expect(
         await accessControlManager.hasPermission(
-          opbnbtestnet.GUARDIAN,
+          opbnbmainnet.GUARDIAN,
           XVS_VAULT_PROXY,
           "setRewardAmountPerBlock(address,uint256)",
         ),
@@ -65,7 +69,7 @@ forking(29407404, async () => {
     it("Check permission for setRewardAmountPerBlockOrSecond", async () => {
       expect(
         await accessControlManager.hasPermission(
-          opbnbtestnet.GUARDIAN,
+          opbnbmainnet.GUARDIAN,
           XVS_VAULT_PROXY,
           "setRewardAmountPerBlockOrSecond(address,uint256)",
         ),

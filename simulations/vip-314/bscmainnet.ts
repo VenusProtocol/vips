@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { calculateMappingStorageSlot, expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
-import vip308, {
+import vip314, {
   ACM,
   BNB_BLOCKS_PER_YEAR,
   CRITICAL_TIMELOCK,
@@ -14,7 +14,7 @@ import vip308, {
   NEW_XVS_IMPLEMENTATION,
   NORMAL_TIMELOCK,
   XVS_VAULT_PROXY,
-} from "../../vips/vip-308/bscmainnet";
+} from "../../vips/vip-314/bscmainnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -39,7 +39,7 @@ forking(38915486, async () => {
     pendingWithdrawalsBefore = BigNumber.from(utils.stripZeros(value));
   });
 
-  testVip("VIP-308 Upgrade XVSVault Implementation", vip308(), {
+  testVip("VIP-314 Upgrade XVSVault Implementation", vip314(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_PROXY_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleRevoked", "RoleGranted"], [3, 3]);
