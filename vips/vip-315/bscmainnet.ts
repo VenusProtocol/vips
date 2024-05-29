@@ -4,6 +4,7 @@ import { makeProposal } from "../../src/utils";
 
 export const vWBNB_IR = "0xdE41feaB3B17C05Ba596b11E2C8d9f3514B71d22";
 export const vWBNB = "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2";
+export const vWBNB_RF = parseUnits("0.5", 18);
 
 const vip315 = () => {
   const meta = {
@@ -22,6 +23,11 @@ const vip315 = () => {
         signature: "setInterestRateModel(address)",
         params: [vWBNB_IR],
       },
+      {
+        target: vWBNB,
+        signature: "setReserveFactor(uint256)",
+        params: [vWBNB_RF]
+      }
     ],
     meta,
     ProposalType.REGULAR,
