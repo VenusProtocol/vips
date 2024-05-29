@@ -77,6 +77,7 @@ forking(39147992, async () => {
   testVip("VIP-315", vip315(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [1, 1]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewLiquidationThreshold"], [4, 4]);
     },
   });
 
