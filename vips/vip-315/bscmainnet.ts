@@ -5,7 +5,7 @@ import { makeProposal } from "../../src/utils";
 
 export const vWBNB_IR = "0xdE41feaB3B17C05Ba596b11E2C8d9f3514B71d22";
 export const vWBNB = "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2";
-export const vWBNB_RF = parseUnits("0.5", 18);
+export const vWBNB_RF = parseUnits("0.05", 18);
 export const LT = parseUnits("0.93", 18);
 export const CF = parseUnits("0.9", 18);
 export const vslisBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
