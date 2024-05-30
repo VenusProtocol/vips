@@ -9,6 +9,8 @@ import vip315, {
   CF,
   COMPTROLLER,
   LT,
+  stkBNB_BORROW_CAP,
+  stkBNB_SUPPLY_CAP,
   vBNBx,
   vWBNB,
   vWBNB_IR,
@@ -72,12 +74,25 @@ forking(39147992, async () => {
       const lt4 = await comptrollerContract.markets(vankrBNB);
       expect(lt4.liquidationThresholdMantissa).to.be.equal(parseUnits("0.9", 18));
     });
+
+    it("check supply and borrow cap", async () => {
+      const supplyCap = await comptrollerContract.supplyCaps(vstkBNB);
+      expect(supplyCap).to.be.equal(parseUnits("2500", 18));
+
+      const borrowCap = await comptrollerContract.borrowCaps(vstkBNB);
+      expect(borrowCap).to.be.equal(parseUnits("250", 18));
+    });
   });
 
   testVip("VIP-315", vip315(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [1, 1]);
-      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewLiquidationThreshold"], [4, 4]);
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI],
+        ["NewCollateralFactor", "NewLiquidationThreshold", "NewSupplyCap", "NewBorrowCap"],
+        [4, 4, 1, 1],
+      );
     },
   });
 
@@ -116,6 +131,14 @@ forking(39147992, async () => {
 
       const lt4 = await comptrollerContract.markets(vankrBNB);
       expect(lt4.liquidationThresholdMantissa).to.be.equal(LT);
+    });
+
+    it("check supply and borrow cap", async () => {
+      const supplyCap = await comptrollerContract.supplyCaps(vstkBNB);
+      expect(supplyCap).to.be.equal(stkBNB_SUPPLY_CAP);
+
+      const borrowCap = await comptrollerContract.borrowCaps(vstkBNB);
+      expect(borrowCap).to.be.equal(stkBNB_BORROW_CAP);
     });
   });
 });

@@ -13,6 +13,8 @@ export const vstkBNB = "0xcc5D9e502574cda17215E70bC0B4546663785227";
 export const vBNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
 export const vankrBNB = "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f";
 export const COMPTROLLER = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
+export const stkBNB_SUPPLY_CAP = parseUnits("50", 18);
+export const stkBNB_BORROW_CAP = parseUnits("0", 18);
 
 const vip315 = () => {
   const meta = {
@@ -55,6 +57,16 @@ const vip315 = () => {
         target: COMPTROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [vankrBNB, CF, LT],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [[vstkBNB], [stkBNB_SUPPLY_CAP]],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [[vstkBNB], [stkBNB_BORROW_CAP]],
       },
     ],
     meta,
