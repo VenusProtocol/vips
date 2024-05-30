@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import vip315, {
+import vip318, {
   CF,
   COMPTROLLER,
   LT,
@@ -19,8 +19,8 @@ import vip315, {
   vankrBNB,
   vslisBNB,
   vstkBNB,
-} from "../../vips/vip-315/bscmainnet";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
+} from "../../vips/vip-318/bscmainnet";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -94,7 +94,7 @@ forking(39172100, async () => {
     });
   });
 
-  testVip("VIP-315", vip315(), {
+  testVip("VIP-318", vip318(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [1, 1]);
       await expectEvents(
