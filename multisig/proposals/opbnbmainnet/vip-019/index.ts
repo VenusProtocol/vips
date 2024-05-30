@@ -2,6 +2,9 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { makeProposal } from "../../../../src/utils";
 
+const ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
+const NORMAL_TIMELOCK = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
+
 const XVS_BRIDGE_ADMIN_PROXY = "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831";
 export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
@@ -14,6 +17,16 @@ export const ARBITRUM_ONE_TRUSTED_REMOTE = "0x20cea49b5f7a6dbd78cae772ca5973ef36
 
 const vip019 = () => {
   return makeProposal([
+    {
+      target: ACM,
+      signature: "revokeCallPermission(address,string,address)",
+      params: [XVS_BRIDGE_ADMIN_PROXY, "dropFailedMessage(uint16,bytes)", NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [XVS_BRIDGE_ADMIN_PROXY, "dropFailedMessage(uint16,bytes,uint64)", NORMAL_TIMELOCK],
+    },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
