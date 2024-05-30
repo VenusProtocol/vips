@@ -6,14 +6,14 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip032, {
+import vip035, {
   ARBITRUM_ONE_CHAIN_ID,
   ARBITRUM_ONE_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/ethereum/vip-032";
+} from "../../../proposals/ethereum/vip-035";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
@@ -40,7 +40,7 @@ forking(19960176, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip032());
+      await pretendExecutingVip(vip035());
     });
 
     it("Should match trusted remote address", async () => {
