@@ -71,20 +71,21 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
 
   for (const market of markets) {
     const marketData: MarketMetadata = await comptroller.markets(market);
-    if (marketData.collateralFactorMantissa.isZero() && !supplyMarket) continue;
-    if (!supplyMarket) {
+    if (!supplyMarket && !marketData.collateralFactorMantissa.isZero()) {
       supplyMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       supplyUnderlying = await ethers.getContractAt(ERC20_ABI, await supplyMarket.underlying(), signer);
       const balance = await supplyUnderlying.balanceOf(poolSupplier);
       if (balance.isZero()) {
         supplyMarket = undefined;
-        continue;
       }
-    } else if (!borrowMarket) {
+    }
+
+    if (!borrowMarket && !(supplyMarket && supplyMarket.address === market)) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
-      break; // Exit the loop if both supplyMarket and borrowMarket are initialized
     }
+
+    if (supplyMarket && borrowMarket) break; // Exit the loop if both supplyMarket and borrowMarket are initialized
   }
 
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
@@ -99,7 +100,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     } > operations - supplying ${await supplyUnderlying?.symbol()} | borrowing ${await borrowUnderlying?.symbol()}`,
   );
   const supplyUnderlyingDecimals = await supplyUnderlying?.decimals();
-  const initialSupplyAmount = parseUnits("0.05", supplyUnderlyingDecimals);
+  const initialSupplyAmount = parseUnits("10000", supplyUnderlyingDecimals);
   const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
