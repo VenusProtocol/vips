@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
+import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import vip315, {
   CF,
   COMPTROLLER,
@@ -139,6 +140,15 @@ forking(39172100, async () => {
 
       const borrowCap = await comptrollerContract.borrowCaps(vstkBNB);
       expect(borrowCap).to.be.equal(stkBNB_BORROW_CAP);
+    });
+
+    it("IR parameters checks", async () => {
+      checkInterestRate(vWBNB_IR, "vWBNB_LiquidStakedBNB", {
+        base: "0",
+        multiplier: "0.009",
+        jump: "3",
+        kink: "0.9",
+      });
     });
   });
 });
