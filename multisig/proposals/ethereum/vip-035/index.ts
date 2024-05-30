@@ -6,10 +6,10 @@ const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 const NORMAL_TIMELOCK = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 
 const XVS_BRIDGE_ADMIN_PROXY = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96";
-export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
-export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
+export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 export const MIN_DEST_GAS = "300000";
 
 export const ARBITRUM_ONE_CHAIN_ID = 110;

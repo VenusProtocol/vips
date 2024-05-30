@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
@@ -11,8 +11,12 @@ import vip003, {
   BNB_MAINNET_TRUSTED_REMOTE,
   ETHEREUM_ENDPOINT_ID,
   ETHEREUM_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  MAX_DAILY_SEND_LIMIT,
   OPBNB_MAINNET_ENDPOINT_ID,
   OPBNB_MAINNET_TRUSTED_REMOTE,
+  SINGLE_RECEIVE_LIMIT,
+  SINGLE_SEND_LIMIT,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
@@ -24,11 +28,6 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
-
-const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
-const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 
 const MIN_DEST_GAS = "300000";
 

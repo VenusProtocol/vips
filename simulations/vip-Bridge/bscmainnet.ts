@@ -145,8 +145,8 @@ forking(39082050, () => {
     });
 
     it("Reverts if max daily transaction limit exceed", async function () {
-      const maxPlusAmount = ethers.utils.parseUnits("5000");
-      const amount = parseUnits("900", 18);
+      const maxPlusAmount = ethers.utils.parseUnits("100000");
+      const amount = parseUnits("1900", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(ARBITRUM_ONE_CHAIN_ID, receiverAddressBytes32, amount, false, defaultAdapterParams)

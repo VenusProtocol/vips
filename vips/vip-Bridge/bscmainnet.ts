@@ -6,10 +6,10 @@ import { makeProposal } from "../../src/utils";
 const XVS_BRIDGE_ADMIN = "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21";
 
 export const MIN_DST_GAS = "300000";
-export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
-export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
+export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 export const ARBITRUM_ONE_CHAIN_ID = 110;
 const ARBITRUM_ONE_TRUSTED_REMOTE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 
