@@ -83,6 +83,15 @@ forking(39172100, async () => {
       const borrowCap = await comptrollerContract.borrowCaps(vstkBNB);
       expect(borrowCap).to.be.equal(parseUnits("250", 18));
     });
+
+    it("IR parameters checks", async () => {
+      checkInterestRate(OLD_IR, "vWBNB_LiquidStakedBNB", {
+        base: "0.01",
+        multiplier: "0.035",
+        jump: "3",
+        kink: "0.8",
+      });
+    });
   });
 
   testVip("VIP-315", vip315(), {
