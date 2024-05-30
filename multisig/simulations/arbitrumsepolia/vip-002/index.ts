@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip003, {
+import vip002, {
   BNB_TESTNET_ENDPOINT_ID,
   BNB_TESTNET_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
@@ -19,7 +19,7 @@ import vip003, {
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
-} from "../../../proposals/arbitrumsepolia/vip-003";
+} from "../../../proposals/arbitrumsepolia/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
@@ -69,7 +69,7 @@ forking(36944975, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(vip002());
     });
 
     it("Should set bridge owner to multisig", async () => {

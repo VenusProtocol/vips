@@ -24,7 +24,7 @@ export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 
-const vip003 = () => {
+const vip002 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -234,4 +234,4 @@ const vip003 = () => {
   ]);
 };
 
-export default vip003;
+export default vip002;

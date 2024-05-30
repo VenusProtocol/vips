@@ -12,7 +12,7 @@ export const MIN_DEST_GAS = "300000";
 export const ARBITRUM_SEPOLIA_ENDPOINT_ID = 10231;
 export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 
-const vip019 = () => {
+const vip034 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -47,4 +47,4 @@ const vip019 = () => {
   ]);
 };
 
-export default vip019;
+export default vip034;

@@ -15,7 +15,7 @@ export const MIN_DEST_GAS = "300000";
 export const ARBITRUM_ONE_CHAIN_ID = 110;
 export const ARBITRUM_ONE_TRUSTED_REMOTE = "0x20cea49b5f7a6dbd78cae772ca5973ef360aa1e6";
 
-const vip035 = () => {
+const vip034 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -60,4 +60,4 @@ const vip035 = () => {
   ]);
 };
 
-export default vip035;
+export default vip034;

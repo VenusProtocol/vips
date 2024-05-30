@@ -7,14 +7,14 @@ import { ethers } from "hardhat";
 
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip291, {
+import vip317, {
   ARBITRUM_SEPOLIA_CHAIN_ID,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../vips/vip-291/bsctestnet";
+} from "../../vips/vip-317/bsctestnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -42,7 +42,7 @@ forking(39571070, () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip-291 testnet", vip291(), {
+  testVip("vip-317 testnet", vip317(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
