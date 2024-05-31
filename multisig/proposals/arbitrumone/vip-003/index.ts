@@ -6,7 +6,7 @@ const { arbitrumone } = NETWORK_ADDRESSES;
 export const XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 export const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 
-const vip004 = () => {
+const vip003 = () => {
   return makeProposal([
     {
       target: arbitrumone.XVS_VAULT_PROXY,
@@ -81,4 +81,4 @@ const vip004 = () => {
   ]);
 };
 
-export default vip004;
+export default vip003;

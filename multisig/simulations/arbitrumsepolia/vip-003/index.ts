@@ -9,7 +9,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { initMainnetUser } from "../../../../src/utils";
 import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip004, { ACM } from "../../../proposals/arbitrumsepolia/vip-004";
+import vip003, { ACM } from "../../../proposals/arbitrumsepolia/vip-003";
 import ACM_ABI from "./abi/acm.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -29,7 +29,7 @@ forking(36285340, () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, arbitrumsepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
 
-    await pretendExecutingVip(vip004());
+    await pretendExecutingVip(vip003());
   });
 
   describe("Post tx checks", () => {

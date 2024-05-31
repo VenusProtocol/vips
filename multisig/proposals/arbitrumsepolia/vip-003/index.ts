@@ -6,7 +6,7 @@ const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 export const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
-const vip004 = () => {
+const vip003 = () => {
   return makeProposal([
     {
       target: arbitrumsepolia.XVS_VAULT_PROXY,
@@ -81,4 +81,4 @@ const vip004 = () => {
   ]);
 };
 
-export default vip004;
+export default vip003;
