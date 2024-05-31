@@ -7,21 +7,21 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip012, {
-  ARBITRUM_SEPOLIA_ENDPOINT_ID,
-  ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
+  ARBITRUM_ONE_CHAIN_ID,
+  ARBITRUM_ONE_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/opbnbtestnet/vip-012";
+} from "../../../proposals/opbnbmainnet/vip-012";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
-const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
-const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
+const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
+const XVS_BRIDGE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
+const XVS_HOLDER = "0x329557Aa54AAb595e6b651B41b796e541D58911f";
 
-forking(26533744, () => {
+forking(25045089, () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -44,37 +44,33 @@ forking(26533744, () => {
     });
 
     it("Should match trusted remote address", async () => {
-      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(ARBITRUM_SEPOLIA_ENDPOINT_ID);
-      expect(trustedRemote).equals(ARBITRUM_SEPOLIA_TRUSTED_REMOTE);
+      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(ARBITRUM_ONE_CHAIN_ID);
+      expect(trustedRemote).equals(ARBITRUM_ONE_TRUSTED_REMOTE);
     });
 
     it("Should match single send transaction limit", async () => {
-      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
-        SINGLE_SEND_LIMIT,
-      );
+      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(ARBITRUM_ONE_CHAIN_ID)).to.equal(SINGLE_SEND_LIMIT);
     });
 
     it("Should match single receive transaction limit", async () => {
-      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
+      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ARBITRUM_ONE_CHAIN_ID)).to.equal(
         SINGLE_RECEIVE_LIMIT,
       );
     });
 
     it("Should match max daily send limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
+      expect(await xvsBridge.chainIdToMaxDailyLimit(ARBITRUM_ONE_CHAIN_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
     });
 
     it("Should match max daily receive limit", async () => {
-      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
-        MAX_DAILY_RECEIVE_LIMIT,
-      );
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(ARBITRUM_ONE_CHAIN_ID)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should emit an event on successful bridging of XVS (Opbnb Testnet -> Arbitrum Sepolia)", async () => {
+    it("Should emit an event on successful bridging of XVS (Opbnb Mainnet -> Arbitrum One)", async () => {
       const amount = parseUnits("1", 18);
       const nativeFee = (
         await xvsBridge.estimateSendFee(
-          ARBITRUM_SEPOLIA_ENDPOINT_ID,
+          ARBITRUM_ONE_CHAIN_ID,
           receiverAddressBytes32,
           amount,
           false,
@@ -91,7 +87,7 @@ forking(26533744, () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            ARBITRUM_SEPOLIA_ENDPOINT_ID,
+            ARBITRUM_ONE_CHAIN_ID,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -99,7 +95,7 @@ forking(26533744, () => {
           ),
       )
         .to.be.emit(xvsBridge, "SendToChain")
-        .withArgs(ARBITRUM_SEPOLIA_ENDPOINT_ID, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(ARBITRUM_ONE_CHAIN_ID, XVS_HOLDER, receiverAddressBytes32, amount);
 
       const circulatingSupplyAfter = await xvsBridge.circulatingSupply();
       const totalSupplyAfter = await xvs.totalSupply();
