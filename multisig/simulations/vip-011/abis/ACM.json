@@ -1,0 +1,186 @@
+[
+  { "type": "constructor", "inputs": [], "stateMutability": "nonpayable" },
+  {
+    "name": "PermissionGranted",
+    "type": "event",
+    "inputs": [
+      { "name": "account", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "contractAddress", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "functionSig", "type": "string", "indexed": false, "internalType": "string" }
+    ],
+    "anonymous": false,
+    "signature": "0x69c5ce2d658fea352a2464f87ffbe1f09746c918a91da0994044c3767d641b3f"
+  },
+  {
+    "name": "PermissionRevoked",
+    "type": "event",
+    "inputs": [
+      { "name": "account", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "contractAddress", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "functionSig", "type": "string", "indexed": false, "internalType": "string" }
+    ],
+    "anonymous": false,
+    "signature": "0x55426a61e90ac7d7d1fc886b67b420ade8c8b535e68d655394bc271e3a12b8e2"
+  },
+  {
+    "name": "RoleAdminChanged",
+    "type": "event",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "previousAdminRole", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "newAdminRole", "type": "bytes32", "indexed": true, "internalType": "bytes32" }
+    ],
+    "anonymous": false,
+    "signature": "0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff"
+  },
+  {
+    "name": "RoleGranted",
+    "type": "event",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "sender", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d"
+  },
+  {
+    "name": "RoleRevoked",
+    "type": "event",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "indexed": true, "internalType": "bytes32" },
+      { "name": "account", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "sender", "type": "address", "indexed": true, "internalType": "address" }
+    ],
+    "anonymous": false,
+    "signature": "0xf6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b"
+  },
+  {
+    "name": "DEFAULT_ADMIN_ROLE",
+    "type": "function",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "internalType": "bytes32"
+      }
+    ],
+    "constant": true,
+    "signature": "0xa217fddf",
+    "stateMutability": "view"
+  },
+  {
+    "name": "getRoleAdmin",
+    "type": "function",
+    "inputs": [{ "name": "role", "type": "bytes32", "internalType": "bytes32" }],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "constant": true,
+    "signature": "0x248a9ca3",
+    "stateMutability": "view"
+  },
+  {
+    "name": "giveCallPermission",
+    "type": "function",
+    "inputs": [
+      { "name": "contractAddress", "type": "address", "internalType": "address" },
+      { "name": "functionSig", "type": "string", "internalType": "string" },
+      { "name": "accountToPermit", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0x584f6b60",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "grantRole",
+    "type": "function",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0x2f2ff15d",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "hasPermission",
+    "type": "function",
+    "inputs": [
+      { "name": "account", "type": "address", "internalType": "address" },
+      { "name": "contractAddress", "type": "address", "internalType": "address" },
+      { "name": "functionSig", "type": "string", "internalType": "string" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "constant": true,
+    "signature": "0x82bfd0f0",
+    "stateMutability": "view"
+  },
+  {
+    "name": "hasRole",
+    "type": "function",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "constant": true,
+    "signature": "0x91d14854",
+    "stateMutability": "view"
+  },
+  {
+    "name": "isAllowedToCall",
+    "type": "function",
+    "inputs": [
+      { "name": "account", "type": "address", "internalType": "address" },
+      { "name": "functionSig", "type": "string", "internalType": "string" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "constant": true,
+    "signature": "0x18c5e8ab",
+    "stateMutability": "view"
+  },
+  {
+    "name": "renounceRole",
+    "type": "function",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0x36568abe",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "revokeCallPermission",
+    "type": "function",
+    "inputs": [
+      { "name": "contractAddress", "type": "address", "internalType": "address" },
+      { "name": "functionSig", "type": "string", "internalType": "string" },
+      { "name": "accountToRevoke", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0x545f7a32",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "revokeRole",
+    "type": "function",
+    "inputs": [
+      { "name": "role", "type": "bytes32", "internalType": "bytes32" },
+      { "name": "account", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "signature": "0xd547741f",
+    "stateMutability": "nonpayable"
+  },
+  {
+    "name": "supportsInterface",
+    "type": "function",
+    "inputs": [{ "name": "interfaceId", "type": "bytes4", "internalType": "bytes4" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "constant": true,
+    "signature": "0x01ffc9a7",
+    "stateMutability": "view"
+  }
+]
