@@ -8,7 +8,7 @@ import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import vip002, {
+import vip004, {
   COMPTROLLER_CORE,
   MOCK_ARB,
   MOCK_USDC,
@@ -21,7 +21,7 @@ import vip002, {
   VUSDT_CORE,
   VWBTC_CORE,
   VWETH_CORE,
-} from "../../../proposals/arbitrumsepolia/vip-002";
+} from "../../../proposals/arbitrumsepolia/vip-004";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -213,7 +213,7 @@ forking(44274400, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(vip004());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

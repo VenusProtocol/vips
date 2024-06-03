@@ -21,7 +21,7 @@ export const VUSDT_CORE = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
 export const VARB_CORE = "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6";
 
 // IL configuration
-const vip002 = () => {
+const vip004 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -338,4 +338,4 @@ const vip002 = () => {
   ]);
 };
 
-export default vip002;
+export default vip004;

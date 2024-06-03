@@ -23,7 +23,7 @@ export const VARB_CORE = "0x292Ec2b45C549Bc2c6B31937dBd511beaAEabea8";
 export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
 
 // IL configuration
-const vip002 = () => {
+const vip004 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -365,4 +365,4 @@ const vip002 = () => {
   ]);
 };
 
-export default vip002;
+export default vip004;
