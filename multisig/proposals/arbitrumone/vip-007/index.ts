@@ -130,6 +130,11 @@ const vip007 = () => {
       signature: "pauseFundsTransfer()",
       params: [],
     },
+    {
+      target: XVS_VAULT_PROXY,
+      signature: "resume()",
+      params: [],
+    },
   ]);
 };
 
