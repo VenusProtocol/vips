@@ -6,22 +6,22 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip012, {
+import vip034, {
   ARBITRUM_SEPOLIA_ENDPOINT_ID,
   ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/opbnbtestnet/vip-012";
+} from "../../../proposals/sepolia/vip-034";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
-const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
-const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
+const XVS_HOLDER = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 
-forking(26533744, () => {
+forking(5673833, () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -40,7 +40,7 @@ forking(26533744, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip012());
+      await pretendExecutingVip(vip034());
     });
 
     it("Should match trusted remote address", async () => {
@@ -70,7 +70,7 @@ forking(26533744, () => {
       );
     });
 
-    it("Should emit an event on successful bridging of XVS (Opbnb Testnet -> Arbitrum Sepolia)", async () => {
+    it("Should emit an event on successful bridging of XVS (Sepolia -> Arbitrum Sepolia)", async () => {
       const amount = parseUnits("1", 18);
       const nativeFee = (
         await xvsBridge.estimateSendFee(
