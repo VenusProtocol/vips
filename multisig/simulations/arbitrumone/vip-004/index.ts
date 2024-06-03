@@ -124,7 +124,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.80",
     reserveFactor: "0.2",
-    initialSupply: "0.3",
+    initialSupply: "0.0731263",
     vTokenReceiver: arbitrumone.VTREASURY,
   },
   vWETH_Core: {
@@ -133,7 +133,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.75",
     liquidationThreshold: "0.80",
     reserveFactor: "0.2",
-    initialSupply: "0.6",
+    initialSupply: "1.317651",
     vTokenReceiver: arbitrumone.VTREASURY,
   },
   vUSDC_Core: {
@@ -142,7 +142,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.78",
     liquidationThreshold: "0.80",
     reserveFactor: "0.1",
-    initialSupply: "2000",
+    initialSupply: "5000",
     vTokenReceiver: arbitrumone.VTREASURY,
   },
   vUSDT_Core: {
@@ -151,7 +151,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.78",
     liquidationThreshold: "0.80",
     reserveFactor: "0.1",
-    initialSupply: "2000",
+    initialSupply: "4999.994418",
     vTokenReceiver: arbitrumone.VTREASURY,
   },
   vARB_Core: {
@@ -160,7 +160,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.55",
     liquidationThreshold: "0.60",
     reserveFactor: "0.2",
-    initialSupply: "1000",
+    initialSupply: "4453.694805",
     vTokenReceiver: arbitrumone.VTREASURY,
   },
 };
@@ -205,7 +205,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vARB_Core: "",
 };
 
-forking(216240099, () => {
+forking(217897094, () => {
   let poolRegistry: Contract;
 
   before(async () => {

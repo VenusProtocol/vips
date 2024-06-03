@@ -61,17 +61,26 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setForcedLiquidation(address,bool)", arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", arbitrumone.NORMAL_TIMELOCK],
+      params: [
+        arbitrumone.POOL_REGISTRY,
+        "addPool(string,address,uint256,uint256,uint256)",
+        arbitrumone.NORMAL_TIMELOCK,
+      ],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", arbitrumone.NORMAL_TIMELOCK],
+      params: [arbitrumone.POOL_REGISTRY, "setPoolName(address,string)", arbitrumone.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [arbitrumone.POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: ACM,
@@ -163,7 +172,7 @@ const vip004 = () => {
     {
       target: arbitrumone.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WBTC, parseUnits("0.3", 8), arbitrumone.NORMAL_TIMELOCK],
+      params: [WBTC, parseUnits("0.0731263", 8), arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: WBTC,
@@ -173,7 +182,7 @@ const vip004 = () => {
     {
       target: WBTC,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("0.3", 8)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("0.0731263", 8)],
     },
     {
       target: VWBTC_CORE,
@@ -188,7 +197,7 @@ const vip004 = () => {
           VWBTC_CORE,
           parseUnits("0.75", 18),
           parseUnits("0.80", 18),
-          parseUnits("0.3", 8),
+          parseUnits("0.0731263", 8),
           arbitrumone.VTREASURY,
           parseUnits("900", 8),
           parseUnits("500", 8),
@@ -197,8 +206,14 @@ const vip004 = () => {
     },
     {
       target: arbitrumone.VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, parseUnits("0.6", 18), arbitrumone.NORMAL_TIMELOCK],
+      signature: "withdrawTreasuryNative(uint256,address)",
+      params: [parseUnits("1.317651", 18), arbitrumone.NORMAL_TIMELOCK],
+    },
+    {
+      target: WETH,
+      signature: "deposit()",
+      params: [],
+      value: "1317651000000000000",
     },
     {
       target: WETH,
@@ -208,7 +223,7 @@ const vip004 = () => {
     {
       target: WETH,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("0.6", 18)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("1.317651", 18)],
     },
     {
       target: VWETH_CORE,
@@ -223,7 +238,7 @@ const vip004 = () => {
           VWETH_CORE,
           parseUnits("0.75", 18),
           parseUnits("0.80", 18),
-          parseUnits("0.6", 18),
+          parseUnits("1.317651", 18),
           arbitrumone.VTREASURY,
           parseUnits("26000", 18),
           parseUnits("23500", 18),
@@ -233,7 +248,7 @@ const vip004 = () => {
     {
       target: arbitrumone.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDC, parseUnits("2000", 6), arbitrumone.NORMAL_TIMELOCK],
+      params: [USDC, parseUnits("5000", 6), arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: USDC,
@@ -243,7 +258,7 @@ const vip004 = () => {
     {
       target: USDC,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("2000", 6)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("5000", 6)],
     },
     {
       target: VUSDC_CORE,
@@ -258,7 +273,7 @@ const vip004 = () => {
           VUSDC_CORE,
           parseUnits("0.78", 18),
           parseUnits("0.80", 18),
-          parseUnits("2000", 6),
+          parseUnits("5000", 6),
           arbitrumone.VTREASURY,
           parseUnits("54000000", 6),
           parseUnits("49000000", 6),
@@ -268,7 +283,7 @@ const vip004 = () => {
     {
       target: arbitrumone.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDT, parseUnits("2000", 6), arbitrumone.NORMAL_TIMELOCK],
+      params: [USDT, parseUnits("4999.994418", 6), arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: USDT,
@@ -278,7 +293,7 @@ const vip004 = () => {
     {
       target: USDT,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("2000", 6)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("4999.994418", 6)],
     },
     {
       target: VUSDT_CORE,
@@ -293,7 +308,7 @@ const vip004 = () => {
           VUSDT_CORE,
           parseUnits("0.78", 18),
           parseUnits("0.80", 18),
-          parseUnits("2000", 6),
+          parseUnits("4999.994418", 6),
           arbitrumone.VTREASURY,
           parseUnits("20000000", 6),
           parseUnits("18000000", 6),
@@ -303,7 +318,7 @@ const vip004 = () => {
     {
       target: arbitrumone.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [ARB, parseUnits("1000", 18), arbitrumone.NORMAL_TIMELOCK],
+      params: [ARB, parseUnits("4453.694805", 18), arbitrumone.NORMAL_TIMELOCK],
     },
     {
       target: ARB,
@@ -313,7 +328,7 @@ const vip004 = () => {
     {
       target: ARB,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("1000", 18)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("4453.694805", 18)],
     },
     {
       target: VARB_CORE,
@@ -328,7 +343,7 @@ const vip004 = () => {
           VARB_CORE,
           parseUnits("0.55", 18),
           parseUnits("0.60", 18),
-          parseUnits("1000", 18),
+          parseUnits("4453.694805", 18),
           arbitrumone.VTREASURY,
           parseUnits("16000000", 18),
           parseUnits("9000000", 18),
