@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -11,7 +11,6 @@ import vip320, {
   NEW_IR,
 } from "../../vips/vip-320/bscmainnet";
 import vip319 from "../../vips/vip-319/bscmainnet";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -34,14 +33,14 @@ forking(39313449, async () => {
       expect(ir).to.be.equal(OLD_IR);
     });
 
-    // it("IR parameters checks", async () => {
-    //   checkInterestRate(vBNBAdmin, "vBNB", {
-    //     base: "0.01",
-    //     multiplier: "0.035",
-    //     jump: "3",
-    //     kink: "0.8",
-    //   });
-    // });
+    it("IR parameters checks", async () => {
+      checkInterestRate(OLD_IR, "vBNB", {
+        base: "0",
+        multiplier: "0.225",
+        jump: "6.8",
+        kink: "0.8",
+      });
+    });
   });
 
   testVip("VIP-320", vip320(), {
@@ -56,13 +55,13 @@ forking(39313449, async () => {
       expect(ir).to.be.equal(NEW_IR);
     });
 
-    // it("IR parameters checks", async () => {
-    //   checkInterestRate(vBNBAdmin, "vBNB", {
-    //     base: "0",
-    //     multiplier: "0.009",
-    //     jump: "3",
-    //     kink: "0.9",
-    //   });
-    // });
+    it("IR parameters checks", async () => {
+      checkInterestRate(NEW_IR, "vBNB", {
+        base: "0",
+        multiplier: "0.625",
+        jump: "6.8",
+        kink: "0.8",
+      });
+    });
   });
 });
