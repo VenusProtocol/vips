@@ -20,12 +20,12 @@ const vip320 = () => {
     [
       {
         target: vBNBAdmin,
-        signature: "_setInterestRateModel(address)",
+        signature: "setInterestRateModel(address)",
         params: [NEW_IR],
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 

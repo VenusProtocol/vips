@@ -4,12 +4,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import vip320, {
   vBNBAdmin,
   NEW_IR,
 } from "../../vips/vip-320/bscmainnet";
+import vip319 from "../../vips/vip-319/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
@@ -17,11 +18,12 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 const OLD_IR = "0xF558Be24F2CACb65a4BB41A155631C83B15388F1";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(39174234, async () => {
+forking(39313449, async () => {
   const provider = ethers.provider;
   let vBNBContract: Contract;
 
   before(async () => {
+    pretendExecutingVip(vip319());
     await impersonateAccount(NORMAL_TIMELOCK);
     vBNBContract = new ethers.Contract(vBNBAdmin, VTOKEN_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
   });
