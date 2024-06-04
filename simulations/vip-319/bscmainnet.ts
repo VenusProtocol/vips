@@ -1,21 +1,15 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import vip319, {
-  vBNBAdmin,
-  NORMAL_TIMELOCK,
-  vBNBAdmin_Implementation,
-  ProxyAdmin
-} from "../../vips/vip-319/bscmainnet";
+import vip319, { ProxyAdmin, vBNBAdmin, vBNBAdmin_Implementation } from "../../vips/vip-319/bscmainnet";
 import PROXY_ABI from "./abi/proxy.json";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 
 const OLD_IMPL = "0x8c15384f1346BD977A689C0c51BD369E8d7313cA";
 
 forking(39313293, async () => {
-  const provider = ethers.provider;
   let proxy: Contract;
 
   before(async () => {

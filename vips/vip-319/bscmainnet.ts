@@ -1,12 +1,9 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const vBNBAdmin_Implementation = "0xaA8D9558d8D45666552a72CECbdd0a746aeaCDc9";
 export const vBNBAdmin = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
 export const ProxyAdmin = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
-
 
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";

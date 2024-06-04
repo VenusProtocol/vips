@@ -2,12 +2,12 @@ import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 export const vBNBAdmin = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
-export const NEW_IR = "0xa741125f4d6b9777a115b326E577F9b4004CB481";
+export const NEW_IR = "0xF558Be24F2CACb65a4BB41A155631C83B15388F1";
 
-const vip320 = () => {
+const vip321 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-320",
+    title: "VIP-321",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -27,4 +27,4 @@ const vip320 = () => {
   );
 };
 
-export default vip320;
+export default vip321;
