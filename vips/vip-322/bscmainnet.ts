@@ -10,7 +10,11 @@ export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const BSC_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-export const REWARDS = [
+export const CORE_XVS_DISTRIBUTOR = "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8";
+export const CURVE_XVS_DISTRIBUTOR = "0x8473B767F68250F5309bae939337136a899E43F9";
+export const LST_XVS_DISTRIBUTOR = "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98";
+
+export const REWARDS_CORE = [
   {
     market: "WETH",
     reward: parseUnits("1125", 18),
@@ -56,6 +60,9 @@ export const REWARDS = [
     reward: parseUnits("500", 18),
     distributor: "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8",
   },
+]
+
+export const REWARDS_CURVE = [
   {
     market: "CRV",
     reward: parseUnits("375", 18),
@@ -66,6 +73,9 @@ export const REWARDS = [
     reward: parseUnits("375", 18),
     distributor: "0x8473B767F68250F5309bae939337136a899E43F9"
   },
+]
+
+export const REWARDS_LST = [
   {
     market: "WETH",
     reward: parseUnits("18333", 18),
@@ -81,19 +91,10 @@ export const REWARDS = [
 export const BRIDGE_FEES = parseUnits("0.1", 18);
 export const DEST_ENDPOINT_ID = 101; // Ethereum chain 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const TOTAL_XVS_TO_BRIDGE = REWARDS.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
-export const BRIDGE_COMMANDS = REWARDS.map(({ market, reward, distributor }) => ({
-  target: XVS_BRIDGE_SRC,
-  signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
-  params: [
-    NORMAL_TIMELOCK,
-    DEST_ENDPOINT_ID,
-    ethers.utils.defaultAbiCoder.encode(["address"], [distributor]),
-    reward.toString(),
-    [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
-  ],
-  value: BRIDGE_FEES.toString(),
-}));
+export const TOTAL_XVS_TO_BRIDGE_TO_CORE = REWARDS_CORE.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
+export const TOTAL_XVS_TO_BRIDGE_TO_CURVE = REWARDS_CURVE.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
+export const TOTAL_XVS_TO_BRIDGE_TO_LST = REWARDS_LST.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
+export const TOTAL_XVS_TO_BRIDGE = TOTAL_XVS_TO_BRIDGE_TO_CORE.add(TOTAL_XVS_TO_BRIDGE_TO_CURVE).add(TOTAL_XVS_TO_BRIDGE_TO_LST);
 
 export const vip322 = () => {
   const meta = {
@@ -110,7 +111,7 @@ export const vip322 = () => {
       {
         target: BSC_TREASURY,
         signature: "withdrawTreasuryBNB(uint256,address)",
-        params: [BRIDGE_FEES.mul(REWARDS.length), NORMAL_TIMELOCK],
+        params: [BRIDGE_FEES.mul(3), NORMAL_TIMELOCK],
         value: "0",
       },
       {
@@ -123,7 +124,42 @@ export const vip322 = () => {
         signature: "approve(address,uint256)",
         params: [XVS_BRIDGE_SRC, TOTAL_XVS_TO_BRIDGE],
       },
-      ...BRIDGE_COMMANDS,
+      {
+        target: XVS_BRIDGE_SRC,
+        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
+        params: [
+          NORMAL_TIMELOCK,
+          DEST_ENDPOINT_ID,
+          ethers.utils.defaultAbiCoder.encode(["address"], [CORE_XVS_DISTRIBUTOR]),
+          TOTAL_XVS_TO_BRIDGE_TO_CORE,
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
+        ],
+        value: BRIDGE_FEES.toString(),
+      },
+      {
+        target: XVS_BRIDGE_SRC,
+        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
+        params: [
+          NORMAL_TIMELOCK,
+          DEST_ENDPOINT_ID,
+          ethers.utils.defaultAbiCoder.encode(["address"], [CURVE_XVS_DISTRIBUTOR]),
+          TOTAL_XVS_TO_BRIDGE_TO_CURVE,
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
+        ],
+        value: BRIDGE_FEES.toString(),
+      },
+      {
+        target: XVS_BRIDGE_SRC,
+        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
+        params: [
+          NORMAL_TIMELOCK,
+          DEST_ENDPOINT_ID,
+          ethers.utils.defaultAbiCoder.encode(["address"], [LST_XVS_DISTRIBUTOR]),
+          TOTAL_XVS_TO_BRIDGE_TO_LST,
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
+        ],
+        value: BRIDGE_FEES.toString(),
+      },
       {
         target: XVS,
         signature: "approve(address,uint256)",
