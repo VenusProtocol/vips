@@ -12,7 +12,7 @@ export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const REWARDS = [
   {
-    market: "weETH",
+    market: "WETH",
     reward: parseUnits("1125", 18),
     distributor: "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8",
   },
@@ -76,11 +76,6 @@ export const REWARDS = [
     reward: parseUnits("3600", 18),
     distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
   },
-  // {
-  //   market: "weETH",
-  //   reward: parseUnits("0", 18),
-  //   distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
-  // }
 ]
 
 export const BRIDGE_FEES = parseUnits("0.1", 18);
