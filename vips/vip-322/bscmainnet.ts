@@ -66,11 +66,11 @@ export const REWARDS = [
     reward: parseUnits("375", 18),
     distributor: "0x8473B767F68250F5309bae939337136a899E43F9"
   },
-  // {
-  //   market: "WETH",
-  //   reward: parseUnits("18333", 18),
-  //   distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
-  // },
+  {
+    market: "WETH",
+    reward: parseUnits("18333", 18),
+    distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
+  },
   {
     market: "wstETH",
     reward: parseUnits("3600", 18),
@@ -119,10 +119,9 @@ export const vip322 = () => {
         value: "0",
       },
       {
-        target: BSC_TREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [XVS, TOTAL_XVS_TO_BRIDGE, NORMAL_TIMELOCK],
-        value: "0",
+        target: COMPTROLLER,
+        signature: "_grantXVS(address,uint256)",
+        params: [NORMAL_TIMELOCK, TOTAL_XVS_TO_BRIDGE],
       },
       {
         target: XVS,
