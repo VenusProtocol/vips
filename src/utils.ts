@@ -93,6 +93,7 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
 
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
+  console.log(requiredGas, "llllllllllllllllllllllllllllllll");
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
   return adapterParam;
 };
@@ -170,6 +171,7 @@ export const makeProposal = async (
       throw "Chain Id is not supported";
     }
   }
+  console.log(proposal);
   return proposal;
 };
 

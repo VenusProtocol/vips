@@ -80,7 +80,11 @@ export const vip030 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", sepolia.GUARDIAN],
     },
-
+    {
+      target: SEPOLIA_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", sepolia.GUARDIAN],
+    },
     {
       target: SEPOLIA_ACM,
       signature: "grantRole(bytes32,address)",

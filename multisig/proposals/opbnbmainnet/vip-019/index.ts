@@ -80,7 +80,11 @@ export const vip019 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", opbnbmainnet.GUARDIAN],
     },
-
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", opbnbmainnet.GUARDIAN],
+    },
     {
       target: OPBNBMAINNET_ACM,
       signature: "grantRole(bytes32,address)",
