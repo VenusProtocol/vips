@@ -11,7 +11,7 @@ import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 import PROXY_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(39159653, () => {
+forking(39159653, async () => {
   let xvs: Contract;
   let oldXVSBal: BigNumber;
 
@@ -20,7 +20,7 @@ forking(39159653, () => {
     oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-322", vip324(), {
+  testVip("VIP-322", await vip324(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

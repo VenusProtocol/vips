@@ -9,7 +9,7 @@ import vip324, { TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(40983092, () => {
+forking(40983092, async () => {
   let xvs: Contract;
   let oldXVSBal: BigNumber;
 
@@ -18,7 +18,7 @@ forking(40983092, () => {
     oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-322", vip324(), {
+  testVip("VIP-322", await vip324(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["SendToChain"], [1]);
     },

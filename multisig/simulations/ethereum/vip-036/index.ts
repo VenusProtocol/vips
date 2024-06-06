@@ -116,7 +116,7 @@ const DAILY_REWARDS = [
 
 const BRIDGE_DEST = "0x888E317606b4c590BBAD88653863e8B345702633";
 
-forking(20025819, () => {
+forking(20025819, async () => {
   describe("Post-Execution state", () => {
     let xvs: Contract;
     let prevCoreDistributorBalance: BigNumber;
@@ -134,7 +134,7 @@ forking(20025819, () => {
       prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
       prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
 
-      await pretendExecutingVip(vip036());
+      await pretendExecutingVip(await vip036());
     });
 
     it("check daily speeds", async () => {
