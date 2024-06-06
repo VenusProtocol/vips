@@ -83,7 +83,7 @@ export const vip018 = () => {
     {
       target: OPBNBTESTNET_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", opbnbtestnet.GUARDIAN],
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", opbnbtestnet.GUARDIAN],
     },
 
     {
