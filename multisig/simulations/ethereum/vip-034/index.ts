@@ -21,7 +21,7 @@ const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const XVS_HOLDER = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 
-forking(19960176, () => {
+forking(19960176, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -40,7 +40,7 @@ forking(19960176, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip034());
+      await pretendExecutingVip(await vip034());
     });
 
     it("Should match trusted remote address", async () => {

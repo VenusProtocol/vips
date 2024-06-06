@@ -40,7 +40,7 @@ async function checkIRModelAddress(market: Contract, expectedIR: string) {
   const IR = await market.interestRateModel();
   expect(IR).equals(expectedIR);
 }
-forking(37700898, () => {
+forking(37700898, async () => {
   let vusdt: Contract;
   let vusdc: Contract;
   let vdai: Contract;
@@ -126,7 +126,7 @@ forking(37700898, () => {
     });
   });
 
-  testVip("VIP-288 Chaos lab recommendation", vip288(), {
+  testVip("VIP-288 Chaos lab recommendation", await vip288(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_IL_ABI], ["NewMarketInterestRateModel"], [3]);
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [5]);

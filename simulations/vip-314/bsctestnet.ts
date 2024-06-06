@@ -39,7 +39,7 @@ forking(40520091, async () => {
     pendingWithdrawalsBefore = BigNumber.from(utils.stripZeros(value));
   });
 
-  testVip("VIP-314 Upgrade XVSVault Implementation", vip314(), {
+  testVip("VIP-314 Upgrade XVSVault Implementation", await vip314(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_PROXY_ABI], ["NewPendingImplementation", "NewImplementation"], [2, 1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionRevoked", "PermissionGranted"], [3, 3]);

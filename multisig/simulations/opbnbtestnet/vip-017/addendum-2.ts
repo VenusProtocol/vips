@@ -10,10 +10,10 @@ const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 const NORMAL_TIMELOCK = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 
 let acm: Contract;
-forking(23894854, () => {
+forking(23894854, async () => {
   before(async () => {
     acm = new ethers.Contract(ACM, ACM_ABI, ethers.provider);
-    await pretendExecutingVip(vip017());
+    await pretendExecutingVip(await vip017());
   });
 
   it("vip executes successfully", async () => {

@@ -14,7 +14,7 @@ const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
 const COMMUNITY_AMOUNT = parseUnits("300000", 18);
 
-forking(34241740, () => {
+forking(34241740, async () => {
   let usdt: Contract;
   let prevBalanceCommunity: any;
 
@@ -23,7 +23,7 @@ forking(34241740, () => {
     prevBalanceCommunity = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-214", vip214(), {
+  testVip("VIP-214", await vip214(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "Failure"], [1, 0]);
     },

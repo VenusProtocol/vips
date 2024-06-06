@@ -565,7 +565,7 @@ const interestRateModels: InterestRateModelSpec[] = [
   },
 ];
 
-forking(29562000, () => {
+forking(29562000, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -625,7 +625,7 @@ forking(29562000, () => {
     }
   });
 
-  testVip("VIP-136 IL phase 2", vip136());
+  testVip("VIP-136 IL phase 2", await vip136());
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {

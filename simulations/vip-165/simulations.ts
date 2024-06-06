@@ -21,7 +21,7 @@ const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 const CHAINLINKADDRESS = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(31358000, () => {
+forking(31358000, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -77,7 +77,7 @@ forking(31358000, () => {
     });
   });
 
-  testVip("VIP-165 Risk Parameters Update", vip165(), {
+  testVip("VIP-165 Risk Parameters Update", await vip165(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "NewSupplyCap", "Failure"], [8, 1, 0]);
     },

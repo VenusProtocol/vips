@@ -11,8 +11,8 @@ const REWARD_DISTRIBUTOR = "0xD86FCff6CCF5C4E277E49e1dC01Ed4bcAb8260ba";
 
 const REWARDS_START_BLOCK = 33343823;
 const REWARDS_END_BLOCK_28_DAYS = REWARDS_START_BLOCK + 806400;
-forking(33365249, () => {
-  testVip("VIP-200", vip200());
+forking(33365249, async () => {
+  testVip("VIP-200", await vip200());
 
   describe("Rewards distributors configuration", () => {
     describe("Last Reward Blcok", () => {

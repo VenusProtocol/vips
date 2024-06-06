@@ -225,7 +225,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vFDUSD_Core: "",
 };
 
-forking(16775600, () => {
+forking(16775600, async () => {
   let poolRegistry: Contract;
   let fdusd: Contract;
   let oldCommunityWalletBalance: BigNumber;
@@ -244,7 +244,7 @@ forking(16775600, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

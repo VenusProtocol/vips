@@ -90,7 +90,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(40208623, () => {
+forking(40208623, async () => {
   const provider = ethers.provider;
   let oracle: Contract;
   let poolRegistry: Contract;
@@ -127,7 +127,7 @@ forking(40208623, () => {
     });
   });
 
-  testVip("Add Meme Pool", vip304());
+  testVip("Add Meme Pool", await vip304());
 
   describe("Post-VIP state", () => {
     it("check price", async () => {

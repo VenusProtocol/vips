@@ -11,20 +11,20 @@ import vip283 from "../../vips/vip-283/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
-forking(39145203, () => {
+forking(39145203, async () => {
   const provider = ethers.provider;
   let xvs: Contract;
   let previousVTreasuryBalance: BigNumber;
 
   before(async () => {
-    await pretendExecutingVip(vip282());
+    await pretendExecutingVip(await vip282());
 
     xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
 
     previousVTreasuryBalance = await xvs.balanceOf(VTREASURY);
   });
 
-  testVip("VIP-283", vip283(), {
+  testVip("VIP-283", await vip283(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["SweepToken"], [1]);
     },

@@ -37,7 +37,7 @@ const erc20At = (tokenAddress: string): Contract => {
   return new Contract(tokenAddress, ERC20_ABI, ethers.provider);
 };
 
-forking(38945597, () => {
+forking(38945597, async () => {
   const usdt = erc20At(USDT);
   let prevUSDTBalanceOfCommunityWallet: BigNumber;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
@@ -63,7 +63,7 @@ forking(38945597, () => {
     });
   });
 
-  testVip("VIP-309", vip309(), {
+  testVip("VIP-309", await vip309(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [97]);
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [24]);

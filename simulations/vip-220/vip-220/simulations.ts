@@ -17,7 +17,7 @@ const ORACLE_ADMIN = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const NEW_COLLATERAL_FACTOR = parseUnits("0.72", 18);
 const OLD_COLLATERAL_FACT0R = parseUnits("0.825", 18);
 
-forking(34455610, () => {
+forking(34455610, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -33,7 +33,7 @@ forking(34455610, () => {
     });
   });
 
-  testVip("VIP-220 Reduce CF of BUSD market", vip220(), {
+  testVip("VIP-220 Reduce CF of BUSD market", await vip220(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "Failure"], [1, 0]);
     },

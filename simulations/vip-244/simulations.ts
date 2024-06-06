@@ -127,7 +127,7 @@ const newExploiterDebts = debts.reduce((acc: { [vTokenSymbol: string]: BigNumber
   return acc;
 }, {});
 
-forking(35476872, () => {
+forking(35476872, async () => {
   let comptroller: Contract;
   let moveDebtDelegate: Contract;
   let proxyAdmin: Contract;
@@ -189,7 +189,7 @@ forking(35476872, () => {
     );
   });
 
-  testVip("VIP-244", vip244());
+  testVip("VIP-244", await vip244());
 
   describe("Generic tests", async () => {
     checkCorePoolComptroller();

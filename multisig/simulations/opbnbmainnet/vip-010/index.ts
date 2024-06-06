@@ -39,7 +39,7 @@ forking(24537990, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip010());
+      await pretendExecutingVip(await vip010());
       // Resume Vault
       const xvsVaultAdmin = await initMainnetUser(opbnbmainnet.NORMAL_TIMELOCK, parseEther("1"));
       await xvsVaultProxy.connect(xvsVaultAdmin).resume();

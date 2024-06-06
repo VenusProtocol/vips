@@ -31,11 +31,22 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
 
 task("propose", "Propose proposal")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
-  .setAction(async function (taskArguments) {
+  .setAction(async function (taskArguments, hre) {
+    hre.FORKED_NETWORK = hre.network.name as "bscmainnet";
     const { proposalPath } = taskArguments;
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const proposeVip = require("./scripts/proposeVIP").default;
     await proposeVip(proposalPath);
+  });
+
+task("proposeOnTestnet", "Propose proposal on testnet")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .setAction(async function (taskArguments, hre) {
+    hre.FORKED_NETWORK = hre.network.name as "bsctestnet";
+    const { proposalPath } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const proposeTestnetVIP = require("./scripts/proposeTestnetVIP").default;
+    await proposeTestnetVIP(proposalPath);
   });
 
 task("multisig", "Execute multisig vip")
@@ -143,6 +154,7 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 200000000,
+    delay: true,
   },
 };
 

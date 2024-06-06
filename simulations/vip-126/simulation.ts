@@ -123,10 +123,10 @@ const vTokens: VTokenConfig[] = [
   },
 ];
 
-forking(28919155, () => {
+forking(28919155, async () => {
   const provider = ethers.provider;
 
-  testVip("VIP-126 Configure Resilient Oracle for IL Pool Tokens", vip126(60 * 60 * 24 * 3), {
+  testVip("VIP-126 Configure Resilient Oracle for IL Pool Tokens", await vip126(60 * 60 * 24 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [7]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [vTokens.length]);

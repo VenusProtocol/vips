@@ -15,7 +15,7 @@ const vCURUSD_CURVE = "0x2d499800239C4CD3012473Cb1EAE33562F0A6933";
 
 const NEW_IR = "0xd7fbFD2A36b8b388E6d04C7a05956Df91862E146";
 const OLD_IR = "0x1C243a1aCe202424fa79F71de36225DF93B9e5C5";
-forking(19612715, () => {
+forking(19612715, async () => {
   let vusdc: Contract;
   let vusdt: Contract;
   let vcurusdCore: Contract;
@@ -47,7 +47,7 @@ forking(19612715, () => {
   });
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(await vip018());
     });
     it("Should have new interest rate model", async () => {
       expect(await vusdc.interestRateModel()).equals(NEW_IR);

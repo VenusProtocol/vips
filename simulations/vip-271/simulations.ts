@@ -10,7 +10,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 const prevBalances: any = {};
 let prevBNBBalance: any;
 
-forking(36907609, () => {
+forking(36907609, async () => {
   before(async () => {
     for (const token of ERC20_TOKENS) {
       const tokenContract = await ethers.getContractAt(IERC20_ABI, token.address);
@@ -20,7 +20,7 @@ forking(36907609, () => {
     prevBNBBalance = await ethers.provider.getBalance(TREASURY);
   });
 
-  testVip("VIP-271", vip271(), {
+  testVip("VIP-271", await vip271(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [IERC20_ABI], ["Transfer"], [ERC20_TOKENS.length + 1]);
     },

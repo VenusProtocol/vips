@@ -12,7 +12,7 @@ import CONVERTER_ABI from "./abi/XVSVaultConverter.json";
 
 const USER = "0x9fcc67d7db763787bb1c7f3bc7f34d3c548c19fe";
 
-forking(37126200, () => {
+forking(37126200, async () => {
   const provider = ethers.provider;
   let xvs: Contract;
   let usdt: Contract;
@@ -39,7 +39,7 @@ forking(37126200, () => {
     });
   });
 
-  testVip("VIP-Converter", vip275(), {
+  testVip("VIP-Converter", await vip275(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [1]);
     },

@@ -41,7 +41,7 @@ const reserves = {
   "0xaef0d72a118ce24fee3cd1d43d383897d05b4e99": "1412410526598519969216500",
 };
 
-forking(32659660, () => {
+forking(32659660, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -74,7 +74,7 @@ forking(32659660, () => {
     });
   });
 
-  testVip("VIP-189", vip189(), {
+  testVip("VIP-189", await vip189(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigAdded"], [4]);
       await expectEvents(txResponse, [PSR_ABI], ["PoolRegistryUpdated"], [1]);

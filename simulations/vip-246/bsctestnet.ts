@@ -15,12 +15,12 @@ import {
 } from "../../vips/vip-246/bsctestnet";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 
-forking(36987461, () => {
+forking(36987461, async () => {
   const provider = ethers.provider;
   let vaiControllerProxy: Contract;
   before(async () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);
-    await pretendExecutingVip(vip246());
+    await pretendExecutingVip(await vip246());
   });
   describe("Pre-VIP behavior", () => {
     it("Verify VAI base rate is 272%", async () => {
@@ -30,7 +30,7 @@ forking(36987461, () => {
   });
 });
 
-forking(36987461, () => {
+forking(36987461, async () => {
   const provider = ethers.provider;
   let vaiControllerProxy: Contract;
 
@@ -49,7 +49,7 @@ forking(36987461, () => {
     });
   });
 
-  testVip("VIP-246 Set VAI risk parameters", vip246(), {
+  testVip("VIP-246 Set VAI risk parameters", await vip246(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewVAIBaseRate", "NewVAIFloatRate"], [1, 1]);
     },

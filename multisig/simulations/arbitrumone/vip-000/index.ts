@@ -7,12 +7,12 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip000, { TREASURY } from "../../../proposals/arbitrumone/vip-000";
 import TREASURY_ABI from "./abi/treasury.json";
 
-forking(209811447, () => {
+forking(209811447, async () => {
   let treasury: Contract;
 
   before(async () => {
     treasury = await ethers.getContractAt(TREASURY_ABI, TREASURY);
-    await pretendExecutingVip(vip000());
+    await pretendExecutingVip(await vip000());
   });
 
   describe("Post tx checks", () => {

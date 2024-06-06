@@ -35,7 +35,7 @@ const vBNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
 const vstkBNB = "0x75aa42c832a8911B77219DbeBABBB40040d16987";
 const vslisBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 
-forking(39571114, () => {
+forking(39571114, async () => {
   let resilientOracle: Contract;
   let vankrBNBContract: Contract;
   let proxyAdmin: Contract;
@@ -96,7 +96,7 @@ forking(39571114, () => {
     });
   });
 
-  testVip("VIP-293", vip293(), {
+  testVip("VIP-293", await vip293(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [5]);
     },

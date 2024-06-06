@@ -11,7 +11,7 @@ import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
-forking(38912197, () => {
+forking(38912197, async () => {
   const provider = ethers.provider;
   let oracle: Contract;
 
@@ -29,7 +29,7 @@ forking(38912197, () => {
     });
   });
 
-  testVip("Update BTC and BNB Price Config", vip310(60 * 60 * 24 * 7), {
+  testVip("Update BTC and BNB Price Config", await vip310(60 * 60 * 24 * 7), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [REDSTONE_ORACLE_ABI], ["TokenConfigAdded"], [4]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [2]);

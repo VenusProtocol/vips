@@ -20,7 +20,7 @@ import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(36760588, () => {
+forking(36760588, async () => {
   let xvsBridge: Contract;
   let xvs: Contract;
   let treasuryXVSBalPrev: BigNumber;
@@ -39,7 +39,7 @@ forking(36760588, () => {
     bridgeXVSBalPrev = await xvs.balanceOf(XVS_BRIDGE);
   });
 
-  testVip("VIP-267", vip267(), {
+  testVip("VIP-267", await vip267(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);

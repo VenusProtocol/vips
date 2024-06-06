@@ -205,7 +205,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vARB_Core: "",
 };
 
-forking(217897094, () => {
+forking(217897094, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -220,7 +220,7 @@ forking(217897094, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip004());
+      await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

@@ -203,8 +203,8 @@ const rewardsDistributors: { [key in RewardsDistributorId]: RewardsDistributorCo
   },
 };
 
-forking(29871800, () => {
-  testVip("VIP-140", vip140());
+forking(29871800, async () => {
+  testVip("VIP-140", await vip140());
 
   describe("Rewards distributors configuration", () => {
     const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {

@@ -20,7 +20,7 @@ import vip303, {
 } from "../../vips/vip-303/bscmainnet";
 import COMPROLLER_ABI from "./abi/Comptroller.json";
 
-forking(38567077, () => {
+forking(38567077, async () => {
   const provider = ethers.provider;
   let coreComptroller: Contract;
   let gameFiComptroller: Contract;
@@ -51,7 +51,7 @@ forking(38567077, () => {
     });
   });
 
-  testVip("Update Caps", vip303(), {
+  testVip("Update Caps", await vip303(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [3, 2]);
     },

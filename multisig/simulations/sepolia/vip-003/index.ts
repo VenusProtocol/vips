@@ -16,7 +16,7 @@ const XVS_BRIDGE_ADMIN = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const SEPOLIA_MULTISIG = sepolia.NORMAL_TIMELOCK;
 
-forking(4936291, () => {
+forking(4936291, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -45,7 +45,7 @@ forking(4936291, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(await vip003());
     });
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();

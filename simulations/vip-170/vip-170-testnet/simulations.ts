@@ -61,7 +61,7 @@ interface VenusPool {
   comptroller: string;
 }
 
-forking(33268000, () => {
+forking(33268000, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -81,7 +81,7 @@ forking(33268000, () => {
     });
   });
 
-  testVip("Risk fund, shortfall, PSR, stage 1", vip170Testnet(), {
+  testVip("Risk fund, shortfall, PSR, stage 1", await vip170Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

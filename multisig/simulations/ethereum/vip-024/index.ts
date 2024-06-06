@@ -19,7 +19,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
-forking(19732900, () => {
+forking(19732900, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vtusd: Contract;
@@ -45,7 +45,7 @@ forking(19732900, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip024());
+      await pretendExecutingVip(await vip024());
     });
     it("check price", async () => {
       expect(await resilientOracle.getPrice(TUSD)).to.equals("1001575890000000000");

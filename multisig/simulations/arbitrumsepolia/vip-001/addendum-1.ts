@@ -11,7 +11,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = arbitrumsepolia.RESILIENT_ORACLE;
 
-forking(36647115, () => {
+forking(36647115, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
 
@@ -31,7 +31,7 @@ forking(36647115, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
 
     it("Should revert on old XVS price fetch", async () => {

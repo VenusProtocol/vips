@@ -21,7 +21,7 @@ const BETH_FEED = "0x2a3796273d47c4ed363b361d3aefb7f7e2a13782";
 const OLD_TUSD_FEED = "0xa3334a9762090e827413a7495afece76f41dfc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(29835855, () => {
+forking(29835855, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -59,7 +59,7 @@ forking(29835855, () => {
     });
   });
 
-  testVip("VIP-141 Risk Parameters Update", vip141(), {
+  testVip("VIP-141 Risk Parameters Update", await vip141(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

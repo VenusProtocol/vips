@@ -30,7 +30,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -75,7 +75,7 @@ forking(32915411, () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -97,7 +97,7 @@ forking(32915411, () => {
       type: "event",
     },
   ];
-  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", vip193(), {
+  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", await vip193(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -109,10 +109,10 @@ forking(32915411, () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193());
+      await pretendExecutingVip(await vip193());
       [user] = await ethers.getSigners();
     });
 
@@ -166,10 +166,10 @@ forking(32915411, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193());
+      await pretendExecutingVip(await vip193());
     });
 
     for (const market of CORE_MARKETS) {

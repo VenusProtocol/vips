@@ -62,7 +62,7 @@ const interestRateModel: InterestRateModelSpec = {
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 12 seconds
 
-forking(19882072, () => {
+forking(19882072, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vPTweETHContract: Contract;
@@ -83,7 +83,7 @@ forking(19882072, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip029());
+      await pretendExecutingVip(await vip029());
     });
 
     it("check price", async () => {

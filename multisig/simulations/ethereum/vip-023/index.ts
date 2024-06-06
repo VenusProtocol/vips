@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { LAST_REWARD_BLOCK, REWARDS_DISTRIBUTOR, vip021, vweETH } from "../../../proposals/ethereum/vip-023";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
-forking(19718702, () => {
+forking(19718702, async () => {
   let rewardDistributor: Contract;
 
   before(async () => {
@@ -15,7 +15,7 @@ forking(19718702, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip021());
+      await pretendExecutingVip(await vip021());
     });
 
     it("check last reward block", async () => {

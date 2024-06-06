@@ -17,7 +17,7 @@ const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 const CAKE = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82";
 const CAKE_FEED = "0xb6064ed41d4f67e353768aa239ca86f4f73665a1";
 
-forking(33133129, () => {
+forking(33133129, async () => {
   let comptroller: Contract;
 
   const provider = ethers.provider;
@@ -38,7 +38,7 @@ forking(33133129, () => {
       expect(oldCap).to.equal(parseUnits("7000000", 18));
     });
   });
-  testVip("VIP-197 Chaos labs recommendations for the week October 31st, 2023", vip197());
+  testVip("VIP-197 Chaos labs recommendations for the week October 31st, 2023", await vip197());
 
   describe("Post-VIP behavior", async () => {
     it("Increase WBETH collateral factor to 80%", async () => {

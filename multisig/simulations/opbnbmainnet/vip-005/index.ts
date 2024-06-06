@@ -42,7 +42,7 @@ const MARKETS: VenusMarket[] = [
   },
 ];
 
-forking(17382200, () => {
+forking(17382200, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
@@ -52,7 +52,7 @@ forking(17382200, () => {
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     psrSigner = await initMainnetUser(PROTOCOL_SHARE_RESERVE, ethers.utils.parseEther("1"));
-    await pretendExecutingVip(vip005());
+    await pretendExecutingVip(await vip005());
   });
 
   describe("Post tx checks", () => {

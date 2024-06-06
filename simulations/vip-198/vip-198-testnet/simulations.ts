@@ -34,7 +34,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PLANET_RATE_MODEL = "0xb7C5A751CCa00b11AF3CA4A35e9e992f0f9c9c9c";
 const PSR = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 
-forking(34765100, () => {
+forking(34765100, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vPLANET_DeFi: Contract;
@@ -60,7 +60,7 @@ forking(34765100, () => {
     });
   });
 
-  testVip("VIP-198 Add PLANET Market to DeFi Pool", vip198());
+  testVip("VIP-198 Add PLANET Market to DeFi Pool", await vip198());
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {

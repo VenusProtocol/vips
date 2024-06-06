@@ -32,7 +32,7 @@ const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 
 const MIN_DEST_GAS = "300000";
 
-forking(36944975, () => {
+forking(36944975, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -69,7 +69,7 @@ forking(36944975, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
     });
 
     it("Should set bridge owner to multisig", async () => {

@@ -129,7 +129,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_LiquidStakedETH: "",
 };
 
-forking(19276500, () => {
+forking(19276500, async () => {
   let poolRegistry: Contract;
   let wstETHNonEquivalentOracle: Contract;
 
@@ -152,7 +152,7 @@ forking(19276500, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip010());
+      await pretendExecutingVip(await vip010());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

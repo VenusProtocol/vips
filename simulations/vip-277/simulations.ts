@@ -20,7 +20,7 @@ import {
 } from "../../vips/vip-277/bscmainnet";
 import SETTER_FACET_ABI from "./abi/SetterFacet.json";
 
-forking(37186111, () => {
+forking(37186111, async () => {
   let comptroller_core: Contract;
   let ilcomptroller_defi: Contract;
   let ilcomptroller_gamefi: Contract;
@@ -62,7 +62,7 @@ forking(37186111, () => {
     });
   });
 
-  testVip("VIP-277", vip277(), {
+  testVip("VIP-277", await vip277(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewBorrowCap", "NewSupplyCap"], [4, 3]);
     },

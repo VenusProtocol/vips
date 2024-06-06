@@ -14,7 +14,7 @@ import PROXY_ABI from "./abi/XVSVaultTreasuryProxy.json";
 
 const XVS_VAULT_TREASURY_OLD_IMPLEMENTATION = "0xCA59D9e8889Bc6034CCD749c4Ddd09c865432bA8";
 
-forking(37533772, () => {
+forking(37533772, async () => {
   let xvsVaultTreasuryProxy: Contract;
 
   before(async () => {
@@ -34,7 +34,7 @@ forking(37533772, () => {
     });
   });
 
-  testVip("VIP-282", vip282());
+  testVip("VIP-282", await vip282());
 
   describe("Post-VIP behavior", async () => {
     it("check implementation", async () => {

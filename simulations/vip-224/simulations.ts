@@ -89,11 +89,11 @@ const MOVE_DEBT_ALLOWLIST: { [borrower: string]: string[] } = {
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(34775900, () => {
-  testVip("VIP-224 Forced liquidations for user", vip224());
+forking(34775900, async () => {
+  testVip("VIP-224 Forced liquidations for user", await vip224());
 });
 
-forking(34775900, () => {
+forking(34775900, async () => {
   let comptroller: Contract;
   let liquidatorContract: Contract;
   let moveDebtDelegate: Contract;
@@ -109,7 +109,7 @@ forking(34775900, () => {
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     moveDebtDelegate = await ethers.getContractAt(MOVE_DEBT_DELEGATE_ABI, MOVE_DEBT_DELEGATE);
-    await pretendExecutingVip(vip224());
+    await pretendExecutingVip(await vip224());
   });
 
   describe("Forced liquidation", () => {

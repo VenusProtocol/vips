@@ -16,7 +16,7 @@ const Actions = {
   BORROW: 2,
 };
 
-forking(27716649, () => {
+forking(27716649, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -47,7 +47,7 @@ forking(27716649, () => {
     });
   });
 
-  testVip("VIP-111 Delist BETH", vip111(), {
+  testVip("VIP-111 Delist BETH", await vip111(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [1]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewReserveFactor"], [1]);

@@ -25,7 +25,7 @@ const FAIRYPROOF_AMOUNT = parseUnits("10000", 18);
 const PECKSHIELD_AMOUNT = parseUnits("12000", 18);
 const CERTIK_AMOUNT = parseUnits("19000", 18);
 
-forking(31298100, () => {
+forking(31298100, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let prevBalanceQuantStamp: BigNumber;
@@ -42,7 +42,7 @@ forking(31298100, () => {
     prevBalanceCertik = await usdt.balanceOf(CERTIK_RECEIVER);
   });
 
-  testVip("VIP-164 Security audits payments", vip164(), {
+  testVip("VIP-164 Security audits payments", await vip164(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async (txResponse: TransactionResponse) => {

@@ -17,7 +17,7 @@ const VTOKEN_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
 const VWBNB_CURRENT_UNDERLYING = "0xF9ce72611a1BE9797FdD2c995dB6fB61FD20E4eB";
 const VWBNB_NEW_UNDERLYING = "0x4200000000000000000000000000000000000006";
 
-forking(22766514, () => {
+forking(22766514, async () => {
   let vTokenBeacon: Contract;
   let vWBNB: Contract;
   let resilientOracle: Contract;
@@ -43,7 +43,7 @@ forking(22766514, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip011());
+      await pretendExecutingVip(await vip011());
     });
 
     it("vtoken impl address", async () => {

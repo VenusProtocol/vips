@@ -71,7 +71,7 @@ const interestRateModel: InterestRateModelSpec = {
   jump: "0.75",
 };
 
-forking(19640453, () => {
+forking(19640453, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHContract: Contract;
@@ -98,7 +98,7 @@ forking(19640453, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip020());
+      await pretendExecutingVip(await vip020());
     });
 
     it("check price", async () => {

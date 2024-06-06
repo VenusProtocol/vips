@@ -28,7 +28,7 @@ const RATE_MODEL_TUSD_OLD = "0x574f056c1751Ed5F3aa30ba04e550f4E6090c992";
 const RATE_MODEL_NEW_CORE_POOL = "0x8c2651590ECE4FFe8E722ef6F80cc7407f537bBa";
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(33570600, () => {
+forking(33570600, async () => {
   let comptroller: Contract;
   let vUSDT: Contract;
   let vUSDC: Contract;
@@ -82,7 +82,7 @@ forking(33570600, () => {
     });
   });
 
-  testVip("VIP-205 Risk Parameters Update", vip205(), {
+  testVip("VIP-205 Risk Parameters Update", await vip205(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

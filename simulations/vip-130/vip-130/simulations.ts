@@ -10,7 +10,7 @@ import SWAP_ROUTER_ABI from "./abi/swapRouter.json";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 forking(29321964, async () => {
-  testVip("VIP-130 Swap router accept ownership", vip130(), {
+  testVip("VIP-130 Swap router accept ownership", await vip130(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(
         txResponse,

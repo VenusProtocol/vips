@@ -15,7 +15,7 @@ import {
 } from "../../vips/vip-176";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 
-forking(32052800, () => {
+forking(32052800, async () => {
   const provider = ethers.provider;
   let vaiControllerProxy: Contract;
 
@@ -34,7 +34,7 @@ forking(32052800, () => {
     });
   });
 
-  testVip("VIP-176 Set VAI risk parameters", vip176(), {
+  testVip("VIP-176 Set VAI risk parameters", await vip176(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewVAIBaseRate", "NewVAIFloatRate"], [1, 1]);
     },

@@ -30,7 +30,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
 
-forking(36760588, () => {
+forking(36760588, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let tusdContract: Contract;
@@ -93,7 +93,7 @@ forking(36760588, () => {
     });
   });
 
-  testVip("VIP-270", vip270(), {
+  testVip("VIP-270", await vip270(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

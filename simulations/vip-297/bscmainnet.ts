@@ -36,7 +36,7 @@ import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38205248, () => {
+forking(38205248, async () => {
   let usdt: Contract;
   let usdc: Contract;
   let xvs: Contract;
@@ -67,7 +67,7 @@ forking(38205248, () => {
     prevSkynetXVSBalance = await xvs.balanceOf(SKYNET);
   });
 
-  testVip("VIP-297", vip297(), {
+  testVip("VIP-297", await vip297(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [9]);
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);

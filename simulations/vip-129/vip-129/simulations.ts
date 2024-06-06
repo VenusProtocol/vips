@@ -23,7 +23,7 @@ const ORACLE_FEED = "0xa3334A9762090E827413A7495AfeCE76F41dFc06";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VTOKEN_RECEIVER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 
-forking(29178963, () => {
+forking(29178963, async () => {
   let comptroller: Contract;
   let tusd: Contract;
   let vTusdOld: Contract;
@@ -40,7 +40,7 @@ forking(29178963, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, OLD_TUSD, ORACLE_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-129 TUSD Contract Migration", vip129(), {
+  testVip("VIP-129 TUSD Contract Migration", await vip129(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

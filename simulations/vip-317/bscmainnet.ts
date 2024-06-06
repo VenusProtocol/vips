@@ -24,7 +24,7 @@ const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const XVS_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(39082050, () => {
+forking(39082050, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -42,7 +42,7 @@ forking(39082050, () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip-317 Bsc mainnet", vip317(), {
+  testVip("vip-317 Bsc mainnet", await vip317(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

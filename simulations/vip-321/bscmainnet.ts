@@ -17,7 +17,7 @@ import vip321, {
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
-forking(39292226, () => {
+forking(39292226, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let prevUSDCBalanceTreasury: BigNumber;
@@ -34,7 +34,7 @@ forking(39292226, () => {
     prevUSDTBalanceCertikWallet = await usdt.balanceOf(CERTIK);
   });
 
-  testVip("VIP-321", vip321(), {
+  testVip("VIP-321", await vip321(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [2]);
     },

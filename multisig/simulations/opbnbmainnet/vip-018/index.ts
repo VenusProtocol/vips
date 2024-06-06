@@ -14,7 +14,7 @@ const vUSDT_CORE = "0xb7a01Ba126830692238521a1aA7E7A7509410b8e";
 const NEW_IR = "0x0E43acCbe2f38A0e98C6979bE5b803f813ce8be5";
 const OLD_IR = "0xaf6862b20280818FA24fA6D17097517608Fe65d4";
 
-forking(21089248, () => {
+forking(21089248, async () => {
   let vfdusd: Contract;
   let vusdt: Contract;
   const BLOCKS_PER_YEAR = BigNumber.from("31536000");
@@ -39,7 +39,7 @@ forking(21089248, () => {
   });
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(await vip018());
     });
     it("Should have new interest rate model", async () => {
       expect(await vfdusd.interestRateModel()).equals(NEW_IR);

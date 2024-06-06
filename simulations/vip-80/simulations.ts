@@ -25,7 +25,7 @@ const LIQUIDATOR_PROXY_ADMIN = "0x2b40b43ac5f7949905b0d2ed9d6154a8ce06084a";
 const LIQUIDATOR_IMPL = "0x0BE68b10dFB2e303D3D0a51Cd8368Fb439E46409";
 const BASE_RATE_MANTISSA = parseUnits("0.01", 18);
 
-forking(24265539, () => {
+forking(24265539, async () => {
   testVip("VIP-80 Stability fee", vip80(), { governorAbi: GOVERNOR_V3_ABI });
 
   describe("VIP-80 Post-upgrade behavior", async () => {

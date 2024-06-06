@@ -257,7 +257,7 @@ const balanceOf = async (token: string, address: string) => {
   return await tokenContract.balanceOf(address);
 };
 
-forking(29567407, () => {
+forking(29567407, async () => {
   const originalTreasuryBalances: { [address: string]: BigNumber } = {};
   const originalBuybackWalletBalances: { [address: string]: BigNumber } = {};
 
@@ -270,7 +270,7 @@ forking(29567407, () => {
     });
   });
 
-  testVip("VIP-137", vip137());
+  testVip("VIP-137", await vip137());
 
   describe("Post-VIP balances", async () => {
     EXPECTED_TREASURY_DELTAS.forEach(({ symbol, token, expectedDelta }) => {

@@ -15,14 +15,14 @@ const { ethereum } = NETWORK_ADDRESSES;
 
 const XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
 
-forking(18890306, () => {
+forking(18890306, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, ethereum.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-    await pretendExecutingVip(vip004());
+    await pretendExecutingVip(await vip004());
   });
 
   describe("Post tx checks", () => {

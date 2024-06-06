@@ -23,7 +23,7 @@ const TRX = "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 
-forking(34311500, () => {
+forking(34311500, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let defaultProxyAdmin: Contract;
@@ -45,7 +45,7 @@ forking(34311500, () => {
     });
   });
 
-  testVip("vip211Testnet", vip211(), {
+  testVip("vip211Testnet", await vip211(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["Upgraded"], [1]);
     },

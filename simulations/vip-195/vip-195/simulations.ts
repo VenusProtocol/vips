@@ -24,7 +24,7 @@ const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const INITIAL_VTOKENS = parseUnits("2454.8886400", 8);
 
-forking(33050757, () => {
+forking(33050757, async () => {
   let comptroller: Contract;
   let uni: Contract;
   let vUni: Contract;
@@ -43,7 +43,7 @@ forking(33050757, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-195 Add UNI Market", vip195(24 * 60 * 60 * 3), {
+  testVip("VIP-195 Add UNI Market", await vip195(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

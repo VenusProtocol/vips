@@ -90,7 +90,7 @@ const caps: { [key in TokenSymbol]: CapObject } = {
   },
 };
 
-forking(38086764, () => {
+forking(38086764, async () => {
   let resilientOracle: Contract;
   let wbethOracleContract: Contract;
   let stakedBNBComptroller: Contract;
@@ -155,7 +155,7 @@ forking(38086764, () => {
     }
   });
 
-  testVip("VIP-293", vip293(), {
+  testVip("VIP-293", await vip293(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [4]);
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [6]);

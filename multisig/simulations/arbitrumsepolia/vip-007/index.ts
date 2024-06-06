@@ -26,7 +26,7 @@ const GENERIC_TEST_USER_ACCOUNT = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const XVS_ADMIN = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 
-forking(41798687, () => {
+forking(41798687, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -75,7 +75,7 @@ forking(41798687, () => {
     let xvs: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip007());
+      await pretendExecutingVip(await vip007());
 
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);

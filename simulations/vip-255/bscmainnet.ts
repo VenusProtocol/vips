@@ -23,7 +23,7 @@ const PRIME_ASSET_ADDRESSES = [
 ];
 const XVS_ADDRESS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-forking(36120958, () => {
+forking(36120958, async () => {
   before(async () => {
     const resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
 
@@ -35,7 +35,7 @@ forking(36120958, () => {
     );
   });
 
-  testVip("VIP-255 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (1/2)", vip255(), {
+  testVip("VIP-255 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (1/2)", await vip255(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Burn"], [1, 10]);
     },

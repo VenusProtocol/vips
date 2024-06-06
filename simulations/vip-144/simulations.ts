@@ -15,7 +15,7 @@ const USDT = "0x55d398326f99059ff775485246999027b3197955";
 const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const COMMUNITY_WALLET_AMOUNT = parseUnits("9216", 18);
 
-forking(30077578, () => {
+forking(30077578, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
   let usdt: Contract;
@@ -34,7 +34,7 @@ forking(30077578, () => {
     });
   });
 
-  testVip("VIP-144", vip144(), {
+  testVip("VIP-144", await vip144(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },

@@ -9,7 +9,7 @@ import BRIDGE_ABI from "./abi/bridgeAbi.json";
 import TREASURY_ABI from "./abi/treasuryAbi.json";
 import USDT_ABI from "./abi/usdtAbi.json";
 
-forking(36070082, () => {
+forking(36070082, async () => {
   let prevDeposits: [BigNumber];
   let bridge: Contract;
   const provider = ethers.provider;
@@ -25,7 +25,7 @@ forking(36070082, () => {
     });
     walletBeforeBalance = await usdt.balanceOf(COMMUNITY_WALLET);
   });
-  testVip("VIP-254", vip254(), {
+  testVip("VIP-254", await vip254(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

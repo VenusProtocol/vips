@@ -27,7 +27,7 @@ const HAY = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
 const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
 const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
 
-forking(32084538, () => {
+forking(32084538, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vSnBNB: Contract;
@@ -99,7 +99,7 @@ forking(32084538, () => {
     });
   });
 
-  testVip("VIP-177 Add SnBnb Market", vip177(24 * 60 * 60 * 3), {
+  testVip("VIP-177 Add SnBnb Market", await vip177(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

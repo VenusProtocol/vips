@@ -31,8 +31,8 @@ const expectedBswConfig: RewardsDistributorConfig = {
   lastRewardsBlock: 30828632 + 864000,
 };
 
-forking(30726850, () => {
-  testVip("VIP-155", vip155());
+forking(30726850, async () => {
+  testVip("VIP-155", await vip155());
 
   describe("Rewards distributors configuration", () => {
     let rewardsDistributor: Contract;

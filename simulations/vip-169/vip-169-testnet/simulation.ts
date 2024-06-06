@@ -12,7 +12,7 @@ const SD_REWARDS_DISTRIBUTOR = "0x37fA1e5613455223F09e179DFAEBba61d7505C97";
 const MARKET_BNBx = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
 const MARKET_HAY = "0x170d3b2da05cc2124334240fB34ad1359e34C562";
 
-forking(33312614, () => {
+forking(33312614, async () => {
   let hayRewardsDistributor: Contract;
   let sdRewardsDistributor: Contract;
   const provider = ethers.provider;
@@ -33,7 +33,7 @@ forking(33312614, () => {
     });
   });
 
-  testVip("VIP-169 Stop HAY and SD Rewards", vip169Testnet(), {
+  testVip("VIP-169 Stop HAY and SD Rewards", await vip169Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

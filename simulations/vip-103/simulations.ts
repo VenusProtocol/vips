@@ -14,17 +14,17 @@ const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
-forking(26544741, () => {
-  testVip("VIP-103 Gauntlet Rrecommendations", vip103());
+forking(26544741, async () => {
+  testVip("VIP-103 Gauntlet Rrecommendations", await vip103());
 });
 
-forking(26544741, () => {
+forking(26544741, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    await pretendExecutingVip(vip103());
+    await pretendExecutingVip(await vip103());
   });
 
   describe("Post-VIP behavior", async () => {

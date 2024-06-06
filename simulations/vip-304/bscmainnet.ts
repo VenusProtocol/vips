@@ -94,7 +94,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(38808005, () => {
+forking(38808005, async () => {
   let oracle: Contract;
   let poolRegistry: Contract;
   let vBabyDoge: Contract;
@@ -138,7 +138,7 @@ forking(38808005, () => {
     });
   });
 
-  testVip("Add Meme Pool", vip304(31536000));
+  testVip("Add Meme Pool", await vip304(31536000));
 
   describe("Post-VIP state", () => {
     it("check price", async () => {

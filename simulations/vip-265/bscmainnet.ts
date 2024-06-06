@@ -83,7 +83,7 @@ let protocolShareReserve: Contract;
 let beacon: Contract;
 let liquidator: Contract;
 
-forking(36680347, () => {
+forking(36680347, async () => {
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
@@ -93,7 +93,7 @@ forking(36680347, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
 
-  testVip("VIP-Converter", vip265(createInitializeData()), {
+  testVip("VIP-Converter", await vip265(createInitializeData()), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(
@@ -118,10 +118,10 @@ forking(36680347, () => {
 });
 
 // Release Fund tests
-forking(36680347, () => {
+forking(36680347, async () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
-    await pretendExecutingVip(vip265(createInitializeData()));
+    await pretendExecutingVip(await vip265(createInitializeData()));
   });
 
   it("amount out and amount in tests", async () => {
@@ -201,7 +201,7 @@ forking(36680347, () => {
   });
 });
 
-forking(36680347, () => {
+forking(36680347, async () => {
   let liquidator: Contract;
   let proxyAdmin: Contract;
   const provider = ethers.provider;
@@ -211,7 +211,7 @@ forking(36680347, () => {
     liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
     proxyAdmin = new ethers.Contract(PROXY_ADMIN_LIQUIDATOR, PROXY_ADMIN_ABI, provider);
     prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR_CONTRACT);
-    await pretendExecutingVip(vip265(createInitializeData()));
+    await pretendExecutingVip(await vip265(createInitializeData()));
   });
 
   describe("Checks", async () => {

@@ -280,7 +280,7 @@ const chainlinkTokens: TokenConfig[] = [
   },
 ];
 
-forking(30098228, () => {
+forking(30098228, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -313,7 +313,7 @@ forking(30098228, () => {
     });
   });
 
-  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145(24 * 60 * 60 * 3), {
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", await vip145(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [2]);
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);

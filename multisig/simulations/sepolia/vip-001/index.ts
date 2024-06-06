@@ -81,7 +81,7 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
   },
 ];
 
-forking(4744200, () => {
+forking(4744200, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
@@ -118,7 +118,7 @@ forking(4744200, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
     it("correct owner", async () => {
       expect(await resilientOracle.owner()).to.equal(NORMAL_TIMELOCK);

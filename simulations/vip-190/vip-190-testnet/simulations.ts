@@ -21,7 +21,7 @@ const TRX_OLD = "0x19E7215abF8B2716EE807c9f4b83Af0e7f92653F";
 const PRICE_LOWER_BOUND = parseUnits("0.99", 18);
 const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
-forking(34366000, () => {
+forking(34366000, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redStoneOracle: Contract;
@@ -50,7 +50,7 @@ forking(34366000, () => {
     });
   });
 
-  testVip("VIP-190 Enable RedStone oracle as the Pivot oracle for TRX", vip190(), {
+  testVip("VIP-190 Enable RedStone oracle as the Pivot oracle for TRX", await vip190(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [2]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [2]);

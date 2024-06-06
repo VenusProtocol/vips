@@ -56,7 +56,7 @@ const vUSDD_Stablecoins_Rate_Model = "0x12D290de159341d36BB1a5A58904aD95053BDB20
 const vUSDT_Tron_Rate_Model = "0x009cdFB248e021f58A34B50dc2A7601EA72d14Ac";
 const vUSDD_Tron_Rate_Model = "0xD9d10f63d736dc2D5271Ce7E94C4B07E114D7c76";
 
-forking(29870474, () => {
+forking(29870474, async () => {
   let DeFi_Pool_Comptroller: Contract;
   let GameFi_Pool_Comptroller: Contract;
   let LiquidStakedBNB_Pool_Comptroller: Contract;
@@ -565,7 +565,7 @@ forking(29870474, () => {
     });
   });
 
-  testVip("VIP-142 Risk Parameters Update", vip142(), {
+  testVip("VIP-142 Risk Parameters Update", await vip142(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

@@ -23,7 +23,7 @@ const XVS_HOLDER = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const SEPOLIA_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 const SEPOLIA_MULTISIG = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-forking(5618902, () => {
+forking(5618902, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -42,7 +42,7 @@ forking(5618902, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip021());
+      await pretendExecutingVip(await vip021());
     });
 
     it("Should match trusted remote address", async () => {

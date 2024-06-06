@@ -14,7 +14,7 @@ const OLD_VTRX = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
 const VDAI = "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1";
 const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 
-forking(26881099, () => {
+forking(26881099, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -55,7 +55,7 @@ forking(26881099, () => {
     });
   });
 
-  testVip("VIP-104 Risk Parameters Update", vip104(), {
+  testVip("VIP-104 Risk Parameters Update", await vip104(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

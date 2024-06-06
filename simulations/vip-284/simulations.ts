@@ -21,7 +21,7 @@ import vip284, {
 } from "../../vips/vip-284/bscmainnet";
 import COMTROLLER_ABI from "./abi/comptroller.json";
 
-forking(37530700, () => {
+forking(37530700, async () => {
   const provider = ethers.provider;
   let corePoolComptroller: Contract;
 
@@ -48,7 +48,7 @@ forking(37530700, () => {
     });
   });
 
-  testVip("VIP-284 Chaos Labs Recommendations", vip284(), {
+  testVip("VIP-284 Chaos Labs Recommendations", await vip284(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 3]);
     },

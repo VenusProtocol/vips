@@ -69,7 +69,7 @@ const assetConfigs: AssetConfig[] = [
   },
 ];
 
-forking(214501786, () => {
+forking(214501786, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let chainLinkOracle: Contract;
@@ -103,7 +103,7 @@ forking(214501786, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
 
     it("correct owner", async () => {

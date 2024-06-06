@@ -351,7 +351,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vCRV_Curve: "",
 };
 
-forking(4783370, () => {
+forking(4783370, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -366,7 +366,7 @@ forking(4783370, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

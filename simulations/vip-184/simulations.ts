@@ -29,7 +29,7 @@ const OZ_AMOUNT = parseUnits("277200", 18);
 const CHAOSLABS_AMOUNT = parseUnits("200000", 18);
 const STEAKHOUSE_AMOUNT = parseUnits("50000", 18);
 
-forking(32516199, () => {
+forking(32516199, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let vai: Contract;
@@ -54,7 +54,7 @@ forking(32516199, () => {
     prevBalanceSteakHouse = await vai.balanceOf(STEAKHOUSE_RECEIVER);
   });
 
-  testVip("VIP-184 Security audits payments", vip184(), {
+  testVip("VIP-184 Security audits payments", await vip184(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [7]);
     },

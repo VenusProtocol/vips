@@ -11,7 +11,7 @@ import VTreasurey_ABI from "./abi/VTreasury.json";
 
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
-forking(39149089, () => {
+forking(39149089, async () => {
   let usdc: Contract;
   let vusdc: Contract;
   let prevBalanceCommunityWallet: BigNumber;
@@ -24,7 +24,7 @@ forking(39149089, () => {
     prevTreasuryBalance = await vusdc.balanceOf(TREASURY);
   });
 
-  testVip("VIP-316 Transfer bootstrap liquidity needed for Arbitrum one to the Community wallet", vip316(), {
+  testVip("VIP-316 Transfer bootstrap liquidity needed for Arbitrum one to the Community wallet", await vip316(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

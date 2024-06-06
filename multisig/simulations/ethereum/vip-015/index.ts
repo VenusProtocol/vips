@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip015, { COMMUNITY_WALLET, TREASURY, XVS } from "../../../proposals/ethereum/vip-015";
 import XVS_ABI from "./abi/XVS.json";
 
-forking(19474280, () => {
+forking(19474280, async () => {
   let xvs: Contract;
 
   before(async () => {
@@ -23,7 +23,7 @@ forking(19474280, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip015());
+      await pretendExecutingVip(await vip015());
     });
 
     it("check xvs balance", async () => {

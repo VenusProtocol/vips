@@ -20,7 +20,7 @@ const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const NEW_DIAMOND_IMPLEMENTATION = "0x795F7238514DE51d04a3550089a62F59ef6992Ad";
 
-forking(35118000, () => {
+forking(35118000, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
 
@@ -29,7 +29,7 @@ forking(35118000, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
   });
 
-  testVip("VIP-209 Forced liquidations for user", vip209(), {
+  testVip("VIP-209 Forced liquidations for user", await vip209(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [1]);
     },

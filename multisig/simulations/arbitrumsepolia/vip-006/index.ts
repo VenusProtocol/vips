@@ -10,12 +10,12 @@ import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 const VWETH = "0x807dCB6946dDF4C5C6446B1B07ACd248B08F45e2";
 const WETH = "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73";
 
-forking(44280488, () => {
+forking(44280488, async () => {
   let nativeTokenGateway: Contract;
 
   before(async () => {
     nativeTokenGateway = await ethers.getContractAt(GATEWAY_ABI, NATIVE_TOKEN_GATEWAY_CORE_POOL);
-    await pretendExecutingVip(vip006());
+    await pretendExecutingVip(await vip006());
   });
 
   describe("Post tx checks", () => {

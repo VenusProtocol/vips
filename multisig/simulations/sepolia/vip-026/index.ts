@@ -89,7 +89,7 @@ const vsFrax_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(5827248, () => {
+forking(5827248, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vFRAXContract: Contract;
@@ -124,7 +124,7 @@ forking(5827248, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip026());
+      await pretendExecutingVip(await vip026());
     });
 
     it("check FRAX price", async () => {

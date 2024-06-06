@@ -11,7 +11,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NEW_VTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";
 
-forking(27679359, () => {
+forking(27679359, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -37,7 +37,7 @@ forking(27679359, () => {
     });
   });
 
-  testVip("VIP-106 Risk Parameters Update", vip112(), {
+  testVip("VIP-106 Risk Parameters Update", await vip112(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

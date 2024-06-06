@@ -178,7 +178,7 @@ forking(31933620, async () => {
     });
   });
 
-  testVip("VIP-Diamond Contract Migration", vip174());
+  testVip("VIP-Diamond Contract Migration", await vip174());
 
   describe("Verify Storage slots after VIP execution", async () => {
     // These tests checks the storage collision of comptroller while updating it via diamond.
@@ -363,7 +363,7 @@ forking(31933620, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(vip174());
+    await pretendExecutingVip(await vip174());
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);

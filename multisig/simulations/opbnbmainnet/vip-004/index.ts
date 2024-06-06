@@ -16,14 +16,14 @@ const { opbnbmainnet } = NETWORK_ADDRESSES;
 const XVS_VAULT_PROXY = "0x7dc969122450749A8B0777c0e324522d67737988";
 const XVS_STORE = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775";
 
-forking(12097615, () => {
+forking(12097615, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-    await pretendExecutingVip(vip004());
+    await pretendExecutingVip(await vip004());
   });
 
   describe("Post tx checks", () => {

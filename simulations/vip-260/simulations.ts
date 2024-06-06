@@ -10,7 +10,7 @@ import { BINANCE_WALLET, USDC, vip260 } from "../../vips/vip-260/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36351188, () => {
+forking(36351188, async () => {
   let usdc: Contract;
   let prevBalanceBinance: BigNumber;
 
@@ -19,7 +19,7 @@ forking(36351188, () => {
     prevBalanceBinance = await usdc.balanceOf(BINANCE_WALLET);
   });
 
-  testVip("VIP-260", vip260(), {
+  testVip("VIP-260", await vip260(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

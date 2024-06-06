@@ -16,9 +16,9 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 const CONVERTER_NETWORK = "0xF7Caad5CeB0209165f2dFE71c92aDe14d0F15995";
 
-forking(35140949, () => {
+forking(35140949, async () => {
   const provider = ethers.provider;
-  testVip("VIP-245", vip245(), {
+  testVip("VIP-245", await vip245(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["OwnershipTransferred"], [8]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [84]);

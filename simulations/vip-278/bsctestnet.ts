@@ -14,7 +14,7 @@ import TEMP_VTOKEN_ABI from "./abi/TempVToken.json";
 
 const RESILIENT_ORACLE = "0x3cD69251D04A28d887Ac14cbe2E14c52F3D57823";
 
-forking(38683734, () => {
+forking(38683734, async () => {
   const provider = ethers.provider;
   let binanceOracle: Contract;
   let resilientOracle: Contract;
@@ -48,7 +48,7 @@ forking(38683734, () => {
     });
   });
 
-  testVip("VIP-278", vip278(), {
+  testVip("VIP-278", await vip278(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);

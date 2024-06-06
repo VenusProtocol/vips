@@ -38,7 +38,7 @@ forking(5947120, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip033());
+      await pretendExecutingVip(await vip033());
     });
 
     checkXVSVault();

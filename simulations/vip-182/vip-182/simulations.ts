@@ -21,7 +21,7 @@ const agEUR_FirsRewardingBlock = 32338350;
 const snBNB_LastRewardingBlock = snBNB_FirstRewardingBlock + BLOCKS_56_DAYS;
 const agEUR_LastRewardingBlock = agEUR_FirsRewardingBlock + BLOCKS_7_DAYS;
 
-forking(32338400, () => {
+forking(32338400, async () => {
   let rewardsDistributor_HAY_LiquidStakedBNB: Contract;
   let rewardsDistributor_ANGLE_Stablecoin: Contract;
 
@@ -66,7 +66,7 @@ forking(32338400, () => {
     });
   });
 
-  testVip("VIP-182", vip182(), {
+  testVip("VIP-182", await vip182(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
