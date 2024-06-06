@@ -24,11 +24,11 @@ export const MAX_DAILY_LIMIT = 100;
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 
-const vip308 = () => {
+const vip322 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip308 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia and opbnbtestnet",
+      "vip322 configure OmnichainProposalSender on bsctestnet and OmnichainGovernanceExecutor on sepolia and opbnbtestnet",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA & OPBNBTESTNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -402,4 +402,4 @@ const vip308 = () => {
   );
 };
 
-export default vip308;
+export default vip322;

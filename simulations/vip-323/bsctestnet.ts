@@ -1,7 +1,7 @@
 import { expectEvents } from "../../src/utils";
 import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import vip308 from "../../vips/vip-308/bsctestnet";
-import vip309 from "../../vips/vip-309/bsctestnet";
+import vip308 from "../../vips/vip-322/bsctestnet";
+import vip309 from "../../vips/vip-323/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(40980904, async () => {

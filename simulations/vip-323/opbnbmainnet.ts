@@ -5,18 +5,15 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip308, {
-  ETHEREUM_ACM,
-  ETHEREUM_NORMAL_TIMELOCK,
-  ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
-} from "../../vips/vip-308/bscmainnet";
+import vip309, { OPBNBMAINNET_ACM } from "../../vips/vip-323/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
-const { ethereum } = NETWORK_ADDRESSES;
+const { opbnbmainnet } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const OPBNBMAINNET_NORMAL_TIMELOCK = "0x935a741d81e5F3decC93081f1Db1F37fd6283464";
 
-forking(19940087, async () => {
+forking(24807845, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -24,16 +21,20 @@ forking(19940087, async () => {
   let multisig: any;
 
   before(async () => {
-    executor = new ethers.Contract(ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
-    acm = new ethers.Contract(ETHEREUM_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
+    executor = new ethers.Contract(
+      opbnbmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
+      provider,
+    );
+    acm = new ethers.Contract(OPBNBMAINNET_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    multisig = await initMainnetUser(ethereum.GUARDIAN, ethers.utils.parseEther("1"));
-    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, ETHEREUM_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
+    multisig = await initMainnetUser(opbnbmainnet.GUARDIAN, ethers.utils.parseEther("1"));
+    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBMAINNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip308 configures bridge", await vip308(), {
+  testForkedNetworkVipCommands("vip309 configures bridge", await vip309(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [18]);
     },
   });
 

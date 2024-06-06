@@ -24,11 +24,11 @@ export const MAX_DAILY_LIMIT = 100;
 const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
 
-const vip308 = () => {
+const vip322 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip308 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum and opbnbmainnet",
+      "vip322 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum and opbnbmainnet",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on ETHEREUM & OPBNBMINNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -405,4 +405,4 @@ const vip308 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip308;
+export default vip322;

@@ -7,7 +7,7 @@ const DEFAULT_ADMIN_ROLE = "0x00000000000000000000000000000000000000000000000000
 const ETHEREUM_OMNICHAIN_EXECUTOR_OWNER = "0xE837D75Acc0eB41D97fCe2f2613d41d6D6590855";
 const { ethereum } = NETWORK_ADDRESSES;
 
-export const vip030 = () => {
+export const vip035 = () => {
   return makeProposal([
     {
       target: ETHEREUM_ACM,
@@ -92,4 +92,4 @@ export const vip030 = () => {
     },
   ]);
 };
-export default vip030;
+export default vip035;

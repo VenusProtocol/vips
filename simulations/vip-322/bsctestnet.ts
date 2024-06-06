@@ -4,12 +4,12 @@ import { ethers } from "hardhat";
 import { LzChainId } from "../../src/types";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip308, {
+import vip322, {
   MAX_DAILY_LIMIT,
   OMNICHAIN_PROPOSAL_SENDER,
   OPBNBTESTNET_OMNICHAIN_GOVERNANCE_EXECUTOR,
   SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
-} from "../../vips/vip-308/bsctestnet";
+} from "../../vips/vip-322/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -37,7 +37,7 @@ forking(40980904, async () => {
     });
   });
 
-  testVip("vip308 give permissions to timelock", await vip308(), {
+  testVip("vip322 give permissions to timelock", await vip322(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

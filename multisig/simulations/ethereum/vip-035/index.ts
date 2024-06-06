@@ -4,69 +4,69 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip030 from "../../../proposals/sepolia/vip-030";
+import vip035 from "../../../proposals/ethereum/vip-035";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xf964158C67439D01e5f17F0A3F39DfF46823F27A";
-const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const SEPOLIA_NORMAL_TIMELOCK = "0xc332F7D8D5eA72cf760ED0E1c0485c8891C6E0cF";
-const { sepolia } = NETWORK_ADDRESSES;
+const ETHEREUM_OMNICHAIN_EXECUTOR_OWNER = "0xE837D75Acc0eB41D97fCe2f2613d41d6D6590855";
+const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
+const ETHEREUM_NORMAL_TIMELOCK = "0x58427ae12C559a5376918b11ce0C88564452ecE6";
+const { ethereum } = NETWORK_ADDRESSES;
 
-forking(6049863, async () => {
+forking(20032329, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {
-    acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, SEPOLIA_ACM);
+    acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ETHEREUM_ACM);
     defaultAdminRole = await acm.DEFAULT_ADMIN_ROLE();
   });
   describe("Pre-VIP behaviour", async () => {
     it("Normal Timelock does not has default admin role", async () => {
-      const hasRole = await acm.hasRole(defaultAdminRole, SEPOLIA_NORMAL_TIMELOCK);
+      const hasRole = await acm.hasRole(defaultAdminRole, ETHEREUM_NORMAL_TIMELOCK);
       expect(hasRole).equals(false);
     });
 
     it("Guardian is not allowed to call retryMessage", async () => {
       const role = ethers.utils.solidityPack(
         ["address", "string"],
-        [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
+        [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, sepolia.GUARDIAN)).to.be.false;
+      expect(await acm.hasRole(roleHash, ethereum.GUARDIAN)).to.be.false;
     });
 
     it("Guardian is not allowed to call forceResumeReceive", async () => {
       const role = ethers.utils.solidityPack(
         ["address", "string"],
-        [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
+        [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, sepolia.GUARDIAN)).to.be.false;
+      expect(await acm.hasRole(roleHash, ethereum.GUARDIAN)).to.be.false;
     });
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip030());
+      await pretendExecutingVip(await vip035());
     });
     it("Normal Timelock has default admin role", async () => {
-      const hasRole = await acm.hasRole(defaultAdminRole, SEPOLIA_NORMAL_TIMELOCK);
+      const hasRole = await acm.hasRole(defaultAdminRole, ETHEREUM_NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
     });
     it("Guardian is allowed to call retryMessage", async () => {
       const role = ethers.utils.solidityPack(
         ["address", "string"],
-        [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
+        [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, sepolia.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, ethereum.GUARDIAN)).to.be.true;
     });
 
     it("Guardian is allowed to call forceResumeReceive", async () => {
       const role = ethers.utils.solidityPack(
         ["address", "string"],
-        [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
+        [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, sepolia.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, ethereum.GUARDIAN)).to.be.true;
     });
   });
 });

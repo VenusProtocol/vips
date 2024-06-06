@@ -14,11 +14,11 @@ export const OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER = "0xF6606cB41EbeF4D3968Be775
 const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
 
-const vip309 = () => {
+const vip323 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip309 give permission of OmnichainGovernanceExecutor to ethereum and opbnbmainnet fasttrack and critical timelock",
+      "vip323 give permission of OmnichainGovernanceExecutor to ethereum and opbnbmainnet fasttrack and critical timelock",
     description: `#### Description
     This VIP will grant permission to timelocks of OmnichainProposalExecutor on ETHEREUM & OPBNBMAINNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -332,4 +332,4 @@ const vip309 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip309;
+export default vip323;
