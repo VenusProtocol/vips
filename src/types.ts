@@ -1,6 +1,13 @@
 import { BigNumberish } from "ethers";
 
-export type SUPPORTED_NETWORKS = "bsctestnet" | "bscmainnet" | "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
+export type SUPPORTED_NETWORKS =
+  | "bsctestnet"
+  | "bscmainnet"
+  | "sepolia"
+  | "ethereum"
+  | "opbnbtestnet"
+  | "opbnbmainnet"
+  | "xlayertestnet";
 
 export type REMOTE_NETWORKS = "sepolia" | "ethereum" | "opbnbtestnet" | "opbnbmainnet";
 

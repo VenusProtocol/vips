@@ -3,7 +3,7 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
@@ -556,4 +556,28 @@ export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: str
   for (const asset of BNB_MAINNET_ASSETS) {
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
+};
+
+// Calculates the storage slot of a mapping(address => mapping(uint256=>uint256))
+// mapping slot = p
+// data[x][y]
+// Storage slot calculation (. denotes concatenation):
+// keccak256(uint256(y) . keccak256(uint256(x) . uint256(p)))
+
+export const calculateMappingStorageSlot = (key1: string, key2: number, mappingStorageSlot: number): string => {
+  // The pre-image used to compute the Storage location
+  const newKeyPreimageHalf = utils.concat([
+    // Mappings' keys in Solidity must all be word-aligned (32 bytes)
+    utils.hexZeroPad(key1, 32),
+
+    // Similarly with the slot-index into the Solidity variable layout
+    utils.hexZeroPad(BigNumber.from(mappingStorageSlot).toHexString(), 32),
+  ]);
+
+  const newKeyHalf = utils.keccak256(newKeyPreimageHalf);
+
+  const newKeyPreimage = utils.concat([utils.hexZeroPad(BigNumber.from(key2).toHexString(), 32), newKeyHalf]);
+
+  const newKey = utils.keccak256(newKeyPreimage);
+  return newKey;
 };

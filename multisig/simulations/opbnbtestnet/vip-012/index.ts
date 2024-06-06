@@ -1,63 +1,113 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip012 from "../../../proposals/opbnbtestnet/vip-012";
-import BEACON_ABI from "./abi/beacon.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import VTOKEN_ABI from "./abi/vToken.json";
+import vip012, {
+  ARBITRUM_SEPOLIA_ENDPOINT_ID,
+  ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  MAX_DAILY_SEND_LIMIT,
+  SINGLE_RECEIVE_LIMIT,
+  SINGLE_SEND_LIMIT,
+} from "../../../proposals/opbnbtestnet/vip-012";
+import XVS_ABI from "./abi/xvs.json";
+import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const { opbnbtestnet } = NETWORK_ADDRESSES;
+const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
+const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
 
-const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
-const VTOKEN_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
+forking(26533744, async () => {
+  let xvs: Contract;
+  let xvsBridge: Contract;
+  let xvsHolderSigner: SignerWithAddress;
+  let receiver: SignerWithAddress;
+  let receiverAddressBytes32: string;
+  let defaultAdapterParams: string;
 
-const VWBNB_CURRENT_UNDERLYING = "0xF9ce72611a1BE9797FdD2c995dB6fB61FD20E4eB";
-const VWBNB_NEW_UNDERLYING = "0x4200000000000000000000000000000000000006";
-
-forking(22766514, async () => {
-  let vTokenBeacon: Contract;
-  let vWBNB: Contract;
-  let resilientOracle: Contract;
-  describe("Pre-VIP behavior", () => {
-    before(async () => {
-      vTokenBeacon = await ethers.getContractAt(BEACON_ABI, VTOKEN_BEACON);
-      vWBNB = await ethers.getContractAt(VTOKEN_ABI, opbnbtestnet.vWBNB_CORE);
-      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, opbnbtestnet.RESILIENT_ORACLE);
-    });
-
-    it("vtoken impl address", async () => {
-      expect(await vTokenBeacon.implementation()).to.equal(VTOKEN_IMPL);
-    });
-
-    it("vWBNB current underlying address", async () => {
-      expect(await vWBNB.underlying()).to.equal(VWBNB_CURRENT_UNDERLYING);
-    });
-
-    it("should revert for non configured asset price request", async () => {
-      await expect(resilientOracle.getPrice(VWBNB_NEW_UNDERLYING)).to.be.revertedWith("invalid resilient oracle price");
-    });
+  before(async () => {
+    xvs = await ethers.getContractAt(XVS_ABI, XVS);
+    xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
+    xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("5"));
+    [receiver] = await ethers.getSigners();
+    receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
+    defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  describe("Post-VIP behavior", async () => {
+  describe("Post-Execution state", () => {
     before(async () => {
       await pretendExecutingVip(await vip012());
     });
 
-    it("vtoken impl address", async () => {
-      expect(await vTokenBeacon.implementation()).to.equal(VTOKEN_IMPL);
+    it("Should match trusted remote address", async () => {
+      const trustedRemote = await xvsBridge.getTrustedRemoteAddress(ARBITRUM_SEPOLIA_ENDPOINT_ID);
+      expect(trustedRemote).equals(ARBITRUM_SEPOLIA_TRUSTED_REMOTE);
     });
 
-    it("vWBNB new underlying address", async () => {
-      expect(await vWBNB.underlying()).to.equal(VWBNB_NEW_UNDERLYING);
-    });
-
-    it("should not for configured asset price request", async () => {
-      await expect(resilientOracle.getPrice(VWBNB_NEW_UNDERLYING)).not.to.be.revertedWith(
-        "invalid resilient oracle price",
+    it("Should match single send transaction limit", async () => {
+      expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
+        SINGLE_SEND_LIMIT,
       );
+    });
+
+    it("Should match single receive transaction limit", async () => {
+      expect(await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
+        SINGLE_RECEIVE_LIMIT,
+      );
+    });
+
+    it("Should match max daily send limit", async () => {
+      expect(await xvsBridge.chainIdToMaxDailyLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(MAX_DAILY_SEND_LIMIT);
+    });
+
+    it("Should match max daily receive limit", async () => {
+      expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.equal(
+        MAX_DAILY_RECEIVE_LIMIT,
+      );
+    });
+
+    it("Should emit an event on successful bridging of XVS (Opbnb Testnet -> Arbitrum Sepolia)", async () => {
+      const amount = parseUnits("1", 18);
+      const nativeFee = (
+        await xvsBridge.estimateSendFee(
+          ARBITRUM_SEPOLIA_ENDPOINT_ID,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
+      ).nativeFee;
+
+      const circulatingSupplyBefore = await xvsBridge.circulatingSupply();
+      const totalSupplyBefore = await xvs.totalSupply();
+      const minterToMintedAmountBefore = await xvs.minterToMintedAmount(XVS_BRIDGE);
+
+      await expect(
+        xvsBridge
+          .connect(xvsHolderSigner)
+          .sendFrom(
+            xvsHolderSigner.address,
+            ARBITRUM_SEPOLIA_ENDPOINT_ID,
+            receiverAddressBytes32,
+            amount,
+            [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
+            { value: nativeFee },
+          ),
+      )
+        .to.be.emit(xvsBridge, "SendToChain")
+        .withArgs(ARBITRUM_SEPOLIA_ENDPOINT_ID, XVS_HOLDER, receiverAddressBytes32, amount);
+
+      const circulatingSupplyAfter = await xvsBridge.circulatingSupply();
+      const totalSupplyAfter = await xvs.totalSupply();
+      const minterToMintedAmountAfter = await xvs.minterToMintedAmount(XVS_BRIDGE);
+
+      expect(circulatingSupplyBefore).equals(circulatingSupplyAfter.add(amount));
+      expect(totalSupplyBefore).equals(totalSupplyAfter.add(amount));
+      expect(minterToMintedAmountBefore).equals(minterToMintedAmountAfter.add(amount));
     });
   });
 });
