@@ -1,10 +1,7 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip035, {
   CORE_vwETH,
@@ -116,8 +113,6 @@ const DAILY_REWARDS = [
   },
 ]
 
-const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
-
 forking(20025819, () => {
   before(async () => {
   });
@@ -132,10 +127,11 @@ forking(20025819, () => {
         const { supply, borrow, distributor, market } = data;
         const rewardsDistributor = await ethers.getContractAt(REWARDS_DISTRIBUTOR_ABI, distributor);
 
-        const _x = await rewardsDistributor.rewardTokenSupplySpeeds(market);
-        console.log(supply.toString(), _x.mul(BLOCKS_IN_ONE_DAY).toString());
-        // expect(await rewardsDistributor.supplySpeed()).to.equal(supply.mul(supplySpeedPercentage).div(100));
-        // expect(await rewardsDistributor.borrowSpeed()).to.equal(borrow.mul(borrowSpeedPercentage).div(100));
+        const supplySpeed = await rewardsDistributor.rewardTokenSupplySpeeds(market);
+        const borrowSpeed = await rewardsDistributor.rewardTokenBorrowSpeeds(market);
+
+        expect(supplySpeed).to.be.closeTo(supply.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
+        expect(borrowSpeed).to.be.closeTo(borrow.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
       }
     });
   });

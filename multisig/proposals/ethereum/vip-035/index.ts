@@ -3,7 +3,7 @@ import { makeProposal } from "../../../../src/utils";
 import { parseUnits } from "ethers/lib/utils";
 
 export const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
-export const BLOCKS_IN_90_DAYS = BLOCKS_PER_YEAR.mul(90).div(365);
+export const BLOCKS_IN_30_DAYS = BLOCKS_PER_YEAR.mul(30).div(365);
 
 export const CORE_vwETH = "0x7c8ff7d2A1372433726f879BD945fFb250B94c65";
 export const CORE_vWBTC = "0x8716554364f20BCA783cb2BAA744d39361fd1D8d";
@@ -142,9 +142,9 @@ export const SPEEDS = [
 const commands = SPEEDS.map((speed) => {
   const totalAmount = speed.reward;
   const supplyAmount = totalAmount.mul(speed.supplySpeedPercentage).div(100);
-  const supplySpeed = supplyAmount.div(BLOCKS_IN_90_DAYS);
+  const supplySpeed = supplyAmount.div(BLOCKS_IN_30_DAYS);
   const borrowAmount = totalAmount.mul(speed.borrowSpeedPercentage).div(100);
-  const borrowSpeed = borrowAmount.div(BLOCKS_IN_90_DAYS);
+  const borrowSpeed = borrowAmount.div(BLOCKS_IN_30_DAYS);
 
   return {
     target: speed.distributor,
