@@ -20,7 +20,7 @@ forking(40983092, () => {
 
   testVip("VIP-322", vip322(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [PROXY_ABI], ["SendToChain"], [3]);
+      await expectEvents(txResponse, [PROXY_ABI], ["SendToChain"], [1]);
     },
   });
 

@@ -26,7 +26,7 @@ forking(39159653, () => {
         txResponse,
         [VTREASURY_ABI, REWARD_FACET_ABI, PROXY_ABI],
         ["WithdrawTreasuryBNB", "VenusGranted", "SendToChain"],
-        [1, 1, 3],
+        [1, 1, 1],
       );
     },
   });
