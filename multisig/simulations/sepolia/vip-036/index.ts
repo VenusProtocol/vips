@@ -5,7 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip035, {
+import vip036, {
   BLOCKS_PER_YEAR,
   CORE_XVS_DISTRIBUTOR,
   CORE_vDAI,
@@ -28,7 +28,7 @@ import vip035, {
   TOTAL_XVS_FOR_LST,
   TREASURY,
   XVS,
-} from "../../../proposals/sepolia/vip-035";
+} from "../../../proposals/sepolia/vip-036";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import XVS_ABI from "./abi/xvs.json";
 
@@ -134,7 +134,7 @@ forking(6049652, () => {
       prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
       prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
 
-      await pretendExecutingVip(vip035());
+      await pretendExecutingVip(vip036());
     });
 
     it("check daily speeds", async () => {

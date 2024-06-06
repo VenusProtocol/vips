@@ -172,7 +172,7 @@ const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
     };
   });
 
-export const vip035 = () => {
+export const vip036 = () => {
   return makeProposal([
     {
       target: TREASURY,
@@ -193,4 +193,4 @@ export const vip035 = () => {
   ]);
 };
 
-export default vip035;
+export default vip036;
