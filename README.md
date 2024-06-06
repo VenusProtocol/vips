@@ -115,3 +115,17 @@ To run simulations use this command
 ```
 npx hardhat test simulations/<simulation-path> --fork <network>
 ```
+
+### Propose VIP
+
+Procedure to propose VIP using tasks
+
+```
+npx hardhat propose <path to vip relative to vips>
+```
+
+For testnet
+
+```
+npx hardhat proposeOnTestnet <path to vip relative to vips>
+```
