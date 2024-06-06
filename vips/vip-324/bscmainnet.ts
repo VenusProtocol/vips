@@ -66,7 +66,7 @@ export const REWARDS = [
   },
 ];
 
-export const BRIDGE_FEES = parseUnits("0.1", 18);
+export const BRIDGE_FEES = parseUnits("0.2", 18);
 export const DEST_ENDPOINT_ID = 101; // Ethereum chain
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const TOTAL_MONTHS = 3;
