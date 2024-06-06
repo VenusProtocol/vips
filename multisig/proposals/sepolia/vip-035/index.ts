@@ -1,5 +1,6 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 
 import { makeProposal } from "../../../../src/utils";
 
@@ -25,7 +26,10 @@ export const CORE_XVS_DISTRIBUTOR = "0xB60666395bEFeE02a28938b75ea620c7191cA77a"
 export const CURVE_XVS_DISTRIBUTOR = "0x67dA6435b35d43081c7c27685fAbb2662b7f1290";
 export const LST_XVS_DISTRIBUTOR = "0x4597B9287fE0DF3c5513D66886706E0719bD270f";
 
-export const SPEEDS = [
+export const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+
+export const CORE_SPEEDS = [
   {
     name: "vweETH",
     address: CORE_vwETH,
@@ -98,6 +102,9 @@ export const SPEEDS = [
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
   },
+];
+
+export const CURVE_SPEEDS = [
   {
     name: "vCRV",
     address: CURVE_vCRV,
@@ -114,6 +121,9 @@ export const SPEEDS = [
     borrowSpeedPercentage: 60,
     distributor: CURVE_XVS_DISTRIBUTOR,
   },
+];
+
+export const LST_SPEEDS = [
   {
     name: "vWETH",
     address: LST_vwETH,
@@ -140,23 +150,55 @@ export const SPEEDS = [
   },
 ];
 
-const commands = SPEEDS.map(speed => {
-  const totalAmount = speed.reward;
-  const supplyAmount = totalAmount.mul(speed.supplySpeedPercentage).div(100);
-  const supplySpeed = supplyAmount.div(BLOCKS_IN_30_DAYS);
-  const borrowAmount = totalAmount.mul(speed.borrowSpeedPercentage).div(100);
-  const borrowSpeed = borrowAmount.div(BLOCKS_IN_30_DAYS);
+export const TOTAL_MONTHS = 3;
+export const TOTAL_XVS_FOR_CORE = CORE_SPEEDS.reduce(
+  (acc, { reward }) => acc.add(reward),
+  ethers.BigNumber.from(0),
+).mul(TOTAL_MONTHS);
+export const TOTAL_XVS_FOR_CURVE = CURVE_SPEEDS.reduce(
+  (acc, { reward }) => acc.add(reward),
+  ethers.BigNumber.from(0),
+).mul(TOTAL_MONTHS);
+export const TOTAL_XVS_FOR_LST = LST_SPEEDS.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0)).mul(
+  TOTAL_MONTHS,
+);
 
-  return {
-    target: speed.distributor,
-    signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-    params: [[speed.address], [supplySpeed], [borrowSpeed]],
-    value: "0",
-  };
-});
+const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
+  .concat(LST_SPEEDS)
+  .map(speed => {
+    const totalAmount = speed.reward;
+    const supplyAmount = totalAmount.mul(speed.supplySpeedPercentage).div(100);
+    const supplySpeed = supplyAmount.div(BLOCKS_IN_30_DAYS);
+    const borrowAmount = totalAmount.mul(speed.borrowSpeedPercentage).div(100);
+    const borrowSpeed = borrowAmount.div(BLOCKS_IN_30_DAYS);
+
+    return {
+      target: speed.distributor,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [[speed.address], [supplySpeed], [borrowSpeed]],
+      value: "0",
+    };
+  });
 
 export const vip035 = () => {
-  return makeProposal([...commands]);
+  return makeProposal([
+    {
+      target: TREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [XVS, TOTAL_XVS_FOR_CORE, CORE_XVS_DISTRIBUTOR],
+    },
+    {
+      target: TREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [XVS, TOTAL_XVS_FOR_CURVE, CURVE_XVS_DISTRIBUTOR],
+    },
+    {
+      target: TREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [XVS, TOTAL_XVS_FOR_LST, LST_XVS_DISTRIBUTOR],
+    },
+    ...commands,
+  ]);
 };
 
 export default vip035;

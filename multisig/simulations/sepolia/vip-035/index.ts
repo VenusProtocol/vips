@@ -1,4 +1,6 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -22,8 +24,14 @@ import vip035, {
   LST_vwETH,
   LST_vweETH,
   LST_vwstETH,
+  TOTAL_XVS_FOR_CORE,
+  TOTAL_XVS_FOR_CURVE,
+  TOTAL_XVS_FOR_LST,
+  TREASURY,
+  XVS,
 } from "../../../proposals/sepolia/vip-035";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
+import XVS_ABI from "./abi/xvs.json";
 
 export const BLOCKS_IN_ONE_DAY = BLOCKS_PER_YEAR.div(365);
 const DAILY_REWARDS = [
@@ -113,9 +121,26 @@ const DAILY_REWARDS = [
   },
 ];
 
+const BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
+
 forking(6049652, () => {
   describe("Post-Execution state", () => {
+    let xvs: Contract;
+    let prevCoreDistributorBalance: BigNumber;
+    let prevCurveDistributorBalance: BigNumber;
+    let prevLstDistributorBalance: BigNumber;
+
     before(async () => {
+      await impersonateAccount(BRIDGE_DEST);
+      await setBalance(BRIDGE_DEST, parseUnits("100", 18));
+
+      xvs = await ethers.getContractAt(XVS_ABI, XVS, ethers.provider.getSigner(BRIDGE_DEST));
+      await xvs.mint(TREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
+
+      prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
+      prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
+      prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
+
       await pretendExecutingVip(vip035());
     });
 
@@ -130,6 +155,16 @@ forking(6049652, () => {
         expect(supplySpeed).to.be.closeTo(supply.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
         expect(borrowSpeed).to.be.closeTo(borrow.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
       }
+    });
+
+    it("check balance", async () => {
+      const coreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
+      const curveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
+      const lstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
+
+      expect(coreDistributorBalance.sub(prevCoreDistributorBalance)).to.equal(TOTAL_XVS_FOR_CORE);
+      expect(curveDistributorBalance.sub(prevCurveDistributorBalance)).to.equal(TOTAL_XVS_FOR_CURVE);
+      expect(lstDistributorBalance.sub(prevLstDistributorBalance)).to.equal(TOTAL_XVS_FOR_LST);
     });
   });
 });
