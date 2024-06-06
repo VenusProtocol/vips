@@ -22,7 +22,6 @@ import vip035, {
   CURVE_vcrvUSD,
   LST_XVS_DISTRIBUTOR,
   LST_vwETH,
-  LST_vweETH,
   LST_vwstETH,
   TOTAL_XVS_FOR_CORE,
   TOTAL_XVS_FOR_CURVE,
