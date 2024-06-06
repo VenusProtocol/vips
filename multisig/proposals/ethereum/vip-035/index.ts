@@ -1,6 +1,7 @@
 import { BigNumber } from "ethers";
-import { makeProposal } from "../../../../src/utils";
 import { parseUnits } from "ethers/lib/utils";
+
+import { makeProposal } from "../../../../src/utils";
 
 export const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 export const BLOCKS_IN_30_DAYS = BLOCKS_PER_YEAR.mul(30).div(365);
@@ -137,9 +138,9 @@ export const SPEEDS = [
     borrowSpeedPercentage: 60,
     distributor: LST_XVS_DISTRIBUTOR,
   },
-]
+];
 
-const commands = SPEEDS.map((speed) => {
+const commands = SPEEDS.map(speed => {
   const totalAmount = speed.reward;
   const supplyAmount = totalAmount.mul(speed.supplySpeedPercentage).div(100);
   const supplySpeed = supplyAmount.div(BLOCKS_IN_30_DAYS);
@@ -149,19 +150,13 @@ const commands = SPEEDS.map((speed) => {
   return {
     target: speed.distributor,
     signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-    params: [
-      [speed.address],
-      [supplySpeed],
-      [borrowSpeed],
-    ],
+    params: [[speed.address], [supplySpeed], [borrowSpeed]],
     value: "0",
   };
 });
 
 export const vip035 = () => {
-  return makeProposal([
-    ...commands
-  ]);
+  return makeProposal([...commands]);
 };
 
 export default vip035;

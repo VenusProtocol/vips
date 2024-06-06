@@ -60,41 +60,51 @@ export const REWARDS_CORE = [
     reward: parseUnits("500", 18),
     distributor: "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8",
   },
-]
+];
 
 export const REWARDS_CURVE = [
   {
     market: "CRV",
     reward: parseUnits("375", 18),
-    distributor: "0x8473B767F68250F5309bae939337136a899E43F9"
+    distributor: "0x8473B767F68250F5309bae939337136a899E43F9",
   },
   {
     market: "crvUSD",
     reward: parseUnits("375", 18),
-    distributor: "0x8473B767F68250F5309bae939337136a899E43F9"
+    distributor: "0x8473B767F68250F5309bae939337136a899E43F9",
   },
-]
+];
 
 export const REWARDS_LST = [
   {
     market: "WETH",
     reward: parseUnits("18333", 18),
-    distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
+    distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
   },
   {
     market: "wstETH",
     reward: parseUnits("3600", 18),
-    distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98"
+    distributor: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
   },
-]
+];
 
 export const BRIDGE_FEES = parseUnits("0.1", 18);
-export const DEST_ENDPOINT_ID = 101; // Ethereum chain 
+export const DEST_ENDPOINT_ID = 101; // Ethereum chain
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const TOTAL_XVS_TO_BRIDGE_TO_CORE = REWARDS_CORE.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
-export const TOTAL_XVS_TO_BRIDGE_TO_CURVE = REWARDS_CURVE.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
-export const TOTAL_XVS_TO_BRIDGE_TO_LST = REWARDS_LST.reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0));
-export const TOTAL_XVS_TO_BRIDGE = TOTAL_XVS_TO_BRIDGE_TO_CORE.add(TOTAL_XVS_TO_BRIDGE_TO_CURVE).add(TOTAL_XVS_TO_BRIDGE_TO_LST);
+export const TOTAL_XVS_TO_BRIDGE_TO_CORE = REWARDS_CORE.reduce(
+  (acc, { reward }) => acc.add(reward),
+  ethers.BigNumber.from(0),
+);
+export const TOTAL_XVS_TO_BRIDGE_TO_CURVE = REWARDS_CURVE.reduce(
+  (acc, { reward }) => acc.add(reward),
+  ethers.BigNumber.from(0),
+);
+export const TOTAL_XVS_TO_BRIDGE_TO_LST = REWARDS_LST.reduce(
+  (acc, { reward }) => acc.add(reward),
+  ethers.BigNumber.from(0),
+);
+export const TOTAL_XVS_TO_BRIDGE =
+  TOTAL_XVS_TO_BRIDGE_TO_CORE.add(TOTAL_XVS_TO_BRIDGE_TO_CURVE).add(TOTAL_XVS_TO_BRIDGE_TO_LST);
 
 export const vip322 = () => {
   const meta = {
