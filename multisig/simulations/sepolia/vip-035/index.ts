@@ -113,12 +113,6 @@ const DAILY_REWARDS = [
     borrow: parseUnits("0", 18),
     distributor: LST_XVS_DISTRIBUTOR,
   },
-  {
-    market: LST_vweETH,
-    supply: parseUnits("0", 18),
-    borrow: parseUnits("0", 18),
-    distributor: LST_XVS_DISTRIBUTOR,
-  },
 ];
 
 const BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";

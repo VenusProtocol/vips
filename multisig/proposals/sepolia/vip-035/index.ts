@@ -140,14 +140,6 @@ export const LST_SPEEDS = [
     borrowSpeedPercentage: 0,
     distributor: LST_XVS_DISTRIBUTOR,
   },
-  {
-    name: "vweETH",
-    address: LST_vweETH,
-    reward: parseUnits("0", 18),
-    supplySpeedPercentage: 40,
-    borrowSpeedPercentage: 60,
-    distributor: LST_XVS_DISTRIBUTOR,
-  },
 ];
 
 export const TOTAL_MONTHS = 3;
