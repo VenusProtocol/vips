@@ -283,6 +283,12 @@ const vip308 = () => {
         dstChainId: ETHEREUM_CHAIN_ID,
       },
       {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ETHEREUM_NORMAL_TIMELOCK],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
+      {
         target: OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
         signature: "acceptOwnership()",
         params: [],
@@ -386,6 +392,12 @@ const vip308 = () => {
           "retryMessage(uint16,bytes,uint64,bytes)",
           OPBNBMAINNET_NORMAL_TIMELOCK,
         ],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_NORMAL_TIMELOCK],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
       },
     ],

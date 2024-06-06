@@ -90,6 +90,18 @@ const vip309 = () => {
         params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ETHEREUM_FASTTRACK_TIMELOCK],
         dstChainId: ETHEREUM_CHAIN_ID,
       },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ETHEREUM_FASTTRACK_TIMELOCK],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
 
       {
         target: ETHEREUM_ACM,
@@ -300,6 +312,19 @@ const vip309 = () => {
           "retryMessage(uint16,bytes,uint64,bytes)",
           OPBNBMAINNET_CRITICAL_TIMELOCK,
         ],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_CRITICAL_TIMELOCK],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
       },
     ],

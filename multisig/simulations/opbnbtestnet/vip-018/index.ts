@@ -7,12 +7,12 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip018 from "../../../proposals/opbnbtestnet/vip-018";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x22E504FaD56cc14B0Cf258C374C44384772c8A40";
+const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x4F570240FF6265Fbb1C79cE824De6408F1948913";
 const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
-const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8Adf0e83189B3cea99F8ad7320afFa8a66Ba75B";
+const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(29592785, async () => {
+forking(30782321, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

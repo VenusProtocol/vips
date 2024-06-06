@@ -25,6 +25,15 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": true, "internalType": "address", "name": "oldGuardian", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newGuardian", "type": "address" }
+    ],
+    "name": "NewGuardian",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
       { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
     ],
@@ -178,13 +187,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "GUARDIAN",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [{ "internalType": "contract ITimelock[]", "name": "timelocks_", "type": "address[]" }],
     "name": "addTimelocks",
     "outputs": [],
@@ -242,6 +244,13 @@
     "inputs": [{ "internalType": "uint16", "name": "_remoteChainId", "type": "uint16" }],
     "name": "getTrustedRemoteAddress",
     "outputs": [{ "internalType": "bytes", "name": "", "type": "bytes" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "guardian",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
   },
@@ -401,6 +410,13 @@
       { "internalType": "bytes", "name": "_config", "type": "bytes" }
     ],
     "name": "setConfig",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newGuardian", "type": "address" }],
+    "name": "setGuardian",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

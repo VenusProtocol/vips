@@ -3,20 +3,20 @@ import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-export const OMNICHAIN_PROPOSAL_SENDER = "0x7a8e88bA76E6A15De6CEa3fa60a465a2af365173";
+export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
 const BSC_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const BSC_FASTTRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const BSC_CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const BSC_GUARDIAN = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
 const { sepolia, opbnbtestnet } = NETWORK_ADDRESSES;
-export const SEPOLIA_NORMAL_TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
-export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xe85116507D5F3f3B42e7b6a01a98d33FD3943ceC";
+export const SEPOLIA_NORMAL_TIMELOCK = "0xc332F7D8D5eA72cf760ED0E1c0485c8891C6E0cF";
+export const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xf964158C67439D01e5f17F0A3F39DfF46823F27A";
 export const SEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR = sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR;
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
-export const OPBNBTESTNET_NORMAL_TIMELOCK = "0xd8Adf0e83189B3cea99F8ad7320afFa8a66Ba75B";
-export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x22E504FaD56cc14B0Cf258C374C44384772c8A40";
+export const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
+export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x4F570240FF6265Fbb1C79cE824De6408F1948913";
 export const OPBNBTESTNET_OMNICHAIN_GOVERNANCE_EXECUTOR = opbnbtestnet.OMNICHAIN_GOVERNANCE_EXECUTOR;
 export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 export const MAX_DAILY_LIMIT = 100;
@@ -279,6 +279,12 @@ const vip308 = () => {
         dstChainId: SEPOLIA_CHAIN_ID,
       },
       {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", SEPOLIA_NORMAL_TIMELOCK],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
+      {
         target: OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER,
         signature: "acceptOwnership()",
         params: [],
@@ -382,6 +388,12 @@ const vip308 = () => {
           "retryMessage(uint16,bytes,uint64,bytes)",
           OPBNBTESTNET_NORMAL_TIMELOCK,
         ],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBTESTNET_NORMAL_TIMELOCK],
         dstChainId: OPBNBTESTNET_CHAIN_ID,
       },
     ],

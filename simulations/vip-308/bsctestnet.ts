@@ -13,7 +13,7 @@ import vip308, {
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(40584500, async () => {
+forking(40980904, async () => {
   const provider = ethers.provider;
   const omnichainProposalSender = new ethers.Contract(
     OMNICHAIN_PROPOSAL_SENDER,
