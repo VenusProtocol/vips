@@ -88,21 +88,29 @@ export const REWARDS_LST = [
   },
 ];
 
-export const BRIDGE_FEES = parseUnits("0.1", 18);
+export const BRIDGE_FEES = parseUnits("0.4", 18);
 export const DEST_ENDPOINT_ID = 10161; // Sepolia chain
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
+export const PERCENTAGE_OF_REAL_AMOUNT_BRIDGE = 10;
+export const TOTAL_MONTHS = 3;
 export const TOTAL_XVS_TO_BRIDGE_TO_CORE = REWARDS_CORE.reduce(
   (acc, { reward }) => acc.add(reward),
   ethers.BigNumber.from(0),
-);
+)
+  .mul(TOTAL_MONTHS)
+  .div(PERCENTAGE_OF_REAL_AMOUNT_BRIDGE);
 export const TOTAL_XVS_TO_BRIDGE_TO_CURVE = REWARDS_CURVE.reduce(
   (acc, { reward }) => acc.add(reward),
   ethers.BigNumber.from(0),
-);
+)
+  .mul(TOTAL_MONTHS)
+  .div(PERCENTAGE_OF_REAL_AMOUNT_BRIDGE);
 export const TOTAL_XVS_TO_BRIDGE_TO_LST = REWARDS_LST.reduce(
   (acc, { reward }) => acc.add(reward),
   ethers.BigNumber.from(0),
-);
+)
+  .mul(TOTAL_MONTHS)
+  .div(PERCENTAGE_OF_REAL_AMOUNT_BRIDGE);
 export const TOTAL_XVS_TO_BRIDGE =
   TOTAL_XVS_TO_BRIDGE_TO_CORE.add(TOTAL_XVS_TO_BRIDGE_TO_CURVE).add(TOTAL_XVS_TO_BRIDGE_TO_LST);
 

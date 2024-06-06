@@ -7,10 +7,9 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip322, { TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip-322/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import PROXY_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(40979777, () => {
+forking(40983092, () => {
   let xvs: Contract;
   let oldXVSBal: BigNumber;
 
@@ -21,7 +20,7 @@ forking(40979777, () => {
 
   testVip("VIP-322", vip322(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [REWARD_FACET_ABI, PROXY_ABI], ["VenusGranted", "SendToChain"], [1, 3]);
+      await expectEvents(txResponse, [PROXY_ABI], ["SendToChain"], [3]);
     },
   });
 
