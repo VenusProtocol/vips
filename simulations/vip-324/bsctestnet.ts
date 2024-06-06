@@ -9,7 +9,7 @@ import vip324, { TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(40983092, async () => {
+forking(40991099, async () => {
   let xvs: Contract;
   let oldXVSBal: BigNumber;
 
