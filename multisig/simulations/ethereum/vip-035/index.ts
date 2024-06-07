@@ -4,15 +4,16 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip035 from "../../../proposals/ethereum/vip-035";
+import vip035, {
+  ETHEREUM_ACM,
+  ETHEREUM_NORMAL_TIMELOCK,
+  ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
+} from "../../../proposals/ethereum/vip-035";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const ETHEREUM_OMNICHAIN_EXECUTOR_OWNER = "0xE837D75Acc0eB41D97fCe2f2613d41d6D6590855";
-const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-const ETHEREUM_NORMAL_TIMELOCK = "0x58427ae12C559a5376918b11ce0C88564452ecE6";
 const { ethereum } = NETWORK_ADDRESSES;
 
-forking(20032329, async () => {
+forking(20039640, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

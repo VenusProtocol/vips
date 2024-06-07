@@ -4,15 +4,16 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip019 from "../../../proposals/opbnbmainnet/vip-019";
+import vip019, {
+  OPBNBMAINNET_ACM,
+  OPBNBMAINNET_NORMAL_TIMELOCK,
+  OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
+} from "../../../proposals/opbnbmainnet/vip-019";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER = "0xF6606cB41EbeF4D3968Be7752e0820a0cdCeF413";
-const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
-const OPBNBMAINNET_NORMAL_TIMELOCK = "0x935a741d81e5F3decC93081f1Db1F37fd6283464";
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
-forking(25917670, async () => {
+forking(26005834, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {
