@@ -12,37 +12,7 @@ export const vip019 = () => {
     {
       target: OPBNBMAINNET_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
       params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", opbnbmainnet.GUARDIAN],
     },
     {
       target: OPBNBMAINNET_ACM,

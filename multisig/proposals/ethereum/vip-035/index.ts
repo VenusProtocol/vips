@@ -12,37 +12,7 @@ export const vip035 = () => {
     {
       target: ETHEREUM_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
       params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", ethereum.GUARDIAN],
     },
     {
       target: ETHEREUM_ACM,
