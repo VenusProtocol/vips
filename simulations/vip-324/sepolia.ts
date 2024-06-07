@@ -134,7 +134,7 @@ forking(6052314, async () => {
     prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
   });
 
-  testForkedNetworkVipCommands("VIP-324", await vip036(), {});
+  testForkedNetworkVipCommands("VIP-324", await vip324(), {});
 
   describe("Post-Execution state", () => {
     it("check daily speeds", async () => {
