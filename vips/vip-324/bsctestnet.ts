@@ -224,6 +224,12 @@ export const vip324 = () => {
       },
       {
         target: ETH_TREASURY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: DEST_ENDPOINT_ID,
+      },
+      {
+        target: ETH_TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, TOTAL_XVS_FOR_CORE, CORE_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
