@@ -116,7 +116,7 @@ const DAILY_REWARDS = [
 
 const BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 
-forking(6057703, async () => {
+forking(6057806, async () => {
   let xvs: Contract;
   let prevCoreDistributorBalance: BigNumber;
   let prevCurveDistributorBalance: BigNumber;
