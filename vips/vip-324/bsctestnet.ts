@@ -226,19 +226,19 @@ export const vip322 = () => {
       {
         target: TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [XVS, TOTAL_XVS_FOR_CORE, CORE_XVS_DISTRIBUTOR],
+        params: [ETHEREUM_XVS, TOTAL_XVS_FOR_CORE, CORE_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [XVS, TOTAL_XVS_FOR_CURVE, CURVE_XVS_DISTRIBUTOR],
+        params: [ETHEREUM_XVS, TOTAL_XVS_FOR_CURVE, CURVE_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
       },
       {
         target: TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [XVS, TOTAL_XVS_FOR_LST, LST_XVS_DISTRIBUTOR],
+        params: [ETHEREUM_XVS, TOTAL_XVS_FOR_LST, LST_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
       },
       ...commands,
