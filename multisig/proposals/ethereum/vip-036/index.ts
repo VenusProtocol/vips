@@ -20,7 +20,6 @@ export const CURVE_vCRV = "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa";
 export const CURVE_vcrvUSD = "0x2d499800239C4CD3012473Cb1EAE33562F0A6933";
 export const LST_vwETH = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
 export const LST_vwstETH = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
-export const LST_vweETH = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";
 
 export const CORE_XVS_DISTRIBUTOR = "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8";
 export const CURVE_XVS_DISTRIBUTOR = "0x8473B767F68250F5309bae939337136a899E43F9";
@@ -172,7 +171,7 @@ const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
     };
   });
 
-export const vip035 = () => {
+export const vip036 = () => {
   return makeProposal([
     {
       target: TREASURY,
@@ -193,4 +192,4 @@ export const vip035 = () => {
   ]);
 };
 
-export default vip035;
+export default vip036;
