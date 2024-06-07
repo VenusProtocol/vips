@@ -5,7 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip036, {
+import vip324, {
   BLOCKS_PER_YEAR,
   CORE_XVS_DISTRIBUTOR,
   CORE_vDAI,

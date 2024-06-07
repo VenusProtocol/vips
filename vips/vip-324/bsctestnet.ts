@@ -188,7 +188,7 @@ const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
     };
   });
 
-export const vip322 = () => {
+export const vip324 = () => {
   const meta = {
     version: "v2",
     title: "VIP-322",
@@ -247,4 +247,4 @@ export const vip322 = () => {
   );
 };
 
-export default vip322;
+export default vip324;
