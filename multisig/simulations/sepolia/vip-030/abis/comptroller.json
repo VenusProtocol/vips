@@ -1,22 +1,346 @@
 [
   {
-    "inputs": [],
-    "payable": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "poolRegistry_",
+        "type": "address"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      },
+      {
+        "internalType": "enum Action",
+        "name": "action",
+        "type": "uint8"
+      }
+    ],
+    "name": "ActionPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BorrowActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cap",
+        "type": "uint256"
+      }
+    ],
+    "name": "BorrowCapExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "BorrowCapIsNotZero",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expectedLessThanOrEqualTo",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "CollateralExceedsThreshold",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CollateralFactorIsNotZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ComptrollerMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "DelegationStatusUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EnterMarketActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ExitMarketActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "collateralToSeize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "availableCollateral",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientCollateral",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientLiquidity",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientShortfall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCollateralFactor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLiquidationThreshold",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "LiquidateActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      }
+    ],
+    "name": "MarketAlreadyListed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "MarketNotCollateral",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      }
+    ],
+    "name": "MarketNotListed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "loopsLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredLoops",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLoopsLimitExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "expectedGreaterThan",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "actual",
+        "type": "uint256"
+      }
+    ],
+    "name": "MinimalCollateralViolated",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MintActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NonzeroBorrowBalance",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "PriceError",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RedeemActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RepayActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SeizeActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "SnapshotError",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cap",
+        "type": "uint256"
+      }
+    ],
+    "name": "SupplyCapExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "SupplyCapIsNotZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TooMuchRepay",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TransferActionNotPaused",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "calledContract",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "methodSignature",
+        "type": "string"
+      }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "expectedSender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "actualSender",
+        "type": "address"
+      }
+    ],
+    "name": "UnexpectedSender",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
       },
       {
-        "indexed": true,
-        "internalType": "enum ComptrollerTypes.Action",
+        "indexed": false,
+        "internalType": "enum Action",
         "name": "action",
         "type": "uint8"
       },
@@ -34,22 +358,9 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "state",
-        "type": "bool"
-      }
-    ],
-    "name": "ActionProtocolPaused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
-        "name": "borrower",
+        "name": "approver",
         "type": "address"
       },
       {
@@ -61,7 +372,7 @@
       {
         "indexed": false,
         "internalType": "bool",
-        "name": "allowDelegatedBorrows",
+        "name": "approved",
         "type": "bool"
       }
     ],
@@ -72,125 +383,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "venusDelta",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "venusBorrowIndex",
-        "type": "uint256"
+        "internalType": "uint8",
+        "name": "version",
+        "type": "uint8"
       }
     ],
-    "name": "DistributedBorrowerVenus",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "supplier",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "venusDelta",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "venusSupplyIndex",
-        "type": "uint256"
-      }
-    ],
-    "name": "DistributedSupplierVenus",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "DistributedVAIVaultVenus",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "error",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "info",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "detail",
-        "type": "uint256"
-      }
-    ],
-    "name": "Failure",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "enable",
-        "type": "bool"
-      }
-    ],
-    "name": "IsForcedLiquidationEnabledForUserUpdated",
+    "name": "Initialized",
     "type": "event"
   },
   {
@@ -254,13 +453,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
       }
     ],
-    "name": "MarketListed",
+    "name": "MarketSupported",
     "type": "event"
   },
   {
@@ -268,7 +467,7 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "contract VToken",
+        "internalType": "address",
         "name": "vToken",
         "type": "address"
       }
@@ -281,18 +480,37 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "oldMaxLoopsLimit",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newmaxLoopsLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "MaxLoopsLimitUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
-        "name": "oldAccessControlAddress",
+        "name": "oldAccessControlManager",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "address",
-        "name": "newAccessControlAddress",
+        "name": "newAccessControlManager",
         "type": "address"
       }
     ],
-    "name": "NewAccessControl",
+    "name": "NewAccessControlManager",
     "type": "event"
   },
   {
@@ -337,7 +555,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
@@ -356,25 +574,6 @@
       }
     ],
     "name": "NewCollateralFactor",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldComptrollerLens",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newComptrollerLens",
-        "type": "address"
-      }
-    ],
-    "name": "NewComptrollerLens",
     "type": "event"
   },
   {
@@ -401,18 +600,24 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "oldLiquidatorContract",
+        "internalType": "contract VToken",
+        "name": "vToken",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "newLiquidatorContract",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "oldLiquidationThresholdMantissa",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newLiquidationThresholdMantissa",
+        "type": "uint256"
       }
     ],
-    "name": "NewLiquidatorContract",
+    "name": "NewLiquidationThreshold",
     "type": "event"
   },
   {
@@ -420,18 +625,18 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "oldPauseGuardian",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "oldMinLiquidatableCollateral",
+        "type": "uint256"
       },
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "newPauseGuardian",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "newMinLiquidatableCollateral",
+        "type": "uint256"
       }
     ],
-    "name": "NewPauseGuardian",
+    "name": "NewMinLiquidatableCollateral",
     "type": "event"
   },
   {
@@ -439,13 +644,13 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "oldPriceOracle",
         "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "newPriceOracle",
         "type": "address"
       }
@@ -477,6 +682,25 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "rewardsDistributor",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
+    ],
+    "name": "NewRewardsDistributor",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
@@ -495,95 +719,19 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "oldTreasuryAddress",
+        "name": "previousOwner",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
-        "name": "newTreasuryAddress",
+        "name": "newOwner",
         "type": "address"
       }
     ],
-    "name": "NewTreasuryAddress",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "oldTreasuryGuardian",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newTreasuryGuardian",
-        "type": "address"
-      }
-    ],
-    "name": "NewTreasuryGuardian",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldTreasuryPercent",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newTreasuryPercent",
-        "type": "uint256"
-      }
-    ],
-    "name": "NewTreasuryPercent",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "contract VAIControllerInterface",
-        "name": "oldVAIController",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "contract VAIControllerInterface",
-        "name": "newVAIController",
-        "type": "address"
-      }
-    ],
-    "name": "NewVAIController",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldVAIMintRate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newVAIMintRate",
-        "type": "uint256"
-      }
-    ],
-    "name": "NewVAIMintRate",
+    "name": "OwnershipTransferStarted",
     "type": "event"
   },
   {
@@ -592,616 +740,40 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "vault_",
+        "name": "previousOwner",
         "type": "address"
       },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "releaseStartBlock_",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "releaseInterval_",
-        "type": "uint256"
-      }
-    ],
-    "name": "NewVAIVaultInfo",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "oldVenusVAIVaultRate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newVenusVAIVaultRate",
-        "type": "uint256"
-      }
-    ],
-    "name": "NewVenusVAIVaultRate",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newSpeed",
-        "type": "uint256"
-      }
-    ],
-    "name": "VenusBorrowSpeedUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
       {
         "indexed": true,
         "internalType": "address",
-        "name": "recipient",
+        "name": "newOwner",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
       }
     ],
-    "name": "VenusGranted",
+    "name": "OwnershipTransferred",
     "type": "event"
   },
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newSpeed",
-        "type": "uint256"
-      }
-    ],
-    "name": "VenusSupplySpeedUpdated",
-    "type": "event"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract Unitroller",
-        "name": "unitroller",
-        "type": "address"
-      }
-    ],
-    "name": "_become",
+    "inputs": [],
+    "name": "acceptOwnership",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "_grantXVS",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newAccessControlAddress",
-        "type": "address"
-      }
-    ],
-    "name": "_setAccessControl",
+    "inputs": [],
+    "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "contract IAccessControlManagerV8",
         "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "markets_",
-        "type": "address[]"
-      },
-      {
-        "internalType": "enum ComptrollerTypes.Action[]",
-        "name": "actions_",
-        "type": "uint8[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "paused_",
-        "type": "bool"
-      }
-    ],
-    "name": "_setActionsPaused",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newCloseFactorMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setCloseFactor",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newCollateralFactorMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setCollateralFactor",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract ComptrollerLensInterface",
-        "name": "comptrollerLens_",
         "type": "address"
       }
     ],
-    "name": "_setComptrollerLens",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vTokenBorrowed",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "enable",
-        "type": "bool"
-      }
-    ],
-    "name": "_setForcedLiquidation",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "vTokenBorrowed",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "enable",
-        "type": "bool"
-      }
-    ],
-    "name": "_setForcedLiquidationForUser",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newLiquidationIncentiveMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setLiquidationIncentive",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newLiquidatorContract_",
-        "type": "address"
-      }
-    ],
-    "name": "_setLiquidatorContract",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "newBorrowCaps",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "_setMarketBorrowCaps",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "newSupplyCaps",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "_setMarketSupplyCaps",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newPauseGuardian",
-        "type": "address"
-      }
-    ],
-    "name": "_setPauseGuardian",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract PriceOracle",
-        "name": "newOracle",
-        "type": "address"
-      }
-    ],
-    "name": "_setPriceOracle",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract IPrime",
-        "name": "_prime",
-        "type": "address"
-      }
-    ],
-    "name": "_setPrimeToken",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "state",
-        "type": "bool"
-      }
-    ],
-    "name": "_setProtocolPaused",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newTreasuryGuardian",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "newTreasuryAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "newTreasuryPercent",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setTreasuryData",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VAIControllerInterface",
-        "name": "vaiController_",
-        "type": "address"
-      }
-    ],
-    "name": "_setVAIController",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newVAIMintRate",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setVAIMintRate",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vault_",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "releaseStartBlock_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "minReleaseAmount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setVAIVaultInfo",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "supplySpeeds",
-        "type": "uint256[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "borrowSpeeds",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "_setVenusSpeeds",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "venusVAIVaultRate_",
-        "type": "uint256"
-      }
-    ],
-    "name": "_setVenusVAIVaultRate",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "contract VToken",
-        "name": "vToken",
-        "type": "address"
-      }
-    ],
-    "name": "_supportMarket",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1222,12 +794,10 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1235,7 +805,7 @@
         "type": "address"
       },
       {
-        "internalType": "enum ComptrollerTypes.Action",
+        "internalType": "enum Action",
         "name": "action",
         "type": "uint8"
       }
@@ -1248,27 +818,23 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "admin",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "address",
-        "name": "",
+        "internalType": "contract RewardsDistributor",
+        "name": "_rewardsDistributor",
         "type": "address"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
+    "name": "addRewardsDistributor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1284,12 +850,10 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1310,58 +874,10 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "borrowAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "borrowAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "borrowCapGuardian",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1377,12 +893,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1402,12 +916,10 @@
     ],
     "name": "borrowVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1428,127 +940,10 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "holders",
-        "type": "address[]"
-      },
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "borrowers",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "suppliers",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "collateral",
-        "type": "bool"
-      }
-    ],
-    "name": "claimVenus",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "holder",
-        "type": "address"
-      },
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      }
-    ],
-    "name": "claimVenus",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "holder",
-        "type": "address"
-      }
-    ],
-    "name": "claimVenus",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "holders",
-        "type": "address[]"
-      },
-      {
-        "internalType": "contract VToken[]",
-        "name": "vTokens",
-        "type": "address[]"
-      },
-      {
-        "internalType": "bool",
-        "name": "borrowers",
-        "type": "bool"
-      },
-      {
-        "internalType": "bool",
-        "name": "suppliers",
-        "type": "bool"
-      }
-    ],
-    "name": "claimVenus",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "holder",
-        "type": "address"
-      }
-    ],
-    "name": "claimVenusAsCollateral",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [],
     "name": "closeFactorMantissa",
     "outputs": [
@@ -1558,42 +953,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "comptrollerImplementation",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "comptrollerLens",
-    "outputs": [
-      {
-        "internalType": "contract ComptrollerLensInterface",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address[]",
@@ -1609,12 +972,10 @@
         "type": "uint256[]"
       }
     ],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1630,12 +991,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1647,26 +1006,24 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "error",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "liquidity",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "shortfall",
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
     "name": "getAllMarkets",
     "outputs": [
@@ -1676,12 +1033,10 @@
         "type": "address[]"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1697,12 +1052,39 @@
         "type": "address[]"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "getBorrowingPower",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "error",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidity",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "shortfall",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -1729,56 +1111,104 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "error",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "liquidity",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "shortfall",
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "getXVSAddress",
+    "name": "getRewardDistributors",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "contract RewardsDistributor[]",
         "name": "",
-        "type": "address"
+        "type": "address[]"
       }
     ],
-    "payable": false,
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "getXVSVTokenAddress",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "vToken",
         "type": "address"
       }
     ],
-    "payable": false,
-    "stateMutability": "pure",
+    "name": "getRewardsByMarket",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "rewardToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "supplySpeed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "borrowSpeed",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ComptrollerStorage.RewardSpeeds[]",
+        "name": "rewardSpeeds",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "healAccount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "loopLimit",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "accessControlManager",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "isComptroller",
     "outputs": [
@@ -1788,12 +1218,10 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "pure",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1809,25 +1237,18 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
+        "internalType": "contract VToken",
+        "name": "vToken",
         "type": "address"
       }
     ],
-    "name": "isForcedLiquidationEnabledForUser",
+    "name": "isMarketListed",
     "outputs": [
       {
         "internalType": "bool",
@@ -1835,53 +1256,45 @@
         "type": "bool"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "vTokenBorrowed",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "vTokenCollateral",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
       {
         "internalType": "address",
         "name": "borrower",
         "type": "address"
       },
       {
-        "internalType": "uint256",
-        "name": "repayAmount",
-        "type": "uint256"
+        "components": [
+          {
+            "internalType": "contract VToken",
+            "name": "vTokenCollateral",
+            "type": "address"
+          },
+          {
+            "internalType": "contract VToken",
+            "name": "vTokenBorrowed",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "repayAmount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ComptrollerStorage.LiquidationOrder[]",
+        "name": "orders",
+        "type": "tuple[]"
       }
     ],
-    "name": "liquidateBorrowAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
+    "name": "liquidateAccount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1916,12 +1329,10 @@
     ],
     "name": "liquidateBorrowVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1943,52 +1354,19 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "error",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "tokensToSeize",
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vTokenCollateral",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "actualRepayAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "liquidateVAICalculateSeizeTokens",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [],
     "name": "liquidationIncentiveMantissa",
     "outputs": [
@@ -1998,27 +1376,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "liquidatorContract",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -2039,19 +1400,17 @@
         "type": "uint256"
       },
       {
-        "internalType": "bool",
-        "name": "isVenus",
-        "type": "bool"
+        "internalType": "uint256",
+        "name": "liquidationThresholdMantissa",
+        "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "maxAssets",
+    "name": "maxLoopsLimit",
     "outputs": [
       {
         "internalType": "uint256",
@@ -2059,14 +1418,12 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "minReleaseAmount",
+    "name": "minLiquidatableCollateral",
     "outputs": [
       {
         "internalType": "uint256",
@@ -2074,58 +1431,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "minter",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "mintAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "mintAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "mintVAIGuardianPaused",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2150,50 +1459,25 @@
     ],
     "name": "mintVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "mintedVAIs",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [],
     "name": "oracle",
     "outputs": [
       {
-        "internalType": "contract PriceOracle",
+        "internalType": "contract ResilientOracleInterface",
         "name": "",
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "pauseGuardian",
+    "name": "owner",
     "outputs": [
       {
         "internalType": "address",
@@ -2201,14 +1485,12 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "pendingAdmin",
+    "name": "pendingOwner",
     "outputs": [
       {
         "internalType": "address",
@@ -2216,14 +1498,12 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "pendingComptrollerImplementation",
+    "name": "poolRegistry",
     "outputs": [
       {
         "internalType": "address",
@@ -2231,42 +1511,89 @@
         "type": "address"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "prime",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "contract IPrime",
-        "name": "",
+        "internalType": "address",
+        "name": "vToken",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "borrowAmount",
+        "type": "uint256"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
+    "name": "preBorrowHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "protocolPaused",
-    "outputs": [
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vTokenBorrowed",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "vTokenCollateral",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "repayAmount",
+        "type": "uint256"
+      },
       {
         "internalType": "bool",
-        "name": "",
+        "name": "skipLiquidityCheck",
         "type": "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
+    "name": "preLiquidateHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "minter",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "mintAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "preMintHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -2284,20 +1611,99 @@
         "type": "uint256"
       }
     ],
-    "name": "redeemAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
+    "name": "preRedeemHook",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      }
+    ],
+    "name": "preRepayHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vTokenCollateral",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "seizerContract",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "liquidator",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      }
+    ],
+    "name": "preSeizeHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "src",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "dst",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "transferTokens",
+        "type": "uint256"
+      }
+    ],
+    "name": "preTransferHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "prime",
+    "outputs": [
+      {
+        "internalType": "contract IPrime",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -2322,63 +1728,17 @@
     ],
     "name": "redeemVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
     "inputs": [],
-    "name": "releaseStartBlock",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "payer",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "repayAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "repayBorrowAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
+    "name": "renounceOwnership",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2408,68 +1768,10 @@
     ],
     "name": "repayBorrowVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "repayVAIGuardianPaused",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "vTokenCollateral",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "vTokenBorrowed",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "seizeTokens",
-        "type": "uint256"
-      }
-    ],
-    "name": "seizeAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2499,38 +1801,201 @@
     ],
     "name": "seizeVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
-        "name": "owner",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract VToken[]",
+        "name": "marketsList",
+        "type": "address[]"
+      },
+      {
+        "internalType": "enum Action[]",
+        "name": "actionsList",
+        "type": "uint8[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "paused",
+        "type": "bool"
+      }
+    ],
+    "name": "setActionsPaused",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newCloseFactorMantissa",
+        "type": "uint256"
+      }
+    ],
+    "name": "setCloseFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract VToken",
+        "name": "vToken",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "amount",
+        "name": "newCollateralFactorMantissa",
         "type": "uint256"
-      }
-    ],
-    "name": "setMintedVAIOf",
-    "outputs": [
+      },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "newLiquidationThresholdMantissa",
         "type": "uint256"
       }
     ],
-    "payable": false,
+    "name": "setCollateralFactor",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vTokenBorrowed",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "enable",
+        "type": "bool"
+      }
+    ],
+    "name": "setForcedLiquidation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newLiquidationIncentiveMantissa",
+        "type": "uint256"
+      }
+    ],
+    "name": "setLiquidationIncentive",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract VToken[]",
+        "name": "vTokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "newBorrowCaps",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "setMarketBorrowCaps",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract VToken[]",
+        "name": "vTokens",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "newSupplyCaps",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "setMarketSupplyCaps",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxLoopsLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newMinLiquidatableCollateral",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMinLiquidatableCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ResilientOracleInterface",
+        "name": "newOracle",
+        "type": "address"
+      }
+    ],
+    "name": "setPriceOracle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract IPrime",
+        "name": "_prime",
+        "type": "address"
+      }
+    ],
+    "name": "setPrimeToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -2546,48 +2011,36 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "contract VToken",
         "name": "vToken",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "src",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "dst",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "transferTokens",
-        "type": "uint256"
       }
     ],
-    "name": "transferAllowed",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
+    "name": "supportMarket",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -2612,57 +2065,10 @@
     ],
     "name": "transferVerify",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "treasuryAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "treasuryGuardian",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "treasuryPercent",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2678,12 +2084,10 @@
         "type": "uint256"
       }
     ],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2692,256 +2096,26 @@
       },
       {
         "internalType": "bool",
-        "name": "allowBorrows",
+        "name": "approved",
         "type": "bool"
       }
     ],
     "name": "updateDelegate",
     "outputs": [],
-    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "constant": true,
-    "inputs": [],
-    "name": "vaiController",
-    "outputs": [
-      {
-        "internalType": "contract VAIControllerInterface",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "vaiMintRate",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "vaiVaultAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "account",
         "type": "address"
       }
     ],
-    "name": "venusAccrued",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusBorrowSpeeds",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusBorrowState",
-    "outputs": [
-      {
-        "internalType": "uint224",
-        "name": "index",
-        "type": "uint224"
-      },
-      {
-        "internalType": "uint32",
-        "name": "block",
-        "type": "uint32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusBorrowerIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "venusInitialIndex",
-    "outputs": [
-      {
-        "internalType": "uint224",
-        "name": "",
-        "type": "uint224"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusSupplierIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusSupplySpeeds",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "venusSupplyState",
-    "outputs": [
-      {
-        "internalType": "uint224",
-        "name": "index",
-        "type": "uint224"
-      },
-      {
-        "internalType": "uint32",
-        "name": "block",
-        "type": "uint32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "venusVAIVaultRate",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
+    "name": "updatePrices",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
