@@ -32,6 +32,8 @@ import vip324, {
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import XVS_ABI from "./abi/xvs.json";
 
+// import ACM_ABI from "./abi/acm.json";
+
 export const BLOCKS_IN_ONE_DAY = BLOCKS_PER_YEAR.div(365);
 const DAILY_REWARDS = [
   {
@@ -115,12 +117,16 @@ const DAILY_REWARDS = [
 ];
 
 const BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
+// const TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
+// const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
-forking(6057806, async () => {
+forking(6057808, async () => {
   let xvs: Contract;
   let prevCoreDistributorBalance: BigNumber;
   let prevCurveDistributorBalance: BigNumber;
   let prevLstDistributorBalance: BigNumber;
+  // let coreDistributor: Contract;
+  // let acm: Contract;
 
   before(async () => {
     await impersonateAccount(BRIDGE_DEST);
@@ -132,6 +138,21 @@ forking(6057806, async () => {
     prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
     prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
     prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
+
+    // await impersonateAccount(TIMELOCK);
+    // await setBalance(TIMELOCK, parseUnits("100", 18));
+    // coreDistributor = await ethers.getContractAt(REWARDS_DISTRIBUTOR_ABI, LST_XVS_DISTRIBUTOR, ethers.provider.getSigner(TIMELOCK));
+
+    // acm = await ethers.getContractAt(ACM_ABI, ACM, ethers.provider.getSigner(TIMELOCK));
+    // await acm.giveCallPermission(CORE_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", TIMELOCK);
+    // await acm.giveCallPermission(CURVE_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", TIMELOCK);
+    // await acm.giveCallPermission(LST_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", TIMELOCK);
+
+    // await coreDistributor.setRewardTokenSpeeds(
+    //   [LST_vwETH],
+    //   [parseUnits("15", 18)],
+    //   [parseUnits("22.50", 18)]
+    // )
   });
 
   testForkedNetworkVipCommands("VIP-324", await vip324(), {});

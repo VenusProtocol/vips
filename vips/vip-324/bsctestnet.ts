@@ -31,6 +31,8 @@ export const CURVE_XVS_DISTRIBUTOR = "0x67dA6435b35d43081c7c27685fAbb2662b7f1290
 export const LST_XVS_DISTRIBUTOR = "0x4597B9287fE0DF3c5513D66886706E0719bD270f";
 export const ETH_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const ETHEREUM_XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+const SEPOLIA_NORMAL_TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
 
 export const CORE_SPEEDS = [
   {
@@ -182,7 +184,7 @@ const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
     return {
       target: speed.distributor,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[speed.address], [supplySpeed], [borrowSpeed]],
+      params: [[speed.address], [supplySpeed.toString()], [borrowSpeed.toString()]],
       value: "0",
       dstChainId: DEST_ENDPOINT_ID,
     };
@@ -245,6 +247,21 @@ export const vip324 = () => {
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, TOTAL_XVS_FOR_LST, LST_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CORE_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", SEPOLIA_NORMAL_TIMELOCK],
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CURVE_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", SEPOLIA_NORMAL_TIMELOCK],
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [LST_XVS_DISTRIBUTOR, "setRewardTokenSpeeds(address[],uint256[],uint256[])", SEPOLIA_NORMAL_TIMELOCK],
       },
       ...commands,
     ],
