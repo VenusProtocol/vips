@@ -9,7 +9,6 @@ export const XVS_BRIDGE_SRC = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 export const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const BSC_TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
-export const ETH_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 
 // Ethereum Addresses
@@ -30,7 +29,7 @@ export const LST_vweETH = "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b";
 export const CORE_XVS_DISTRIBUTOR = "0xB60666395bEFeE02a28938b75ea620c7191cA77a";
 export const CURVE_XVS_DISTRIBUTOR = "0x67dA6435b35d43081c7c27685fAbb2662b7f1290";
 export const LST_XVS_DISTRIBUTOR = "0x4597B9287fE0DF3c5513D66886706E0719bD270f";
-export const TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
+export const ETH_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const ETHEREUM_XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 
 export const CORE_SPEEDS = [
@@ -224,19 +223,19 @@ export const vip322 = () => {
         params: [XVS_BRIDGE_SRC, 0],
       },
       {
-        target: TREASURY,
+        target: ETH_TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, TOTAL_XVS_FOR_CORE, CORE_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
       },
       {
-        target: TREASURY,
+        target: ETH_TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, TOTAL_XVS_FOR_CURVE, CURVE_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,
       },
       {
-        target: TREASURY,
+        target: ETH_TREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, TOTAL_XVS_FOR_LST, LST_XVS_DISTRIBUTOR],
         dstChainId: DEST_ENDPOINT_ID,

@@ -21,13 +21,13 @@ import vip036, {
   CURVE_vCRV,
   CURVE_vcrvUSD,
   ETHEREUM_XVS,
+  ETH_TREASURY,
   LST_XVS_DISTRIBUTOR,
   LST_vwETH,
   LST_vwstETH,
   TOTAL_XVS_FOR_CORE,
   TOTAL_XVS_FOR_CURVE,
   TOTAL_XVS_FOR_LST,
-  TREASURY,
 } from "../../vips/vip-324/bsctestnet";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import XVS_ABI from "./abi/xvs.json";
@@ -127,7 +127,7 @@ forking(6052314, async () => {
     await setBalance(BRIDGE_DEST, parseUnits("100", 18));
 
     xvs = await ethers.getContractAt(XVS_ABI, ETHEREUM_XVS, ethers.provider.getSigner(BRIDGE_DEST));
-    await xvs.mint(TREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
+    await xvs.mint(ETH_TREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
 
     prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
     prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
