@@ -1,6 +1,7 @@
 import { BigNumber, ethers } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 
+import { ZERO_ADDRESS } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -31,9 +32,8 @@ export const CURVE_XVS_DISTRIBUTOR = "0x67dA6435b35d43081c7c27685fAbb2662b7f1290
 export const LST_XVS_DISTRIBUTOR = "0x4597B9287fE0DF3c5513D66886706E0719bD270f";
 export const ETH_TREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 export const ETHEREUM_XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
-export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-export const SEPOLIA_NORMAL_TIMELOCK = "0xeF9B3f8330352C7d09B7CD29A5A72f0410e901D1";
-export const ZERO_ADDRESS = ethers.constants.AddressZero;
+const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+export const SEPOLIA_NORMAL_TIMELOCK = "0xc332F7D8D5eA72cf760ED0E1c0485c8891C6E0cF";
 
 export const CORE_SPEEDS = [
   {
@@ -229,6 +229,12 @@ export const vip324 = () => {
         target: ETH_TREASURY,
         signature: "acceptOwnership()",
         params: [],
+        dstChainId: DEST_ENDPOINT_ID,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", ETHEREUM_NORMAL_TIMELOCK],
         dstChainId: DEST_ENDPOINT_ID,
       },
       {
