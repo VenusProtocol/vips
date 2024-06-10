@@ -9,7 +9,7 @@ export const loadProposal = async (path: string) => {
   const proposalModule = await import(`../vips/${path}`);
   return await proposalModule.default();
 };
-const proposeTestnetVIP = async (vipPath: string) => {
+const proposeTestnetVIP = async (vipPath: string, networkName: string) => {
   const proposal = await loadProposal(vipPath);
 
   const { targets, signatures, values, meta } = proposal;
@@ -25,7 +25,7 @@ const proposeTestnetVIP = async (vipPath: string) => {
     proposal.type,
   );
   const receipt = await tx.wait();
-  console.log(`VIP proposed successfully on bsctestnet (txId: ${receipt?.transactionHash})`);
+  console.log(`VIP proposed successfully on ${networkName} (txId: ${receipt?.transactionHash})`);
 };
 
 export default proposeTestnetVIP;

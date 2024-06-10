@@ -46,7 +46,7 @@ task("proposeOnTestnet", "Propose proposal on testnet")
     const { proposalPath } = taskArguments;
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const proposeTestnetVIP = require("./scripts/proposeTestnetVIP").default;
-    await proposeTestnetVIP(proposalPath);
+    await proposeTestnetVIP(proposalPath, hre.network.name);
   });
 
 task("multisig", "Execute multisig vip")
