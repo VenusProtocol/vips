@@ -14,6 +14,8 @@ export const REWARDS_DISTRIBUTOR_XVS = "0xB60666395bEFeE02a28938b75ea620c7191cA7
 export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 export const XVS_REWARD_TRANSFER = parseUnits("2400", 18);
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+export const SUPPLY_CAP = parseUnits("10000", 18);
+export const BORROW_CAP = parseUnits("1000", 18);
 
 export const MockSfrxEthFraxOracle = "0x96f7FD1d922Bb6769773BeC88BE6aA615DE77ad1";
 export const IS_BAD_DATA = false;
@@ -87,8 +89,8 @@ export const vip035 = () => {
           "930000000000000000",
           INITIAL_SUPPLY,
           VTREASURY,
-          "10000000000000000000000",
-          "1000000000000000000000",
+          SUPPLY_CAP,
+          BORROW_CAP,
         ],
       ],
     },
