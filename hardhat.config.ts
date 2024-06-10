@@ -52,7 +52,7 @@ task("createProposal", "Create proposal objects for various destinations").setAc
   taskArguments,
   hre,
 ) {
-  hre.FORKED_NETWORK = hre.network.name as "bsctestnet";
+  hre.FORKED_NETWORK = (hre.network.name as "bsctestnet") || "bscmainnet";
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const createProposal = require("./scripts/createProposal").default;
   await createProposal();
