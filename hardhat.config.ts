@@ -48,6 +48,15 @@ task("proposeOnTestnet", "Propose proposal on testnet")
     const proposeTestnetVIP = require("./scripts/proposeTestnetVIP").default;
     await proposeTestnetVIP(proposalPath, hre.network.name);
   });
+task("createProposal", "Create proposal objects for various destinations").setAction(async function (
+  taskArguments,
+  hre,
+) {
+  hre.FORKED_NETWORK = hre.network.name as "bsctestnet";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const createProposal = require("./scripts/createProposal").default;
+  await createProposal();
+});
 
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")

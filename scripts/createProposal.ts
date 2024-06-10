@@ -117,4 +117,4 @@ const createProposal = async () => {
   }
 };
 
-export default createProposal();
+export default createProposal;

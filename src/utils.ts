@@ -163,7 +163,7 @@ export const makeProposal = async (
 
       proposal.targets.push(getOmnichainProposalSenderAddress());
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
-      proposal.values.push(value);
+      proposal.values.push(value.toString());
       proposal.signatures.push("execute(uint16,bytes,bytes,address)");
       proposal.params.push([key, remoteParam, remoteAdapterParam, ethers.constants.AddressZero]);
     } else {

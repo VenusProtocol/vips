@@ -39,7 +39,7 @@ Script to generate proposal data for multiple destinations such as venusApp bsce
 Procedure for Creating a Proposal
 
 ```
-npx hardhat run scripts/createProposal.ts
+npx hardhat createProposal --network <networkName>
 
 Enter the number of vip for which you require proposal data.
 Select the type of destination, such as txBuilder/venusApp/bsc.
