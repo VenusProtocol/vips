@@ -121,11 +121,11 @@ npx hardhat test simulations/<simulation-path> --fork <network>
 Procedure to propose VIP using tasks
 
 ```
-npx hardhat propose <path to vip relative to vips>
+npx hardhat propose <path to vip relative to vips> --network bscmainnet
 ```
 
 For testnet
 
 ```
-npx hardhat proposeOnTestnet <path to vip relative to vips>
+npx hardhat proposeOnTestnet <path to vip relative to vips> --network bsctestnet
 ```
