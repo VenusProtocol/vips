@@ -192,10 +192,10 @@ const commands = CORE_SPEEDS.concat(CURVE_SPEEDS)
     };
   });
 
-export const vip324 = () => {
+export const vip322 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-324",
+    title: "VIP-322",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -263,4 +263,4 @@ export const vip324 = () => {
   );
 };
 
-export default vip324;
+export default vip322;
