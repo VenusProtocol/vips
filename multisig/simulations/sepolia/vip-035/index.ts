@@ -5,7 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip035, { NORMAL_TIMELOCK, TREASURY } from "../../../proposals/sepolia/vip-035.1";
+import vip035, { NORMAL_TIMELOCK, TREASURY } from "../../../proposals/sepolia/vip-035";
 import TREASURY_ABI from "./abi/treasury.json";
 
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";

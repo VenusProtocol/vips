@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip322, { NORMAL_TIMELOCK, TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip-322.1/bscmainnet";
+import vip322, { NORMAL_TIMELOCK, TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip-322/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";

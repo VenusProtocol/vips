@@ -4,8 +4,10 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip035, {
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { expectEvents } from "../../src/utils";
+import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
+import vip322, {
   BLOCKS_PER_YEAR,
   CORE_XVS_DISTRIBUTOR,
   CORE_vDAI,
@@ -23,14 +25,17 @@ import vip035, {
   LST_XVS_DISTRIBUTOR,
   LST_vwETH,
   LST_vwstETH,
+  SEPOLIA_XVS,
   TOTAL_XVS_FOR_CORE,
   TOTAL_XVS_FOR_CURVE,
   TOTAL_XVS_FOR_LST,
-  TREASURY,
-  XVS,
-} from "../../../proposals/ethereum/vip-035.1";
+} from "../../vips/vip-322/bsctestnet";
+import ACM_ABI from "./abi/AccessControlManager_ABI.json";
+import VTREASURY_ABI from "./abi/VTreasuryEthereumAbi.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import XVS_ABI from "./abi/xvs.json";
+
+const { sepolia } = NETWORK_ADDRESSES;
 
 export const BLOCKS_IN_ONE_DAY = BLOCKS_PER_YEAR.div(365);
 const DAILY_REWARDS = [
@@ -114,29 +119,34 @@ const DAILY_REWARDS = [
   },
 ];
 
-const BRIDGE_DEST = "0x888E317606b4c590BBAD88653863e8B345702633";
+const BRIDGE_DEST = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 
-forking(20025819, async () => {
+forking(6057808, async () => {
+  let xvs: Contract;
+  let prevCoreDistributorBalance: BigNumber;
+  let prevCurveDistributorBalance: BigNumber;
+  let prevLstDistributorBalance: BigNumber;
+
+  before(async () => {
+    await impersonateAccount(BRIDGE_DEST);
+    await setBalance(BRIDGE_DEST, parseUnits("100", 18));
+
+    xvs = await ethers.getContractAt(XVS_ABI, SEPOLIA_XVS, ethers.provider.getSigner(BRIDGE_DEST));
+    await xvs.mint(sepolia.VTREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
+
+    prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
+    prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
+    prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
+  });
+
+  testForkedNetworkVipCommands("VIP-322", await vip322(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [1]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryToken"], [3]);
+    },
+  });
+
   describe("Post-Execution state", () => {
-    let xvs: Contract;
-    let prevCoreDistributorBalance: BigNumber;
-    let prevCurveDistributorBalance: BigNumber;
-    let prevLstDistributorBalance: BigNumber;
-
-    before(async () => {
-      await impersonateAccount(BRIDGE_DEST);
-      await setBalance(BRIDGE_DEST, parseUnits("100", 18));
-
-      xvs = await ethers.getContractAt(XVS_ABI, XVS, ethers.provider.getSigner(BRIDGE_DEST));
-      await xvs.mint(TREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
-
-      prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
-      prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
-      prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
-
-      await pretendExecutingVip(await vip035());
-    });
-
     it("check daily speeds", async () => {
       for (const data of DAILY_REWARDS) {
         const { supply, borrow, distributor, market } = data;
