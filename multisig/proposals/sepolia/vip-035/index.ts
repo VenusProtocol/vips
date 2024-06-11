@@ -40,7 +40,7 @@ export const vip035 = () => {
     {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
-      params: [[rsETH, [ONE_JUMP_MAIN, ONE_JUMP_PIVOT, ethers.constants.AddressZero], [true, true, false]]],
+      params: [[rsETH, [ONE_JUMP_MAIN, ONE_JUMP_PIVOT, ONE_JUMP_PIVOT], [true, true, true]]],
     },
 
     // Add Market
