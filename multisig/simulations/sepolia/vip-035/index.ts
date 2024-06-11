@@ -4,6 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { initMainnetUser } from "../../../../src/utils";
 import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
@@ -13,12 +14,13 @@ import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import ERC20_ABI from "./abi/weth.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
-forking(6078810, () => {
+forking(6078825, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vrsETHContract: Contract;
@@ -69,7 +71,7 @@ forking(6078810, () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("100", 8);
+      const expectedSupply = parseUnits("1000", 8);
       expect(await vrsETHContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
     it("check borrow and supply caps", async () => {
@@ -112,7 +114,17 @@ forking(6078810, () => {
       );
     });
     it("check Pool", async () => {
-      checkIsolatedPoolsComptrollers({ comptroller: LIQUID_STAKED_COMPTROLLER });
+      const vWETH = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+      const user = "0x5dAD5eB7a3e557642625399D51577838d26dEae0";
+      const vWETH_core = await ethers.getContractAt(VTOKEN_ABI, vWETH);
+      const weth = await ethers.getContractAt(ERC20_ABI, sepolia.WETH);
+      const amount = parseUnits("3000", 18);
+      const signer = await initMainnetUser(user, parseUnits("3100", 18));
+      await weth.connect(signer).deposit({ value: amount });
+      await weth.connect(signer).approve(vWETH, amount);
+      await vWETH_core.connect(signer).mint(amount);
+
+      checkIsolatedPoolsComptrollers();
     });
   });
 });
