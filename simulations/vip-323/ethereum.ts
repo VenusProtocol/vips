@@ -5,15 +5,18 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip323, { ETHEREUM_ACM } from "../../vips/vip-323/bscmainnet";
+import vip323, {
+  ETHEREUM_ACM,
+  ETHEREUM_NORMAL_TIMELOCK,
+  ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
+} from "../../vips/vip-323/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const ETHEREUM_NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
 
-forking(20039520, async () => {
+forking(20039460, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -21,7 +24,7 @@ forking(20039520, async () => {
   let multisig: any;
 
   before(async () => {
-    executor = new ethers.Contract(ethereum.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executor = new ethers.Contract(ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
     acm = new ethers.Contract(ETHEREUM_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
     multisig = await initMainnetUser(ethereum.GUARDIAN, ethers.utils.parseEther("1"));
@@ -30,7 +33,7 @@ forking(20039520, async () => {
 
   testForkedNetworkVipCommands("vip323 configures bridge", await vip323(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [18]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
     },
   });
 
