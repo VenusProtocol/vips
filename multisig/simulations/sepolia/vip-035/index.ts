@@ -49,9 +49,9 @@ forking(6078825, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("12846543", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("3670", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vrsETH)).to.be.closeTo(
-        parseUnits("12846543", 18),
+        parseUnits("3670", 18),
         parseUnits("1", 18),
       );
     });
@@ -71,7 +71,7 @@ forking(6078825, () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("1000", 8);
+      const expectedSupply = parseUnits("2", 8);
       expect(await vrsETHContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
     it("check borrow and supply caps", async () => {

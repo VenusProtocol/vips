@@ -13,7 +13,7 @@ export const ONE_JUMP_PIVOT = "0xDAF249b4A937385dB567B73630539BacDBB04342";
 export const rsETH = "0xfA0614E5C803E15070d31f7C38d2d430EBe68E47";
 export const vrsETH = "0x20a83DE526F2CF2fCec2131E07b11F956d8f3Cdf";
 export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
-export const INITIAL_SUPPLY = parseUnits("1000", 18);
+export const INITIAL_SUPPLY = parseUnits("2", 18);
 export const SUPPLY_CAP = parseUnits("8000", 18);
 export const BORROW_CAP = parseUnits("3600", 18);
 export const CF = parseUnits("0.8", 18);
@@ -30,12 +30,12 @@ export const vip035 = () => {
     {
       target: sepolia.REDSTONE_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [rsETH, parseUnits("3500", 18)],
+      params: [rsETH, parseUnits("1", 18)],
     },
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [rsETH, parseUnits("3500", 18)],
+      params: [rsETH, parseUnits("1", 18)],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
@@ -77,17 +77,7 @@ export const vip035 = () => {
     {
       target: sepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [
-        [
-          vrsETH,
-          CF,
-          LT,
-          INITIAL_SUPPLY,
-          sepolia.VTREASURY, // TBD
-          SUPPLY_CAP,
-          BORROW_CAP,
-        ],
-      ],
+      params: [[vrsETH, CF, LT, INITIAL_SUPPLY, sepolia.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
     },
   ]);
 };
