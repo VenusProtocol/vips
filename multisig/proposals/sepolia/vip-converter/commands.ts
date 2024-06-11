@@ -1,15 +1,4 @@
-import {
-  ACM,
-  BaseAssets,
-  CONVERTER_NETWORK,
-  GUARDIAN,
-  USDCPrimeConverterTokenOuts,
-  USDTPrimeConverterTokenOuts,
-  WBTCPrimeConverterTokenOuts,
-  WETHPrimeConverterTokenOuts,
-  XVSVaultConverterTokenOuts,
-  converters,
-} from "./Addresses";
+import { ACM, Assets, CONVERTER_NETWORK, GUARDIAN, converters } from "./Addresses";
 
 type IncentiveAndAccessibility = [number, number];
 
@@ -107,7 +96,7 @@ export const incentiveAndAccessibilityForWBTCPrimeConverter: IncentiveAndAccessi
 export const incentiveAndAccessibilityForWETHPrimeConverter: IncentiveAndAccessibility[] = [];
 export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = [];
 
-for (let i = 0; i < USDTPrimeConverterTokenOuts.length; i++) {
+for (let i = 0; i < Assets.length - 1; i++) {
   incentiveAndAccessibilityForUSDTPrimeConverter.push(incentiveAndAccessibility);
 
   incentiveAndAccessibilityForUSDCPrimeConverter.push(incentiveAndAccessibility);
