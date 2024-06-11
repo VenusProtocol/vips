@@ -7,6 +7,7 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip324, { TOTAL_XVS_TO_BRIDGE, XVS, XVS_BRIDGE_SRC } from "../../vips/vip-324/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSenderAbi.json";
 import PROXY_ABI from "./abi/XVSProxyOFTSrc.json";
 
 forking(40991099, async () => {
@@ -18,9 +19,10 @@ forking(40991099, async () => {
     oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-322", await vip324(), {
+  testVip("VIP-324", await vip324(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["SendToChain"], [1]);
+      await expectEvents(txResponse, [OMNICHAIN_PROPOSAL_SENDER_ABI], ["ExecuteRemoteProposal"], [1]);
     },
   });
 

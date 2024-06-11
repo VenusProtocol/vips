@@ -4,6 +4,8 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
+import { expectEvents } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import vip324, {
   BLOCKS_PER_YEAR,
@@ -20,17 +22,20 @@ import vip324, {
   CURVE_XVS_DISTRIBUTOR,
   CURVE_vCRV,
   CURVE_vcrvUSD,
-  ETHEREUM_XVS,
-  ETH_TREASURY,
   LST_XVS_DISTRIBUTOR,
   LST_vwETH,
   LST_vwstETH,
+  SEPOLIA_XVS,
   TOTAL_XVS_FOR_CORE,
   TOTAL_XVS_FOR_CURVE,
   TOTAL_XVS_FOR_LST,
 } from "../../vips/vip-324/bsctestnet";
+import ACM_ABI from "./abi/AccessControlManager_ABI.json";
+import VTREASURY_ABI from "./abi/VTreasuryEthereumAbi.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 import XVS_ABI from "./abi/xvs.json";
+
+const { sepolia } = NETWORK_ADDRESSES;
 
 export const BLOCKS_IN_ONE_DAY = BLOCKS_PER_YEAR.div(365);
 const DAILY_REWARDS = [
@@ -126,15 +131,20 @@ forking(6057808, async () => {
     await impersonateAccount(BRIDGE_DEST);
     await setBalance(BRIDGE_DEST, parseUnits("100", 18));
 
-    xvs = await ethers.getContractAt(XVS_ABI, ETHEREUM_XVS, ethers.provider.getSigner(BRIDGE_DEST));
-    await xvs.mint(ETH_TREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
+    xvs = await ethers.getContractAt(XVS_ABI, SEPOLIA_XVS, ethers.provider.getSigner(BRIDGE_DEST));
+    await xvs.mint(sepolia.VTREASURY, TOTAL_XVS_FOR_CORE.add(TOTAL_XVS_FOR_CURVE).add(TOTAL_XVS_FOR_LST));
 
     prevCoreDistributorBalance = await xvs.balanceOf(CORE_XVS_DISTRIBUTOR);
     prevCurveDistributorBalance = await xvs.balanceOf(CURVE_XVS_DISTRIBUTOR);
     prevLstDistributorBalance = await xvs.balanceOf(LST_XVS_DISTRIBUTOR);
   });
 
-  testForkedNetworkVipCommands("VIP-324", await vip324(), {});
+  testForkedNetworkVipCommands("VIP-324", await vip324(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [1]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryToken"], [3]);
+    },
+  });
 
   describe("Post-Execution state", () => {
     it("check daily speeds", async () => {
