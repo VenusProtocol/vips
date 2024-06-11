@@ -25,7 +25,7 @@ import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
 const BSCTESTNET_OMNICHAIN_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
-const BSCMAINNET_OMNICHAIN_SENDER = "0xB61BA63441bE8F6cFbcA4510c78F2265aDBb05Ee";
+const BSCMAINNET_OMNICHAIN_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
 
 export const getOmnichainProposalSenderAddress = () => {
   if (FORKED_NETWORK === "bscmainnet" || REMOTE_MAINNET_NETWORKS.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
@@ -163,7 +163,7 @@ export const makeProposal = async (
 
       proposal.targets.push(getOmnichainProposalSenderAddress());
       const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
-      proposal.values.push(value);
+      proposal.values.push(value.toString());
       proposal.signatures.push("execute(uint16,bytes,bytes,address)");
       proposal.params.push([key, remoteParam, remoteAdapterParam, ethers.constants.AddressZero]);
     } else {
