@@ -30,12 +30,12 @@ export const vip035 = () => {
     {
       target: sepolia.REDSTONE_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [rsETH, parseUnits("1", 18)],
+      params: [rsETH, parseUnits("3500", 18)],
     },
     {
       target: sepolia.CHAINLINK_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [rsETH, parseUnits("1", 18)],
+      params: [rsETH, parseUnits("3500", 18)],
     },
     {
       target: sepolia.RESILIENT_ORACLE,
