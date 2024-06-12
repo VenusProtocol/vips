@@ -15,23 +15,34 @@ import {
   converters,
 } from "../../../proposals/sepolia/vip-converter/Addresses";
 import vipConverter, {
+  COMPTROLLER_CORE,
+  COMPTROLLER_LST,
+  PLP,
+  PRIME,
   PROTOCOL_SHARE_RESERVE_PROXY,
+  USDC,
+  USDT,
   VTREASURY,
+  VUSDC_CORE,
+  VUSDT_CORE,
+  VWBTC_CORE,
+  VWETH_LST,
+  WBTC,
+  WETH,
   XVS_VAULT_TREASURY,
 } from "../../../proposals/sepolia/vip-converter/vipConverter";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import COMPTROLLER_ABI from "./abi/ILComptroller.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_VAULT_CONVERTER_ABI from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
-const COMPTROLLER_CORE_POOL = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70"; // IL core pool
 const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
-const USDT = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
-const USDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 const XVS_VAULT = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
-const PLP = "0x15242a55Ad1842A1aEa09c59cf8366bD2f3CE9B4";
 const USDT_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 const USDC_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 
@@ -195,7 +206,7 @@ forking(6078847, () => {
       const destinationAddressForUsdcConverter = await usdcPrimeConverter.destinationAddress();
 
       await usdc.connect(user1).transfer(USDT_PRIME_CONVERTER, amount);
-      await usdtPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE_POOL, USDC);
+      await usdtPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDC);
 
       const usdcBalanceUsdtPrimeConverterPrevious = await usdtPrimeConverter.balanceOf(USDC);
       const usdtBalanceUsdtPrimePrevious = await usdt.balanceOf(PLP);
@@ -204,7 +215,7 @@ forking(6078847, () => {
 
       await usdt.connect(user1).transfer(USDC_PRIME_CONVERTER, amount);
       // Private Conversion will occur
-      await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE_POOL, USDT);
+      await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDT);
 
       const usdcBalanceUsdtPrimeConverterCurrent = await usdtPrimeConverter.balanceOf(USDC);
       const usdtBalanceUsdtPrimeCurrent = await usdt.balanceOf(PLP);
@@ -218,6 +229,69 @@ forking(6078847, () => {
         plpBalanceForUsdcPrevious.add(amount),
         parseUnits("1", 18),
       );
+    });
+  });
+});
+
+forking(6078847, () => {
+  const provider = ethers.provider;
+  let prime: Contract;
+  let plp: Contract;
+
+  describe("Pre-VIP behaviour", () => {
+    before(async () => {
+      prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+      plp = new ethers.Contract(PLP, PLP_ABI, provider);
+    });
+
+    it("Plp should not contain tokens", async () => {
+      plp = new ethers.Contract(PLP, PLP_ABI, provider);
+
+      expect(await plp.lastAccruedBlockOrSecond(USDT)).to.be.equal(0);
+      expect(await plp.lastAccruedBlockOrSecond(USDC)).to.be.equal(0);
+      expect(await plp.lastAccruedBlockOrSecond(WETH)).to.be.equal(0);
+      expect(await plp.lastAccruedBlockOrSecond(WBTC)).to.be.equal(0);
+    });
+
+    it("Prime should have not contain number of revocable and irrevocable tokens", async () => {
+      expect(await prime.irrevocableLimit()).to.equal(0);
+      expect(await prime.revocableLimit()).to.equal(0);
+    });
+  });
+
+  describe("Post-VIP behavior", () => {
+    let prime: Contract;
+    let plp: Contract;
+
+    before(async () => {
+      await pretendExecutingVip(vipConverter());
+
+      prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+      plp = new ethers.Contract(PLP, PLP_ABI, provider);
+    });
+
+    it("Comptroller lst should have correct Prime token address", async () => {
+      const comptrollerLst = new ethers.Contract(COMPTROLLER_LST, COMPTROLLER_ABI, provider);
+      expect(await comptrollerLst.prime()).to.be.equal(PRIME);
+    });
+
+    it("Prime should contain correct markets", async () => {
+      expect((await prime.markets(VUSDC_CORE))[4]).to.be.equal(true);
+      expect((await prime.markets(VUSDT_CORE))[4]).to.be.equal(true);
+      expect((await prime.markets(VWBTC_CORE))[4]).to.be.equal(true);
+      expect((await prime.markets(VWETH_LST))[4]).to.be.equal(true);
+    });
+
+    it("Prime should have correct number of revocable and irrevocable tokens", async () => {
+      expect(await prime.irrevocableLimit()).to.equal(0);
+      expect(await prime.revocableLimit()).to.equal(500);
+    });
+
+    it("Plp should have correct tokens", async () => {
+      expect(await plp.lastAccruedBlockOrSecond(USDT)).to.be.gt(0);
+      expect(await plp.lastAccruedBlockOrSecond(USDC)).to.be.gt(0);
+      expect(await plp.lastAccruedBlockOrSecond(WETH)).to.be.gt(0);
+      expect(await plp.lastAccruedBlockOrSecond(WBTC)).to.be.gt(0);
     });
   });
 });
