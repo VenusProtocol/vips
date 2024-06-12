@@ -56,16 +56,6 @@ export const vip035 = () => {
     },
     {
       target: rsETH,
-      signature: "transfer(address,uint256)",
-      params: [sepolia.VTREASURY, INITIAL_SUPPLY],
-    },
-    {
-      target: sepolia.VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [rsETH, INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
-    },
-    {
-      target: rsETH,
       signature: "approve(address,uint256)",
       params: [sepolia.POOL_REGISTRY, 0],
     },

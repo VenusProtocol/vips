@@ -20,7 +20,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
-forking(6078825, () => {
+forking(6092029, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vrsETHContract: Contract;
@@ -49,9 +49,9 @@ forking(6078825, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("3670", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("3540", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vrsETH)).to.be.closeTo(
-        parseUnits("3670", 18),
+        parseUnits("3540", 18),
         parseUnits("1", 18),
       );
     });
