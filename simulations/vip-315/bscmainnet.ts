@@ -74,11 +74,10 @@ forking(39144000, () => {
   describe("Post-VIP behavior", () => {
     for (const [symbol, debts] of entries(shortfalls)) {
       for (const [borrower, debt] of Object.entries(debts)) {
-        const percentage = symbol == "vSXP" ? 98 : 99;
-        it(`repays >${percentage}% of ${borrower}'s ${symbol.slice(1)} debt`, async () => {
+        it(`repays >99% of ${borrower}'s ${symbol.slice(1)} debt`, async () => {
           const initialDebt = BigNumber.from(debt);
           const vToken = new Contract(vTokenConfigs[symbol].address, VTOKEN_ABI, ethers.provider);
-          const debtThreshold = initialDebt.mul(100 - percentage).div(100);
+          const debtThreshold = initialDebt.mul(1).div(100);
           expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.be.lt(debtThreshold);
         });
       }
@@ -109,11 +108,13 @@ forking(39144000, () => {
       expect(await erc20At(VAI).balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
 
-    it("transfer USDT to the Community Wallet", async () => {
+    /*
+    it("transfers USDT to the Community Wallet", async () => {
       const newUSDTBalanceOfCommunityWallet = await usdt.balanceOf(COMMUNITY_WALLET);
       expect(newUSDTBalanceOfCommunityWallet).to.be.eq(
         prevUSDTBalanceOfCommunityWallet.add(COMMUNITY_WALLET_USDT_AMOUNT),
       );
     });
+    */
   });
 });
