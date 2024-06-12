@@ -5,18 +5,18 @@ import { makeProposal } from "../../../../src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-export const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
-export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
-export const ONE_JUMP_MAIN = "0xB15CA4Cd4bA5696FDC1cbBd859588c0421cc1F68";
-export const ONE_JUMP_PIVOT = "0xDAF249b4A937385dB567B73630539BacDBB04342";
+const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
+const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
+const rsETH_ONE_JUMP_REDSTONE_ORACLE = "0xB15CA4Cd4bA5696FDC1cbBd859588c0421cc1F68";
+const rsETH_ONE_JUMP_CHAINLINK_ORACLE = "0xDAF249b4A937385dB567B73630539BacDBB04342";
 export const rsETH = "0xfA0614E5C803E15070d31f7C38d2d430EBe68E47";
 export const vrsETH = "0x20a83DE526F2CF2fCec2131E07b11F956d8f3Cdf";
-export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
-export const INITIAL_SUPPLY = parseUnits("2", 18);
+const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
+const INITIAL_SUPPLY = parseUnits("2", 18);
 export const SUPPLY_CAP = parseUnits("8000", 18);
 export const BORROW_CAP = parseUnits("3600", 18);
-export const CF = parseUnits("0.8", 18);
-export const LT = parseUnits("0.85", 18);
+const CF = parseUnits("0.8", 18);
+const LT = parseUnits("0.85", 18);
 
 export const vip035 = () => {
   return makeProposal([
@@ -39,7 +39,13 @@ export const vip035 = () => {
     {
       target: sepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
-      params: [[rsETH, [ONE_JUMP_MAIN, ONE_JUMP_PIVOT, ONE_JUMP_PIVOT], [true, true, true]]],
+      params: [
+        [
+          rsETH,
+          [rsETH_ONE_JUMP_REDSTONE_ORACLE, rsETH_ONE_JUMP_CHAINLINK_ORACLE, rsETH_ONE_JUMP_CHAINLINK_ORACLE],
+          [true, true, true],
+        ],
+      ],
     },
 
     // Add Market
