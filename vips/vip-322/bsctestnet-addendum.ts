@@ -40,7 +40,7 @@ export const CORE_SPEEDS = [
   {
     name: "vweETH",
     address: CORE_vwETH,
-    reward: parseUnits("1125", 18).div(10),
+    reward: parseUnits("1125", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -48,7 +48,7 @@ export const CORE_SPEEDS = [
   {
     name: "vWBTC",
     address: CORE_vWBTC,
-    reward: parseUnits("3375", 18).div(10),
+    reward: parseUnits("3375", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -56,7 +56,7 @@ export const CORE_SPEEDS = [
   {
     name: "vUSDT",
     address: CORE_vUSDT,
-    reward: parseUnits("3375", 18).div(10),
+    reward: parseUnits("3375", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -64,7 +64,7 @@ export const CORE_SPEEDS = [
   {
     name: "vUSDC",
     address: CORE_vUSDC,
-    reward: parseUnits("3375", 18).div(10),
+    reward: parseUnits("3375", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -72,7 +72,7 @@ export const CORE_SPEEDS = [
   {
     name: "vcrvUSD",
     address: CORE_vcrvUSD,
-    reward: parseUnits("1500", 18).div(10),
+    reward: parseUnits("1500", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -80,7 +80,7 @@ export const CORE_SPEEDS = [
   {
     name: "vFRAX",
     address: CORE_vFRAX,
-    reward: parseUnits("600", 18).div(10),
+    reward: parseUnits("600", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -88,7 +88,7 @@ export const CORE_SPEEDS = [
   {
     name: "vsFRAX",
     address: CORE_vsFRAX,
-    reward: parseUnits("600", 18).div(10),
+    reward: parseUnits("600", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -96,7 +96,7 @@ export const CORE_SPEEDS = [
   {
     name: "vTUSD",
     address: CORE_vTUSD,
-    reward: parseUnits("200", 18).div(10),
+    reward: parseUnits("200", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -104,7 +104,7 @@ export const CORE_SPEEDS = [
   {
     name: "vDAI",
     address: CORE_vDAI,
-    reward: parseUnits("500", 18).div(10),
+    reward: parseUnits("500", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CORE_XVS_DISTRIBUTOR,
@@ -115,7 +115,7 @@ export const CURVE_SPEEDS = [
   {
     name: "vCRV",
     address: CURVE_vCRV,
-    reward: parseUnits("375", 18).div(10),
+    reward: parseUnits("375", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CURVE_XVS_DISTRIBUTOR,
@@ -123,7 +123,7 @@ export const CURVE_SPEEDS = [
   {
     name: "vcrvUSD",
     address: CURVE_vcrvUSD,
-    reward: parseUnits("375", 18).div(10),
+    reward: parseUnits("375", 18).div(50),
     supplySpeedPercentage: 40,
     borrowSpeedPercentage: 60,
     distributor: CURVE_XVS_DISTRIBUTOR,
@@ -134,7 +134,7 @@ export const LST_SPEEDS = [
   {
     name: "vWETH",
     address: LST_vwETH,
-    reward: parseUnits("18333", 18).div(10),
+    reward: parseUnits("18333", 18).div(50),
     supplySpeedPercentage: 30,
     borrowSpeedPercentage: 70,
     distributor: LST_XVS_DISTRIBUTOR,
@@ -142,7 +142,7 @@ export const LST_SPEEDS = [
   {
     name: "vwstETH",
     address: LST_vwstETH,
-    reward: parseUnits("3600", 18).div(10),
+    reward: parseUnits("3600", 18).div(50),
     supplySpeedPercentage: 100,
     borrowSpeedPercentage: 0,
     distributor: LST_XVS_DISTRIBUTOR,
@@ -152,8 +152,7 @@ export const LST_SPEEDS = [
 export const BRIDGE_FEES = parseUnits("0.4", 18);
 export const DEST_ENDPOINT_ID = 10161; // Sepolia chain
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const PERCENTAGE_OF_REAL_AMOUNT_BRIDGE = 10;
-export const TOTAL_MONTHS = 1;
+export const TOTAL_MONTHS = 5;
 export const TOTAL_XVS_TO_BRIDGE = CURVE_SPEEDS.concat(LST_SPEEDS)
   .reduce((acc, { reward }) => acc.add(reward), ethers.BigNumber.from(0))
   .mul(TOTAL_MONTHS);
