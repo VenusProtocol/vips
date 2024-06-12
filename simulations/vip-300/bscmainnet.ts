@@ -4,21 +4,36 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip300, { XVS, XVS_AMOUNT, XVS_BRIDGE_SRC } from "../../vips/vip-300/bscmainnet";
+import vip300, {
+  COMMUNITY_WALLET,
+  ETH,
+  ETH_AMOUNT_WALLET,
+  XVS,
+  XVS_AMOUNT,
+  XVS_AMOUNT_WALLET,
+  XVS_BRIDGE_SRC,
+} from "../../vips/vip-300/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(39114470, () => {
+forking(39546351, () => {
   let xvsBridge: Contract;
   let xvs: Contract;
+  let eth: Contract;
   let oldCirculatingSupply: BigNumber;
-  let oldXVSBal: BigNumber;
+  let oldXvsBalBridge: BigNumber;
+  let oldXvsBalWallet: BigNumber;
+  let oldEthBalWallet: BigNumber;
 
   before(async () => {
     xvsBridge = new ethers.Contract(XVS_BRIDGE_SRC, XVS_BRIDGE_ABI, ethers.provider);
     xvs = new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
+    eth = new ethers.Contract(ETH, ERC20_ABI, ethers.provider);
+
     oldCirculatingSupply = await xvsBridge.circulatingSupply();
-    oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
+    oldXvsBalBridge = await xvs.balanceOf(XVS_BRIDGE_SRC);
+    oldXvsBalWallet = await xvs.balanceOf(COMMUNITY_WALLET);
+    oldEthBalWallet = await eth.balanceOf(COMMUNITY_WALLET);
   });
 
   testVip("VIP-300 Send XVS to Dest Chain", vip300(), {
@@ -28,6 +43,11 @@ forking(39114470, () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    it("Should increase wallet xvs and eth balance", async () => {
+      expect(await xvs.balanceOf(COMMUNITY_WALLET)).to.equal(XVS_AMOUNT_WALLET.add(oldXvsBalWallet));
+      expect(await eth.balanceOf(COMMUNITY_WALLET)).to.equal(ETH_AMOUNT_WALLET.add(oldEthBalWallet));
+    });
+
     it("Should decrease circulating supply", async () => {
       const currCirculatingSupply = await xvsBridge.circulatingSupply();
       expect(oldCirculatingSupply.sub(currCirculatingSupply)).equals(XVS_AMOUNT);
@@ -35,7 +55,7 @@ forking(39114470, () => {
 
     it("Should increase number of locked tokens on bridge", async () => {
       const currXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
-      expect(currXVSBal.sub(oldXVSBal)).equals(XVS_AMOUNT);
+      expect(currXVSBal.sub(oldXvsBalBridge)).equals(XVS_AMOUNT);
     });
   });
 });
