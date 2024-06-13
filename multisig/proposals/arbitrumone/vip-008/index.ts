@@ -7,7 +7,7 @@ const { arbitrumone } = NETWORK_ADDRESSES;
 
 export const XVS_VAULT_PROXY = "0x8b79692AAB2822Be30a6382Eb04763A74752d5B4";
 export const XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
-export const XVS_VAULT_REWARDS_SPEED = "578703703703703"; // to be decided
+export const XVS_VAULT_REWARDS_SPEED = "578703703703703"; // 1500 xvs/month
 export const XVS = "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52";
 export const XVS_AMOUNT = parseUnits("4500", 18);
 

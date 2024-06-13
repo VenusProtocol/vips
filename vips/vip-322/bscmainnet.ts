@@ -12,7 +12,7 @@ const BSC_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-const BRIDGE_FEES = parseUnits("0.005", 18); // value bigger than real estimated fees(0.0005)
+const BRIDGE_FEES = parseUnits("0.05", 18); // value bigger than real estimated fees(0.0005)
 export const XVS_AMOUNT = parseUnits("30000", 18);
 const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [ARBITRUM_ONE_VTREASURY]);
 const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
@@ -68,9 +68,14 @@ const vip322 = () => {
           DEST_CHAIN_ID,
           RECEIVER_ADDRESS,
           XVS_AMOUNT,
-          [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         value: BRIDGE_FEES.toString(),
+      },
+      {
+        target: XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_SRC, 0],
       },
     ],
     meta,
