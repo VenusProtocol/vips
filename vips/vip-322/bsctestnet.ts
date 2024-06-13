@@ -17,10 +17,10 @@ export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [
 export const XVS_AMOUNT = parseUnits("5000", 18);
 export const DEST_CHAIN_ID = 10231;
 
-const vip300 = () => {
+const vip322 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-300 Bootstrap XVS liquidity for the Arbitrum Sepolia rewards",
+    title: "VIP-322 Bootstrap XVS liquidity for the Arbitrum Sepolia rewards",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -58,4 +58,4 @@ const vip300 = () => {
   );
 };
 
-export default vip300;
+export default vip322;

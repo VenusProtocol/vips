@@ -23,10 +23,10 @@ export const ETH_AMOUNT_WALLET = parseUnits("5", 18);
 export const XVS_AMOUNT_WALLET = parseUnits("1500", 18);
 export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
-const vip300 = () => {
+const vip322 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-300 Bootstrap XVS liquidity for the Arbitrum one rewards",
+    title: "VIP-322 Bootstrap XVS liquidity for the Arbitrum one rewards",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -78,4 +78,4 @@ const vip300 = () => {
   );
 };
 
-export default vip300;
+export default vip322;
