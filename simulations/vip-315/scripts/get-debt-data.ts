@@ -1,4 +1,4 @@
-import { BigNumber, Contract, Signer } from "ethers";
+import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { Result, formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import fs from "fs/promises";
@@ -28,6 +28,7 @@ const CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 const VIP_REPAYMENT_THRESHOLD = parseUnits("15", 18); // Repaying debts > $15 in the VIP, the rest to be repaid by community
 const COLLATERAL_THRESHOLD = parseUnits("10", 18); // Debt would be repaid if the collateral is < $10
 const SXPOLD_DEBANK_PRICE = parseUnits("0.006", 18); // Use DeBank price for SXPOLD token as it's more realistic than assuming SXPOLD == SXP
+const SCALE_BY = parseUnits("1.01", 18);
 
 const CHAINLINK_ORACLE_ABI = [
   "function setDirectPrice(address asset, uint256 price) external",
@@ -253,6 +254,22 @@ const filterDebts = ({ market, debts }: MarketDebtData, filterFn: (arg: [string,
   };
 }
 
+const scaleDebts = ({ market, debts }: MarketDebtData, scale: BigNumberish): MarketDebtData => {
+  const scaled = Object.entries(debts).map(([account, value]: [string, Value]): [string, Value] => {
+    const scaledValue = market.valueFromUnderlyingAmount(value.underlyingAmount.mul(scale).div(MANTISSA_ONE));
+    return [account, scaledValue];
+  });
+  const totalDebtInUnderlying = scaled.reduce(
+    (acc: BigNumber, [_, x]: [string, Value]) => acc.add(x.underlyingAmount), BigNumber.from(0)
+  );
+  const totalDebt = market.valueFromUnderlyingAmount(totalDebtInUnderlying);
+  return {
+    market,
+    debts: Object.fromEntries(scaled),
+    totalDebt,
+  };
+}
+
 const main = async () => {
   const signer = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2", 18));
   await chainlinkOracle.connect(signer).setDirectPrice(SXPOLD, SXPOLD_DEBANK_PRICE);
@@ -278,21 +295,23 @@ const main = async () => {
     return bigDebt && lowCollateral;
   }
 
-  const filteredDebts = marketDebtData.map((debts) => filterDebts(debts, shouldRepayInVip));
+  const scaledDebts = marketDebtData.map((m) => scaleDebts(m, SCALE_BY));
+  const filteredDebts = scaledDebts.map((debts) => filterDebts(debts, shouldRepayInVip));
   const debtsToRepay = filteredDebts.filter((debtData) => debtData.totalDebt.underlyingAmount.gt(0));
   const marketsWithNoVipRepayment = filteredDebts.filter((debtData) => debtData.totalDebt.underlyingAmount.eq(0)).map(({ market }) => market.symbol);
   console.log("export const shortfalls = " + codegen.printAnnotatedDebts(debtsToRepay));
-  const { vTokenWithdrawals, underlyingWithdrawals, errors } = await computeTreasuryWithdrawals(marketDebtData);
+  const { vTokenWithdrawals, underlyingWithdrawals, errors } = await computeTreasuryWithdrawals(scaledDebts);
   console.log("export const vTokenWithdrawals = " + codegen.printVTokenAmounts(vTokenWithdrawals));
   console.log("export const underlyingWithdrawals = " + codegen.printUnderlyingAmounts(underlyingWithdrawals));
   for (const error of errors) {
     console.warn(error);
   }
 
-  const totalVaiDebt = vaiDebts.totalDebt.underlyingAmount;
-  console.log("export const vaiDebts = " + codegen.printVaiDebts(filterDebts(vaiDebts, shouldRepayInVip)));
+  const scaledVaiDebts = scaleDebts(vaiDebts, SCALE_BY);
+  const totalVaiDebt = scaledVaiDebts.totalDebt.underlyingAmount;
+  console.log("export const vaiDebts = " + codegen.printVaiDebts(filterDebts(scaledVaiDebts, shouldRepayInVip)));
   console.log(`export const totalVAIDebt = parseUnits("${formatUnits(totalVaiDebt, 18)}", 18);`);
-  console.log(`export const plainTransfers = [${ marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ") })}]`)
+  console.log(`export const plainTransfers = [${ marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ") }] as const;`)
 };
 
 // @kkirka: I couldn't make `hardhat run` preserve the --fork parameter: scripts are launched

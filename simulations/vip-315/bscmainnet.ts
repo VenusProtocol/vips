@@ -73,20 +73,17 @@ forking(39144000, () => {
 
   describe("Post-VIP behavior", () => {
     for (const [symbol, debts] of entries(shortfalls)) {
-      for (const [borrower, debt] of Object.entries(debts)) {
-        it(`repays >99% of ${borrower}'s ${symbol.slice(1)} debt`, async () => {
-          const initialDebt = BigNumber.from(debt);
+      for (const [borrower, _] of Object.entries(debts)) {
+        it(`repays ${borrower}'s ${symbol.slice(1)} debt in full`, async () => {
           const vToken = new Contract(vTokenConfigs[symbol].address, VTOKEN_ABI, ethers.provider);
-          const debtThreshold = initialDebt.mul(1).div(100);
-          expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.be.lt(debtThreshold);
+          expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.equal(0);
         });
       }
     }
 
-    for (const [borrower, debt] of Object.entries(vaiDebts)) {
-      it(`repays >99% of ${borrower}'s VAI debt`, async () => {
-        const initialDebt = BigNumber.from(debt);
-        expect(await vaiController.callStatic.getVAIRepayAmount(borrower)).to.be.lt(initialDebt.mul(1).div(100));
+    for (const [borrower, _] of Object.entries(vaiDebts)) {
+      it(`repays ${borrower}'s VAI debt in full`, async () => {
+        expect(await vaiController.callStatic.getVAIRepayAmount(borrower)).to.equal(0);
       });
     }
 
