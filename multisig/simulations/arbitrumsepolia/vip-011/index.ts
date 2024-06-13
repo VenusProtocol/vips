@@ -13,7 +13,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-forking(53937516, async () => {
+forking(54239346, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {
