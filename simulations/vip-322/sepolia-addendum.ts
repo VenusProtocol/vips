@@ -39,80 +39,80 @@ export const BLOCKS_IN_ONE_DAY = BLOCKS_PER_YEAR.div(365);
 const DAILY_REWARDS = [
   {
     market: CORE_vwETH,
-    supply: parseUnits("1.5", 18),
-    borrow: parseUnits("2.250", 18),
+    supply: parseUnits("15", 18).div(50),
+    borrow: parseUnits("22.50", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vWBTC,
-    supply: parseUnits("4.5", 18),
-    borrow: parseUnits("6.750", 18),
+    supply: parseUnits("45", 18).div(50),
+    borrow: parseUnits("67.50", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vUSDT,
-    supply: parseUnits("4.5", 18),
-    borrow: parseUnits("6.750", 18),
+    supply: parseUnits("45", 18).div(50),
+    borrow: parseUnits("67.50", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vUSDC,
-    supply: parseUnits("4.5", 18),
-    borrow: parseUnits("6.750", 18),
+    supply: parseUnits("45", 18).div(50),
+    borrow: parseUnits("67.50", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vcrvUSD,
-    supply: parseUnits("2", 18),
-    borrow: parseUnits("3", 18),
+    supply: parseUnits("20", 18).div(50),
+    borrow: parseUnits("30", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vFRAX,
-    supply: parseUnits("0.8", 18),
-    borrow: parseUnits("1.2", 18),
+    supply: parseUnits("8", 18).div(50),
+    borrow: parseUnits("12", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vsFRAX,
-    supply: parseUnits("0.8", 18),
-    borrow: parseUnits("1.2", 18),
+    supply: parseUnits("8", 18).div(50),
+    borrow: parseUnits("12", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vTUSD,
-    supply: parseUnits("0.267", 18),
-    borrow: parseUnits("0.4", 18),
+    supply: parseUnits("2.67", 18).div(50),
+    borrow: parseUnits("4", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CORE_vDAI,
-    supply: parseUnits("0.667", 18),
-    borrow: parseUnits("0.10", 18),
+    supply: parseUnits("6.67", 18).div(50),
+    borrow: parseUnits("10", 18).div(50),
     distributor: CORE_XVS_DISTRIBUTOR,
   },
   {
     market: CURVE_vCRV,
-    supply: parseUnits("0.5", 18),
-    borrow: parseUnits("0.750", 18),
+    supply: parseUnits("5", 18).div(50),
+    borrow: parseUnits("7.50", 18).div(50),
     distributor: CURVE_XVS_DISTRIBUTOR,
   },
   {
     market: CURVE_vcrvUSD,
-    supply: parseUnits("0.5", 18),
-    borrow: parseUnits("0.750", 18),
+    supply: parseUnits("5", 18).div(50),
+    borrow: parseUnits("7.50", 18).div(50),
     distributor: CURVE_XVS_DISTRIBUTOR,
   },
   {
     market: LST_vwETH,
-    supply: parseUnits("18.333", 18),
-    borrow: parseUnits("42.778", 18),
+    supply: parseUnits("183.33", 18).div(50),
+    borrow: parseUnits("427.78", 18).div(50),
     distributor: LST_XVS_DISTRIBUTOR,
   },
   {
     market: LST_vwstETH,
-    supply: parseUnits("12", 18),
-    borrow: parseUnits("0", 18),
+    supply: parseUnits("120", 18).div(50),
+    borrow: parseUnits("0", 18).div(50),
     distributor: LST_XVS_DISTRIBUTOR,
   },
 ];
@@ -150,8 +150,8 @@ forking(6086455, async () => {
         const supplySpeed = await rewardsDistributor.rewardTokenSupplySpeeds(market);
         const borrowSpeed = await rewardsDistributor.rewardTokenBorrowSpeeds(market);
 
-        expect(supplySpeed).to.be.closeTo(supply.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
-        expect(borrowSpeed).to.be.closeTo(borrow.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 18));
+        expect(supplySpeed).to.be.closeTo(supply.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 13));
+        expect(borrowSpeed).to.be.closeTo(borrow.div(BLOCKS_IN_ONE_DAY), parseUnits("0.01", 13));
       }
     });
 
