@@ -4,7 +4,7 @@ import vip323 from "../../vips/vip-323/bscmainnet";
 import vip324 from "../../vips/vip-324/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(39400639, async () => {
+forking(39603799, async () => {
   before(async () => {
     await pretendExecutingVip(await vip323());
   });
@@ -15,7 +15,7 @@ forking(39400639, async () => {
         txResponse,
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
-        [2, 0],
+        [3, 0],
       );
     },
   });

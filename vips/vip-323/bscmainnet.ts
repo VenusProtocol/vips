@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bscmainnet, arbitrumone } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
 const BSC_ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
 const BSC_FASTTRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
@@ -21,16 +21,22 @@ export const OPBNBMAINNET_OMNICHAIN_GOVERNANCE_EXECUTOR = opbnbmainnet.OMNICHAIN
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 export const MAX_DAILY_LIMIT = 100;
 
+export const ARBITRUM_NORMAL_TIMELOCK = "0x4b94589Cc23F618687790036726f744D602c4017";
+export const ARBITRUM_OMNICHAIN_EXECUTOR_OWNER = "0xf72C1Aa0A1227B4bCcB28E1B1015F0616E2db7fD";
+export const ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR = arbitrumone.OMNICHAIN_GOVERNANCE_EXECUTOR;
+export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
+
 const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
+const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
 const vip323 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip323 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum and opbnbmainnet",
+      "vip323 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum, opbnbmainnet & arbitrum ",
     description: `#### Description
-    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on ETHEREUM & OPBNBMINNET chains`,
+    This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on ETHEREUM, OPBNBMINNET & ARBITRUM chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -198,6 +204,16 @@ const vip323 = () => {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [OPBNBMAINNET_CHAIN_ID, OPBNBMAINNET_OMNICHAIN_GOVERNANCE_EXECUTOR],
+      },
+      {
+        target: OMNICHAIN_PROPOSAL_SENDER,
+        signature: "setMaxDailyLimit(uint16,uint256)",
+        params: [ARBITRUM_CHAIN_ID, MAX_DAILY_LIMIT],
+      },
+      {
+        target: OMNICHAIN_PROPOSAL_SENDER,
+        signature: "setTrustedRemoteAddress(uint16,bytes)",
+        params: [ARBITRUM_CHAIN_ID, ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR],
       },
 
       {
@@ -399,6 +415,94 @@ const vip323 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_NORMAL_TIMELOCK],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "pause()", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
+          "retryMessage(uint16,bytes,uint64,bytes)",
+          ARBITRUM_NORMAL_TIMELOCK,
+        ],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
       },
     ],
     meta,
