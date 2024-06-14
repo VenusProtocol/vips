@@ -32,12 +32,12 @@ export const vip035 = () => {
     {
       target: ethereum.REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[rsETH, CHAINLINK_rsETH_FEED, STALE_PERIOD_26H]],
+      params: [[rsETH, REDSTONE_rsETH_FEED, STALE_PERIOD_26H]],
     },
     {
       target: ethereum.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[rsETH, REDSTONE_rsETH_FEED, STALE_PERIOD_26H]],
+      params: [[rsETH, CHAINLINK_rsETH_FEED, STALE_PERIOD_26H]],
     },
     {
       target: ethereum.RESILIENT_ORACLE,

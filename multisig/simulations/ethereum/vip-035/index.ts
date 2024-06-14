@@ -54,9 +54,9 @@ forking(20083100, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("3518", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(rsETH)).to.be.closeTo(parseUnits("3520", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vrsETH)).to.be.closeTo(
-        parseUnits("3518", 18),
+        parseUnits("3520", 18),
         parseUnits("1", 18),
       );
     });
