@@ -13,6 +13,7 @@ import vip008, {
   COMPTROLLER_CORE,
   REWARD_DISTRIBUTOR_CORE_0,
   VARB_CORE,
+  VTREASURY,
   VUSDC_CORE,
   VUSDT_CORE,
   VWBTC_CORE,
@@ -31,11 +32,30 @@ forking(221153914, () => {
   let xvsVault: Contract;
   let xvs: Contract;
 
+  describe("Pre-VIP behaviour", async () => {
+    before(async () => {
+      xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
+      xvs = new ethers.Contract(XVS, XVS_ABI, provider);
+    });
+
+    it("vTreasury should hold 30000 XVS", async () => {
+      expect(await xvs.balanceOf(VTREASURY)).to.be.equal(parseUnits("30000", 18));
+    });
+  });
+
   describe("Post-VIP behavior", async () => {
     before(async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
       await pretendExecutingVip(vip008());
+    });
+
+    it("vTreasury should hold 15300 XVS", async () => {
+      expect(await xvs.balanceOf(VTREASURY)).to.be.equal(parseUnits("15300", 18));
+    });
+
+    it("rewards distributor should have expected number of xvs tokens", async () => {
+      expect(await xvs.balanceOf(REWARD_DISTRIBUTOR_CORE_0)).to.be.equal(parseUnits("10200", 18));
     });
 
     it("vault should be enabled", async () => {
