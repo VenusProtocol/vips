@@ -1,3 +1,5 @@
+import { parseUnits } from "ethers/lib/utils";
+
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
@@ -13,7 +15,14 @@ export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
 const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 
-export const XVS_VAULT_REWARDS_SPEED = "7291666666666666";
+export const XVS_VAULT_REWARDS_SPEED = "67341820987654320";
+
+const XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
+export const XVS_VAULT_TREASURY_RELEASE_AMOUNT = parseUnits("79000", 18);
+
+const COMPTROLLER_CORE = "0xfd36e2c2a6789db23113685031d7f16329158384";
+export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
+export const COMPTROLLER_CORE_RELEASE_AMOUNT = parseUnits("153510", 18); // Q3 ->95,550 + Q4 -> 57,960
 
 export const vip323 = () => {
   const meta = {
@@ -54,6 +63,16 @@ export const vip323 = () => {
         target: PROTOCOL_SHARE_RESERVE_PROXY,
         signature: "removeDistributionConfig(uint8,address)",
         params: [1, RISK_FUND_CONVERTER],
+      },
+      {
+        target: XVS_VAULT_TREASURY,
+        signature: "fundXVSVault(uint256)",
+        params: [XVS_VAULT_TREASURY_RELEASE_AMOUNT],
+      },
+      {
+        target: COMPTROLLER_CORE,
+        signature: "_grantXVS(address,uint256)",
+        params: [XVS_STORE, COMPTROLLER_CORE_RELEASE_AMOUNT],
       },
       {
         target: bscmainnet.XVS_VAULT_PROXY,

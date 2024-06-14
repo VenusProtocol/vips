@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
@@ -7,30 +7,42 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip323, {
   BTCB_PRIME_CONVERTER,
+  COMPTROLLER_CORE_RELEASE_AMOUNT,
   PROTOCOL_SHARE_RESERVE_PROXY,
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
   VTREASURY,
+  XVS_STORE,
   XVS_VAULT_CONVERTER,
   XVS_VAULT_REWARDS_SPEED,
+  XVS_VAULT_TREASURY_RELEASE_AMOUNT,
 } from "../../vips/vip-323/bscmainnet";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
+import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
+import XVS_ABI from "./abi/xvs.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(39555400, () => {
   let psr: Contract;
+  let xvs: Contract;
   let xvsVault: Contract;
+  let oldXvsStoreBalance: BigNumber;
 
   before(async () => {
     psr = await ethers.getContractAt(PSR_ABI, PROTOCOL_SHARE_RESERVE_PROXY);
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, bscmainnet.XVS_VAULT_PROXY);
+    xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, ethers.provider);
+    oldXvsStoreBalance = await xvs.balanceOf(XVS_STORE);
   });
 
   testVip("VIP-323 Update Distribution rules on PSR", vip323(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [10]);
+      await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["FundsTransferredToXVSStore"], [1]);
+      await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
     },
   });
 
@@ -58,6 +70,12 @@ forking(39555400, () => {
           expect(target[1]).to.be.equal(300);
         }
       }
+    });
+
+    it("balance of xvs store should increase", async () => {
+      expect(await xvs.balanceOf(XVS_STORE)).to.be.equal(
+        oldXvsStoreBalance.add(XVS_VAULT_TREASURY_RELEASE_AMOUNT).add(COMPTROLLER_CORE_RELEASE_AMOUNT),
+      );
     });
 
     it("Should update reward speeds correctly", async () => {
