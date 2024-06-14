@@ -25,7 +25,7 @@ const ACCOUNT_LENS = "0x9659F447EB89C49E37f49f24979C0ee2c1a3c823";
 const RESILIENT_ORACLE = NETWORK_ADDRESSES.bscmainnet.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
-const VIP_REPAYMENT_THRESHOLD = parseUnits("15", 18); // Repaying debts > $15 in the VIP, the rest to be repaid by community
+const VIP_REPAYMENT_THRESHOLD = parseUnits("15", 18); // Repaying debts > $10 in the VIP, the rest to be repaid by community
 const COLLATERAL_THRESHOLD = parseUnits("10", 18); // Debt would be repaid if the collateral is < $10
 const SXPOLD_DEBANK_PRICE = parseUnits("0.006", 18); // Use DeBank price for SXPOLD token as it's more realistic than assuming SXPOLD == SXP
 const SCALE_BY = parseUnits("1.01", 18);
@@ -331,6 +331,6 @@ const main = async () => {
 // @kkirka: I couldn't make `hardhat run` preserve the --fork parameter: scripts are launched
 // in a subprocess, so the configuration and custom params are reset. Thus, this script expects
 // to be run in a test environment (i.e. `npx hardhat test --fork bscmainnet ./get-debt-data.ts`)
-forking(39144000, () => {
+forking(39602646, () => {
   it("prints the data for the VIP", main);
 });

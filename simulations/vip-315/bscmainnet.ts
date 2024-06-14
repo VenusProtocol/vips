@@ -49,7 +49,7 @@ const balance = async (
   return erc20At(underlyingAddress).balanceOf(userAddress);
 }
 
-forking(39144000, () => {
+forking(39602646, () => {
   const usdt = erc20At(USDT);
   let prevBalancesOfCommunityWallet: Record<string, BigNumber>;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
@@ -64,13 +64,6 @@ forking(39144000, () => {
   });
 
   describe("Pre-VIP state", () => {
-    /*entries(vTokenWithdrawals).forEach(([symbol, amount]) => {
-      it(`has treasury balance >${formatUnits(amount, 8)} ${symbol}`, async () => {
-        const balance = await erc20At(vTokenConfigs[symbol].address).balanceOf(VTREASURY);
-        expect(balance).to.be.gt(amount);
-      });
-    });*/
-
     entries(underlyingWithdrawals).forEach(([vTokenSymbol, amount]) => {
       it(`has treasury balance >=${amount} ${vTokenSymbol.slice(1)} units`, async () => {
         const treasuryBalance = await balance(vTokenSymbol, VTREASURY);
@@ -89,6 +82,7 @@ forking(39144000, () => {
   });
 
   testVip("VIP-315", vip315(), {
+    supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D", // Custom supporter to prevent overriding community wallet BNB balance
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       //await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [97]);
       //await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [24]);
@@ -118,11 +112,7 @@ forking(39144000, () => {
       });
 
       it(`does not keep any ${symbol.slice(1)} in the redeemer`, async () => {
-        if (vTokenConfig.underlying === ethers.constants.AddressZero) {
-          expect(await ethers.provider.getBalance(TOKEN_REDEEMER)).to.equal(0);
-        } else {
-          expect(await erc20At(vTokenConfig.underlying).balanceOf(TOKEN_REDEEMER)).to.equal(0);
-        }
+        expect(await balance(symbol, TOKEN_REDEEMER)).to.equal(0);
       });
     }
 
@@ -138,14 +128,5 @@ forking(39144000, () => {
         expect(balanceDiff).to.be.gt(expectedAmount.mul(99).div(100));
       })
     }
-
-    /*
-    it("transfers USDT to the Community Wallet", async () => {
-      const newUSDTBalanceOfCommunityWallet = await usdt.balanceOf(COMMUNITY_WALLET);
-      expect(newUSDTBalanceOfCommunityWallet).to.be.eq(
-        prevUSDTBalanceOfCommunityWallet.add(COMMUNITY_WALLET_USDT_AMOUNT),
-      );
-    });
-    */
   });
 });
