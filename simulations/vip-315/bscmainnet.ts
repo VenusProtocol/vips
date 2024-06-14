@@ -15,6 +15,7 @@ import {
   VAI_CONTROLLER,
   VTREASURY,
   entries,
+  expectedCommunityWithdrawals,
   shortfalls,
   underlyingWithdrawals,
   vTokenConfigs,
@@ -37,30 +38,54 @@ const erc20At = (tokenAddress: string): Contract => {
   return new Contract(tokenAddress, ERC20_ABI, ethers.provider);
 };
 
+const balance = async (
+  symbol: keyof typeof vTokenConfigs | "VAI",
+  userAddress: string
+): Promise<BigNumber> => {
+  const underlyingAddress = symbol == "VAI" ? VAI : vTokenConfigs[symbol].underlying;
+  if (underlyingAddress === ethers.constants.AddressZero) {
+    return ethers.provider.getBalance(userAddress);
+  }
+  return erc20At(underlyingAddress).balanceOf(userAddress);
+}
+
 forking(39144000, () => {
   const usdt = erc20At(USDT);
-  let prevUSDTBalanceOfCommunityWallet: BigNumber;
+  let prevBalancesOfCommunityWallet: Record<string, BigNumber>;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
 
   before(async () => {
-    prevUSDTBalanceOfCommunityWallet = await usdt.balanceOf(COMMUNITY_WALLET);
+    prevBalancesOfCommunityWallet = Object.fromEntries(await Promise.all(
+      entries(expectedCommunityWithdrawals).map(async ([symbol, _]) => {
+        return [symbol, await balance(symbol, COMMUNITY_WALLET)];
+      })
+    ));
     await setMaxStaleCoreAssets(CHAINLINK, NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", () => {
-    entries(vTokenWithdrawals).forEach(([symbol, amount]) => {
+    /*entries(vTokenWithdrawals).forEach(([symbol, amount]) => {
       it(`has treasury balance >${formatUnits(amount, 8)} ${symbol}`, async () => {
         const balance = await erc20At(vTokenConfigs[symbol].address).balanceOf(VTREASURY);
         expect(balance).to.be.gt(amount);
       });
-    });
+    });*/
 
     entries(underlyingWithdrawals).forEach(([vTokenSymbol, amount]) => {
-      it(`has treasury balance >${amount} ${vTokenSymbol.slice(1)} units`, async () => {
-        const balance = await erc20At(vTokenConfigs[vTokenSymbol].underlying).balanceOf(VTREASURY);
-        expect(balance).to.be.gt(amount);
+      it(`has treasury balance >=${amount} ${vTokenSymbol.slice(1)} units`, async () => {
+        const treasuryBalance = await balance(vTokenSymbol, VTREASURY);
+        expect(treasuryBalance).to.be.gte(amount);
       });
     });
+
+    for (const [symbol, debts] of entries(shortfalls)) {
+      for (const [borrower, _] of Object.entries(debts)) {
+        it(`has recorded nonzero debt for ${borrower} in ${symbol.slice(1)}`, async () => {
+          const vToken = new Contract(vTokenConfigs[symbol].address, VTOKEN_ABI, ethers.provider);
+          expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.be.gt(0);
+        });
+      }
+    }
   });
 
   testVip("VIP-315", vip315(), {
@@ -104,6 +129,15 @@ forking(39144000, () => {
     it(`does not keep any VAI in the redeemer`, async () => {
       expect(await erc20At(VAI).balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
+
+    for (const [symbol, expectedAmount] of entries(expectedCommunityWithdrawals)) {
+      it(`transfers expected amount (with 1% tolerance) of ${symbol} to the community`, async () => {
+        const balanceAfter = await balance(symbol, COMMUNITY_WALLET);
+        const balanceDiff = balanceAfter.sub(prevBalancesOfCommunityWallet[symbol]);
+        expect(balanceDiff).to.be.lt(expectedAmount.mul(101).div(100));
+        expect(balanceDiff).to.be.gt(expectedAmount.mul(99).div(100));
+      })
+    }
 
     /*
     it("transfers USDT to the Community Wallet", async () => {

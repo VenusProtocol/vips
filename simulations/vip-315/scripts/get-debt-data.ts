@@ -200,7 +200,7 @@ const getMarketDebts = async (
   return market.marketDebtDataFromBorrowBalances(borrowBalances);
 };
 
-const balanceOf = async (token: string, account: string) => {
+const balanceOf = async (token: string, account: string): Promise<BigNumber> => {
   if (token === ethers.constants.AddressZero) {
     return ethers.provider.getBalance(account);
   }
@@ -219,7 +219,7 @@ const computeTreasuryWithdrawals = async (
   const underlyingWithdrawals: Record<string, Value> = {};
   const errors: string[] = [];
   for (const { market, totalDebt } of marketDebtData) {
-    const vTokenBalance = await balanceOf(market.address, VTREASURY);
+    /*const vTokenBalance = await balanceOf(market.address, VTREASURY);
     if (vTokenBalance.gt(totalDebt.vTokenAmount)) {
       const marketLiquidity = await balanceOf(market.underlying, market.address);
       if (marketLiquidity.gt(totalDebt.underlyingAmount)) {
@@ -229,16 +229,17 @@ const computeTreasuryWithdrawals = async (
         errors.push(`Insufficient market liquidity to redeem ${market.symbol}`);
         // We still try to withdraw underlying in this case
       }
-    }
+    }*/
     const underlyingBalance = await balanceOf(market.underlying, VTREASURY);
     if (underlyingBalance.gt(totalDebt.underlyingAmount)) {
       underlyingWithdrawals[market.symbol] = totalDebt;
       continue;
     }
+    underlyingWithdrawals[market.symbol] = market.valueFromUnderlyingAmount(underlyingBalance);
     // We do not try to combine underlying withdrawals and vToken withdrawals
-    errors.push(`Insufficient treasury balance to repay ${market.symbol} debt`);
+    errors.push(`Insufficient treasury balance to repay ${market.symbol} debt of ${totalDebt.underlyingAmount}`);
   }
-  return { vTokenWithdrawals, underlyingWithdrawals, errors };
+  return { vTokenWithdrawals: {}, underlyingWithdrawals, errors };
 };
 
 const filterDebts = ({ market, debts }: MarketDebtData, filterFn: (arg: [string, Value]) => boolean): MarketDebtData => {
@@ -309,9 +310,22 @@ const main = async () => {
 
   const scaledVaiDebts = scaleDebts(vaiDebts, SCALE_BY);
   const totalVaiDebt = scaledVaiDebts.totalDebt.underlyingAmount;
-  console.log("export const vaiDebts = " + codegen.printVaiDebts(filterDebts(scaledVaiDebts, shouldRepayInVip)));
+  const vaiDebtsToRepay = filterDebts(scaledVaiDebts, shouldRepayInVip);
+  console.log("export const vaiDebts = " + codegen.printVaiDebts(vaiDebtsToRepay));
   console.log(`export const totalVAIDebt = parseUnits("${formatUnits(totalVaiDebt, 18)}", 18);`);
-  console.log(`export const plainTransfers = [${ marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ") }] as const;`)
+  console.log(`export const plainTransfers = [${ marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ") }] as const;`);
+
+  const totalDebtPerMarket = Object.fromEntries(scaledDebts.map(({ market, totalDebt }) => [market.symbol, totalDebt]));
+  totalDebtPerMarket["VAI"] = scaledVaiDebts.totalDebt;
+  const repaidDebtPerMarket = Object.fromEntries(debtsToRepay.map(({ market, totalDebt }) => [market.symbol, totalDebt]));
+  repaidDebtPerMarket["VAI"] = vaiDebtsToRepay.totalDebt;
+  const expectedCommunityWithdrawals = Object.fromEntries(Object.entries(totalDebtPerMarket).map(([symbol, debt]) => {
+    const repaidDebt = repaidDebtPerMarket[symbol];
+    const market = debt.market;
+    const diff = market.valueFromUnderlyingAmount(debt.underlyingAmount.sub(repaidDebt?.underlyingAmount ?? 0));
+    return [symbol, diff];
+  }));
+  console.log("export const expectedCommunityWithdrawals = " + codegen.printUnderlyingAmounts(expectedCommunityWithdrawals));
 };
 
 // @kkirka: I couldn't make `hardhat run` preserve the --fork parameter: scripts are launched

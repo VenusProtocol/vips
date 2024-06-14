@@ -2,6 +2,7 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
+import { BigNumber } from "ethers";
 
 export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
@@ -11,7 +12,7 @@ export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 // We don't have enough DAI in treasury, so we transfer USDT to cover for DAI debt
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-export const COMMUNITY_WALLET_USDT_AMOUNT = parseUnits("217.472781047664196103", 18);
+export const COMMUNITY_WALLET_USDT_AMOUNT = parseUnits("636.088367745766859294", 18);
 
 export const vTokenConfigs = {
   "vUSDC": {
@@ -330,37 +331,36 @@ export const shortfalls = {
 } // total across all markets: $4093.953406272918411195
 
 export const vTokenWithdrawals = {
-  "vUSDC": parseUnits("99205.05965146", 8), // 2371.254428291868522494 USDC = $2371.135865570453929067
-  "vBNB": parseUnits("222.51419047", 8), // 5.412921655102637829 BNB = $3245.960069235498904488
-  "vETH": parseUnits("12.70567656", 8), // 0.262804555100064948 ETH = $1003.478838614670201383
-  "vXRP": parseUnits("12046.66965914", 8), // 244.686842057118579506 XRP = $129.918313941542538178
-  "vAAVE": parseUnits("32.80905654", 8), // 0.679651058129503029 AAVE = $72.774044839851414531
-  "vUST": parseUnits("119.73879966", 8), // 2.576394 UST = $0.000000000000000002
-  "vTUSD": parseUnits("1.25990413", 8), // 1.349231953511239096 TUSD = $1.346945963304724538
-} // total: $6824.614078165321712187
+} // total: $0.0
 
 export const underlyingWithdrawals = {
+  "vUSDC": parseUnits("2371.254428291868522494", 18), // $2371.135865570453929067
   "vUSDT": parseUnits("3558.842516499929659771", 18), // $3555.354850833759728704
   "vBUSD": parseUnits("51.560406721017138624", 18), // $51.560406721017138624
   "vSXP": parseUnits("528.167961901411360062", 18), // $3.16900777140846816
   "vXVS": parseUnits("0.191501860657698048", 18), // $2.018165549416476526
+  "vBNB": parseUnits("5.412921655102637829", 18), // $3245.960069235498904488
   "vBTC": parseUnits("0.014269776096922876", 18), // $968.861124979117858008
+  "vETH": parseUnits("0.262804555100064948", 18), // $1003.478838614670201383
   "vLTC": parseUnits("2.092222063426973403", 18), // $174.903119165854899103
+  "vXRP": parseUnits("244.686842057118579506", 18), // $129.918313941542538178
   "vBCH": parseUnits("0.393436707393494669", 18), // $184.539019786909017094
   "vDOT": parseUnits("6.684739000129446843", 18), // $49.845495953988194706
   "vLINK": parseUnits("12.211773311406626418", 18), // $228.117334817833650926
+  "vDAI": parseUnits("405.317272401585042669", 18), // $405.10945407650657797
   "vFIL": parseUnits("11.981529942798777725", 18), // $71.841253537021471239
-  "vDAI": parseUnits("357.626074321506119557", 18), // $357.442708704419253724
   "vBETH": parseUnits("0.059368539680176057", 18), // $226.238860820753328304
   "vADA": parseUnits("252.843620475815907255", 18), // $116.800928431396415768
   "vDOGE": parseUnits("2130.43436228", 8), // $353.0541338216752496
   "vMATIC": parseUnits("30.989183216106714101", 18), // $22.99634864746103212
   "vCAKE": parseUnits("73.859903735653073602", 18), // $216.0813982775140163
+  "vAAVE": parseUnits("0.679651058129503029", 18), // $72.774044839851414531
   "vTUSDOLD": parseUnits("653.69667882052469294", 18), // $652.589127074565866157
   "vTRXOLD": parseUnits("944.03845916921150724", 18), // $105.480107552584633956
   "vTRX": parseUnits("60.351209", 6), // $6.74321258251565
   "vWBETH": parseUnits("0.056076891952705543", 18), // $222.52949172995022928
-} // total: $7570.166096759162578299
+  "vTUSD": parseUnits("1.349231953511239096", 18), // $1.346945963304724538
+} // total: $14442.446920296571614731
 
 export const vaiDebts = {
   "0x404555fb2123b96627b68c9b1c5a3b4c9d36ef98": parseUnits("94.65908368696534239", 18), // $94.65908368696534239
@@ -429,8 +429,41 @@ export const vaiDebts = {
 export const totalVAIDebt = parseUnits("9264.694461793362582944", 18);
 
 export const plainTransfers = [
-  "vBUSD", "vSXP", "vXVS", "vLTC", "vXRP", "vDOT", "vLINK", "vCAN", "vMATIC", "vAAVE", "vTRXOLD", "vUST", "vTRX", "vWBETH", "vTUSD"
+  "vBUSD", "vSXP", "vXVS", "vLTC", "vXRP", "vDOT", "vLINK", "vMATIC", "vAAVE", "vTRXOLD", "vTRX", "vWBETH", "vTUSD"
 ] as const;
+
+export const expectedCommunityWithdrawals = {
+  "vUSDC": parseUnits("1383.92220367869729355", 18), // $1383.853007568513358685
+  "vUSDT": parseUnits("1890.766384889294519011", 18), // $1888.913433832103010382
+  "vBUSD": parseUnits("51.560406721017138624", 18), // $51.560406721017138624
+  "vSXP": parseUnits("528.167961901411360062", 18), // $3.16900777140846816
+  "vXVS": parseUnits("0.191501860657698048", 18), // $2.018165549416476526
+  "vBNB": parseUnits("4.686018131921995959", 18), // $2810.058727820975069144
+  "vBTC": parseUnits("0.013396332415252074", 18), // $909.55776784992229103
+  "vETH": parseUnits("0.217750325359270072", 18), // $831.446180665659626354
+  "vLTC": parseUnits("2.092222063426973403", 18), // $174.903119165854899103
+  "vXRP": parseUnits("244.686842057118579506", 18), // $129.918313941542538178
+  "vBCH": parseUnits("0.309403243678805286", 18), // $145.123650728073773839
+  "vDOT": parseUnits("6.684739000129446843", 18), // $49.845495953988194706
+  "vLINK": parseUnits("12.211773311406626418", 18), // $228.117334817833650926
+  "vDAI": parseUnits("683.779565825845782406", 18), // $683.428971529059896497
+  "vFIL": parseUnits("8.650000365511574302", 18), // $51.865402191607399514
+  "vBETH": parseUnits("0.055106975449777701", 18), // $209.999090700186749665
+  "vADA": parseUnits("211.971768106956169579", 18), // $97.920205657335365528
+  "vDOGE": parseUnits("1875.64643107", 8), // $310.8308511173472724
+  "vMATIC": parseUnits("30.989183216106714101", 18), // $22.99634864746103212
+  "vCAKE": parseUnits("57.157332095357741899", 18), // $167.217063877857840809
+  "vAAVE": parseUnits("0.679651058129503029", 18), // $72.774044839851414531
+  "vTUSDOLD": parseUnits("423.356680395281993616", 18), // $422.639391405255071287
+  "vTRXOLD": parseUnits("944.03845916921150724", 18), // $105.480107552584633956
+  "vTRX": parseUnits("60.351209", 6), // $6.74321258251565
+  "vWBETH": parseUnits("0.056076891952705543", 18), // $222.52949172995022928
+  "vTUSD": parseUnits("1.349231953511239096", 18), // $1.346945963304724538
+  "VAI": parseUnits("7468.085710095491556236", 18), // $7468.085710095491556236
+} // total: $18452.341450276118282127
+// We withdraw part of the DAI debt as USDT because we do not have enough DAI in treasury
+expectedCommunityWithdrawals["vDAI"] = expectedCommunityWithdrawals["vDAI"].sub(COMMUNITY_WALLET_USDT_AMOUNT);
+expectedCommunityWithdrawals["vUSDT"] = expectedCommunityWithdrawals["vUSDT"].add(COMMUNITY_WALLET_USDT_AMOUNT);
 
 export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
   return Object.entries(r) as [K, V][];
@@ -446,18 +479,33 @@ export const vip315 = () => {
     abstainDescription: "Indifferent to execution",
   };
 
+  const withdraw = (symbol: keyof typeof vTokenConfigs, underlyingAmount: BigNumber) => {
+    if (symbol === "vBNB") {
+      return {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [underlyingAmount, TOKEN_REDEEMER],
+      }
+    }
+    return {
+      target: VTREASURY,
+      signature: "withdrawTreasuryBEP20(address,uint256,address)",
+      params: [vTokenConfigs[symbol].underlying, underlyingAmount, TOKEN_REDEEMER],
+    }
+  }
+
   return makeProposal(
     [
+      /*
       ...entries(vTokenWithdrawals).map(([symbol, vTokenAmount]) => ({
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [vTokenConfigs[symbol].address, vTokenAmount, TOKEN_REDEEMER],
       })),
-      ...entries(underlyingWithdrawals).map(([symbol, underlyingAmount]) => ({
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [vTokenConfigs[symbol].underlying, underlyingAmount, TOKEN_REDEEMER],
-      })),
+      */
+      ...entries(underlyingWithdrawals).map(
+        ([symbol, underlyingAmount]) => withdraw(symbol, underlyingAmount)
+      ),
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
