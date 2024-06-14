@@ -3,13 +3,13 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip009, {
+import vip008, {
   REWARDS_SPEED,
   XVS,
   XVS_AMOUNT,
   XVS_STORE,
   XVS_VAULT_PROXY,
-} from "../../../proposals/arbitrumsepolia/vip-009";
+} from "../../../proposals/arbitrumsepolia/vip-008/index-addendum";
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
 import XVS_ABI from "./abi/xvs.json";
 
@@ -22,7 +22,7 @@ forking(39472113, () => {
     before(async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(vip008());
     });
 
     it("vault should be enabled", async () => {

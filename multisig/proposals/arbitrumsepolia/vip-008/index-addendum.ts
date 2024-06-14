@@ -10,7 +10,7 @@ export const XVS_AMOUNT = parseUnits("5000", 18);
 
 const VTREASURY = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 
-const vip009 = () => {
+const vip008 = () => {
   return makeProposal([
     {
       target: VTREASURY,
@@ -30,4 +30,4 @@ const vip009 = () => {
   ]);
 };
 
-export default vip009;
+export default vip008;
