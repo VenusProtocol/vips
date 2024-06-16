@@ -11,8 +11,10 @@ const rsETH_ONE_JUMP_REDSTONE_ORACLE = "0xf689AD140BDb9425fB83ba6f55866447244b5a
 const rsETH_ONE_JUMP_CHAINLINK_ORACLE = "0xD63011ddAc93a6f8348bf7E6Aeb3E30Ad7B46Df8";
 export const rsETH = "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7";
 export const vrsETH = "0xDB6C345f864883a8F4cae87852Ac342589E76D1B";
+export const vPTweETH = "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C";
 const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
-export const INITIAL_SUPPLY = parseUnits("2", 18); // TBD
+export const VTOKEN_RECEIVER = "0x7AAd74b7f0d60D5867B59dbD377a71783425af47";
+export const INITIAL_SUPPLY = parseUnits("2", 18);
 export const SUPPLY_CAP = parseUnits("8000", 18);
 export const BORROW_CAP = parseUnits("3600", 18);
 const CHAINLINK_rsETH_FEED = "0x03c68933f7a3F76875C0bc670a58e69294cDFD01";
@@ -21,7 +23,7 @@ const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of
 const CF = parseUnits("0.8", 18);
 const LT = parseUnits("0.85", 18);
 
-export const vip035 = () => {
+export const vip036 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -64,15 +66,25 @@ export const vip035 = () => {
     },
     {
       target: vrsETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
+    },
+    {
+      target: vrsETH,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["7200"],
     },
     {
+      target: vPTweETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
+    },
+    {
       target: ethereum.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-      params: [[vrsETH, CF, LT, INITIAL_SUPPLY, ethereum.VTREASURY, SUPPLY_CAP, BORROW_CAP]], // TBD VToken receiver
+      params: [[vrsETH, CF, LT, INITIAL_SUPPLY, VTOKEN_RECEIVER, SUPPLY_CAP, BORROW_CAP]],
     },
   ]);
 };
 
-export default vip035;
+export default vip036;
