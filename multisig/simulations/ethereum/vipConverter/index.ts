@@ -120,7 +120,7 @@ forking(20088800, () => {
     });
 
     it("PSR should have correct distribution configs", async () => {
-      const percentageDistributionConverters = [200, 200, 100, 1500, 2000];
+      const percentageDistributionConverters = [140, 140, 140, 1580, 2000];
       expect(await protocolShareReserve.totalDistributions()).to.equal(8);
 
       for (let i = 0; i < 5; i++) {
@@ -211,13 +211,10 @@ forking(20088800, () => {
 
       const plpBalanceForUsdcPrevious = await usdc.balanceOf(destinationAddressForUsdcConverter);
       await usdt.connect(user1).transfer(USDC_PRIME_CONVERTER, amount);
-      // await usdc.connect(user1).transfer(USDT_PRIME_CONVERTER, amount);
 
       // Private Conversion will occur
-      const tx = usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDT);
-      await expect(tx).to.be.revertedWith("InvalidTokenConfigAddresses");
-
-      await expect(tx).to.be.revertedWithCustomError(usdcPrimeConverter, "InvalidTokenConfigAddresses");
+      await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDT);
+      
       const usdcBalanceUsdtPrimeConverterCurrent = await usdtPrimeConverter.balanceOf(USDC);
       const usdtBalanceUsdtPrimeCurrent = await usdt.balanceOf(PLP);
 

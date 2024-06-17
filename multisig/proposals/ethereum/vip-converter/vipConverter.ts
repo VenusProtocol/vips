@@ -72,10 +72,10 @@ const vipConverter = () => {
         [
           [0, 6000, VTREASURY],
           [0, 2000, XVS_VAULT_CONVERTER],
-          [0, 200, USDC_PRIME_CONVERTER],
-          [0, 200, USDT_PRIME_CONVERTER],
-          [0, 100, WBTC_PRIME_CONVERTER],
-          [0, 1500, WETH_PRIME_CONVERTER],
+          [0, 140, USDC_PRIME_CONVERTER], // 7% of the Prime allocation
+          [0, 140, USDT_PRIME_CONVERTER], // 7% of the Prime allocation
+          [0, 140, WBTC_PRIME_CONVERTER], // 7% of the Prime allocation
+          [0, 1580, WETH_PRIME_CONVERTER], // 79% of the Prime allocation
           [1, 8000, VTREASURY],
           [1, 2000, XVS_VAULT_CONVERTER],
         ],
