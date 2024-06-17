@@ -10,6 +10,7 @@ import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import ERC20_ABI from "./abi/erc20.json";
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
@@ -24,6 +25,7 @@ forking(6077234, () => {
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
   let comptroller: Contract;
+  let sfrxETHContract: Contract;
 
   before(async () => {
     impersonateAccount(sepolia.NORMAL_TIMELOCK);
@@ -31,6 +33,7 @@ forking(6077234, () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
+    sfrxETHContract = await ethers.getContractAt(ERC20_ABI, sfrxETH, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
   });
 
   describe("Pre-VIP behavior", () => {
@@ -103,8 +106,13 @@ forking(6077234, () => {
         BigNumber.from(2628000),
       );
     });
-    // it("check Pool", async () => {
-    //   checkIsolatedPoolsComptrollers({ comptroller: CORE_COMPTROLLER });
-    // });
+    it("check Pool", async () => {
+      await sfrxETHContract.faucet(parseUnits("10000", 18));
+      await checkIsolatedPoolsComptrollers({
+        [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
+      });
+
+      checkIsolatedPoolsComptrollers();
+    });
   });
 });
