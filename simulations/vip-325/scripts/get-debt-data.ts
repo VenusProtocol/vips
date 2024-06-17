@@ -1,19 +1,18 @@
 import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
-import { Result, formatUnits, parseUnits } from "ethers/lib/utils";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import fs from "fs/promises";
 
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
+import { initMainnetUser } from "../../../src/utils";
 import { NORMAL_TIMELOCK, forking } from "../../../src/vip-framework";
 import COMPROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/IERC20.json";
 import VAI_CONTROLLER_ABI from "../abi/VAIController.json";
 import VTOKEN_ABI from "../abi/VBep20.json";
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { initMainnetUser } from "../../../src/utils";
-import { AccountSnapshotUsd, MANTISSA_ONE, Market, MarketDebtData, Value } from "./types";
-import { Codegen } from "./codegen";
-import { AccountSnapshotsCache, BorrowBalancesCache } from "./cache";
 import allAccounts from "./accounts";
+import { AccountSnapshotsCache, BorrowBalancesCache } from "./cache";
+import { Codegen } from "./codegen";
+import { AccountSnapshotUsd, MANTISSA_ONE, Market, MarketDebtData, Value } from "./types";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
@@ -30,13 +29,9 @@ const COLLATERAL_THRESHOLD = parseUnits("10", 18); // Debt would be repaid if th
 const SXPOLD_DEBANK_PRICE = parseUnits("0.006", 18); // Use DeBank price for SXPOLD token as it's more realistic than assuming SXPOLD == SXP
 const SCALE_BY = parseUnits("1.01", 18);
 
-const CHAINLINK_ORACLE_ABI = [
-  "function setDirectPrice(address asset, uint256 price) external",
-];
+const CHAINLINK_ORACLE_ABI = ["function setDirectPrice(address asset, uint256 price) external"];
 
-const ORACLE_ABI = [
-  "function getPrice(address asset) external view returns (uint256)",
-];
+const ORACLE_ABI = ["function getPrice(address asset) external view returns (uint256)"];
 
 const MULTICALL_ABI = [
   "function aggregate(tuple(address target, bytes callData)[] calls) public returns (uint256 blockNumber, bytes[] returnData)",
@@ -103,18 +98,27 @@ const getAccountSnapshots = async (
   cache: AccountSnapshotsCache,
 ): Promise<[string, AccountSnapshotUsd][]> => {
   let snapshots = cache.readAll();
-  const remainingAccounts = accounts.filter((account) => !cache.has(account));
+  const remainingAccounts = accounts.filter(account => !cache.has(account));
   const runChunk = async (accountsChunk: ReadonlyArray<string>) => {
     const [, multicallResult] = await multicall.callStatic.aggregate(
       accountsChunk.flatMap(account => [
-        [ accountLens.address, accountLens.interface.encodeFunctionData("getSupplyAndBorrowsUsd", [COMPTROLLER, account]) ],
-        [ comptroller.address, comptroller.interface.encodeFunctionData("getAccountLiquidity", [account]) ],
+        [
+          accountLens.address,
+          accountLens.interface.encodeFunctionData("getSupplyAndBorrowsUsd", [COMPTROLLER, account]),
+        ],
+        [comptroller.address, comptroller.interface.encodeFunctionData("getAccountLiquidity", [account])],
       ]),
     );
     const chunk: [string, AccountSnapshotUsd][] = accountsChunk.map(
       (account: string, idx: number): [string, AccountSnapshotUsd] => {
-        const supplyAndBorrows = accountLens.interface.decodeFunctionResult("getSupplyAndBorrowsUsd", multicallResult[idx * 2])
-        const [_, liquidity, shortfall] = comptroller.interface.decodeFunctionResult("getAccountLiquidity", multicallResult[idx * 2 + 1]);
+        const supplyAndBorrows = accountLens.interface.decodeFunctionResult(
+          "getSupplyAndBorrowsUsd",
+          multicallResult[idx * 2],
+        );
+        const [, liquidity, shortfall] = comptroller.interface.decodeFunctionResult(
+          "getAccountLiquidity",
+          multicallResult[idx * 2 + 1],
+        );
         return [
           account,
           {
@@ -122,16 +126,16 @@ const getAccountSnapshots = async (
             borrowsUsd: supplyAndBorrows.borrowsUsd,
             liquidity: liquidity,
             shortfall: shortfall,
-          }
+          },
         ];
-      }
+      },
     );
     await cache.append(chunk);
     return chunk;
-  }
+  };
   for (let start = 0; start < remainingAccounts.length; start += chunkSize) {
     console.log(`Getting snapshots for accounts ${start} to ${start + chunkSize} of ${remainingAccounts.length}`);
-    snapshots = [...snapshots, ...await runChunk(remainingAccounts.slice(start, start + chunkSize))];
+    snapshots = [...snapshots, ...(await runChunk(remainingAccounts.slice(start, start + chunkSize)))];
   }
   return snapshots;
 };
@@ -144,7 +148,7 @@ const getMarkets = async () => {
         underlyingSymbol: "BNB",
         underlyingDecimals: 18,
         underlyingPrice: await oracle.getPrice("0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"),
-      }
+      };
     }
     const underlyingAddress = await vToken.underlying();
     const erc20 = new ethers.Contract(underlyingAddress, ERC20_ABI, ethers.provider);
@@ -154,19 +158,21 @@ const getMarkets = async () => {
       underlyingDecimals: await erc20.decimals(),
       underlyingPrice: await oracle.getPrice(underlyingAddress),
     };
-  }
+  };
   const marketAddresses = await comptroller.getAllMarkets();
   const markets: Market[] = [];
   for (const address of marketAddresses) {
     const vToken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
     const exchangeRate = await vToken.callStatic.exchangeRateCurrent();
     const symbol = await vToken.symbol();
-    markets.push(new Market({
-      address,
-      exchangeRate,
-      symbol,
-      ...await getUnderlyingInfo(vToken),
-    }));
+    markets.push(
+      new Market({
+        address,
+        exchangeRate,
+        symbol,
+        ...(await getUnderlyingInfo(vToken)),
+      }),
+    );
   }
   return markets;
 };
@@ -175,26 +181,31 @@ const getMarketDebts = async (
   market: Market,
   accounts: ReadonlyArray<string>,
   chunkSize: number,
-  cache: BorrowBalancesCache
+  cache: BorrowBalancesCache,
 ) => {
   const [signer] = await ethers.getSigners();
   const vToken = new VTokenAdapter(market);
   await vToken.accrueInterest(signer);
-  const remainingAccounts = accounts.filter((account) => !cache.has(account));
+  const remainingAccounts = accounts.filter(account => !cache.has(account));
 
   const runChunk = async (chunk: ReadonlyArray<string>): Promise<[string, BigNumber][]> => {
     const [, multicallResult] = await multicall.callStatic.aggregate(
       chunk.map(account => [market.address, vToken.encodeBorrowBalanceRequest(account)]),
     );
-    return multicallResult.map(
-      (r: string, idx: number): [string, BigNumber] => ([chunk[idx], vToken.decodeBorrowBalanceResult(r)]),
-    );
-  }
+    return multicallResult.map((r: string, idx: number): [string, BigNumber] => [
+      chunk[idx],
+      vToken.decodeBorrowBalanceResult(r),
+    ]);
+  };
   let borrowBalances: [string, BigNumber][] = cache.readKeys(accounts);
   for (let start = 0; start < remainingAccounts.length; start += chunkSize) {
-    console.log(`Getting ${market.symbol} borrow balances for accounts ${start} to ${start + chunkSize} of ${remainingAccounts.length}`);
+    console.log(
+      `Getting ${market.symbol} borrow balances for accounts ${start} to ${start + chunkSize} of ${
+        remainingAccounts.length
+      }`,
+    );
     const chunk = await runChunk(remainingAccounts.slice(start, start + chunkSize));
-    cache.append(chunk);
+    await cache.append(chunk);
     borrowBalances = [...borrowBalances, ...chunk];
   }
   return market.marketDebtDataFromBorrowBalances(borrowBalances);
@@ -215,37 +226,28 @@ const computeTreasuryWithdrawals = async (
   underlyingWithdrawals: Record<string, Value>;
   errors: string[];
 }> => {
-  const vTokenWithdrawals: Record<string, Value> = {};
   const underlyingWithdrawals: Record<string, Value> = {};
   const errors: string[] = [];
   for (const { market, totalDebt } of marketDebtData) {
-    /*const vTokenBalance = await balanceOf(market.address, VTREASURY);
-    if (vTokenBalance.gt(totalDebt.vTokenAmount)) {
-      const marketLiquidity = await balanceOf(market.underlying, market.address);
-      if (marketLiquidity.gt(totalDebt.underlyingAmount)) {
-        vTokenWithdrawals[market.symbol] = totalDebt;
-        continue;
-      } else {
-        errors.push(`Insufficient market liquidity to redeem ${market.symbol}`);
-        // We still try to withdraw underlying in this case
-      }
-    }*/
     const underlyingBalance = await balanceOf(market.underlying, VTREASURY);
     if (underlyingBalance.gt(totalDebt.underlyingAmount)) {
       underlyingWithdrawals[market.symbol] = totalDebt;
       continue;
     }
     underlyingWithdrawals[market.symbol] = market.valueFromUnderlyingAmount(underlyingBalance);
-    // We do not try to combine underlying withdrawals and vToken withdrawals
     errors.push(`Insufficient treasury balance to repay ${market.symbol} debt of ${totalDebt.underlyingAmount}`);
   }
   return { vTokenWithdrawals: {}, underlyingWithdrawals, errors };
 };
 
-const filterDebts = ({ market, debts }: MarketDebtData, filterFn: (arg: [string, Value]) => boolean): MarketDebtData => {
+const filterDebts = (
+  { market, debts }: MarketDebtData,
+  filterFn: (arg: [string, Value]) => boolean,
+): MarketDebtData => {
   const filtered = Object.entries(debts).filter(filterFn);
   const totalDebtInUnderlying = filtered.reduce(
-    (acc: BigNumber, [_, x]: [string, Value]) => acc.add(x.underlyingAmount), BigNumber.from(0)
+    (acc: BigNumber, [, x]: [string, Value]) => acc.add(x.underlyingAmount),
+    BigNumber.from(0),
   );
   const totalDebt = market.valueFromUnderlyingAmount(totalDebtInUnderlying);
   return {
@@ -253,7 +255,7 @@ const filterDebts = ({ market, debts }: MarketDebtData, filterFn: (arg: [string,
     debts: Object.fromEntries(filtered),
     totalDebt,
   };
-}
+};
 
 const scaleDebts = ({ market, debts }: MarketDebtData, scale: BigNumberish): MarketDebtData => {
   const scaled = Object.entries(debts).map(([account, value]: [string, Value]): [string, Value] => {
@@ -261,7 +263,8 @@ const scaleDebts = ({ market, debts }: MarketDebtData, scale: BigNumberish): Mar
     return [account, scaledValue];
   });
   const totalDebtInUnderlying = scaled.reduce(
-    (acc: BigNumber, [_, x]: [string, Value]) => acc.add(x.underlyingAmount), BigNumber.from(0)
+    (acc: BigNumber, [, x]: [string, Value]) => acc.add(x.underlyingAmount),
+    BigNumber.from(0),
   );
   const totalDebt = market.valueFromUnderlyingAmount(totalDebtInUnderlying);
   return {
@@ -269,7 +272,7 @@ const scaleDebts = ({ market, debts }: MarketDebtData, scale: BigNumberish): Mar
     debts: Object.fromEntries(scaled),
     totalDebt,
   };
-}
+};
 
 const main = async () => {
   const signer = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2", 18));
@@ -277,29 +280,33 @@ const main = async () => {
   const markets = await getMarkets();
   const snapshotsCache = await AccountSnapshotsCache.create();
   const accountSnapshots = await getAccountSnapshots(allAccounts, 50, snapshotsCache);
-  const underwaterAccounts = accountSnapshots.filter(([_, { shortfall }]) => shortfall.gt(0));
+  const underwaterAccounts = accountSnapshots.filter(([, { shortfall }]) => shortfall.gt(0));
 
-  const accounts = underwaterAccounts.map(([account, _]) => account);
-  const unfilteredMarketDebtData = await Promise.all(markets.map(async (market) => {
-    const cache = await BorrowBalancesCache.create(market);
-    console.log("Loaded " + market.symbol + " cache, " + cache.readAll().length + " entries");
-    return getMarketDebts(market, accounts, 100, cache);
-  }));
+  const accounts = underwaterAccounts.map(([account]) => account);
+  const unfilteredMarketDebtData = await Promise.all(
+    markets.map(async market => {
+      const cache = await BorrowBalancesCache.create(market);
+      console.log("Loaded " + market.symbol + " cache, " + cache.readAll().length + " entries");
+      return getMarketDebts(market, accounts, 100, cache);
+    }),
+  );
   const marketDebtData = unfilteredMarketDebtData.filter(({ totalDebt }) => totalDebt.underlyingAmount.gt(0));
   const vaiCache = await BorrowBalancesCache.create(vaiMarket);
   const vaiDebts = await getMarketDebts(vaiMarket, accounts, 100, vaiCache);
-  
+
   const codegen = new Codegen();
   const shouldRepayInVip = ([account, debt]: [string, Value]) => {
     const bigDebt = debt.usdValue.gt(VIP_REPAYMENT_THRESHOLD);
     const lowCollateral = Object.fromEntries(accountSnapshots)[account].supplyUsd.lt(COLLATERAL_THRESHOLD);
     return bigDebt && lowCollateral;
-  }
+  };
 
-  const scaledDebts = marketDebtData.map((m) => scaleDebts(m, SCALE_BY));
-  const filteredDebts = scaledDebts.map((debts) => filterDebts(debts, shouldRepayInVip));
-  const debtsToRepay = filteredDebts.filter((debtData) => debtData.totalDebt.underlyingAmount.gt(0));
-  const marketsWithNoVipRepayment = filteredDebts.filter((debtData) => debtData.totalDebt.underlyingAmount.eq(0)).map(({ market }) => market.symbol);
+  const scaledDebts = marketDebtData.map(m => scaleDebts(m, SCALE_BY));
+  const filteredDebts = scaledDebts.map(debts => filterDebts(debts, shouldRepayInVip));
+  const debtsToRepay = filteredDebts.filter(debtData => debtData.totalDebt.underlyingAmount.gt(0));
+  const marketsWithNoVipRepayment = filteredDebts
+    .filter(debtData => debtData.totalDebt.underlyingAmount.eq(0))
+    .map(({ market }) => market.symbol);
   console.log("export const shortfalls = " + codegen.printAnnotatedDebts(debtsToRepay));
   const { vTokenWithdrawals, underlyingWithdrawals, errors } = await computeTreasuryWithdrawals(scaledDebts);
   console.log("export const vTokenWithdrawals = " + codegen.printVTokenAmounts(vTokenWithdrawals));
@@ -313,19 +320,25 @@ const main = async () => {
   const vaiDebtsToRepay = filterDebts(scaledVaiDebts, shouldRepayInVip);
   console.log("export const vaiDebts = " + codegen.printVaiDebts(vaiDebtsToRepay));
   console.log(`export const totalVAIDebt = parseUnits("${formatUnits(totalVaiDebt, 18)}", 18);`);
-  console.log(`export const plainTransfers = [${ marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ") }] as const;`);
+  console.log(`export const plainTransfers = [${marketsWithNoVipRepayment.map(m => `"${m}"`).join(", ")}] as const;`);
 
   const totalDebtPerMarket = Object.fromEntries(scaledDebts.map(({ market, totalDebt }) => [market.symbol, totalDebt]));
   totalDebtPerMarket["VAI"] = scaledVaiDebts.totalDebt;
-  const repaidDebtPerMarket = Object.fromEntries(debtsToRepay.map(({ market, totalDebt }) => [market.symbol, totalDebt]));
+  const repaidDebtPerMarket = Object.fromEntries(
+    debtsToRepay.map(({ market, totalDebt }) => [market.symbol, totalDebt]),
+  );
   repaidDebtPerMarket["VAI"] = vaiDebtsToRepay.totalDebt;
-  const expectedCommunityWithdrawals = Object.fromEntries(Object.entries(totalDebtPerMarket).map(([symbol, debt]) => {
-    const repaidDebt = repaidDebtPerMarket[symbol];
-    const market = debt.market;
-    const diff = market.valueFromUnderlyingAmount(debt.underlyingAmount.sub(repaidDebt?.underlyingAmount ?? 0));
-    return [symbol, diff];
-  }));
-  console.log("export const expectedCommunityWithdrawals = " + codegen.printUnderlyingAmounts(expectedCommunityWithdrawals));
+  const expectedCommunityWithdrawals = Object.fromEntries(
+    Object.entries(totalDebtPerMarket).map(([symbol, debt]) => {
+      const repaidDebt = repaidDebtPerMarket[symbol];
+      const market = debt.market;
+      const diff = market.valueFromUnderlyingAmount(debt.underlyingAmount.sub(repaidDebt?.underlyingAmount ?? 0));
+      return [symbol, diff];
+    }),
+  );
+  console.log(
+    "export const expectedCommunityWithdrawals = " + codegen.printUnderlyingAmounts(expectedCommunityWithdrawals),
+  );
 };
 
 // @kkirka: I couldn't make `hardhat run` preserve the --fork parameter: scripts are launched

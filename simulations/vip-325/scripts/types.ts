@@ -25,18 +25,23 @@ export class Market {
   public readonly underlyingDecimals: number;
   public readonly underlyingPrice: BigNumber;
 
-  constructor(
-    {address, exchangeRate, symbol, underlying, underlyingSymbol, underlyingDecimals, underlyingPrice}:
-    {
-      address: string;
-      exchangeRate: BigNumber;
-      symbol: string;
-      underlying: string;
-      underlyingSymbol: string;
-      underlyingDecimals: number;
-      underlyingPrice: BigNumber;
-    }
-  ) {
+  constructor({
+    address,
+    exchangeRate,
+    symbol,
+    underlying,
+    underlyingSymbol,
+    underlyingDecimals,
+    underlyingPrice,
+  }: {
+    address: string;
+    exchangeRate: BigNumber;
+    symbol: string;
+    underlying: string;
+    underlyingSymbol: string;
+    underlyingDecimals: number;
+    underlyingPrice: BigNumber;
+  }) {
     this.address = address;
     this.exchangeRate = exchangeRate;
     this.symbol = symbol;
@@ -49,11 +54,12 @@ export class Market {
   marketDebtDataFromBorrowBalances(borrowBalances: [string, BigNumber][]): MarketDebtData {
     const debts = Object.fromEntries(
       borrowBalances
-        .filter(([_, debt]: [string, BigNumber]) => debt.gt(0))
-        .map(([account, debt]: [string, BigNumber]) => [account, this.valueFromUnderlyingAmount(debt)])
+        .filter(([, debt]: [string, BigNumber]) => debt.gt(0))
+        .map(([account, debt]: [string, BigNumber]) => [account, this.valueFromUnderlyingAmount(debt)]),
     );
     const totalDebtInUnderlying = Object.values(debts).reduce(
-      (acc: BigNumber, x: Value) => acc.add(x.underlyingAmount), BigNumber.from(0)
+      (acc: BigNumber, x: Value) => acc.add(x.underlyingAmount),
+      BigNumber.from(0),
     );
     const totalDebt = this.valueFromUnderlyingAmount(totalDebtInUnderlying);
     return {
@@ -71,12 +77,12 @@ export class Market {
     return new VTokenValue(vTokenAmount, this);
   }
 }
-  
+
 export interface Value {
-    readonly market: Market;
-    readonly underlyingAmount: BigNumber;
-    readonly vTokenAmount: BigNumber;
-    readonly usdValue: BigNumber;
+  readonly market: Market;
+  readonly underlyingAmount: BigNumber;
+  readonly vTokenAmount: BigNumber;
+  readonly usdValue: BigNumber;
 }
 
 class UnderlyingValue implements Value {

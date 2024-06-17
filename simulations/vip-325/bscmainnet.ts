@@ -1,7 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { formatUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
@@ -35,27 +34,26 @@ const erc20At = (tokenAddress: string): Contract => {
   return new Contract(tokenAddress, ERC20_ABI, ethers.provider);
 };
 
-const balance = async (
-  symbol: keyof typeof vTokenConfigs | "VAI",
-  userAddress: string
-): Promise<BigNumber> => {
+const balance = async (symbol: keyof typeof vTokenConfigs | "VAI", userAddress: string): Promise<BigNumber> => {
   const underlyingAddress = symbol == "VAI" ? VAI : vTokenConfigs[symbol].underlying;
   if (underlyingAddress === ethers.constants.AddressZero) {
     return ethers.provider.getBalance(userAddress);
   }
   return erc20At(underlyingAddress).balanceOf(userAddress);
-}
+};
 
 forking(39688245, () => {
   let prevBalancesOfCommunityWallet: Record<string, BigNumber>;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
 
   before(async () => {
-    prevBalancesOfCommunityWallet = Object.fromEntries(await Promise.all(
-      entries(expectedCommunityWithdrawals).map(async ([symbol, _]) => {
-        return [symbol, await balance(symbol, COMMUNITY_WALLET)];
-      })
-    ));
+    prevBalancesOfCommunityWallet = Object.fromEntries(
+      await Promise.all(
+        entries(expectedCommunityWithdrawals).map(async ([symbol]) => {
+          return [symbol, await balance(symbol, COMMUNITY_WALLET)];
+        }),
+      ),
+    );
     await setMaxStaleCoreAssets(CHAINLINK, NORMAL_TIMELOCK);
   });
 
@@ -68,7 +66,7 @@ forking(39688245, () => {
     });
 
     for (const [symbol, debts] of entries(shortfalls)) {
-      for (const [borrower, _] of Object.entries(debts)) {
+      for (const [borrower] of Object.entries(debts)) {
         it(`has recorded nonzero debt for ${borrower} in ${symbol.slice(1)}`, async () => {
           const vToken = new Contract(vTokenConfigs[symbol].address, VTOKEN_ABI, ethers.provider);
           expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.be.gt(0);
@@ -89,7 +87,7 @@ forking(39688245, () => {
 
   describe("Post-VIP behavior", () => {
     for (const [symbol, debts] of entries(shortfalls)) {
-      for (const [borrower, _] of Object.entries(debts)) {
+      for (const [borrower] of Object.entries(debts)) {
         it(`repays ${borrower}'s ${symbol.slice(1)} debt in full`, async () => {
           const vToken = new Contract(vTokenConfigs[symbol].address, VTOKEN_ABI, ethers.provider);
           expect(await vToken.callStatic.borrowBalanceCurrent(borrower)).to.equal(0);
@@ -97,7 +95,7 @@ forking(39688245, () => {
       }
     }
 
-    for (const [borrower, _] of Object.entries(vaiDebts)) {
+    for (const [borrower] of Object.entries(vaiDebts)) {
       it(`repays ${borrower}'s VAI debt in full`, async () => {
         expect(await vaiController.callStatic.getVAIRepayAmount(borrower)).to.equal(0);
       });
@@ -123,7 +121,7 @@ forking(39688245, () => {
         const balanceDiff = balanceAfter.sub(prevBalancesOfCommunityWallet[symbol]);
         expect(balanceDiff).to.be.lt(expectedAmount.mul(101).div(100));
         expect(balanceDiff).to.be.gt(expectedAmount.mul(99).div(100));
-      })
+      });
     }
   });
 });
