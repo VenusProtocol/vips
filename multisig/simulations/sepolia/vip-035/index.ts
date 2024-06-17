@@ -69,7 +69,7 @@ forking(6077234, () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("1", 8);
+      const expectedSupply = parseUnits("1.2", 8);
       expect(await vsfrxETHContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
 

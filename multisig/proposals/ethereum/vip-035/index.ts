@@ -9,13 +9,14 @@ const { ethereum } = NETWORK_ADDRESSES;
 export const sfrxETH = "0xac3E018457B222d93114458476f3E3416Abbe38F";
 export const VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
 export const vsfrxETH = "0x625d47820d26976DDeABee38784d2843ca95D8Ae";
-export const INITIAL_SUPPLY = parseUnits("1", 18);
+export const INITIAL_SUPPLY = parseUnits("1.2", 18);
 export const REWARDS_DISTRIBUTOR_XVS = "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8";
 export const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const XVS_REWARD_TRANSFER = parseUnits("2400", 18);
 export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
+export const RECEIVER = "0x6e74053a3798e0fC9a9775F7995316b27f21c4D2";
 
 export const SFrxETHOracle = "0x987010fD82FDCe099174aC605B88E1cc35019ef4";
 export const PRICE_DIFF = parseUnits("1.14", 18);
@@ -64,7 +65,7 @@ export const vip035 = () => {
       target: ethereum.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [vsfrxETH, "900000000000000000", "930000000000000000", INITIAL_SUPPLY, VTREASURY, SUPPLY_CAP, BORROW_CAP],
+        [vsfrxETH, "900000000000000000", "930000000000000000", INITIAL_SUPPLY, RECEIVER, SUPPLY_CAP, BORROW_CAP],
       ],
     },
 

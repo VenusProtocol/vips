@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { sfrxETH, vip035, vsfrxETH } from "../../../proposals/ethereum/vip-035";
+import { sfrxETH, vip035, vsfrxETH, RECEIVER } from "../../../proposals/ethereum/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -67,8 +67,8 @@ forking(20110093, () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("1", 8);
-      expect(await vsfrxETHContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+      const expectedSupply = parseUnits("1.2", 8);
+      expect(await vsfrxETHContract.balanceOf(RECEIVER)).to.equal(expectedSupply);
     });
 
     it("should set collateral factor to 90% and Liquidation threshold to 93%", async () => {
