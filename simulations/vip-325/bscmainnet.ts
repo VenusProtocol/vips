@@ -10,8 +10,8 @@ import {
   REWARDS_DISTRIBUTOR,
   USDT,
   VBABYDOGE,
-  vip326,
-} from "../../vips/vip-326/bscmainnet";
+  vip325,
+} from "../../vips/vip-325/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
@@ -28,7 +28,7 @@ forking(39692520, () => {
     communityWalletBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-326", vip326());
+  testVip("VIP-325", vip325());
 
   describe("Post-VIP behavior", async () => {
     it(`transfers ${formatUnits(EXPECTED_COMMUNITY_USDT, 18)} USDT to community wallet`, async () => {
