@@ -19,9 +19,9 @@ export const BORROW_CAP = parseUnits("1000", 18);
 
 export const MockSfrxEthFraxOracle = "0x96f7FD1d922Bb6769773BeC88BE6aA615DE77ad1";
 export const IS_BAD_DATA = false;
-export const PRICE_LOW = "250318482717998"
-export const PRICE_HIGH = "250665814578833"
-export const SFrxETHOracle = "0x6E202555f0CA6558118C67150e16fbf89080eB3b"
+export const PRICE_LOW = "250318482717998";
+export const PRICE_HIGH = "250665814578833";
+export const SFrxETHOracle = "0x6E202555f0CA6558118C67150e16fbf89080eB3b";
 export const PRICE_DIFF = parseUnits("1.14", 18);
 
 export const vip035 = () => {
@@ -83,15 +83,7 @@ export const vip035 = () => {
       target: sepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [
-          vsfrxETH,
-          "900000000000000000",
-          "930000000000000000",
-          INITIAL_SUPPLY,
-          VTREASURY,
-          SUPPLY_CAP,
-          BORROW_CAP,
-        ],
+        [vsfrxETH, "900000000000000000", "930000000000000000", INITIAL_SUPPLY, VTREASURY, SUPPLY_CAP, BORROW_CAP],
       ],
     },
 
@@ -99,11 +91,7 @@ export const vip035 = () => {
     {
       target: REWARDS_DISTRIBUTOR_XVS,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [
-        [vsfrxETH],
-        ["3703703703703703"],
-        ["0"],
-      ],
+      params: [[vsfrxETH], ["3703703703703703"], ["0"]],
     },
     {
       target: VTREASURY,

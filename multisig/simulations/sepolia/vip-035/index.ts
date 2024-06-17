@@ -1,24 +1,23 @@
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { vip035, sfrxETH, vsfrxETH } from "../../../proposals/sepolia/vip-035";
+import { sfrxETH, vip035, vsfrxETH } from "../../../proposals/sepolia/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import VTOKEN_ABI from "./abi/vToken.json";
 import ERC20_ABI from "./abi/erc20.json";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
-const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
 forking(6077234, () => {
   let resilientOracle: Contract;
@@ -28,7 +27,7 @@ forking(6077234, () => {
   let sfrxETHContract: Contract;
 
   before(async () => {
-    impersonateAccount(sepolia.NORMAL_TIMELOCK);
+    await impersonateAccount(sepolia.NORMAL_TIMELOCK);
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
