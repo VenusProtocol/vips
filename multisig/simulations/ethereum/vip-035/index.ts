@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { sfrxETH, vip035, vsfrxETH, RECEIVER } from "../../../proposals/ethereum/vip-035";
+import { RECEIVER, sfrxETH, vip035, vsfrxETH } from "../../../proposals/ethereum/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
