@@ -8,9 +8,7 @@ import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import {
   COMMUNITY_WALLET,
-  COMMUNITY_WALLET_USDT_AMOUNT,
   TOKEN_REDEEMER,
-  USDT,
   VAI,
   VAI_CONTROLLER,
   VTREASURY,
@@ -19,7 +17,6 @@ import {
   shortfalls,
   underlyingWithdrawals,
   vTokenConfigs,
-  vTokenWithdrawals,
   vaiDebts,
   vip315,
 } from "../../vips/vip-315/bscmainnet";
@@ -49,8 +46,7 @@ const balance = async (
   return erc20At(underlyingAddress).balanceOf(userAddress);
 }
 
-forking(39602646, () => {
-  const usdt = erc20At(USDT);
+forking(39688245, () => {
   let prevBalancesOfCommunityWallet: Record<string, BigNumber>;
   const vaiController = new Contract(VAI_CONTROLLER, VAI_CONTROLLER_ABI, ethers.provider);
 
@@ -84,9 +80,10 @@ forking(39602646, () => {
   testVip("VIP-315", vip315(), {
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D", // Custom supporter to prevent overriding community wallet BNB balance
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      //await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [97]);
-      //await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [24]);
-      //await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [19]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [153]);
+      await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["RepayVAI"], [77]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [26]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBNB"], [1]);
     },
   });
 

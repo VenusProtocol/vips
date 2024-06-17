@@ -8,11 +8,7 @@ export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
-
-// We don't have enough DAI in treasury, so we transfer USDT to cover for DAI debt
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
-export const COMMUNITY_WALLET_USDT_AMOUNT = parseUnits("3.666036335919046394", 18);
 
 export const vTokenConfigs = {
   "vUSDC": {
@@ -349,7 +345,7 @@ export const underlyingWithdrawals = {
   "vBCH": parseUnits("0.392927628601094352", 18), // $172.043022060904568629
   "vDOT": parseUnits("6.698682998431588253", 18), // $43.259873546371758742
   "vLINK": parseUnits("12.018486515102211594", 18), // $184.142898009689506928
-  "vDAI": parseUnits("1032.958476679082230441", 18), // $1032.755562315923391527
+  "vDAI": parseUnits("1036.624513015001276835", 18), // $1036.420878495664608947
   "vFIL": parseUnits("11.99254739767836892", 18), // $64.869043911972761167
   "vBETH": parseUnits("0.059073194526503488", 18), // $207.452689250146400025
   "vADA": parseUnits("248.135686153001214872", 18), // $104.864478406421874676
@@ -362,7 +358,7 @@ export const underlyingWithdrawals = {
   "vTRX": parseUnits("60.592353", 6), // $7.01966772154416
   "vWBETH": parseUnits("0.020667104021029936", 18), // $75.59268716473448468
   "vTUSD": parseUnits("1.355597672220478433", 18), // $1.350761103065646599
-} // total: $14409.762639956385672542
+} // total: $14413.427956136126889962
 
 export const vaiDebts = {
   "0x404555fb2123b96627b68c9b1c5a3b4c9d36ef98": parseUnits("94.65908368696534239", 18), // $94.65908368696534239
@@ -462,7 +458,7 @@ export const expectedCommunityWithdrawals = {
   "vBCH": parseUnits("0.30878243372833433", 18), // $135.200121322788726807
   "vDOT": parseUnits("6.698682998431588253", 18), // $43.259873546371758742
   "vLINK": parseUnits("12.018486515102211594", 18), // $184.142898009689506928
-  "vDAI": parseUnits("641.283575821619070498", 18), // $641.157602075984671647
+  "vDAI": parseUnits("644.949612157538116892", 18), // $644.822918255725889459
   "vFIL": parseUnits("8.657037572953758206", 18), // $46.826894390782246181
   "vBETH": parseUnits("0.059073194526503488", 18), // $207.452689250146400025
   "vADA": parseUnits("207.2174583863580071", 18), // $87.572049902532893292
@@ -476,10 +472,7 @@ export const expectedCommunityWithdrawals = {
   "vWBETH": parseUnits("0.020667104021029936", 18), // $75.59268716473448468
   "vTUSD": parseUnits("1.355597672220478433", 18), // $1.350761103065646599
   "VAI": parseUnits("7153.883327952298075002", 18), // $7153.883327952298075002
-} // total: $17350.639330570666740334
-// We withdraw part of the DAI debt as USDT because we do not have enough DAI in treasury
-expectedCommunityWithdrawals["vDAI"] = expectedCommunityWithdrawals["vDAI"].sub(COMMUNITY_WALLET_USDT_AMOUNT);
-expectedCommunityWithdrawals["vUSDT"] = expectedCommunityWithdrawals["vUSDT"].add(COMMUNITY_WALLET_USDT_AMOUNT);
+} // total: $17354.304646750407958146
 
 export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
   return Object.entries(r) as [K, V][];
@@ -534,11 +527,6 @@ export const vip315 = () => {
         target: TOKEN_REDEEMER,
         signature: "batchRepayVAI(address,(address,uint256)[],address)",
         params: [VAI_CONTROLLER, Object.entries(vaiDebts), COMMUNITY_WALLET],
-      },
-      {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, COMMUNITY_WALLET_USDT_AMOUNT, COMMUNITY_WALLET],
       },
     ],
     meta,
