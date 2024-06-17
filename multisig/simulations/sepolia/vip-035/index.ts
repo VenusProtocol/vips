@@ -111,8 +111,6 @@ forking(6077234, () => {
       await checkIsolatedPoolsComptrollers({
         [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
-
-      checkIsolatedPoolsComptrollers();
     });
   });
 });
