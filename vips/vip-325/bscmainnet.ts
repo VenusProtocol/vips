@@ -478,11 +478,65 @@ export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
   return Object.entries(r) as [K, V][];
 };
 
-export const vip315 = () => {
+export const vip325 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-315 Partial shortfall repayment",
-    description: ``,
+    title: "VIP-325 Partial shortfall repayment",
+    description: `Following [VIP-309](https://app.venus.io/#/governance/proposal/309), Venus continues to repay old shortfalls with the objective of being 100% debt-free. If passed, this VIP will repay the bad debt for all accounts with debts higher than $15, using the funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9). Moreover, it will transfer funds to the [Community Wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) to repay the rest of the bad debt (distributed among thousands of small debtors).
+
+The total estimated repayment amount in this VIP is **$6,327.48**, and the total transferred to the Community Wallet is **$17,354.30**, considering the June 14th, 2024 token prices.
+
+A total of 192 accounts will be repaid in this VIP, with a total token value of:
+
+- USDC: 1,010.31 ($1,010.26)
+- USDT: 1,703.69 ($1,702.38)
+- BNB: 0.84 ($511.17)
+- BTCB: 0.00087 ($58.42)
+- ETH: 0.041 ($143.90)
+- BCH: 0.084 ($36.84)
+- DAI: 395.34 ($395.26)
+- FIL: 3.33 ($18.04)
+- ADA: 40.92 ($17.29)
+- DOGE: 255.10 ($36.30)
+- CAKE: 16.73 ($42.15)
+- TUSDOLD: 230.34 ($229.51)
+- TRXOLD: 130.56 ($15.13)
+- VAI: 2,110.81 ($2,110.81)
+
+The funds transferred to the Community wallet to complete the repayment of the bad debt are:
+
+- USDC: 1,374.72 ($1,374.65)
+- USDT: 1,873.54 ($1,872.10)
+- BUSD: 56.32 ($56.32)
+- SXP: 560.41 ($3.36)
+- XVS: 0.19 ($1.62)
+- BNB: 4.36 ($2652.91)
+- BTC: 0.013 ($858.21)
+- ETH: 0.21 ($743.50)
+- LTC: 1.76 ($139.87)
+- XRP: 239.40 ($114.34)
+- BCH: 0.31 ($135.20)
+- DOT: 6.70 ($43.26)
+- LINK: 12.02 ($184.14)
+- DAI: 644.95 ($644.82)
+- FIL: 8.66 ($46.83)
+- BETH: 0.059 ($207.45)
+- ADA: 207.22 ($87.57)
+- DOGE: 1856.24 ($264.14)
+- MATIC: 20.16 ($12.27)
+- CAKE: 53.02 ($133.62)
+- AAVE: 0.59 ($49.92)
+- TUSDOLD: 397.32 ($395.90)
+- TRXOLD: 815.14 ($94.43)
+- TRX: 60.59 ($7.02)
+- WBETH: 0.021 ($75.59)
+- TUSD: 1.36 ($1.35)
+- VAI: 7,153.88 ($7,153.88)
+
+#### References
+
+- [TokenRedeemer contract used to repay the debt](https://bscscan.com/address/0xC53ffda840B51068C64b2E052a5715043f634bcd)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/295)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -534,4 +588,4 @@ export const vip315 = () => {
   );
 };
 
-export default vip315;
+export default vip325;
