@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { RECEIVER, sfrxETH, vip035, vsfrxETH } from "../../../proposals/ethereum/vip-035";
+import { RECEIVER, sfrxETH, vip035, vsfrxETH, SFrxETHOracle } from "../../../proposals/ethereum/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -18,12 +18,14 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { ethereum } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const sfrxETH_HOLDER = "0x8CA7A5d6f3acd3A7A8bC468a8CD0FB14B6BD28b6";
+const MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 
-forking(20110093, () => {
+forking(20119662, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
   let comptroller: Contract;
+  let sfrxETHOracle: Contract;
 
   before(async () => {
     await impersonateAccount(sfrxETH_HOLDER);
@@ -31,6 +33,7 @@ forking(20110093, () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
+    sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -44,10 +47,14 @@ forking(20110093, () => {
       await pretendExecutingVip(vip035());
     });
 
+    it("check owner", async () => {
+      expect(await resilientOracle.owner()).to.equal(MULTISIG);
+    })
+
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3875", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3720", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vsfrxETH)).to.be.closeTo(
-        parseUnits("3875", 18),
+        parseUnits("3720", 18),
         parseUnits("1", 18),
       );
     });
@@ -78,7 +85,7 @@ forking(20110093, () => {
     });
 
     it("check protocol seize share", async () => {
-      expect(await vsfrxETHContract.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+      expect(await vsfrxETHContract.protocolSeizeShareMantissa()).equals(parseUnits("0.01", 18));
     });
 
     it("check vToken", async () => {

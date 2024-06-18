@@ -21,7 +21,7 @@ export const MockSfrxEthFraxOracle = "0x96f7FD1d922Bb6769773BeC88BE6aA615DE77ad1
 export const IS_BAD_DATA = false;
 export const PRICE_LOW = "250318482717998";
 export const PRICE_HIGH = "250665814578833";
-export const SFrxETHOracle = "0x6E202555f0CA6558118C67150e16fbf89080eB3b";
+export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 export const PRICE_DIFF = parseUnits("1.14", 18);
 
 export const vip035 = () => {
@@ -36,8 +36,8 @@ export const vip035 = () => {
     },
     {
       target: SFrxETHOracle,
-      signature: "initialize(address,uint256)",
-      params: [ACM, PRICE_DIFF],
+      signature: "acceptOwnership()",
+      params: [],
     },
     {
       target: MockSfrxEthFraxOracle,
@@ -53,17 +53,6 @@ export const vip035 = () => {
     },
     {
       target: sfrxETH,
-      signature: "transfer(address,uint256)",
-      params: [VTREASURY, INITIAL_SUPPLY],
-    },
-    {
-      target: VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [sfrxETH, INITIAL_SUPPLY, sepolia.NORMAL_TIMELOCK],
-      value: "0",
-    },
-    {
-      target: sfrxETH,
       signature: "approve(address,uint256)",
       params: [sepolia.POOL_REGISTRY, 0],
       value: "0",
@@ -73,6 +62,11 @@ export const vip035 = () => {
       signature: "approve(address,uint256)",
       params: [sepolia.POOL_REGISTRY, INITIAL_SUPPLY],
       value: "0",
+    },
+    {
+      target: vsfrxETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
     },
     {
       target: vsfrxETH,
@@ -87,7 +81,7 @@ export const vip035 = () => {
       ],
     },
 
-    // Add FRAX and sFrax Market Rewards
+    // // Add FRAX and sFrax Market Rewards
     {
       target: REWARDS_DISTRIBUTOR_XVS,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",

@@ -18,7 +18,7 @@ export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
 export const RECEIVER = "0x6e74053a3798e0fC9a9775F7995316b27f21c4D2";
 
-export const SFrxETHOracle = "0x987010fD82FDCe099174aC605B88E1cc35019ef4";
+export const SFrxETHOracle = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
 export const PRICE_DIFF = parseUnits("1.14", 18);
 
 export const vip035 = () => {
@@ -33,8 +33,8 @@ export const vip035 = () => {
     },
     {
       target: SFrxETHOracle,
-      signature: "initialize(address,uint256)",
-      params: [ACM, PRICE_DIFF],
+      signature: "acceptOwnership()",
+      params: [],
     },
 
     // Add Market
@@ -55,6 +55,11 @@ export const vip035 = () => {
       signature: "approve(address,uint256)",
       params: [ethereum.POOL_REGISTRY, INITIAL_SUPPLY],
       value: "0",
+    },
+    {
+      target: vsfrxETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
     },
     {
       target: vsfrxETH,
