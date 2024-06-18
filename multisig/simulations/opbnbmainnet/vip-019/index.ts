@@ -13,7 +13,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
-forking(26005834, async () => {
+forking(26959433, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

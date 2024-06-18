@@ -4,7 +4,7 @@ import vip326 from "../../vips/vip-326/bscmainnet";
 import vip327 from "../../vips/vip-327/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(39603799, async () => {
+forking(39719981, async () => {
   before(async () => {
     await pretendExecutingVip(await vip326());
   });
