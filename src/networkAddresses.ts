@@ -73,6 +73,8 @@ export const NETWORK_ADDRESSES = {
     XVS_VAULT_PROXY: ethereumDeployedContracts.addresses.XVSVaultProxy,
     GENERIC_TEST_USER_ACCOUNT: "0x700E5E41Ee18455540256C4e6F055a4CE9BdBd7C", // XVS Holder
     CHAINLINK_ORACLE: oracleEthereumContracts.addresses.ChainlinkOracle,
+    REDSTONE_ORACLE: oracleEthereumContracts.addresses.RedStoneOracle,
+    WETH: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   },
   sepolia: {
     NORMAL_TIMELOCK: "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB", // Sepolia Multisig
