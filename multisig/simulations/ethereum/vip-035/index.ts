@@ -18,7 +18,6 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { ethereum } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const sfrxETH_HOLDER = "0x8CA7A5d6f3acd3A7A8bC468a8CD0FB14B6BD28b6";
-const MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";
 
 forking(20119662, () => {
   let resilientOracle: Contract;
@@ -48,7 +47,7 @@ forking(20119662, () => {
     });
 
     it("check owner", async () => {
-      expect(await sfrxETHOracle.owner()).to.equal(MULTISIG);
+      expect(await sfrxETHOracle.owner()).to.equal(ethereum.GUARDIAN);
     });
 
     it("check price", async () => {

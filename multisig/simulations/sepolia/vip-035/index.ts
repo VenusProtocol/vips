@@ -18,7 +18,6 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
-const MULTISIG = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
 forking(6134567, () => {
   let resilientOracle: Contract;
@@ -50,7 +49,7 @@ forking(6134567, () => {
     });
 
     it("check owner", async () => {
-      expect(await sfrxETHOracle.owner()).to.equal(MULTISIG);
+      expect(await sfrxETHOracle.owner()).to.equal(sepolia.GUARDIAN);
     });
 
     it("check price", async () => {
