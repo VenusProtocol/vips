@@ -30,11 +30,11 @@ const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
 const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
-const vip323 = () => {
+const vip326 = () => {
   const meta = {
     version: "v2",
     title:
-      "vip323 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum, opbnbmainnet & arbitrum ",
+      "vip326 configure OmnichainProposalSender on bscmainnet and OmnichainGovernanceExecutor on ethereum, opbnbmainnet & arbitrum ",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on ETHEREUM, OPBNBMINNET & ARBITRUM chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -509,4 +509,4 @@ const vip323 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip323;
+export default vip326;

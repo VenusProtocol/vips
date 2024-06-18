@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip323, { OPBNBMAINNET_ACM, OPBNBMAINNET_NORMAL_TIMELOCK } from "../../vips/vip-323/bscmainnet";
+import vip326, { OPBNBMAINNET_ACM, OPBNBMAINNET_NORMAL_TIMELOCK } from "../../vips/vip-326/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
@@ -31,7 +31,7 @@ forking(25999099, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBMAINNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip323 configures bridge", await vip323(), {
+  testForkedNetworkVipCommands("vip326 configures bridge", await vip326(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
     },

@@ -5,12 +5,13 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip323, { OPBNBTESTNET_ACM, OPBNBTESTNET_NORMAL_TIMELOCK } from "../../vips/vip-323/bsctestnet";
+import vip327, { OPBNBTESTNET_ACM } from "../../vips/vip-327/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
 
 forking(30782321, async () => {
   const provider = ethers.provider;
@@ -31,9 +32,9 @@ forking(30782321, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBTESTNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip323 configures bridge", await vip323(), {
+  testForkedNetworkVipCommands("vip327 configures bridge", await vip327(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [18]);
     },
   });
 

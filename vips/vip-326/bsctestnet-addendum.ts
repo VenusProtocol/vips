@@ -14,10 +14,10 @@ export const MAX_DAILY_LIMIT = 100;
 
 const ARBITRUMSEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
-const vip323 = () => {
+const vip326 = () => {
   const meta = {
     version: "v2",
-    title: "vip323 configure OmnichainGovernanceExecutor on arbitrumsepolia",
+    title: "vip326 configure OmnichainGovernanceExecutor on arbitrumsepolia",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalExecutor on ARBITRUMSEPOLIA chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -158,4 +158,4 @@ const vip323 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip323;
+export default vip326;

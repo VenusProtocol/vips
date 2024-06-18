@@ -5,15 +5,18 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
-import vip324, { OPBNBMAINNET_ACM } from "../../vips/vip-324/bscmainnet";
+import vip326, {
+  ARBITRUMSEPOLIA_ACM,
+  ARBITRUMSEPOLIA_NORMAL_TIMELOCK,
+  ARBITRUMSEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
+} from "../../vips/vip-326/bsctestnet-addendum";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
-const { opbnbmainnet } = NETWORK_ADDRESSES;
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const OPBNBMAINNET_NORMAL_TIMELOCK = "0x372044f837eBBec77e64a449173732f8955c75bA";
 
-forking(26002700, async () => {
+forking(54239346, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -22,19 +25,19 @@ forking(26002700, async () => {
 
   before(async () => {
     executor = new ethers.Contract(
-      opbnbmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      ARBITRUMSEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
       OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
       provider,
     );
-    acm = new ethers.Contract(OPBNBMAINNET_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
+    acm = new ethers.Contract(ARBITRUMSEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    multisig = await initMainnetUser(opbnbmainnet.GUARDIAN, ethers.utils.parseEther("1"));
-    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBMAINNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
+    multisig = await initMainnetUser(arbitrumsepolia.GUARDIAN, ethers.utils.parseEther("1"));
+    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip324 configures bridge", await vip324(), {
+  testForkedNetworkVipCommands("vip326 configures bridge", await vip326(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [18]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
     },
   });
 
