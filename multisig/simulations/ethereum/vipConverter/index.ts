@@ -214,7 +214,7 @@ forking(20088800, () => {
 
       // Private Conversion will occur
       await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDT);
-      
+
       const usdcBalanceUsdtPrimeConverterCurrent = await usdtPrimeConverter.balanceOf(USDC);
       const usdtBalanceUsdtPrimeCurrent = await usdt.balanceOf(PLP);
 
