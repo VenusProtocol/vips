@@ -104,7 +104,7 @@ forking(20119662, () => {
       const IR = await vsfrxETHContract.interestRateModel();
       checkInterestRate(
         IR,
-        "vTUSD_Core",
+        "vsfrxETH_LiquidStakedETH",
         { base: "0", multiplier: "0.09", jump: "3", kink: "0.4" },
         BigNumber.from(2628000),
       );
