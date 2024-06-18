@@ -24,10 +24,10 @@ const COMPTROLLER_CORE = "0xfd36e2c2a6789db23113685031d7f16329158384";
 export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 export const COMPTROLLER_CORE_RELEASE_AMOUNT = parseUnits("153510", 18); // Q3 ->95,550 + Q4 -> 57,960
 
-export const vip323 = () => {
+export const vip326 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-323 Update Distribution rules on PSR",
+    title: "VIP-326 Update Distribution rules on PSR",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -85,4 +85,4 @@ export const vip323 = () => {
   );
 };
 
-export default vip323;
+export default vip326;
