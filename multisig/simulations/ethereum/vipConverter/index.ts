@@ -38,6 +38,7 @@ import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import SINGLE_TOKEN_CONVERTER_BEACON_ABI from "./abi/SingleTokenConverterBeacon.json";
 import XVS_VAULT_CONVERTER_ABI from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
@@ -45,18 +46,25 @@ const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const USDT_HOLDER = "0xb23360CCDd9Ed1b15D45E5d3824Bb409C8D7c460";
 const USDC_HOLDER = "0x974CaA59e49682CdA0AD2bbe82983419A2ECC400";
+const SINGLE_TOKEN_CONVERTER_BEACON = "0x5C0b5D09388F2BA6441E74D40666C4d96e4527D1";
 
-forking(20088800, () => {
+forking(20119261, () => {
   const provider = ethers.provider;
 
   describe("Post-VIP behavior", () => {
     let converterNetwork: Contract;
     let xvsVaultTreasury: Contract;
+    let singleTokenConverterBeacon: Contract;
     before(async () => {
       await pretendExecutingVip(vipConverter());
 
       converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
       xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
+      singleTokenConverterBeacon = new ethers.Contract(
+        SINGLE_TOKEN_CONVERTER_BEACON,
+        SINGLE_TOKEN_CONVERTER_BEACON_ABI,
+        provider,
+      );
     });
 
     it("Timelock should be the owner of all converters", async () => {
@@ -64,6 +72,9 @@ forking(20088800, () => {
         const Converter = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
         expect(await Converter.owner()).to.equal(GUARDIAN);
       }
+    });
+    it("Owner of single token converter should be normal timelock", async () => {
+      expect(await singleTokenConverterBeacon.owner()).to.equal(GUARDIAN);
     });
 
     it("Timelock should be the owner of ConverterNetwork", async () => {
@@ -76,7 +87,7 @@ forking(20088800, () => {
   });
 });
 
-forking(20088800, () => {
+forking(20119261, () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -231,7 +242,7 @@ forking(20088800, () => {
   });
 });
 
-forking(20088800, () => {
+forking(20119261, () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
