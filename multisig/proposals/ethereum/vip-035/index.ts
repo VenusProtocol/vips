@@ -19,7 +19,6 @@ export const BORROW_CAP = parseUnits("1000", 18);
 export const RECEIVER = "0x6e74053a3798e0fC9a9775F7995316b27f21c4D2";
 
 export const SFrxETHOracle = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
-export const PRICE_DIFF = parseUnits("1.14", 18);
 
 export const vip035 = () => {
   return makeProposal([

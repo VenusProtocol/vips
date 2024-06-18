@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { sfrxETH, SFrxETHOracle, vip035, vsfrxETH } from "../../../proposals/sepolia/vip-035";
+import { SFrxETHOracle, sfrxETH, vip035, vsfrxETH } from "../../../proposals/sepolia/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -50,8 +50,8 @@ forking(6134567, () => {
     });
 
     it("check owner", async () => {
-      expect(await resilientOracle.owner()).to.equal(MULTISIG);
-    })
+      expect(await sfrxETHOracle.owner()).to.equal(MULTISIG);
+    });
 
     it("check price", async () => {
       expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3992", 18), parseUnits("1", 18));

@@ -22,7 +22,6 @@ export const IS_BAD_DATA = false;
 export const PRICE_LOW = "250318482717998";
 export const PRICE_HIGH = "250665814578833";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
-export const PRICE_DIFF = parseUnits("1.14", 18);
 
 export const vip035 = () => {
   return makeProposal([
@@ -82,16 +81,16 @@ export const vip035 = () => {
     },
 
     // // Add FRAX and sFrax Market Rewards
-    {
-      target: REWARDS_DISTRIBUTOR_XVS,
-      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [[vsfrxETH], ["3703703703703703"], ["0"]],
-    },
-    {
-      target: VTREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_XVS],
-    },
+    // {
+    //   target: REWARDS_DISTRIBUTOR_XVS,
+    //   signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+    //   params: [[vsfrxETH], ["3703703703703703"], ["0"]],
+    // },
+    // {
+    //   target: VTREASURY,
+    //   signature: "withdrawTreasuryToken(address,uint256,address)",
+    //   params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_XVS],
+    // },
   ]);
 };
 
