@@ -20,6 +20,7 @@ import vipConverter, {
   PLP,
   PRIME,
   PROTOCOL_SHARE_RESERVE_PROXY,
+  SINGLE_TOKEN_CONVERTER_BEACON,
   USDC,
   USDT,
   VTREASURY,
@@ -46,9 +47,8 @@ const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 const XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const USDT_HOLDER = "0xb23360CCDd9Ed1b15D45E5d3824Bb409C8D7c460";
 const USDC_HOLDER = "0x974CaA59e49682CdA0AD2bbe82983419A2ECC400";
-const SINGLE_TOKEN_CONVERTER_BEACON = "0x5C0b5D09388F2BA6441E74D40666C4d96e4527D1";
 
-forking(20119261, () => {
+forking(20120060, () => {
   const provider = ethers.provider;
 
   describe("Post-VIP behavior", () => {
@@ -87,7 +87,7 @@ forking(20119261, () => {
   });
 });
 
-forking(20119261, () => {
+forking(20120060, () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -242,7 +242,7 @@ forking(20119261, () => {
   });
 });
 
-forking(20119261, () => {
+forking(20120060, () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;

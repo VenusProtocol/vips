@@ -46,6 +46,8 @@ export const VUSDC_CORE = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
 export const VWBTC_CORE = "0x8716554364f20BCA783cb2BAA744d39361fd1D8d";
 export const VWETH_LST = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
 
+export const SINGLE_TOKEN_CONVERTER_BEACON = "0x5C0b5D09388F2BA6441E74D40666C4d96e4527D1";
+
 const vipConverter = () => {
   return makeProposal([
     ...acceptOwnershipCommandsAllConverters,
@@ -58,6 +60,11 @@ const vipConverter = () => {
       target: CONVERTER_NETWORK,
       signature: "acceptOwnership()",
       params: [],
+    },
+    {
+      target: SINGLE_TOKEN_CONVERTER_BEACON,
+      signature: "upgradeTo(address)",
+      params: ["0x95de59aD391589603DF33F81B53C4d894D8e5545"],
     },
     ...callPermissionCommandsAllConverter,
 
