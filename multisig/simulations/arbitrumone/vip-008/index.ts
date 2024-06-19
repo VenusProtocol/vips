@@ -31,7 +31,7 @@ import XVS_ABI from "./abi/xvs.json";
 const BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const TREAUSRY_AMOUNT = parseUnits("30000", 18);
 
-forking(221153914, () => {
+forking(221153914, async () => {
   const provider = ethers.provider;
   let bridgeSigner: Signer;
   let xvsVault: Contract;
@@ -56,7 +56,7 @@ forking(221153914, () => {
     before(async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
     });
 
     it("vTreasury should hold 15300 XVS", async () => {

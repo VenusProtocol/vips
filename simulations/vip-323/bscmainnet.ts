@@ -16,7 +16,7 @@ import vip323, {
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(39546351, () => {
+forking(39546351, async () => {
   let xvsBridge: Contract;
   let xvs: Contract;
   let eth: Contract;
@@ -36,7 +36,7 @@ forking(39546351, () => {
     oldEthBalWallet = await eth.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-323 Send XVS to Dest Chain", vip323(), {
+  testVip("VIP-323 Send XVS to Dest Chain", await vip323(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
     },

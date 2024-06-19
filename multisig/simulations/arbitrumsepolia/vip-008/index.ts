@@ -13,10 +13,10 @@ import vip008, {
   VUSDT_CORE,
 } from "../../../proposals/arbitrumsepolia/vip-008";
 
-forking(44291286, () => {
+forking(44291286, async () => {
   describe("Generic checks", async () => {
     before(async () => {
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
     });
 
     checkRewardsDistributorPool(COMPTROLLER_CORE, 1);
