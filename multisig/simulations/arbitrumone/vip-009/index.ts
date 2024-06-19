@@ -4,11 +4,11 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip008, {
+import vip009, {
   ARBITRUM_ACM,
   ARBITRUM_NORMAL_TIMELOCK,
   ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
-} from "../../../proposals/arbitrumone/vip-008";
+} from "../../../proposals/arbitrumone/vip-009";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
@@ -46,7 +46,7 @@ forking(221758908, async () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip008());
+      await pretendExecutingVip(await vip009());
     });
     it("Normal Timelock has default admin role", async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, ARBITRUM_NORMAL_TIMELOCK);

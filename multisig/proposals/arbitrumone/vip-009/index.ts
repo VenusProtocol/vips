@@ -8,7 +8,7 @@ const DEFAULT_ADMIN_ROLE = "0x00000000000000000000000000000000000000000000000000
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-export const vip008 = () => {
+export const vip009 = () => {
   return makeProposal([
     {
       target: ARBITRUM_ACM,
@@ -93,4 +93,4 @@ export const vip008 = () => {
     },
   ]);
 };
-export default vip008;
+export default vip009;
