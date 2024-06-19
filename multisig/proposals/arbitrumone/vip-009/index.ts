@@ -13,37 +13,7 @@ export const vip009 = () => {
     {
       target: ARBITRUM_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
       params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", arbitrumone.GUARDIAN],
     },
     {
       target: ARBITRUM_ACM,
