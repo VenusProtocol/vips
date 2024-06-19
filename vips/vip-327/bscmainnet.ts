@@ -494,10 +494,10 @@ export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
   return Object.entries(r) as [K, V][];
 };
 
-export const vip325 = () => {
+export const vip327 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-325 Partial shortfall repayment",
+    title: "VIP-327 Partial shortfall repayment",
     description: `Following [VIP-309](https://app.venus.io/#/governance/proposal/309), Venus continues to repay old shortfalls with the objective of being 100% debt-free. If passed, this VIP will repay the bad debt for all accounts with debts higher than $15, using the funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9). Moreover, it will transfer funds to the [Community Wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) to repay the rest of the bad debt (distributed among thousands of small debtors).
 
 The total estimated repayment amount in this VIP is **$6,327.48**, and the total transferred to the Community Wallet is **$17,354.30**, considering the June 14th, 2024 token prices.
@@ -602,4 +602,4 @@ The funds transferred to the Community wallet to complete the repayment of the b
   );
 };
 
-export default vip325;
+export default vip327;

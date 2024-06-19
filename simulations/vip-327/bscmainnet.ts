@@ -17,8 +17,8 @@ import {
   underlyingWithdrawals,
   vTokenConfigs,
   vaiDebts,
-  vip325,
-} from "../../vips/vip-325/bscmainnet";
+  vip327,
+} from "../../vips/vip-327/bscmainnet";
 import ERC20_ABI from "./abi/IERC20.json";
 import VAI_CONTROLLER_ABI from "./abi/VAIController.json";
 import VTOKEN_ABI from "./abi/VBep20.json";
@@ -75,7 +75,7 @@ forking(39688245, () => {
     }
   });
 
-  testVip("VIP-325", vip325(), {
+  testVip("VIP-327", vip327(), {
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D", // Custom supporter to prevent overriding community wallet BNB balance
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [153]);
