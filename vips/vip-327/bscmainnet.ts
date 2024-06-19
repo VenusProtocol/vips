@@ -96,18 +96,6 @@ const vip324 = () => {
         params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ETHEREUM_FASTTRACK_TIMELOCK],
         dstChainId: ETHEREUM_CHAIN_ID,
       },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ETHEREUM_CRITICAL_TIMELOCK],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
 
       {
         target: ETHEREUM_ACM,
@@ -115,48 +103,7 @@ const vip324 = () => {
         params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ETHEREUM_CRITICAL_TIMELOCK],
         dstChainId: ETHEREUM_CHAIN_ID,
       },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          ETHEREUM_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
 
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          ETHEREUM_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          ETHEREUM_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
-
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          ETHEREUM_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: ETHEREUM_CHAIN_ID,
-      },
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -257,48 +204,7 @@ const vip324 = () => {
         params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", OPBNBMAINNET_CRITICAL_TIMELOCK],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
       },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          OPBNBMAINNET_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
 
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          OPBNBMAINNET_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          OPBNBMAINNET_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
-
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          OPBNBMAINNET_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -320,19 +226,7 @@ const vip324 = () => {
         ],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
       },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
 
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", OPBNBMAINNET_CRITICAL_TIMELOCK],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
-      },
       {
         target: ARBITRUM_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -403,48 +297,7 @@ const vip324 = () => {
         params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ARBITRUM_CRITICAL_TIMELOCK],
         dstChainId: ARBITRUM_CHAIN_ID,
       },
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          ARBITRUM_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
 
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTrustedRemoteAddress(uint16,bytes)",
-          ARBITRUM_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          ARBITRUM_FASTTRACK_TIMELOCK,
-        ],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
-
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
-          "setTimelockPendingAdmin(address,uint8)",
-          ARBITRUM_CRITICAL_TIMELOCK,
-        ],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
       {
         target: ARBITRUM_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -464,18 +317,6 @@ const vip324 = () => {
           "retryMessage(uint16,bytes,uint64,bytes)",
           ARBITRUM_CRITICAL_TIMELOCK,
         ],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ARBITRUM_FASTTRACK_TIMELOCK],
-        dstChainId: ARBITRUM_CHAIN_ID,
-      },
-      {
-        target: ARBITRUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ARBITRUM_CRITICAL_TIMELOCK],
         dstChainId: ARBITRUM_CHAIN_ID,
       },
     ],

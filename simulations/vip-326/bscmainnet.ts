@@ -14,7 +14,7 @@ import vip326, {
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(39719971, async () => {
+forking(39752400, async () => {
   const provider = ethers.provider;
   const omnichainProposalSender = new ethers.Contract(
     OMNICHAIN_PROPOSAL_SENDER,
@@ -50,7 +50,7 @@ forking(39719971, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["RoleGranted", "SetMaxDailyLimit", "SetTrustedRemoteAddress", "Failure"],
-        [26, 3, 3, 0],
+        [30, 3, 3, 0],
       );
     },
   });

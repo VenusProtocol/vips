@@ -53,7 +53,22 @@ export const vip019 = () => {
     {
       target: OPBNBMAINNET_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", opbnbmainnet.GUARDIAN],
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", opbnbmainnet.GUARDIAN],
     },
     {
       target: OPBNBMAINNET_ACM,

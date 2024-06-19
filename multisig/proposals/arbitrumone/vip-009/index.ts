@@ -54,7 +54,22 @@ export const vip009 = () => {
     {
       target: ARBITRUM_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", arbitrumone.GUARDIAN],
+      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", arbitrumone.GUARDIAN],
+    },
+    {
+      target: ARBITRUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", arbitrumone.GUARDIAN],
+    },
+    {
+      target: ARBITRUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", arbitrumone.GUARDIAN],
+    },
+    {
+      target: ARBITRUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", arbitrumone.GUARDIAN],
     },
     {
       target: ARBITRUM_ACM,

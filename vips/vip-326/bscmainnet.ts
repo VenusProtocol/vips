@@ -90,6 +90,11 @@ const vip326 = () => {
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "removeTrustedRemote(uint16)", bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setMaxDailyLimit(uint16,uint256)", BSC_FASTTRACK_TIMELOCK],
       },
       {
@@ -125,6 +130,11 @@ const vip326 = () => {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "setConfig(uint16,uint16,uint256,bytes)", BSC_FASTTRACK_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "removeTrustedRemote(uint16)", BSC_FASTTRACK_TIMELOCK],
       },
       {
         target: BSC_ACM,
@@ -168,6 +178,11 @@ const vip326 = () => {
       {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "removeTrustedRemote(uint16)", BSC_CRITICAL_TIMELOCK],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "retryExecute(uint256,uint16,bytes,bytes,address,uint256)", BSC_GUARDIAN],
       },
       {
@@ -184,6 +199,11 @@ const vip326 = () => {
         target: BSC_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [OMNICHAIN_PROPOSAL_SENDER, "unpause()", BSC_GUARDIAN],
+      },
+      {
+        target: BSC_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OMNICHAIN_PROPOSAL_SENDER, "removeTrustedRemote(uint16)", BSC_GUARDIAN],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
@@ -222,6 +242,19 @@ const vip326 = () => {
         params: [],
         dstChainId: ETHEREUM_CHAIN_ID,
       },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", ETHEREUM_NORMAL_TIMELOCK],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", ETHEREUM_NORMAL_TIMELOCK],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
+
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
@@ -308,6 +341,22 @@ const vip326 = () => {
         target: OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
         signature: "acceptOwnership()",
         params: [],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", OPBNBMAINNET_NORMAL_TIMELOCK],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
+          "transferBridgeOwnership(address)",
+          OPBNBMAINNET_NORMAL_TIMELOCK,
+        ],
         dstChainId: OPBNBMAINNET_CHAIN_ID,
       },
       {
@@ -420,6 +469,18 @@ const vip326 = () => {
         target: ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
         signature: "acceptOwnership()",
         params: [],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", ARBITRUM_NORMAL_TIMELOCK],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: ARBITRUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", ARBITRUM_NORMAL_TIMELOCK],
         dstChainId: ARBITRUM_CHAIN_ID,
       },
       {

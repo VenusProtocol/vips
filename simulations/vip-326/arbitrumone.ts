@@ -9,9 +9,11 @@ import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import vip326, {
   ARBITRUM_ACM,
   ARBITRUM_NORMAL_TIMELOCK,
+  ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
   ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
 } from "../../vips/vip-326/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
@@ -20,15 +22,17 @@ const NORMAL_TIMELOCK = "0x4b94589Cc23F618687790036726f744D602c4017";
 const FAST_TRACK_TIMELOCK = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
 const CRITICAL_TIMELOCK = "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674";
 
-forking(221760109, async () => {
+forking(223542712, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
+  let executorOwner: Contract;
   let acm: Contract;
   let multisig: any;
 
   before(async () => {
     executor = new ethers.Contract(ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executorOwner = new ethers.Contract(ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     acm = new ethers.Contract(ARBITRUM_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
     multisig = await initMainnetUser(arbitrumone.GUARDIAN, ethers.utils.parseEther("1"));
@@ -37,7 +41,7 @@ forking(221760109, async () => {
 
   testForkedNetworkVipCommands("vip326 configures bridge", await vip326(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [13]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [15]);
     },
   });
 
@@ -65,7 +69,35 @@ forking(221760109, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(14);
+      expect(await executor.last24HourCommandsReceived()).equals(16);
+
+      // Check function registry
+      const functionSignatures: string[] = [
+        "forceResumeReceive(uint16,bytes)",
+        "pause()",
+        "unpause()",
+        "setSendVersion(uint16)",
+        "setReceiveVersion(uint16)",
+        "setMaxDailyReceiveLimit(uint256)",
+        "setTrustedRemoteAddress(uint16,bytes)",
+        "setPrecrime(address)",
+        "setMinDstGas(uint16,uint16,uint256)",
+        "setPayloadSizeLimit(uint16,uint256)",
+        "setConfig(uint16,uint16,uint256,bytes)",
+        "addTimelocks(ITimelock[])",
+        "setTimelockPendingAdmin(address,uint8)",
+        "retryMessage(uint16,bytes,uint64,bytes)",
+        "setGuardian(address)",
+        "setSrcChainId(uint16)",
+      ];
+      const getFunctionSelector = (signature: string): string => {
+        return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(signature)).substring(0, 10);
+      };
+
+      for (const signature of functionSignatures) {
+        const selector = getFunctionSelector(signature);
+        expect(await executorOwner.functionRegistry(selector)).equals(signature);
+      }
     });
   });
 });

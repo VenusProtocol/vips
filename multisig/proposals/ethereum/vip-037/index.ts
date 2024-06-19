@@ -53,7 +53,22 @@ export const vip037 = () => {
     {
       target: ETHEREUM_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", ethereum.GUARDIAN],
+      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", ethereum.GUARDIAN],
+    },
+    {
+      target: ETHEREUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", ethereum.GUARDIAN],
+    },
+    {
+      target: ETHEREUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", ethereum.GUARDIAN],
+    },
+    {
+      target: ETHEREUM_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", ethereum.GUARDIAN],
     },
     {
       target: ETHEREUM_ACM,
