@@ -47,6 +47,7 @@ export const VWBTC_CORE = "0x8716554364f20BCA783cb2BAA744d39361fd1D8d";
 export const VWETH_LST = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
 
 export const SINGLE_TOKEN_CONVERTER_BEACON = "0x5C0b5D09388F2BA6441E74D40666C4d96e4527D1";
+export const NEW_IMPLEMENTATION = "0x95de59aD391589603DF33F81B53C4d894D8e5545";
 
 const vipConverter = () => {
   return makeProposal([
@@ -64,7 +65,7 @@ const vipConverter = () => {
     {
       target: SINGLE_TOKEN_CONVERTER_BEACON,
       signature: "upgradeTo(address)",
-      params: ["0x95de59aD391589603DF33F81B53C4d894D8e5545"],
+      params: [NEW_IMPLEMENTATION],
     },
     ...callPermissionCommandsAllConverter,
 

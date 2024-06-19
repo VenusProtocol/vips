@@ -17,6 +17,7 @@ import {
 import vipConverter, {
   COMPTROLLER_CORE,
   COMPTROLLER_LST,
+  NEW_IMPLEMENTATION,
   PLP,
   PRIME,
   PROTOCOL_SHARE_RESERVE_PROXY,
@@ -48,23 +49,38 @@ const XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const USDT_HOLDER = "0xb23360CCDd9Ed1b15D45E5d3824Bb409C8D7c460";
 const USDC_HOLDER = "0x974CaA59e49682CdA0AD2bbe82983419A2ECC400";
 
+const OLD_IMPLEMENTATION = "0x97D77d7e02095C26854FF7E1dCBE03041e2Af432";
+
 forking(20120060, () => {
   const provider = ethers.provider;
+  let converterNetwork: Contract;
+  let xvsVaultTreasury: Contract;
+  let singleTokenConverterBeacon: Contract;
 
-  describe("Post-VIP behavior", () => {
-    let converterNetwork: Contract;
-    let xvsVaultTreasury: Contract;
-    let singleTokenConverterBeacon: Contract;
+  describe("Pre-VIP behaviour", () => {
     before(async () => {
-      await pretendExecutingVip(vipConverter());
-
-      converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
-      xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
       singleTokenConverterBeacon = new ethers.Contract(
         SINGLE_TOKEN_CONVERTER_BEACON,
         SINGLE_TOKEN_CONVERTER_BEACON_ABI,
         provider,
       );
+    });
+
+    it("Converters should have old implementation", async () => {
+      expect(await singleTokenConverterBeacon.implementation()).to.equal(OLD_IMPLEMENTATION);
+    });
+  });
+
+  describe("Post-VIP behavior", () => {
+    before(async () => {
+      await pretendExecutingVip(vipConverter());
+
+      converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
+    });
+
+    it("Converters should have new implementation", async () => {
+      expect(await singleTokenConverterBeacon.implementation()).to.equal(NEW_IMPLEMENTATION);
     });
 
     it("Timelock should be the owner of all converters", async () => {
