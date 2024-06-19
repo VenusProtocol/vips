@@ -3,7 +3,8 @@ import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents, initMainnetUser } from "../../src/utils";
+import { LzChainId } from "../../src/types";
+import { expectEvents, getOmnichainProposalSenderAddress, initMainnetUser } from "../../src/utils";
 import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import vip326, {
   ETHEREUM_ACM,
@@ -15,6 +16,9 @@ import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor
 
 const { ethereum } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
+const FAST_TRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
+const CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
 
 forking(20039460, async () => {
   const provider = ethers.provider;
@@ -44,6 +48,24 @@ forking(20039460, async () => {
     it("proposal should be executed", async () => {
       const pId = await executor.lastProposalReceived();
       expect(await executor.state(pId)).to.be.equals(2);
+    });
+    it("check configuration", async () => {
+      // Check Timelock configurations
+      expect(await executor.proposalTimelocks(0)).equals(NORMAL_TIMELOCK);
+      expect(await executor.proposalTimelocks(1)).equals(FAST_TRACK_TIMELOCK);
+      expect(await executor.proposalTimelocks(2)).equals(CRITICAL_TIMELOCK);
+
+      // Check trusted remote
+      expect(await executor.trustedRemoteLookup(LzChainId.bscmainnet)).equals(
+        ethers.utils.solidityPack(
+          ["address", "address"],
+          [getOmnichainProposalSenderAddress(), ethereum.OMNICHAIN_GOVERNANCE_EXECUTOR],
+        ),
+      );
+
+      // Check receiving limit
+      expect(await executor.maxDailyReceiveLimit()).equals(100);
+      expect(await executor.last24HourCommandsReceived()).equals(14);
     });
   });
 });
