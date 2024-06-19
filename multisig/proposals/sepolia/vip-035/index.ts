@@ -12,10 +12,11 @@ export const vsfrxETH = "0x7C4890D673985CE22A4D38761473f190e434c956";
 export const INITIAL_SUPPLY = parseUnits("1.2", 18);
 export const REWARDS_DISTRIBUTOR_XVS = "0xB60666395bEFeE02a28938b75ea620c7191cA77a";
 export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
-export const XVS_REWARD_TRANSFER = parseUnits("2400", 18);
+export const XVS_REWARD_TRANSFER = parseUnits("2400", 18).div(2);
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
+export const SPEED = parseUnits("0.003703703703703703", 18).div(2);
 
 export const MockSfrxEthFraxOracle = "0x96f7FD1d922Bb6769773BeC88BE6aA615DE77ad1";
 export const IS_BAD_DATA = false;
@@ -81,16 +82,11 @@ export const vip035 = () => {
     },
 
     // // Add FRAX and sFrax Market Rewards
-    // {
-    //   target: REWARDS_DISTRIBUTOR_XVS,
-    //   signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-    //   params: [[vsfrxETH], ["3703703703703703"], ["0"]],
-    // },
-    // {
-    //   target: VTREASURY,
-    //   signature: "withdrawTreasuryToken(address,uint256,address)",
-    //   params: [XVS, XVS_REWARD_TRANSFER, REWARDS_DISTRIBUTOR_XVS],
-    // },
+    {
+      target: REWARDS_DISTRIBUTOR_XVS,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [[vsfrxETH], [SPEED], ["0"]],
+    },
   ]);
 };
 

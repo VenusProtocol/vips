@@ -9,10 +9,19 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { RECEIVER, SFrxETHOracle, sfrxETH, vip035, vsfrxETH } from "../../../proposals/ethereum/vip-035";
+import {
+  RECEIVER,
+  REWARDS_DISTRIBUTOR_XVS,
+  SFrxETHOracle,
+  XVS_REWARD_TRANSFER,
+  sfrxETH,
+  vip035,
+  vsfrxETH,
+} from "../../../proposals/ethereum/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -25,6 +34,7 @@ forking(20119662, () => {
   let vsfrxETHContract: Contract;
   let comptroller: Contract;
   let sfrxETHOracle: Contract;
+  let xvsContract: Contract;
 
   before(async () => {
     await impersonateAccount(sfrxETH_HOLDER);
@@ -33,6 +43,7 @@ forking(20119662, () => {
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
     sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
+    xvsContract = await ethers.getContractAt(ERC20_ABI, ethereum.XVS);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -113,6 +124,9 @@ forking(20119662, () => {
       await checkIsolatedPoolsComptrollers({
         [CORE_COMPTROLLER]: sfrxETH_HOLDER,
       });
+    });
+    it("should have balance", async () => {
+      expect(await xvsContract.balanceOf(REWARDS_DISTRIBUTOR_XVS)).to.gte(XVS_REWARD_TRANSFER);
     });
   });
 });

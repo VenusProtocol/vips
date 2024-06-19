@@ -9,7 +9,14 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import { SFrxETHOracle, sfrxETH, vip035, vsfrxETH } from "../../../proposals/sepolia/vip-035";
+import {
+  REWARDS_DISTRIBUTOR_XVS,
+  SFrxETHOracle,
+  XVS_REWARD_TRANSFER,
+  sfrxETH,
+  vip035,
+  vsfrxETH,
+} from "../../../proposals/sepolia/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -19,13 +26,14 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { sepolia } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
-forking(6134567, () => {
+forking(6139904, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
   let comptroller: Contract;
   let sfrxETHContract: Contract;
   let sfrxETHOracle: Contract;
+  let xvsContract: Contract;
 
   before(async () => {
     await impersonateAccount(sepolia.NORMAL_TIMELOCK);
@@ -35,6 +43,7 @@ forking(6134567, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
     sfrxETHContract = await ethers.getContractAt(ERC20_ABI, sfrxETH, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
     sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
+    xvsContract = await ethers.getContractAt(ERC20_ABI, sepolia.XVS);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -116,6 +125,9 @@ forking(6134567, () => {
       await checkIsolatedPoolsComptrollers({
         [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
+    });
+    it("check balance", async () => {
+      expect(await xvsContract.balanceOf(REWARDS_DISTRIBUTOR_XVS)).to.gte(XVS_REWARD_TRANSFER);
     });
   });
 });
