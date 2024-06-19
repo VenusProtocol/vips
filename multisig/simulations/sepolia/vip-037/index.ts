@@ -6,14 +6,6 @@ import { ethers } from "hardhat";
 
 import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import {
-  CONVERTER_NETWORK,
-  GUARDIAN,
-  USDC_PRIME_CONVERTER,
-  USDT_PRIME_CONVERTER,
-  XVS_VAULT_CONVERTER,
-  converters,
-} from "../../../proposals/sepolia/vip-037/Addresses";
 import vip037, {
   COMPTROLLER_CORE,
   COMPTROLLER_LST,
@@ -31,6 +23,14 @@ import vip037, {
   WETH,
   XVS_VAULT_TREASURY,
 } from "../../../proposals/sepolia/vip-037";
+import {
+  CONVERTER_NETWORK,
+  GUARDIAN,
+  USDC_PRIME_CONVERTER,
+  USDT_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
+  converters,
+} from "../../../proposals/sepolia/vip-037/Addresses";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
