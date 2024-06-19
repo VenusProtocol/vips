@@ -13,13 +13,15 @@ import {
   USDT_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
   converters,
-} from "../../../proposals/sepolia/vip-converter/Addresses";
-import vipConverter, {
+} from "../../../proposals/ethereum/vip-037/Addresses";
+import vip037, {
   COMPTROLLER_CORE,
   COMPTROLLER_LST,
+  NEW_IMPLEMENTATION,
   PLP,
   PRIME,
   PROTOCOL_SHARE_RESERVE_PROXY,
+  SINGLE_TOKEN_CONVERTER_BEACON,
   USDC,
   USDT,
   VTREASURY,
@@ -30,7 +32,7 @@ import vipConverter, {
   WBTC,
   WETH,
   XVS_VAULT_TREASURY,
-} from "../../../proposals/sepolia/vip-converter/vipConverter";
+} from "../../../proposals/ethereum/vip-037";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
@@ -38,25 +40,47 @@ import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import SINGLE_TOKEN_CONVERTER_BEACON_ABI from "./abi/SingleTokenConverterBeacon.json";
 import XVS_VAULT_CONVERTER_ABI from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
-const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
-const XVS_VAULT = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
-const USDT_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
-const USDC_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
+const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
+const XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
+const USDT_HOLDER = "0xb23360CCDd9Ed1b15D45E5d3824Bb409C8D7c460";
+const USDC_HOLDER = "0x974CaA59e49682CdA0AD2bbe82983419A2ECC400";
 
-forking(6078847, () => {
+const OLD_IMPLEMENTATION = "0x97D77d7e02095C26854FF7E1dCBE03041e2Af432";
+
+forking(20120060, () => {
   const provider = ethers.provider;
+  let converterNetwork: Contract;
+  let xvsVaultTreasury: Contract;
+  let singleTokenConverterBeacon: Contract;
+
+  describe("Pre-VIP behaviour", () => {
+    before(async () => {
+      singleTokenConverterBeacon = new ethers.Contract(
+        SINGLE_TOKEN_CONVERTER_BEACON,
+        SINGLE_TOKEN_CONVERTER_BEACON_ABI,
+        provider,
+      );
+    });
+
+    it("Converters should have old implementation", async () => {
+      expect(await singleTokenConverterBeacon.implementation()).to.equal(OLD_IMPLEMENTATION);
+    });
+  });
 
   describe("Post-VIP behavior", () => {
-    let converterNetwork: Contract;
-    let xvsVaultTreasury: Contract;
     before(async () => {
-      await pretendExecutingVip(vipConverter());
+      await pretendExecutingVip(vip037());
 
       converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
       xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
+    });
+
+    it("Converters should have new implementation", async () => {
+      expect(await singleTokenConverterBeacon.implementation()).to.equal(NEW_IMPLEMENTATION);
     });
 
     it("Timelock should be the owner of all converters", async () => {
@@ -64,6 +88,9 @@ forking(6078847, () => {
         const Converter = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
         expect(await Converter.owner()).to.equal(GUARDIAN);
       }
+    });
+    it("Owner of single token converter should be normal timelock", async () => {
+      expect(await singleTokenConverterBeacon.owner()).to.equal(GUARDIAN);
     });
 
     it("Timelock should be the owner of ConverterNetwork", async () => {
@@ -76,7 +103,7 @@ forking(6078847, () => {
   });
 });
 
-forking(6078847, () => {
+forking(20120060, () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -92,22 +119,20 @@ forking(6078847, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
 
-    await pretendExecutingVip(vipConverter());
+    await pretendExecutingVip(vip037());
   });
 
   describe("Post-VIP behavior", () => {
     let usdt: Contract;
     let usdc: Contract;
-    let usdcPrimeConverter: Contract;
     let user1: Signer;
     let usdtHolder: Signer;
     let usdcHolder: Signer;
     let user1Address: string;
 
-    const amount = parseUnits("1000", 18);
+    const amount = parseUnits("1000", 6);
 
     before(async () => {
-      usdcPrimeConverter = new ethers.Contract(USDC_PRIME_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, provider);
       usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
       usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
 
@@ -122,7 +147,7 @@ forking(6078847, () => {
     });
 
     it("PSR should have correct distribution configs", async () => {
-      const percentageDistributionConverters = [200, 200, 100, 1500, 2000];
+      const percentageDistributionConverters = [140, 140, 140, 1580, 2000];
       expect(await protocolShareReserve.totalDistributions()).to.equal(8);
 
       for (let i = 0; i < 5; i++) {
@@ -212,8 +237,8 @@ forking(6078847, () => {
       const usdtBalanceUsdtPrimePrevious = await usdt.balanceOf(PLP);
 
       const plpBalanceForUsdcPrevious = await usdc.balanceOf(destinationAddressForUsdcConverter);
-
       await usdt.connect(user1).transfer(USDC_PRIME_CONVERTER, amount);
+
       // Private Conversion will occur
       await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDT);
 
@@ -223,17 +248,17 @@ forking(6078847, () => {
       expect(usdtBalanceUsdtPrimeCurrent).to.equal(usdtBalanceUsdtPrimePrevious.add(amount));
       expect(usdcBalanceUsdtPrimeConverterCurrent).to.closeTo(
         usdcBalanceUsdtPrimeConverterPrevious.sub(amount),
-        parseUnits("1", 18),
+        parseUnits("1", 6),
       );
       expect(await usdc.balanceOf(destinationAddressForUsdcConverter)).to.closeTo(
         plpBalanceForUsdcPrevious.add(amount),
-        parseUnits("1", 18),
+        parseUnits("1", 6),
       );
     });
   });
 });
 
-forking(6078847, () => {
+forking(20120060, () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -264,7 +289,7 @@ forking(6078847, () => {
     let plp: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vipConverter());
+      await pretendExecutingVip(vip037());
 
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);

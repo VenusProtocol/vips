@@ -27,29 +27,26 @@ import {
   incentiveAndAccessibilityForXVSVaultConverter,
 } from "./commands";
 
-export const XVS_VAULT_TREASURY = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
-export const PROTOCOL_SHARE_RESERVE_PROXY = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
-export const VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
+export const XVS_VAULT_TREASURY = "0xCCB08e5107b406E67Ad8356023dd489CEbc79B40";
+export const PROTOCOL_SHARE_RESERVE_PROXY = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
+export const VTREASURY = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";
 
-export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
-export const COMPTROLLER_LST = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
-export const PRIME = "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39";
-export const PLP = "0x8ba6aFfd0e7Bcd0028D1639225C84DdCf53D8872";
+export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+export const COMPTROLLER_LST = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
+export const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
+export const PLP = "0x15242a55Ad1842A1aEa09c59cf8366bD2f3CE9B4";
 
 export const USDT = BaseAssets[0];
 export const USDC = BaseAssets[1];
 export const WBTC = BaseAssets[2];
 export const WETH = BaseAssets[3];
 
-export const VUSDT_CORE = "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E";
-export const VUSDC_CORE = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
-export const VWBTC_CORE = "0x8716554364f20BCA783cb2BAA744d39361fd1D8d";
-export const VWETH_LST = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
+export const VUSDT_CORE = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+export const VUSDC_CORE = "0xF87bceab8DD37489015B426bA931e08A4D787616";
+export const VWBTC_CORE = "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383";
+export const VWETH_LST = "0x9f6213dFa9069a5426Fe8fAE73857712E1259Ed4";
 
-export const SINGLE_TOKEN_CONVERTER_BEACON = "0x5C0b5D09388F2BA6441E74D40666C4d96e4527D1";
-export const NEW_IMPLEMENTATION = "0x95de59aD391589603DF33F81B53C4d894D8e5545";
-
-const vipConverter = () => {
+const vip037 = () => {
   return makeProposal([
     ...acceptOwnershipCommandsAllConverters,
     {
@@ -61,11 +58,6 @@ const vipConverter = () => {
       target: CONVERTER_NETWORK,
       signature: "acceptOwnership()",
       params: [],
-    },
-    {
-      target: SINGLE_TOKEN_CONVERTER_BEACON,
-      signature: "upgradeTo(address)",
-      params: [NEW_IMPLEMENTATION],
     },
     ...callPermissionCommandsAllConverter,
 
@@ -80,10 +72,10 @@ const vipConverter = () => {
         [
           [0, 6000, VTREASURY],
           [0, 2000, XVS_VAULT_CONVERTER],
-          [0, 140, USDC_PRIME_CONVERTER], // 7% of the Prime allocation
-          [0, 140, USDT_PRIME_CONVERTER], // 7% of the Prime allocation
-          [0, 140, WBTC_PRIME_CONVERTER], // 7% of the Prime allocation
-          [0, 1580, WETH_PRIME_CONVERTER], // 79% of the Prime allocation
+          [0, 200, USDC_PRIME_CONVERTER],
+          [0, 200, USDT_PRIME_CONVERTER],
+          [0, 100, WBTC_PRIME_CONVERTER],
+          [0, 1500, WETH_PRIME_CONVERTER],
           [1, 8000, VTREASURY],
           [1, 2000, XVS_VAULT_CONVERTER],
         ],
@@ -164,4 +156,4 @@ const vipConverter = () => {
   ]);
 };
 
-export default vipConverter;
+export default vip037;
