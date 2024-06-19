@@ -72,7 +72,7 @@ We applied the following security procedures for this upgrade:
     - [Fairyproof audit report (2023/09/10)](https://github.com/VenusProtocol/venus-protocol/blob/e02832bb2716bc0a178d910f6698877bf1b191e1/audits/056_prime_fairyproof_20230910.pdf)
     - [Code4rena contest (2023/09/28)](https://code4rena.com/contests/2023-09-venus-prime)
 
-#### Deployed contracts to main net
+#### Deployed contracts to mainnet
 
 - [Prime](https://etherscan.io/address/0x14C4525f47A7f7C984474979c57a2Dccb8EACB39)
 - [PrimeLiquidityProvider](https://etherscan.io/address/0x8ba6aFfd0e7Bcd0028D1639225C84DdCf53D8872)
@@ -93,7 +93,7 @@ We applied the following security procedures for this upgrade:
 
 #### Disclaimer for Ethereum VIPs
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, this multisig transaction will be executed. Otherwise, it will be rejected.`,
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are deployed. If this VIP passes, [this](https://app.safe.global/transactions/tx?id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x26d04a48c999c076e48433559151de7697cdffbe904fd55368cee727d9fa1075&safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67) multisig transaction will be executed. Otherwise, it will be rejected.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
