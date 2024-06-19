@@ -4,11 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip037, {
-  COMPTROLLER,
-  vsFRAX,
-  BORROW_CAP
-} from "../../../proposals/ethereum/vip-037";
+import vip037, { BORROW_CAP, COMPTROLLER, vsFRAX } from "../../../proposals/ethereum/vip-037";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
 forking(19962658, () => {

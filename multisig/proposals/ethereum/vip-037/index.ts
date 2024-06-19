@@ -11,10 +11,7 @@ export const vip037 = () => {
     {
       target: COMPTROLLER,
       signature: "setMarketBorrowCaps(address[],uint256[])",
-      params: [
-        [vsFRAX],
-        [BORROW_CAP],
-      ],
+      params: [[vsFRAX], [BORROW_CAP]],
     },
   ]);
 };
