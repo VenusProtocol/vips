@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip326, { COMPTROLLER, vUSDT, vUSDT_SUPPLY_CAP } from "../../vips/vip-326/bscmainnet";
+import vip328, { COMPTROLLER, vUSDT, vUSDT_SUPPLY_CAP } from "../../vips/vip-328/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(39743887, async () => {
@@ -22,7 +22,7 @@ forking(39743887, async () => {
     });
   });
 
-  testVip("VIP-326", vip326(), {
+  testVip("VIP-328", vip328(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },

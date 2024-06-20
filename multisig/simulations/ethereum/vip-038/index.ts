@@ -4,7 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip037, { BORROW_CAP, COMPTROLLER, vsFRAX } from "../../../proposals/ethereum/vip-037";
+import vip038, { BORROW_CAP, COMPTROLLER, vsFRAX } from "../../../proposals/ethereum/vip-038";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
 forking(19962658, () => {
@@ -23,7 +23,7 @@ forking(19962658, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip037());
+      await pretendExecutingVip(vip038());
     });
 
     it("new vsFRAX borrow cap", async () => {
