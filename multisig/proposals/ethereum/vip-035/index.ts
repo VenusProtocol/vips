@@ -35,6 +35,11 @@ export const vip035 = () => {
       signature: "acceptOwnership()",
       params: [],
     },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [SFrxETHOracle, "setMaxAllowedPriceDifference(uint256)", ethereum.NORMAL_TIMELOCK],
+    },
 
     // Add Market
     {
