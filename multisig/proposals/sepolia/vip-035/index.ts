@@ -24,7 +24,7 @@ export const PRICE_LOW = "250318482717998";
 export const PRICE_HIGH = "250665814578833";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
-export const vip035 = () => {
+const vip035 = () => {
   return makeProposal([
     // Configure Oracle
     {
