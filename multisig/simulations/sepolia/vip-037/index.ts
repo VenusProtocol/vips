@@ -46,14 +46,14 @@ const XVS_VAULT = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const USDT_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 const USDC_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 
-forking(6078847, () => {
+forking(6078847, async () => {
   const provider = ethers.provider;
 
   describe("Post-VIP behavior", () => {
     let converterNetwork: Contract;
     let xvsVaultTreasury: Contract;
     before(async () => {
-      await pretendExecutingVip(vip037());
+      await pretendExecutingVip(await vip037());
 
       converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
       xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
@@ -76,7 +76,7 @@ forking(6078847, () => {
   });
 });
 
-forking(6078847, () => {
+forking(6078847, async () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -92,7 +92,7 @@ forking(6078847, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
 
-    await pretendExecutingVip(vip037());
+    await pretendExecutingVip(await vip037());
   });
 
   describe("Post-VIP behavior", () => {
@@ -233,7 +233,7 @@ forking(6078847, () => {
   });
 });
 
-forking(6078847, () => {
+forking(6078847, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -264,7 +264,7 @@ forking(6078847, () => {
     let plp: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip037());
+      await pretendExecutingVip(await vip037());
 
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);
