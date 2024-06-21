@@ -9,13 +9,12 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import {
+import vip035, {
   RECEIVER,
   REWARDS_DISTRIBUTOR_XVS,
   SFrxETHOracle,
   XVS_REWARD_TRANSFER,
   sfrxETH,
-  vip035,
   vsfrxETH,
 } from "../../../proposals/ethereum/vip-035";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -25,10 +24,10 @@ import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
-const CORE_COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
+const LST_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 const sfrxETH_HOLDER = "0x8CA7A5d6f3acd3A7A8bC468a8CD0FB14B6BD28b6";
 
-forking(20119662, () => {
+forking(20138265, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
@@ -41,7 +40,7 @@ forking(20119662, () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, LST_COMPTROLLER);
     sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
     xvsContract = await ethers.getContractAt(ERC20_ABI, ethereum.XVS);
   });
@@ -62,16 +61,16 @@ forking(20119662, () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3720", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3826", 18), parseUnits("1", 18));
       expect(await resilientOracle.getUnderlyingPrice(vsfrxETH)).to.be.closeTo(
-        parseUnits("3720", 18),
+        parseUnits("3826", 18),
         parseUnits("1", 18),
       );
     });
 
-    it("should have 10 markets in core pool", async () => {
+    it("should have 6 markets in LST pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.have.lengthOf(10);
+      expect(poolVTokens).to.have.lengthOf(6);
     });
 
     it("should add vsfrxETH to the pool", async () => {
@@ -105,7 +104,7 @@ forking(20119662, () => {
         decimals: 8,
         underlying: sfrxETH,
         exchangeRate: parseUnits("1", 28),
-        comptroller: CORE_COMPTROLLER,
+        comptroller: LST_COMPTROLLER,
       });
     });
     it("check reserve factor", async () => {
@@ -122,7 +121,7 @@ forking(20119662, () => {
     });
     it("check Pool", async () => {
       await checkIsolatedPoolsComptrollers({
-        [CORE_COMPTROLLER]: sfrxETH_HOLDER,
+        [LST_COMPTROLLER]: sfrxETH_HOLDER,
       });
     });
     it("should have balance", async () => {
