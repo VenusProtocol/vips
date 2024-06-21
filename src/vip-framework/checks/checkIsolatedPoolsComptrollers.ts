@@ -100,7 +100,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     } > operations - supplying ${await supplyUnderlying?.symbol()} | borrowing ${await borrowUnderlying?.symbol()}`,
   );
   const supplyUnderlyingDecimals = await supplyUnderlying?.decimals();
-  const initialSupplyAmount = parseUnits("10", supplyUnderlyingDecimals);
+  const initialSupplyAmount = parseUnits("0.1", supplyUnderlyingDecimals);
   const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
