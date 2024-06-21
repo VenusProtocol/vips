@@ -9,11 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip035, {
-  SFrxETHOracle,
-  sfrxETH,
-  vsfrxETH,
-} from "../../../proposals/sepolia/vip-035/addendum";
+import vip035, { SFrxETHOracle, sfrxETH, vsfrxETH } from "../../../proposals/sepolia/vip-035/addendum";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -30,7 +26,6 @@ forking(6152795, () => {
   let comptroller: Contract;
   let sfrxETHContract: Contract;
   let sfrxETHOracle: Contract;
-  let xvsContract: Contract;
 
   before(async () => {
     await impersonateAccount(sepolia.NORMAL_TIMELOCK);
@@ -40,7 +35,6 @@ forking(6152795, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, LST_COMPTROLLER);
     sfrxETHContract = await ethers.getContractAt(ERC20_ABI, sfrxETH, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
     sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
-    xvsContract = await ethers.getContractAt(ERC20_ABI, sepolia.XVS);
   });
 
   describe("Pre-VIP behavior", () => {
