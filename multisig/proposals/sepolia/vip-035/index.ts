@@ -44,11 +44,6 @@ const vip035 = () => {
       signature: "setPrices(bool,uint256,uint256)",
       params: [IS_BAD_DATA, PRICE_LOW, PRICE_HIGH],
     },
-    {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [SFrxETHOracle, "setMaxAllowedPriceDifference(uint256)", sepolia.NORMAL_TIMELOCK],
-    },
 
     // Add Market
     {
