@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import {
   NEW_BASE_RATE_MANTISSA,
   NEW_FLOAT_RATE_MANTISSA,
@@ -15,12 +16,14 @@ import {
 } from "../../vips/vip-246/bsctestnet";
 import VAI_CONTROLLER_ABI from "./abi/VAIController_ABI.json";
 
+const { bsctestnet } = NETWORK_ADDRESSES;
+
 forking(36987461, async () => {
   const provider = ethers.provider;
   let vaiControllerProxy: Contract;
   before(async () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_ABI, provider);
-    await pretendExecutingVip(await vip246());
+    await pretendExecutingVip(await vip246(), bsctestnet.NORMAL_TIMELOCK);
   });
   describe("Pre-VIP behavior", () => {
     it("Verify VAI base rate is 272%", async () => {

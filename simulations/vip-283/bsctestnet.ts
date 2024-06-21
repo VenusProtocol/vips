@@ -2,6 +2,7 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
@@ -11,13 +12,15 @@ import vip283 from "../../vips/vip-283/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 
+const { bsctestnet } = NETWORK_ADDRESSES;
+
 forking(39145203, async () => {
   const provider = ethers.provider;
   let xvs: Contract;
   let previousVTreasuryBalance: BigNumber;
 
   before(async () => {
-    await pretendExecutingVip(await vip282());
+    await pretendExecutingVip(await vip282(), bsctestnet.NORMAL_TIMELOCK);
 
     xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
 

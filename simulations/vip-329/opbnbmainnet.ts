@@ -31,8 +31,8 @@ forking(26959433, async () => {
     multisig = await initMainnetUser(opbnbmainnet.GUARDIAN, ethers.utils.parseEther("1"));
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBMAINNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
-
-  testForkedNetworkVipCommands("vip329 configures bridge", await vip329(), {
+  const proposal = await vip329();
+  testForkedNetworkVipCommands("vip329 configures bridge", proposal, {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
     },

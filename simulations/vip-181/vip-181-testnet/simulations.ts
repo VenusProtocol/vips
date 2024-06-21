@@ -6,11 +6,14 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { vip181Testnet } from "../../../vips/vip-181/vip-181-testnet";
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 import VENUS_LENS_ABI from "../abi/VenusLens.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const VENUS_LENS = "0x36B434654bD5fb010f8A68e190428dc4789E1b24";
@@ -368,7 +371,7 @@ forking(33763885, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(await vip181Testnet());
+    await pretendExecutingVip(await vip181Testnet(), bscmainnet.NORMAL_TIMELOCK);
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);

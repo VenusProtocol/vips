@@ -5,6 +5,7 @@ import { expect } from "chai";
 import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
@@ -38,6 +39,8 @@ import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP_20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
 import VEBEP_20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0xE1Ac99E486EBEcD40Ab4C9FF29Fe4d28be244D33";
 const OLD_VTOKEN_IMPLEMENTATION = "0xF83362aF1722b1762e21369225901B90D9b980d9";
@@ -242,7 +245,7 @@ forking(38508666, async () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(await vip276());
+      await pretendExecutingVip(await vip276(), bsctestnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {
@@ -292,7 +295,7 @@ forking(38508666, async () => {
     let user: SignerWithAddress;
 
     before(async () => {
-      await pretendExecutingVip(await vip276());
+      await pretendExecutingVip(await vip276(), bsctestnet.NORMAL_TIMELOCK);
       deployer = await initMainnetUser(ACCOUNT_1, parseUnits("10", 18));
       user = await initMainnetUser(ACCOUNT_2, parseUnits("10", 18));
 
@@ -318,7 +321,7 @@ forking(38508666, async () => {
 // xvs setter tests
 forking(38508666, async () => {
   beforeEach(async () => {
-    await pretendExecutingVip(await vip276());
+    await pretendExecutingVip(await vip276(), bsctestnet.NORMAL_TIMELOCK);
   });
 
   it("Should return correct xvs and xvs vtoken addresses", async () => {
@@ -461,7 +464,7 @@ forking(38508666, async () => {
       );
     }
 
-    await pretendExecutingVip(await vip276());
+    await pretendExecutingVip(await vip276(), bsctestnet.NORMAL_TIMELOCK);
   });
 
   describe("Verify Storage slots after VIP execution", async () => {

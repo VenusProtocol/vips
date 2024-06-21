@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
@@ -11,6 +12,7 @@ import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const DIAMOND = "0xAd69AA3811fE0EE7dBd4e25C4bae40e6422c76C8";
 
@@ -363,7 +365,7 @@ forking(31933620, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(await vip174());
+    await pretendExecutingVip(await vip174(), bscmainnet.NORMAL_TIMELOCK);
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);

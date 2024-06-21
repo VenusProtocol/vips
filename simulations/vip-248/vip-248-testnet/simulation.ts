@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
@@ -18,6 +19,8 @@ import RISK_FUND_V2_ABI from "../abi/RiskFundV2.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
 import XVS_VAULT_CONVERTER_ABI from "../abi/XVSVaultTreasury.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const allAssets = [
   ...Assets,
@@ -71,7 +74,7 @@ forking(36752108, async () => {
   const PsrTotalAssetReserveBefore: number[] = [];
 
   before(async () => {
-    await pretendExecutingVip(await vip245());
+    await pretendExecutingVip(await vip245(), bsctestnet.NORMAL_TIMELOCK);
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);

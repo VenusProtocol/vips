@@ -4,6 +4,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
@@ -29,6 +30,7 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(32915411, async () => {
   describe("Pre VIP simulations", async () => {
@@ -112,7 +114,7 @@ forking(32915411, async () => {
 forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip193());
+      await pretendExecutingVip(await vip193(), bscmainnet.NORMAL_TIMELOCK);
       [user] = await ethers.getSigners();
     });
 
@@ -169,7 +171,7 @@ forking(32915411, async () => {
 forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip193());
+      await pretendExecutingVip(await vip193(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {

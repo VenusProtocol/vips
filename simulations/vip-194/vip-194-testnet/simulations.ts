@@ -4,6 +4,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
@@ -13,6 +14,8 @@ import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0xcA408D716011169645Aa94ddc5665043C33df814";
@@ -83,7 +86,7 @@ forking(34543167, async () => {
 forking(34543167, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip194Testnet());
+      await pretendExecutingVip(await vip194Testnet(), bsctestnet.NORMAL_TIMELOCK);
       [user] = await ethers.getSigners();
     });
 

@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
@@ -11,6 +12,8 @@ import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 import VENUS_LENS_ABI from "../abi/VenusLens.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VENUS_LENS = "0xfB0f09dB330dC842a6637BfB959209424BbFE8C7";
@@ -368,7 +371,7 @@ forking(32159070, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(await vip181());
+    await pretendExecutingVip(await vip181(), bscmainnet.NORMAL_TIMELOCK);
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);
