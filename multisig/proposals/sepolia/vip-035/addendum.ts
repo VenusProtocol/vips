@@ -11,7 +11,6 @@ export const vsfrxETH = "0x83F63118dcAAdAACBFF36D78ffB88dd474309e70";
 export const INITIAL_SUPPLY = parseUnits("1.2", 18);
 export const REWARDS_DISTRIBUTOR_XVS = "0x4597B9287fE0DF3c5513D66886706E0719bD270f";
 export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
-export const XVS_REWARD_TRANSFER = parseUnits("2400", 18).div(100);
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
