@@ -10,9 +10,7 @@ import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip035, {
-  REWARDS_DISTRIBUTOR_XVS,
   SFrxETHOracle,
-  XVS_REWARD_TRANSFER,
   sfrxETH,
   vsfrxETH,
 } from "../../../proposals/sepolia/vip-035/addendum";
@@ -128,9 +126,6 @@ forking(6152795, () => {
       await checkIsolatedPoolsComptrollers({
         [LST_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
-    });
-    it("check balance", async () => {
-      expect(await xvsContract.balanceOf(REWARDS_DISTRIBUTOR_XVS)).to.gte(XVS_REWARD_TRANSFER);
     });
   });
 });

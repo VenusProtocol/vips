@@ -13,6 +13,7 @@ import vip035, {
   RECEIVER,
   REWARDS_DISTRIBUTOR_XVS,
   SFrxETHOracle,
+  XVS_REWARD_TRANSFER,
   sfrxETH,
   vsfrxETH,
 } from "../../../proposals/ethereum/vip-035";
@@ -122,6 +123,9 @@ forking(20138265, () => {
       await checkIsolatedPoolsComptrollers({
         [LST_COMPTROLLER]: sfrxETH_HOLDER,
       });
+    });
+    it("should have balance", async () => {
+      expect(await xvsContract.balanceOf(REWARDS_DISTRIBUTOR_XVS)).to.gte(XVS_REWARD_TRANSFER);
     });
   });
 });
