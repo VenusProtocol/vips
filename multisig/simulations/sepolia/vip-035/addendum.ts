@@ -15,7 +15,7 @@ import vip035, {
   XVS_REWARD_TRANSFER,
   sfrxETH,
   vsfrxETH,
-} from "../../../proposals/sepolia/vip-035";
+} from "../../../proposals/sepolia/vip-035/addendum";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -23,9 +23,9 @@ import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
-const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+const LST_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-forking(6139904, () => {
+forking(6152795, () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
@@ -39,7 +39,7 @@ forking(6139904, () => {
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vsfrxETHContract = await ethers.getContractAt(VTOKEN_ABI, vsfrxETH);
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, LST_COMPTROLLER);
     sfrxETHContract = await ethers.getContractAt(ERC20_ABI, sfrxETH, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
     sfrxETHOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, SFrxETHOracle);
     xvsContract = await ethers.getContractAt(ERC20_ABI, sepolia.XVS);
@@ -47,7 +47,11 @@ forking(6139904, () => {
 
   describe("Pre-VIP behavior", () => {
     it("check price", async () => {
-      await expect(resilientOracle.getPrice(sfrxETH)).to.be.reverted;
+      expect(await resilientOracle.getPrice(sfrxETH)).to.be.closeTo(parseUnits("3992", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getUnderlyingPrice(vsfrxETH)).to.be.closeTo(
+        parseUnits("3992", 18),
+        parseUnits("1", 18),
+      );
     });
   });
 
@@ -68,9 +72,9 @@ forking(6139904, () => {
       );
     });
 
-    it("should have 11 markets in core pool", async () => {
+    it("should have 6 markets in LST pool", async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.have.lengthOf(11);
+      expect(poolVTokens).to.have.lengthOf(6);
     });
 
     it("should add vsfrxETH to the pool", async () => {
@@ -104,7 +108,7 @@ forking(6139904, () => {
         decimals: 8,
         underlying: sfrxETH,
         exchangeRate: parseUnits("1", 28),
-        comptroller: CORE_COMPTROLLER,
+        comptroller: LST_COMPTROLLER,
       });
     });
     it("check reserve factor", async () => {
@@ -122,7 +126,7 @@ forking(6139904, () => {
     it("check Pool", async () => {
       await sfrxETHContract.faucet(parseUnits("10000", 18));
       await checkIsolatedPoolsComptrollers({
-        [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
+        [LST_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
     });
     it("check balance", async () => {

@@ -24,26 +24,9 @@ export const PRICE_LOW = "250318482717998";
 export const PRICE_HIGH = "250665814578833";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
-const vip035 = () => {
+const vip035Addendum = () => {
   return makeProposal([
     // Configure Oracle
-    {
-      target: sepolia.RESILIENT_ORACLE,
-      signature: "setTokenConfig((address,address[3],bool[3]))",
-      params: [
-        [sfrxETH, [SFrxETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
-      ],
-    },
-    {
-      target: SFrxETHOracle,
-      signature: "acceptOwnership()",
-      params: [],
-    },
-    {
-      target: MockSfrxEthFraxOracle,
-      signature: "setPrices(bool,uint256,uint256)",
-      params: [IS_BAD_DATA, PRICE_LOW, PRICE_HIGH],
-    },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
@@ -95,4 +78,4 @@ const vip035 = () => {
   ]);
 };
 
-export default vip035;
+export default vip035Addendum;
