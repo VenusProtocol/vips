@@ -15,7 +15,7 @@ export const XVS_REWARD_TRANSFER = parseUnits("2400", 18).div(100);
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
-export const SPEED = parseUnits("0.003703703703703703", 18).div(100);
+export const SPEED = parseUnits("0.003703703703703703", 18).div(100); // 24 XVS total rewards
 
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
