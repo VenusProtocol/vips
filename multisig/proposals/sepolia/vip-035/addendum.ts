@@ -68,7 +68,7 @@ const vip035Addendum = () => {
       ],
     },
 
-    // // Add FRAX and sFrax Market Rewards
+    // Add sfrxETH Market Rewards
     {
       target: REWARDS_DISTRIBUTOR_XVS,
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
