@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip230 } from "../../vips/vip-230";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";

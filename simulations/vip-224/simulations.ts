@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip224 } from "../../vips/vip-224";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";

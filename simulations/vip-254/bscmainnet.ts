@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BRIDGE_ASSETS, COMMUNITY_WALLET, OPBNB_BRIDGE, USDT, vip254 } from "../../vips/vip-254/bscmainnet";
 import BRIDGE_ABI from "./abi/bridgeAbi.json";
 import TREASURY_ABI from "./abi/treasuryAbi.json";

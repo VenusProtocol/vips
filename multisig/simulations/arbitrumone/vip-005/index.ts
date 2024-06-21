@@ -2,9 +2,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip005, { ACM, NORMAL_TIMELOCK, POOL_REGISTRY, PSR, VTREASURY } from "../../../proposals/arbitrumone/vip-005";
 import ACM_ABI from "./abi/accessControlManager.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";

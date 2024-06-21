@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId } from "src/types";
+import { expectEvents, getOmnichainProposalSenderAddress, initMainnetUser } from "src/utils";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { LzChainId } from "../../src/types";
-import { expectEvents, getOmnichainProposalSenderAddress, initMainnetUser } from "../../src/utils";
-import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import vip328, {
   OPBNBMAINNET_ACM,
   OPBNBMAINNET_NORMAL_TIMELOCK,

@@ -4,9 +4,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMMUNITY_WALLET, PECKSHIELD_RECEIVER, USDC, vip173 } from "../../vips/vip-173";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";

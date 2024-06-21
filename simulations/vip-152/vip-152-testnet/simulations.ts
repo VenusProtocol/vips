@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
+import { StorageLayout } from "src/vtokenUpgradesHelper";
 
-import { forking, testVip } from "../../../src/vip-framework";
-import { StorageLayout } from "../../../src/vtokenUpgradesHelper";
 import { vip152Testnet } from "../../../vips/vip-152/vip-152-testnet";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";

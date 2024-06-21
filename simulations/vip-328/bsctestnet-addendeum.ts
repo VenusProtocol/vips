@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { LzChainId } from "src/types";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { LzChainId } from "../../src/types";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip328, {
   ARBITRUMSEPOLIA_OMNICHAIN_GOVERNANCE_EXECUTOR,
   MAX_DAILY_LIMIT,

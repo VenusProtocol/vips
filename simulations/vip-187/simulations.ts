@@ -1,6 +1,7 @@
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+
 import { vip187 } from "../../vips/vip-187";
 import VTOKEN_CORE_ABI from "./abi/VToken_core.json";
 import VTOKEN_IL_ABI from "./abi/VToken_il.json";

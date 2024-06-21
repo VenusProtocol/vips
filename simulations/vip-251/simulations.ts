@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip216 } from "../../vips/vip-216";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";

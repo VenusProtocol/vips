@@ -1,4 +1,5 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
+
 import {
   REWARD_DISTRIBUTOR_CORE_0,
   REWARD_DISTRIBUTOR_CORE_1,

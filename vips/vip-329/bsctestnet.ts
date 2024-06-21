@@ -1,5 +1,5 @@
-import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { LzChainId, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
 const SEPOLIA_CRITICAL_TIMELOCK = "0xA24A7A65b8968a749841988Bd7d05F6a94329fDe";

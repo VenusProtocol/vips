@@ -3,9 +3,9 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vHAY, vSnBNB, vip256 } from "../../vips/vip-256/bsctestnet";
 import ACM_ABI from "./abi/acm.json";
 import BEACON_ABI from "./abi/beacon.json";

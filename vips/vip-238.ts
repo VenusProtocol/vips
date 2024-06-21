@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 export const ADDRESSES_1 = [

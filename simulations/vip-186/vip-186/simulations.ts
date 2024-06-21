@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip186 } from "../../../vips/vip-186/vip-186";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "./abi/comptroller-beacon.json";

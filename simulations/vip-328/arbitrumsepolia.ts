@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testForkedNetworkVipCommands } from "../../src/vip-framework";
 import vip328, {
   ARBITRUMSEPOLIA_ACM,
   ARBITRUMSEPOLIA_NORMAL_TIMELOCK,

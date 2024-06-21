@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { FEE_OUT, PSM_USDT, vip159 } from "../../vips/vip-159";
 import PSM_ABI from "./abi/PSM_ABI.json";
 

@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_BORROW_CAP, OLD_BORROW_CAP, WBETH_VTOKEN, vip261 } from "../../vips/vip-261/bsctestnet";
 import { abi as DIAMOND_CONSOLIDATED_ABI } from "./abi/DiamondConsolidated.json";
 

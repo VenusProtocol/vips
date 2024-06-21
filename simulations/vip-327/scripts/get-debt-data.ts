@@ -1,10 +1,10 @@
 import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
-import { initMainnetUser } from "../../../src/utils";
-import { NORMAL_TIMELOCK, forking } from "../../../src/vip-framework";
 import COMPROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/IERC20.json";
 import VAI_CONTROLLER_ABI from "../abi/VAIController.json";

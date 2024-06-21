@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip144 } from "../../vips/vip-144";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import XVS_VAULT_ABI from "./abi/xvsVault.json";

@@ -1,6 +1,6 @@
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";

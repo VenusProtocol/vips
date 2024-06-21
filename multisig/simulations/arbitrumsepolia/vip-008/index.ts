@@ -1,11 +1,11 @@
 import { parseUnits } from "ethers/lib/utils";
-
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../../src/vip-framework/checks/rewardsDistributor";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
+} from "src/vip-framework/checks/rewardsDistributor";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
+
 import vip008, {
   COMPTROLLER_CORE,
   REWARD_DISTRIBUTOR_CORE_0,

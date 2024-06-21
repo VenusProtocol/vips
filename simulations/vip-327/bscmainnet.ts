@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import {
   COMMUNITY_WALLET,
   TOKEN_REDEEMER,

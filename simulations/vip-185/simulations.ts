@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { LIQUID_STAKED_BNB_COMPTROLLER, STABLECOIN_COMPTROLLER, VAGEUR, VSNBNB, vip185 } from "../../vips/vip-185";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 

@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const UNI = "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1";

@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import vip299 from "../../vips/vip-299/bscmainnet";
 import { NEW_VAI_CONTROLLER_IMPL, VAI_UNITROLLER } from "../../vips/vip-299/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";

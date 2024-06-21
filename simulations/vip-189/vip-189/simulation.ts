@@ -2,9 +2,9 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip189 } from "../../../vips/vip-189/vip-189";
 import ERC20_ABI from "./abi/ERC20.json";
 import PSR_ABI from "./abi/PSR.json";

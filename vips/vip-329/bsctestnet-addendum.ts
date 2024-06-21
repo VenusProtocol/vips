@@ -1,5 +1,5 @@
-import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { LzChainId, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const ARBITRUMSEPOLIA_FASTTRACK_TIMELOCK = "0x14642991184F989F45505585Da52ca6A6a7dD4c8";
 const ARBITRUMSEPOLIA_CRITICAL_TIMELOCK = "0x0b32Be083f7041608E023007e7802430396a2123";

@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { initMainnetUser } from "../../../../src/utils";
+import { initMainnetUser } from "src/utils";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../../src/vip-framework/checks/rewardsDistributor";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
+} from "src/vip-framework/checks/rewardsDistributor";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
+
 import {
   COMPTROLLER_CORE,
   COMPTROLLER_CURVE,

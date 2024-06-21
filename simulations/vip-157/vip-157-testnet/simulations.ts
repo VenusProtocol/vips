@@ -3,9 +3,9 @@ import { BigNumber, Signer } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { FEE_IN, FEE_OUT, vip157Testnet } from "../../../vips/vip-157/vip-157-testnet";
 import { swapStableForVAIAndValidate, swapVAIForStableAndValidate } from "../utils";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";

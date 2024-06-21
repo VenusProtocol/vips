@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vip245 } from "../../../vips/vip-245/vip-245-testnet/vip-245-testnet";
 import { Assets, converters } from "../../../vips/vip-248/vip-248-testnet/Addresses";
 import { vip248 } from "../../../vips/vip-248/vip-248-testnet/vip-248-testnet";

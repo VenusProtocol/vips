@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip006, { NATIVE_TOKEN_GATEWAY_CORE_POOL } from "../../../proposals/arbitrumsepolia/vip-006";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 

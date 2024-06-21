@@ -3,9 +3,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import vip299 from "../../vips/vip-299/bsctestnet";
 import { NEW_VAI_CONTROLLER_IMPL, VAI_UNITROLLER } from "../../vips/vip-299/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";

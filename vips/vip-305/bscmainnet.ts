@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const NORMAL_TRACK_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 

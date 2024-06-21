@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip113 } from "../../vips/vip-113";
 import XVS_VAULT_ABI from "./abi/xvsVault.json";
 import XVS_VAULT_PROXY_ABI from "./abi/xvsVaultProxy.json";

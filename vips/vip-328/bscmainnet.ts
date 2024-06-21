@@ -1,6 +1,6 @@
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { LzChainId, ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const { bscmainnet, arbitrumone } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";

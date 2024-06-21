@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import vip282 from "../../vips/vip-282/bsctestnet";
 import { VTREASURY, XVS, XVS_FOR_V_TREASURY } from "../../vips/vip-283/bsctestnet";
 import vip283 from "../../vips/vip-283/bsctestnet";

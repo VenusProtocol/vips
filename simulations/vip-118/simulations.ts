@@ -3,8 +3,8 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip118 } from "../../vips/vip-118";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 

@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { XVSStore, swapRouterCorePool, vip130 } from "../../../vips/vip-130/vip-130";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import SWAP_ROUTER_ABI from "./abi/swapRouter.json";

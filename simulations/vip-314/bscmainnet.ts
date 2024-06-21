@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { calculateMappingStorageSlot, expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { calculateMappingStorageSlot, expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
 import vip314, {
   ACM,
   BNB_BLOCKS_PER_YEAR,

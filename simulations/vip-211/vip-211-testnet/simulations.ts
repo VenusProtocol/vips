@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip211 } from "../../../vips/vip-211/vip-211-testnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";

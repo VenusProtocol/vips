@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip188 } from "../../vips/vip-188";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import XVS_VAULT_ABI from "./abi/xvsVault.json";

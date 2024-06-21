@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip017 from "../../../proposals/opbnbtestnet/vip-017/addendum-2";
 import ACM_ABI from "./abi/AccessControlManager.json";
 

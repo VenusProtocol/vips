@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const XVSBridgeAdmin_Proxy = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96";
 export const SINGLE_SEND_LIMIT = parseUnits("100000", 18);

@@ -4,8 +4,8 @@ import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { MAX_TICK_CENTER, MIN_TICK_CENTER, TICK_SPREAD, vip285 } from "../../vips/vip-285/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import V3_POSITION_MANAGER_ABI from "./abi/NonfungiblePositionManager.json";

@@ -3,9 +3,9 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, CRITICAL_TIMELOCK, RESILIENT_ORACLE, vip250 } from "../../vips/vip-250/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";

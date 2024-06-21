@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { swapRouters, vip130Testnet } from "../../../vips/vip-130/vip-130-testnet";
 import SWAP_ROUTER_ABI from "./abi/swapRouter.json";
 

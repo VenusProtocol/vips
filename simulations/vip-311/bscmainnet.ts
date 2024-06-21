@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { REWARDS_DISTRIBUTOR, REWARDS_END_BLOCK_90_DAYS, VBABYDOGE, vip311 } from "../../vips/vip-311/bscmainnet";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 

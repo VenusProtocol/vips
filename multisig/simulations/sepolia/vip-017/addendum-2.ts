@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip017, {
   NATIVE_TOKEN_GATEWAY_VWETH_CORE,
   NATIVE_TOKEN_GATEWAY_VWETH_LST,

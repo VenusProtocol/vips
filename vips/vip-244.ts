@@ -1,8 +1,7 @@
 import { constants } from "ethers";
 import { id, parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const PROXY_ADMIN = "0x1BB765b741A5f3C2A338369DAb539385534E3343";
 const MOVE_DEBT_DELEGATE = "0x89621C48EeC04A85AfadFD37d32077e65aFe2226";
