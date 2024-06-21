@@ -17,10 +17,6 @@ export const SUPPLY_CAP = parseUnits("10000", 18);
 export const BORROW_CAP = parseUnits("1000", 18);
 export const SPEED = parseUnits("0.003703703703703703", 18).div(100);
 
-export const MockSfrxEthFraxOracle = "0x96f7FD1d922Bb6769773BeC88BE6aA615DE77ad1";
-export const IS_BAD_DATA = false;
-export const PRICE_LOW = "250318482717998";
-export const PRICE_HIGH = "250665814578833";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
 const vip035Addendum = () => {
