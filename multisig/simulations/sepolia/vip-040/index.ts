@@ -9,13 +9,13 @@ import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/ch
 import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip035, {
+import vip040, {
   REWARDS_DISTRIBUTOR_XVS,
   SFrxETHOracle,
   XVS_REWARD_TRANSFER,
   sfrxETH,
   vsfrxETH,
-} from "../../../proposals/sepolia/vip-035";
+} from "../../../proposals/sepolia/vip-040";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -53,7 +53,7 @@ forking(6139904, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip035());
+      await pretendExecutingVip(vip040());
     });
 
     it("check owner", async () => {
