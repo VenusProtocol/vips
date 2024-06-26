@@ -6,22 +6,23 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip328, {
-  OPBNBMAINNET_ACM,
-  OPBNBMAINNET_NORMAL_TIMELOCK,
-  OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-328/bscmainnet";
+import vip330, {
+  ARBITRUM_ACM,
+  ARBITRUM_NORMAL_TIMELOCK,
+  ARBITRUM_OMNICHAIN_EXECUTOR_OWNER,
+  ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
+} from "../../vips/vip-330/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
-const { opbnbmainnet } = NETWORK_ADDRESSES;
+const { arbitrumone } = NETWORK_ADDRESSES;
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const NORMAL_TIMELOCK = "0x10f504e939b912569Dca611851fDAC9E3Ef86819";
-const FAST_TRACK_TIMELOCK = "0xEdD04Ecef0850e834833789576A1d435e7207C0d";
-const CRITICAL_TIMELOCK = "0xA7DD2b15B24377296F11c702e758cd9141AB34AA";
+const NORMAL_TIMELOCK = "0x4b94589Cc23F618687790036726f744D602c4017";
+const FAST_TRACK_TIMELOCK = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
+const CRITICAL_TIMELOCK = "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674";
 
-forking(27059596, async () => {
+forking(223542712, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -30,19 +31,15 @@ forking(27059596, async () => {
   let multisig: any;
 
   before(async () => {
-    executor = new ethers.Contract(
-      opbnbmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR,
-      OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
-      provider,
-    );
-    executorOwner = new ethers.Contract(OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
-    acm = new ethers.Contract(OPBNBMAINNET_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
+    executor = new ethers.Contract(ARBITRUM_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executorOwner = new ethers.Contract(ARBITRUM_OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
+    acm = new ethers.Contract(ARBITRUM_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    multisig = await initMainnetUser(opbnbmainnet.GUARDIAN, ethers.utils.parseEther("1"));
-    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, OPBNBMAINNET_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
+    multisig = await initMainnetUser(arbitrumone.GUARDIAN, ethers.utils.parseEther("1"));
+    await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, ARBITRUM_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip328 configures bridge", await vip328(), {
+  testForkedNetworkVipCommands("vip330 configures bridge", await vip330(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [15]);
     },
@@ -66,7 +63,7 @@ forking(27059596, async () => {
       expect(await executor.trustedRemoteLookup(LzChainId.bscmainnet)).equals(
         ethers.utils.solidityPack(
           ["address", "address"],
-          [getOmnichainProposalSenderAddress(), opbnbmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR],
+          [getOmnichainProposalSenderAddress(), arbitrumone.OMNICHAIN_GOVERNANCE_EXECUTOR],
         ),
       );
 

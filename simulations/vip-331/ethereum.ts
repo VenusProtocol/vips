@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip329, { ETHEREUM_ACM } from "../../vips/vip-329/bscmainnet";
+import vip331, { ETHEREUM_ACM } from "../../vips/vip-331/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
@@ -28,7 +28,7 @@ forking(20039520, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, ETHEREUM_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip329 configures bridge", await vip329(), {
+  testForkedNetworkVipCommands("vip329 configures bridge", await vip331(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [12]);
     },

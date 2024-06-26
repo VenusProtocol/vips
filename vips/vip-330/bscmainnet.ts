@@ -30,7 +30,7 @@ const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
 const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
-const vip328 = () => {
+const vip330 = () => {
   const meta = {
     version: "v2",
     title:
@@ -570,4 +570,4 @@ const vip328 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip328;
+export default vip330;

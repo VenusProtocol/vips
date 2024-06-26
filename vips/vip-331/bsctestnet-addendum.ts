@@ -8,10 +8,10 @@ export const ARBITRUMSEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xfCA70dd553b7dF6eB8F81
 
 const ARBITRUMSEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
-const vip329 = () => {
+const vip331 = () => {
   const meta = {
     version: "v2",
-    title: "vip329 give permission of OmnichainGovernanceExecutor to arbitrum sepolia fasttrack and critical timelock",
+    title: "vip331 give permission of OmnichainGovernanceExecutor to arbitrum sepolia fasttrack and critical timelock",
     description: `#### Description
     This VIP will grant permission to timelocks of OmnichainProposalExecutor on ARBITRUMSEPOLIA chain`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -194,4 +194,4 @@ const vip329 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip329;
+export default vip331;

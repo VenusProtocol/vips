@@ -6,12 +6,12 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip328, {
+import vip330, {
   ETHEREUM_ACM,
   ETHEREUM_NORMAL_TIMELOCK,
   ETHEREUM_OMNICHAIN_EXECUTOR_OWNER,
   ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
-} from "../../vips/vip-328/bscmainnet";
+} from "../../vips/vip-330/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
@@ -39,7 +39,7 @@ forking(20126859, async () => {
     await acm.connect(multisig).grantRole(DEFAULT_ADMIN_ROLE, ETHEREUM_NORMAL_TIMELOCK); // Will be removed once multisig VIP for this will be executed
   });
 
-  testForkedNetworkVipCommands("vip328 configures bridge", await vip328(), {
+  testForkedNetworkVipCommands("vip330 configures bridge", await vip330(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [15]);
     },
