@@ -23,10 +23,19 @@ const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 const vip331 = () => {
   const meta = {
     version: "v2",
-    title:
-      "vip331 give permission of OmnichainGovernanceExecutor to ethereum, opbnbmainnet, & arbitrum fasttrack and critical timelock",
-    description: `#### Description
-    This VIP will grant permission to timelocks of OmnichainProposalExecutor on ETHEREUM & OPBNBMAINNET & ARBITRUM chains`,
+    title: "VIP-331 Enable Multichain Governance (2/2)",
+    description: `### Description
+
+Related with the VIP-330, if passed, this VIP will grant permission to Fast-track and Critical timelocks to execute privilege commands on the OmnichainProposalExecutor on Ethereum, Arbitrum one and opBNB. Review VIP-330 for more details.
+
+### References
+
+* [VIP simulation](https://github.com/VenusProtocol/vips/pull/126)
+* [Code of Multichain Governance](https://github.com/VenusProtocol/governance-contracts/pull/21)
+* Community post [Venus Upgrade - Omnichain Money Markets](https://community.venus.io/t/venus-upgrade-omnichain-money-markets/3027/9)
+* Snapshot [Venus Upgrade - Omnichain Money Markets with LayerZero Integration](https://snapshot.org/#/venus-xvs.eth/proposal/0x62440d98cb7513d4873662203b7a27f9441880afa73105c55a733005de7ac9a1)
+* [Documentation - Technical article with more details of the Multichain Governance feature](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance)
+`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
