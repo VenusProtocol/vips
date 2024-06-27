@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip038 from "../../../proposals/sepolia/vip-038";
+import vip041 from "../../../proposals/sepolia/vip-041";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
 const SEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0xf964158C67439D01e5f17F0A3F39DfF46823F27A";
@@ -45,7 +45,7 @@ forking(6049863, async () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip038());
+      await pretendExecutingVip(await vip041());
     });
     it("Normal Timelock has default admin role", async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, SEPOLIA_NORMAL_TIMELOCK);

@@ -27,7 +27,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 const LST_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 const sfrxETH_HOLDER = "0x8CA7A5d6f3acd3A7A8bC468a8CD0FB14B6BD28b6";
 
-forking(20138265, () => {
+forking(20138265, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
@@ -53,7 +53,7 @@ forking(20138265, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip040());
+      await pretendExecutingVip(await vip040());
     });
 
     it("check owner", async () => {
