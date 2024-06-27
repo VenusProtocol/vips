@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const BLOCKS_56_DAYS = 1_612_800;
 export const BLOCKS_7_DAYS = 201_600;

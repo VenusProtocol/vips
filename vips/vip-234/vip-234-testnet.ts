@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const BNB_TREASURY = "0x8b293600c50d6fbdc6ed4251cc75ece29880276f";
 export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";

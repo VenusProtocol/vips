@@ -1,6 +1,7 @@
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import { cutParams as params } from "../../simulations/vip-276/utils/bsctestnet-cut-params2.json";
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
 
 export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 export const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";

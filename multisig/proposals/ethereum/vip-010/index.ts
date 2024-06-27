@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";

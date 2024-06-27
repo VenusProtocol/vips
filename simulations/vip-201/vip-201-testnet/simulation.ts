@@ -3,9 +3,9 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip201Testnet } from "../../../vips/vip-201/vip-201-testnet";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
@@ -51,7 +51,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(34867069, () => {
+forking(34867069, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -80,7 +80,7 @@ forking(34867069, () => {
     });
   });
 
-  testVip("VIP-201 Prime Program", vip201Testnet(), {
+  testVip("VIP-201 Prime Program", await vip201Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [SETTER_FACET_ABI], ["NewPrimeToken"], [1]);
     },

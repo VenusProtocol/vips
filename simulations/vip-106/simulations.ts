@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip106 } from "../../vips/vip-106";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -14,7 +14,7 @@ const OLD_VTRX = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
 const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const VXVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
 
-forking(27276233, () => {
+forking(27276233, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -60,7 +60,7 @@ forking(27276233, () => {
     });
   });
 
-  testVip("VIP-106 Risk Parameters Update", vip106(), {
+  testVip("VIP-106 Risk Parameters Update", await vip106(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

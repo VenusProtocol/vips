@@ -4,8 +4,8 @@ import Decimal from "decimal.js";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { MAX_TICK_CENTER, MIN_TICK_CENTER, TICK_SPREAD, vip285 } from "../../vips/vip-285/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import V3_POSITION_MANAGER_ABI from "./abi/NonfungiblePositionManager.json";
@@ -67,7 +67,7 @@ The following tick values are used in this VIP:
     )} USDT/VAI.
 `);
 
-forking(37624600, () => {
+forking(37624600, async () => {
   const usdt = new ethers.Contract(USDT, IERC20_ABI, ethers.provider);
   const vai = new ethers.Contract(VAI, IERC20_ABI, ethers.provider);
   const v2lp = new ethers.Contract(V2_LP, IERC20_ABI, ethers.provider);
@@ -83,7 +83,7 @@ forking(37624600, () => {
     treasuryVaiBalanceBefore = await vai.balanceOf(TREASURY);
   });
 
-  testVip("VIP-285", vip285(), {
+  testVip("VIP-285", await vip285(), {
     callbackAfterExecution: async tx => {
       executionTx = tx;
       executionTxReceipt = await tx.wait();

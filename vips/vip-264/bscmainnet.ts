@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VBNB_ADMIN = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
 const NEW_IR = "0xF558Be24F2CACb65a4BB41A155631C83B15388F1";

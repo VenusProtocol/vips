@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip211 } from "../../../vips/vip-211/vip-211-testnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import PROXY_ADMIN_ABI from "./abi/proxyAdmin.json";
@@ -23,7 +23,7 @@ const TRX = "0x7D21841DC10BA1C5797951EFc62fADBBDD06704B";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const CHAINLINK_ORACLE = "0xCeA29f1266e880A1482c06eD656cD08C148BaA32";
 
-forking(34311500, () => {
+forking(34311500, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let defaultProxyAdmin: Contract;
@@ -45,7 +45,7 @@ forking(34311500, () => {
     });
   });
 
-  testVip("vip211Testnet", vip211(), {
+  testVip("vip211Testnet", await vip211(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["Upgraded"], [1]);
     },

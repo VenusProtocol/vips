@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip001 from "../../../proposals/opbnbtestnet/vip-001";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -57,7 +57,7 @@ const assetConfigs: AssetConfig[] = [
   },
 ];
 
-forking(16003453, () => {
+forking(16003453, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let binanceOracle: Contract;
@@ -87,7 +87,7 @@ forking(16003453, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
     it("Binance Oracle should have new implementation", async () => {
       const implementation = await defaultProxyAdmin.getProxyImplementation(BINANCE_ORACLE);

@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const RISK_FUND = "0x487CeF72dacABD7E12e633bb3B63815a386f7012";
 const NEW_RISK_FUND_IMPLEMENTATION = "0x1E7DEC93C77740c2bB46daf87ef42056E388dA14";

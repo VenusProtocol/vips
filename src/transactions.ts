@@ -6,7 +6,7 @@ const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
 
 export const loadProposal = async (path: string) => {
   const proposalModule = await import(`../vips/${path}`);
-  return proposalModule.default();
+  return await proposalModule.default();
 };
 
 export const proposeVIP = async (vipPath: string, governorProxyAddress?: string) => {

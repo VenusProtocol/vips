@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip002, {
   BNB_MAINNET_ENDPOINT_ID,
   BNB_MAINNET_TRUSTED_REMOTE,
@@ -31,7 +31,7 @@ const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
 const MIN_DEST_GAS = "300000";
 
-forking(214523193, () => {
+forking(214523193, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -68,7 +68,7 @@ forking(214523193, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
     });
 
     it("Should set bridge owner to multisig", async () => {

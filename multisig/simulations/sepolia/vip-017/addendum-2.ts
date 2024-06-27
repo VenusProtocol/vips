@@ -1,15 +1,15 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip017, {
   NATIVE_TOKEN_GATEWAY_VWETH_CORE,
   NATIVE_TOKEN_GATEWAY_VWETH_LST,
 } from "../../../proposals/sepolia/vip-017/addendum-2";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 
-forking(5470354, () => {
+forking(5470354, async () => {
   const provider = ethers.provider;
   let nativeTokenGatewayCore: Contract;
   let nativeTokenGatewayLst: Contract;
@@ -21,7 +21,7 @@ forking(5470354, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(await vip017());
     });
 
     it("timelock should be the owner of NativeTokenGateway contract for core pool market", async () => {

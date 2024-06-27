@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip220Testnet } from "../../../vips/vip-220/vip-220-testnet";
 import COMPTROLLER_ABI from "./abi/Comproller_ABI.json";
 
@@ -17,7 +17,7 @@ const ORACLE_ADMIN = "0xce10739590001705F7FF231611ba4A48B2820327";
 const OLD_COLLATERAL_FACT0R = parseUnits("0.8", 18);
 const NEW_COLLATERAL_FACTOR = parseUnits("0.72", 18);
 
-forking(36057801, () => {
+forking(36057801, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -33,7 +33,7 @@ forking(36057801, () => {
     });
   });
 
-  testVip("VIP-220Testnet Reduce CF of BUSD market", vip220Testnet(), {
+  testVip("VIP-220Testnet Reduce CF of BUSD market", await vip220Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "Failure"], [1, 0]);
     },

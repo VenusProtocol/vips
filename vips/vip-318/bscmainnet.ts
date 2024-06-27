@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const vWBNB_IR = "0x8037f793A298789736fc1cb7e3154573647CDD11";
 export const vWBNB = "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2";

@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import vip299 from "../../vips/vip-299/bscmainnet";
 import { NEW_VAI_CONTROLLER_IMPL, VAI_UNITROLLER } from "../../vips/vip-299/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -23,7 +23,7 @@ const ACCOUNT_TO_REPAY_ON_BEHALF = "0x33454D23fB15ae91CDe5085e0c43AEC1f2082C8b";
 
 const CHAINLINK = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 
-forking(38306755, () => {
+forking(38306755, async () => {
   const provider = ethers.provider;
   const vaiController = new ethers.Contract(VAI_UNITROLLER, VAI_CONTROLLER_ABI, provider);
   const vai = new ethers.Contract(VAI, ERC20_ABI, provider);
@@ -43,7 +43,7 @@ forking(38306755, () => {
     });
   });
 
-  testVip("VAIController upgrade VIP", vip299(), {
+  testVip("VAIController upgrade VIP", await vip299(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VAI_CONTROLLER_ABI], ["NewImplementation"], [1]);
     },

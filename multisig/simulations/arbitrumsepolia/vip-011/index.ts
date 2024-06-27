@@ -8,7 +8,7 @@ import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
 const OLD_POOL_REGISTRY = "0x6866b2BDaaEf6648ddd5b678B3e9f3352bF3d2A5";
 
-forking(57920209, () => {
+forking(57920209, async () => {
   let protocolShareReserve: Contract;
 
   before(async () => {
@@ -24,7 +24,7 @@ forking(57920209, () => {
 
   describe("Post tx checks", () => {
     before(async () => {
-      await pretendExecutingVip(vip011());
+      await pretendExecutingVip(await vip011());
     });
 
     it("PSR should contain correct PoolRegistry address", async () => {

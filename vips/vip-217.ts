@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export interface MarketInformation {
   name: string;

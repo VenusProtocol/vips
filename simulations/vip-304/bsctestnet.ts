@@ -3,16 +3,13 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, testVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { checkRewardsDistributor, checkRewardsDistributorPool } from "src/vip-framework/checks/rewardsDistributor";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
-import {
-  checkRewardsDistributor,
-  checkRewardsDistributorPool,
-} from "../../src/vip-framework/checks/rewardsDistributor";
 import vip304, {
   BABYDOGE,
   COMPTROLLER,
@@ -90,7 +87,7 @@ const vUSDT_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(40208623, () => {
+forking(40208623, async () => {
   const provider = ethers.provider;
   let oracle: Contract;
   let poolRegistry: Contract;
@@ -127,7 +124,7 @@ forking(40208623, () => {
     });
   });
 
-  testVip("Add Meme Pool", vip304());
+  testVip("Add Meme Pool", await vip304());
 
   describe("Post-VIP state", () => {
     it("check price", async () => {

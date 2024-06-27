@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const XVS_BRIDGE_ADMIN_PROXY = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96";
 export const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";

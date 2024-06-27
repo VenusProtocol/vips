@@ -1,5 +1,5 @@
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 

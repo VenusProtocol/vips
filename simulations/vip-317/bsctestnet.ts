@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip317, {
   ARBITRUM_SEPOLIA_CHAIN_ID,
   MAX_DAILY_RECEIVE_LIMIT,
@@ -24,7 +24,7 @@ const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 
-forking(39571070, () => {
+forking(39571070, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -42,7 +42,7 @@ forking(39571070, () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip-317 testnet", vip317(), {
+  testVip("vip-317 testnet", await vip317(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

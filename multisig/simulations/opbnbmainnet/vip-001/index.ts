@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip001 from "../../../proposals/opbnbmainnet/vip-001";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -52,7 +52,7 @@ const assetConfigs: AssetConfig[] = [
   },
 ];
 
-forking(13905270, () => {
+forking(13905270, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let binanceOracle: Contract;
@@ -88,7 +88,7 @@ forking(13905270, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
     it("correct owner", async () => {
       expect(await resilientOracle.owner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);

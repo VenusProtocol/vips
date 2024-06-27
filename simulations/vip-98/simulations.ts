@@ -2,8 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { Actions, vip98 } from "../../vips/vip-98";
 import TRX_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTRX_ABI from "./abi/VBep20Abi.json";
@@ -18,12 +19,13 @@ const VTOKEN_IMPLEMENTATION = "0x13f816511384D3534783241ddb5751c4b7a7e148"; // O
 const NEW_TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
 const TRX_HOLDER = "0x2C7A1398368A38489bB6Dc53B79B3e416B531636";
 const TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(25892445, () => {
-  testVip("VIP-98 TRON Contract Migration", vip98());
+forking(25892445, async () => {
+  testVip("VIP-98 TRON Contract Migration", await vip98());
 });
 
-forking(25892445, () => {
+forking(25892445, async () => {
   let comptroller: Contract;
   let trx: Contract;
   let vTrxOld: Contract;
@@ -39,7 +41,7 @@ forking(25892445, () => {
     vTrxOld = new ethers.Contract(OLD_VTRX, VTRX_ABI, provider);
     vTrx = new ethers.Contract(NEW_VTRX, VTRX_ABI, provider);
 
-    await pretendExecutingVip(vip98());
+    await pretendExecutingVip(await vip98(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Post-VIP behavior", async () => {

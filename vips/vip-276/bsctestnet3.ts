@@ -1,6 +1,6 @@
-import { ZERO_ADDRESS } from "../../src/networkAddresses";
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ZERO_ADDRESS } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";

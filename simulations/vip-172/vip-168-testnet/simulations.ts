@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip172Testnet } from "../../../vips/vip-172/vip-172-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -25,7 +25,7 @@ const BUSD_FEED = "0x9331b55D9830EF609A2aBCfAc0FBCE050A52fdEa";
 const BUSD_BORROWER = "0x3456f6d0bd2484482675068542bBa4FcD13dBac7";
 const BUSD_HOLDER = "0x202963d793C3973aFd14A3B435507Cb4194f3E9A";
 
-forking(33246200, () => {
+forking(33246200, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -34,7 +34,7 @@ forking(33246200, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ADDRESS, BUSD, BUSD_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-168 Forced liquidations", vip172Testnet(), {
+  testVip("VIP-168 Forced liquidations", await vip172Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

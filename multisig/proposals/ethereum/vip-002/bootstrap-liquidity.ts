@@ -1,8 +1,7 @@
 import { hours } from "@nomicfoundation/hardhat-network-helpers/dist/src/helpers/time/duration";
 import { concat, hexlify, parseUnits } from "ethers/lib/utils";
-
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 // Make sure to update the deadline before submitting the transaction
 const NOW = 1705566017;

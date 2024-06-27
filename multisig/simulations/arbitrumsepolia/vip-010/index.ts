@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { calculateMappingStorageSlot } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { calculateMappingStorageSlot } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip010, { NEW_XVS_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/arbitrumsepolia/vip-010";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import ACM_ABI from "./abi/accessControlManager.json";
@@ -35,7 +35,7 @@ forking(46354403, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip010());
+      await pretendExecutingVip(await vip010());
     });
 
     checkXVSVault();

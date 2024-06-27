@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip117 } from "../../vips/vip-117";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VSXP_ABI from "./abi/VBep20Abi.json";
@@ -21,7 +21,7 @@ const VSXP_RESERVES = "526189372708075633111";
 const VSXP_RESERVES_NOT_REDUCED = "69458726743711838972";
 const SXP_TREASURY_BALANCE = "25610823482588636519545";
 
-forking(28148357, () => {
+forking(28148357, async () => {
   let comptroller: Contract;
   let sxpContract: Contract;
   let vsxpContract: Contract;
@@ -56,7 +56,7 @@ forking(28148357, () => {
     });
   });
 
-  testVip("VIP-117 Risk Parameters Update", vip117(), {
+  testVip("VIP-117 Risk Parameters Update", await vip117(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const VTUSD_OLD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
 export const TUSD_OLD = "0x14016E85a25aeb13065688cAFB43044C2ef86784";

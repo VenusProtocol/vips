@@ -4,10 +4,11 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { CORE_MARKETS, vip193Testnet } from "../../../vips/vip-193/vip-193-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
@@ -18,6 +19,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const TOKEN_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 let vToken: Contract;
 let underlying: Contract;
@@ -31,7 +33,7 @@ const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
 
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -79,7 +81,7 @@ forking(34541821, () => {
   });
 });
 
-forking(34541821, () => {
+forking(34541821, async () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -101,7 +103,7 @@ forking(34541821, () => {
       type: "event",
     },
   ];
-  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", vip193Testnet(), {
+  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", await vip193Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -113,10 +115,10 @@ forking(34541821, () => {
   });
 });
 
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193Testnet());
+      await pretendExecutingVip(await vip193Testnet(), bscmainnet.NORMAL_TIMELOCK);
       [user] = await ethers.getSigners();
     });
 
@@ -172,10 +174,10 @@ forking(34541821, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(34541821, () => {
+forking(34541821, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193Testnet());
+      await pretendExecutingVip(await vip193Testnet(), bscmainnet.NORMAL_TIMELOCK);
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
 

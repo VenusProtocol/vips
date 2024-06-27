@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const REWARD_DISTRIBUTOR_CORE_0 = "0xB60666395bEFeE02a28938b75ea620c7191cA77a";
 export const REWARD_DISTRIBUTOR_CORE_1 = "0x341f52BfecC10115087e46eB94AA06E384b8925E";

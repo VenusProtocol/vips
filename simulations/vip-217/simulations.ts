@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { MarketInformation, vip217 } from "../../vips/vip-217";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -40,7 +40,7 @@ const markets: MarketInformation[] = [
   },
 ];
 
-forking(34340570, () => {
+forking(34340570, async () => {
   const underlyingTokenContracts: UnderlyingTokenContracts = {};
 
   before(async () => {
@@ -59,7 +59,7 @@ forking(34340570, () => {
     });
   });
 
-  testVip("VIP-217 Restore bad debt", vip217(), {
+  testVip("VIP-217 Restore bad debt", await vip217(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

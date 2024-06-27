@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const DeFi_Pool = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const vANKR_DeFi = "0x19CE11C8817a1828D1d357DFBF62dCf5b0B2A362";

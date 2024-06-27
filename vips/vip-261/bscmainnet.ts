@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const WBETH_VTOKEN = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";

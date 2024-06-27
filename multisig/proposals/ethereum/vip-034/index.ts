@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 const NORMAL_TIMELOCK = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";

@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { vip148 } from "../../vips/vip-148";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 
@@ -19,7 +19,7 @@ const CERTIK_AMOUNT = parseUnits("19000", 18);
 const FAIRYPROOF_AMOUNT = parseUnits("12500", 18);
 const QUANTSTAMP_AMOUNT = parseUnits("50000", 18);
 
-forking(30302154, () => {
+forking(30302154, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let prevBalancePeckShield: BigNumber;
@@ -36,7 +36,7 @@ forking(30302154, () => {
     prevBalanceOZ = await usdc.balanceOf(QUANTSTAMP_RECEIVER);
   });
 
-  testVip("VIP-148 Payments for auditors", vip148(), {
+  testVip("VIP-148 Payments for auditors", await vip148(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });

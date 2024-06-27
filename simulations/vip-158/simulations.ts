@@ -2,13 +2,13 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_BORROW_CAP, NEW_SUPPLY_CAP, VTUSD, vip158 } from "../../vips/vip-158";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(30843050, () => {
+forking(30843050, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -16,7 +16,7 @@ forking(30843050, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-158 Risk Parameters Update", vip158(), {
+  testVip("VIP-158 Risk Parameters Update", await vip158(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },

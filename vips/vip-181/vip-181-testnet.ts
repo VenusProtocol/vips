@@ -1,6 +1,7 @@
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import { cutParams as params } from "../../simulations/vip-181/vip-181-testnet/utils/cut-params.json";
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
 
 const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 const cutParams = params;

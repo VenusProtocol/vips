@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip169 } from "../../../vips/vip-169/vip-169";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/REWARDS_DISTRIBUTOR.json";
 
@@ -12,7 +12,7 @@ const SD_REWARDS_DISTRIBUTOR = "0xBE607b239a8776B47159e2b0E9E65a7F1DAA6478";
 const MARKET_BNBx = "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791";
 const MARKET_HAY = "0xCa2D81AA7C09A1a025De797600A7081146dceEd9";
 
-forking(31715160, () => {
+forking(31715160, async () => {
   let hayRewardsDistributor: Contract;
   let sdRewardsDistributor: Contract;
   const provider = ethers.provider;
@@ -33,7 +33,7 @@ forking(31715160, () => {
     });
   });
 
-  testVip("VIP-169 Stop HAY and SD Rewards", vip169(), {
+  testVip("VIP-169 Stop HAY and SD Rewards", await vip169(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
+import { StorageLayout } from "src/vtokenUpgradesHelper";
 
-import { forking, testVip } from "../../../src/vip-framework";
-import { StorageLayout } from "../../../src/vtokenUpgradesHelper";
 import { vip152Testnet } from "../../../vips/vip-152/vip-152-testnet";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -21,7 +21,7 @@ const POOL_REGISTRY_PROXY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 const POOL_REGISTRY_OLD_IMPL = "0xed659A02c5f63f299C28F6A246143326b922e3d9";
 const PROXY_ADMIN = "0xef480a5654b231ff7d80A0681F938f3Db71a6Ca6";
 
-forking(31917221, () => {
+forking(31917221, async () => {
   let comptroller: Contract;
   let poolRegistry: Contract;
   let beacon: Contract;
@@ -97,7 +97,7 @@ forking(31917221, () => {
     expectedPoolStorage = await fetchPoolRegistryStorage();
   });
 
-  testVip("VIP-152 Remove BIFI Market", vip152Testnet());
+  testVip("VIP-152 Remove BIFI Market", await vip152Testnet());
 
   describe("Post-VIP behavior", async () => {
     it("Comptroller Implementation should be = 0x80691DaD6dAb8a028FFE68bb8045f2547d210f9D", async () => {

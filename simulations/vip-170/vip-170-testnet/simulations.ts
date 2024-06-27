@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip170Testnet } from "../../../vips/vip-170/vip-170-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -61,7 +61,7 @@ interface VenusPool {
   comptroller: string;
 }
 
-forking(33268000, () => {
+forking(33268000, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -81,7 +81,7 @@ forking(33268000, () => {
     });
   });
 
-  testVip("Risk fund, shortfall, PSR, stage 1", vip170Testnet(), {
+  testVip("Risk fund, shortfall, PSR, stage 1", await vip170Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

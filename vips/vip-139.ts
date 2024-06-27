@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const COMPTROLLER = "0x3344417c9360b963ca93A4e8305361AEde340Ab9";
 const VBIFI_DEFI = "0xC718c51958d3fd44f5F9580c9fFAC2F89815C909";

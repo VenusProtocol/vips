@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const XVS_BRIDGE_ADMIN_PROXY = "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21";
 export const BNB_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";

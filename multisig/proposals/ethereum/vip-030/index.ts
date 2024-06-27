@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const JUMPRATEMODELV2_BASE0BPS_SLOPE875BPS_JUMP25000BPS_KINK8000BPS = "0xD9D3E7adA04993Cf06dE1A5c9C7f101BD1DefBF4";
 

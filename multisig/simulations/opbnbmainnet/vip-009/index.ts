@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip009, {
   BNB_ENDPOINT_ID,
   ETHEREUM_ENDPOINT_ID,
@@ -24,7 +24,7 @@ const XVS_BRIDGE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
 const XVS_HOLDER = "0xc27Bac74AAbbE19A346660E1F5fd4602F2D54E93";
 const OPBNB_MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
-forking(20387710, () => {
+forking(20387710, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -43,7 +43,7 @@ forking(20387710, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(await vip009());
     });
 
     it("Should match trusted remote address", async () => {

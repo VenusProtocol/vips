@@ -4,11 +4,11 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip003, { ACM } from "../../../proposals/arbitrumsepolia/vip-003";
 import ACM_ABI from "./abi/acm.json";
 import XVS_ABI from "./abi/xvs.json";
@@ -20,7 +20,7 @@ const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 
-forking(36285340, () => {
+forking(36285340, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;
@@ -29,7 +29,7 @@ forking(36285340, () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, arbitrumsepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
 
-    await pretendExecutingVip(vip003());
+    await pretendExecutingVip(await vip003());
   });
 
   describe("Post tx checks", () => {

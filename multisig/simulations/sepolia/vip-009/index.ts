@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip009 from "../../../proposals/sepolia/vip-009";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WSTETH_ABI from "./abi/wstETH.json";
@@ -16,7 +16,7 @@ const WETH_ADDRESS = "0x700868CAbb60e90d77B6588ce072d9859ec8E281";
 const WSTETH_ADDRESS = "0x9b87ea90fdb55e1a0f17fbeddcf7eb0ac4d50493";
 const WETH_USD_PRICE_DENOMINATOR = parseUnits("1", 18);
 
-forking(5113339, () => {
+forking(5113339, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let wstETH: Contract;
@@ -32,7 +32,7 @@ forking(5113339, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(await vip009());
     });
     it("should return correct wstETH price", async () => {
       const WETH_USD_PRICE = await resilientOracle.getPrice(WETH_ADDRESS);

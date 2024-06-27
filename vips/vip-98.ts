@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NEW_VTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";

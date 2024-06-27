@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const SINGLE_TOKEN_CONVERTER_BEACON = "0x4c9D57b05B245c40235D720A5f3A592f3DfF11ca";
 export const NEW_SINGLE_TOKEN_CONVERTER_IMP = "0x40ed28180Df01FdeB957224E4A5415704B9D5990";

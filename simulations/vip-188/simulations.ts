@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip188 } from "../../vips/vip-188";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import XVS_VAULT_ABI from "./abi/xvsVault.json";
@@ -14,7 +14,7 @@ const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 
-forking(32715679, () => {
+forking(32715679, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
   let xvsVaultSigner: Signer;
@@ -33,7 +33,7 @@ forking(32715679, () => {
     });
   });
 
-  testVip("VIP-188", vip188(), {
+  testVip("VIP-188", await vip188(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [2]);

@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const XVS_VAULT_PROXY = "0x051100480289e704d20e9DB4804837068f3f9204";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";

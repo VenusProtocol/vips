@@ -1,8 +1,7 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const LAST_REWARD_BLOCK = 39793420; // Fri Jun 21 2024 01:34:41 UTC
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";

@@ -22,7 +22,7 @@ forking(39743887, async () => {
     });
   });
 
-  testVip("VIP-328", vip328(), {
+  testVip("VIP-328", await vip328(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },

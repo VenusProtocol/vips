@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip032, {
   LIQUID_STAKED_ETH_COMPTROLLER,
   vweETH,
@@ -14,7 +14,7 @@ import vip032, {
 } from "../../../proposals/ethereum/vip-032";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
-forking(19962658, () => {
+forking(19962658, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -45,7 +45,7 @@ forking(19962658, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip032());
+      await pretendExecutingVip(await vip032());
     });
 
     it("new vweETH supply cap", async () => {

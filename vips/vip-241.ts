@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 export const PLP = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";

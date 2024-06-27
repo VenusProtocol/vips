@@ -1,8 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";

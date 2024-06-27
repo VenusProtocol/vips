@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const BSW_REWARDS_DISTRIBUTOR = "0x7524116CEC937ef17B5998436F16d1306c4F7EF8";
 const VBSW_DEFI = "0x8f657dFD3a1354DEB4545765fE6840cc54AFd379";

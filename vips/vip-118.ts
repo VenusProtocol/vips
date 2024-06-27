@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const vETH = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8";
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";

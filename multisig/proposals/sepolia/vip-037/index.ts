@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
+import { makeProposal } from "src/utils";
 
-import { makeProposal } from "../../../../src/utils";
 import {
   BaseAssets,
   CONVERTER_NETWORK,

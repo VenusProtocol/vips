@@ -1,14 +1,14 @@
 import { expect } from "chai";
 import { BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { VTOKEN_SNAPSHOT, vip190 } from "../../vips/vip-190";
 import IERC20 from "./abi/IERC20UpgradableAbi.json";
 
 const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 
-forking(32774106, () => {
+forking(32774106, async () => {
   let underlying: Contract;
   let prevBnbBal: BigNumberish;
   const provider = ethers.provider;
@@ -24,7 +24,7 @@ forking(32774106, () => {
     });
   });
 
-  testVip("VIP-190 Redeem VTokens in the Treasury", vip190());
+  testVip("VIP-190 Redeem VTokens in the Treasury", await vip190());
 
   describe("Post-VIP", async () => {
     let index = 0;

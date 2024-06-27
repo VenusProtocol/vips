@@ -1,8 +1,7 @@
 import { parseUnits } from "@ethersproject/units";
 import { BigNumber, BigNumberish } from "ethers";
-
-import { Command, ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { Command, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const BUYBACK_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";

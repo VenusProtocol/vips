@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const vFRAX = "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95";
 export const vsFRAX = "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe";

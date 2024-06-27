@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { StorageLayout } from "src/vtokenUpgradesHelper";
 
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { StorageLayout } from "../../../src/vtokenUpgradesHelper";
 import { vip152 } from "../../../vips/vip-152/vip-152";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -25,7 +25,7 @@ const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const BSW_FEED = "0x08E70777b982a58D23D05E3D7714f44837c06A21";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(30362200, () => {
+forking(30362200, async () => {
   let comptroller: Contract;
   let poolRegistry: Contract;
   let beacon: Contract;
@@ -102,7 +102,7 @@ forking(30362200, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, BSW, BSW_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-152 Remove BIFI Market", vip152());
+  testVip("VIP-152 Remove BIFI Market", await vip152());
 
   describe("Post-VIP behavior", async () => {
     it("Comptroller Implementation should be = 0x939C05e2E694db68cE54d80bf29926b09190aA0F", async () => {

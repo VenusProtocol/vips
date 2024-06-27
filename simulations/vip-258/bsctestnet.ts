@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip258Testnet } from "../../vips/vip-258/bsctestnet";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -16,7 +16,7 @@ const FAST_TRACK_TIMELOCK = "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6";
 const CRITICAL_TIMELOCK = "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D";
 const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 
-forking(31942719, () => {
+forking(31942719, async () => {
   let accessControlManager: Contract;
   let comptroller: Contract;
   let liquidator: Contract;
@@ -30,7 +30,7 @@ forking(31942719, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Liquidator Update", vip258Testnet(), {
+  testVip("VIP-Liquidator Liquidator Update", await vip258Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

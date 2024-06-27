@@ -1,5 +1,6 @@
-import { ProposalType } from "../../../src/types";
-import { makeProposal } from "../../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import { CONVERTER_NETWORK } from "./Addresses";
 import { acceptOwnershipCommandsAllConverters, callPermissionCommandsAllConverter } from "./commands";
 

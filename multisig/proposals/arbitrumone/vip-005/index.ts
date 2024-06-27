@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const PSR = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";

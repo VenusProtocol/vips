@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { formatUnits, id, parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
-import { initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
 import { vip244 } from "../../vips/vip-244";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
@@ -127,7 +127,7 @@ const newExploiterDebts = debts.reduce((acc: { [vTokenSymbol: string]: BigNumber
   return acc;
 }, {});
 
-forking(35476872, () => {
+forking(35476872, async () => {
   let comptroller: Contract;
   let moveDebtDelegate: Contract;
   let proxyAdmin: Contract;
@@ -189,7 +189,7 @@ forking(35476872, () => {
     );
   });
 
-  testVip("VIP-244", vip244());
+  testVip("VIP-244", await vip244());
 
   describe("Generic tests", async () => {
     checkCorePoolComptroller();

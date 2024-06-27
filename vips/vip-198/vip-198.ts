@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const PLANET = "0xca6d678e74f553f0e59cccc03ae644a3c2c5ee7d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";

@@ -25,6 +25,7 @@
     "@venusprotocol/venus-protocol": "^7.4.0",
     "ajv": "^8.12.0",
     "decimal.js": "^10.4.3",
+    "module-alias": "^2.2.3",
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
@@ -48,6 +49,7 @@
     "@types/chai": "^4.3.4",
     "@types/fs-extra": "^9.0.13",
     "@types/mocha": "^10.0.0",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^18.11.9",
     "@types/readline-sync": "^1.4.8",
     "@types/sinon": "^17.0.3",
@@ -75,6 +77,9 @@
     "ts-node": "^10.9.1",
     "typechain": "^8.1.1",
     "typescript": "^4.9.3"
+  },
+  "_moduleAliases": {
+    "src": "src"
   },
   "files": [
     "/contracts"

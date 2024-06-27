@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const BEACON = "0xdDDD7725C073105fB2AbfCbdeC16708fC4c24B74";
 const NEW_IMPL_COMP = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";

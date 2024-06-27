@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip235 } from "../../vips/vip-235";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 
@@ -17,7 +17,7 @@ const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
 const OracleAdmin = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const NewCollateralFactor = parseUnits("0.78", 18);
 
-forking(35091610, () => {
+forking(35091610, async () => {
   let comptroller: Contract;
   before(async () => {
     comptroller = new ethers.Contract(Comptroller, COMPTROLLER_ABI, ethers.provider);
@@ -39,7 +39,7 @@ forking(35091610, () => {
     });
   });
 
-  testVip("VIP-235 Update Risk Parameters", vip235(), {
+  testVip("VIP-235 Update Risk Parameters", await vip235(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

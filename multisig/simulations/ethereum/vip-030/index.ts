@@ -2,15 +2,15 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip030, { NEW_IR, VCRVUSD_CORE, VUSDC_CORE, VUSDT_CORE } from "../../../proposals/ethereum/vip-030";
 import VTOKEN_IL_ABI from "./abi/VToken.json";
 
 const OLD_IR = "0x508a84311d19fb77E603C1d234d560b2374d0791";
 
-forking(19909700, () => {
+forking(19909700, async () => {
   let vusdc: Contract;
   let vusdt: Contract;
   let vcurusdCore: Contract;
@@ -42,7 +42,7 @@ forking(19909700, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip030());
+      await pretendExecutingVip(await vip030());
     });
 
     it("Should have new interest rate model", async () => {

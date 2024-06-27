@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 // Core pool: 0xfD36E2c2a6789Db23113685031d7F16329158384
 // swapRouter core pool = "0x8938E6dA30b59c1E27d5f70a94688A89F7c815a4"

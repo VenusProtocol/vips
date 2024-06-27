@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const ankrBNB = "0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827";
 const ANKR = "0xf307910A4c7bbc79691fD374889b36d8531B08e3";

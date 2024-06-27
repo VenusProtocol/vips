@@ -2,16 +2,16 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip313, { GITCOIN_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-313/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
-forking(39090224, () => {
+forking(39090224, async () => {
   let usdc: Contract;
   let vusdc: Contract;
   let prevBalanceGitcoinWallet: BigNumber;
@@ -24,7 +24,7 @@ forking(39090224, () => {
     prevTreasuryBalance = await vusdc.balanceOf(TREASURY);
   });
 
-  testVip("VIP-313 VIP to transfer funds to the Gitcoin wallet, for the grants", vip313(), {
+  testVip("VIP-313 VIP to transfer funds to the Gitcoin wallet, for the grants", await vip313(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

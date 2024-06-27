@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   BNB_AMOUNT_COMMUNITY_WALLET,
   BTC,
@@ -30,7 +30,7 @@ import VTOKEN_ABI from "./abi/vTokenAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38912650, () => {
+forking(38912650, async () => {
   let oldUsdcBalance: BigNumber;
   let oldEthBalance: BigNumber;
   let oldBtcBalance: BigNumber;
@@ -69,7 +69,7 @@ forking(38912650, () => {
     oldBNBBalTreasury = await ethers.provider.getBalance(bscmainnet.VTREASURY);
   });
 
-  testVip("VIP-307", vip307(), {
+  testVip("VIP-307", await vip307(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20", "WithdrawTreasuryBNB"], [6, 1]);
     },

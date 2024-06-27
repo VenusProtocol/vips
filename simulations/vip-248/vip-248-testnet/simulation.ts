@@ -2,9 +2,10 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vip245 } from "../../../vips/vip-245/vip-245-testnet/vip-245-testnet";
 import { Assets, converters } from "../../../vips/vip-248/vip-248-testnet/Addresses";
 import { vip248 } from "../../../vips/vip-248/vip-248-testnet/vip-248-testnet";
@@ -18,6 +19,8 @@ import RISK_FUND_V2_ABI from "../abi/RiskFundV2.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "../abi/TransparentProxyAbi.json";
 import XVS_VAULT_CONVERTER_ABI from "../abi/XVSVaultTreasury.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const allAssets = [
   ...Assets,
@@ -53,7 +56,7 @@ const PROTOCOL_SHARE_RESERVE_PROXY = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3
 const PROTOCOL_SHARE_RESERVE_OLD_IMPLEMENTATION = "0x194777360f9DFAA147F462349E9bC9002F72b0EE";
 const PROTOCOL_SHARE_RESERVE_NEW_IMPLEMENTATION = "0x91B67df8B13a1B53a3828EAAD3f4233B55FEc26d";
 
-forking(36752108, () => {
+forking(36752108, async () => {
   const provider = ethers.provider;
   let riskFund: Contract;
   let proxyAdmin: Contract;
@@ -71,7 +74,7 @@ forking(36752108, () => {
   const PsrTotalAssetReserveBefore: number[] = [];
 
   before(async () => {
-    await pretendExecutingVip(vip245());
+    await pretendExecutingVip(await vip245(), bsctestnet.NORMAL_TIMELOCK);
     proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
@@ -111,7 +114,7 @@ forking(36752108, () => {
     });
   });
 
-  testVip("VIP-248", vip248(), {
+  testVip("VIP-248", await vip248(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [6]);
       await expectEvents(

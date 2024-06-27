@@ -1,8 +1,8 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
+import { Proposal, SUPPORTED_NETWORKS } from "src/types";
 
-import { Proposal, SUPPORTED_NETWORKS } from "../../src/types";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 
 const DEFAULT_OPERATION = 0; // Call

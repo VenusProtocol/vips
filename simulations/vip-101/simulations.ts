@@ -2,18 +2,20 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip101 } from "../../vips/vip-101";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const NEW_VTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";
 const OLD_VTRX = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
 const VETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
 
-forking(26107552, () => {
+forking(26107552, async () => {
   let comptroller: Contract;
   before(async () => {
     const provider = ethers.provider;
@@ -53,17 +55,17 @@ forking(26107552, () => {
   });
 });
 
-forking(26107552, () => {
-  testVip("VIP-101 Venus Recommend Parameters", vip101());
+forking(26107552, async () => {
+  testVip("VIP-101 Venus Recommend Parameters", await vip101());
 });
 
-forking(26107552, () => {
+forking(26107552, async () => {
   let comptroller: Contract;
 
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    await pretendExecutingVip(vip101());
+    await pretendExecutingVip(await vip101(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Post-VIP behavior", async () => {

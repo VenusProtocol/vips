@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 // imported addresses from converter vip
 import {
   BTCBPrimeConverterTokenOuts,
@@ -28,7 +28,7 @@ import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "./abi/TransparentProxyAbi.json";
 
-forking(38131280, () => {
+forking(38131280, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let beacon: Contract;
@@ -38,7 +38,7 @@ forking(38131280, () => {
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
   });
 
-  testVip("VIP-Converter2", vipConverter2(), {
+  testVip("VIP-Converter2", await vipConverter2(), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [2]);
     },

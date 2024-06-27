@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { vip110 } from "../../vips/vip-110";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/VAIControllerProxy_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";
@@ -13,7 +13,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 const VENUS_DEPLOYER = "0x1ca3Ac3686071be692be7f1FBeCd668641476D7e";
 
-forking(27430345, () => {
+forking(27430345, async () => {
   const provider = ethers.provider;
   let vai: Contract;
   let vaiControllerProxy: Contract;
@@ -23,7 +23,7 @@ forking(27430345, () => {
     vaiControllerProxy = new ethers.Contract(VAI_CONTROLLER_PROXY, VAI_CONTROLLER_PROXY_ABI, provider);
   });
 
-  testVip("VIP-110 Change Admin in VAI", vip110());
+  testVip("VIP-110 Change Admin in VAI", await vip110());
   describe("Post-VIP behavior", async () => {
     it("Check admin of vai contract", async () => {
       const check = await vai.wards(NORMAL_TIMELOCK);

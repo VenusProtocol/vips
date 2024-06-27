@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const JUMPRATEMODEL_BASE0BPS_SLOPE875BPS_JUMP25000BPS_KINK8000BPS = "0xBe4609d972FdEBAa9DC870F4A957F40C301bEb1D";
 const JUMPRATEMODEL_BASE0BPS_SLOPE875BPS_JUMP50000BPS_KINK8000BPS = "0xE19C14171C2aC6CA63E008133e4B0D8571164BA3";

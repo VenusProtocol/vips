@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Signer } from "ethers";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip127Testnet } from "../../../vips/vip-127-testnet";
 import ACM_ABI from "./abi/IAccessControlManager_ABI.json";
 import VAIVault_ABI from "./abi/VAIVault_ABI.json";
@@ -43,7 +43,7 @@ forking(30622030, async () => {
     accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
   });
 
-  testVip("VIP-127-testnet Change Vault Implementation Testnet", vip127Testnet());
+  testVip("VIP-127-testnet Change Vault Implementation Testnet", await vip127Testnet());
 
   describe("Post-VIP behavior", async () => {
     it("Owner of XVSVault is NORMAL TIMELOCK", async () => {

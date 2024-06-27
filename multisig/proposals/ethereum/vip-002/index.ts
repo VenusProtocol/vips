@@ -1,5 +1,5 @@
-import { ZERO_ADDRESS } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { ZERO_ADDRESS } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 const ETHEREUM_MULTISIG = "0x285960C5B22fD66A736C7136967A3eB15e93CC67";

@@ -5,9 +5,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip177Testnet } from "../../../vips/vip-177/vip-177-testnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -25,7 +25,7 @@ const Liquid_Staked_BNB_Comptroller = "0x596B11acAACF03217287939f88d63b51d377170
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const HAY = "0xe73774DfCD551BF75650772dC2cC56a2B6323453";
 
-forking(33682900, () => {
+forking(33682900, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vSnBNB: Contract;
@@ -97,7 +97,7 @@ forking(33682900, () => {
     });
   });
 
-  testVip("VIP-177Testnet Add SnBnb Market", vip177Testnet(), {
+  testVip("VIP-177Testnet Add SnBnb Market", await vip177Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

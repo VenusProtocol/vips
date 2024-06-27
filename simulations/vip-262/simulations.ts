@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   ETH_AMOUNT,
   TREASURY,
@@ -19,7 +19,7 @@ import {
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36506196, () => {
+forking(36506196, async () => {
   let vUSDCContract: Contract;
   let vUSDTContract: Contract;
   let vETHContract: Contract;
@@ -36,7 +36,7 @@ forking(36506196, () => {
     prevETHBalance = await vETHContract.balanceOf(TREASURY);
   });
 
-  testVip("VIP-262", vip262(), {
+  testVip("VIP-262", await vip262(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [3]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["MintBehalf"], [3]);

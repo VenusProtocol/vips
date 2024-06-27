@@ -1,7 +1,8 @@
+import { ZERO_ADDRESS } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import { cutParams as params } from "../../simulations/vip-276/utils/bscmainnet-cut-params.json";
-import { ZERO_ADDRESS } from "../../src/networkAddresses";
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
 import { accounts1, accounts2 } from "./users";
 
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";

@@ -4,9 +4,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip146 } from "../../../vips/vip-146/vip-146-testnet";
 import ORACLE_ABI from "./abi/binanceOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -28,7 +28,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const REWARD_DISTRIBUTOR = "0x4be90041D1e082EfE3613099aA3b987D9045d718";
 const ANKR = "0xe4a90EB942CF2DA7238e8F6cC9EF510c49FC8B4B";
 
-forking(31655347, () => {
+forking(31655347, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vankrBNB: Contract;
@@ -105,7 +105,7 @@ forking(31655347, () => {
     });
   });
 
-  testVip("VIP-146 Add Market", vip146());
+  testVip("VIP-146 Add Market", await vip146());
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {

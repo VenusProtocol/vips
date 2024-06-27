@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip145 } from "../../../vips/vip-145/vip-145";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -280,7 +280,7 @@ const chainlinkTokens: TokenConfig[] = [
   },
 ];
 
-forking(30098228, () => {
+forking(30098228, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -313,7 +313,7 @@ forking(30098228, () => {
     });
   });
 
-  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", vip145(24 * 60 * 60 * 3), {
+  testVip("VIP-145 Change Oracle and Configure Resilient Oracle", await vip145(24 * 60 * 60 * 3), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["SymbolOverridden"], [2]);
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [1]);

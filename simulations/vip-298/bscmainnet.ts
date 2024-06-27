@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   BORROW_CAP_USDT_GAMEFI,
   COMPTROLLER,
@@ -20,7 +20,7 @@ import {
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
-forking(38167059, () => {
+forking(38167059, async () => {
   let comptroller: Contract;
   let ilComptroller: Contract;
 
@@ -47,7 +47,7 @@ forking(38167059, () => {
     });
   });
 
-  testVip("VIP-298 Update Supply and Borrow Cap", vip298(), {
+  testVip("VIP-298 Update Supply and Borrow Cap", await vip298(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [3, 1]);
     },

@@ -1,5 +1,6 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import staked from "./staked-users";
 
 export const vip203 = () => {

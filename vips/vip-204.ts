@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const vBUSD = "0x95c78222b3d6e262426483d42cfa53685a67ab9d";
 const BUSD = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56";

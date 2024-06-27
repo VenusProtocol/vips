@@ -1,5 +1,5 @@
-import { ZERO_ADDRESS } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { ZERO_ADDRESS } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";

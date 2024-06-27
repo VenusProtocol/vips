@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip003 from "../../../proposals/ethereum/vip-003";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import XVS_ABI from "./abi/xvs.json";
@@ -21,7 +21,7 @@ const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const REGULAR_USER = "0x68dC394Aa8aFe0Af3F772DeEcB97dC63fB5E0B77";
 
-forking(18889414, () => {
+forking(18889414, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -52,7 +52,7 @@ forking(18889414, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(await vip003());
     });
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();

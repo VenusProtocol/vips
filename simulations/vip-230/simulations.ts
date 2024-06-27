@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip230 } from "../../vips/vip-230";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
@@ -14,7 +14,7 @@ const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-forking(34925177, () => {
+forking(34925177, async () => {
   let xvs: Contract;
   before(async () => {
     const provider = ethers.provider;
@@ -31,7 +31,7 @@ forking(34925177, () => {
     });
   });
 
-  testVip("VIP-230 Venus Recommend Parameters", vip230(), {
+  testVip("VIP-230 Venus Recommend Parameters", await vip230(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
     },

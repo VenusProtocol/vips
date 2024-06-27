@@ -2,13 +2,13 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, FDUSD_SUPPLY, OLD_FDUSD_SUPPLY, vFDUSD, vip249 } from "../../vips/vip-249/bscmainnet";
 import COMTROLLER_ABI from "./abi/comptroller.json";
 
-forking(35700072, () => {
+forking(35700072, async () => {
   const provider = ethers.provider;
   let corePoolComptroller: Contract;
 
@@ -23,7 +23,7 @@ forking(35700072, () => {
     });
   });
 
-  testVip("VIP-249 Chaos Labs Recommendations", vip249(), {
+  testVip("VIP-249 Chaos Labs Recommendations", await vip249(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMTROLLER_ABI], ["NewSupplyCap"], [1]);
     },

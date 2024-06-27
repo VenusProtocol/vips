@@ -3,11 +3,11 @@ import { BigNumberish } from "ethers";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import vip002 from "../../../proposals/ethereum/vip-002";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -324,7 +324,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vCRV_Curve: "",
 };
 
-forking(19033343, () => {
+forking(19033343, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -339,7 +339,7 @@ forking(19033343, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {
           const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);

@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract, Signer } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip186 } from "../../../vips/vip-186/vip-186";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "./abi/comptroller-beacon.json";
@@ -58,7 +58,7 @@ async function verifySetForcedLiquidation(signers: Signer[], comptroller: Contra
   }
 }
 
-forking(32567583, () => {
+forking(32567583, async () => {
   const provider = ethers.provider;
   let comptrollerBeacon: Contract;
   let comptrollerStableCoin: Contract;
@@ -97,7 +97,7 @@ forking(32567583, () => {
     });
   });
 
-  testVip("vip186", vip186(), {
+  testVip("vip186", await vip186(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_BEACON_ABI], ["Upgraded"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [15]);

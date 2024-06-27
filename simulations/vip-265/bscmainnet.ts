@@ -2,9 +2,10 @@ import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 // imported addresses from converter vip
 import {
   BTCBPrimeConverterTokenOuts,
@@ -37,6 +38,8 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import TRANSPARENT_PROXY_ABI from "./abi/TransparentProxyAbi.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 import COMPTROLLER_CORE_ABI from "./abi/comptroller.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
@@ -83,7 +86,7 @@ let protocolShareReserve: Contract;
 let beacon: Contract;
 let liquidator: Contract;
 
-forking(36680347, () => {
+forking(36680347, async () => {
   before(async () => {
     proxyAdmin = new ethers.Contract(PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
     beacon = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, BEACON_ABI, provider);
@@ -93,7 +96,7 @@ forking(36680347, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
   });
 
-  testVip("VIP-Converter", vip265(createInitializeData()), {
+  testVip("VIP-Converter", await vip265(createInitializeData()), {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(txResponse, [TRANSPARENT_PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(
@@ -118,10 +121,10 @@ forking(36680347, () => {
 });
 
 // Release Fund tests
-forking(36680347, () => {
+forking(36680347, async () => {
   before(async () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
-    await pretendExecutingVip(vip265(createInitializeData()));
+    await pretendExecutingVip(await vip265(createInitializeData()), bscmainnet.NORMAL_TIMELOCK);
   });
 
   it("amount out and amount in tests", async () => {
@@ -201,7 +204,7 @@ forking(36680347, () => {
   });
 });
 
-forking(36680347, () => {
+forking(36680347, async () => {
   let liquidator: Contract;
   let proxyAdmin: Contract;
   const provider = ethers.provider;
@@ -211,7 +214,7 @@ forking(36680347, () => {
     liquidator = new ethers.Contract(LIQUIDATOR_CONTRACT, LIQUIDATOR_ABI, provider);
     proxyAdmin = new ethers.Contract(PROXY_ADMIN_LIQUIDATOR, PROXY_ADMIN_ABI, provider);
     prevImplLiquidator = await proxyAdmin.getProxyImplementation(LIQUIDATOR_CONTRACT);
-    await pretendExecutingVip(vip265(createInitializeData()));
+    await pretendExecutingVip(await vip265(createInitializeData()), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Checks", async () => {

@@ -5,9 +5,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip162Testnet } from "../../../vips/vip-162/vip-162-testnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -26,7 +26,7 @@ const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const USDD = "0x2E2466e22FcbE0732Be385ee2FBb9C59a1098382";
 const vUSDD_DeFi = "0xa109DE0abaeefC521Ec29D89eA42E64F37A6882E";
 
-forking(32725445, () => {
+forking(32725445, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTWT: Contract;
@@ -100,7 +100,7 @@ forking(32725445, () => {
     });
   });
 
-  testVip("VIP-162Testnet Add TWT Market", vip162Testnet(), {
+  testVip("VIP-162Testnet Add TWT Market", await vip162Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VUNI = "0x27FF564707786720C71A2e5c1490A63266683612";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";

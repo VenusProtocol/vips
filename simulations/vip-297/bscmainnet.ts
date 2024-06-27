@@ -3,10 +3,10 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   CERTIK,
   CERTIK_AMOUNT,
@@ -36,7 +36,7 @@ import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(38205248, () => {
+forking(38205248, async () => {
   let usdt: Contract;
   let usdc: Contract;
   let xvs: Contract;
@@ -67,7 +67,7 @@ forking(38205248, () => {
     prevSkynetXVSBalance = await xvs.balanceOf(SKYNET);
   });
 
-  testVip("VIP-297", vip297(), {
+  testVip("VIP-297", await vip297(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [9]);
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);

@@ -1,5 +1,5 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 export const COMPTROLLER_BEACON = "0x11C3e19236ce17729FC66b74B537de00C54d44e7";

@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import { PTweETH, vPTweETH, vip029 } from "../../../proposals/sepolia/vip-029";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -14,7 +14,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { sepolia } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-forking(5773190, () => {
+forking(5773190, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vPTweETHContract: Contract;
@@ -35,7 +35,7 @@ forking(5773190, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip029());
+      await pretendExecutingVip(await vip029());
     });
 
     it("check price", async () => {

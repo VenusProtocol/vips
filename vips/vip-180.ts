@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const LIQUID_STAKED_BNB_COMPTROLLER = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
 export const VSNBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";

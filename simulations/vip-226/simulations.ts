@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { vip226 } from "../../vips/vip-226";
 import IERC20_UPGRADABLE_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
@@ -18,7 +18,7 @@ const BNB_CHAIN_RECEIVER = "0x6657911F7411765979Da0794840D671Be55bA273";
 const EXPECTED_RESERVES_TRANSFER = parseUnits("2373087.553409498607767042", 18);
 const EXPECTED_LIQUIDATION_REVENUE_VTOKENS = parseUnits("7021262.3028218", 8);
 
-forking(34837453, () => {
+forking(34837453, async () => {
   let comptroller: Contract;
   let busd: Contract;
   let vBUSD: Contract;
@@ -38,7 +38,7 @@ forking(34837453, () => {
     vBUSDBalanceBefore = await busd.balanceOf(VBUSD);
   });
 
-  testVip("VIP-226", vip226());
+  testVip("VIP-226", await vip226());
 
   describe("Oracle price", () => {
     it("sets BUSD price to fixed $1", async () => {

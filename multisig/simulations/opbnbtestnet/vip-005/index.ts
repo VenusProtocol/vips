@@ -2,9 +2,9 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip005, {
   ACM,
   MARKETS,
@@ -17,7 +17,7 @@ import ACM_ABI from "./abi/accessControlManager.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-forking(18439107, () => {
+forking(18439107, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
@@ -27,7 +27,7 @@ forking(18439107, () => {
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     psrSigner = await initMainnetUser(PROTOCOL_SHARE_RESERVE, ethers.utils.parseEther("1"));
-    await pretendExecutingVip(vip005());
+    await pretendExecutingVip(await vip005());
   });
 
   describe("Post tx checks", () => {

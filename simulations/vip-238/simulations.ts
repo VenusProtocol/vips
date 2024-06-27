@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriod } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { ADDRESSES_1, PRIME, vip238 } from "../../vips/vip-238";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
@@ -20,7 +20,7 @@ const PRIME_ASSET_ADDRESSES = [
 ];
 const XVS_ADDRESS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
-forking(35091518, () => {
+forking(35091518, async () => {
   before(async () => {
     const resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
 
@@ -32,7 +32,7 @@ forking(35091518, () => {
     );
   });
 
-  testVip("VIP-238 Prime Program", vip238(), {
+  testVip("VIP-238 Prime Program", await vip238(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated", "Mint"], [1, 10]);
     },

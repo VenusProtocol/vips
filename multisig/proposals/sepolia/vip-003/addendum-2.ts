@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const XVSBridgeAdmin_Proxy = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
 const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";

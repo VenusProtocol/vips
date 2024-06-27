@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip001, { XVS } from "../../../proposals/arbitrumsepolia/vip-001/addendum-2";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -12,7 +12,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = arbitrumsepolia.RESILIENT_ORACLE;
 
-forking(48763255, () => {
+forking(48763255, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
@@ -30,7 +30,7 @@ forking(48763255, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
 
     it("Should return correct owner", async () => {

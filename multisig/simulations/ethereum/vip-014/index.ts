@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip013, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
@@ -20,7 +20,7 @@ const OLD_MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 const OLD_SINGLE_RECEIVE_LIMIT = parseUnits("10000", 18);
 const OLD_MAX_DAILY_RECEIVE_LIMIT = parseUnits("50000", 18);
 
-forking(19431701, () => {
+forking(19431701, async () => {
   let xvsBridge: Contract;
 
   before(async () => {
@@ -49,7 +49,7 @@ forking(19431701, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip013());
+      await pretendExecutingVip(await vip013());
     });
 
     it("Should match single send transaction limit", async () => {

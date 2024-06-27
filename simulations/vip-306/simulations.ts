@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip306, {
   CORE_COMPTROLLER_ADDRESS,
   CORE_TUSD_ADDRESS,
@@ -75,7 +75,7 @@ import vip306, {
 import CORE_COMPTROLLER_ABI from "./abi/Comptroller.json";
 import IL_COMPTROLLER_ABI from "./abi/ILComptroller.json";
 
-forking(38778780, () => {
+forking(38778780, async () => {
   const provider = ethers.provider;
   let coreComptroller: Contract;
   let gameFiComptroller: Contract;
@@ -211,7 +211,7 @@ forking(38778780, () => {
     });
   });
 
-  testVip("Update Caps", vip306(), {
+  testVip("Update Caps", await vip306(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [18, 20]);
     },

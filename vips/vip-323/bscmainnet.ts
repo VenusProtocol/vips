@@ -1,8 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 export const XVS_BRIDGE_SRC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";

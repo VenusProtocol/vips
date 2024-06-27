@@ -3,16 +3,16 @@ import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { USDT, XVS, XVS_VAULT_CONVERTER, vip275 } from "../../vips/vip-275/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import CONVERTER_ABI from "./abi/XVSVaultConverter.json";
 
 const USER = "0x9fcc67d7db763787bb1c7f3bc7f34d3c548c19fe";
 
-forking(37126200, () => {
+forking(37126200, async () => {
   const provider = ethers.provider;
   let xvs: Contract;
   let usdt: Contract;
@@ -39,7 +39,7 @@ forking(37126200, () => {
     });
   });
 
-  testVip("VIP-Converter", vip275(), {
+  testVip("VIP-Converter", await vip275(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [1]);
     },

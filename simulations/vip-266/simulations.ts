@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   BNB_DEBT_BORROWER_3,
   BORROWER_1,
@@ -26,7 +26,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 
-forking(36710086, () => {
+forking(36710086, async () => {
   let vUSDT: Contract;
   let vTusdOld: Contract;
   let vBNB: Contract;
@@ -57,7 +57,7 @@ forking(36710086, () => {
     borrower3BnbDebtPrev = await vBNB.borrowBalanceStored(BORROWER_3);
   });
 
-  testVip("VIP-266", vip266(), {
+  testVip("VIP-266", await vip266(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [2]);
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB"], [1]);

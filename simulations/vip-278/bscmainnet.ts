@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip278 } from "../../vips/vip-278/bscmainnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
@@ -14,7 +14,7 @@ import TEMP_VTOKEN_ABI from "./abi/TempVToken.json";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 
-forking(37477280, () => {
+forking(37477280, async () => {
   const provider = ethers.provider;
   let binanceOracle: Contract;
   let resilientOracle: Contract;
@@ -53,7 +53,7 @@ forking(37477280, () => {
     });
   });
 
-  testVip("VIP-278", vip278(), {
+  testVip("VIP-278", await vip278(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded", "SymbolOverridden"], [1, 1]);
       await expectEvents(txResponse, [BEACON_ABI], ["Upgraded"], [2]);

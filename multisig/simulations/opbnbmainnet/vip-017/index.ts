@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import vip017, {
   COMPTROLLER_BEACON,
   NATIVE_TOKEN_GATEWAY,
@@ -24,7 +24,7 @@ const CORE_POOL = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
 const USER_1 = "0x9026A229b535ecF0162Dfe48fDeb3c75f7b2A7AE";
 const USER_2 = "0x7041bB74553fD011268Da863496dA3CBE4Ab8787";
 
-forking(18647639, () => {
+forking(18647639, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   let comptrollerBeacon: Contract;
@@ -80,7 +80,7 @@ forking(18647639, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip017());
+      await pretendExecutingVip(await vip017());
     });
 
     it("comptroller should have new implementation", async () => {
