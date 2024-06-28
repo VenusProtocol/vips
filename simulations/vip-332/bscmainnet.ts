@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip326, {
+import vip332, {
   BTCB_PRIME_CONVERTER,
   COMPTROLLER_CORE_RELEASE_AMOUNT,
   PROTOCOL_SHARE_RESERVE_PROXY,
@@ -16,7 +16,7 @@ import vip326, {
   XVS_VAULT_CONVERTER,
   XVS_VAULT_REWARDS_SPEED,
   XVS_VAULT_TREASURY_RELEASE_AMOUNT,
-} from "../../vips/vip-326/bscmainnet";
+} from "../../vips/vip-332/bscmainnet";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
@@ -25,7 +25,7 @@ import XVS_ABI from "./abi/Xvs.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(39555400, () => {
+forking(40013598, () => {
   let psr: Contract;
   let xvs: Contract;
   let xvsVault: Contract;
@@ -38,7 +38,7 @@ forking(39555400, () => {
     oldXvsStoreBalance = await xvs.balanceOf(XVS_STORE);
   });
 
-  testVip("VIP-326 Update Distribution rules on PSR", vip326(), {
+  testVip("VIP-332 Update Distribution rules on PSR", vip332(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [10]);
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["FundsTransferredToXVSStore"], [1]);
