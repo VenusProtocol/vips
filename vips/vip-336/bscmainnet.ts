@@ -25,7 +25,7 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/316](https://github.
 
 #### Disclaimer for Ethereum commands
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this]() multisig transaction will be executed. Otherwise, they will be rejected.`,
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xb4c1c75d88be0ae534fc4e15fa380aea42859db4cc67549279c92a1de70b969a&safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67) multisig transaction will be executed. Otherwise, they will be rejected.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
