@@ -1,10 +1,11 @@
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import vip332 from "../../vips/vip-332/bscmainnet";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+
+import vip333 from "../../vips/vip-333/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(40343666, async () => {
-  testVip("vip332 accept ownership and give permissions", await vip332(), {
+forking(41938696, async () => {
+  testVip("vip333 permissions of oracles", await vip333(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

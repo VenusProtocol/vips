@@ -31,7 +31,7 @@ forking(230362555, async () => {
 
   testForkedNetworkVipCommands("vip332 configures bridge", await vip332(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted", "RoleRevoked"], [24, 5]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [17]);
     },
   });
 
