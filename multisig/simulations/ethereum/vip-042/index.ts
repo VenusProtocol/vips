@@ -4,10 +4,11 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip042, { BOUND_VALIDATOR } from "../../../proposals/ethereum/vip-042";
+import vip042, { BOUND_VALIDATOR, SFrxETHOracle } from "../../../proposals/ethereum/vip-042";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import SFRAXETH_ORACLE_ABI from "./abi/sFrxETHOracle.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -22,6 +23,7 @@ forking(20267718, async () => {
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;
   let boundValidator: Contract;
+  let sfrxETHOracle: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
@@ -29,6 +31,7 @@ forking(20267718, async () => {
       chainLinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, provider);
       redstoneOracle = new ethers.Contract(REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
+      sfrxETHOracle = new ethers.Contract(SFrxETHOracle, SFRAXETH_ORACLE_ABI, provider);
     });
 
     it("should have no pending owner", async () => {
@@ -49,6 +52,7 @@ forking(20267718, async () => {
       expect(await chainLinkOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
       expect(await redstoneOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
       expect(await boundValidator.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await sfrxETHOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
     });
   });
 });
