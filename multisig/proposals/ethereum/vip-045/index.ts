@@ -21,10 +21,10 @@ export const vUSDT = "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E";
 export const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 export const BLOCKS_IN_30_DAYS = BLOCKS_PER_YEAR.mul(30).div(365);
 
-export const WBTC_PER_90_DAYS_REWARD = parseUnits("0.0772", 8).mul(3);
-export const WETH_PER_90_DAYS_REWARD = parseUnits("15.959", 18).mul(3);
-export const USDC_PER_90_DAYS_REWARD = parseUnits("4665", 6).mul(3);
-export const USDT_PER_90_DAYS_REWARD = parseUnits("4665", 6).mul(3);
+export const WBTC_PER_90_DAYS_REWARD = parseUnits("0.2316", 8);
+export const WETH_PER_90_DAYS_REWARD = parseUnits("47.877", 18);
+export const USDC_PER_90_DAYS_REWARD = parseUnits("13995", 6);
+export const USDT_PER_90_DAYS_REWARD = parseUnits("13995", 6);
 
 export const WBTC_PER_BLOCK_REWARD = WBTC_PER_90_DAYS_REWARD.div(BLOCKS_IN_30_DAYS);
 export const WETH_PER_BLOCK_REWARD = WETH_PER_90_DAYS_REWARD.div(BLOCKS_IN_30_DAYS);
@@ -40,26 +40,6 @@ export const vip045 = () => {
         [WBTC, WETH, USDC, USDT],
         [WBTC_PER_BLOCK_REWARD, WETH_PER_BLOCK_REWARD, USDC_PER_BLOCK_REWARD, USDT_PER_BLOCK_REWARD],
       ],
-    },
-    {
-      target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, WETH_PER_90_DAYS_REWARD, PRIME_LIQUIDITY_PROVIDER],
-    },
-    {
-      target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WBTC, WBTC_PER_90_DAYS_REWARD, PRIME_LIQUIDITY_PROVIDER],
-    },
-    {
-      target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDC, USDC_PER_90_DAYS_REWARD, PRIME_LIQUIDITY_PROVIDER],
-    },
-    {
-      target: TREASURY,
-      signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [USDT, USDT_PER_90_DAYS_REWARD, PRIME_LIQUIDITY_PROVIDER],
     },
     {
       target: PRIME_LIQUIDITY_PROVIDER,
