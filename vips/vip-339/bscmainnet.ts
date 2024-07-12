@@ -69,8 +69,7 @@ Privilege commands on Ethereum will be executed by the [Guardian wallet](https:/
   - [Prime Deployment Boost Snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x0a8305d81d70bf6ec05b2a652754cdec746de64a45e53d43473c6979b1e5f535)
   - [BTC transfer](https://etherscan.io/tx/0xbdad4c9c61970b999ee471f1d25f8ddc4da9a77c539915117f4d3eb3744bac7f),
   - [USDC transfer](https://etherscan.io/tx/0x8ab20fd0629fef4bfb80d93186013b794a621162a431bc252494f23b62ae279b)
-  - [USDT transfer](https://etherscan.io/tx/0x97e5fe45a40d24a72bba20c46d81a94f8702d153eb0c717d639c5c9ca3d0514b)
-  - [ETH transfer]()`,
+  - [USDT transfer](https://etherscan.io/tx/0x97e5fe45a40d24a72bba20c46d81a94f8702d153eb0c717d639c5c9ca3d0514b)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
