@@ -4,13 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip338, {
-  BTC,
-  ETH,
-  PLP,
-  USDC,
-  USDT,
-} from "../../vips/vip-338/bscmainnet";
+import vip338, { BTC, ETH, PLP, USDC, USDT } from "../../vips/vip-338/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
 forking(40397206, () => {
