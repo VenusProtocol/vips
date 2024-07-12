@@ -8,16 +8,16 @@ import vip045, {
   PRIME_LIQUIDITY_PROVIDER,
   USDC,
   USDC_PER_BLOCK_REWARD,
-  USDC_PER_MONTH_REWARD,
+  USDC_PER_90_DAYS_REWARD,
   USDT,
   USDT_PER_BLOCK_REWARD,
-  USDT_PER_MONTH_REWARD,
+  USDT_PER_90_DAYS_REWARD,
   WBTC,
   WBTC_PER_BLOCK_REWARD,
-  WBTC_PER_MONTH_REWARD,
+  WBTC_PER_90_DAYS_REWARD,
   WETH,
   WETH_PER_BLOCK_REWARD,
-  WETH_PER_MONTH_REWARD,
+  WETH_PER_90_DAYS_REWARD,
 } from "../../../proposals/ethereum/vip-045";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
@@ -109,10 +109,10 @@ forking(20282042, () => {
       const currentUSDCBalance = await usdcContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
       const currentUSDTBalance = await usdtContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
 
-      expect(currentBTCBBalance.sub(prevBTCBBalance)).to.be.equal(WBTC_PER_MONTH_REWARD);
-      expect(currentETHBalance.sub(prevETHBalance)).to.be.equal(WETH_PER_MONTH_REWARD);
-      expect(currentUSDCBalance.sub(prevUSDCBalance)).to.be.equal(USDC_PER_MONTH_REWARD);
-      expect(currentUSDTBalance.sub(prevUSDTBalance)).to.be.equal(USDT_PER_MONTH_REWARD);
+      expect(currentBTCBBalance.sub(prevBTCBBalance)).to.be.equal(WBTC_PER_90_DAYS_REWARD);
+      expect(currentETHBalance.sub(prevETHBalance)).to.be.equal(WETH_PER_90_DAYS_REWARD);
+      expect(currentUSDCBalance.sub(prevUSDCBalance)).to.be.equal(USDC_PER_90_DAYS_REWARD);
+      expect(currentUSDTBalance.sub(prevUSDTBalance)).to.be.equal(USDT_PER_90_DAYS_REWARD);
     });
   });
 });
