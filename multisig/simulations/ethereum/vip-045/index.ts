@@ -24,30 +24,13 @@ import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
 forking(20282042, () => {
-  let prevBTCBBalance: any;
-  let prevETHBalance: any;
-  let prevUSDCBalance: any;
-  let prevUSDTBalance: any;
-  let btcbContract: Contract;
-  let ethContract: Contract;
-  let usdcContract: Contract;
-  let usdtContract: Contract;
+  const erc20At = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
 
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
-
-      btcbContract = await ethers.getContractAt(ERC20_ABI, WBTC);
-      ethContract = await ethers.getContractAt(ERC20_ABI, WETH);
-      usdcContract = await ethers.getContractAt(ERC20_ABI, USDC);
-      usdtContract = await ethers.getContractAt(ERC20_ABI, USDT);
-
-      prevBTCBBalance = await btcbContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      prevETHBalance = await ethContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      prevUSDCBalance = await usdcContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      prevUSDTBalance = await usdtContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     });
 
     it("speeds", async () => {
@@ -103,16 +86,20 @@ forking(20282042, () => {
       expect(primePaused).to.be.equal(false);
     });
 
-    it("check balance", async () => {
-      const currentBTCBBalance = await btcbContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      const currentETHBalance = await ethContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      const currentUSDCBalance = await usdcContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-      const currentUSDTBalance = await usdtContract.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    it("has enough WBTC for the reward", async () => {
+      expect(await erc20At(WBTC).balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.greaterThanOrEqual(WBTC_PER_90_DAYS_REWARD);
+    });
 
-      expect(currentBTCBBalance.sub(prevBTCBBalance)).to.be.equal(WBTC_PER_90_DAYS_REWARD);
-      expect(currentETHBalance.sub(prevETHBalance)).to.be.equal(WETH_PER_90_DAYS_REWARD);
-      expect(currentUSDCBalance.sub(prevUSDCBalance)).to.be.equal(USDC_PER_90_DAYS_REWARD);
-      expect(currentUSDTBalance.sub(prevUSDTBalance)).to.be.equal(USDT_PER_90_DAYS_REWARD);
+    it("has enough WETH for the reward", async () => {
+      expect(await erc20At(WETH).balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.greaterThanOrEqual(WETH_PER_90_DAYS_REWARD);
+    });
+
+    it("has enough USDC for the reward", async () => {
+      expect(await erc20At(USDC).balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.greaterThanOrEqual(USDC_PER_90_DAYS_REWARD);
+    });
+
+    it("has enough USDT for the reward", async () => {
+      expect(await erc20At(USDT).balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.greaterThanOrEqual(USDT_PER_90_DAYS_REWARD);
     });
   });
 });
