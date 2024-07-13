@@ -1,7 +1,9 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
+import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip046, { XVS_STORE_TRANSFER_AMOUNT, XVS_VAULT_TREASURY } from "../../../proposals/ethereum/vip-046";
 import ERC20_ABI from "./abis/ERC20.json";
@@ -12,15 +14,20 @@ const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 forking(20292199, () => {
   let prevXvsVaultTreasuryBalance: BigNumber;
   let prevXvsStoreBalance: BigNumber;
+  const xvsContract = new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
+
+  // VIP-339 bridges 45,000 XVS to Ethereum but we have no means to simulate it here just yet,
+  // so for the simulation purposes we just pretend 45,000 XVS comes out of thin air
+  const pretendXVSHasBeenBridged = async () => {
+    const xvsHolder = await initMainnetUser("0xA0882C2D5DF29233A092d2887A258C2b90e9b994", parseEther("1"));
+    const xvsFundingAmount = parseUnits("45000", 18);
+    await xvsContract.connect(xvsHolder).transfer(XVS_VAULT_TREASURY, xvsFundingAmount);
+  };
 
   describe("Post-VIP behavior", async () => {
-    let xvsContract: Contract;
-
     before(async () => {
-      xvsContract = await ethers.getContractAt(ERC20_ABI, XVS);
-
+      await pretendXVSHasBeenBridged();
       prevXvsVaultTreasuryBalance = await xvsContract.balanceOf(XVS_VAULT_TREASURY);
-      console.log(prevXvsVaultTreasuryBalance.toString());
       prevXvsStoreBalance = await xvsContract.balanceOf(XVS_STORE);
       await pretendExecutingVip(vip046());
     });
