@@ -42,7 +42,7 @@ const vip339 = () => {
     version: "v2",
     title: "VIP-339 Ethereum: Venus Prime Deployment Prime Adjustment Proposal - Q3 2024",
     description: `#### Summary
-If passed, this VIP will configure the Prime contract with the reward speeds specified in [VIP-334](https://app.venus.io/#/governance/proposal/334?chainId=56), initiating rewards for Prime holders. Additionally, based on the approved parameters for the Ethereum Mainnet deployment (snapshot)[https://snapshot.org/#/venus-xvs.eth/proposal/0x39947aa28f834f73a607b506cf495925eda7ba2b5ab9e591ab23adb1f802cceb]. 45,000 XVS will be transferred from the [XVS Distributor on BNB chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA) in preparation to fund the Vault incentives for 2 additional quarters.
+If passed, this VIP will configure the Prime contract with the reward speeds specified in [VIP-334](https://app.venus.io/#/governance/proposal/334?chainId=56), initiating rewards for Prime holders. Additionally, based on the approved parameters for the Ethereum Mainnet deployment [snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x39947aa28f834f73a607b506cf495925eda7ba2b5ab9e591ab23adb1f802cceb). 45,000 XVS will be transferred from the [XVS Distributor on BNB chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA) in preparation to fund the Vault incentives for 2 additional quarters.
 
 #### Details
 
@@ -56,10 +56,10 @@ Following the approval of [VIP-334](https://app.venus.io/#/governance/proposal/3
   - USDC: 15,395
   - BTC: 0.25476
 
-Additionally, 45,000 XVS will be transferred from the [XVS Distributor on BNB chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). From this amount, 22,500 XVS will be sent to the [XVS Store contract](https://etherscan.io/address/0x1db646e1ab05571af99e47e8f909801e5c99d37b#code), which is responsible for distributing rewards via a [multisig transaction](https://app.safe.global/transactions/tx?).
+Additionally, 45,000 XVS will be transferred from the [XVS Distributor on BNB chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). From this amount, 22,500 XVS will be sent to the [XVS Store contract](https://etherscan.io/address/0x1db646e1ab05571af99e47e8f909801e5c99d37b#code), which is responsible for distributing rewards via a [multisig transaction](https://app.safe.global/transactions/tx?id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xc0f37c5e0780a606424f8955012366668df4a65fe43c6c4cafbd4fd167bb5c90&safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67).
 
 
-Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?) multisig transaction will be executed. Otherwise, it will be rejected.
+Privilege commands on Ethereum will be executed by the [Guardian wallet](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x2fb85050b16611934d0accd2bbb439407e1eec1ef32d53bd714de3f473ebc529&safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67) and [this](https://app.safe.global/transactions/tx?id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xc0f37c5e0780a606424f8955012366668df4a65fe43c6c4cafbd4fd167bb5c90&safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67) multisig transactions will be executed. Otherwise, they will be rejected.
 
 #### References
 
@@ -67,9 +67,10 @@ Privilege commands on Ethereum will be executed by the [Guardian wallet](https:/
   - Deploy Venus Prime on ETH Mainet ([Venus Prime Deployment Proposal for Ethereum Mainnet - Proposals - Venus Community](https://community.venus.io/t/venus-prime-deployment-proposal-for-ethereum-mainnet/4417))
   - [VIP-334 Ethereum](https://app.venus.io/#/governance/proposal/334?chainId=56)
   - [Prime Deployment Boost Snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x0a8305d81d70bf6ec05b2a652754cdec746de64a45e53d43473c6979b1e5f535)
-  - [BTC transfer](https://etherscan.io/tx/0xbdad4c9c61970b999ee471f1d25f8ddc4da9a77c539915117f4d3eb3744bac7f),
+  - [BTC transfer](https://etherscan.io/tx/0xbdad4c9c61970b999ee471f1d25f8ddc4da9a77c539915117f4d3eb3744bac7f)
   - [USDC transfer](https://etherscan.io/tx/0x8ab20fd0629fef4bfb80d93186013b794a621162a431bc252494f23b62ae279b)
-  - [USDT transfer](https://etherscan.io/tx/0x97e5fe45a40d24a72bba20c46d81a94f8702d153eb0c717d639c5c9ca3d0514b)`,
+  - [USDT transfer](https://etherscan.io/tx/0x97e5fe45a40d24a72bba20c46d81a94f8702d153eb0c717d639c5c9ca3d0514b)
+  - [ETH transfer](https://etherscan.io/tx/0x568876b1fb2f2a8537a25b6ec709314f40f6a4fef08d5e58d5ab0aa9064d9d41)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
