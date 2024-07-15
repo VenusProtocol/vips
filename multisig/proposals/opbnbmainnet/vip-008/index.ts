@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const vFDUSD_CORE = "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917";
 const vUSDT_CORE = "0xb7a01Ba126830692238521a1aA7E7A7509410b8e";

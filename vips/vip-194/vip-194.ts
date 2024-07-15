@@ -1,7 +1,6 @@
 import { ethers } from "hardhat";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
 const NEW_IMPL_VTOKEN = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";

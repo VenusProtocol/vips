@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { setMaxStalePeriodInChainlinkOracle } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip007 from "../../../proposals/sepolia/vip-007";
 import vip008 from "../../../proposals/sepolia/vip-008";
 import PRIME_ABI from "./abis/Prime.json";
@@ -63,9 +63,9 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(5007188, () => {
+forking(5007188, async () => {
   before(async () => {
-    await pretendExecutingVip(vip007());
+    await pretendExecutingVip(await vip007());
   });
 
   describe("Pre-VIP behavior", () => {
@@ -105,7 +105,7 @@ forking(5007188, () => {
     let primeLiquidityProvider: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip008());
+      await pretendExecutingVip(await vip008());
 
       await impersonateAccount(USER);
       const accounts = await ethers.getSigners();

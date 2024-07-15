@@ -25,7 +25,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { sepolia } = NETWORK_ADDRESSES;
 const CORE_COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
-forking(6139904, () => {
+forking(6139904, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vsfrxETHContract: Contract;
@@ -53,7 +53,7 @@ forking(6139904, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip040());
+      await pretendExecutingVip(await vip040());
     });
 
     it("check owner", async () => {

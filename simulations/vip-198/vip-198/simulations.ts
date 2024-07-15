@@ -3,16 +3,16 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
+import { initMainnetUser, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../src/vip-framework/checks/rewardsDistributor";
+} from "src/vip-framework/checks/rewardsDistributor";
+
 import { vip198 } from "../../../vips/vip-198/vip-198";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -33,7 +33,7 @@ const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const PLANET_RATE_MODEL = "0x53DbE3c0d1Bd439E4F600ad36791C41d02906E6b";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
-forking(33253419, () => {
+forking(33253419, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vPLANET_DeFi: Contract;
@@ -56,7 +56,7 @@ forking(33253419, () => {
     });
   });
 
-  testVip("VIP-198 Add PLANET Market to DeFi Pool", vip198(3 * 24 * 60 * 60));
+  testVip("VIP-198 Add PLANET Market to DeFi Pool", await vip198(3 * 24 * 60 * 60));
 
   describe("Post-VIP state", () => {
     describe("PoolRegistry state", () => {

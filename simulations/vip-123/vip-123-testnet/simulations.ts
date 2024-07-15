@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip123Testnet } from "../../../vips/vip-123/vip-123-testnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -253,7 +253,7 @@ const ilPoolTokens: ILVTokenConfig[] = [
   },
 ];
 
-forking(30247983, () => {
+forking(30247983, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -278,7 +278,7 @@ forking(30247983, () => {
     });
   });
 
-  testVip("VIP-123 Change Oracle and Configure Resilient Oracle", vip123Testnet(), {
+  testVip("VIP-123 Change Oracle and Configure Resilient Oracle", await vip123Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [19]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [35]);

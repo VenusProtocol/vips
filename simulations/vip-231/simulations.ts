@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { formatEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip231 } from "../../vips/vip-231";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -146,7 +146,7 @@ const TOKENS: Token[] = [
   },
 ];
 
-forking(34945549, () => {
+forking(34945549, async () => {
   let resilientOracle: Contract;
 
   before(async () => {
@@ -168,7 +168,7 @@ forking(34945549, () => {
     });
   });
 
-  testVip("VIP-231", vip231(), {
+  testVip("VIP-231", await vip231(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [16]);
     },

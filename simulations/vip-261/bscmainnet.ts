@@ -2,13 +2,13 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_BORROW_CAP, OLD_BORROW_CAP, WBETH_VTOKEN, vip261 } from "../../vips/vip-261/bscmainnet";
 import { abi as DIAMOND_CONSOLIDATED_ABI } from "./abi/DiamondConsolidated.json";
 
-forking(36334143, () => {
+forking(36334143, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
 
@@ -23,7 +23,7 @@ forking(36334143, () => {
     });
   });
 
-  testVip("VIP-261 Set new WBETH borrow cap to 4000", vip261(), {
+  testVip("VIP-261 Set new WBETH borrow cap to 4000", await vip261(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_CONSOLIDATED_ABI], ["NewBorrowCap"], [1]);
     },

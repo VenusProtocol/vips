@@ -19,7 +19,7 @@ import vip334, {
 } from "../../vips/vip-334/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 
-forking(40155663, () => {
+forking(40155663, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let wbtc: Contract;
@@ -52,7 +52,7 @@ forking(40155663, () => {
     prevWETHBalanceCommunityWallet = await weth.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-334", vip334(), {
+  testVip("VIP-334", await vip334(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ERC20_ABI], ["Transfer"], [4]);
     },

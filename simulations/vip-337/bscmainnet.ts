@@ -23,7 +23,7 @@ import vip337, {
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
-forking(40328331, () => {
+forking(40328331, async () => {
   let psr: Contract;
   let plp: Contract;
   const distributionTargets: object[] = [];
@@ -38,7 +38,7 @@ forking(40328331, () => {
     }
   });
 
-  testVip("VIP-337 Prime Adjustment", vip337(), {
+  testVip("VIP-337 Prime Adjustment", await vip337(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
       await expectEvents(txResponse, [PLP_ABI], ["TokenDistributionSpeedUpdated"], [4]);

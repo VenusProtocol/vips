@@ -1,8 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const XVS_AMOUNT_TO_VESTING = parseUnits("12270.35", 18);

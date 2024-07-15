@@ -2,13 +2,13 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, vFDUSD, vFIL, vip300 } from "../../vips/vip-300/bscmainnet";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
 
-forking(38340754, () => {
+forking(38340754, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -29,7 +29,7 @@ forking(38340754, () => {
     });
   });
 
-  testVip("VIP-300 Update Supply and Borrow Cap", vip300(), {
+  testVip("VIP-300 Update Supply and Borrow Cap", await vip300(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [2, 1]);
     },

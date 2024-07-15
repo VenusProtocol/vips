@@ -1,5 +1,6 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
 import { accounts3, accounts4, accounts5, accounts6 } from "./users";
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";

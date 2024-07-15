@@ -16,7 +16,7 @@ import vip333, {
 import ERC20_ABI from "./abi/ERC20.json";
 import VBEP20_ABI from "./abi/VBep20.json";
 
-forking(39954538, () => {
+forking(39954538, async () => {
   let usdc: Contract;
   let vusdc: Contract;
   let prevUSDTBalanceVanguardVantageWallet: BigNumber;
@@ -28,7 +28,7 @@ forking(39954538, () => {
     console.log((await usdc.balanceOf(TREASURY)).toString());
   });
 
-  testVip("VIP-333", vip333(), {
+  testVip("VIP-333", await vip333(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ERC20_ABI], ["Transfer"], [2]);
     },
