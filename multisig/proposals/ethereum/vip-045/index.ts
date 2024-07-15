@@ -13,11 +13,6 @@ export const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 
-export const vWBTC = "0x8716554364f20BCA783cb2BAA744d39361fd1D8d";
-export const vWETH = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
-export const vUSDC = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
-export const vUSDT = "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E";
-
 export const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 export const BLOCKS_IN_90_DAYS = BLOCKS_PER_YEAR.mul(90).div(365);
 
