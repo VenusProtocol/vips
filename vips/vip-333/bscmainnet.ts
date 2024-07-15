@@ -451,6 +451,26 @@ const vip333 = () => {
         params: [ETHEREUM_XVS_BRIDGE_ADMIN, "transferBridgeOwnership(address)", ethereum.NORMAL_TIMELOCK],
         dstChainId: ETHEREUM_CHAIN_ID,
       },
+
+      // Whitelist Normal Timelock
+      {
+        target: ARBITRUM_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [arbitrumone.NORMAL_TIMELOCK, true],
+        dstChainId: ARBITRUM_CHAIN_ID,
+      },
+      {
+        target: OPBNBMAINNET_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [opbnbmainnet.NORMAL_TIMELOCK, true],
+        dstChainId: OPBNBMAINNET_CHAIN_ID,
+      },
+      {
+        target: ETHEREUM_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [ethereum.NORMAL_TIMELOCK, true],
+        dstChainId: ETHEREUM_CHAIN_ID,
+      },
     ],
     meta,
     ProposalType.REGULAR,

@@ -8,8 +8,10 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip010 from "../../multisig/proposals/arbitrumone/vip-010";
 import vip333, { ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-333/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import XVS_BRIDGE_ABI from "./abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 
+const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const { arbitrumone } = NETWORK_ADDRESSES;
 
 forking(230362555, async () => {
@@ -30,11 +32,16 @@ forking(230362555, async () => {
 
   describe("Post-VIP behaviour", async () => {
     let xvsBridgeAdmin: Contract;
+    let xvsBridge: Contract;
     before(async () => {
       xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, ARBITRUM_XVS_BRIDGE_ADMIN);
+      xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     });
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(arbitrumone.NORMAL_TIMELOCK);
+    });
+    it("Normal Timelock should be whitelisted", async () => {
+      expect(await xvsBridge.whitelist(arbitrumone.NORMAL_TIMELOCK)).to.be.true;
     });
   });
 });

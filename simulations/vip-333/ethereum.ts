@@ -8,8 +8,10 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip042 from "../../multisig/proposals/ethereum/vip-042";
 import vip333, { ETHEREUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-333/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import XVS_BRIDGE_ABI from "./abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 
+const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const { ethereum } = NETWORK_ADDRESSES;
 
 forking(20274111, async () => {
@@ -30,11 +32,17 @@ forking(20274111, async () => {
 
   describe("Post-VIP behaviour", async () => {
     let xvsBridgeAdmin: Contract;
+    let xvsBridge: Contract;
+
     before(async () => {
       xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, ETHEREUM_XVS_BRIDGE_ADMIN);
+      xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     });
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(ethereum.NORMAL_TIMELOCK);
+    });
+    it("Normal Timelock should be whitelisted", async () => {
+      expect(await xvsBridge.whitelist(ethereum.NORMAL_TIMELOCK)).to.be.true;
     });
   });
 });

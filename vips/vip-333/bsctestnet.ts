@@ -491,6 +491,26 @@ const vip333 = () => {
         params: [SEPOLIA_XVS_BRIDGE_ADMIN, "transferBridgeOwnership(address)", sepolia.NORMAL_TIMELOCK],
         dstChainId: SEPOLIA_CHAIN_ID,
       },
+
+      // Whitelist Normal Timelock
+      {
+        target: ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [arbitrumsepolia.NORMAL_TIMELOCK, true],
+        dstChainId: ARBITRUM_SEPOLIA_CHAIN_ID,
+      },
+      {
+        target: OPBNBTESTNET_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [opbnbtestnet.NORMAL_TIMELOCK, true],
+        dstChainId: OPBNBTESTNET_CHAIN_ID,
+      },
+      {
+        target: SEPOLIA_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [sepolia.NORMAL_TIMELOCK, true],
+        dstChainId: SEPOLIA_CHAIN_ID,
+      },
     ],
     meta,
     ProposalType.REGULAR,

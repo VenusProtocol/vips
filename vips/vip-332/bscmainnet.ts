@@ -23,7 +23,7 @@ const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
 const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
 
-const vip331 = () => {
+const vip332 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 XVS permissions given to all Timelocks",
@@ -316,4 +316,4 @@ const vip331 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip331;
+export default vip332;
