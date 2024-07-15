@@ -13,14 +13,10 @@ export const ARBITRUM_ONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 
-export const ARBITRUM_ONE_FASTTRACK_TIMELOCK = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
-export const ETHEREUM_FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
-export const OPBNBMAINNET_FASTTRACK_TIMELOCK = "0xEdD04Ecef0850e834833789576A1d435e7207C0d";
-
 const vip332 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-332 accept ownership & give permissions of oracle to Normal Timelock & Fasttrack Timelock",
+    title: "VIP-332 accept ownership & give permissions of oracle to Normal Timelock",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -278,130 +274,6 @@ const vip332 = () => {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [OPBNBMAINNET_BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opbnbmainnet.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-
-      // Fasttrack Timelock Permissions
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.RESILIENT_ORACLE, "pause()", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.RESILIENT_ORACLE, "unpause()", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ARBITRUM_ONE_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.RESILIENT_ORACLE, "pause()", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.RESILIENT_ORACLE, "unpause()", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ETHEREUM_sFrxETH_ORACLE, "setMaxAllowedPriceDifference(uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.RESILIENT_ORACLE, "pause()", OPBNBMAINNET_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.RESILIENT_ORACLE, "unpause()", OPBNBMAINNET_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.BINANCE_ORACLE, "setMaxStalePeriod(string,uint256)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-      {
-        target: OPBNBMAINNET_ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.BINANCE_ORACLE, "setSymbolOverride(string,string)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.opbnbmainnet,
       },
     ],

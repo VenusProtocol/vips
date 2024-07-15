@@ -7,7 +7,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 forking(28761242, async () => {
   testForkedNetworkVipCommands("vip333 oracles permissions", await vip333(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted", "RoleRevoked"], [5, 3]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [10]);
     },
   });
 });

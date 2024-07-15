@@ -3,6 +3,8 @@ import { makeProposal } from "src/utils";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 export const BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
+export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+
 export const vip020 = () => {
   return makeProposal([
     {
@@ -19,6 +21,24 @@ export const vip020 = () => {
       target: BOUND_VALIDATOR,
       signature: "transferOwnership(address)",
       params: [opbnbtestnet.NORMAL_TIMELOCK],
+    },
+
+    // Revoke unnecessary permissions from Guardian
+
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "revokeCallPermission(address,string,address)",
+      params: [opbnbtestnet.RESILIENT_ORACLE, "setOracle(address,address,uint8)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "revokeCallPermission(address,string,address)",
+      params: [opbnbtestnet.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "revokeCallPermission(address,string,address)",
+      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opbnbtestnet.GUARDIAN],
     },
   ]);
 };

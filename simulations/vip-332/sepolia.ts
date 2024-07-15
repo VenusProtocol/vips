@@ -34,7 +34,7 @@ forking(6276156, async () => {
 
   testForkedNetworkVipCommands("vip332 ownership & permission configuartions of oracles", await vip332(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [19]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [11]);
     },
   });
 
