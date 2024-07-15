@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip044, { BBTC, COMMUNITY_WALLET, PRIME_LIQUIDITY_PROVIDER } from "../../../proposals/ethereum/vip-044";
 import ERC20 from "./abi/erc20.json";
 
-forking(20270578, () => {
+forking(20270578, async () => {
   let bbtc: Contract;
   let bbtcBalanceBefore: string;
 
@@ -17,7 +17,7 @@ forking(20270578, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip044());
+      await pretendExecutingVip(await vip044());
     });
 
     it("Prime Liquidity Provider should not have any bbtc tokens", async () => {

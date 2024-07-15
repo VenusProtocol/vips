@@ -13,7 +13,7 @@ import vip041, {
 } from "../../../proposals/sepolia/vip-041";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 
-forking(6246386, () => {
+forking(6246386, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -36,7 +36,7 @@ forking(6246386, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip041());
+      await pretendExecutingVip(await vip041());
     });
 
     it("new weETH collateral factor and liquidation threshold", async () => {
