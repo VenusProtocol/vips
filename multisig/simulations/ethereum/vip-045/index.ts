@@ -1,9 +1,7 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { initMainnetUser } from "../../../../src/utils";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip045, {
   PRIME,
@@ -25,15 +23,8 @@ import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
-forking(20282042, () => {
+forking(20311017, () => {
   const erc20At = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
-
-  // WBTC is to be transferred after BBTC is swapped to WBTC, here we pretend it has happened already
-  const pretendWBTCFundingHappened = async () => {
-    const wbtcHolder = await initMainnetUser("0x5Ee5bf7ae06D1Be5997A1A72006FE6C607eC6DE8", parseEther("1"));
-    const wbtcFundingAmount = parseUnits("0.23168", 8);
-    await erc20At(WBTC).connect(wbtcHolder).transfer(PRIME_LIQUIDITY_PROVIDER, wbtcFundingAmount);
-  };
 
   describe("Pre-VIP behavior", () => {
     let primeLiquidityProvider: Contract;
@@ -96,7 +87,6 @@ forking(20282042, () => {
     });
 
     it("has enough WBTC for the reward", async () => {
-      await pretendWBTCFundingHappened();
       expect(await erc20At(WBTC).balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.be.greaterThanOrEqual(WBTC_PER_90_DAYS_REWARD);
     });
 
