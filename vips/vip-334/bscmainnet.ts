@@ -18,7 +18,7 @@ const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
 const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
 const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
-const vip331 = () => {
+const vip334 = () => {
   const meta = {
     version: "v2",
     title: "VIP-334 XVS Bridge permissions given to Fasttrack Timelock",
@@ -358,4 +358,4 @@ const vip331 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip331;
+export default vip334;

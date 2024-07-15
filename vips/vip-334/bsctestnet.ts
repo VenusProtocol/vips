@@ -18,7 +18,7 @@ const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
 const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 const ARBITRUM_SEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
-const vip331 = () => {
+const vip334 = () => {
   const meta = {
     version: "v2",
     title: "VIP-334 XVS Bridge permissions given to Fasttrack Timelock",
@@ -386,4 +386,4 @@ const vip331 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip331;
+export default vip334;
