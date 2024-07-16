@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const Comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";

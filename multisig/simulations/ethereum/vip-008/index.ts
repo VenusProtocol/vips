@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import vip008, {
   COMPTROLLER_BEACON,
   NATIVE_TOKEN_GATEWAY_VWETH_CORE,

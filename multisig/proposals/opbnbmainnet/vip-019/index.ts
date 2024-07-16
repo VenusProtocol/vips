@@ -1,10 +1,10 @@
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
-export const OPBNBMAINNET_NORMAL_TIMELOCK = "0x372044f837eBBec77e64a449173732f8955c75bA";
+export const OPBNBMAINNET_NORMAL_TIMELOCK = "0x10f504e939b912569Dca611851fDAC9E3Ef86819";
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER = "0xf19b44Bf78A5330354312Cbc236EA8984828b4E2";
+export const OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER = "0xf7e4c81Cf4A03d52472a4d00c3d9Ef35aF127E45";
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
 export const vip019 = () => {
@@ -53,7 +53,22 @@ export const vip019 = () => {
     {
       target: OPBNBMAINNET_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", opbnbmainnet.GUARDIAN],
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", opbnbmainnet.GUARDIAN],
+    },
+    {
+      target: OPBNBMAINNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBMAINNET_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", opbnbmainnet.GUARDIAN],
     },
     {
       target: OPBNBMAINNET_ACM,

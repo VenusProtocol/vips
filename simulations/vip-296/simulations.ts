@@ -3,10 +3,10 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMMUNITY_WALLET, USDT, vip296 } from "../../vips/vip-296/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 import USDT_ABI from "./abi/usdtAbi.json";

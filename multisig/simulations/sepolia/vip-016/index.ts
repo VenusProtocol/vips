@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import {
   REWARD_DISTRIBUTOR_CORE_0,
   REWARD_DISTRIBUTOR_CORE_1,

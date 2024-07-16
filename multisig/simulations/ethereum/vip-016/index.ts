@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip016 from "../../../proposals/ethereum/vip-016";
 import { XVS, XVS_BRIDGE_DEST, XVS_MINT_LIMIT } from "../../../proposals/ethereum/vip-016";
 import XVS_ABI from "./abi/xvs.json";

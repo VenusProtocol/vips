@@ -4,14 +4,17 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { CORE_MARKETS, vip192Testnet } from "../../../vips/vip-192/vip-192-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const NEW_VBEP20_DELEGATE_IMPL = "0x8d79C8f4400fE68Fd17040539FE5e1706c1f2850";
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -117,7 +120,7 @@ forking(34517682, async () => {
 forking(34517682, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip192Testnet());
+      await pretendExecutingVip(await vip192Testnet(), bscmainnet.NORMAL_TIMELOCK);
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       [user] = await ethers.getSigners();
     });
@@ -179,7 +182,7 @@ forking(34517682, async () => {
 forking(34517682, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip192Testnet());
+      await pretendExecutingVip(await vip192Testnet(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {

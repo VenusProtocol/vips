@@ -2,9 +2,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { converters } from "../../../vips/vip-245/vip-245/Addresses";
 import { vip245 } from "../../../vips/vip-245/vip-245/vip-245";
 import ACCESS_CONTROL_MANAGER_ABI from "../abi/AccessControlManagerMainnet.json";

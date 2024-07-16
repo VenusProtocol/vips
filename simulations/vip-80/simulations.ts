@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip80 } from "../../vips/vip-80";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import GOVERNOR_V3_ABI from "./abi/governorV3Abi.json";

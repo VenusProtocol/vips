@@ -1,5 +1,5 @@
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";

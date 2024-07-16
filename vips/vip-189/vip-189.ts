@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const vBNB_ADDRESS = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";

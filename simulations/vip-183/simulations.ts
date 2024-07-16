@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { vip183 } from "../../vips/vip-183";
 import IERC20 from "./abi/IERC20UpgradableAbi.json";
 

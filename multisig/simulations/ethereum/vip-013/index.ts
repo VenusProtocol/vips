@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip013 from "../../../proposals/ethereum/vip-013";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTDest.json";
 

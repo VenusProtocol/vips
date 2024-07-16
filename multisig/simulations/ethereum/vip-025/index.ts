@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { BORROW_CAP, CURVE_COMPTROLLER, SUPPLY_CAP, vcrvUSD_CURVE, vip025 } from "../../../proposals/ethereum/vip-025";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 

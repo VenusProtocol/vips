@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip313, { GITCOIN_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-313/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";

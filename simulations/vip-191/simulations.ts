@@ -4,10 +4,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import { vip191 } from "../../vips/vip-191";
 import BUSD_LIQUIDATOR_ABI from "./abi/BUSDLiquidator.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";

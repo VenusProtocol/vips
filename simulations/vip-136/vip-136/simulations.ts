@@ -3,13 +3,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import {
-  initMainnetUser,
-  setMaxStalePeriodInBinanceOracle,
-  setMaxStalePeriodInChainlinkOracle,
-} from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip136 } from "../../../vips/vip-136/vip-136";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";

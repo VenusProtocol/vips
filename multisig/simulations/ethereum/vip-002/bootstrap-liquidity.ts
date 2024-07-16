@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip002 from "../../../proposals/ethereum/vip-002/bootstrap-liquidity";
 import ERC20_ABI from "./abi/erc20.json";
 

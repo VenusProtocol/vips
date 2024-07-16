@@ -3,9 +3,9 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip201Testnet } from "../../../vips/vip-201/vip-201-testnet";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";

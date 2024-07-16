@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip150 } from "../../vips/vip-150";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";

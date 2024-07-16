@@ -4,16 +4,16 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../src/vip-framework/checks/rewardsDistributor";
+} from "src/vip-framework/checks/rewardsDistributor";
+
 import { vip178 } from "../../../vips/vip-178/vip-178";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";

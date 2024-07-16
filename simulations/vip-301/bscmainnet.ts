@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStaleCoreAssets } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import vip301 from "../../vips/vip-301/bscmainnet";
 import { TOKEN_REDEEMER, TREASURY, VAI, VAI_UNITROLLER, shortfallAccounts } from "../../vips/vip-301/bscmainnet";
 import COMPROLLER_ABI from "./abi/Comptroller.json";

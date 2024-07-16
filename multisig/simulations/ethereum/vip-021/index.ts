@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip021, {
   BNB_ENDPOINT_ID,
   ETHEREUM_MULTISIG,

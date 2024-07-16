@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip009 from "../../../proposals/ethereum/vip-009";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WSTETH_ABI from "./abi/wstETH.json";

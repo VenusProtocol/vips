@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip211 } from "../../../vips/vip-211/vip-211";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";

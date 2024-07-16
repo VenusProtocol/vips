@@ -2,9 +2,10 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import vip262 from "../../vips/vip-262/bscmainnet";
 import {
   BRIDGE_XVS_AMOUNT,
@@ -28,6 +29,8 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import VTreasurey_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(36530861, async () => {
   let usdc: Contract;
@@ -59,7 +62,7 @@ forking(36530861, async () => {
     oldCirculatingSupply = await xvsBridge.circulatingSupply();
     oldXVSBalance = await xvs.balanceOf(XVS_BRIDGE);
 
-    await pretendExecutingVip(await vip262());
+    await pretendExecutingVip(await vip262(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   testVip("VIP-263", await vip263(), {

@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriod } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip238 } from "../../vips/vip-238";
 import { ADDRESSES_2, PRIME, vip239 } from "../../vips/vip-239";
 import ERC20_ABI from "./abis/ERC20.json";

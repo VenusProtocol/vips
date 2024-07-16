@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../src/vip-framework/checks/rewardsDistributor";
+} from "src/vip-framework/checks/rewardsDistributor";
+
 import { vip163Testnet } from "../../../vips/vip-163/vip-163-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import COMPTROLLER_BEACON_ABI from "./abi/COMPTROLLER_BEACON.json";

@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip019, {
   OPBNBMAINNET_ACM,
   OPBNBMAINNET_NORMAL_TIMELOCK,
@@ -13,7 +13,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
-forking(26005834, async () => {
+forking(26959433, async () => {
   let acm: Contract;
   let defaultAdminRole: string;
   before(async () => {

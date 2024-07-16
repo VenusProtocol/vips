@@ -1,77 +1,61 @@
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { LzChainId } from "../../src/types";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip323, {
-  ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR,
-  MAX_DAILY_LIMIT,
-  OMNICHAIN_PROPOSAL_SENDER,
-  OPBNBMAINNET_OMNICHAIN_GOVERNANCE_EXECUTOR,
+  COMMUNITY_WALLET,
+  ETH,
+  ETH_AMOUNT_WALLET,
+  XVS,
+  XVS_AMOUNT,
+  XVS_AMOUNT_WALLET,
+  XVS_BRIDGE_SRC,
 } from "../../vips/vip-323/bscmainnet";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
-import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(39400639, async () => {
-  const provider = ethers.provider;
-  const omnichainProposalSender = new ethers.Contract(
-    OMNICHAIN_PROPOSAL_SENDER,
-    OMNICHAIN_PROPOSAL_SENDER_ABI,
-    provider,
-  );
+forking(39546351, async () => {
+  let xvsBridge: Contract;
+  let xvs: Contract;
+  let eth: Contract;
+  let oldCirculatingSupply: BigNumber;
+  let oldXvsBalBridge: BigNumber;
+  let oldXvsBalWallet: BigNumber;
+  let oldEthBalWallet: BigNumber;
 
-  describe("Pre-VIP behaviour", () => {
-    it("Daily limit should be 0", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.ethereum)).to.equals(0);
-    });
-    it("Trusted remote should not be set", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.ethereum)).to.be.equals("0x");
-    });
-    it("Daily limit should be 100 of opbnbmainnet", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.opbnbmainnet)).to.equals(0);
-    });
+  before(async () => {
+    xvsBridge = new ethers.Contract(XVS_BRIDGE_SRC, XVS_BRIDGE_ABI, ethers.provider);
+    xvs = new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
+    eth = new ethers.Contract(ETH, ERC20_ABI, ethers.provider);
 
-    it("Trusted remote should be set of opbnbmainnet", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.opbnbmainnet)).to.be.equals("0x");
-    });
+    oldCirculatingSupply = await xvsBridge.circulatingSupply();
+    oldXvsBalBridge = await xvs.balanceOf(XVS_BRIDGE_SRC);
+    oldXvsBalWallet = await xvs.balanceOf(COMMUNITY_WALLET);
+    oldEthBalWallet = await eth.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("vip323 give permissions to timelock", await vip323(), {
+  testVip("VIP-323 Send XVS to Dest Chain", await vip323(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
-        ["RoleGranted", "SetMaxDailyLimit", "SetTrustedRemoteAddress", "Failure"],
-        [26, 2, 2, 0],
-      );
+      await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
     },
   });
 
-  describe("Post-VIP behavior", () => {
-    it("Daily limit should be 100 of ethereum", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.ethereum)).to.equals(MAX_DAILY_LIMIT);
+  describe("Post-VIP behavior", async () => {
+    it("Should increase wallet xvs and eth balance", async () => {
+      expect(await xvs.balanceOf(COMMUNITY_WALLET)).to.equal(XVS_AMOUNT_WALLET.add(oldXvsBalWallet));
+      expect(await eth.balanceOf(COMMUNITY_WALLET)).to.equal(ETH_AMOUNT_WALLET.add(oldEthBalWallet));
     });
 
-    it("Trusted remote should be set of ethereum", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.ethereum)).to.be.equals(
-        ethers.utils.solidityPack(
-          ["address", "address"],
-          [ETHEREUM_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
-        ),
-      );
-    });
-    it("Daily limit should be 100 of opbnbmainnet", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.opbnbmainnet)).to.equals(MAX_DAILY_LIMIT);
+    it("Should decrease circulating supply", async () => {
+      const currCirculatingSupply = await xvsBridge.circulatingSupply();
+      expect(oldCirculatingSupply.sub(currCirculatingSupply)).equals(XVS_AMOUNT);
     });
 
-    it("Trusted remote should be set of opbnbmainnet", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.opbnbmainnet)).to.be.equals(
-        ethers.utils.solidityPack(
-          ["address", "address"],
-          [OPBNBMAINNET_OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
-        ),
-      );
+    it("Should increase number of locked tokens on bridge", async () => {
+      const currXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
+      expect(currXVSBal.sub(oldXvsBalBridge)).equals(XVS_AMOUNT);
     });
   });
 });

@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import vip308, {
   NEW_VDAI_IR,
   NEW_VFDUSD_IR,

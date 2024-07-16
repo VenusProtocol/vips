@@ -2,10 +2,10 @@ import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip004 from "../../../proposals/opbnbmainnet/vip-004";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";

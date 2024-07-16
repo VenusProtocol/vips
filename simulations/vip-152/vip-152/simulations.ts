@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { StorageLayout } from "src/vtokenUpgradesHelper";
 
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { StorageLayout } from "../../../src/vtokenUpgradesHelper";
 import { vip152 } from "../../../vips/vip-152/vip-152";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";

@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip011 from "../../../proposals/opbnbmainnet/vip-011";
 import VTOKEN_ABI from "./abi/vToken.json";
 

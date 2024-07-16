@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { vip226 } from "../../vips/vip-226";
 import IERC20_UPGRADABLE_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";

@@ -2,12 +2,12 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip022 from "../../../proposals/ethereum/vip-022";
 import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/ethereum/vip-022";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";

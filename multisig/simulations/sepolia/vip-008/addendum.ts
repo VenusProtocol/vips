@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip008 from "../../../proposals/sepolia/vip-008/addendum-1";
 import ERC20_ABI from "./abis/ERC20.json";
 

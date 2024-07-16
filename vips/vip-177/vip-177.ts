@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const SnBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";

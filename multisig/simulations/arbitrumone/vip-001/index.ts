@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip001, { BOUND_VALIDATOR } from "../../../proposals/arbitrumone/vip-001";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";

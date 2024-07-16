@@ -4,9 +4,10 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip224 } from "../../vips/vip-224";
 import ERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
@@ -15,6 +16,8 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import LIQUIDATOR_ABI from "./abi/liquidator.json";
 import MOVE_DEBT_DELEGATE_ABI from "./abi/moveDebtDelegate.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracleAbi.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const LIQUIDATOR_CONTRACT = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
@@ -109,7 +112,7 @@ forking(34775900, async () => {
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     moveDebtDelegate = await ethers.getContractAt(MOVE_DEBT_DELEGATE_ABI, MOVE_DEBT_DELEGATE);
-    await pretendExecutingVip(await vip224());
+    await pretendExecutingVip(await vip224(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Forced liquidation", () => {

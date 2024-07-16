@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip310, { BNB, BTC, RESILIENT_ORACLE } from "../../vips/vip-310/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";

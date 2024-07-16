@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip030, { NEW_IR, VCRVUSD_CORE, VUSDC_CORE, VUSDT_CORE } from "../../../proposals/ethereum/vip-030";
 import VTOKEN_IL_ABI from "./abi/VToken.json";
 

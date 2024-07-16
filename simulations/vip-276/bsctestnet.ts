@@ -4,12 +4,13 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { performVTokenBasicAndBehalfActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { performVTokenBasicAndBehalfActions } from "../../src/vtokenUpgradesHelper";
 import {
   COMPTROLLER_BEACON,
   CORE_MARKETS,
@@ -30,6 +31,8 @@ import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import VBEP_20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
 import VEBEP_20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 import VTOKEN_ABI from "./abi/VToken.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const OLD_COMPTROLLER_IMPLEMENTATION = "0x329Bc34E6A46243d21955A4369cD66bdD52E6C22";
 const OLD_VTOKEN_IMPLEMENTATION = "0xe21251bc79ee0abeba71faabdc2ad36762a0b82f";
@@ -280,7 +283,7 @@ forking(38305470, async () => {
 
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(await vip276());
+      await pretendExecutingVip(await vip276(), bsctestnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {

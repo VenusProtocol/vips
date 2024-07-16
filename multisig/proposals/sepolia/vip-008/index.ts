@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const PRIME_LIQUIDITY_PROVIDER = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 const VTreasury = "0x4116CA92960dF77756aAAc3aFd91361dB657fbF8";

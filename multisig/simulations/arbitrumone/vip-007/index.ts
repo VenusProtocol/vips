@@ -3,11 +3,11 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip007, {
   POOL_REGISTRY,
   PRIME,

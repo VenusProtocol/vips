@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import { vip007 } from "../../../proposals/ethereum/vip-007";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";

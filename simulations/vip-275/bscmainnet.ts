@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { USDT, XVS, XVS_VAULT_CONVERTER, vip275 } from "../../vips/vip-275/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import CONVERTER_ABI from "./abi/XVSVaultConverter.json";

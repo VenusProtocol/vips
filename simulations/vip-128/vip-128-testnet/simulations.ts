@@ -4,9 +4,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip128Testnet } from "../../../vips/vip-128/vip-128-testnet";
 import WBETH_ABI from "./abi/IERC20UpgradableAbi.json";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";

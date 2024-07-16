@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip258 } from "../../vips/vip-258/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";

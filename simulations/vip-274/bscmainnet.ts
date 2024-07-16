@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, testVip } from "../../src/vip-framework";
 import { vip274 } from "../../vips/vip-274/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";

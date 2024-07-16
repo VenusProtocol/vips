@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";

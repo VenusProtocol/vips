@@ -28,7 +28,7 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR =
 
 const VOTING_PERIOD = 28800;
 
-export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
+export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK, GUARDIAN } =
   NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
@@ -69,8 +69,8 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
   });
 };
 
-export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("4.0"));
+export const pretendExecutingVip = async (proposal: Proposal, sender: string = GUARDIAN) => {
+  const impersonatedTimelock = await initMainnetUser(sender, ethers.utils.parseEther("4.0"));
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
   }

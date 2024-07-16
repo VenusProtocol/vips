@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import vip317, {
   ARBITRUM_SEPOLIA_CHAIN_ID,
   MAX_DAILY_RECEIVE_LIMIT,

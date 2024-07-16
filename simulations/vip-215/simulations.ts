@@ -4,16 +4,19 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
-import { initMainnetUser } from "../../src/utils";
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
 import { vip215 } from "../../vips/vip-215";
 import IERC20_UPGRADABLE_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import MOVE_DEBT_DELEGATE_ABI from "./abi/moveDebtDelegate.json";
 import PRICE_ORACLE_ABI from "./abi/priceOracleAbi.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const DIAMOND_IMPL = "0xD93bFED40466c9A9c3E7381ab335a08807318a1b";
@@ -60,7 +63,7 @@ forking(34258500, async () => {
     oracle = new ethers.Contract(oracleAddress, PRICE_ORACLE_ABI, provider);
     moveDebtDelegate = new ethers.Contract(MOVE_DEBT_DELEGATE, MOVE_DEBT_DELEGATE_ABI, provider);
     busdHolder = await initMainnetUser(BUSD_HOLDER, parseEther("1"));
-    await pretendExecutingVip(await vip215());
+    await pretendExecutingVip(await vip215(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Post-VIP contracts status", async () => {

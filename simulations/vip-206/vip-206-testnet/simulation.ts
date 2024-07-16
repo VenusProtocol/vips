@@ -2,9 +2,9 @@ import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpe
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip206Testnet } from "../../../vips/vip-206/vip-206-testnet";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";

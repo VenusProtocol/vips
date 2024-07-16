@@ -5,9 +5,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip146 } from "../../../vips/vip-146/vip-146";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";

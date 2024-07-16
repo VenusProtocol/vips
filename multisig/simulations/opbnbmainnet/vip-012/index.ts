@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip012, {
   ARBITRUM_ONE_CHAIN_ID,
   ARBITRUM_ONE_TRUSTED_REMOTE,

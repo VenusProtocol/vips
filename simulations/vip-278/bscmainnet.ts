@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, VTOKEN_BEACON, VTOKEN_IMPL, vagEUR, vip278 } from "../../vips/vip-278/bscmainnet";
 import BEACON_ABI from "./abi/Beacon.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";

@@ -3,11 +3,11 @@ import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-n
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
 import users from "../../vips/vip-207/users";
 import { vip207 } from "../../vips/vip-207/vip-207";
 import PRIME_ABI from "./abis/Prime.json";

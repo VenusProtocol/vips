@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const VAI_UNITROLLER = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
 export const NEW_VAI_CONTROLLER_IMPL = "0x181936d73641c0B002649B7dD08b51ab935d58C2";

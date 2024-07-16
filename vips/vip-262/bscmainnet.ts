@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";

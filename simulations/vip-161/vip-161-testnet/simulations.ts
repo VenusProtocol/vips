@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { Actions, vip161Testnet } from "../../../vips/vip-161/vip-161-testnet";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 import INTEREST_RATE_MODEL_ABI from "./abi/INTEREST_RATE_MODEL_ABI.json";

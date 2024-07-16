@@ -2,9 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, FDUSD_SUPPLY, OLD_FDUSD_SUPPLY, vFDUSD, vip249 } from "../../vips/vip-249/bscmainnet";
 import COMTROLLER_ABI from "./abi/comptroller.json";
 

@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip145Testnet } from "../../../vips/vip-145/vip-145-testnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";

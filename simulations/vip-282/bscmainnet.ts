@@ -2,8 +2,8 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import {
   DEFAULT_PROXY_ADMIN,
   XVS_VAULT_TREASURY,

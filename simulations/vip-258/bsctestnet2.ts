@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip258Testnet2 } from "../../vips/vip-258/bsctestnet-2";
 import ACCESS_CONTROL_ABI from "./abi/accessControlmanager.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";

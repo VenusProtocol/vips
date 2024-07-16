@@ -3,10 +3,10 @@ import { BigNumber, BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import vip002, {
   COMPTROLLER_CORE,
   COMPTROLLER_CURVE,

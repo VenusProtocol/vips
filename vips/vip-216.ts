@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const BUSD = "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56";

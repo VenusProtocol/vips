@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { vip110 } from "../../vips/vip-110";
 import VAI_CONTROLLER_PROXY_ABI from "./abi/VAIControllerProxy_ABI.json";
 import VAI_ABI from "./abi/VAI_ABI.json";

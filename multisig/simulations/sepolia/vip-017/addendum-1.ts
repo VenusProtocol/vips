@@ -2,10 +2,10 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { NORMAL_TIMELOCK, forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import vip017, {
   COMPTROLLER_BEACON,
   COMPTROLLER_LIQUID_STAKED_ETH,

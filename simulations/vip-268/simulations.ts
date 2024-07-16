@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { NORMAL_TIMELOCK, TREASURY, WBNB, WBNB_WITHDRAW_AMOUNT, vBNB, vip268 } from "../../vips/vip-268/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VToken.json";

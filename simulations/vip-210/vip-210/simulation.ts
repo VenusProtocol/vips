@@ -3,11 +3,11 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip210 } from "../../../vips/vip-210/vip-210";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";

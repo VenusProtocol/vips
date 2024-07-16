@@ -4,11 +4,10 @@ import { BigNumber } from "ethers";
 import fs from "fs/promises";
 import { network } from "hardhat";
 import readline from "readline-sync";
-
-import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "../src/multisig/utils";
-import { loadProposal, proposeVIP } from "../src/transactions";
-import { SUPPORTED_NETWORKS } from "../src/types";
-import { getCalldatas, proposalSchema } from "../src/utils";
+import { buildMultiSigTx, getSafeAddress, loadMultisigTx } from "src/multisig/utils";
+import { loadProposal, proposeVIP } from "src/transactions";
+import { SUPPORTED_NETWORKS } from "src/types";
+import { getCalldatas, proposalSchema } from "src/utils";
 
 const safeAddress = "0x12341234123412341234123412341232412341234";
 

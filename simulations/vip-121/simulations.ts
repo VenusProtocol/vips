@@ -3,12 +3,14 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { vip121 } from "../../vips/vip-121";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
 const vBTC = "0x882c173bc7ff3b7786ca16dfed3dfffb9ee7847b";
 const BORROWER = "0xef044206db68e40520bfa82d45419d498b4bc7bf";
 
@@ -28,7 +30,7 @@ forking(28538732, async () => {
     before(async () => {
       vToken = new ethers.Contract(vBTC, VBEP20_ABI, ethers.provider);
       prevBalance = await vToken.callStatic.borrowBalanceCurrent(BORROWER);
-      await pretendExecutingVip(await vip121());
+      await pretendExecutingVip(await vip121(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("Should decrese Borrow Balance Stored", async () => {

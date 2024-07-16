@@ -4,15 +4,18 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { IL_MARKETS, vip194 } from "../../../vips/vip-194/vip-194";
 import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const VTOKEN_BEACON = "0x2b8A1C539ABaC89CbF7E2Bc6987A0A38A5e660D4";
 const NEW_IMPL_VTOKEN = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
@@ -82,7 +85,7 @@ forking(32940330, async () => {
 forking(32940330, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip194());
+      await pretendExecutingVip(await vip194(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     for (const market of IL_MARKETS) {
@@ -137,7 +140,7 @@ forking(32940330, async () => {
 forking(32940330, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip194());
+      await pretendExecutingVip(await vip194(), bscmainnet.NORMAL_TIMELOCK);
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
 

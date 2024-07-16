@@ -3,14 +3,16 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageCore } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageCore } from "../../../src/vtokenUpgradesHelper";
+import { NETWORK_ADDRESSES } from "../../../src/networkAddresses";
 import { CORE_MARKETS, vip192 } from "../../../vips/vip-192/vip-192";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
 const NEW_VBEP20_DELEGATE_IMPL = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775";
 const ACCESS_CONTROL_MANAGER = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
@@ -87,7 +89,7 @@ forking(32915411, async () => {
 forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip192());
+      await pretendExecutingVip(await vip192(), bscmainnet.NORMAL_TIMELOCK);
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
       [user] = await ethers.getSigners();
     });
@@ -126,7 +128,7 @@ forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
-      await pretendExecutingVip(await vip192());
+      await pretendExecutingVip(await vip192(), bscmainnet.NORMAL_TIMELOCK);
     });
     for (const market of CORE_MARKETS) {
       if (market.name == "vTRXOLD") {

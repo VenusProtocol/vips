@@ -2,9 +2,10 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriod } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { ADDRESSES_1 } from "../../vips/vip-238";
 import { ADDRESSES_2 } from "../../vips/vip-239";
 import { PRIME, vip255 } from "../../vips/vip-255/bscmainnet";
@@ -14,6 +15,7 @@ import PRIME_ABI from "./abis/Prime.json";
 import RESILIENT_ORACLE_ABI from "./abis/ResilientOracle.json";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const ADDRESSES = [...ADDRESSES_1, ...ADDRESSES_2];
 
@@ -36,7 +38,7 @@ forking(36120958, async () => {
       }),
     );
 
-    await pretendExecutingVip(await vip255());
+    await pretendExecutingVip(await vip255(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   testVip("VIP-257 Burn Prime tokens of the Venus 3rd Anniversary x Polyhedra Campaign winners (2/2)", await vip257(), {
