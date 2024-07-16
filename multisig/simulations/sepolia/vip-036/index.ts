@@ -9,7 +9,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { BORROW_CAP, SUPPLY_CAP, rsETH, vip036, vrsETH } from "../../../proposals/sepolia/vip-043";
+import { BORROW_CAP, SUPPLY_CAP, rsETH, vip036, vrsETH } from "../../../proposals/sepolia/vip-036";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
