@@ -1,8 +1,8 @@
 import { BigNumber } from "ethers";
 import { Result, formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking } from "src/vip-framework";
 
-import { forking } from "../../../src/vip-framework";
 import COMPROLLER_ABI from "../abi/Comptroller.json";
 import ERC20_ABI from "../abi/IERC20.json";
 import VAI_CONTROLLER_ABI from "../abi/VAIController.json";
@@ -308,6 +308,6 @@ const main = async () => {
 // @kkirka: I couldn't make `hardhat run` preserve the --fork parameter: scripts are launched
 // in a subprocess, so the configuration and custom params are reset. Thus, this script expects
 // to be run in a test environment (i.e. `npx hardhat test --fork bscmainnet ./get-debt-data.ts`)
-forking(38945597, () => {
+forking(38945597, async () => {
   it("prints the data for the VIP", main);
 });

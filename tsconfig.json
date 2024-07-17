@@ -15,7 +15,11 @@
     "sourceMap": true,
     "strict": true,
     "target": "esnext",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
   "exclude": ["node_modules"],
   "files": ["./hardhat.config.ts"],

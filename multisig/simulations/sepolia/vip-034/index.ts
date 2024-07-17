@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip034, {
   ARBITRUM_SEPOLIA_ENDPOINT_ID,
   ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
@@ -21,7 +21,7 @@ const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const XVS_HOLDER = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 
-forking(5673833, () => {
+forking(5673833, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -40,7 +40,7 @@ forking(5673833, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip034());
+      await pretendExecutingVip(await vip034());
     });
 
     it("Should match trusted remote address", async () => {

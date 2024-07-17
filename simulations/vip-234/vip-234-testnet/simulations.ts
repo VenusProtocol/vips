@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import {
   BNB_TREASURY,
   BTC,
@@ -19,7 +19,7 @@ import {
 import ERC20_ABI from "../abi/ERC20.json";
 import VTreasurey_ABI from "../abi/VTreasury.json";
 
-forking(36724768, () => {
+forking(36724768, async () => {
   let btc: Contract;
   let eth: Contract;
   let usdt: Contract;
@@ -42,7 +42,7 @@ forking(36724768, () => {
     oldUSDTBalTreasury = await usdt.balanceOf(BNB_TREASURY);
   });
 
-  testVip("VIP-213 Send XVS to Dest Chain", vip234Testnet(), {
+  testVip("VIP-213 Send XVS to Dest Chain", await vip234Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },

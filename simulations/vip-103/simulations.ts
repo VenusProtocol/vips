@@ -2,10 +2,13 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { vip103 } from "../../vips/vip-103";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NEW_VTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";
@@ -14,17 +17,17 @@ const VSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
 const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
-forking(26544741, () => {
-  testVip("VIP-103 Gauntlet Rrecommendations", vip103());
+forking(26544741, async () => {
+  testVip("VIP-103 Gauntlet Rrecommendations", await vip103());
 });
 
-forking(26544741, () => {
+forking(26544741, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
   before(async () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-    await pretendExecutingVip(vip103());
+    await pretendExecutingVip(await vip103(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Post-VIP behavior", async () => {

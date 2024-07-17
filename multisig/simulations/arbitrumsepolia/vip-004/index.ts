@@ -3,11 +3,11 @@ import { BigNumberish } from "ethers";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import vip004, {
   COMPTROLLER_CORE,
   MOCK_ARB,
@@ -198,7 +198,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vARB_Core: "",
 };
 
-forking(44274400, () => {
+forking(44274400, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -213,7 +213,7 @@ forking(44274400, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip004());
+      await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

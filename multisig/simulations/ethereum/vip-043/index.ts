@@ -16,7 +16,7 @@ import vip043, {
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 import BEACON_ABI from "./abi/beacon.json";
 
-forking(20235713, () => {
+forking(20235713, async () => {
   let comptroller: Contract;
   let beacon: Contract;
 
@@ -41,7 +41,7 @@ forking(20235713, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip043());
+      await pretendExecutingVip(await vip043());
     });
 
     it("should set the new implementation on the beacon", async () => {

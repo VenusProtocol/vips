@@ -4,10 +4,11 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageCore, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { CORE_MARKETS, vip193 } from "../../../vips/vip-193/vip-193";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
@@ -29,8 +30,9 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -75,7 +77,7 @@ forking(32915411, () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   const ProxyAdminInterface = [
     {
       anonymous: false,
@@ -97,7 +99,7 @@ forking(32915411, () => {
       type: "event",
     },
   ];
-  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", vip193(), {
+  testVip("VIP-193 Core  VToken Upgrade of AIA Part - 2", await vip193(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -109,10 +111,10 @@ forking(32915411, () => {
   });
 });
 
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193());
+      await pretendExecutingVip(await vip193(), bscmainnet.NORMAL_TIMELOCK);
       [user] = await ethers.getSigners();
     });
 
@@ -166,10 +168,10 @@ forking(32915411, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(32915411, () => {
+forking(32915411, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip193());
+      await pretendExecutingVip(await vip193(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {

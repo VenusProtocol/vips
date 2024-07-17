@@ -4,10 +4,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import { vip191 } from "../../vips/vip-191";
 import BUSD_LIQUIDATOR_ABI from "./abi/BUSDLiquidator.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -35,7 +35,7 @@ enum Actions {
   EXIT_MARKET = 8,
 }
 
-forking(32738700, () => {
+forking(32738700, async () => {
   let busdLiquidator: Contract;
   let comptroller: Contract;
 
@@ -53,7 +53,7 @@ forking(32738700, () => {
     });
   });
 
-  testVip("VIP-191 BUSD Liquidator", vip191(), {
+  testVip("VIP-191 BUSD Liquidator", await vip191(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_CORE_ABI], ["NewMarketInterestRateModel", "Failure"], [1, 0]);
     },

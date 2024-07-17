@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const LIQUIDATOR_PROXY = "0x55AEABa76ecf144031Ef64E222166eb28Cb4865F";
 const LIQUIDATOR_IMPL = "0x83372155Dd4A4306af82795d5A27d40188ED1F3B";

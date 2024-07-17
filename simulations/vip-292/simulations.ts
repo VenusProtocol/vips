@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import vip292, {
   BNB_TREASURY,
   ETHEREUM_ENDPOINT_ID,
@@ -17,9 +17,9 @@ import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(37997157, () => {
+forking(37997157, async () => {
   let xvsBridge: Contract;
-  testVip("VIP-292", vip292(), {});
+  testVip("VIP-292", await vip292(), {});
   describe("Post-Execution state", () => {
     before(async () => {
       xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);

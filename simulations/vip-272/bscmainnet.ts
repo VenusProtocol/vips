@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   COMMUNITY_WALLET,
   TOKEN_REDEEMER,
@@ -21,7 +21,7 @@ import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
-forking(36990775, () => {
+forking(36990775, async () => {
   let xvsBridge: Contract;
   let xvs: Contract;
   let eth: Contract;
@@ -40,7 +40,7 @@ forking(36990775, () => {
     prevBalanceCommunityWallet = await eth.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-272 Send XVS to Dest Chain", vip272(), {
+  testVip("VIP-272 Send XVS to Dest Chain", await vip272(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI, XVS_BRIDGE_ABI], ["VenusGranted", "SendToChain"], [1, 1]);
       await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBNB", "WithdrawTreasuryBEP20"], [1, 1]);

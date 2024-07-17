@@ -1,6 +1,6 @@
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const vip324 = () => {

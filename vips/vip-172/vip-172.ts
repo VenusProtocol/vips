@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const NEW_COMPTROLLER_IMPLEMENTATION = "0xb5Cb55cAbC34544C708289D899Dfe2f190794C8D";

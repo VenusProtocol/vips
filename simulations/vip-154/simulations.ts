@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_SUPPLY_CAP, VWBETH, vip154 } from "../../vips/vip-154";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(30669350, () => {
+forking(30669350, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -15,7 +15,7 @@ forking(30669350, () => {
     comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
   });
 
-  testVip("VIP-154 Risk Parameters Update", vip154(), {
+  testVip("VIP-154 Risk Parameters Update", await vip154(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },

@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip148 } from "../../../vips/vip-148/vip-148";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 
@@ -98,8 +98,8 @@ const rewardsDistributors: { [key in RewardsDistributorId]: { address: string; v
   },
 };
 
-forking(30298000, () => {
-  testVip("VIP-148", vip148());
+forking(30298000, async () => {
+  testVip("VIP-148", await vip148());
 
   describe("Rewards distributors configuration", () => {
     const checkLastRewardingBlock = (id: RewardsDistributorId, lastRewardingBlock: number) => {

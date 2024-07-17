@@ -2,13 +2,16 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
 import { COMPTROLLER, NEW_BORROW_CAP, OLD_BORROW_CAP, WBETH_VTOKEN, vip261 } from "../../vips/vip-261/bsctestnet";
 import { abi as DIAMOND_CONSOLIDATED_ABI } from "./abi/DiamondConsolidated.json";
 
-forking(37940238, () => {
+const { bsctestnet } = NETWORK_ADDRESSES;
+
+forking(37940238, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
   before(async () => {
@@ -27,14 +30,14 @@ forking(37940238, () => {
       expect(currentWBethBorrowCap).equals(OLD_BORROW_CAP);
     });
     it("Verify current borrow cap is 4000", async () => {
-      await pretendExecutingVip(vip261());
+      await pretendExecutingVip(await vip261(), bsctestnet.NORMAL_TIMELOCK);
       const currentWBethBorrowCap = await comptroller.borrowCaps(WBETH_VTOKEN);
       expect(currentWBethBorrowCap).equals(NEW_BORROW_CAP);
     });
   });
 });
 
-forking(37940238, () => {
+forking(37940238, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
 
@@ -49,7 +52,7 @@ forking(37940238, () => {
     });
   });
 
-  testVip("VIP-261 Set new WBETH borrow cap to 4000", vip261(), {
+  testVip("VIP-261 Set new WBETH borrow cap to 4000", await vip261(), {
     supporter: "0x55a9f5374af30e3045fb491f1da3c2e8a74d168d",
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_CONSOLIDATED_ABI], ["NewBorrowCap"], [1]);

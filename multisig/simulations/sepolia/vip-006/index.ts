@@ -1,11 +1,11 @@
 import { parseUnits } from "ethers/lib/utils";
-
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../../src/vip-framework/checks/rewardsDistributor";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
+} from "src/vip-framework/checks/rewardsDistributor";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
+
 import vip006, {
   COMPTROLLER_CORE,
   COMPTROLLER_CURVE,
@@ -30,10 +30,10 @@ import vip006, {
   XVS,
 } from "../../../proposals/sepolia/vip-006";
 
-forking(5523471, () => {
+forking(5523471, async () => {
   describe("Generic checks", async () => {
     before(async () => {
-      await pretendExecutingVip(vip006());
+      await pretendExecutingVip(await vip006());
     });
 
     checkRewardsDistributorPool(COMPTROLLER_CORE, 2);

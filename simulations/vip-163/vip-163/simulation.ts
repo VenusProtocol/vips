@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../src/vip-framework/checks/rewardsDistributor";
+} from "src/vip-framework/checks/rewardsDistributor";
+
 import { vip163 } from "../../../vips/vip-163/vip-163";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import COMPTROLLER_BEACON_ABI from "./abi/COMPTROLLER_BEACON.json";
@@ -49,7 +49,7 @@ const sdRewardsDistributorConfig: RewardsDistributorConfig = {
   totalRewardsToDistribute: parseUnits("2000", 18),
 };
 
-forking(31166657, () => {
+forking(31166657, async () => {
   let comptrollerBeacon: Contract;
   let hayRewardsDistributor: Contract;
   let sdRewardsDistributor: Contract;
@@ -71,7 +71,7 @@ forking(31166657, () => {
     });
   });
 
-  testVip("VIP-163 HAY and SD Rewards", vip163(), {
+  testVip("VIP-163 HAY and SD Rewards", await vip163(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

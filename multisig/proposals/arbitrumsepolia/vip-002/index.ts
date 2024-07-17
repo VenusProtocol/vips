@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 

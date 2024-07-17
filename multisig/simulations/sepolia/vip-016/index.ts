@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import {
   REWARD_DISTRIBUTOR_CORE_0,
   REWARD_DISTRIBUTOR_CORE_1,
@@ -75,10 +75,10 @@ const lastRewardBlockConfig: LastRewardBlockConfig[] = [
   },
 ];
 
-forking(5530144, () => {
+forking(5530144, async () => {
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip016());
+      await pretendExecutingVip(await vip016());
     });
 
     const checkLastRewardingBlock = (

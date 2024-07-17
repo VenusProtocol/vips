@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";

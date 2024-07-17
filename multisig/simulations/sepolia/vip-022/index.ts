@@ -2,12 +2,12 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip022 from "../../../proposals/sepolia/vip-022";
 import { BORROW_CAP, DAI, SUPPLY_CAP, vDAI } from "../../../proposals/sepolia/vip-022";
 import COMPTROLLER_ABI from "./abi/ComptrollerAbi.json";
@@ -19,7 +19,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 const COMPTROLLER = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
-forking(5730900, () => {
+forking(5730900, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vdai: Contract;
@@ -44,7 +44,7 @@ forking(5730900, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip022());
+      await pretendExecutingVip(await vip022());
     });
 
     it("check price", async () => {

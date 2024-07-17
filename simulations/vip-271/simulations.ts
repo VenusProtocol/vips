@@ -1,16 +1,16 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BNB_AMOUNT, ERC20_TOKENS, NORMAL_TIMELOCK, TREASURY, vip271 } from "../../vips/vip-271/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 
 const prevBalances: any = {};
 let prevBNBBalance: any;
 
-forking(36907609, () => {
+forking(36907609, async () => {
   before(async () => {
     for (const token of ERC20_TOKENS) {
       const tokenContract = await ethers.getContractAt(IERC20_ABI, token.address);
@@ -20,7 +20,7 @@ forking(36907609, () => {
     prevBNBBalance = await ethers.provider.getBalance(TREASURY);
   });
 
-  testVip("VIP-271", vip271(), {
+  testVip("VIP-271", await vip271(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [IERC20_ABI], ["Transfer"], [ERC20_TOKENS.length + 1]);
     },

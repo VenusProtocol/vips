@@ -1,6 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const CORE_COMPTROLLER_ADDRESS = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 export const CRV_COMPTROLLER_ADDRESS = "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796";

@@ -2,11 +2,11 @@ import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { initMainnetUser } from "../../../../src/utils";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip004 from "../../../proposals/sepolia/vip-004";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -17,14 +17,14 @@ const { sepolia } = NETWORK_ADDRESSES;
 const XVS_VAULT_PROXY = "0x1129f882eAa912aE6D4f6D445b2E2b1eCbA99fd5";
 const XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
 
-forking(4961243, () => {
+forking(4961243, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
 
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-    await pretendExecutingVip(vip004());
+    await pretendExecutingVip(await vip004());
   });
 
   describe("Post tx checks", () => {
