@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip047, { COMPTROLLER_CORE, COMPTROLLER_CURVE, PRIME } from "../../../proposals/ethereum/vip-047";
+import vip046, { COMPTROLLER_CORE, COMPTROLLER_CURVE, PRIME } from "../../../proposals/ethereum/vip-046";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 
 forking(20321056, async () => {
@@ -11,7 +11,7 @@ forking(20321056, async () => {
 
   describe("Post-VIP behavior", () => {
     before(async () => {
-      await pretendExecutingVip(await vip047());
+      await pretendExecutingVip(await vip046());
     });
 
     it("Comptroller Core should have correct Prime token address", async () => {
