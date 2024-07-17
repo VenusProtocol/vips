@@ -1,80 +1,51 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { makeProposal } from "src/utils";
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 
-export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-export const ETHEREUM_NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
-const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ETHEREUM_OMNICHAIN_EXECUTOR_OWNER = "0x87Ed3Fd3a25d157637b955991fb1B41B566916Ba";
-const { ethereum } = NETWORK_ADDRESSES;
+import { makeProposal } from "../../../../src/utils";
+
+export const PRIME_LIQUIDITY_PROVIDER = "0x8ba6aFfd0e7Bcd0028D1639225C84DdCf53D8872";
+export const PRIME = "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39";
+export const TREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
+
+export const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
+export const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
+export const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+
+export const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
+export const BLOCKS_IN_90_DAYS = BLOCKS_PER_YEAR.mul(90).div(365);
+
+export const WBTC_PER_90_DAYS_REWARD = parseUnits("0.25476", 8);
+export const WETH_PER_90_DAYS_REWARD = parseUnits("52.6647", 18);
+export const USDC_PER_90_DAYS_REWARD = parseUnits("15395", 6);
+export const USDT_PER_90_DAYS_REWARD = parseUnits("15395", 6);
+
+export const WBTC_PER_BLOCK_REWARD = WBTC_PER_90_DAYS_REWARD.div(BLOCKS_IN_90_DAYS);
+export const WETH_PER_BLOCK_REWARD = WETH_PER_90_DAYS_REWARD.div(BLOCKS_IN_90_DAYS);
+export const USDC_PER_BLOCK_REWARD = USDC_PER_90_DAYS_REWARD.div(BLOCKS_IN_90_DAYS);
+export const USDT_PER_BLOCK_REWARD = USDT_PER_90_DAYS_REWARD.div(BLOCKS_IN_90_DAYS);
 
 export const vip045 = () => {
   return makeProposal([
     {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", ethereum.GUARDIAN],
+      target: PRIME_LIQUIDITY_PROVIDER,
+      signature: "setTokensDistributionSpeed(address[],uint256[])",
+      params: [
+        [WBTC, WETH, USDC, USDT],
+        [WBTC_PER_BLOCK_REWARD, WETH_PER_BLOCK_REWARD, USDC_PER_BLOCK_REWARD, USDT_PER_BLOCK_REWARD],
+      ],
     },
     {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", ethereum.GUARDIAN],
-    },
-
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "pause()", ethereum.GUARDIAN],
+      target: PRIME_LIQUIDITY_PROVIDER,
+      signature: "resumeFundsTransfer()",
+      params: [],
     },
     {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "unpause()", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setSrcChainId(uint16)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "giveCallPermission(address,string,address)",
-      params: [ETHEREUM_OMNICHAIN_EXECUTOR_OWNER, "transferBridgeOwnership(address)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, ETHEREUM_NORMAL_TIMELOCK],
+      target: PRIME,
+      signature: "togglePause()",
+      params: [],
     },
   ]);
 };
+
 export default vip045;
