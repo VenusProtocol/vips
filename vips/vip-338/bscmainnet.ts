@@ -1,7 +1,7 @@
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
 
 const vip338 = () => {
   const meta = {
@@ -16,14 +16,14 @@ const vip338 = () => {
   return makeProposal(
     [
       {
-        target: CRITICAL_TIMELOCK,
+        target: FAST_TRACK_TIMELOCK,
         signature: "",
         params: [],
         value: "1",
       },
     ],
     meta,
-    ProposalType.CRITICAL,
+    ProposalType.FAST_TRACK,
   );
 };
 
