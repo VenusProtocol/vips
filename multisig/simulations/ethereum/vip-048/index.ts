@@ -29,7 +29,7 @@ forking(20292199, async () => {
       await pretendXVSHasBeenBridged();
       prevXvsVaultTreasuryBalance = await xvsContract.balanceOf(XVS_VAULT_TREASURY);
       prevXvsStoreBalance = await xvsContract.balanceOf(XVS_STORE);
-      await pretendExecutingVip(vip048());
+      await pretendExecutingVip(await vip048());
     });
 
     it("check balance", async () => {
