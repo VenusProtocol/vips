@@ -7,14 +7,14 @@ import { forking, testVip } from "../../src/vip-framework";
 import vip338, { BTC, ETH, PLP, USDC, USDT } from "../../vips/vip-338/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
-forking(40397206, () => {
+forking(40397206, async () => {
   let plp: Contract;
 
   before(async () => {
     plp = await ethers.getContractAt(PLP_ABI, PLP);
   });
 
-  testVip("VIP-338 Prime Adjustment", vip338(), {
+  testVip("VIP-338 Prime Adjustment", await vip338(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PLP_ABI], ["TokenDistributionSpeedUpdated"], [4]);
     },
