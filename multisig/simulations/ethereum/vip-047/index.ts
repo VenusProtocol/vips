@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip046 from "../../../proposals/ethereum/vip-046";
+import vip047 from "../../../proposals/ethereum/vip-047";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTDest.json";
 
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
@@ -25,7 +25,7 @@ forking(20324857, async () => {
 
   describe("Post tx checks", () => {
     before(async () => {
-      await pretendExecutingVip(await vip046());
+      await pretendExecutingVip(await vip047());
     });
 
     it("Should whitelist xvs vault treasury address", async () => {
