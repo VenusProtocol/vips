@@ -23,7 +23,7 @@ import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 
-forking(20311017, () => {
+forking(20311017, async () => {
   const erc20At = (address: string) => new ethers.Contract(address, ERC20_ABI, ethers.provider);
 
   describe("Pre-VIP behavior", () => {
@@ -58,7 +58,7 @@ forking(20311017, () => {
     let prime: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip041());
+      await pretendExecutingVip(await vip041());
 
       primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
