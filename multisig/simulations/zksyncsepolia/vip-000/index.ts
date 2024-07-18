@@ -8,7 +8,6 @@ import vip000, { TREASURY } from "../../../proposals/zksyncsepolia/vip-000";
 import TREASURY_ABI from "./abi/treasury.json";
 
 forking(3444498, async () => {
-  console.log(1);
   let treasury: Contract;
 
   before(async () => {

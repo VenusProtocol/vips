@@ -29,6 +29,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
   xlayertestnet: 30000000,
+  zksyncsepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -158,6 +159,12 @@ const config: HardhatUserConfig = {
       url: process.env.ARCHIVE_NODE_xlayermainnet || "https://rpc.xlayer.tech/",
       chainId: 196,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    zksyncsepolia: {
+      url: process.env.ARCHIVE_NODE_zksyncsepolia || "https://sepolia.era.zksync.dev",
+      chainId: 300,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.bscmainnet,
     },
   },
   paths: {
