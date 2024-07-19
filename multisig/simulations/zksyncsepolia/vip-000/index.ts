@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import vip000, { TREASURY } from "../../../proposals/zksyncsepolia/vip-000";
 import TREASURY_ABI from "./abi/treasury.json";
 
-forking(3453978, async () => {
+forking(3464250, async () => {
   let treasury: Contract;
 
   before(async () => {
