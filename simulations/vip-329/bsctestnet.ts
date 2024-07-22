@@ -33,7 +33,7 @@ forking(41501999, async () => {
     });
   });
 
-  testVip("VIP-329", vip329());
+  testVip("VIP-329", await vip329());
 
   describe("Post-VIP behavior", async () => {
     it("check implementation", async () => {
