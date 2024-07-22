@@ -4,12 +4,12 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import vip319, { ProxyAdmin, vBNBAdmin, vBNBAdmin_Implementation } from "../../vips/vip-319/bsctestnet";
+import vip343, { ProxyAdmin, vBNBAdmin, vBNBAdmin_Implementation } from "../../vips/vip-343/bscmainnet";
 import PROXY_ABI from "./abi/proxy.json";
 
-const OLD_IMPL = "0x698B2c7c82B980265ed4B4a7653a5735E93767b4";
+const OLD_IMPL = "0x8c15384f1346BD977A689C0c51BD369E8d7313cA";
 
-forking(40951988, async () => {
+forking(39313293, async () => {
   let proxy: Contract;
 
   before(async () => {
@@ -24,7 +24,7 @@ forking(40951988, async () => {
     });
   });
 
-  testVip("VIP-319", vip319());
+  testVip("VIP-343", await vip343());
 
   describe("Post-VIP behavior", async () => {
     it("check implementation", async () => {
