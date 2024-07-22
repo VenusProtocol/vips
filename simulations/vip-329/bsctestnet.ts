@@ -3,7 +3,12 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, testVip } from "../../src/vip-framework";
-import vip329, { COMPTROLLER_BEACON, COMPTROLLER_IMPL, COMPTROLLER_LST } from "../../vips/vip-329/bsctestnet";
+import vip329, {
+  COMPTROLLER_BEACON,
+  COMPTROLLER_IMPL,
+  COMPTROLLER_LST,
+  REWARDS_DISTRIBUTOR_ankrBNB,
+} from "../../vips/vip-329/bsctestnet";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -24,7 +29,7 @@ forking(41501999, async () => {
 
     it("check reward distributor exists", async () => {
       const distributors = await comptrollerContract.getRewardDistributors();
-      expect(distributors.length).to.be.equal(5);
+      expect(distributors).to.include(REWARDS_DISTRIBUTOR_ankrBNB);
     });
   });
 
@@ -38,7 +43,7 @@ forking(41501999, async () => {
 
     it("check reward distributor removed", async () => {
       const distributors = await comptrollerContract.getRewardDistributors();
-      expect(distributors.length).to.be.equal(4);
+      expect(distributors).to.not.include(REWARDS_DISTRIBUTOR_ankrBNB);
     });
   });
 });
