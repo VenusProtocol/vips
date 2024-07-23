@@ -266,8 +266,10 @@ export const setMaxStalePeriod = async (
     console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
   }
 
-  const normalTimelock = FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet" ?  getForkedNetworkAddress("NORMAL_TIMELOCK") : getForkedNetworkAddress("GUARDIAN")
-  // const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
+  const normalTimelock =
+    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+      ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+      : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
