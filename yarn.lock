@@ -5,13 +5,6 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@adraffy/ens-normalize@npm:1.10.1":
-  version: 1.10.1
-  resolution: "@adraffy/ens-normalize@npm:1.10.1"
-  checksum: 0836f394ea256972ec19a0b5e78cb7f5bcdfd48d8a32c7478afc94dd53ae44c04d1aa2303d7f3077b4f3ac2323b1f557ab9188e8059978748fdcd83e04a80dcc
-  languageName: node
-  linkType: hard
-
 "@aws-crypto/sha256-js@npm:1.2.2":
   version: 1.2.2
   resolution: "@aws-crypto/sha256-js@npm:1.2.2"
@@ -1168,9 +1161,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-deploy@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@matterlabs/hardhat-zksync-deploy@npm:1.5.0"
+"@matterlabs/hardhat-zksync-deploy@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "@matterlabs/hardhat-zksync-deploy@npm:0.11.0"
   dependencies:
     "@matterlabs/hardhat-zksync-solc": ^1.2.0
     chai: ^4.3.4
@@ -1182,30 +1175,34 @@ __metadata:
     sinon-chai: ^3.7.0
     ts-morph: ^22.0.0
   peerDependencies:
-    ethers: ^6.12.2
-    hardhat: ^2.22.5
-    zksync-ethers: ^6.8.0
-  checksum: ad36aa28e7f89958b3bcecede71f658f019582485b377cc3107f191a85aa482be7aae2adcd11651a845b54bbb26406584c89370df25fcf498f33fa341d2e7484
+    ethers: ~5.7.2
+    hardhat: ^2.14.0
+    zksync-ethers: ^5.8.0
+  checksum: 82305a8b9426bce5a4b59944ebfa88909d4dff37c7bcbd28866c62eb3ca3858c20686155ed3cb69217bfb9774ede07ed9df2126bb4d34249b36e1424c389fe56
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-ethers@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@matterlabs/hardhat-zksync-ethers@npm:1.1.0"
+"@matterlabs/hardhat-zksync-node@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@matterlabs/hardhat-zksync-node@npm:0.2.0"
   dependencies:
-    "@matterlabs/hardhat-zksync-deploy": ^1.5.0
     "@matterlabs/hardhat-zksync-solc": ^1.2.0
+    axios: ^1.7.2
     chai: ^4.3.4
     chalk: ^4.1.2
-    hardhat: ^2.22.5
+    fs-extra: ^11.2.0
+    proxyquire: ^2.1.3
+    sinon: ^18.0.0
+    sinon-chai: ^3.7.0
+    undici: ^6.18.2
   peerDependencies:
-    ethers: ^6.12.2
-    zksync-ethers: ^6.8.0
-  checksum: a00c56a249bf132a89d5e706a4d2b1551592e4538e86dd9e3a05e9ca0f287fd841912146f5831c308219ad9194f815f794a41cb3b14125a572218290658e78e3
+    hardhat: ^2.14.0
+    zksync-ethers: ^5.8.0
+  checksum: 9c769b069f841dfc7ce66c01169842f9b159d6b9cb424dd5c44b44b3c7acc1e83a158c48cce124e7084c08880f8e13e453be8e57c447928c042840c07457f3e0
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-node@npm:^1.1.0, @matterlabs/hardhat-zksync-node@npm:^1.1.1":
+"@matterlabs/hardhat-zksync-node@npm:^1.1.1":
   version: 1.1.1
   resolution: "@matterlabs/hardhat-zksync-node@npm:1.1.1"
   dependencies:
@@ -1245,81 +1242,82 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-upgradable@npm:^1.5.0":
-  version: 1.5.1
-  resolution: "@matterlabs/hardhat-zksync-upgradable@npm:1.5.1"
+"@matterlabs/hardhat-zksync-upgradable@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@matterlabs/hardhat-zksync-upgradable@npm:0.5.1"
   dependencies:
-    "@matterlabs/hardhat-zksync-deploy": ^1.5.0
+    "@ethersproject/abi": ^5.1.2
+    "@matterlabs/hardhat-zksync-deploy": ^0.11.0
     "@matterlabs/hardhat-zksync-solc": ^1.2.0
-    "@openzeppelin/upgrades-core": ^1.31.3
+    "@openzeppelin/upgrades-core": ~1.29.0
     chalk: ^4.1.2
     compare-versions: ^6.1.0
+    dockerode: ^3.3.4
     ethereumjs-util: ^7.1.5
-    ethers: ^6.12.2
+    ethers: ~5.7.2
     fs-extra: ^11.2.0
-    hardhat: ^2.22.5
+    hardhat: ^2.14.0
     proper-lockfile: ^4.1.2
     solidity-ast: ^0.4.56
-    zksync-ethers: ^6.8.0
+    zksync-ethers: ^5.8.0
   peerDependencies:
     "@openzeppelin/contracts-upgradeable": ^4.9.2
-  checksum: cfdad4da54bb955b56e9bd35b1b9004ba284cdde49adfc7fbd60ab86733fda730eb8cd84f510bb874cdba8cbb54deb2f6a3f4a871b4693c87b6c282d7f86f5e9
+  checksum: 00ae82ad8cf3e64479a36898253dac2edb8ca9e51b3cbb9d16cb61c41218d259a6136cd2ede4366c8934ab3b27635133ca4b4000f51ab8dc1321ae42eedbfefb
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-verify@npm:^1.5.0":
-  version: 1.6.0
-  resolution: "@matterlabs/hardhat-zksync-verify@npm:1.6.0"
+"@matterlabs/hardhat-zksync-verify@npm:^0.7.0":
+  version: 0.7.0
+  resolution: "@matterlabs/hardhat-zksync-verify@npm:0.7.0"
   dependencies:
     "@ethersproject/abi": ^5.7.0
     "@ethersproject/address": 5.7.0
-    "@matterlabs/hardhat-zksync-solc": ^1.2.1
+    "@matterlabs/hardhat-zksync-solc": ^1.2.0
     "@nomicfoundation/hardhat-verify": ^2.0.8
+    "@openzeppelin/contracts": ^4.9.2
     axios: ^1.7.2
     cbor: ^9.0.2
     chai: ^4.3.4
     chalk: ^4.1.2
     debug: ^4.3.5
-    semver: ^7.6.2
+    hardhat: ^2.14.0
     sinon: ^18.0.0
     sinon-chai: ^3.7.0
+    zksync-ethers: ^5.8.0
   peerDependencies:
     "@nomicfoundation/hardhat-verify": ^2.0.8
-    hardhat: ^2.22.5
-  checksum: 289f380abcfeeee71524d504754507f39cdb2d1214914f9e178522b6187edfa59e0e48eb3d3efb745a0f613492af4fbea972d34637d2e96823c7a7e4c63b50a2
+  checksum: 58223280b58bc33a49e600f499d5ea902bf135d3b9ebde61a8a25b63cb16d266195e43df8d645d8ed48098dfd148e7b623db3ead0563944548088f72ad7de698
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@matterlabs/hardhat-zksync@npm:1.1.0"
+"@matterlabs/hardhat-zksync@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@matterlabs/hardhat-zksync@npm:0.2.0"
   dependencies:
-    "@matterlabs/hardhat-zksync-deploy": ^1.5.0
-    "@matterlabs/hardhat-zksync-ethers": ^1.1.0
-    "@matterlabs/hardhat-zksync-node": ^1.1.0
+    "@matterlabs/hardhat-zksync-deploy": ^0.11.0
+    "@matterlabs/hardhat-zksync-node": ^0.2.0
     "@matterlabs/hardhat-zksync-solc": ^1.2.0
-    "@matterlabs/hardhat-zksync-upgradable": ^1.5.0
-    "@matterlabs/hardhat-zksync-verify": ^1.5.0
+    "@matterlabs/hardhat-zksync-upgradable": ^0.5.0
+    "@matterlabs/hardhat-zksync-verify": ^0.7.0
     "@matterlabs/zksync-contracts": ^0.6.1
-    "@nomicfoundation/hardhat-ethers": ^3.0.4
-    "@nomicfoundation/hardhat-verify": ^2.0.0
+    "@nomicfoundation/hardhat-verify": ^2.0.8
+    "@nomiclabs/hardhat-ethers": ^2.2.1
     "@openzeppelin/contracts": ^4.9.2
     "@openzeppelin/contracts-upgradeable": ^4.9.2
-    "@openzeppelin/upgrades-core": ^1.31.3
-    chai: ^4.3.4
-    ethers: ^6.12.2
-    hardhat: ^2.22.5
+    "@openzeppelin/upgrades-core": ^1.27.0
+    chai: ^4.3.7
+    ethers: ~5.7.2
+    hardhat: ^2.14.0
     sinon: ^18.0.0
     sinon-chai: ^3.7.0
-    zksync-ethers: ^6.8.0
+    zksync-ethers: ^5.8.0
   peerDependencies:
-    "@matterlabs/hardhat-zksync-deploy": ^1.5.0
-    "@matterlabs/hardhat-zksync-ethers": ^1.1.0
-    "@matterlabs/hardhat-zksync-node": ^1.1.0
+    "@matterlabs/hardhat-zksync-deploy": ^0.11.0
+    "@matterlabs/hardhat-zksync-node": ^0.2.0
     "@matterlabs/hardhat-zksync-solc": ^1.2.0
-    "@matterlabs/hardhat-zksync-upgradable": ^1.5.0
-    "@matterlabs/hardhat-zksync-verify": ^1.5.0
-  checksum: ae0521def2058e340f195557bc5a9b1501c21913ab64dc5474ab04b93fd328baccb32df1c14413ee8d9e6133f45bc745667e23d7ebc40d6d1329c2dc2158fc55
+    "@matterlabs/hardhat-zksync-upgradable": ^0.5.0
+    "@matterlabs/hardhat-zksync-verify": ^0.7.0
+  checksum: 124e545e8b6e23313669352cadc4047cb738064595f9722707bd841a15b7d0ba14a3992e62e9847f445b0f18569f81b37274f1a66bf294949d6c6dcc1326f958
   languageName: node
   linkType: hard
 
@@ -1359,15 +1357,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@noble/curves@npm:1.2.0"
-  dependencies:
-    "@noble/hashes": 1.3.2
-  checksum: bb798d7a66d8e43789e93bc3c2ddff91a1e19fdb79a99b86cd98f1e5eff0ee2024a2672902c2576ef3577b6f282f3b5c778bebd55761ddbb30e36bf275e83dd0
-  languageName: node
-  linkType: hard
-
 "@noble/curves@npm:1.4.2, @noble/curves@npm:~1.4.0":
   version: 1.4.2
   resolution: "@noble/curves@npm:1.4.2"
@@ -1381,13 +1370,6 @@ __metadata:
   version: 1.2.0
   resolution: "@noble/hashes@npm:1.2.0"
   checksum: 8ca080ce557b8f40fb2f78d3aedffd95825a415ac8e13d7ffe3643f8626a8c2d99a3e5975b555027ac24316d8b3c02a35b8358567c0c23af681e6573602aa434
-  languageName: node
-  linkType: hard
-
-"@noble/hashes@npm:1.3.2":
-  version: 1.3.2
-  resolution: "@noble/hashes@npm:1.3.2"
-  checksum: fe23536b436539d13f90e4b9be843cc63b1b17666a07634a2b1259dded6f490be3d050249e6af98076ea8f2ea0d56f578773c2197f2aa0eeaa5fba5bc18ba474
   languageName: node
   linkType: hard
 
@@ -1564,7 +1546,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-ethers@npm:^3.0.0, @nomicfoundation/hardhat-ethers@npm:^3.0.4":
+"@nomicfoundation/hardhat-ethers@npm:^3.0.0":
   version: 3.0.6
   resolution: "@nomicfoundation/hardhat-ethers@npm:3.0.6"
   dependencies:
@@ -1588,7 +1570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-verify@npm:^2.0.0, @nomicfoundation/hardhat-verify@npm:^2.0.8":
+"@nomicfoundation/hardhat-verify@npm:^2.0.8":
   version: 2.0.8
   resolution: "@nomicfoundation/hardhat-verify@npm:2.0.8"
   dependencies:
@@ -1821,7 +1803,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/upgrades-core@npm:^1.27.0, @openzeppelin/upgrades-core@npm:^1.31.3":
+"@openzeppelin/upgrades-core@npm:^1.27.0":
   version: 1.34.4
   resolution: "@openzeppelin/upgrades-core@npm:1.34.4"
   dependencies:
@@ -1836,6 +1818,24 @@ __metadata:
   bin:
     openzeppelin-upgrades-core: dist/cli/cli.js
   checksum: a9dba51a78871088828d2eddf9d1b72fe31717f9a5216dd1f8a1fb20667d6396f805e0bdd92b476a2cfbab9efc3f42724dfdcd9a7e8b5f5953604be6ec4080aa
+  languageName: node
+  linkType: hard
+
+"@openzeppelin/upgrades-core@npm:~1.29.0":
+  version: 1.29.0
+  resolution: "@openzeppelin/upgrades-core@npm:1.29.0"
+  dependencies:
+    cbor: ^9.0.0
+    chalk: ^4.1.0
+    compare-versions: ^6.0.0
+    debug: ^4.1.1
+    ethereumjs-util: ^7.0.3
+    minimist: ^1.2.7
+    proper-lockfile: ^4.1.1
+    solidity-ast: ^0.4.26
+  bin:
+    openzeppelin-upgrades-core: dist/cli/cli.js
+  checksum: 99dea5d180b56670ff01d0f4fd99f19def5904b0d764b5c79106878d866c7fd6576c1523661a71170947ef06ab83fbb189cd65747bfcd6b20c8ea29adcea8a0a
   languageName: node
   linkType: hard
 
@@ -2393,13 +2393,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.15.13":
-  version: 18.15.13
-  resolution: "@types/node@npm:18.15.13"
-  checksum: 79cc5a2b5f98e8973061a4260a781425efd39161a0e117a69cd089603964816c1a14025e1387b4590c8e82d05133b7b4154fa53a7dffb3877890a66145e76515
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:20.5.1":
   version: 20.5.1
   resolution: "@types/node@npm:20.5.1"
@@ -2784,7 +2777,7 @@ __metadata:
     "@ethersproject/bignumber": ^5.7.0
     "@ethersproject/bytes": ^5.7.0
     "@ethersproject/providers": ^5.7.2
-    "@matterlabs/hardhat-zksync": ^1.1.0
+    "@matterlabs/hardhat-zksync": ^0.2.0
     "@matterlabs/hardhat-zksync-node": ^1.1.1
     "@matterlabs/hardhat-zksync-solc": ^1.2.1
     "@morpho-labs/gnosis-tx-builder": ^1.3.1
@@ -2929,13 +2922,6 @@ __metadata:
   version: 3.0.0
   resolution: "aes-js@npm:3.0.0"
   checksum: 251e26d533cd1a915b44896b17d5ed68c24a02484cfdd2e74ec700a309267db96651ea4eb657bf20aac32a3baa61f6e34edf8e2fec2de440a655da9942d334b8
-  languageName: node
-  linkType: hard
-
-"aes-js@npm:4.0.0-beta.5":
-  version: 4.0.0-beta.5
-  resolution: "aes-js@npm:4.0.0-beta.5"
-  checksum: cc2ea969d77df939c32057f7e361b6530aa6cb93cb10617a17a45cd164e6d761002f031ff6330af3e67e58b1f0a3a8fd0b63a720afd591a653b02f649470e15b
   languageName: node
   linkType: hard
 
@@ -4773,6 +4759,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"docker-modem@npm:^3.0.0":
+  version: 3.0.8
+  resolution: "docker-modem@npm:3.0.8"
+  dependencies:
+    debug: ^4.1.1
+    readable-stream: ^3.5.0
+    split-ca: ^1.0.1
+    ssh2: ^1.11.0
+  checksum: e3675c9b1ad800be8fb1cb9c5621fbef20a75bfedcd6e01b69808eadd7f0165681e4e30d1700897b788a67dbf4769964fcccd19c3d66f6d2499bb7aede6b34df
+  languageName: node
+  linkType: hard
+
 "docker-modem@npm:^5.0.3":
   version: 5.0.3
   resolution: "docker-modem@npm:5.0.3"
@@ -4793,6 +4791,17 @@ __metadata:
     docker-modem: ^1.0.8
     tar-fs: ~1.16.3
   checksum: 01381da98f98a3236b735fb2bb2a66f521da39200a2a11b83777cee3b104b32966ba7dfeb93f3fa8ab85b5e639265842d66f576e7db9562b1049564c2af6ec84
+  languageName: node
+  linkType: hard
+
+"dockerode@npm:^3.3.4":
+  version: 3.3.5
+  resolution: "dockerode@npm:3.3.5"
+  dependencies:
+    "@balena/dockerignore": ^1.0.2
+    docker-modem: ^3.0.0
+    tar-fs: ~2.0.1
+  checksum: 7f6650422b07fa7ea9d5801f04b1a432634446b5fe37b995b8302b953b64e93abf1bb4596c2fb574ba47aafee685ef2ab959cc86c9654add5a26d09541bbbcc6
   languageName: node
   linkType: hard
 
@@ -5474,7 +5483,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^5.6.8, ethers@npm:^5.7.0, ethers@npm:^5.7.2":
+"ethers@npm:^5.6.8, ethers@npm:^5.7.0, ethers@npm:^5.7.2, ethers@npm:~5.7.0, ethers@npm:~5.7.2":
   version: 5.7.2
   resolution: "ethers@npm:5.7.2"
   dependencies:
@@ -5509,21 +5518,6 @@ __metadata:
     "@ethersproject/web": 5.7.1
     "@ethersproject/wordlists": 5.7.0
   checksum: b7c08cf3e257185a7946117dbbf764433b7ba0e77c27298dec6088b3bc871aff711462b0621930c56880ff0a7ceb8b1d3a361ffa259f93377b48e34107f62553
-  languageName: node
-  linkType: hard
-
-"ethers@npm:^6.12.2":
-  version: 6.13.1
-  resolution: "ethers@npm:6.13.1"
-  dependencies:
-    "@adraffy/ens-normalize": 1.10.1
-    "@noble/curves": 1.2.0
-    "@noble/hashes": 1.3.2
-    "@types/node": 18.15.13
-    aes-js: 4.0.0-beta.5
-    tslib: 2.4.0
-    ws: 8.17.1
-  checksum: beef4b6d117f64c369f44be631e0f666b966374eac0cc0446fa7abe114b11d6b3019060022eec65c031f150711f4913d249de507ff3da3204e654635db80a07e
   languageName: node
   linkType: hard
 
@@ -6649,7 +6643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.12.2, hardhat@npm:^2.16.1, hardhat@npm:^2.22.5, hardhat@npm:^2.8.0":
+"hardhat@npm:^2.12.2, hardhat@npm:^2.14.0, hardhat@npm:^2.16.1, hardhat@npm:^2.8.0":
   version: 2.22.6
   resolution: "hardhat@npm:2.22.6"
   dependencies:
@@ -10258,7 +10252,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"solidity-ast@npm:^0.4.38, solidity-ast@npm:^0.4.51, solidity-ast@npm:^0.4.56":
+"solidity-ast@npm:^0.4.26, solidity-ast@npm:^0.4.38, solidity-ast@npm:^0.4.51, solidity-ast@npm:^0.4.56":
   version: 0.4.56
   resolution: "solidity-ast@npm:0.4.56"
   dependencies:
@@ -10360,7 +10354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ssh2@npm:^1.15.0":
+"ssh2@npm:^1.11.0, ssh2@npm:^1.15.0":
   version: 1.15.0
   resolution: "ssh2@npm:1.15.0"
   dependencies:
@@ -11000,13 +10994,6 @@ __metadata:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: fde256c9073969e234526e2cfead42591b9a2aec5222bac154b0de2fa9e4ceb30efcd717ee8bc785a56f3a119bdd5aa27b333d9dbec94ed254bd26f8944c67ac
-  languageName: node
-  linkType: hard
-
-"tslib@npm:2.4.0":
-  version: 2.4.0
-  resolution: "tslib@npm:2.4.0"
-  checksum: 8c4aa6a3c5a754bf76aefc38026134180c053b7bd2f81338cb5e5ebf96fefa0f417bff221592bf801077f5bf990562f6264fecbc42cd3309b33872cb6fc3b113
   languageName: node
   linkType: hard
 
@@ -11979,21 +11966,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:8.17.1":
-  version: 8.17.1
-  resolution: "ws@npm:8.17.1"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ">=5.0.2"
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 442badcce1f1178ec87a0b5372ae2e9771e07c4929a3180321901f226127f252441e8689d765aa5cfba5f50ac60dd830954afc5aeae81609aefa11d3ddf5cecf
-  languageName: node
-  linkType: hard
-
 "ws@npm:^3.0.0":
   version: 3.3.3
   resolution: "ws@npm:3.3.3"
@@ -12168,7 +12140,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zksync-ethers@npm:^6.10.0, zksync-ethers@npm:^6.8.0":
+"zksync-ethers@npm:^5.8.0":
+  version: 5.9.1
+  resolution: "zksync-ethers@npm:5.9.1"
+  dependencies:
+    ethers: ~5.7.0
+  peerDependencies:
+    ethers: ~5.7.0
+  checksum: c9e54677de296b328805c617e8e39aee8abe74c906a335f6431687301f06b30e70337b9b2136e5eece8b275f3523404e3e78956f4f8a82b47a638a08347ce459
+  languageName: node
+  linkType: hard
+
+"zksync-ethers@npm:^6.10.0":
   version: 6.10.0
   resolution: "zksync-ethers@npm:6.10.0"
   peerDependencies:
