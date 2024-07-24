@@ -73,6 +73,11 @@ export const vip043 = () => {
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [[vezETH, CF, LT, INITIAL_SUPPLY, sepolia.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
     },
+    {
+      target: vezETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
+    },
   ]);
 };
 

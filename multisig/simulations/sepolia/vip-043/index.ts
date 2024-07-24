@@ -100,7 +100,7 @@ forking(6361533, async () => {
     });
 
     it("check protocol seize share", async () => {
-      expect(await vezETHContract.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
+      expect(await vezETHContract.protocolSeizeShareMantissa()).equals(parseUnits("0.01", 18));
     });
 
     it("check vToken", async () => {
