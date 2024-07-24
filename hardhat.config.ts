@@ -1,7 +1,5 @@
 import "module-alias/register";
 
-import "@matterlabs/hardhat-zksync-node";
-import "@matterlabs/hardhat-zksync-solc";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
@@ -31,7 +29,6 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
   xlayertestnet: 30000000,
-  zksyncsepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -99,33 +96,10 @@ task("test", "Update fork config")
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
-  zksolc: {
-    version: "1.5.0",
-  },
-  solidity: {
-    compilers: [
-      {
-        version: "0.8.24",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 10000,
-          },
-          evmVersion: "paris",
-          outputSelection: {
-            "*": {
-              "*": ["storageLayout"],
-            },
-          },
-        },
-      },
-    ],
-  },
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
       loggingEnabled: false,
-      zksync: true,
     },
     bsctestnet: {
       url: process.env.ARCHIVE_NODE_bsctestnet || "https://data-seed-prebsc-1-s1.binance.org:8545",
@@ -184,13 +158,6 @@ const config: HardhatUserConfig = {
       url: process.env.ARCHIVE_NODE_xlayermainnet || "https://rpc.xlayer.tech/",
       chainId: 196,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
-    },
-    zksyncsepolia: {
-      url: process.env.ARCHIVE_NODE_zksyncsepolia || "https://sepolia.era.zksync.dev",
-      chainId: 300,
-      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
-      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.bscmainnet,
-      zksync: true,
     },
   },
   paths: {

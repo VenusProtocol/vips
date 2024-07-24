@@ -45,14 +45,15 @@ export const getPayload = (proposal: Proposal) => {
 };
 
 const gasUsedPerCommand = 300000;
-export async function setForkBlock(blockNumber: number) {
+export async function setForkBlock(_blockNumber: number) {
+  const blockNumber = config.networks.hardhat.zksync ? _blockNumber.toString(16) : _blockNumber;
   await network.provider.request({
     method: "hardhat_reset",
     params: [
       {
         forking: {
           jsonRpcUrl: config.networks.hardhat.forking?.url,
-          blockNumber: blockNumber.toString(16),
+          blockNumber,
         },
       },
     ],
