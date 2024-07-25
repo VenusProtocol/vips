@@ -13,8 +13,8 @@ export const vip049 = () => {
   return makeProposal([
     {
       target: XVS_VAULT_TREASURY,
-      signature: "sweepToken(address,address,uint256)",
-      params: [XVS, XVS_STORE, TRANSFER_AMOUNT],
+      signature: "fundXVSVault(uint256)",
+      params: [TRANSFER_AMOUNT],
     },
     {
       target: XVS_VAULT,
