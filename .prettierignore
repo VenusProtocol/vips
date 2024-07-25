@@ -4,8 +4,10 @@
 **/.coverage_cache
 **/.coverage_contracts
 **/artifacts
+**/artifacts-zk
 **/build
 **/cache
+**/cache-zl
 **/coverage
 **/dist
 **/node_modules
