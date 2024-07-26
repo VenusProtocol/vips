@@ -9,7 +9,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { BORROW_CAP, SUPPLY_CAP, ezETH, vezETH, vip043 } from "../../../proposals/sepolia/vip-043";
+import { BORROW_CAP, SUPPLY_CAP, ezETH, vezETH, vip050 } from "../../../proposals/sepolia/vip-050";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -50,7 +50,7 @@ forking(6361533, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip043());
+      await pretendExecutingVip(await vip050());
     });
 
     it("check price", async () => {

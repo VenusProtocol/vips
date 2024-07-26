@@ -17,8 +17,8 @@ import {
   VTOKEN_RECEIVER,
   ezETH,
   vezETH,
-  vip049,
-} from "../../../proposals/ethereum/vip-049";
+  vip050,
+} from "../../../proposals/ethereum/vip-050";
 import ERC20_ABI from "./abi/ERC20.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
@@ -69,7 +69,7 @@ forking(20390350, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip049());
+      await pretendExecutingVip(await vip050());
     });
 
     it("check price", async () => {
