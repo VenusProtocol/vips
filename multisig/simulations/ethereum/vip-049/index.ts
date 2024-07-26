@@ -150,17 +150,17 @@ forking(20390350, async () => {
       await ezETHContract.transfer(usdtPrimeConverter.address, ezETHAmount);
 
       const usdtBalanceBefore = await usdt.balanceOf(ethereum.GUARDIAN);
-      const babyDogeBalanceBefore = await ezETHContract.balanceOf(ethereum.GUARDIAN);
+      const ezETHBalanceBefore = await ezETHContract.balanceOf(ethereum.GUARDIAN);
 
       await usdtPrimeConverter
         .connect(await ethers.getSigner(ethereum.GUARDIAN))
         .convertForExactTokens(usdtAmount, ezETHAmount, usdt.address, ezETHContract.address, ethereum.GUARDIAN);
 
       const usdtBalanceAfter = await usdt.balanceOf(ethereum.GUARDIAN);
-      const babyDogeBalanceAfter = await ezETHContract.balanceOf(ethereum.GUARDIAN);
+      const ezETHBalanceAfter = await ezETHContract.balanceOf(ethereum.GUARDIAN);
 
       expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("3.287820", 6));
-      expect(babyDogeBalanceAfter.sub(babyDogeBalanceBefore)).to.be.equal(ezETHAmount);
+      expect(ezETHBalanceAfter.sub(ezETHBalanceBefore)).to.be.equal(ezETHAmount);
     });
   });
 });
