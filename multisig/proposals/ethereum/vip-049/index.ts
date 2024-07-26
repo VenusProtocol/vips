@@ -21,6 +21,18 @@ const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of
 const STALE_PERIOD_13H = 60 * 60 * 13; // 13 hours (pricefeeds with heartbeat of 12 hr) ;
 const CF = parseUnits("0.8", 18);
 const LT = parseUnits("0.85", 18);
+export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
+export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
+export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0";
+export const WETH_PRIME_CONVERTER = "0xb8fD67f215117FADeF06447Af31590309750529D";
+export const XVS_VAULT_CONVERTER = "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407";
+export const BaseAssets = [
+  "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT USDTTokenConverter BaseAsset
+  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC USDCTokenConverter BaseAsset
+  "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC WBTCTokenConverter BaseAsset
+  "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH WETHTokenConverter BaseAsset
+  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
+];
 
 export const vip049 = () => {
   return makeProposal([
@@ -77,6 +89,33 @@ export const vip049 = () => {
       target: ethereum.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [[vezETH, CF, LT, INITIAL_SUPPLY, VTOKEN_RECEIVER, SUPPLY_CAP, BORROW_CAP]],
+    },
+
+    // Conversion config
+    {
+      target: USDT_PRIME_CONVERTER,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [BaseAssets[0], [ezETH], [[0, 1]]],
+    },
+    {
+      target: USDC_PRIME_CONVERTER,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [BaseAssets[1], [ezETH], [[0, 1]]],
+    },
+    {
+      target: WBTC_PRIME_CONVERTER,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [BaseAssets[2], [ezETH], [[0, 1]]],
+    },
+    {
+      target: WETH_PRIME_CONVERTER,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [BaseAssets[3], [ezETH], [[0, 1]]],
+    },
+    {
+      target: XVS_VAULT_CONVERTER,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [BaseAssets[4], [ezETH], [[0, 1]]],
     },
   ]);
 };
