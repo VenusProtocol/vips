@@ -8,7 +8,7 @@ export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const CERTIK = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
-export const FAIRYPROOF = "0x060a08fff78aedba4eef712533a324272bf68119"
+export const FAIRYPROOF = "0x060a08fff78aedba4eef712533a324272bf68119";
 export const CHAINALYSIS = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const CHAOSLABS = "0xfb1912af5b9d3fb678f801bf764e98f1c217ef35";
 export const COMMUNITY = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
@@ -21,7 +21,7 @@ export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 
-export const CERTIK_AMOUNT = parseUnits("17500", 18).mul(2); 
+export const CERTIK_AMOUNT = parseUnits("17500", 18).mul(2);
 export const FAIRYPROOF_AMOUNT = parseUnits("7500", 18);
 export const CHAINALYSIS_AMOUNT = parseUnits("21600", 18);
 export const CHAOS_LABS_AMOUNT = parseUnits("170000", 18);
@@ -37,7 +37,7 @@ export const CHAINPATROL_AMOUNT = parseUnits("3000", 18);
 // Extra USDC Needed = 191,913 - 130,475 = 61,438
 // 1 vUSDC = 0.02420 USDC
 // vUSDC Needed = 61,438 / 0.02420 = 2,538,843.47
-export const VUSDC_AMOUNT = parseUnits("2538844", 8); 
+export const VUSDC_AMOUNT = parseUnits("2538844", 8);
 export const USDC_AMOUNT = parseUnits("61438", 18);
 
 export const vip344 = () => {

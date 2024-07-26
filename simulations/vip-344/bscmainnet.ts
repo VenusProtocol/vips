@@ -7,7 +7,6 @@ import { forking, testVip } from "../../src/vip-framework";
 import vip344, {
   CERTIK,
   CERTIK_AMOUNT,
-  CHAINALYSIS,
   CHAINALYSIS_AMOUNT,
   CHAINPATROL,
   CHAINPATROL_AMOUNT,
@@ -25,7 +24,6 @@ import vip344, {
   TOKEN_REDEEMER,
   USDC,
   USDT,
-  VTREASURY,
   XVS,
   vUSDC,
 } from "../../vips/vip-344/bscmainnet";
