@@ -19,7 +19,6 @@ const MOCK_USDT = "0x9Bf62C9C6AaB7AB8e01271f0d7A401306579709B";
 const WETH = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
 const MOCK_WBTC = "0xeF891B3FA37FfD83Ce8cC7b682E4CADBD8fFc6F0";
 const MOCK_ZK = "0x8A2E9048F5d658E88D6eD89DdD1F3B5cA0250B9F";
-// const XVS = "0x3AeCac43A2ebe5D8184e650403bf9F656F9D1cfA";
 
 // VIP: Configures the new oracle with the ACL and configures the initial price feeds on this oracle
 const vip001 = () => {
@@ -183,17 +182,24 @@ const vip001 = () => {
     //   signature: "setTokenConfig((address,address,uint256))",
     //   params: [[zksyncsepolia.XVS, REDSTONE_XVS_FEED, STALE_PERIOD_26H]],
     // },
-    // {
-    //   target: zksyncsepolia.RESILIENT_ORACLE,
-    //   signature: "setTokenConfig((address,address[3],bool[3]))",
-    //   params: [
-    //     [
-    //       zksyncsepolia.XVS,
-    //       [REDSTONE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
-    //       [true, false, false],
-    //     ],
-    //   ],
-    // },
+
+    {
+      target: REDSTONE_ORACLE,
+      signature: "setDirectPrice(address,uint256)",
+      params: [zksyncsepolia.XVS, "7000000000000000000"], // 7$
+    },
+
+    {
+      target: zksyncsepolia.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          zksyncsepolia.XVS,
+          [REDSTONE_ORACLE, "0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"],
+          [true, false, false],
+        ],
+      ],
+    },
   ]);
 };
 

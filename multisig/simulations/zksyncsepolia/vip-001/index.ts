@@ -61,6 +61,7 @@ const assetConfigs: AssetConfig[] = [
     feed: "0x07F05C2aFeb54b68Ea425CAbCcbF53E2d5605d76",
     oracle: "chainlink",
   },
+  // TO-DO
   //   {
   //     name: "XVS",
   //     address: "0x3AeCac43A2ebe5D8184e650403bf9F656F9D1cfA",
@@ -75,6 +76,11 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
     name: "ZK",
     address: "0x8A2E9048F5d658E88D6eD89DdD1F3B5cA0250B9F",
     price: "0.2", // 0.2$
+  },
+  {
+    name: "XVS",
+    address: "0x3AeCac43A2ebe5D8184e650403bf9F656F9D1cfA",
+    price: "7", // 7$
   },
 ];
 

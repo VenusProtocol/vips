@@ -7,6 +7,7 @@
 **/artifacts-zk
 **/build
 **/cache
+**/cache-zk
 **/cache-zl
 **/coverage
 **/dist
