@@ -13,6 +13,7 @@ export const CHAINALYSIS = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const CHAOSLABS = "0xfb1912af5b9d3fb678f801bf764e98f1c217ef35";
 export const COMMUNITY = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const SKYNET = "0x4124E7aAAfd7F29ad6E6914B80179060B8bE871c";
+export const CHAINPATROL = "0x3D9d22E1821Be3b1Ce2A8ACB6FE47fFEF04243c3";
 
 export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -29,6 +30,7 @@ export const COMMUNITY_USDT_AMOUNT = parseUnits("936.61", 18);
 export const COMMUNITY_USDC_AMOUNT = parseUnits("313", 18);
 export const SKYNET_XVS_AMOUNT = parseUnits("68000", 18);
 export const SKYNET_BNB_AMOUNT = parseUnits("833.33", 18);
+export const CHAINPATROL_AMOUNT = parseUnits("3000", 18);
 
 // Total USDC Balance of Treasury = 130,475
 // USDC Needed = 21,600 + 170,000 + 313 = 191,913
@@ -116,6 +118,11 @@ export const vip344 = () => {
         signature: "",
         params: [],
         value: SKYNET_BNB_AMOUNT.toString(),
+      },
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, CHAINPATROL_AMOUNT, CHAINPATROL],
       },
     ],
     meta,

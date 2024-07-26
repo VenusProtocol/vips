@@ -6,7 +6,7 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip344, { 
   USDC, USDT, VTREASURY, CERTIK, FAIRYPROOF, CHAINALYSIS, CHAOSLABS, CERTIK_AMOUNT, FAIRYPROOF_AMOUNT, CHAINALYSIS_AMOUNT, CHAOS_LABS_AMOUNT,
-  COMMUNITY, SKYNET, COMMUNITY_BNB_AMOUNT, COMMUNITY_USDC_AMOUNT, COMMUNITY_USDT_AMOUNT, SKYNET_BNB_AMOUNT, SKYNET_XVS_AMOUNT, XVS
+  COMMUNITY, SKYNET, COMMUNITY_BNB_AMOUNT, COMMUNITY_USDC_AMOUNT, COMMUNITY_USDT_AMOUNT, SKYNET_BNB_AMOUNT, SKYNET_XVS_AMOUNT, XVS, CHAINPATROL, CHAINPATROL_AMOUNT,
 } from "../../vips/vip-344/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -26,6 +26,7 @@ forking(40805481, async () => {
   let prevBNBBalanceOfCommunity: BigNumber;
   let prevUSDCBalanceOfCommunity: BigNumber;
   let prevUSDTBalanceOfCommunity: BigNumber;
+  let prevChainPatrolBalance: BigNumber;
 
   before(async () => {
     usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
@@ -42,14 +43,13 @@ forking(40805481, async () => {
     prevBNBBalanceOfCommunity = await ethers.provider.getBalance(COMMUNITY);
     prevUSDCBalanceOfCommunity = await usdc.balanceOf(COMMUNITY);
     prevUSDTBalanceOfCommunity = await usdt.balanceOf(COMMUNITY);
-
-    //print bnb balance of timelock
-    console.log(await ethers.provider.getBalance(SKYNET))
+    prevChainPatrolBalance = await usdt.balanceOf(CHAINPATROL);
   });
 
   testVip("VIP-344", await vip344(), {
+    supporter: "0x55a9f5374af30e3045fb491f1da3c2e8a74d168d",
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [8]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [9]);
     },
   });
 
@@ -57,31 +57,30 @@ forking(40805481, async () => {
     it("check balances", async () => {
       const certikBalance = await usdt.balanceOf(CERTIK);
       const fairyProofBalance = await usdt.balanceOf(FAIRYPROOF);
-      const chainalysisBalance = await usdc.balanceOf(CHAINALYSIS);
       const chaosLabsBalance = await usdc.balanceOf(CHAOSLABS);
       const bnbBalanceOfSkynet = await ethers.provider.getBalance(SKYNET);
       const xvsBalanceOfSkynet = await xvs.balanceOf(SKYNET);
       const bnbBalanceOfCommunity = await ethers.provider.getBalance(COMMUNITY);
       const usdcBalanceOfCommunity = await usdc.balanceOf(COMMUNITY);
       const usdtBalanceOfCommunity = await usdt.balanceOf(COMMUNITY);
+      const chainPatrolBalance = await usdt.balanceOf(CHAINPATROL);
 
       expect(certikBalance.sub(prevCertikBalance)).to.equal(CERTIK_AMOUNT);
       expect(fairyProofBalance.sub(prevFairyProofBalance)).to.equal(FAIRYPROOF_AMOUNT);
 
-      // sends more
-      //expect(chainalysisBalance.sub(prevChainalysisBalance)).to.be.eq(CHAINALYSIS_AMOUNT);
+      console.log(bnbBalanceOfCommunity.toString());
       
       expect(chaosLabsBalance.sub(prevChaosLabsBalance)).to.equal(CHAOS_LABS_AMOUNT);
       expect(bnbBalanceOfSkynet.sub(prevBNBBalanceOfSkynet)).to.equal(SKYNET_BNB_AMOUNT);
       expect(xvsBalanceOfSkynet.sub(prevXVSBalanceOfSkynet)).to.equal(SKYNET_XVS_AMOUNT);
       
-      // sends less
-      // expect(bnbBalanceOfCommunity.sub(prevBNBBalanceOfCommunity)).to.equal(COMMUNITY_BNB_AMOUNT);
+      expect(bnbBalanceOfCommunity.sub(prevBNBBalanceOfCommunity)).to.equal(COMMUNITY_BNB_AMOUNT);
     
-      // sends more
-      //expect(usdcBalanceOfCommunity.sub(prevUSDCBalanceOfCommunity)).to.equal(COMMUNITY_USDC_AMOUNT);
+      expect(usdcBalanceOfCommunity.sub(prevUSDCBalanceOfCommunity)).to.equal(COMMUNITY_USDC_AMOUNT.add(CHAINALYSIS_AMOUNT));
       
       expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(COMMUNITY_USDT_AMOUNT);
+
+      expect(chainPatrolBalance.sub(prevChainPatrolBalance)).to.equal(CHAINPATROL_AMOUNT);
     });
   });
 });
