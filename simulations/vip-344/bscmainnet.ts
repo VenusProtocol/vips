@@ -22,10 +22,12 @@ import vip344, {
   SKYNET,
   SKYNET_BNB_AMOUNT,
   SKYNET_XVS_AMOUNT,
+  TOKEN_REDEEMER,
   USDC,
   USDT,
   VTREASURY,
   XVS,
+  vUSDC,
 } from "../../vips/vip-344/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -33,12 +35,11 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 forking(40805481, async () => {
   let usdc: Contract;
   let usdt: Contract;
-  let treasury: Contract;
   let xvs: Contract;
+  let vusdc: Contract;
 
   let prevCertikBalance: BigNumber;
   let prevFairyProofBalance: BigNumber;
-  let prevChainalysisBalance: BigNumber;
   let prevChaosLabsBalance: BigNumber;
   let prevBNBBalanceOfSkynet: BigNumber;
   let prevXVSBalanceOfSkynet: BigNumber;
@@ -50,12 +51,11 @@ forking(40805481, async () => {
   before(async () => {
     usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
     usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
-    treasury = new ethers.Contract(VTREASURY, VTREASURY_ABI, ethers.provider);
     xvs = new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
+    vusdc = new ethers.Contract(vUSDC, ERC20_ABI, ethers.provider);
 
     prevCertikBalance = await usdt.balanceOf(CERTIK);
     prevFairyProofBalance = await usdt.balanceOf(FAIRYPROOF);
-    prevChainalysisBalance = await usdc.balanceOf(CHAINALYSIS);
     prevChaosLabsBalance = await usdc.balanceOf(CHAOSLABS);
     prevBNBBalanceOfSkynet = await ethers.provider.getBalance(SKYNET);
     prevXVSBalanceOfSkynet = await xvs.balanceOf(SKYNET);
@@ -102,6 +102,14 @@ forking(40805481, async () => {
       expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(COMMUNITY_USDT_AMOUNT);
 
       expect(chainPatrolBalance.sub(prevChainPatrolBalance)).to.equal(CHAINPATROL_AMOUNT);
+    });
+
+    it(`does not keep any vUSDC in the redeemer`, async () => {
+      expect(await vusdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
+    });
+
+    it(`does not keep any USDC in the redeemer`, async () => {
+      expect(await usdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
   });
 });
