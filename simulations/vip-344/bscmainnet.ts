@@ -4,9 +4,28 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip344, { 
-  USDC, USDT, VTREASURY, CERTIK, FAIRYPROOF, CHAINALYSIS, CHAOSLABS, CERTIK_AMOUNT, FAIRYPROOF_AMOUNT, CHAINALYSIS_AMOUNT, CHAOS_LABS_AMOUNT,
-  COMMUNITY, SKYNET, COMMUNITY_BNB_AMOUNT, COMMUNITY_USDC_AMOUNT, COMMUNITY_USDT_AMOUNT, SKYNET_BNB_AMOUNT, SKYNET_XVS_AMOUNT, XVS, CHAINPATROL, CHAINPATROL_AMOUNT,
+import vip344, {
+  CERTIK,
+  CERTIK_AMOUNT,
+  CHAINALYSIS,
+  CHAINALYSIS_AMOUNT,
+  CHAINPATROL,
+  CHAINPATROL_AMOUNT,
+  CHAOSLABS,
+  CHAOS_LABS_AMOUNT,
+  COMMUNITY,
+  COMMUNITY_BNB_AMOUNT,
+  COMMUNITY_USDC_AMOUNT,
+  COMMUNITY_USDT_AMOUNT,
+  FAIRYPROOF,
+  FAIRYPROOF_AMOUNT,
+  SKYNET,
+  SKYNET_BNB_AMOUNT,
+  SKYNET_XVS_AMOUNT,
+  USDC,
+  USDT,
+  VTREASURY,
+  XVS,
 } from "../../vips/vip-344/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -69,15 +88,17 @@ forking(40805481, async () => {
       expect(fairyProofBalance.sub(prevFairyProofBalance)).to.equal(FAIRYPROOF_AMOUNT);
 
       console.log(bnbBalanceOfCommunity.toString());
-      
+
       expect(chaosLabsBalance.sub(prevChaosLabsBalance)).to.equal(CHAOS_LABS_AMOUNT);
       expect(bnbBalanceOfSkynet.sub(prevBNBBalanceOfSkynet)).to.equal(SKYNET_BNB_AMOUNT);
       expect(xvsBalanceOfSkynet.sub(prevXVSBalanceOfSkynet)).to.equal(SKYNET_XVS_AMOUNT);
-      
+
       expect(bnbBalanceOfCommunity.sub(prevBNBBalanceOfCommunity)).to.equal(COMMUNITY_BNB_AMOUNT);
-    
-      expect(usdcBalanceOfCommunity.sub(prevUSDCBalanceOfCommunity)).to.equal(COMMUNITY_USDC_AMOUNT.add(CHAINALYSIS_AMOUNT));
-      
+
+      expect(usdcBalanceOfCommunity.sub(prevUSDCBalanceOfCommunity)).to.equal(
+        COMMUNITY_USDC_AMOUNT.add(CHAINALYSIS_AMOUNT),
+      );
+
       expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(COMMUNITY_USDT_AMOUNT);
 
       expect(chainPatrolBalance.sub(prevChainPatrolBalance)).to.equal(CHAINPATROL_AMOUNT);
