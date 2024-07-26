@@ -17,7 +17,8 @@ export const SUPPLY_CAP = parseUnits("14000", 18);
 export const BORROW_CAP = parseUnits("1400", 18);
 const CHAINLINK_ezETH_FEED = "0x636A000262F6aA9e1F094ABF0aD8f645C44f641C";
 const REDSTONE_ezETH_FEED = "0xF4a3e183F59D2599ee3DF213ff78b1B3b1923696";
-const STALE_PERIOD_26H = 60 * 60 * 13; // 13 hours (pricefeeds with heartbeat of 12 hr) ;
+const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr) ;
+const STALE_PERIOD_13H = 60 * 60 * 13; // 13 hours (pricefeeds with heartbeat of 12 hr) ;
 const CF = parseUnits("0.8", 18);
 const LT = parseUnits("0.85", 18);
 
@@ -32,7 +33,7 @@ export const vip049 = () => {
     {
       target: ethereum.REDSTONE_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[ezETH, REDSTONE_ezETH_FEED, STALE_PERIOD_26H]],
+      params: [[ezETH, REDSTONE_ezETH_FEED, STALE_PERIOD_13H]],
     },
     {
       target: ethereum.CHAINLINK_ORACLE,
