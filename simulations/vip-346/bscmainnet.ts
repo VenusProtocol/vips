@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip344, {
+import vip346, {
   CERTIK,
   CERTIK_AMOUNT,
   CHAINALYSIS_AMOUNT,
@@ -26,7 +26,7 @@ import vip344, {
   USDT,
   XVS,
   vUSDC,
-} from "../../vips/vip-344/bscmainnet";
+} from "../../vips/vip-346/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
@@ -63,7 +63,7 @@ forking(40805481, async () => {
     prevChainPatrolBalance = await usdt.balanceOf(CHAINPATROL);
   });
 
-  testVip("VIP-344", await vip344(), {
+  testVip("VIP-346", await vip346(), {
     supporter: "0x55a9f5374af30e3045fb491f1da3c2e8a74d168d",
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [9]);
