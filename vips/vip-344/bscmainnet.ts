@@ -87,11 +87,6 @@ export const vip344 = () => {
       },
       {
         target: WBNB,
-        signature: "approve(address,uint256)",
-        params: [WBNB, COMMUNITY_BNB_AMOUNT.add(SKYNET_BNB_AMOUNT)],
-      },
-      {
-        target: WBNB,
         signature: "withdraw(uint256)",
         params: [COMMUNITY_BNB_AMOUNT.add(SKYNET_BNB_AMOUNT)],
       },
@@ -117,7 +112,7 @@ export const vip344 = () => {
         params: [SKYNET, SKYNET_XVS_AMOUNT],
       },
       {
-        target: COMMUNITY,
+        target: SKYNET,
         signature: "",
         params: [],
         value: SKYNET_BNB_AMOUNT.toString(),
