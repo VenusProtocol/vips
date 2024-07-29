@@ -5,6 +5,32 @@
     "type": "constructor"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "calledContract",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "methodSignature",
+        "type": "string"
+      }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddressNotAllowed",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -27,13 +53,32 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "vTokenAddress",
         "type": "address"
       }
     ],
     "name": "MarketAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAccessControlManager",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAccessControlManager",
+        "type": "address"
+      }
+    ],
+    "name": "NewAccessControlManager",
     "type": "event"
   },
   {
@@ -86,11 +131,6 @@
       {
         "components": [
           {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
             "internalType": "string",
             "name": "category",
             "type": "string"
@@ -113,11 +153,6 @@
       },
       {
         "components": [
-          {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
           {
             "internalType": "string",
             "name": "category",
@@ -222,58 +257,26 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [
+      {
+        "internalType": "contract IAccessControlManagerV8",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "components": [
           {
-            "internalType": "address",
-            "name": "comptroller",
+            "internalType": "contract VToken",
+            "name": "vToken",
             "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "asset",
-            "type": "address"
-          },
-          {
-            "internalType": "uint8",
-            "name": "decimals",
-            "type": "uint8"
-          },
-          {
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "symbol",
-            "type": "string"
-          },
-          {
-            "internalType": "enum PoolRegistry.InterestRateModels",
-            "name": "rateModel",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "baseRatePerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "multiplierPerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "jumpMultiplierPerYear",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "kink_",
-            "type": "uint256"
           },
           {
             "internalType": "uint256",
@@ -286,24 +289,14 @@
             "type": "uint256"
           },
           {
-            "internalType": "contract AccessControlManager",
-            "name": "accessControlManager",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "vTokenProxyAdmin",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "beaconAddress",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
             "name": "initialSupply",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "vTokenReceiver",
+            "type": "address"
           },
           {
             "internalType": "uint256",
@@ -334,8 +327,8 @@
         "type": "string"
       },
       {
-        "internalType": "address",
-        "name": "beaconAddress",
+        "internalType": "contract Comptroller",
+        "name": "comptroller",
         "type": "address"
       },
       {
@@ -352,24 +345,14 @@
         "internalType": "uint256",
         "name": "minLiquidatableCollateral",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "priceOracle",
-        "type": "address"
       }
     ],
-    "name": "createRegistryPool",
+    "name": "addPool",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "index",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "proxyAddress",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -517,11 +500,6 @@
       {
         "components": [
           {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
             "internalType": "string",
             "name": "category",
             "type": "string"
@@ -548,33 +526,8 @@
   {
     "inputs": [
       {
-        "internalType": "contract VTokenProxyFactory",
-        "name": "_vTokenFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract JumpRateModelFactory",
-        "name": "_jumpRateFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract WhitePaperInterestRateModelFactory",
-        "name": "_whitePaperFactory",
-        "type": "address"
-      },
-      {
-        "internalType": "contract Shortfall",
-        "name": "_shortfall",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "riskFund_",
-        "type": "address"
-      },
-      {
-        "internalType": "address payable",
-        "name": "protocolShareReserve_",
+        "internalType": "address",
+        "name": "accessControlManager_",
         "type": "address"
       }
     ],
@@ -593,11 +546,6 @@
     ],
     "name": "metadata",
     "outputs": [
-      {
-        "internalType": "enum PoolRegistryInterface.RiskRating",
-        "name": "riskRating",
-        "type": "uint8"
-      },
       {
         "internalType": "string",
         "name": "category",
@@ -654,6 +602,19 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "comptroller",
         "type": "address"
       },
@@ -691,11 +652,6 @@
       {
         "components": [
           {
-            "internalType": "enum PoolRegistryInterface.RiskRating",
-            "name": "riskRating",
-            "type": "uint8"
-          },
-          {
             "internalType": "string",
             "name": "category",
             "type": "string"
@@ -712,7 +668,7 @@
           }
         ],
         "internalType": "struct PoolRegistryInterface.VenusPoolMetaData",
-        "name": "_metadata",
+        "name": "metadata_",
         "type": "tuple"
       }
     ],

@@ -27,82 +27,82 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMarketSupplyCaps(address[],uint256[])", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMarketSupplyCaps(address[],uint256[])", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMarketBorrowCaps(address[],uint256[])", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMarketBorrowCaps(address[],uint256[])", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setCloseFactor(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setCloseFactor(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMinLiquidatableCollateral(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMinLiquidatableCollateral(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setActionsPaused(address[],uint256[],bool)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setActionsPaused(address[],uint256[],bool)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setPoolName(address,string)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setProtocolSeizeShare(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setProtocolSeizeShare(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setReserveFactor(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setReserveFactor(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setInterestRateModel(address)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setInterestRateModel(address)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -112,12 +112,12 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.POOL_REGISTRY, "addMarket(AddMarketInput)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.POOL_REGISTRY, "addMarket(AddMarketInput)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setReduceReservesBlockDelta(uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setReduceReservesBlockDelta(uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -164,7 +164,7 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_WBTC, parseUnits("0.075", 8), zksyncsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_WBTC, parseUnits("0.075", 8), zksyncsepolia.GUARDIAN],
     },
     {
       target: MOCK_WBTC,
@@ -199,7 +199,7 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_WETH, parseUnits("1.5", 18), zksyncsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_WETH, parseUnits("1.5", 18), zksyncsepolia.GUARDIAN],
     },
     {
       target: MOCK_WETH,
@@ -234,7 +234,7 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_USDC, parseUnits("5000", 6), zksyncsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_USDC, parseUnits("5000", 6), zksyncsepolia.GUARDIAN],
     },
     {
       target: MOCK_USDC,
@@ -269,7 +269,7 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_USDT, parseUnits("5000", 6), zksyncsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_USDT, parseUnits("5000", 6), zksyncsepolia.GUARDIAN],
     },
     {
       target: MOCK_USDT,
@@ -309,7 +309,7 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_ZK, parseUnits("25000", 18), zksyncsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_ZK, parseUnits("25000", 18), zksyncsepolia.GUARDIAN],
     },
     {
       target: MOCK_ZK,

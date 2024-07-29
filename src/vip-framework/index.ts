@@ -66,6 +66,7 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     value: proposal.values[commandIdx],
     data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
     gasLimit: 8000000,
+    // maxFeePerGas: 200000000000, // needed for zksync
   });
 };
 
