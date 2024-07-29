@@ -2,11 +2,11 @@ import { parseUnits } from "ethers/lib/utils";
 
 import { makeProposal } from "../../../../src/utils";
 
-export const LIQUID_STAKED_ETH_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
-export const vPTweETH26DEC2024LiquidStakedETH = "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C";
+export const LIQUID_STAKED_ETH_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
+export const vPTweETH26DEC2024LiquidStakedETH = "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1";
 export const NEW_SUPPLY_CAP = parseUnits("2400", 18);
 
-export const vip049 = () => {
+export const vip051 = () => {
   return makeProposal([
     {
       target: LIQUID_STAKED_ETH_COMPTROLLER,
@@ -16,4 +16,4 @@ export const vip049 = () => {
   ]);
 };
 
-export default vip049;
+export default vip051;

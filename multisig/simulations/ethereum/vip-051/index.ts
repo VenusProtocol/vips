@@ -4,11 +4,11 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip049, {
+import vip051, {
   LIQUID_STAKED_ETH_COMPTROLLER,
   NEW_SUPPLY_CAP,
   vPTweETH26DEC2024LiquidStakedETH,
-} from "../../../proposals/ethereum/vip-049";
+} from "../../../proposals/ethereum/vip-051";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
 forking(20376300, async () => {
@@ -27,7 +27,7 @@ forking(20376300, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip049());
+      await pretendExecutingVip(await vip051());
     });
 
     it("Should have new supply cap", async () => {
