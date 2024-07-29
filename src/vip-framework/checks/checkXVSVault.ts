@@ -11,7 +11,10 @@ import ERC20_ABI from "../abi/erc20.json";
 
 const FORKED_NETWORK_CONFIG = FORKED_NETWORK && NETWORK_CONFIG[FORKED_NETWORK];
 
-const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK");
+const NORMAL_TIMELOCK =
+  FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+    ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+    : getForkedNetworkAddress("GUARDIAN");
 const XVS = getForkedNetworkAddress("XVS");
 const XVS_VAULT_PROXY = getForkedNetworkAddress("XVS_VAULT_PROXY");
 const ACCOUNT = getForkedNetworkAddress("GENERIC_TEST_USER_ACCOUNT");
