@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip037, {
   COMPTROLLER_CORE,
   COMPTROLLER_LST,
@@ -51,7 +51,7 @@ const USDC_HOLDER = "0x974CaA59e49682CdA0AD2bbe82983419A2ECC400";
 
 const OLD_IMPLEMENTATION = "0x97D77d7e02095C26854FF7E1dCBE03041e2Af432";
 
-forking(20120060, () => {
+forking(20120060, async () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -73,7 +73,7 @@ forking(20120060, () => {
 
   describe("Post-VIP behavior", () => {
     before(async () => {
-      await pretendExecutingVip(vip037());
+      await pretendExecutingVip(await vip037());
 
       converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
       xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_CONVERTER_ABI, provider);
@@ -103,7 +103,7 @@ forking(20120060, () => {
   });
 });
 
-forking(20120060, () => {
+forking(20120060, async () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;
@@ -119,7 +119,7 @@ forking(20120060, () => {
     protocolShareReserve = new ethers.Contract(PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
 
-    await pretendExecutingVip(vip037());
+    await pretendExecutingVip(await vip037());
   });
 
   describe("Post-VIP behavior", () => {
@@ -258,7 +258,7 @@ forking(20120060, () => {
   });
 });
 
-forking(20120060, () => {
+forking(20120060, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -289,7 +289,7 @@ forking(20120060, () => {
     let plp: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip037());
+      await pretendExecutingVip(await vip037());
 
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);

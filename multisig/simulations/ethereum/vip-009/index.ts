@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip009 from "../../../proposals/ethereum/vip-009";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import WSTETH_ABI from "./abi/wstETH.json";
@@ -13,7 +13,7 @@ const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 const WETH_USD_PRICE_DENOMINATOR = parseUnits("1", 18);
 
-forking(19076168, () => {
+forking(19076168, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let wstETH: Contract;
@@ -29,7 +29,7 @@ forking(19076168, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip009());
+      await pretendExecutingVip(await vip009());
     });
     it("should return correct wstETH price", async () => {
       const WETH_USD_PRICE = await resilientOracle.getPrice(WETH_ADDRESS);

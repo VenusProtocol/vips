@@ -2429,6 +2429,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/module-alias@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "@types/module-alias@npm:2.0.4"
+  checksum: f324ec96e07955270b8729cbc03e56405780f7a87f1f8e75009b40ba47c07a08f22ac5fe27e8e9a8c08b7951565618357429f4cec1cfffb2b777e569a0ffb966
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:*":
   version: 20.11.17
   resolution: "@types/node@npm:20.11.17"
@@ -2864,6 +2871,7 @@ __metadata:
     "@types/chai": ^4.3.4
     "@types/fs-extra": ^9.0.13
     "@types/mocha": ^10.0.0
+    "@types/module-alias": ^2.0.4
     "@types/node": ^18.11.9
     "@types/readline-sync": ^1.4.8
     "@types/sinon": ^17.0.3
@@ -2891,6 +2899,7 @@ __metadata:
     lint-staged: ^13.0.4
     lodash: ^4.17.21
     mocha: ^10.1.0
+    module-alias: ^2.2.3
     pinst: ^3.0.0
     prettier: ^2.8.4
     readline-sync: ^1.4.10
@@ -8464,7 +8473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"module-alias@npm:^2.2.2":
+"module-alias@npm:^2.2.2, module-alias@npm:^2.2.3":
   version: 2.2.3
   resolution: "module-alias@npm:2.2.3"
   checksum: 6169187f69de8dcf8af8fab4d9e53ada6338a43f7670d38d0b27a089c28f9eb18d85a6fd46f11b54c63079a68449b85d071d7db0ac067f9f7faedbcd6231456d

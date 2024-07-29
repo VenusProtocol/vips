@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const vETH = "0xf508fcd89b8bd15579dc79a6827cb4686a3592c8";
 const vLINK = "0x650b940a1033b8a1b1873f78730fcfc73ec11f1f";

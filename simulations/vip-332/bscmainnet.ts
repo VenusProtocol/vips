@@ -25,7 +25,7 @@ import XVS_ABI from "./abi/Xvs.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(40013598, () => {
+forking(40013598, async () => {
   let psr: Contract;
   let xvs: Contract;
   let xvsVault: Contract;
@@ -38,7 +38,7 @@ forking(40013598, () => {
     oldXvsStoreBalance = await xvs.balanceOf(XVS_STORE);
   });
 
-  testVip("VIP-332 Update Distribution rules on PSR", vip332(), {
+  testVip("VIP-332 Update Distribution rules on PSR", await vip332(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [10]);
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["FundsTransferredToXVSStore"], [1]);

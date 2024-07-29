@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0x196b19C2037863409C65CbF63592ae2a3CD2Dc2C";
 

@@ -7,7 +7,7 @@ import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip038, { BORROW_CAP, COMPTROLLER, vsFRAX } from "../../../proposals/ethereum/vip-038";
 import COMPTROLLER_ABI from "./abi/ILComprollerAbi.json";
 
-forking(19962658, () => {
+forking(19962658, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -23,7 +23,7 @@ forking(19962658, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip038());
+      await pretendExecutingVip(await vip038());
     });
 
     it("new vsFRAX borrow cap", async () => {

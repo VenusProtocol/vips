@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip003, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
@@ -17,7 +17,7 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
 const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 
-forking(18417812, () => {
+forking(18417812, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
 
@@ -28,7 +28,7 @@ forking(18417812, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip003());
+      await pretendExecutingVip(await vip003());
     });
     it("Should match single send transaction limit", async () => {
       expect(await xvsBridge.chainIdToMaxSingleTransactionLimit(SRC_CHAIN_ID)).to.equal(SINGLE_SEND_LIMIT);

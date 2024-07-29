@@ -2,12 +2,12 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
   BORROW_CAP,
   SUPPLY_CAP,
@@ -26,7 +26,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 const LIQUID_STAKED_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
-forking(20097158, () => {
+forking(20097158, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vrsETHContract: Contract;
@@ -53,7 +53,7 @@ forking(20097158, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip036());
+      await pretendExecutingVip(await vip036());
     });
 
     it("check price", async () => {

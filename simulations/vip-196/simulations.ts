@@ -4,9 +4,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   CERTIK_RECEIVER,
   COMMUNITY_WALLET,
@@ -26,7 +26,7 @@ const VRTUHub_AMOUNT = parseUnits("15000", 18);
 const MESSARI_AMOUNT = parseUnits("95000", 18);
 const GALXE_CAMPAIGN_AMOUNT = parseUnits("25000", 18);
 
-forking(33135500, () => {
+forking(33135500, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let vai: Contract;
@@ -49,7 +49,7 @@ forking(33135500, () => {
     prevBalanceGalxeCampaign = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-196 Payments", vip196(), {
+  testVip("VIP-196 Payments", await vip196(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
     callbackAfterExecution: async (txResponse: TransactionResponse) => {

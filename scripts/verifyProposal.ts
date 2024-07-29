@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
-
-import { proposeVIP } from "../src/transactions";
+import { proposeVIP } from "src/transactions";
 
 export async function getTransactionData(vip: string, txHash: string, networkId: number) {
   // create an Ethers.js provider based on the network ID

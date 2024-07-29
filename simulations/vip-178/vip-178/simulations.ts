@@ -4,16 +4,16 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../src/vip-framework/checks/rewardsDistributor";
+} from "src/vip-framework/checks/rewardsDistributor";
+
 import { vip178 } from "../../../vips/vip-178/vip-178";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -33,7 +33,7 @@ const ANGLE = "0x97B6897AAd7aBa3861c04C0e6388Fc02AF1F227f";
 const PROTOCOL_SHARE_RESERVE = "0xfB5bE09a1FA6CFDA075aB1E69FE83ce8324682e4";
 const SHORTFALL = "0xf37530A8a810Fcb501AA0Ecd0B0699388F0F2209";
 
-forking(32162545, () => {
+forking(32162545, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vagEUR: Contract;
@@ -55,7 +55,7 @@ forking(32162545, () => {
     });
   });
 
-  testVip("VIP-178 Add agEUR Market", vip178(24 * 60 * 60 * 3), {
+  testVip("VIP-178 Add agEUR Market", await vip178(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

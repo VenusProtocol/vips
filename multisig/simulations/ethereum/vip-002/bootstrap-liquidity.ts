@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip002 from "../../../proposals/ethereum/vip-002/bootstrap-liquidity";
 import ERC20_ABI from "./abi/erc20.json";
 
@@ -17,7 +17,7 @@ const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
 const BBTC_AMOUNT = parseUnits("0.3", 8);
 const WBTC_AMOUNT = parseUnits("0.29818818", 8);
 
-forking(19032429, () => {
+forking(19032429, async () => {
   let wbtc: Contract;
   let bbtc: Contract;
   let oldWBTCBalance: BigNumber;
@@ -32,7 +32,7 @@ forking(19032429, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
     });
 
     it("should transfer BBTC out of treasury", async () => {

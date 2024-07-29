@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0xca408d716011169645aa94ddc5665043c33df814";

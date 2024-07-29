@@ -7,12 +7,44 @@ import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
-import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
+import {
+  Command,
+  LzChainId,
+  Proposal,
+  ProposalMeta,
+  ProposalType,
+  REMOTE_MAINNET_NETWORKS,
+  REMOTE_NETWORKS,
+  REMOTE_TESTNET_NETWORKS,
+  TokenConfig,
+} from "./types";
+import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
+const BSCTESTNET_OMNICHAIN_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
+const BSCMAINNET_OMNICHAIN_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
+
+export const getOmnichainProposalSenderAddress = () => {
+  if (FORKED_NETWORK === "bscmainnet" || REMOTE_MAINNET_NETWORKS.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
+    return BSCMAINNET_OMNICHAIN_SENDER;
+  } else return BSCTESTNET_OMNICHAIN_SENDER;
+};
+
+export const getPayload = (proposal: Proposal) => {
+  for (let j = proposal.targets.length - 1; j >= 0; j--) {
+    if (
+      proposal.params[j][0] === LzChainId[FORKED_NETWORK as REMOTE_NETWORKS] &&
+      proposal.signatures[j] === "execute(uint16,bytes,bytes,address)"
+    ) {
+      return proposal.params[j][1];
+    }
+  }
+};
+
+const gasUsedPerCommand = 300000;
 export async function setForkBlock(blockNumber: number) {
   await network.provider.request({
     method: "hardhat_reset",
@@ -26,6 +58,22 @@ export async function setForkBlock(blockNumber: number) {
     ],
   });
 }
+
+export const getSourceChainId = (network: REMOTE_NETWORKS) => {
+  if (REMOTE_MAINNET_NETWORKS.includes(network as string)) {
+    return LzChainId.bscmainnet;
+  } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
+    return LzChainId.bsctestnet;
+  }
+};
+
+export const makePayload = (targets: any, values: any, signatures: any, calldatas: any, proposalType: ProposalType) => {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+    [targets, values, signatures, calldatas, proposalType],
+  );
+  return payload;
+};
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
@@ -43,15 +91,86 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
-  return {
-    signatures: commands.map(cmd => cmd.signature),
-    targets: commands.map(cmd => cmd.target),
-    params: commands.map(cmd => cmd.params),
-    values: commands.map(cmd => cmd.value ?? "0"),
-    meta,
-    type,
-  };
+const getAdapterParam = (noOfCommands: number): string => {
+  const requiredGas = calculateGasForAdapterParam(noOfCommands);
+  const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
+  return adapterParam;
+};
+
+export const calculateGasForAdapterParam = (noOfCommands: number): number => {
+  const requiredGas = (500000 + gasUsedPerCommand * noOfCommands) * 1.5;
+  return requiredGas;
+};
+const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
+  const provider = ethers.provider;
+  const OmnichainProposalSender = new ethers.Contract(
+    getOmnichainProposalSenderAddress(),
+    OmnichainProposalSender_ABI,
+    provider,
+  );
+
+  let fee;
+  if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
+    const proposalId = await OmnichainProposalSender.proposalCount();
+    const payloadWithId = ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]);
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payloadWithId, false, adapterParams))[0].add(
+      ethers.utils.parseEther("1"),
+    );
+  } else {
+    fee = ethers.BigNumber.from("0");
+  }
+  return fee;
+};
+
+export const makeProposal = async (
+  commands: Command[],
+  meta?: ProposalMeta,
+  type?: ProposalType,
+): Promise<Proposal> => {
+  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const map = new Map<number, Command[]>();
+  const _commands = [];
+  for (const command of commands) {
+    const { dstChainId } = command;
+    if (dstChainId) {
+      const currentChainCommands = map.get(dstChainId) || [];
+      currentChainCommands.push(command);
+      map.set(dstChainId, currentChainCommands);
+    } else {
+      _commands.push(command);
+    }
+  }
+  if (_commands.length != 0) {
+    proposal.targets.push(..._commands.map(cmd => cmd.target));
+    proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
+    proposal.signatures.push(..._commands.map(cmd => cmd.signature));
+    proposal.params.push(..._commands.map(cmd => cmd.params));
+  }
+  for (const key of map.keys()) {
+    const chainCommands = map.get(key);
+    if (chainCommands) {
+      const remoteParam = makePayload(
+        chainCommands.map(cmd => cmd.target),
+        chainCommands.map(cmd => cmd.value ?? "0"),
+        chainCommands.map(cmd => cmd.signature),
+        getCalldatas({
+          signatures: chainCommands.map(cmd => cmd.signature),
+          params: chainCommands.map(cmd => cmd.params),
+        }),
+        type as ProposalType,
+      );
+      const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
+
+      proposal.targets.push(getOmnichainProposalSenderAddress());
+      const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
+      proposal.values.push(value.toString());
+      proposal.signatures.push("execute(uint16,bytes,bytes,address)");
+      proposal.params.push([key, remoteParam, remoteAdapterParam, ethers.constants.AddressZero]);
+    } else {
+      throw "Chain Id is not supported";
+    }
+  }
+  return proposal;
 };
 
 export const setMaxStalePeriodInOracle = async (
@@ -147,7 +266,10 @@ export const setMaxStalePeriod = async (
     console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
   }
 
-  const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
+  const normalTimelock =
+    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+      ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+      : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
@@ -193,7 +315,7 @@ export const expectEvents = async (
   for (let i = 0; i < expectedEvents.length; ++i) {
     expect(
       namedEvents.filter(it => it === expectedEvents[i]),
-      `expected a differnt number of ${expectedEvents[i]} events`,
+      `expected a different number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
 };

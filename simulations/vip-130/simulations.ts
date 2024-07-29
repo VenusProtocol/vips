@@ -3,9 +3,9 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip130 } from "../../vips/vip-130";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
@@ -28,7 +28,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const VTRXOLD_RATE_MODEL_CURR = "0x8B831e2c6f184F552Fb4c2CB7c01Ff76FeC93881";
 const VSXP_RATE_MODEL_CURR = "0x32450305D6c692269B3cBf9730d99104f80fce23";
 
-forking(29288200, () => {
+forking(29288200, async () => {
   let comptroller: Contract;
   let rateModel: Contract;
   let vSxp: Contract;
@@ -90,7 +90,7 @@ forking(29288200, () => {
     });
   });
 
-  testVip("VIP-130 Risk Parameters Update", vip130(), {
+  testVip("VIP-130 Risk Parameters Update", await vip130(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

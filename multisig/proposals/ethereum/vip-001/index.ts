@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const RESILIENT_ORACLE = "0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94";
 const CHAINLINK_ORACLE = "0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2";

@@ -1,8 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 

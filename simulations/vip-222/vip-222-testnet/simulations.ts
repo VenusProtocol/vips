@@ -2,11 +2,11 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEvents } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkVToken } from "../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../src/vip-framework/checks/interestRateModel";
 import { vip222Testnet } from "../../../vips/vip-222/vip-222-testnet";
 import USDT_ABI from "./abi/USDT_ABI.json";
 import VFDUSD_ABI from "./abi/VBep20_ABI.json";
@@ -33,7 +33,7 @@ const RESERVES_BLOCK_DELTA = 100;
 const RESERVE_FACTOR = parseUnits("0.1", 18);
 const RATE_MODEL = "0xf59B7f2733a549dCF82b804d69d9c6a38985B90B";
 
-forking(36131280, () => {
+forking(36131280, async () => {
   let comptroller: Contract;
   let fdusd: Contract;
   let vFdusd: Contract;
@@ -51,7 +51,7 @@ forking(36131280, () => {
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
   });
 
-  testVip("VIP-222-testnet Add FDUSD Market", vip222Testnet(), {
+  testVip("VIP-222-testnet Add FDUSD Market", await vip222Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

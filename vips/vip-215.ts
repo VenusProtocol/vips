@@ -1,5 +1,5 @@
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const COMPTROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const CONFIGURE_ATTACKER_COMPTROLLER_IMPL = "0xAE37464537fDa217258Bb2Cd70e4f8ffC7E95790";

@@ -1,15 +1,15 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BRIDGE_ASSETS, COMMUNITY_WALLET, OPBNB_BRIDGE, USDT, vip254 } from "../../vips/vip-254/bscmainnet";
 import BRIDGE_ABI from "./abi/bridgeAbi.json";
 import TREASURY_ABI from "./abi/treasuryAbi.json";
 import USDT_ABI from "./abi/usdtAbi.json";
 
-forking(36070082, () => {
+forking(36070082, async () => {
   let prevDeposits: [BigNumber];
   let bridge: Contract;
   const provider = ethers.provider;
@@ -25,7 +25,7 @@ forking(36070082, () => {
     });
     walletBeforeBalance = await usdt.balanceOf(COMMUNITY_WALLET);
   });
-  testVip("VIP-254", vip254(), {
+  testVip("VIP-254", await vip254(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

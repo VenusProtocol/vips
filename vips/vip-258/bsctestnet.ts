@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const LIQUIDATOR = "0x55AEABa76ecf144031Ef64E222166eb28Cb4865F";
 const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";

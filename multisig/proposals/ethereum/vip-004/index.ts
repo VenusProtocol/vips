@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 const XVS_VAULT_PROXY = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 const XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";

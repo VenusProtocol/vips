@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import vip308, {
   NEW_VDAI_IR,
   NEW_VFDUSD_IR,
@@ -41,7 +41,7 @@ async function checkIRModelAddress(market: Contract, expectedIR: string) {
   expect(IR).equals(expectedIR);
 }
 
-forking(38970500, () => {
+forking(38970500, async () => {
   let vusdt: Contract;
   let vusdc: Contract;
   let vdai: Contract;
@@ -134,7 +134,7 @@ forking(38970500, () => {
     });
   });
 
-  testVip("VIP-308 Chaos lab recommendation", vip308(), {
+  testVip("VIP-308 Chaos lab recommendation", await vip308(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_IL_ABI], ["NewMarketInterestRateModel"], [3]);
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [5]);

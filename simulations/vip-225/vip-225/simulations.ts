@@ -4,13 +4,13 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVAIController } from "src/vip-framework/checks/checkVAIController";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkIsolatedPoolsComptrollers } from "../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVAIController } from "../../../src/vip-framework/checks/checkVAIController";
-import { checkXVSVault } from "../../../src/vip-framework/checks/checkXVSVault";
 import { vip225 } from "../../../vips/vip-225/vip-225";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -48,7 +48,7 @@ const XVS_CHAINLINK_FEED = "0xbf63f430a79d4036a5900c19818aff1fa710f206";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 
-forking(34778191, () => {
+forking(34778191, async () => {
   const provider = ethers.provider;
   let oldPrime: Contract;
   let newPrime: Contract;
@@ -109,7 +109,7 @@ forking(34778191, () => {
     });
   });
 
-  testVip("vip225", vip225(), {
+  testVip("vip225", await vip225(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

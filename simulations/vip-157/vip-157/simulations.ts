@@ -4,9 +4,9 @@ import { BigNumber, Signer } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import {
   BASE_RATE_MANTISSA,
   FEE_IN,
@@ -41,7 +41,7 @@ const STABLE_TOKEN_HOLDER = "0x6a0b3611214d5001fa5efae91b7222a316c12b52";
 const VAI_HOLDER = "0x29aa70f8f3f2aa241b0ba9eaa744c97808d032c9";
 const BASE_RATE_BEFORE_VIP = parseUnits("0.01", 18);
 
-forking(30501836, () => {
+forking(30501836, async () => {
   const provider = ethers.provider;
   let vai: Contract;
   let vaiControllerProxy: Contract;
@@ -77,7 +77,7 @@ forking(30501836, () => {
     });
   });
 
-  testVip("VIP-157 Add Peg Stability (USDT)", vip157(), {
+  testVip("VIP-157 Add Peg Stability (USDT)", await vip157(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

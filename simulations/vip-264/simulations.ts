@@ -1,10 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEventWithParams, expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { expectEventWithParams, expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkInterestRate } from "../../src/vip-framework/checks/interestRateModel";
 import { vip264 } from "../../vips/vip-264/bscmainnet";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20DelegatorAbi.json";
 
@@ -13,7 +13,7 @@ const VBNB_CORE = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 const IR_NEW = "0xF558Be24F2CACb65a4BB41A155631C83B15388F1";
 const IR_OLD = "0x8B5351D0568CEEFa9BfC71C7a11C01179B736d99";
 
-forking(36584000, () => {
+forking(36584000, async () => {
   let vBNB: Contract;
 
   before(async () => {
@@ -26,7 +26,7 @@ forking(36584000, () => {
     });
   });
 
-  testVip("VIP-264 Core Pool BNB IR Curve Update", vip264(), {
+  testVip("VIP-264 Core Pool BNB IR Curve Update", await vip264(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewMarketInterestRateModel"], [1]);
       await expectEventWithParams(txResponse, VBEP20_DELEGATOR_ABI, "NewMarketInterestRateModel", [IR_OLD, IR_NEW]);

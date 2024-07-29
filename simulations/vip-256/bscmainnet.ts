@@ -3,9 +3,9 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { BINANCE_ORACLE, NORMAL_TIMELOCK, RESILIENT_ORACLE, vHAY, vSnBNB, vip256 } from "../../vips/vip-256/bscmainnet";
 import ACM_ABI from "./abi/acm.json";
 import BEACON_ABI from "./abi/beacon.json";
@@ -13,7 +13,7 @@ import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TEMP_VTOKEN_ABI from "./abi/tempVToken.json";
 
-forking(35926690, () => {
+forking(35926690, async () => {
   const provider = ethers.provider;
   let binanceOracle: Contract;
   let resilientOracle: Contract;
@@ -55,7 +55,7 @@ forking(35926690, () => {
     });
   });
 
-  testVip("VIP-256 Rebrand of VTokens for HAY and SnBNB", vip256(), {
+  testVip("VIP-256 Rebrand of VTokens for HAY and SnBNB", await vip256(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [2]);
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);

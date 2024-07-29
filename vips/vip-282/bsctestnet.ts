@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const XVS_VAULT_TREASURY = "0x317c6C4c9AA7F87170754DB08b4804dD689B68bF";
 export const XVS_VAULT_TREASURY_NEW_IMPLEMENTATION = "0x7c7DcD99889ADe9caaA07026a699a4E7Da05A524";

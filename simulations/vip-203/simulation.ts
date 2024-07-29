@@ -3,11 +3,11 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkXVSVault } from "../../src/vip-framework/checks/checkXVSVault";
 import { vip201 } from "../../vips/vip-201/vip-201";
 import { vip202 } from "../../vips/vip-202/vip-202";
 import { vip203 } from "../../vips/vip-203/vip-203";
@@ -54,9 +54,9 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(33490463, () => {
-  testVip("VIP-201 Prime Program", vip201(), {});
-  testVip("VIP-202 Prime Program", vip202(), {});
+forking(33490463, async () => {
+  testVip("VIP-201 Prime Program", await vip201(), {});
+  testVip("VIP-202 Prime Program", await vip202(), {});
 
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
@@ -82,7 +82,7 @@ forking(33490463, () => {
     });
   });
 
-  testVip("VIP-203 Prime Program", vip203(), {
+  testVip("VIP-203 Prime Program", await vip203(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["StakedAtUpdated"], [200]);
     },
