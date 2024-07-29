@@ -4,15 +4,16 @@
   "version": "0.0.1",
   "author": "",
   "scripts": {
-    "compile": "hardhat compile",
+    "compile": "hardhat compile && hardhat compile --config hardhat.config.zksync.ts",
     "test": "hardhat test",
-    "build": "rm -rf dist && tsc --declaration && hardhat compile && cp -r ./{package.json,yarn.lock,artifacts,contracts,networks} dist/",
+    "build": "rm -rf dist && tsc --declaration && hardhat compile && hardhat compile --config hardhat.config.zksync.ts && cp -r ./{package.json,yarn.lock,artifacts,contracts,networks} dist/",
     "publish:dist": "yarn build && cd dist && yarn publish --access public",
     "lint": "yarn lint:ts && yarn prettier:check",
     "lint:ts": "eslint --ignore-path ./.eslintignore --ext .js,.ts .",
     "prettier": "prettier --write \"**/*.{js,json,md,ts,yaml,yml,sol}\"",
     "prettier:check": "prettier --check \"**/*.{js,json,md,ts,yaml,yml,sol}\"",
-    "docgen": "hardhat docgen"
+    "docgen": "hardhat docgen",
+    "clean": "hardhat clean && hardhat clean --config hardhat.config.zksync.ts"
   },
   "dependencies": {
     "@morpho-labs/gnosis-tx-builder": "^1.3.1",
