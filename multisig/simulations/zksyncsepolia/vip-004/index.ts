@@ -205,7 +205,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vZK_Core: "",
 };
 
-forking(3532713, async () => {
+forking(3545593, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
