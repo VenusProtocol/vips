@@ -9,12 +9,12 @@ import TREASURY_ABI from "./abi/treasury.json";
 
 const TREASURY = "0x5A1a12F47FA7007C9e23cf5e025F3f5d3aC7d755";
 
-forking(14147950, () => {
+forking(14147950, async () => {
   let treasury: Contract;
 
   before(async () => {
     treasury = await ethers.getContractAt(TREASURY_ABI, TREASURY);
-    await pretendExecutingVip(vip000());
+    await pretendExecutingVip(await vip000());
   });
 
   describe("Post tx checks", () => {
