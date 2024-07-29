@@ -15,7 +15,7 @@ const { zksyncsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = zksyncsepolia.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = zksyncsepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = "0x3af097f1Dcec172D5ECdD0D1eFA6B118FF15f152";
-const NORMAL_TIMELOCK = zksyncsepolia.NORMAL_TIMELOCK;
+const NORMAL_TIMELOCK = zksyncsepolia.GUARDIAN;
 const BOUND_VALIDATOR = "0x0A4daBeF41C83Af7e30FfC33feC56ba769f3D24b";
 
 interface AssetConfig {

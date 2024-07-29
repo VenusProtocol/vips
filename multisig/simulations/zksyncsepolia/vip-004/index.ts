@@ -8,6 +8,7 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip001 from "../../../proposals/zksyncsepolia/vip-001";
 import vip004, {
   COMPTROLLER_CORE,
   MOCK_USDC,
@@ -220,6 +221,7 @@ forking(3545593, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
+      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {

@@ -162,6 +162,11 @@ const vip004 = () => {
       params: ["Core", COMPTROLLER_CORE, parseUnits("0.5", 18), parseUnits("1.1", 18), parseUnits("100", 18)],
     },
     {
+      target: zksyncsepolia.VTREASURY, // Will remove once vip-000 will be executed on zksyns sepolia
+      signature: "acceptOwnership()",
+      params: [],
+    },
+    {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [MOCK_WBTC, parseUnits("0.075", 8), zksyncsepolia.GUARDIAN],
