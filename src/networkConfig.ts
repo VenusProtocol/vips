@@ -73,4 +73,20 @@ export const NETWORK_CONFIG = {
     },
     XVS_VAULT_POOL_ID: 0,
   },
+  opsepolia: {
+    DELAY_BLOCKS: {
+      [ProposalType.REGULAR]: 200,
+      [ProposalType.FAST_TRACK]: 100,
+      [ProposalType.CRITICAL]: 34,
+    },
+    XVS_VAULT_POOL_ID: 0,
+  },
+  opmainnet: {
+    DELAY_BLOCKS: {
+      [ProposalType.REGULAR]: 200,
+      [ProposalType.FAST_TRACK]: 100,
+      [ProposalType.CRITICAL]: 34,
+    },
+    XVS_VAULT_POOL_ID: 0,
+  },
 };

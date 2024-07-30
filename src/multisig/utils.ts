@@ -98,6 +98,18 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0x727a77a074D1E6c4530e814F89E618a3298FC044",
       },
     },
+    opsepolia: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xe1Ed13Dd60b85a072401a3C4Fc7d2EaA678092F8",
+        safeProxyFactoryAddress: "0xf509dB5de5e01ce6e29EAaF8301981DE3C4c7cda",
+        multiSendAddress: "0x0A941df0A84634098abE04f52037c7Fb05C2dEd7",
+        multiSendCallOnlyAddress: "0x2694246B72e40a72B0F9137A9A0a9e818775B4dc",
+        fallbackHandlerAddress: "0x4f85CF627f6106FFDB72aBee57f143C61b6aEcA2",
+        signMessageLibAddress: "0xe5A8983525b0dC8757C47eD001C22ADB003ae372",
+        createCallAddress: "0xFf17bb26b8B702b698FE3De40C10d430742C9F47",
+        simulateTxAccessorAddress: "0xe7A7552B0Cff45E837e1422b479d2dEDE748f571",
+      },
+    },
     // Add more networks as needed
   };
 

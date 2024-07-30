@@ -29,6 +29,8 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
   xlayertestnet: 30000000,
+  opsepolia: 30000000,
+  opmainnet: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -158,6 +160,18 @@ const config: HardhatUserConfig = {
       url: process.env.ARCHIVE_NODE_xlayermainnet || "https://rpc.xlayer.tech/",
       chainId: 196,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    opsepolia: {
+      url: process.env.ARCHIVE_NODE_opsepolia || "https://sepolia.optimism.io",
+      chainId: 11155420,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opsepolia,
+    },
+    opmainnet: {
+      url: process.env.ARCHIVE_NODE_opmainnet || "https://mainnet.optimism.io",
+      chainId: 10,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opmainnet,
     },
   },
   paths: {
