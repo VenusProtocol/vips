@@ -11,13 +11,13 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip001 from "../../../proposals/zksyncsepolia/vip-001";
 import vip004, {
   COMPTROLLER_CORE,
-  MOCK_USDC,
+  MOCK_USDC_e,
   MOCK_USDT,
   MOCK_WBTC,
   MOCK_WETH,
   MOCK_ZK,
   PSR,
-  VUSDC_CORE,
+  VUSDC_e_CORE,
   VUSDT_CORE,
   VWBTC_CORE,
   VWETH_CORE,
@@ -36,13 +36,13 @@ const POOL_REGISTRY = zksyncsepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vUSDC_Core" | "vZK_Core";
+type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vUSDC_e_Core" | "vZK_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
   vWBTC_Core: VWBTC_CORE,
   vWETH_Core: VWETH_CORE,
   vUSDT_Core: VUSDT_CORE,
-  vUSDC_Core: VUSDC_CORE,
+  vUSDC_e_Core: VUSDC_e_CORE,
   vZK_Core: VZK_CORE,
 };
 
@@ -50,7 +50,7 @@ const tokens = {
   WBTC: MOCK_WBTC,
   WETH: MOCK_WETH,
   USDT: MOCK_USDT,
-  USDC: MOCK_USDC,
+  USDC: MOCK_USDC_e,
   ZK: MOCK_ZK,
 };
 
@@ -89,9 +89,9 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     exchangeRate: parseUnits("1", 16),
     comptroller: COMPTROLLER_CORE,
   },
-  vUSDC_Core: {
+  vUSDC_e_Core: {
     name: "Venus USDC (Core)",
-    symbol: "vUSDC_Core",
+    symbol: "vUSDC_e_Core",
     decimals: 8,
     underlying: tokens.USDC,
     exchangeRate: parseUnits("1", 16),
@@ -137,7 +137,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "1.5",
     vTokenReceiver: zksyncsepolia.VTREASURY,
   },
-  vUSDC_Core: {
+  vUSDC_e_Core: {
     borrowCap: "49000000",
     supplyCap: "54000000",
     collateralFactor: "0.78",
@@ -183,7 +183,7 @@ const interestRateModels: InterestRateModelSpec[] = [
     jump: "2.5",
   },
   {
-    vTokens: ["vUSDC_Core", "vUSDT_Core"],
+    vTokens: ["vUSDC_e_Core", "vUSDT_Core"],
     kink: "0.8",
     base: "0",
     multiplier: "0.0875",
@@ -202,11 +202,11 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWBTC_Core: "",
   vWETH_Core: "",
   vUSDT_Core: "",
-  vUSDC_Core: "",
+  vUSDC_e_Core: "",
   vZK_Core: "",
 };
 
-forking(3545593, async () => {
+forking(3548657, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -257,7 +257,7 @@ forking(3545593, async () => {
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
         expect(poolVTokens).to.include(vTokens.vWETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);
-        expect(poolVTokens).to.include(vTokens.vUSDC_Core);
+        expect(poolVTokens).to.include(vTokens.vUSDC_e_Core);
         expect(poolVTokens).to.include(vTokens.vZK_Core);
       });
 

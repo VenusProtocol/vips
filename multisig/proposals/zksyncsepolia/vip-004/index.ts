@@ -10,12 +10,12 @@ export const COMPTROLLER_CORE = "0xC527DE08E43aeFD759F7c0e6aE85433923064669";
 export const MOCK_WBTC = "0xeF891B3FA37FfD83Ce8cC7b682E4CADBD8fFc6F0";
 export const MOCK_WETH = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
 export const MOCK_USDT = "0x9Bf62C9C6AaB7AB8e01271f0d7A401306579709B";
-export const MOCK_USDC = "0x71ff1d2598035C401ED36C97f6cC4DFb05cd9495";
+export const MOCK_USDC_e = "0xF98780C8a0843829f98e624d83C3FfDDf43BE984";
 export const MOCK_ZK = "0x8A2E9048F5d658E88D6eD89DdD1F3B5cA0250B9F";
 
 export const VWBTC_CORE = "0x9c2379ed8ab06B44328487f61873C7c44BD6E87D";
 export const VWETH_CORE = "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49";
-export const VUSDC_CORE = "0x0766c92F2780022167bcF3Aebba9F2d5Dd9DEdb2";
+export const VUSDC_e_CORE = "0x58b0b248BB11DCAA9336bBf8a81914201fD49461";
 export const VUSDT_CORE = "0x7Bfd185eF8380a72027bF65bFEEAb0242b147778";
 export const VZK_CORE = "0x92f4BD794303c0BD0791B350Be5531DB38414f47";
 
@@ -239,20 +239,20 @@ const vip004 = () => {
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_USDC, parseUnits("5000", 6), zksyncsepolia.GUARDIAN],
+      params: [MOCK_USDC_e, parseUnits("5000", 6), zksyncsepolia.GUARDIAN],
     },
     {
-      target: MOCK_USDC,
+      target: MOCK_USDC_e,
       signature: "approve(address,uint256)",
       params: [zksyncsepolia.POOL_REGISTRY, 0],
     },
     {
-      target: MOCK_USDC,
+      target: MOCK_USDC_e,
       signature: "approve(address,uint256)",
       params: [zksyncsepolia.POOL_REGISTRY, parseUnits("5000", 6)],
     },
     {
-      target: VUSDC_CORE,
+      target: VUSDC_e_CORE,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["86400"],
     },
@@ -261,7 +261,7 @@ const vip004 = () => {
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
         [
-          VUSDC_CORE,
+          VUSDC_e_CORE,
           parseUnits("0.78", 18), // CF
           parseUnits("0.80", 18), // LT
           parseUnits("5000", 6), // initial supply
