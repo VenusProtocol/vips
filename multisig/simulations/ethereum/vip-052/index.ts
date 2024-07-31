@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip050, {
+import vip052, {
   REWARDS_DISTRIBUTOR_CORE_NEW,
   REWARDS_DISTRIBUTOR_CORE_OLD,
   REWARDS_DISTRIBUTOR_CURVE_NEW,
@@ -22,7 +22,7 @@ import vip050, {
   VWETH_CORE,
   VWETH_LST,
   VWSTETH_LST,
-} from "../../../proposals/ethereum/vip-050";
+} from "../../../proposals/ethereum/vip-052";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardsDistributor.json";
 
 const rewardsDistributorConfigOld = [
@@ -238,7 +238,7 @@ forking(20382800, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip050());
+      await pretendExecutingVip(await vip052());
     });
 
     it("old rewards distributor speeds for markets should be set to 0", async () => {

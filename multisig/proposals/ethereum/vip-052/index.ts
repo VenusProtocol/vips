@@ -23,7 +23,7 @@ export const VSFRXETH_LST = "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E";
 export const VWSTETH_LST = "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB";
 export const VWETH_LST = "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2";
 
-export const vip050 = () => {
+export const vip052 = () => {
   return makeProposal([
     {
       target: REWARDS_DISTRIBUTOR_CORE_OLD,
@@ -89,4 +89,4 @@ export const vip050 = () => {
   ]);
 };
 
-export default vip050;
+export default vip052;
