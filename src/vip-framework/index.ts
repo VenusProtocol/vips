@@ -1,9 +1,10 @@
-import { TransactionResponse } from "@ethersproject/providers";
+import { TransactionRequest, TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import cliProgress from "cli-progress";
 import { Contract, ContractInterface } from "ethers";
-import { FORKED_NETWORK, ethers } from "hardhat";
+import { FORKED_NETWORK, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
@@ -61,20 +62,34 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     return iface.encodeFunctionData(signature, params);
   };
 
-  await timelock.sendTransaction({
+  const feeData = await ethers.provider.getFeeData();
+  const txnParams: TransactionRequest = {
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
     data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
-    gasLimit: 8000000,
-    // maxFeePerGas: 200000000000, // needed for zksync
-  });
+  };
+
+  if (network.zksync && feeData.maxFeePerGas) {
+    // Sometimes the gas estimation is wrong with zksync
+    txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+  }
+
+  await timelock.sendTransaction(txnParams);
 };
 
 export const pretendExecutingVip = async (proposal: Proposal, sender: string = GUARDIAN) => {
   const impersonatedTimelock = await initMainnetUser(sender, ethers.utils.parseEther("4.0"));
+  console.log("===== Simulating vip =====");
+
+  const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+  bar.start(proposal.signatures.length, 0);
+
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
+    bar.update(i + 1);
   }
+
+  bar.stop();
 };
 
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {

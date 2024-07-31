@@ -229,10 +229,10 @@ const vip004 = () => {
           VWETH_CORE,
           parseUnits("0.75", 18), // CF
           parseUnits("0.80", 18), // LT
-          parseUnits("1.5", 8), // initial supply
+          parseUnits("1.5", 18), // initial supply
           zksyncsepolia.VTREASURY,
-          parseUnits("26000", 8), // supply cap
-          parseUnits("23500", 8), // borrow cap
+          parseUnits("26000", 18), // supply cap
+          parseUnits("23500", 18), // borrow cap
         ],
       ],
     },

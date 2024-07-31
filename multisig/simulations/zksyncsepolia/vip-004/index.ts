@@ -90,8 +90,8 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     comptroller: COMPTROLLER_CORE,
   },
   vUSDC_e_Core: {
-    name: "Venus USDC (Core)",
-    symbol: "vUSDC_e_Core",
+    name: "Venus USDC.e (Core)",
+    symbol: "vUSDC.e_Core",
     decimals: 8,
     underlying: tokens.USDC,
     exchangeRate: parseUnits("1", 16),
@@ -147,8 +147,8 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     vTokenReceiver: zksyncsepolia.VTREASURY,
   },
   vUSDT_Core: {
-    borrowCap: "130000",
-    supplyCap: "150000",
+    borrowCap: "18000000",
+    supplyCap: "20000000",
     collateralFactor: "0.78",
     liquidationThreshold: "0.8",
     reserveFactor: "0.1",
@@ -206,7 +206,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vZK_Core: "",
 };
 
-forking(3548657, async () => {
+forking(3551594, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
