@@ -2288,6 +2288,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cli-progress@npm:^3.11.6":
+  version: 3.11.6
+  resolution: "@types/cli-progress@npm:3.11.6"
+  dependencies:
+    "@types/node": "*"
+  checksum: 2df9d4788089564c8eb01e6d05b084bd030b7ce3f1a3698c57a998f2b329c5c7a3ea2d20e3756579a385945c70875df3c798b7740f6bf679eb1b1937e91f5eca
+  languageName: node
+  linkType: hard
+
 "@types/concat-stream@npm:^1.6.0":
   version: 1.6.1
   resolution: "@types/concat-stream@npm:1.6.1"
@@ -2793,6 +2802,7 @@ __metadata:
     "@typechain/ethers-v5": ^10.1.1
     "@typechain/hardhat": ^6.1.4
     "@types/chai": ^4.3.4
+    "@types/cli-progress": ^3.11.6
     "@types/fs-extra": ^9.0.13
     "@types/mocha": ^10.0.0
     "@types/module-alias": ^2.0.4
@@ -2808,6 +2818,7 @@ __metadata:
     "@venusprotocol/venus-protocol": ^7.4.0
     ajv: ^8.12.0
     chai: ^4.3.7
+    cli-progress: ^3.12.0
     commitizen: ^4.2.5
     cross-env: ^7.0.3
     cz-conventional-changelog: ^3.3.0
@@ -3922,6 +3933,15 @@ __metadata:
   dependencies:
     restore-cursor: ^4.0.0
   checksum: ab3f3ea2076e2176a1da29f9d64f72ec3efad51c0960898b56c8a17671365c26e67b735920530eaf7328d61f8bd41c27f46b9cf6e4e10fe2fa44b5e8c0e392cc
+  languageName: node
+  linkType: hard
+
+"cli-progress@npm:^3.12.0":
+  version: 3.12.0
+  resolution: "cli-progress@npm:3.12.0"
+  dependencies:
+    string-width: ^4.2.3
+  checksum: e8390dc3cdf3c72ecfda0a1e8997bfed63a0d837f97366bbce0ca2ff1b452da386caed007b389f0fe972625037b6c8e7ab087c69d6184cc4dfc8595c4c1d3e6e
   languageName: node
   linkType: hard
 
