@@ -15,7 +15,7 @@ const { zksyncsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = zksyncsepolia.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = zksyncsepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = "0x3af097f1Dcec172D5ECdD0D1eFA6B118FF15f152";
-const NORMAL_TIMELOCK = zksyncsepolia.NORMAL_TIMELOCK;
+const GUARDIAN = zksyncsepolia.GUARDIAN;
 const BOUND_VALIDATOR = "0x0A4daBeF41C83Af7e30FfC33feC56ba769f3D24b";
 
 interface AssetConfig {
@@ -36,28 +36,28 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "WBTC",
     address: "0xeF891B3FA37FfD83Ce8cC7b682E4CADBD8fFc6F0",
-    price: "642272100000000",
+    price: "664950000000000",
     feed: "0x95Bc57e794aeb02E4a16eff406147f3ce2531F83",
     oracle: "chainlink",
   },
   {
     name: "WETH",
     address: "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6",
-    price: "3149.81097051",
+    price: "3315.90563553",
     feed: "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF",
     oracle: "chainlink",
   },
   {
     name: "USDC",
-    address: "0x71ff1d2598035C401ED36C97f6cC4DFb05cd9495",
-    price: "999970100000",
+    address: "0xF98780C8a0843829f98e624d83C3FfDDf43BE984",
+    price: "999976210000",
     feed: "0x1844478CA634f3a762a2E71E3386837Bd50C947F",
     oracle: "chainlink",
   },
   {
     name: "USDT",
     address: "0x9Bf62C9C6AaB7AB8e01271f0d7A401306579709B",
-    price: "999761760000",
+    price: "999800000000",
     feed: "0x07F05C2aFeb54b68Ea425CAbCcbF53E2d5605d76",
     oracle: "chainlink",
   },
@@ -84,7 +84,7 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
   },
 ];
 
-forking(3528074, async () => {
+forking(3551612, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
@@ -99,10 +99,10 @@ forking(3528074, async () => {
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
     });
     it("correct pending owner", async () => {
-      expect(await resilientOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-      expect(await redstoneOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-      expect(await chainLinkOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-      expect(await boundValidator.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await resilientOracle.pendingOwner()).to.equal(GUARDIAN);
+      expect(await redstoneOracle.pendingOwner()).to.equal(GUARDIAN);
+      expect(await chainLinkOracle.pendingOwner()).to.equal(GUARDIAN);
+      expect(await boundValidator.pendingOwner()).to.equal(GUARDIAN);
     });
     it("should revert for unconfigured asset price request", async () => {
       for (let i = 0; i < assetConfigs.length; i++) {
@@ -124,10 +124,10 @@ forking(3528074, async () => {
       await pretendExecutingVip(await vip001());
     });
     it("correct owner", async () => {
-      expect(await resilientOracle.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await redstoneOracle.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await chainLinkOracle.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await boundValidator.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await resilientOracle.owner()).to.equal(GUARDIAN);
+      expect(await redstoneOracle.owner()).to.equal(GUARDIAN);
+      expect(await chainLinkOracle.owner()).to.equal(GUARDIAN);
+      expect(await boundValidator.owner()).to.equal(GUARDIAN);
     });
 
     for (let i = 0; i < assetConfigs.length; i++) {

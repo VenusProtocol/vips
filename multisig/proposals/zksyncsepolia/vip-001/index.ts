@@ -14,7 +14,7 @@ const CHAINLINK_USDT_FEED = "0x07F05C2aFeb54b68Ea425CAbCcbF53E2d5605d76";
 const STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours (pricefeeds with heartbeat of 24 hr)
 
 const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
-const MOCK_USDC = "0x71ff1d2598035C401ED36C97f6cC4DFb05cd9495";
+const MOCK_USDC = "0xF98780C8a0843829f98e624d83C3FfDDf43BE984";
 const MOCK_USDT = "0x9Bf62C9C6AaB7AB8e01271f0d7A401306579709B";
 const WETH = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
 const MOCK_WBTC = "0xeF891B3FA37FfD83Ce8cC7b682E4CADBD8fFc6F0";
@@ -26,52 +26,52 @@ const vip001 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.RESILIENT_ORACLE, "pause()", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.RESILIENT_ORACLE, "pause()", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.RESILIENT_ORACLE, "unpause()", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.RESILIENT_ORACLE, "unpause()", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [zksyncsepolia.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [zksyncsepolia.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [REDSTONE_ORACLE, "setDirectPrice(address,uint256)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [REDSTONE_ORACLE, "setDirectPrice(address,uint256)", zksyncsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", zksyncsepolia.NORMAL_TIMELOCK],
+      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", zksyncsepolia.GUARDIAN],
     },
     { target: zksyncsepolia.RESILIENT_ORACLE, signature: "acceptOwnership()", params: [] },
     { target: zksyncsepolia.CHAINLINK_ORACLE, signature: "acceptOwnership()", params: [] },
