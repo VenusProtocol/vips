@@ -8,7 +8,6 @@
 **/build
 **/cache
 **/cache-zk
-**/cache-zl
 **/coverage
 **/dist
 **/node_modules
