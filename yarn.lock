@@ -2843,7 +2843,6 @@ __metadata:
     ts-node: ^10.9.1
     typechain: ^8.1.1
     typescript: ^4.9.3
-    zksync-ethers: ^6.10.0
   languageName: unknown
   linkType: soft
 
@@ -12168,15 +12167,6 @@ __metadata:
   peerDependencies:
     ethers: ~5.7.0
   checksum: c9e54677de296b328805c617e8e39aee8abe74c906a335f6431687301f06b30e70337b9b2136e5eece8b275f3523404e3e78956f4f8a82b47a638a08347ce459
-  languageName: node
-  linkType: hard
-
-"zksync-ethers@npm:^6.10.0":
-  version: 6.10.0
-  resolution: "zksync-ethers@npm:6.10.0"
-  peerDependencies:
-    ethers: ^6.7.1
-  checksum: ab1699b63d6b1b0bc9a5a1af6243a2a5b33797fd8aef30a297684570a5e4615bdfbee0259a2f00f900525c0b2062e09fb4378ad16364c7819604c16bc575128d
   languageName: node
   linkType: hard
 
