@@ -10,7 +10,6 @@ const CHAINLINK_ETH_FEED = "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF";
 const CHAINLINK_BTC_FEED = "0x95Bc57e794aeb02E4a16eff406147f3ce2531F83";
 const CHAINLINK_USDC_FEED = "0x1844478CA634f3a762a2E71E3386837Bd50C947F";
 const CHAINLINK_USDT_FEED = "0x07F05C2aFeb54b68Ea425CAbCcbF53E2d5605d76";
-// const REDSTONE_XVS_FEED = ""; // TBD
 const STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours (pricefeeds with heartbeat of 24 hr)
 
 const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
@@ -177,12 +176,6 @@ const vip001 = () => {
         ],
       ],
     },
-    // {
-    //   target: REDSTONE_ORACLE,
-    //   signature: "setTokenConfig((address,address,uint256))",
-    //   params: [[zksyncsepolia.XVS, REDSTONE_XVS_FEED, STALE_PERIOD_26H]],
-    // },
-
     {
       target: REDSTONE_ORACLE,
       signature: "setDirectPrice(address,uint256)",
