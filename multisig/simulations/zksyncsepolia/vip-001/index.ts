@@ -61,14 +61,6 @@ const assetConfigs: AssetConfig[] = [
     feed: "0x07F05C2aFeb54b68Ea425CAbCcbF53E2d5605d76",
     oracle: "chainlink",
   },
-  // TO-DO
-  //   {
-  //     name: "XVS",
-  //     address: "0x3AeCac43A2ebe5D8184e650403bf9F656F9D1cfA",
-  //     price: "",
-  //     feed: "",
-  //     oracle: "redstone",
-  //   },
 ];
 
 const directAssetPriceConfigs: AssetDirectPriceConfig[] = [

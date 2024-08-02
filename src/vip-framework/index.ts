@@ -35,10 +35,14 @@ export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWO
 
 export const forking = (blockNumber: number, fn: () => Promise<void>) => {
   (async () => {
-    console.log(`At block #${blockNumber}`);
-    await setForkBlock(blockNumber);
-    await fn();
-    run();
+    try {
+      console.log(`At block #${blockNumber}`);
+      await setForkBlock(blockNumber);
+      await fn();
+      run();
+    } catch (e) {
+      console.error(e);
+    }
   })();
 };
 
