@@ -19,8 +19,6 @@ export const VUSDC_e_CORE = "0x58b0b248BB11DCAA9336bBf8a81914201fD49461";
 export const VUSDT_CORE = "0x7Bfd185eF8380a72027bF65bFEEAb0242b147778";
 export const VZK_CORE = "0x92f4BD794303c0BD0791B350Be5531DB38414f47";
 
-export const PSR = "0x5722B43BD91fAaDC4E7f384F4d6Fb32456Ec5ffB";
-
 // IL configuration
 const vip004 = () => {
   return makeProposal([
@@ -285,11 +283,6 @@ const vip004 = () => {
       target: VUSDT_CORE,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["86400"],
-    },
-    {
-      target: VUSDT_CORE,
-      signature: "setProtocolShareReserve(address)",
-      params: [PSR],
     },
     {
       target: zksyncsepolia.POOL_REGISTRY,

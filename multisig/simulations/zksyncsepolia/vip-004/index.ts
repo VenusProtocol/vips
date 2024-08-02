@@ -8,7 +8,6 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip001 from "../../../proposals/zksyncsepolia/vip-001";
 import vip004, {
   COMPTROLLER_CORE,
   MOCK_USDC_e,
@@ -16,7 +15,6 @@ import vip004, {
   MOCK_WBTC,
   MOCK_WETH,
   MOCK_ZK,
-  PSR,
   VUSDC_e_CORE,
   VUSDT_CORE,
   VWBTC_CORE,
@@ -33,6 +31,7 @@ const { zksyncsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = zksyncsepolia.RESILIENT_ORACLE;
 const GUARDIAN = zksyncsepolia.GUARDIAN;
 const POOL_REGISTRY = zksyncsepolia.POOL_REGISTRY;
+const PSR = "0x5722B43BD91fAaDC4E7f384F4d6Fb32456Ec5ffB";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
@@ -221,7 +220,6 @@ forking(3559047, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {
