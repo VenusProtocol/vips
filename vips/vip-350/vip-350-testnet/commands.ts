@@ -1,51 +1,33 @@
 import {
-  BTCBPrimeConverterTokenOuts,
+  Assets,
   BaseAssets,
-  ETHPrimeConverterTokenOuts,
-  RiskFundConverterTokenOuts,
-  USDCPrimeConverterTokenOuts,
-  USDTPrimeConverterTokenOuts,
-  XVSVaultConverterTokenOuts,
 } from "./addresses";
 
 type IncentiveAndAccessibility = [number, number];
 
-function getIncentiveAndAccessibility(tokenIn: string, tokenOut: string): IncentiveAndAccessibility {
-  const validTokenIns = [BaseAssets[2], BaseAssets[3], BaseAssets[4], BaseAssets[5]];
+function getIncentiveAndAccessibility(baseAsset: string) {
+  let incentivesAndAccess: Array<[number, number]> = [];
 
-  // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
-  // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
-  if (validTokenIns.includes(tokenIn) && tokenOut === BaseAssets[0]) {
-    return [1e14, 2]; // ONLY_FOR_CONVERTERS
-  } else {
-    return [1e14, 1]; // ALL
+  for (const asset of Assets) {
+    if (asset != baseAsset) {
+      // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
+      // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
+      if (asset === BaseAssets[0]) {
+        incentivesAndAccess.push([0, 2]); // ONLY_FOR_CONVERTERS
+
+        // Exculde only when tokenIn and tokenOut are same
+      } else {
+        incentivesAndAccess.push([1e14, 1]); // ALL
+      }
+    }
   }
+  return incentivesAndAccess;
 }
 
-export const incentiveAndAccessibilityForRiskFundConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForBTCBPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForETHPrimeConverter: IncentiveAndAccessibility[] = [];
-export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = [];
+export const incentiveAndAccessibilityForRiskFundConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[0]);
+export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[1]);
+export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[2]);
+export const incentiveAndAccessibilityForBTCBPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[3]);
+export const incentiveAndAccessibilityForETHPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[4]);
+export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(BaseAssets[5]);
 
-for (let i = 0; i < RiskFundConverterTokenOuts.length; i++) {
-  incentiveAndAccessibilityForRiskFundConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[0], RiskFundConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForUSDTPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[1], USDTPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForUSDCPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[2], USDCPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForBTCBPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[3], BTCBPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForETHPrimeConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[4], ETHPrimeConverterTokenOuts[i]),
-  );
-  incentiveAndAccessibilityForXVSVaultConverter.push(
-    getIncentiveAndAccessibility(BaseAssets[5], XVSVaultConverterTokenOuts[i]),
-  );
-}
