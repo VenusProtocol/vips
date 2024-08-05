@@ -11,8 +11,7 @@ const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 
 const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
-const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
-const VUSDC_AMOUNT = parseUnits("276060909.74786926", 8);
+const VUSDC_AMOUNT = parseUnits("273524078.61416397", 8);
 
 export const vip337 = () => {
   const meta = {
@@ -72,7 +71,7 @@ The owner of both contracts is the [Normal Timelock](https://bscscan.com/address
       {
         target: LIQUIDATE_AND_REDEEM_HELPER,
         signature: "liquidateAndRedeemNative(address,address,address)",
-        params: [EXPLOITER_WALLET, VUSDC, BINANCE_WALLET],
+        params: [EXPLOITER_WALLET, VUSDC, TREASURY],
       },
       {
         target: COMPTROLLER,

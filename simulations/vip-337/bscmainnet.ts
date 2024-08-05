@@ -24,15 +24,14 @@ const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
 const EXPLOITER_WALLET = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
-const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";
-const VUSDC_AMOUNT = parseUnits("276060909.74786926", 8);
-const REPAY_AMOUNT_WITH_INTEREST = parseUnits("6655965.849513021969132983", 18);
-const EXPECTED_BNB_AMOUNT = parseUnits("14811.539080677835945182", 18);
+const VUSDC_AMOUNT = parseUnits("273524078.61416397", 8);
+const REPAY_AMOUNT_WITH_INTEREST = parseUnits("6634917.556755621658523718", 18);
+const EXPECTED_BNB_AMOUNT = parseUnits("15967.951877432955047974", 18);
 
 // Interest rate model with no interest, for testing purposes
 const ZERO_RATE_MODEL = "0x93FBc248e83bc8931141ffC7f457EC882595135A";
 
-forking(40211900, () => {
+forking(41100292, () => {
   const usdc = new ethers.Contract(USDC, IERC20_ABI, ethers.provider);
   const vUSDC = new ethers.Contract(VUSDC, VTOKEN_ABI, ethers.provider);
   const vBNB = new ethers.Contract(VBNB, VTOKEN_ABI, ethers.provider);
@@ -47,7 +46,7 @@ forking(40211900, () => {
   let timelock: SignerWithAddress;
   let treasuryVTokenBalanceBefore: BigNumber;
   let exploiterDebtBefore: BigNumber;
-  let binanceWalletBalanceBefore: BigNumber;
+  let treasuryBalanceBefore: BigNumber;
 
   before(async () => {
     await setMaxStaleCoreAssets(CHAINLINK_ORACLE, NORMAL_TIMELOCK);
@@ -58,7 +57,7 @@ forking(40211900, () => {
 
     treasuryVTokenBalanceBefore = await vUSDC.balanceOf(TREASURY);
     exploiterDebtBefore = await vUSDC.callStatic.borrowBalanceCurrent(EXPLOITER_WALLET);
-    binanceWalletBalanceBefore = await ethers.provider.getBalance(BINANCE_WALLET);
+    treasuryBalanceBefore = await ethers.provider.getBalance(TREASURY);
   });
 
   describe("Liquidate and redeem helper", () => {
@@ -127,10 +126,10 @@ forking(40211900, () => {
       expect(exploiterDebtDelta).to.equal(REPAY_AMOUNT_WITH_INTEREST);
     });
 
-    it(`transfers ${formatUnits(EXPECTED_BNB_AMOUNT, 18)} BNB to Binance wallet`, async () => {
-      const binanceWalletBalanceAfter = await ethers.provider.getBalance(BINANCE_WALLET);
-      const binanceWalletBalanceDelta = binanceWalletBalanceAfter.sub(binanceWalletBalanceBefore);
-      expect(binanceWalletBalanceDelta).to.equal(EXPECTED_BNB_AMOUNT);
+    it(`transfers ${formatUnits(EXPECTED_BNB_AMOUNT, 18)} BNB to Treasury`, async () => {
+      const treasuryBalanceAfter = await ethers.provider.getBalance(TREASURY);
+      const treasuryBalanceDelta = treasuryBalanceAfter.sub(treasuryBalanceBefore);
+      expect(treasuryBalanceDelta).to.equal(EXPECTED_BNB_AMOUNT);
     });
 
     it("restores the liquidator contract address", async () => {
