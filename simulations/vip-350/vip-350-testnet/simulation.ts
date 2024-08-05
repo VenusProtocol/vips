@@ -1,3 +1,4 @@
+import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -5,19 +6,17 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
+  Assets,
+  BTCB_PRIME_CONVERTER,
+  BaseAssets,
+  ETH_PRIME_CONVERTER,
   RISK_FUND_CONVERTER,
   USDC_PRIME_CONVERTER,
-  XVS_VAULT_CONVERTER,
   USDT_PRIME_CONVERTER,
-  ETH_PRIME_CONVERTER,
-  BTCB_PRIME_CONVERTER,
-  Assets,
-  BaseAssets,
+  XVS_VAULT_CONVERTER,
 } from "../../../vips/vip-350/vip-350-testnet/addresses";
 import { vip350 } from "../../../vips/vip-350/vip-350-testnet/bsctestnet";
-
 import SINGLE_TOKEN_CONVERTER_ABI from "../abi/SingleTokenConverter.json";
-import * as helpers from "@nomicfoundation/hardhat-network-helpers";
 
 forking(42623700, async () => {
   await helpers.mine();
@@ -52,40 +51,44 @@ forking(42623700, async () => {
     const converterStates: Array<[number, number]> = [];
     for (let i = 0; i < Assets.length; i++) {
       const asset = Assets[i];
-      if(asset != baseAsset) {
+      if (asset != baseAsset) {
         result = await converter.conversionConfigurations(baseAsset, asset);
-        converterStates.push([result[0], result[1]])
-        expect(result[0]).to.equal(0)
-        if(asset == BaseAssets[0]){
-          expect(result[1]).to.equal(2)
+        converterStates.push([result[0], result[1]]);
+        expect(result[0]).to.equal(0);
+        if (asset == BaseAssets[0]) {
+          expect(result[1]).to.equal(2);
         } else {
-          expect(result[1]).to.equal(1)
+          expect(result[1]).to.equal(1);
         }
       }
     }
-    return converterStates
-  }
+    return converterStates;
+  };
 
-  const getAndCompareConverterStates = async (baseAsset: string, converter: any, oldConverterStates: Array<[number, number]>) => {
+  const getAndCompareConverterStates = async (
+    baseAsset: string,
+    converter: any,
+    oldConverterStates: Array<[number, number]>,
+  ) => {
     let result;
     let j = 0;
     for (let i = 0; i < Assets.length; i++) {
       const asset = Assets[i];
-      if(asset != baseAsset) {
+      if (asset != baseAsset) {
         result = await converter.conversionConfigurations(baseAsset, asset);
-        const oldIncentivesAndAccess = oldConverterStates[j]
-        if(asset == BaseAssets[0]){
-          expect(result[0]).to.equal(0)
+        const oldIncentivesAndAccess = oldConverterStates[j];
+        if (asset == BaseAssets[0]) {
+          expect(result[0]).to.equal(0);
         } else {
-          expect(result[0]).to.equal(updatedIncentivesAfterVip)
+          expect(result[0]).to.equal(updatedIncentivesAfterVip);
         }
-        expect(result[1]).to.equal(oldIncentivesAndAccess[1])
+        expect(result[1]).to.equal(oldIncentivesAndAccess[1]);
         j++;
       }
     }
-  }
+  };
 
-  describe("Pre-VIP behaviour",  () => {
+  describe("Pre-VIP behaviour", () => {
     it("Get and save the values for the incentives and conversionAccess for all conversion configs before the execution of VIP", async () => {
       riskFundConverterBeforeVip = await getConverterStates(BaseAssets[0], riskFundConverter);
 
@@ -98,33 +101,28 @@ forking(42623700, async () => {
       ETHPrimeConverterBeforeVip = await getConverterStates(BaseAssets[4], ETHPrimeConverter);
 
       XVSVaultConverterBeforeVip = await getConverterStates(BaseAssets[5], XVSVaultConverter);
-    })
-  })
+    });
+  });
 
   testVip("VIP-350", await vip350(), {
     callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(
-        txResponse,
-        [SINGLE_TOKEN_CONVERTER_ABI],
-        ["ConversionConfigUpdated"],
-        [222],
-      );
+      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [222]);
     },
   });
 
   describe("Post-VIP behavior", () => {
     it("Get and compare the values for the incentives and conversionAccess for all conversion configs after the execution of VIP", async () => {
-      await getAndCompareConverterStates(BaseAssets[0], riskFundConverter, riskFundConverterBeforeVip)
+      await getAndCompareConverterStates(BaseAssets[0], riskFundConverter, riskFundConverterBeforeVip);
 
-      await getAndCompareConverterStates(BaseAssets[1], USDTPrimeConverter, USDTPrimeConverterBeforeVip)
-      
-      await getAndCompareConverterStates(BaseAssets[2], USDCPrimeConverter, USDCPrimeConverterBeforeVip)
+      await getAndCompareConverterStates(BaseAssets[1], USDTPrimeConverter, USDTPrimeConverterBeforeVip);
 
-      await getAndCompareConverterStates(BaseAssets[3], BTCBPrimeConverter, BTCBPrimeConverterBeforeVip)
+      await getAndCompareConverterStates(BaseAssets[2], USDCPrimeConverter, USDCPrimeConverterBeforeVip);
 
-      await getAndCompareConverterStates(BaseAssets[4], ETHPrimeConverter, ETHPrimeConverterBeforeVip)
+      await getAndCompareConverterStates(BaseAssets[3], BTCBPrimeConverter, BTCBPrimeConverterBeforeVip);
 
-      await getAndCompareConverterStates(BaseAssets[5], XVSVaultConverter, XVSVaultConverterBeforeVip)
-    })
-  })
-})
+      await getAndCompareConverterStates(BaseAssets[4], ETHPrimeConverter, ETHPrimeConverterBeforeVip);
+
+      await getAndCompareConverterStates(BaseAssets[5], XVSVaultConverter, XVSVaultConverterBeforeVip);
+    });
+  });
+});
