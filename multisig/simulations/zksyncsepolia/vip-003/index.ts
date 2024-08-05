@@ -1,20 +1,27 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser, mineBlocks } from "src/utils";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip003 from "../../../proposals/zksyncsepolia/vip-003";
+import vip003, { ACM, XVS_STORE } from "../../../proposals/zksyncsepolia/vip-003";
+import ACM_ABI from "./abi/acm.json";
+import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
 import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
-const XVS_STORE = "0xf0DaEFE5f5df4170426F88757EcdF45430332d88";
+const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 
-forking(3546606, async () => {
+forking(3572259, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
+  let xvsMinter: SignerWithAddress;
 
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, zksyncsepolia.XVS_VAULT_PROXY);
@@ -23,9 +30,26 @@ forking(3546606, async () => {
   });
 
   describe("Post tx checks", () => {
-    // it("Check Vault", async () => {  // We can check this once we have XVS on zksync sepolia chain
-    //   // checkXVSVault();
-    // });
+    describe("Generic checks", async () => {
+      before(async () => {
+        const acm: Contract = await ethers.getContractAt(ACM_ABI, ACM);
+        const xvs: Contract = await ethers.getContractAt(XVS_ABI, zksyncsepolia.XVS);
+        xvsMinter = await initMainnetUser(XVS_BRIDGE, ethers.utils.parseEther("1"));
+        const admin = await initMainnetUser(zksyncsepolia.GUARDIAN, ethers.utils.parseEther("1"));
+        const xvsHolder = await initMainnetUser(zksyncsepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
+        await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(zksyncsepolia.XVS, "61805555555555555");
+        await xvsVault.connect(admin).resume();
+        // Giving call permissions to call the functions as xvs bridge vip is not executed now.
+        await acm.connect(admin).giveCallPermission(zksyncsepolia.XVS, "mint(address,uint256)", XVS_BRIDGE);
+        await acm.connect(admin).giveCallPermission(zksyncsepolia.XVS, "setMintCap(address,uint256)", admin.address);
+        await xvs.connect(admin).setMintCap(XVS_BRIDGE, parseUnits("100", 18));
+        await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"));
+
+        await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
+        await mineBlocks(604800);
+      });
+      checkXVSVault();
+    });
 
     it("Should set xvs vault owner to multisig", async () => {
       const owner = await xvsVault.admin();

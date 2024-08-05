@@ -3,7 +3,7 @@ import { makeProposal } from "src/utils";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
-const XVS_STORE = "0xf0DaEFE5f5df4170426F88757EcdF45430332d88";
+export const XVS_STORE = "0xf0DaEFE5f5df4170426F88757EcdF45430332d88";
 export const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 
 const vip003 = () => {
