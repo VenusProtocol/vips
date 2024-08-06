@@ -1,10 +1,10 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, mineBlocks } from "src/utils";
+import { initMainnetUser } from "src/utils";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
@@ -32,21 +32,33 @@ forking(3572259, async () => {
   describe("Post tx checks", () => {
     describe("Generic checks", async () => {
       before(async () => {
+        const feeData = await ethers.provider.getFeeData();
+        const txnParams: { maxFeePerGas?: BigNumber } = {};
+        if (feeData.maxFeePerGas) {
+          // Sometimes the gas estimation is wrong with zksync
+          txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+        }
+
         const acm: Contract = await ethers.getContractAt(ACM_ABI, ACM);
         const xvs: Contract = await ethers.getContractAt(XVS_ABI, zksyncsepolia.XVS);
         xvsMinter = await initMainnetUser(XVS_BRIDGE, ethers.utils.parseEther("1"));
         const admin = await initMainnetUser(zksyncsepolia.GUARDIAN, ethers.utils.parseEther("1"));
         const xvsHolder = await initMainnetUser(zksyncsepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
-        await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(zksyncsepolia.XVS, "61805555555555555");
-        await xvsVault.connect(admin).resume();
-        // Giving call permissions to call the functions as xvs bridge vip is not executed now.
-        await acm.connect(admin).giveCallPermission(zksyncsepolia.XVS, "mint(address,uint256)", XVS_BRIDGE);
-        await acm.connect(admin).giveCallPermission(zksyncsepolia.XVS, "setMintCap(address,uint256)", admin.address);
-        await xvs.connect(admin).setMintCap(XVS_BRIDGE, parseUnits("100", 18));
-        await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"));
+        await xvsVault
+          .connect(admin)
+          .setRewardAmountPerBlockOrSecond(zksyncsepolia.XVS, "61805555555555555", txnParams);
 
-        await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
-        await mineBlocks(604800);
+        await xvsVault.connect(admin).resume(txnParams);
+        // Giving call permissions to call the functions as xvs bridge vip is not executed now.
+        await acm.connect(admin).giveCallPermission(zksyncsepolia.XVS, "mint(address,uint256)", XVS_BRIDGE, txnParams);
+
+        await acm
+          .connect(admin)
+          .giveCallPermission(zksyncsepolia.XVS, "setMintCap(address,uint256)", admin.address, txnParams);
+        await xvs.connect(admin).setMintCap(XVS_BRIDGE, parseUnits("100", 18), txnParams);
+        await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"), txnParams);
+
+        await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"), txnParams);
       });
       checkXVSVault();
     });
