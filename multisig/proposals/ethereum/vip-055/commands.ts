@@ -1,31 +1,10 @@
-import { Assets, BaseAssets } from "./addresses";
+import { Assets } from "./addresses";
 
 type IncentiveAndAccessibility = [number, number];
+const incentiveAndAccessibility: IncentiveAndAccessibility = [1e14, 1]; // ALL
 
-function getIncentiveAndAccessibility(baseAsset: string) {
-  const incentivesAndAccess: Array<[number, number]> = [];
+export const incentiveAndAccessibilityForConverters: IncentiveAndAccessibility[] = [];
 
-  for (const asset of Assets) {
-    if (asset != baseAsset) {
-      incentivesAndAccess.push([1e14, 1]); // ALL
-    }
-  }
-
-  return incentivesAndAccess;
+for (let i = 0; i < Assets.length - 1; i++) {
+  incentiveAndAccessibilityForConverters.push(incentiveAndAccessibility);
 }
-
-export const incentiveAndAccessibilityForUSDTPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(
-  BaseAssets[0],
-);
-export const incentiveAndAccessibilityForUSDCPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(
-  BaseAssets[1],
-);
-export const incentiveAndAccessibilityForWBTCPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(
-  BaseAssets[2],
-);
-export const incentiveAndAccessibilityForWETHPrimeConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(
-  BaseAssets[3],
-);
-export const incentiveAndAccessibilityForXVSVaultConverter: IncentiveAndAccessibility[] = getIncentiveAndAccessibility(
-  BaseAssets[4],
-);

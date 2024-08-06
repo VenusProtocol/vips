@@ -14,13 +14,7 @@ import {
   XVSVaultConverterTokenOuts,
   XVS_VAULT_CONVERTER,
 } from "./addresses";
-import {
-  incentiveAndAccessibilityForUSDCPrimeConverter,
-  incentiveAndAccessibilityForUSDTPrimeConverter,
-  incentiveAndAccessibilityForWBTCPrimeConverter,
-  incentiveAndAccessibilityForWETHPrimeConverter,
-  incentiveAndAccessibilityForXVSVaultConverter,
-} from "./commands";
+import { incentiveAndAccessibilityForConverters } from "./commands";
 
 export const vip055 = () => {
   const meta = {
@@ -37,27 +31,27 @@ export const vip055 = () => {
       {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], USDTPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDTPrimeConverter],
+        params: [BaseAssets[0], USDTPrimeConverterTokenOuts, incentiveAndAccessibilityForConverters],
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], USDCPrimeConverterTokenOuts, incentiveAndAccessibilityForUSDCPrimeConverter],
+        params: [BaseAssets[1], USDCPrimeConverterTokenOuts, incentiveAndAccessibilityForConverters],
       },
       {
         target: WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], WBTCPrimeConverterTokenOuts, incentiveAndAccessibilityForWBTCPrimeConverter],
+        params: [BaseAssets[2], WBTCPrimeConverterTokenOuts, incentiveAndAccessibilityForConverters],
       },
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], WETHPrimeConverterTokenOuts, incentiveAndAccessibilityForWETHPrimeConverter],
+        params: [BaseAssets[3], WETHPrimeConverterTokenOuts, incentiveAndAccessibilityForConverters],
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], XVSVaultConverterTokenOuts, incentiveAndAccessibilityForXVSVaultConverter],
+        params: [BaseAssets[4], XVSVaultConverterTokenOuts, incentiveAndAccessibilityForConverters],
       },
     ],
     meta,
