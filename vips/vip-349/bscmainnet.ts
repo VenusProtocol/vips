@@ -19,18 +19,18 @@ const vip349 = () => {
   };
   return makeProposal(
     [
-      {
-        target: arbitrumone.XVS_VAULT_PROXY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: arbitrumone.XVS_VAULT_PROXY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.arbitrumone,
-      },
+      // {
+      //   target: arbitrumone.XVS_VAULT_PROXY,
+      //   signature: "acceptOwnership()",
+      //   params: [],
+      //   dstChainId: LzChainId.arbitrumone,
+      // },
+      // {
+      //   target: arbitrumone.XVS_VAULT_PROXY,
+      //   signature: "acceptOwnership()",
+      //   params: [],
+      //   dstChainId: LzChainId.arbitrumone,
+      // },
 
       // Normal Timelock Permissions
       {
