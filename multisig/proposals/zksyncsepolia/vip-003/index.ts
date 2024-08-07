@@ -51,7 +51,7 @@ const vip003 = () => {
         zksyncsepolia.XVS_VAULT_PROXY,
         "setRewardAmountPerBlockOrSecond(address,uint256)",
         zksyncsepolia.GUARDIAN,
-      ], // func name changed from setRewardAmountPerBlock to setRewardAmountPerBlockOrSecond
+      ],
     },
 
     {
@@ -66,7 +66,7 @@ const vip003 = () => {
     {
       target: zksyncsepolia.XVS_VAULT_PROXY,
       signature: "add(address,uint256,address,uint256,uint256)",
-      params: [zksyncsepolia.XVS, 100, zksyncsepolia.XVS, "0", 604800],
+      params: [zksyncsepolia.XVS, 100, zksyncsepolia.XVS, "0", 300],
     },
     {
       target: zksyncsepolia.XVS_VAULT_PROXY,
