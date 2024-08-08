@@ -66,6 +66,25 @@ const vip350 = () => {
         dstChainId: LzChainId.ethereum,
       },
 
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "pause()", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "resume()", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+
 
       // Critical Timelock Permissions
       {
@@ -104,6 +123,25 @@ const vip350 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ETHEREUM_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
+      },
+
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "pause()", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "resume()", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,

@@ -31,6 +31,12 @@ const vip349 = () => {
         params: [],
         dstChainId: LzChainId.ethereum,
       },
+      {
+        target: opbnbmainnet.XVS_VAULT_PROXY,
+        signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
 
       // Normal Timelock Permissions
       {
@@ -105,6 +111,43 @@ const vip349 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [ethereum.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
+      },
+
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "pause()", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "resume()", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "set(address,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [opbnbmainnet.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,
