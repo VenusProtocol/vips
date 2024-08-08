@@ -13,10 +13,6 @@ const { arbitrumone } = NETWORK_ADDRESSES;
 
 forking(230362555, async () => {
   const provider = ethers.provider;
-  let chainLinkOracle: Contract;
-  let redstoneOracle: Contract;
-  let resilientOracle: Contract;
-  let boundValidator: Contract;
 
   before(async () => {
     await pretendExecutingVip(await vip010());
