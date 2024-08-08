@@ -11,7 +11,7 @@ export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 const vip349 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-349 Accept ownership & Give permissions of XVS Vault to Normal Timelock",
+    title: "VIP-332 accept ownership & give permissions of oracle to Normal Timelock",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -26,10 +26,10 @@ const vip349 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: arbitrumone.XVS_VAULT_PROXY,
+        target: ethereum.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.arbitrumone,
+        dstChainId: LzChainId.ethereum,
       },
 
       // Normal Timelock Permissions
@@ -69,10 +69,46 @@ const vip349 = () => {
         params: [arbitrumone.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
         dstChainId: LzChainId.arbitrumone,
       },
+
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "pause()", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "resume()", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "set(address,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethereum.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
     ],
     meta,
     ProposalType.REGULAR,
-  )
+  );
 };
-
 export default vip349;

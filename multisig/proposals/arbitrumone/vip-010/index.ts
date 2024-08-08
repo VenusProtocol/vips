@@ -12,11 +12,6 @@ const vip010 = () => {
       signature: "_setPendingAdmin(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-    {
-      target: arbitrumone.XVS_VAULT_PROXY,
-      signature: "_setPendingAdmin(address)",
-      params: [arbitrumone.NORMAL_TIMELOCK],
-    },
 
     // Revoke permissions
     {
