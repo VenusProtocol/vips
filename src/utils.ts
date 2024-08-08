@@ -116,6 +116,17 @@ const toRpcQuantity = (x: NumberLike): string => {
   return hex.startsWith("0x") ? hex.replace(/0x0+/, "0x") : `0x${hex}`;
 };
 
+export async function mineBlocks(blocks: NumberLike = 1, options: { interval?: NumberLike } = {}): Promise<void> {
+  const interval = options.interval ?? 1;
+  const blocksHex = toRpcQuantity(blocks);
+  const intervalHex = toRpcQuantity(interval);
+
+  await network.provider.request({
+    method: "hardhat_mine",
+    params: [blocksHex, intervalHex],
+  });
+}
+
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
   const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
@@ -291,7 +302,10 @@ export const setMaxStalePeriod = async (
     console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
   }
 
-  const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
+  const normalTimelock =
+    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+      ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+      : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
