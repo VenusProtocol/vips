@@ -54,7 +54,11 @@ const vip349 = () => {
       {
         target: ARBITRUM_ONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
+        params: [
+          arbitrumone.XVS_VAULT_PROXY,
+          "add(address,uint256,address,uint256,uint256)",
+          arbitrumone.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -66,13 +70,21 @@ const vip349 = () => {
       {
         target: ARBITRUM_ONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", arbitrumone.NORMAL_TIMELOCK],
+        params: [
+          arbitrumone.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          arbitrumone.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_ONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
+        params: [
+          arbitrumone.XVS_VAULT_PROXY,
+          "setWithdrawalLockingPeriod(address,uint256,uint256)",
+          arbitrumone.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
 
@@ -103,13 +115,21 @@ const vip349 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ethereum.NORMAL_TIMELOCK],
+        params: [
+          ethereum.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ethereum.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
+        params: [
+          ethereum.XVS_VAULT_PROXY,
+          "setWithdrawalLockingPeriod(address,uint256,uint256)",
+          ethereum.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -128,7 +148,11 @@ const vip349 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "add(address,uint256,address,uint256,uint256)",
+          opbnbmainnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -140,13 +164,21 @@ const vip349 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          opbnbmainnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "setWithdrawalLockingPeriod(address,uint256,uint256)",
+          opbnbmainnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
     ],

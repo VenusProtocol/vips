@@ -1,4 +1,3 @@
-import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
@@ -6,9 +5,7 @@ import vip013 from "../../multisig/proposals/arbitrumsepolia/vip-013";
 import vip350 from "../../vips/vip-350/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 
-forking(69719920, async () => {
-  const provider = ethers.provider;
-
+forking(69733447, async () => {
   before(async () => {
     await pretendExecutingVip(await vip013());
   });

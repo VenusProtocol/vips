@@ -11,7 +11,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 
 const NORMAL_TIMELOCK = sepolia.NORMAL_TIMELOCK;
 
-forking(6459965, async () => {
+forking(69730992, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
 

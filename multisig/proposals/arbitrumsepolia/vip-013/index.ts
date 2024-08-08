@@ -17,7 +17,11 @@ const vip010 = () => {
     {
       target: ARBITRUM_SEPOLIA_ACM,
       signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", arbitrumsepolia.GUARDIAN],
+      params: [
+        arbitrumsepolia.XVS_VAULT_PROXY,
+        "add(address,uint256,address,uint256,uint256)",
+        arbitrumsepolia.GUARDIAN,
+      ],
     },
     {
       target: ARBITRUM_SEPOLIA_ACM,
@@ -27,12 +31,20 @@ const vip010 = () => {
     {
       target: ARBITRUM_SEPOLIA_ACM,
       signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", arbitrumsepolia.GUARDIAN],
+      params: [
+        arbitrumsepolia.XVS_VAULT_PROXY,
+        "setRewardAmountPerBlockOrSecond(address,uint256)",
+        arbitrumsepolia.GUARDIAN,
+      ],
     },
     {
       target: ARBITRUM_SEPOLIA_ACM,
       signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", arbitrumsepolia.GUARDIAN],
+      params: [
+        arbitrumsepolia.XVS_VAULT_PROXY,
+        "setWithdrawalLockingPeriod(address,uint256,uint256)",
+        arbitrumsepolia.GUARDIAN,
+      ],
     },
   ]);
 };

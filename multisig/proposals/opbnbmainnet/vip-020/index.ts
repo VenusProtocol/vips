@@ -32,7 +32,11 @@ const vip020 = () => {
     {
       target: OPBNBMAINNET_ACM,
       signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", opbnbmainnet.GUARDIAN],
+      params: [
+        opbnbmainnet.XVS_VAULT_PROXY,
+        "setWithdrawalLockingPeriod(address,uint256,uint256)",
+        opbnbmainnet.GUARDIAN,
+      ],
     },
   ]);
 };

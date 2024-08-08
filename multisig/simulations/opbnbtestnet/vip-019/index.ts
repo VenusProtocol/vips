@@ -1,3 +1,4 @@
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -21,6 +22,7 @@ forking(28761242, async () => {
     });
 
     it("should have no pending owner", async () => {
+      await mine();
       expect(await xvsVault.pendingAdmin()).to.equal(ethers.constants.AddressZero);
     });
   });

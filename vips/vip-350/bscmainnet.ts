@@ -43,7 +43,11 @@ const vip350 = () => {
       {
         target: ARBITRUM_ONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          arbitrumone.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
 
@@ -62,7 +66,11 @@ const vip350 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
+        params: [
+          ethereum.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ETHEREUM_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -81,10 +89,13 @@ const vip350 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
-
 
       // Critical Timelock Permissions
       {
@@ -102,7 +113,11 @@ const vip350 = () => {
       {
         target: ARBITRUM_ONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumone.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          arbitrumone.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
 
@@ -115,13 +130,17 @@ const vip350 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.XVS_VAULT_PROXY, "resume()",ETHEREUM_CRITICAL_TIMELOCK],
+        params: [ethereum.XVS_VAULT_PROXY, "resume()", ETHEREUM_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ETHEREUM_CRITICAL_TIMELOCK],
+        params: [
+          ethereum.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ETHEREUM_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -140,7 +159,11 @@ const vip350 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
     ],

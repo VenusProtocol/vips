@@ -43,7 +43,11 @@ const vip350 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumsepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          arbitrumsepolia.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
 
@@ -62,7 +66,11 @@ const vip350 = () => {
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          sepolia.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -81,10 +89,13 @@ const vip350 = () => {
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbtestnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          opbnbtestnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
-
 
       // Critical Timelock Permissions
       {
@@ -102,7 +113,11 @@ const vip350 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [arbitrumsepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          arbitrumsepolia.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
 
@@ -115,13 +130,17 @@ const vip350 = () => {
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.XVS_VAULT_PROXY, "resume()",SEPOLIA_CRITICAL_TIMELOCK],
+        params: [sepolia.XVS_VAULT_PROXY, "resume()", SEPOLIA_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [sepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          sepolia.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -140,7 +159,11 @@ const vip350 = () => {
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [opbnbtestnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          opbnbtestnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
     ],

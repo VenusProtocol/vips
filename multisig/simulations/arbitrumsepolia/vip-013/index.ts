@@ -11,7 +11,7 @@ const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 const NORMAL_TIMELOCK = arbitrumsepolia.NORMAL_TIMELOCK;
 
-forking(69713811, async () => {
+forking(69730992, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
 

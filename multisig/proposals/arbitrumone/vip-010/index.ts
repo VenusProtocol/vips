@@ -32,7 +32,11 @@ const vip010 = () => {
     {
       target: ARBITRUM_ONE_ACM,
       signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", arbitrumone.GUARDIAN],
+      params: [
+        arbitrumone.XVS_VAULT_PROXY,
+        "setWithdrawalLockingPeriod(address,uint256,uint256)",
+        arbitrumone.GUARDIAN,
+      ],
     },
   ]);
 };
