@@ -135,6 +135,8 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     let proposalId: number;
 
     it("can be proposed", async () => {
+      // Temporary workaround(mining a block just after forking) till hardforking issue is solved by hardhat, https://github.com/NomicFoundation/hardhat/issues/5511
+      await mine();
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
       let tx;
