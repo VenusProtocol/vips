@@ -19,18 +19,18 @@ const vip349 = () => {
   };
   return makeProposal(
     [
-      // {
-      //   target: arbitrumone.XVS_VAULT_PROXY,
-      //   signature: "acceptOwnership()",
-      //   params: [],
-      //   dstChainId: LzChainId.arbitrumone,
-      // },
-      // {
-      //   target: arbitrumone.XVS_VAULT_PROXY,
-      //   signature: "acceptOwnership()",
-      //   params: [],
-      //   dstChainId: LzChainId.arbitrumone,
-      // },
+      {
+        target: arbitrumone.XVS_VAULT_PROXY,
+        signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: arbitrumone.XVS_VAULT_PROXY,
+        signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
 
       // Normal Timelock Permissions
       {
@@ -69,7 +69,9 @@ const vip349 = () => {
         params: [arbitrumone.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
         dstChainId: LzChainId.arbitrumone,
       },
-    ]
+    ],
+    meta,
+    ProposalType.REGULAR,
   )
 };
 

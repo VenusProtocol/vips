@@ -9,12 +9,12 @@ const vip010 = () => {
   return makeProposal([
     // {
     //   target: arbitrumone.XVS_VAULT_PROXY,
-    //   signature: "transferOwnership(address)",
+    //   signature: "_setPendingAdmin(address)",
     //   params: [arbitrumone.NORMAL_TIMELOCK],
     // },
     // {
     //   target: arbitrumone.XVS_VAULT_PROXY,
-    //   signature: "transferOwnership(address)",
+    //   signature: "_setPendingAdmin(address)",
     //   params: [arbitrumone.NORMAL_TIMELOCK],
     // },
 

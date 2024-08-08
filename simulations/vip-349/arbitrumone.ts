@@ -22,7 +22,7 @@ forking(230362555, async () => {
     await pretendExecutingVip(await vip010());
   });
 
-  testForkedNetworkVipCommands("vip332 configures bridge", await vip349(), {
+  testForkedNetworkVipCommands("vip349 configures XVS Vault admin", await vip349(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [10]);
     },
