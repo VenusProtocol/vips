@@ -9,13 +9,13 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip349, {
+import vip350, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../vips/vip-349/bsctestnet";
+} from "../../vips/vip-350/bsctestnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -43,7 +43,7 @@ forking(42792146, async () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip-349 testnet", await vip349(), {
+  testVip("vip-350 testnet", await vip350(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

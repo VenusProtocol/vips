@@ -11,7 +11,7 @@ export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 
-const vip349 = () => {
+const vip350 = () => {
   const meta = {
     version: "v2",
     title: "VIP-349 Enable BSC -> ZKSYNC bridge",
@@ -59,4 +59,4 @@ const vip349 = () => {
   );
 };
 
-export default vip349;
+export default vip350;
