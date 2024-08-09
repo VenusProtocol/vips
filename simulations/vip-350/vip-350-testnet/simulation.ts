@@ -77,12 +77,12 @@ forking(42623700, async () => {
       if (asset != baseAsset) {
         result = await converter.conversionConfigurations(baseAsset, asset);
         const oldIncentivesAndAccess = oldConverterStates[j];
+        expect(result[0]).to.equal(updatedIncentivesAfterVip);
         if (asset == BaseAssets[0]) {
-          expect(result[0]).to.equal(0);
+          expect(result[1]).to.equal(1);
         } else {
-          expect(result[0]).to.equal(updatedIncentivesAfterVip);
+          expect(result[1]).to.equal(oldIncentivesAndAccess[1]);
         }
-        expect(result[1]).to.equal(oldIncentivesAndAccess[1]);
         j++;
       }
     }
@@ -106,7 +106,7 @@ forking(42623700, async () => {
 
   testVip("VIP-350", await vip350(), {
     callbackAfterExecution: async (txResponse: any) => {
-      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [222]);
+      await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [228]);
     },
   });
 

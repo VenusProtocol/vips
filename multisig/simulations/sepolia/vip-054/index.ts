@@ -43,13 +43,20 @@ forking(6446869, async () => {
     const converterStates: Array<[number, number]> = [];
     for (let i = 0; i < Assets.length; i++) {
       const asset = Assets[i];
+
       if (asset != baseAsset) {
         result = await converter.conversionConfigurations(baseAsset, asset);
         converterStates.push([result[0], result[1]]);
         expect(result[0]).to.equal(0);
-        expect(result[1]).to.equal(1);
+        if (asset == Assets[14]) {
+          // for ezETH no config existed
+          expect(result[1]).to.equal(0);
+        } else {
+          expect(result[1]).to.equal(1);
+        }
       }
     }
+
     return converterStates;
   };
 
@@ -66,7 +73,12 @@ forking(6446869, async () => {
         result = await converter.conversionConfigurations(baseAsset, asset);
         const oldIncentivesAndAccess = oldConverterStates[j];
         expect(result[0]).to.equal(updatedIncentivesAfterVip);
-        expect(result[1]).to.equal(oldIncentivesAndAccess[1]);
+        if (asset == Assets[14]) {
+          // for ezETH no config existed
+          expect(result[1]).to.equal(1);
+        } else {
+          expect(result[1]).to.equal(oldIncentivesAndAccess[1]);
+        }
         j++;
       }
     }

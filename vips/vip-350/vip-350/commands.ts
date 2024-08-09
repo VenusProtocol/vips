@@ -7,18 +7,7 @@ function getIncentiveAndAccessibility(baseAsset: string) {
 
   for (const asset of Assets) {
     if (asset != baseAsset) {
-      // Every conversion of the baseAsset for USDT in a SingleTokenConverter with a baseAsset != USDT is enabled only for converters,
-      // because the RiskFundConverter of the USDTPrimeConverter should be able to cover those conversions
-      if (asset === BaseAssets[0]) {
-        if (baseAsset != BaseAssets[5]) {
-          incentivesAndAccess.push([0, 2]); // ONLY_FOR_CONVERTERS
-        } else {
-          incentivesAndAccess.push([0, 1]); // ALL for XVSVaultConverter
-        }
-        // Exculde only when tokenIn and tokenOut are same
-      } else {
-        incentivesAndAccess.push([1e14, 1]); // ALL
-      }
+      incentivesAndAccess.push([1e14, 1]); // ALL
     }
   }
   return incentivesAndAccess;
