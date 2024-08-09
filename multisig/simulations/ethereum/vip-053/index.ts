@@ -4,17 +4,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip053, {
-  COMPTROLLER_BEACON, 
-  VTOKEN_BEACON, 
-  VTOKENS, 
-  COMPTROLLERS
-} from "../../../proposals/ethereum/vip-053";
+import vip053, { COMPTROLLERS, COMPTROLLER_BEACON, VTOKENS, VTOKEN_BEACON } from "../../../proposals/ethereum/vip-053";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import VTOKEN_ABI from "./abi/VToken.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
-import VTOKEN_BEACON_ABI from "./abi/VTokenBeacon.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
+import VTOKEN_ABI from "./abi/VToken.json";
+import VTOKEN_BEACON_ABI from "./abi/VTokenBeacon.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -27,7 +22,7 @@ forking(20482219, async () => {
   describe("Pre-VIP behavior", async () => {
     before(async () => {
       comptrollerBeacon = new ethers.Contract(COMPTROLLER_BEACON, COMPTROLLER_BEACON_ABI, provider);
-      vTokenBeacon = new ethers.Contract(VTOKEN_BEACON, VTOKEN_BEACON_ABI, provider)
+      vTokenBeacon = new ethers.Contract(VTOKEN_BEACON, VTOKEN_BEACON_ABI, provider);
       poolRegistry = new ethers.Contract(ethereum.POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
     });
 

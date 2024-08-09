@@ -9,9 +9,7 @@ export const VTOKEN_BEACON = "0x0463a7E5221EAE1990cEddB51A5821a68cdA6008";
 export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const POOL_REGISTRY = "0x758f5715d817e02857Ba40889251201A5aE3E186";
 
-export const COMPTROLLERS = [
-  "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70"
-]
+export const COMPTROLLERS = ["0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70"];
 
 export const VTOKENS = [
   "0xA09cFAd2e138fe6d8FF62df803892cbCb79ED082",
@@ -35,8 +33,8 @@ export const VTOKENS = [
   "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b",
   "0x9C5e7a3B4db931F07A6534f9e44100DDDc78c408",
   "0xD5f83FCbb4a62779D0B37b9E603CD19Ad84884F0",
-  "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4"
-]
+  "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4",
+];
 
 const vip052 = () => {
   return makeProposal([
@@ -55,21 +53,20 @@ const vip052 = () => {
       signature: "transferOwnership(address)",
       params: [sepolia.NORMAL_TIMELOCK],
     },
-    ...COMPTROLLERS.map((comptroller) => {
+    ...COMPTROLLERS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [sepolia.NORMAL_TIMELOCK],
-      }
+      };
     }),
-    ...VTOKENS.map((comptroller) => {
+    ...VTOKENS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [sepolia.NORMAL_TIMELOCK],
-      }
+      };
     }),
-
 
     // Revoke permissions
     {

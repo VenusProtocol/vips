@@ -3,15 +3,9 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 
 import vip052 from "../../multisig/proposals/ethereum/vip-052";
 import vip351 from "../../vips/vip-351/bsctestnet";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import VTOKEN_ABI from "./abi/VToken.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
-const { ethereum } = NETWORK_ADDRESSES;
-
 forking(6460097, async () => {
-  const provider = ethers.provider;
   before(async () => {
     await pretendExecutingVip(await vip052());
   });

@@ -1,37 +1,15 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import {
-  COMPTROLLERS as SEPOLIA_COMPTROLLERS,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  VTOKENS as SEPOLIA_VTOKENS,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  POOL_REGISTRY as SEPOLIA_POOL_REGISTRY,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  COMPTROLLERS as ARBITRUMSEPOLIA_COMPTROLLERS,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  VTOKENS as ARBITRUMSEPOLIA_VTOKENS,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  POOL_REGISTRY as ARBITRUMSEPOLIA_POOL_REGISTRY,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS,
-} from "../../multisig/proposals/opbnbtestnet/vip-019";
-import {
-  VTOKENS as OPBNBTESTNET_VTOKENS,
-} from "../../multisig/proposals/opbnbtestnet/vip-019";
-import {
-  POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY,
-} from "../../multisig/proposals/opbnbtestnet/vip-019";
 
-import { ethers } from "hardhat";
-
-const { arbitrumsepolia, opbnbtestnet, sepolia } = NETWORK_ADDRESSES;
+import { COMPTROLLERS as ARBITRUMSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/arbitrumsepolia/vip-013";
+import { VTOKENS as ARBITRUMSEPOLIA_VTOKENS } from "../../multisig/proposals/arbitrumsepolia/vip-013";
+import { POOL_REGISTRY as ARBITRUMSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-013";
+import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-019";
+import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-019";
+import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-019";
+import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/sepolia/vip-052";
+import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-052";
+import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/sepolia/vip-052";
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
@@ -54,21 +32,21 @@ const vip350 = () => {
         params: [],
         dstChainId: LzChainId.sepolia,
       },
-      ...SEPOLIA_COMPTROLLERS.map((comptroller) => {
+      ...SEPOLIA_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.sepolia,
-        }
+        };
       }),
-      ...SEPOLIA_VTOKENS.map((comptroller) => {
+      ...SEPOLIA_VTOKENS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.sepolia,
-        }
+        };
       }),
 
       {
@@ -77,21 +55,21 @@ const vip350 = () => {
         params: [],
         dstChainId: LzChainId.arbitrumsepolia,
       },
-      ...ARBITRUMSEPOLIA_COMPTROLLERS.map((comptroller) => {
+      ...ARBITRUMSEPOLIA_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.arbitrumsepolia,
-        }
+        };
       }),
-      ...ARBITRUMSEPOLIA_VTOKENS.map((comptroller) => {
+      ...ARBITRUMSEPOLIA_VTOKENS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.arbitrumsepolia,
-        }
+        };
       }),
 
       {
@@ -100,21 +78,21 @@ const vip350 = () => {
         params: [],
         dstChainId: LzChainId.opbnbtestnet,
       },
-      ...OPBNBTESTNET_COMPTROLLERS.map((comptroller) => {
+      ...OPBNBTESTNET_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.opbnbtestnet,
-        }
+        };
       }),
-      ...OPBNBTESTNET_VTOKENS.map((comptroller) => {
+      ...OPBNBTESTNET_VTOKENS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.opbnbtestnet,
-        }
+        };
       }),
     ],
     meta,

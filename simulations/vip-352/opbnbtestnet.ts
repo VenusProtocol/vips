@@ -3,20 +3,9 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 
 import vip019 from "../../multisig/proposals/opbnbtestnet/vip-019";
 import vip352 from "../../vips/vip-352/bsctestnet";
-import {
-  COMPTROLLERS, VTOKENS
-} from "../../multisig/proposals/opbnbmainnet/vip-020";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import VTOKEN_ABI from "./abi/VToken.json";
-import { expect } from "chai";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
-const { opbnbmainnet } = NETWORK_ADDRESSES;
-
 forking(36325286, async () => {
-  const provider = ethers.provider;
   before(async () => {
     await pretendExecutingVip(await vip019());
   });

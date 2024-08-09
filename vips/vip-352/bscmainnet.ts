@@ -1,19 +1,6 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import {
-  POOL_REGISTRY as ETHEREUM_POOL_REGISTRY,
-} from "../../multisig/proposals/ethereum/vip-053";
-import {
-  POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY,
-} from "../../multisig/proposals/arbitrumone/vip-010";
-import {
-  POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY,
-} from "../../multisig/proposals/opbnbmainnet/vip-020";
-
-import { ethers } from "hardhat";
-
-const { arbitrumone, opbnbmainnet, ethereum } = NETWORK_ADDRESSES;
 
 export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
@@ -42,7 +29,11 @@ const vip352 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ETHEREUM_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -60,7 +51,11 @@ const vip352 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ETHEREUM_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ETHEREUM_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -88,29 +83,44 @@ const vip352 = () => {
         dstChainId: LzChainId.ethereum,
       },
 
-
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -138,29 +148,44 @@ const vip352 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
 
-
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -188,13 +213,15 @@ const vip352 = () => {
         dstChainId: LzChainId.opbnbmainnet,
       },
 
-
-
       // Critical Timelock Permissions
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ETHEREUM_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ETHEREUM_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -212,7 +239,11 @@ const vip352 = () => {
       {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ETHEREUM_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ETHEREUM_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -240,29 +271,44 @@ const vip352 = () => {
         dstChainId: LzChainId.ethereum,
       },
 
-
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -290,29 +336,44 @@ const vip352 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
 
-
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {

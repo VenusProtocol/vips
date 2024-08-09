@@ -1,9 +1,6 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-
-
-import { ethers } from "hardhat";
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
@@ -32,7 +29,11 @@ const vip352 = () => {
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -50,7 +51,11 @@ const vip352 = () => {
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -78,35 +83,54 @@ const vip352 = () => {
         dstChainId: LzChainId.sepolia,
       },
 
-
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setForcedLiquidation(address,bool)",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -124,33 +148,52 @@ const vip352 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setReduceReservesBlockDelta(uint256)",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
 
-
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -178,13 +221,15 @@ const vip352 = () => {
         dstChainId: LzChainId.opbnbtestnet,
       },
 
-
-
       // Critical Timelock Permissions
       {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -230,35 +275,54 @@ const vip352 = () => {
         dstChainId: LzChainId.sepolia,
       },
 
-
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setForcedLiquidation(address,bool)",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -276,33 +340,52 @@ const vip352 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setReduceReservesBlockDelta(uint256)",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
 
-
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {

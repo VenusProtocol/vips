@@ -9,16 +9,14 @@ export const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
 export const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 export const POOL_REGISTRY = "0x560eA4e1cC42591E9f5F5D83Ad2fd65F30128951";
 
-export const COMPTROLLERS = [
-  "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388"
-]
+export const COMPTROLLERS = ["0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388"];
 
 export const VTOKENS = [
   "0x86F82bca79774fc04859966917D2291A68b870A9",
   "0x034Cc5097379B13d3Ed5F6c85c8FAf20F48aE480",
   "0xe3923805f6E117E51f5387421240a86EF1570abC",
-  "0xD36a31AcD3d901AeD998da6E24e848798378474e"
-]
+  "0xD36a31AcD3d901AeD998da6E24e848798378474e",
+];
 
 const vip019 = () => {
   return makeProposal([
@@ -37,21 +35,20 @@ const vip019 = () => {
       signature: "transferOwnership(address)",
       params: [opbnbtestnet.NORMAL_TIMELOCK],
     },
-    ...COMPTROLLERS.map((comptroller) => {
+    ...COMPTROLLERS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [opbnbtestnet.NORMAL_TIMELOCK],
-      }
+      };
     }),
-    ...VTOKENS.map((comptroller) => {
+    ...VTOKENS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [opbnbtestnet.NORMAL_TIMELOCK],
-      }
+      };
     }),
-
 
     // Revoke permissions
     {

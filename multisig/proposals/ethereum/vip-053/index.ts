@@ -12,8 +12,8 @@ export const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
 export const COMPTROLLERS = [
   "0x687a01ecF6d3907658f7A7c714749fAC32336D1B",
   "0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796",
-  "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3"
-]
+  "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3",
+];
 
 export const VTOKENS = [
   "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
@@ -33,8 +33,8 @@ export const VTOKENS = [
   "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E",
   "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
   "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
-  "0xb4933AF59868986316Ed37fa865C829Eba2df0C7"
-]
+  "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
+];
 
 const vip053 = () => {
   return makeProposal([
@@ -53,21 +53,20 @@ const vip053 = () => {
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-    ...COMPTROLLERS.map((comptroller) => {
+    ...COMPTROLLERS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [ethereum.NORMAL_TIMELOCK],
-      }
+      };
     }),
-    ...VTOKENS.map((comptroller) => {
+    ...VTOKENS.map(comptroller => {
       return {
         target: comptroller,
         signature: "transferOwnership(address)",
         params: [ethereum.NORMAL_TIMELOCK],
-      }
+      };
     }),
-
 
     // Revoke permissions
     {

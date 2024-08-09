@@ -1,29 +1,10 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import {
-  COMPTROLLERS as SEPOLIA_COMPTROLLERS,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  VTOKENS as SEPOLIA_VTOKENS,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  POOL_REGISTRY as SEPOLIA_POOL_REGISTRY,
-} from "../../multisig/proposals/sepolia/vip-052";
-import {
-  COMPTROLLERS as ARBITRUMONE_COMPTROLLERS,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  VTOKENS as ARBITRUMONE_VTOKENS,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY,
-} from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import {
-  POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY,
-} from "../../multisig/proposals/opbnbtestnet/vip-019";
 
-import { ethers } from "hardhat";
+import { POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-013";
+import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-019";
 
 const { arbitrumsepolia, opbnbtestnet, sepolia } = NETWORK_ADDRESSES;
 
@@ -140,11 +121,14 @@ const vip351 = () => {
         dstChainId: LzChainId.sepolia,
       },
 
-
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -162,25 +146,41 @@ const vip351 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMinLiquidatableCollateral(uint256)",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -192,7 +192,11 @@ const vip351 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMONE_POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ARBITRUMONE_POOL_REGISTRY,
+          "addPool(string,address,uint256,uint256,uint256)",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -210,7 +214,11 @@ const vip351 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMONE_POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ARBITRUMONE_POOL_REGISTRY,
+          "updatePoolMetadata(address,VenusPoolMetaData)",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -238,11 +246,14 @@ const vip351 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
 
-
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -260,19 +271,31 @@ const vip351 = () => {
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          ethers.constants.AddressZero,
+          "setActionsPaused(address[],uint256[],bool)",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -290,7 +313,11 @@ const vip351 = () => {
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          OPBNBMAINNET_POOL_REGISTRY,
+          "addPool(string,address,uint256,uint256,uint256)",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -308,7 +335,11 @@ const vip351 = () => {
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          OPBNBMAINNET_POOL_REGISTRY,
+          "updatePoolMetadata(address,VenusPoolMetaData)",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {

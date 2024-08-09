@@ -1,17 +1,13 @@
-import { expectEvents } from "src/utils";
+import { expect } from "chai";
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip010 from "../../multisig/proposals/arbitrumone/vip-010";
+import { COMPTROLLERS, VTOKENS } from "../../multisig/proposals/arbitrumone/vip-010";
 import vip350 from "../../vips/vip-350/bscmainnet";
-import {
-  COMPTROLLERS, VTOKENS
-} from "../../multisig/proposals/arbitrumone/vip-010";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import VTOKEN_ABI from "./abi/VToken.json";
-import { expect } from "chai";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -37,5 +33,5 @@ forking(241112064, async () => {
         expect(await v.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }
-  })
+  });
 });
