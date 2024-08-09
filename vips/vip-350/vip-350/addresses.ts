@@ -43,6 +43,7 @@ export const Assets = [
   "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B", // BTT
   "0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99", // WIN
   "0xd17479997F34dd9156Deef8F95A52D81D265be9c", // USDD
+  "0xc748673057861a797275CD8A068AbB95A902e8de", // BabyDoge
 ];
 
 export const BaseAssets = [

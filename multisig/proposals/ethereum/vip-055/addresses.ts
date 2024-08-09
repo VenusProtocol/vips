@@ -15,6 +15,7 @@ export const Assets = [
   "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS
   "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7", // rsETH
   "0xac3E018457B222d93114458476f3E3416Abbe38F", // sfrxETH
+  "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110", // ezETH
 ];
 
 export const BaseAssets = [
