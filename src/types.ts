@@ -67,4 +67,5 @@ export enum LzChainId {
   opbnbtestnet = 10202,
   arbitrumsepolia = 10231,
   arbitrumone = 110,
+  zksyncsepolia = 10248,
 }
