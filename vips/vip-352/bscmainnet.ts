@@ -27,7 +27,7 @@ export const ARBITRUM_ONE_CRITICAL_TIMELOCK = "0x181E4f8F21D087bF02Ea2F64D5e5508
 export const ETHEREUM_CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
 export const OPBNBMAINNET_CRITICAL_TIMELOCK = "0xA7DD2b15B24377296F11c702e758cd9141AB34AA";
 
-const vip350 = () => {
+const vip352 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 accept ownership & give permissions to Normal Timelock",
@@ -344,4 +344,4 @@ const vip350 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip350;
+export default vip352;

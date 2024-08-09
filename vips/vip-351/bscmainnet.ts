@@ -19,7 +19,7 @@ export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 
-const vip350 = () => {
+const vip351 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 accept ownership & give permissions to Normal Timelock",
@@ -328,4 +328,4 @@ const vip350 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip350;
+export default vip351;
