@@ -21,6 +21,7 @@ const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 
 export const vip007 = () => {
   return makeProposal([
+    // ACM Permissions
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
@@ -48,6 +49,8 @@ export const vip007 = () => {
         zksyncsepolia.GUARDIAN,
       ],
     },
+
+    // Configure pool rewards
     {
       target: zksyncsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",

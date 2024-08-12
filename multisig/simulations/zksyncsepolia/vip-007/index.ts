@@ -49,7 +49,7 @@ forking(3602113, async () => {
       await xvs.connect(bridgeSigner).mint(zksyncsepolia.VTREASURY, TREASURY_AMOUNT, { maxFeePerGas: "20000000000" });
     });
 
-    it("vTreasury should hold 3600 XVS", async () => {
+    it("vTreasury should hold 7200 XVS", async () => {
       expect(await xvs.balanceOf(zksyncsepolia.VTREASURY)).to.be.equal(TREASURY_AMOUNT);
     });
   });
