@@ -1,7 +1,7 @@
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip052 from "../../multisig/proposals/ethereum/vip-052";
+import vip052 from "../../multisig/proposals/sepolia/vip-052";
 import vip352 from "../../vips/vip-352/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
