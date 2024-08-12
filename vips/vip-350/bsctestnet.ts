@@ -1,11 +1,10 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsepolia/vip-013";
-import { PSR as SEPOLIA_PSR } from "../../multisig/proposals/sepolia/vip-052";
 import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-019";
-
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { PSR as SEPOLIA_PSR } from "../../multisig/proposals/sepolia/vip-052";
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
@@ -61,13 +60,21 @@ const vip350 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMSEPOLIA_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", arbitrumsepolia.NORMAL_TIMELOCK],
+        params: [
+          ARBITRUMSEPOLIA_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          arbitrumsepolia.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBTESTNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", opbnbtestnet.NORMAL_TIMELOCK],
+        params: [
+          OPBNBTESTNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          opbnbtestnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -99,13 +106,21 @@ const vip350 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMSEPOLIA_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        params: [
+          ARBITRUMSEPOLIA_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBTESTNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        params: [
+          OPBNBTESTNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          OPBNBTESTNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -137,13 +152,21 @@ const vip350 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMSEPOLIA_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        params: [
+          ARBITRUMSEPOLIA_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBTESTNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        params: [
+          OPBNBTESTNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          OPBNBTESTNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -163,7 +186,7 @@ const vip350 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [OPBNBTESTNET_PSR, "removeDistributionConfig(Schema,address)", OPBNBTESTNET_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.opbnbtestnet,
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,

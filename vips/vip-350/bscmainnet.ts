@@ -1,10 +1,10 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { PSR as ARBITRUMONE_PSR } from "../../multisig/proposals/arbitrumone/vip-010";
 import { PSR as ETHEREUM_PSR } from "../../multisig/proposals/ethereum/vip-053";
 import { PSR as OPBNBMAINNET_PSR } from "../../multisig/proposals/opbnbmainnet/vip-020";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
@@ -66,7 +66,11 @@ const vip350 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", opbnbmainnet.NORMAL_TIMELOCK],
+        params: [
+          OPBNBMAINNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          opbnbmainnet.NORMAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -98,13 +102,21 @@ const vip350 = () => {
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMONE_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        params: [
+          ARBITRUMONE_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          ARBITRUM_ONE_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        params: [
+          OPBNBMAINNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          OPBNBMAINNET_FASTTRACK_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -136,13 +148,21 @@ const vip350 = () => {
       {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUMONE_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        params: [
+          ARBITRUMONE_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          ARBITRUM_ONE_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [OPBNBMAINNET_PSR, "addOrUpdateDistributionConfigs(DistributionConfig[])", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        params: [
+          OPBNBMAINNET_PSR,
+          "addOrUpdateDistributionConfigs(DistributionConfig[])",
+          OPBNBMAINNET_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -162,7 +182,7 @@ const vip350 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [OPBNBMAINNET_PSR, "removeDistributionConfig(Schema,address)", OPBNBMAINNET_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.opbnbmainnet,
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,

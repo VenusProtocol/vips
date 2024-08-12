@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip020, {PSR} from "../../../proposals/opbnbmainnet/vip-020";
+import vip020, { PSR } from "../../../proposals/opbnbmainnet/vip-020";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;

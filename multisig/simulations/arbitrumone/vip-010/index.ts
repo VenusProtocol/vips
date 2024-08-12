@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip010, {PSR} from "../../../proposals/arbitrumone/vip-010";
+import vip010, { PSR } from "../../../proposals/arbitrumone/vip-010";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
