@@ -5,6 +5,7 @@ import { makeProposal } from "src/utils";
 
 import { POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-013";
 import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-019";
+import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/sepolia/vip-052";
 
 const { arbitrumsepolia, opbnbtestnet, sepolia } = NETWORK_ADDRESSES;
 
