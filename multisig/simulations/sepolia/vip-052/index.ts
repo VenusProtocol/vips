@@ -4,9 +4,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip052, { PRIME, PLP } from "../../../proposals/sepolia/vip-052";
-import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
+import vip052, { PLP, PRIME } from "../../../proposals/sepolia/vip-052";
 import PRIME_ABI from "./abi/Prime.json";
+import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 

@@ -4,9 +4,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip053, { PRIME, PLP } from "../../../proposals/ethereum/vip-053";
-import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
+import vip053, { PLP, PRIME } from "../../../proposals/ethereum/vip-053";
 import PRIME_ABI from "./abi/Prime.json";
+import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
