@@ -3,10 +3,10 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip019, { XVS, XVS_VAULT_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/opbnbmainnet/vip-019/index";
+import vip014, { XVS, XVS_VAULT_IMPLEMENTATION, XVS_VAULT_PROXY } from "../../../proposals/opbnbmainnet/vip-014/index";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
-forking(27145987, () => {
+forking(27145987, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
 
@@ -26,7 +26,7 @@ forking(27145987, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip019());
+      await pretendExecutingVip(await vip014());
     });
 
     it("check XVS address", async () => {

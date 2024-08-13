@@ -5,7 +5,7 @@ export const XVS_VAULT_TEMP_IMPLEMENTATION = "0xc8614663Cc4ee868EF5267891E177586
 export const XVS_VAULT_IMPLEMENTATION = "0x85B0711FB5Bef4CfeDb90BD2F392b943fd9f556D";
 export const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 
-const vip018 = () => {
+const vip014 = () => {
   return makeProposal([
     {
       target: XVS_VAULT_PROXY,
@@ -35,4 +35,4 @@ const vip018 = () => {
   ]);
 };
 
-export default vip018;
+export default vip014;
