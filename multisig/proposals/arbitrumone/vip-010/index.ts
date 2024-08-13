@@ -1,4 +1,3 @@
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
@@ -8,7 +7,7 @@ export const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const IRMs = [
   "0x390D1C248217615D79f74f2453D682906Bd2dD20",
   "0x305f960b00594200ed80373B61b38e669651469E",
-  "0xC7EDE29FE265aA46C1Bbc62Dc7e0f3565cce3Db6"
+  "0xC7EDE29FE265aA46C1Bbc62Dc7e0f3565cce3Db6",
 ];
 
 const vip010 = () => {
