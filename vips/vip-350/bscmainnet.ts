@@ -35,49 +35,6 @@ const vip350 = () => {
           dstChainId: LzChainId.arbitrumone,
         };
       }),
-
-      // Grant Normal Timelock permissions
-      // ...ETHEREUM_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ETHEREUM_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", ethereum.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.ethereum,
-      //   };
-      // }),
-      // ...ETHEREUM_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ETHEREUM_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlocks(address[],uint32[],uint32[])", ethereum.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.ethereum,
-      //   };
-      // }),
-
-      // ...ARBITRUMONE_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUMONE_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumone.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumone,
-      //   };
-      // }),
-      // ...ARBITRUMONE_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUMONE_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumone.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumone,
-      //   };
-      // }),
-      // ...ARBITRUMONE_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUMONE_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", arbitrumone.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumone,
-      //   };
-      // }),
     ],
     meta,
     ProposalType.REGULAR,

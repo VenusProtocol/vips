@@ -35,49 +35,6 @@ const vip350 = () => {
           dstChainId: LzChainId.arbitrumsepolia,
         };
       }),
-
-      // Grant Normal Timelock permissions
-      // ...SEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: SEPOLIA_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", sepolia.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.sepolia,
-      //   };
-      // }),
-      // ...SEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: SEPOLIA_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlocks(address[],uint32[],uint32[])", sepolia.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.sepolia,
-      //   };
-      // }),
-
-      // ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUM_SEPOLIA_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumsepolia.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumsepolia,
-      //   };
-      // }),
-      // ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUM_SEPOLIA_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumsepolia.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumsepolia,
-      //   };
-      // }),
-      // ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-      //   return {
-      //     target: ARBITRUM_SEPOLIA_ACM,
-      //     signature: "giveCallPermission(address,string,address)",
-      //     params: [rewardDistirbutor, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", arbitrumsepolia.NORMAL_TIMELOCK],
-      //     dstChainId: LzChainId.arbitrumsepolia,
-      //   };
-      // }),
     ],
     meta,
     ProposalType.REGULAR,
