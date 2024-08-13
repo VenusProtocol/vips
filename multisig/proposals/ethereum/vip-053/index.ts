@@ -15,7 +15,7 @@ export const REWARD_DISTRIBUTORS = [
   "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
   "0xe72Aa7BaB160eaa2605964D2379AA56Cb4b9A1BB",
   "0xDCB0CfA130496c749738Acbe2d6aA06C7C320f06",
-  "0x1e25CF968f12850003Db17E0Dba32108509C4359"
+  "0x1e25CF968f12850003Db17E0Dba32108509C4359",
 ];
 
 const vip053 = () => {
@@ -36,7 +36,7 @@ const vip053 = () => {
         params: [rewardDistributor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", ethereum.GUARDIAN],
       };
     }),
-    ...REWARD_DISTRIBUTORS.map(_ => {
+    ...REWARD_DISTRIBUTORS.map(() => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
@@ -54,7 +54,11 @@ const vip053 = () => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [rewardDistributor, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", ethereum.GUARDIAN],
+        params: [
+          rewardDistributor,
+          "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
+          ethereum.GUARDIAN,
+        ],
       };
     }),
   ]);

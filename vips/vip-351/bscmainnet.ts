@@ -1,9 +1,9 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { REWARD_DISTRIBUTORS as ARBITRUMONE_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-010";
 import { REWARD_DISTRIBUTORS as ETHEREUM_REWARD_DISTRIBUTORS } from "../../multisig/proposals/ethereum/vip-053";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
@@ -42,7 +42,11 @@ const vip351 = () => {
         return {
           target: ARBITRUMONE_ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [rewardDistirbutor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumone.NORMAL_TIMELOCK],
+          params: [
+            rewardDistirbutor,
+            "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+            arbitrumone.NORMAL_TIMELOCK,
+          ],
           dstChainId: LzChainId.arbitrumone,
         };
       }),
@@ -50,7 +54,11 @@ const vip351 = () => {
         return {
           target: ARBITRUMONE_ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [rewardDistirbutor, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumone.NORMAL_TIMELOCK],
+          params: [
+            rewardDistirbutor,
+            "setLastRewardingBlocks(address[],uint32[],uint32[])",
+            arbitrumone.NORMAL_TIMELOCK,
+          ],
           dstChainId: LzChainId.arbitrumone,
         };
       }),
@@ -58,7 +66,11 @@ const vip351 = () => {
         return {
           target: ARBITRUMONE_ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [rewardDistirbutor, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", arbitrumone.NORMAL_TIMELOCK],
+          params: [
+            rewardDistirbutor,
+            "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
+            arbitrumone.NORMAL_TIMELOCK,
+          ],
           dstChainId: LzChainId.arbitrumone,
         };
       }),

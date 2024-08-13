@@ -3,11 +3,9 @@ import { makeProposal } from "src/utils";
 
 import { REWARD_DISTRIBUTORS as ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-013";
 import { REWARD_DISTRIBUTORS as SEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/sepolia/vip-052";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
-const { arbitrumsepolia, sepolia } = NETWORK_ADDRESSES;
 
 const vip350 = () => {
   const meta = {

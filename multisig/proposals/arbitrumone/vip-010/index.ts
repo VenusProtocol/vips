@@ -5,9 +5,7 @@ import { makeProposal } from "src/utils";
 const { arbitrumone } = NETWORK_ADDRESSES;
 
 export const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
-export const REWARD_DISTRIBUTORS = [
-  "0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a",
-];
+export const REWARD_DISTRIBUTORS = ["0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a"];
 
 const vip010 = () => {
   return makeProposal([
@@ -27,11 +25,15 @@ const vip010 = () => {
         params: [rewardDistributor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumone.GUARDIAN],
       };
     }),
-    ...REWARD_DISTRIBUTORS.map(_ => {
+    ...REWARD_DISTRIBUTORS.map(() => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setLastRewardingBlock(address[],uint32[],uint32[])", arbitrumone.GUARDIAN],
+        params: [
+          ethers.constants.AddressZero,
+          "setLastRewardingBlock(address[],uint32[],uint32[])",
+          arbitrumone.GUARDIAN,
+        ],
       };
     }),
     ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
@@ -45,7 +47,11 @@ const vip010 = () => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [rewardDistributor, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", arbitrumone.GUARDIAN],
+        params: [
+          rewardDistributor,
+          "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
+          arbitrumone.GUARDIAN,
+        ],
       };
     }),
   ]);

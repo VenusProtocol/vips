@@ -3,11 +3,9 @@ import { makeProposal } from "src/utils";
 
 import { REWARD_DISTRIBUTORS as ARBITRUMONE_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-010";
 import { REWARD_DISTRIBUTORS as ETHEREUM_REWARD_DISTRIBUTORS } from "../../multisig/proposals/ethereum/vip-053";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-const { arbitrumone, ethereum } = NETWORK_ADDRESSES;
 
 const vip350 = () => {
   const meta = {
