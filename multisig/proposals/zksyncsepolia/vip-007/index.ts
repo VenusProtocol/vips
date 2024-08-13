@@ -7,6 +7,7 @@ const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 export const PRIME_LIQUIDITY_PROVIDER = "0x3407c349F80E4E9544c73ca1E9334CeEA7266517";
 export const PRIME = "0x72b85930F7f8D00ACe5EAD10a315C17b8954FBcF";
 export const POOL_REGISTRY = "0x1401404e6279BB8C06E5E3999eCA3e2008B46A76";
+export const COMPTROLLER_CORE = "0xC527DE08E43aeFD759F7c0e6aE85433923064669";
 const PRIME_POOL_ID = 0;
 
 const vip007 = () => {
@@ -118,6 +119,11 @@ const vip007 = () => {
       target: PRIME_LIQUIDITY_PROVIDER,
       signature: "pauseFundsTransfer()",
       params: [],
+    },
+    {
+      target: COMPTROLLER_CORE,
+      signature: "setPrimeToken(address)",
+      params: [PRIME],
     },
   ]);
 };

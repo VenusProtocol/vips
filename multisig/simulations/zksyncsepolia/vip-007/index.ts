@@ -7,7 +7,13 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip007, { POOL_REGISTRY, PRIME, PRIME_LIQUIDITY_PROVIDER } from "../../../proposals/zksyncsepolia/vip-007";
+import vip007, {
+  COMPTROLLER_CORE,
+  POOL_REGISTRY,
+  PRIME,
+  PRIME_LIQUIDITY_PROVIDER,
+} from "../../../proposals/zksyncsepolia/vip-007";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -26,9 +32,11 @@ forking(3606272, async () => {
     let primeLiquidityProvider: Contract;
     let xvs: Contract;
     let xvsVault: Contract;
+    let comptrollerCore: Contract;
     const amount = parseUnits("1000", 18);
 
     before(async () => {
+      comptrollerCore = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
       xvs = await ethers.getContractAt(XVS_ABI, zksyncsepolia.XVS);
       xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, zksyncsepolia.XVS_VAULT_PROXY);
       prime = await ethers.getContractAt(PRIME_ABI, PRIME);
@@ -47,6 +55,10 @@ forking(3606272, async () => {
     it("should have correct owner", async () => {
       expect(await prime.owner()).to.be.equal(zksyncsepolia.GUARDIAN);
       expect(await primeLiquidityProvider.owner()).to.be.equal(zksyncsepolia.GUARDIAN);
+    });
+
+    it("Comptroller Core should have correct Prime token address", async () => {
+      expect(await comptrollerCore.prime()).to.be.equal(PRIME);
     });
 
     it("stake XVS", async () => {
