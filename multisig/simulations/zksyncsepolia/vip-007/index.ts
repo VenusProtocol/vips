@@ -1,9 +1,8 @@
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import {
   RewardsDistributorConfig,
@@ -30,27 +29,22 @@ import XVS_ABI from "./abi/xvs.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
-const BRIDGE = "0x760461ccB2508CAAa2ECe0c28af3a4707b853043";
 const TREASURY_AMOUNT = parseUnits("7200", 18);
 
-forking(3602113, async () => {
+forking(3613959, async () => {
   const provider = ethers.provider;
-  let bridgeSigner: Signer;
   let xvsVault: Contract;
   let xvs: Contract;
+  let treasuryBalanceBefore: BigNumber;
 
   describe("Pre-VIP behaviour", async () => {
     before(async () => {
-      bridgeSigner = await initMainnetUser(BRIDGE, parseUnits("1", 18));
-
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
-
-      await xvs.connect(bridgeSigner).mint(zksyncsepolia.VTREASURY, TREASURY_AMOUNT, { maxFeePerGas: "20000000000" });
     });
 
-    it("vTreasury should hold 7200 XVS", async () => {
-      expect(await xvs.balanceOf(zksyncsepolia.VTREASURY)).to.be.equal(TREASURY_AMOUNT);
+    it("vTreasury should hold atleast 7200 XVS", async () => {
+      expect(await xvs.balanceOf(zksyncsepolia.VTREASURY)).to.be.gt(TREASURY_AMOUNT);
     });
   });
 
@@ -58,11 +52,12 @@ forking(3602113, async () => {
     before(async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
+      treasuryBalanceBefore = await xvs.balanceOf(zksyncsepolia.VTREASURY);
       await pretendExecutingVip(await vip007());
     });
 
-    it("vTreasury should hold 0 XVS", async () => {
-      expect(await xvs.balanceOf(zksyncsepolia.VTREASURY)).to.be.equal(0);
+    it("vTreasury balance should be updated", async () => {
+      expect(await xvs.balanceOf(zksyncsepolia.VTREASURY)).to.be.equal(treasuryBalanceBefore.sub(TREASURY_AMOUNT));
     });
 
     it("rewards distributor should have expected number of xvs tokens", async () => {
