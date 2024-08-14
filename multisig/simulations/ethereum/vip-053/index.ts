@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
-import vip028, { LST_POOL_COMPTROLLER, LST_POOL_VWETH } from "../../../proposals/ethereum/vip-028";
+import vip053, { LST_POOL_COMPTROLLER, LST_POOL_VWETH } from "../../../proposals/ethereum/vip-053";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 
@@ -73,7 +73,7 @@ forking(20526637, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip028());
+      await pretendExecutingVip(vip053());
     });
 
     it("check reserve factor", async () => {

@@ -9,7 +9,7 @@ export const COLLATERAL_FACTOR = "0";
 export const RESERVE_FACTOR = parseUnits("0.25", 18);
 export const LIQUIDATION_THRESHOLD = parseUnits("0.93", 18);
 
-const vip028 = () => {
+const vip053 = () => {
   return makeProposal([
     {
       target: LST_POOL_VWETH,
@@ -29,4 +29,4 @@ const vip028 = () => {
   ]);
 };
 
-export default vip028;
+export default vip053;

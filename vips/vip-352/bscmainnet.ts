@@ -3,10 +3,10 @@ import { makeProposal } from "../../src/utils";
 
 const FAST_TRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
 
-const vip304 = () => {
+const vip352 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-304",
+    title: "VIP-352",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -27,4 +27,4 @@ const vip304 = () => {
   );
 };
 
-export default vip304;
+export default vip352;
