@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const GAME_FI_COMPTROLLER = "0x1b43ea8622e76627B81665B1eCeBB4867566B963";
 export const GAME_FI_VUSDT = "0x4978591f17670A846137d9d613e333C38dc68A37";

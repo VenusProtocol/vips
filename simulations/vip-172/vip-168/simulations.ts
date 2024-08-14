@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip172 } from "../../../vips/vip-172/vip-172";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -24,7 +24,7 @@ const VBTC = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
 const BUSD_BORROWER = "0x36D023d3Bb82b3ee3BCa30701f2C61329572b688";
 const BUSD_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
-forking(31563335, () => {
+forking(31563335, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -33,7 +33,7 @@ forking(31563335, () => {
     await setMaxStaleCoreAssets(CHAINLINK_ADDRESS, NORMAL_TIMELOCK);
   });
 
-  testVip("VIP-168 Forced liquidations", vip172(), {
+  testVip("VIP-168 Forced liquidations", await vip172(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 const BINANCE_WALLET = "0x6657911F7411765979Da0794840D671Be55bA273";

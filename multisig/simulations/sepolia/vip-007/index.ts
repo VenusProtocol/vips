@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { setMaxStalePeriod } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import { setMaxStalePeriod } from "../../../../src/utils";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkXVSVault } from "../../../../src/vip-framework/checks/checkXVSVault";
 import vip007 from "../../../proposals/sepolia/vip-007";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
@@ -55,7 +55,7 @@ const vTokens: vTokenConfig[] = [
   },
 ];
 
-forking(5060107, () => {
+forking(5060107, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -95,7 +95,7 @@ forking(5060107, () => {
     let resilientOracle: Contract;
 
     before(async () => {
-      await pretendExecutingVip(vip007());
+      await pretendExecutingVip(await vip007());
 
       await impersonateAccount(USER);
       const accounts = await ethers.getSigners();

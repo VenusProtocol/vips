@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../../src/vip-framework/checks/checkCorePoolComptroller";
 import { vip209 } from "../../../vips/vip-209/vip-209";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import UNITROLLER_ABI from "../abi/unitroller.json";
@@ -21,7 +21,7 @@ const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const UNITROLLER = "0xfd36e2c2a6789db23113685031d7f16329158384";
 const NEW_DIAMOND_IMPLEMENTATION = "0xD93bFED40466c9A9c3E7381ab335a08807318a1b";
 
-forking(33715200, () => {
+forking(33715200, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
 
@@ -30,7 +30,7 @@ forking(33715200, () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
   });
 
-  testVip("VIP-209 Forced liquidations for user", vip209(), {
+  testVip("VIP-209 Forced liquidations for user", await vip209(), {
     proposer: "0x97a32d4506f6a35de68e0680859cdf41d077a9a9",
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [1]);

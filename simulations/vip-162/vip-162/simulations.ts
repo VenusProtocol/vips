@@ -5,9 +5,9 @@ import { BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStalePeriodInBinanceOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import { vip162 } from "../../../vips/vip-162/vip-162";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -27,7 +27,7 @@ const VTOKEN_RECEIVER_TWT = "0x0848dB7cB495E7b9aDA1D4dC972b9A526D014D84";
 const VTWT_DeFi = "0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-forking(31162125, () => {
+forking(31162125, async () => {
   let poolRegistry: Contract;
   let comptroller: Contract;
   let vTWT: Contract;
@@ -99,7 +99,7 @@ forking(31162125, () => {
     });
   });
 
-  testVip("VIP-162 Add Markets", vip162(24 * 60 * 60 * 3), {
+  testVip("VIP-162 Add Markets", await vip162(24 * 60 * 60 * 3), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

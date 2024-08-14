@@ -1,0 +1,417 @@
+import { parseUnits } from "ethers/lib/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+export const VTREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
+export const VAI_CONTROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
+export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
+
+// We don't have enough DAI in treasury, so we transfer USDT to cover for DAI debt
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const COMMUNITY_WALLET = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+export const COMMUNITY_WALLET_USDT_AMOUNT = parseUnits("217.472781047664196103", 18);
+
+export const vTokenConfigs = {
+  vUSDC: {
+    address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
+    underlying: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+  },
+  vUSDT: {
+    address: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
+    underlying: "0x55d398326f99059fF775485246999027B3197955",
+  },
+  vBUSD: {
+    address: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D",
+    underlying: "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+  },
+  vSXP: {
+    address: "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0",
+    underlying: "0x47BEAd2563dCBf3bF2c9407fEa4dC236fAbA485A",
+  },
+  vXVS: {
+    address: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
+    underlying: "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63",
+  },
+  vBNB: {
+    address: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
+    underlying: "0x0000000000000000000000000000000000000000",
+  },
+  vBTC: {
+    address: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
+    underlying: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+  },
+  vETH: {
+    address: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
+    underlying: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+  },
+  vLTC: {
+    address: "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B",
+    underlying: "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94",
+  },
+  vXRP: {
+    address: "0xB248a295732e0225acd3337607cc01068e3b9c10",
+    underlying: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+  },
+  vBCH: {
+    address: "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176",
+    underlying: "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf",
+  },
+  vDOT: {
+    address: "0x1610bc33319e9398de5f57B33a5b184c806aD217",
+    underlying: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402",
+  },
+  vLINK: {
+    address: "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f",
+    underlying: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+  },
+  vDAI: {
+    address: "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1",
+    underlying: "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+  },
+  vFIL: {
+    address: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343",
+    underlying: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153",
+  },
+  vBETH: {
+    address: "0x972207A639CC1B374B893cc33Fa251b55CEB7c07",
+    underlying: "0x250632378E573c6Be1AC2f97Fcdf00515d0Aa91B",
+  },
+  vCAN: {
+    address: "0xeBD0070237a0713E8D94fEf1B728d3d993d290ef",
+    underlying: "0x20bff4bbEDa07536FF00e073bd8359E5D80D733d",
+  },
+  vADA: {
+    address: "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec",
+    underlying: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+  },
+  vDOGE: {
+    address: "0xec3422Ef92B2fb59e84c8B02Ba73F1fE84Ed8D71",
+    underlying: "0xbA2aE424d960c26247Dd6c32edC70B295c744C43",
+  },
+  vMATIC: {
+    address: "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8",
+    underlying: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD",
+  },
+  vCAKE: {
+    address: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c",
+    underlying: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+  },
+  vAAVE: {
+    address: "0x26DA28954763B92139ED49283625ceCAf52C6f94",
+    underlying: "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+  },
+  vTUSDOLD: {
+    address: "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3",
+    underlying: "0x14016E85a25aeb13065688cAFB43044C2ef86784",
+  },
+  vTRXOLD: {
+    address: "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93",
+    underlying: "0x85EAC5Ac2F758618dFa09bDbe0cf174e7d574D5B",
+  },
+  vUST: {
+    address: "0x78366446547D062f45b4C0f320cDaa6d710D87bb",
+    underlying: "0x3d4350cD54aeF9f9b2C29435e0fa809957B3F30a",
+  },
+  vLUNA: {
+    address: "0xb91A659E88B51474767CD97EF3196A3e7cEDD2c8",
+    underlying: "0x156ab3346823B651294766e23e6Cf87254d68962",
+  },
+  vTRX: {
+    address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
+    underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+  },
+  vWBETH: {
+    address: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
+    underlying: "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
+  },
+  vTUSD: {
+    address: "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E",
+    underlying: "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9",
+  },
+  vUNI: {
+    address: "0x27FF564707786720C71A2e5c1490A63266683612",
+    underlying: "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
+  },
+  vFDUSD: {
+    address: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
+    underlying: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+  },
+};
+
+export const vTokenWithdrawals = {
+  vUSDC: "17950736928772",
+  vBNB: "14655534010",
+  vETH: "466006632",
+  vXRP: "471773541445",
+  vLUNA: "124998423",
+};
+
+export const underlyingWithdrawals = {
+  vUSDT: "8011706784414518653711",
+  vSXP: "23673720802998396920",
+  vBTC: "5572032799243878",
+  vLTC: "413857736174668387",
+  vBCH: "130350757307830380",
+  vLINK: "6529015934225463743",
+  vDAI: "2395707692726973622271",
+  vBETH: "37720962089242406",
+  vADA: "268911459647674215933",
+  vDOGE: "28916213367",
+  vCAKE: "5547237619746460835",
+  vTUSDOLD: "32980518855761164261",
+};
+
+export const shortfalls = {
+  vUSDC: {
+    "0xf2930d76a52857335be3a4147736bfc71c052d0c": "947738054161753978761",
+    "0x613592604ff962ad8361719e3953da08d85343d1": "576033100242877132267",
+    "0x44099bc16e1603d54b5fec0d19afcc04fc792dcd": "855523437621392823181",
+    "0x21f3bb63e775ccdf0cc04559be142971d241ab0e": "210615350598100765320",
+    "0xdc9af4213dee2321c0461a59e761f76e4677fdb9": "195092217978556052700",
+    "0xf57245320d75fa2cb0eacd55055b57e4026dbcc7": "443776391563599920532",
+    "0xed5456c84812168584e45a83e8571a5a15485829": "368913835527058939042",
+    "0xbdbb18c1a16a79510d529cdbc8a425d4aba8477c": "138108661150665818795",
+    "0xbd043882d36b6def4c30f20c613cfa70d3af8bb7": "92745799402767349485",
+    "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a": "164655042690531646749",
+    "0xdf915e81acad4587c617122da0046694295d5b5f": "36733801875251244814",
+    "0xe42463dd1177485881c97c84c37e75c32078af8c": "78930888821145534072",
+    "0x1e803cf10460bcd7235a87527105d1e2a3c6319b": "59256487284151116654",
+    "0x70a9b01952a57bfa12eea490c95c13f743c549d7": "112755080867164139140",
+  },
+  vUSDT: {
+    "0x4ac5188c72c3a705d7daad03bdeaf8721a1fd30a": "796958516903423200246",
+    "0xd8f7a0cc1baf9c56f9b48d3de836a21dbc979f1f": "520321155215509868908",
+    "0x80a65288848f645cbafbe04c7c07e092df1de01a": "617300731401007381474",
+    "0xa7597c542b7edbb3e885b4102ef3f5bebbfc76e2": "615569911751148796702",
+    "0xf6099a6e4b5bcfc43c87626d17cc00ac3cdf2d4d": "611729578007631674056",
+    "0xaac4ea52570d29e0bddc88b56f05a13c23fb3b66": "384926903930279287644",
+    "0xdc9af4213dee2321c0461a59e761f76e4677fdb9": "198466723415708097199",
+    "0x9c6b3c2789f807ef10acd6a05de8b6f61b0b6aa3": "476231327259171857650",
+    "0x822759d8f48a42b9ff29c040619b5539c31b727b": "451511257321606995336",
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "4846597666908563636",
+    "0xf37a8fad82771ee2c27b698163646cb99e228ca9": "432400346903062338632",
+    "0x21203096218d8761c397d162db7572be7d7c7b8e": "406260472700203550573",
+    "0xe2e6241af754d172f047ea48c950059b5813000f": "332550000395470768912",
+    "0xbe243f84611d729ba3ddfefb2d41333bb9cf533f": "329602068037255357718",
+    "0x3b7f525dc67cca55251abb5d04c81a83a6005269": "289328229564059020338",
+    "0x09fedc780a049c8ac876dc2443ad3146effe3875": "171218682242662281563",
+    "0xd45fbbde3767b68e34cdcbb9dfbe865d3aa0ebb6": "242754307677598224868",
+    "0xfa684e2526ac3a68023dd00a563a73a9cfbf3ce9": "34183657798373798979",
+    "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a": "46229241944810325773",
+    "0x17289bd5c7191c28340835166f2322d81a9b1bb7": "172438856205478479856",
+    "0xdf915e81acad4587c617122da0046694295d5b5f": "32315056844856155084",
+    "0xe42463dd1177485881c97c84c37e75c32078af8c": "88472987170750746202",
+    "0x24c0ae3612ca72069a39bb0edeb65357f59d2ec6": "161058944202855905018",
+    "0x642873e7abd1d8430fe9990a01ea5cec35e8d0e5": "154757797684128863968",
+    "0x3762e67e24b9b44cea8e89163aba9d4015e27d40": "28848788981122660724",
+    "0x4f381fb46dfde2bc9dcae2d881705749b1ed6e1a": "136457585237948159827",
+    "0x1e803cf10460bcd7235a87527105d1e2a3c6319b": "76079989205628886974",
+    "0x307c56fabc9fec98ff6d8cf06cf5325843623401": "123779909507811383264",
+    "0xa60385ba34e34e7899ceb3e61b367405501d958d": "75107159238046022587",
+  },
+  vSXP: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "14745650771362135366",
+    "0xf57245320d75fa2cb0eacd55055b57e4026dbcc7": "5884745540634004524",
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "3042670258745191922",
+    "0xdf915e81acad4587c617122da0046694295d5b5f": "654232257065108",
+  },
+  vBNB: {
+    "0xf2930d76a52857335be3a4147736bfc71c052d0c": "702382768847650714",
+    "0x7678266854f73c625f49069c83de63f26f0174da": "1123193688255435141",
+    "0xf6099a6e4b5bcfc43c87626d17cc00ac3cdf2d4d": "1344688950568",
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "92721604315445528",
+    "0xf57245320d75fa2cb0eacd55055b57e4026dbcc7": "1537736078731",
+    "0x3b7f525dc67cca55251abb5d04c81a83a6005269": "109316186771",
+    "0xbd043882d36b6def4c30f20c613cfa70d3af8bb7": "303393964788703793",
+    "0x6a68b9cf65d64d060854f2cbb6825b6026bde920": "451395221049094146",
+    "0x94061a67e9aafbc9c1366eaab664a4467eaf3f4b": "418911017533130910",
+    "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a": "8410666",
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "61070221740957444",
+    "0x894eb2f36769be80171f9d700b39695c1500b9f6": "264115366945527952",
+    "0x1e803cf10460bcd7235a87527105d1e2a3c6319b": "102948",
+    "0xb8a7de41a8d28952a4d253f22c4786c6cd65122f": "194601626568411",
+    "0x7a7c42979883a9964de7f82bd91d0587ab46a1a1": "313503449308",
+    "0xd6a8a9eafaccef0e2f2e87941431712268f5dea1": "147586827828010467",
+    "0x2d796771e3ac310fb4d2cbd40bcae51aa554f37b": "2463604508752",
+  },
+  vBTC: {
+    "0x21f3bb63e775ccdf0cc04559be142971d241ab0e": "4860402223223632",
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "480554125280895",
+    "0x4b07cf856920e127cbd262ff3eac81c2f65f74f8": "231076450739351",
+  },
+  vETH: {
+    "0x4ac5188c72c3a705d7daad03bdeaf8721a1fd30a": "28770135436",
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "16507404698626030",
+    "0x4b07cf856920e127cbd262ff3eac81c2f65f74f8": "9709225117773705",
+    "0xef044206db68e40520bfa82d45419d498b4bc7bf": "37246700662122731",
+    "0x1f6d66ba924ebf554883cf84d482394013ed294b": "32901278580006921",
+  },
+  vLTC: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "413857736174668387",
+  },
+  vXRP: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "64236059950382075860",
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "31586852059405941400",
+  },
+  vBCH: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "127899607800593484",
+    "0xef044206db68e40520bfa82d45419d498b4bc7bf": "2451149507236896",
+  },
+  vLINK: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "4240681534818192237",
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "2288334399407271506",
+  },
+  vDAI: {
+    "0x613592604ff962ad8361719e3953da08d85343d1": "320135631941595181525",
+    "0x21f3bb63e775ccdf0cc04559be142971d241ab0e": "229828394316691609634",
+    "0x058476edacb23e9507cff379e7dd8cf4dee4d2db": "793174831391706242150",
+    "0x12a1e05876c41f858bae86c720c197d5986b240d": "669843418846344470523",
+    "0xbdbb18c1a16a79510d529cdbc8a425d4aba8477c": "165751579980541663038",
+    "0xfa684e2526ac3a68023dd00a563a73a9cfbf3ce9": "191899507686650883426",
+    "0xb8a7de41a8d28952a4d253f22c4786c6cd65122f": "25074328563443571975",
+    // "0xdf915e81acad4587c617122da0046694295d5b5f": "101645718632445036785",
+    // "0x49de015ac608d12859b3e531d001ca7d82c9bd9f": "115827062415219159318",
+  },
+  vBETH: {
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "14110572564438927",
+    "0xb8a7de41a8d28952a4d253f22c4786c6cd65122f": "23610389524803479",
+  },
+  vADA: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "64934999070878760288",
+    "0x2d796771e3ac310fb4d2cbd40bcae51aa554f37b": "203976460576795455645",
+  },
+  vDOGE: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "9367730083",
+    "0x42d4013830885f457b937bf12ba4f97e15c5eaf4": "19548415070",
+    "0xdf915e81acad4587c617122da0046694295d5b5f": "68214",
+  },
+  vCAKE: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "5547237619746460835",
+  },
+  vTUSDOLD: {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "32980482059148470623",
+    "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a": "36796612693638",
+  },
+  /*
+  "vUST": {
+    "0x318b939379e79433a6e260adc48ded4daaa9b6d4": "1024823502"
+  },
+  */
+  vLUNA: {
+    "0x1f6d66ba924ebf554883cf84d482394013ed294b": "25256",
+  },
+};
+
+export const vaiDebts = {
+  "0xd745274a69d8fd93071e658e54c832474574fe51": "834845062719843488209",
+  "0xa8481e94eeda61e7fdec6e9678daeb677d57e136": "827643467911472044925",
+  "0x21f3bb63e775ccdf0cc04559be142971d241ab0e": "43649541617563275312",
+  "0x12a1e05876c41f858bae86c720c197d5986b240d": "85878356947153935559",
+  "0xd8f7a0cc1baf9c56f9b48d3de836a21dbc979f1f": "175138711303319921006",
+  "0xaac4ea52570d29e0bddc88b56f05a13c23fb3b66": "189828947753745010458",
+  "0xdc9af4213dee2321c0461a59e761f76e4677fdb9": "105083226781991963600",
+  "0x21203096218d8761c397d162db7572be7d7c7b8e": "338926191927110195",
+  "0x7464cad56ab234458f0ed51f593f978e7ab9f059": "363378084102405512289",
+  "0x84711eae73dcbf96718c57d55fb8c207dd4e38c4": "327386395327423598809",
+  "0xc3327bbc16644adcb5fd5faa6235718be39916af": "277713664358234134377",
+  "0x09fedc780a049c8ac876dc2443ad3146effe3875": "88409414191733926377",
+  "0x4b07cf856920e127cbd262ff3eac81c2f65f74f8": "199370169745519829788",
+  "0x0f2577ccb1e895ed1e8bfd4e709706595831e78a": "11186504514383708700",
+  "0x3762e67e24b9b44cea8e89163aba9d4015e27d40": "110437816609315359716",
+  "0x99982c26a813b7ffaf4b70ca8c07084d380a5ecf": "125176773392785206137",
+  "0x3bca4d25aa8d75bb7b418e536fc02e4cf035e829": "118635493888151671810",
+  "0xccd9eb9b3d9e8e7782f85795a882d12649b5f98b": "115277091351867900463",
+  "0xa60385ba34e34e7899ceb3e61b367405501d958d": "38072183332822132369",
+  "0xcac00a622290aebab1a0ec0eb649fd630cb998c3": "115985946094386314293",
+  "0x7a7c42979883a9964de7f82bd91d0587ab46a1a1": "111343772788147605384",
+  "0xcc6c1ad2aefc7ea7a58c2808495ab9ca6bf4cbdd": "110063965840396248868",
+  "0xd6a8a9eafaccef0e2f2e87941431712268f5dea1": "16384122224360179913",
+  "0x54b63f4bbb0b2ef9d0af0b93016fae8dfde59d37": "106341095981315325665",
+};
+
+const totalVAIDebt = parseUnits("4497.568734970265404222", 18);
+
+export const entries = <K extends string, V>(r: Record<K, V>): [K, V][] => {
+  return Object.entries(r) as [K, V][];
+};
+
+export const vip309 = () => {
+  const meta = {
+    version: "v2",
+    title: "VIP-309 Partial shortfall repayment",
+    description: `#### Description
+
+Following [VIP-281](https://app.venus.io/#/governance/proposal/281?chainId=56), Venus continues to repay old shortfalls with the objective of being 100% debt-free. If passed, this VIP will repay the bad debt for all accounts with debts higher than $100, using the funds from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+A total of 64 accounts will be repaid, with a total token value of:
+
+- ADA: 268.91146
+- BCH: 0.13035
+- BETH: 0.03772
+- BNB: 3.56497
+- BTC: 0.00557
+- CAKE: 5.54724
+- DAI: 2,613.18047
+- ETH: 0.09636
+- LINK: 6.52902
+- LTC: 0.41386
+- SXP: 23.67372
+- TUSDOLD: 32.98052
+- USDC: 4,280.87815
+- USDT: 8,011.70678
+- XRP: 95.82291
+- VAI: 4,497.56873
+
+With this, the total estimated repayment amount is **$22,966.92**, considering May 21st, 2024 token prices.
+
+The vTreasury has enough assets to repay all markets except DAI. For this, 2,395 DAI will be used for a partial repayment, and the rest of the missing tokens will be transferred in USDT value to the [Community Wallet](https://debank.com/profile/0xc444949e0054A23c44Fc45789738bdF64aed2391) to cover the remainder.
+
+#### References
+
+- [TokenRedeemer contract used to repay the debt](https://bscscan.com/address/0xC53ffda840B51068C64b2E052a5715043f634bcd)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/282)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
+  };
+
+  return makeProposal(
+    [
+      ...entries(vTokenWithdrawals).map(([symbol, vTokenAmount]) => ({
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [vTokenConfigs[symbol].address, vTokenAmount, TOKEN_REDEEMER],
+      })),
+      ...entries(underlyingWithdrawals).map(([symbol, underlyingAmount]) => ({
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [vTokenConfigs[symbol].underlying, underlyingAmount, TOKEN_REDEEMER],
+      })),
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [VAI, totalVAIDebt, TOKEN_REDEEMER],
+      },
+      ...entries(shortfalls).map(([symbol, borrows]) => ({
+        target: TOKEN_REDEEMER,
+        signature: "redeemAndBatchRepay(address,(address,uint256)[],address)",
+        params: [vTokenConfigs[symbol].address, Object.entries(borrows), VTREASURY],
+      })),
+      {
+        target: TOKEN_REDEEMER,
+        signature: "batchRepayVAI(address,(address,uint256)[],address)",
+        params: [VAI_CONTROLLER, Object.entries(vaiDebts), VTREASURY],
+      },
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, COMMUNITY_WALLET_USDT_AMOUNT, COMMUNITY_WALLET],
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip309;

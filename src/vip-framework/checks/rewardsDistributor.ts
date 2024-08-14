@@ -1,8 +1,8 @@
 import { expect } from "chai";
 import { BigNumberish, Contract } from "ethers";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
+import { getForkedNetworkAddress } from "src/utils";
 
-import { NORMAL_TIMELOCK } from "..";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
 import REWARDS_DISTRIBUTOR_ABI from "../abi/rewardsDistributor.json";
@@ -36,6 +36,7 @@ type RewardsDistributorId =
   | "RewardsDistributor_Core_0_VWBTC"
   | "RewardsDistributor_Core_0_USDT"
   | "RewardsDistributor_Core_0_USDC"
+  | "RewardsDistributor_Core_0_XVS"
   | "RewardsDistributor_Core_0_CRVUSD"
   | "RewardsDistributor_Core_0_FRAX"
   | "RewardsDistributor_Core_0_SFRAX"
@@ -46,7 +47,13 @@ type RewardsDistributorId =
   | "RewardsDistributor_LST_0_WSTETH"
   | "RewardsDistributor_LST_0_WETH"
   | "RewardsDistributor_LST_1_WSTETH"
-  | "RewardsDistributor_LST_2_WEETH";
+  | "RewardsDistributor_LST_2_WEETH"
+  | "RewardsDistributor_MEME_0_BABYDOGE";
+
+const NORMAL_TIMELOCK =
+  FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+    ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+    : getForkedNetworkAddress("GUARDIAN");
 
 export const checkRewardsDistributor = (id: RewardsDistributorId, reward: RewardsDistributorConfig) => {
   describe(id, () => {

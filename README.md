@@ -39,7 +39,7 @@ Script to generate proposal data for multiple destinations such as venusApp bsce
 Procedure for Creating a Proposal
 
 ```
-npx hardhat run scripts/createProposal.ts
+npx hardhat createProposal --network <networkName>
 
 Enter the number of vip for which you require proposal data.
 Select the type of destination, such as txBuilder/venusApp/bsc.
@@ -97,3 +97,35 @@ Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => 000
 ```
 
 The script should output a file `gnosisTXBuilder.json` that you can import in your Gnosis Safe UI.
+
+### Make proposal for multiple networks
+
+Procedure to make vip:
+
+For remote commands add one more field of `dstChainId` specifying layer zero chain id of desired remote chain for instance `dstChainId = 101` for Ethereum. Lz chain ids can be retrieve from `LzChainId` enum present in types.
+
+### Simulations for multiple networks proposal
+
+In .env update `ARCHIVE_NODE_<NETWORK_NAME>` with the URL of desired network.
+
+Make different simulations for different networks. Use `testForkedNetworkVipCommands` to simulate remote proposal.
+
+To run simulations use this command
+
+```
+npx hardhat test simulations/<simulation-path> --fork <network>
+```
+
+### Propose VIP
+
+Procedure to propose VIP using tasks
+
+```
+npx hardhat propose <path to vip relative to vips> --network bscmainnet
+```
+
+For testnet
+
+```
+npx hardhat proposeOnTestnet <path to vip relative to vips> --network bsctestnet
+```
