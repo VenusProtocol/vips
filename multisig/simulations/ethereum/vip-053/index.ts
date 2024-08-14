@@ -35,7 +35,7 @@ const vWETH_interestRateModel_new: InterestRateModelSpec = {
 
 const BLOCKS_PER_YEAR = BigNumber.from(2628000); // assuming a block is mined every 12 seconds
 
-forking(20526637, () => {
+forking(20526637, async () => {
   let comptroller: Contract;
   let vweth: Contract;
 
@@ -73,7 +73,7 @@ forking(20526637, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip053());
+      await pretendExecutingVip(await vip053());
     });
 
     it("check reserve factor", async () => {
