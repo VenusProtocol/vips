@@ -6,13 +6,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip005, { ACM, POOL_REGISTRY, PSR, VTREASURY } from "../../../proposals/zksyncsepolia/vip-005";
+import vip009, { ACM, POOL_REGISTRY, PSR, VTREASURY } from "../../../proposals/zksyncsepolia/vip-009";
 import ACM_ABI from "./abi/accessControlManager.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
-forking(3548961, async () => {
+forking(3615677, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
@@ -22,7 +22,7 @@ forking(3548961, async () => {
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     psrSigner = await initMainnetUser(PSR, ethers.utils.parseEther("1"));
-    await pretendExecutingVip(await vip005());
+    await pretendExecutingVip(await vip009());
   });
 
   describe("Post tx checks", () => {

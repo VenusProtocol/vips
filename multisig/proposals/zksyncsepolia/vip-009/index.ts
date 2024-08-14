@@ -7,7 +7,7 @@ export const VTREASURY = "0x943eBE4460a12F551D60A68f510Ea10CD8d564BA";
 export const POOL_REGISTRY = "0x1401404e6279BB8C06E5E3999eCA3e2008B46A76";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
-const vip005 = () => {
+const vip009 = () => {
   return makeProposal([
     {
       target: PSR,
@@ -42,4 +42,4 @@ const vip005 = () => {
   ]);
 };
 
-export default vip005;
+export default vip009;
