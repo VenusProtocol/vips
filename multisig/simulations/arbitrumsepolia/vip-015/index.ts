@@ -97,7 +97,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   vwstETH_Liquid_staked_ETH: {
     borrowCap: "800",
     supplyCap: "8000",
-    collateralFactor: "0.93",
+    collateralFactor: "0.9",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
@@ -106,7 +106,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   vweETH_Liquid_staked_ETH: {
     borrowCap: "2300",
     supplyCap: "4600",
-    collateralFactor: "0.93",
+    collateralFactor: "0.9",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
@@ -154,7 +154,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(70967977, async () => {
+forking(71063604, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -239,7 +239,6 @@ forking(70967977, async () => {
           // Since we're distributing 1:1, decimals should be accounted for in the exchange rate
           const expectedSupply = parseUnits(params.initialSupply, 8);
           const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);
-          console.log("---------------------", await vToken.balanceOf(params.vTokenReceiver), expectedSupply);
           expect(await vToken.balanceOf(params.vTokenReceiver)).to.equal(expectedSupply);
         });
       }

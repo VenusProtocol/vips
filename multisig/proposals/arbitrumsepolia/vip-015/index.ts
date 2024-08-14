@@ -19,17 +19,9 @@ const STALE_PERIOD_3M = 60 * 3; // 3 minutes (for pricefeeds with heartbeat of 2
 
 export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
 
-const COMPTROLLER_BEACON = "0x12Dcb8D9F1eE7Ad7410F5B36B07bcC7891ab4cEf";
-const NEW_COMPTROLLER_IMPLEMENTATION = "0x92e20Cdad0f06D557C4270Be724C9cf8A2E26Ac3";
-
 // IL configuration
 const vip015 = () => {
   return makeProposal([
-    {
-      target: COMPTROLLER_BEACON,
-      signature: "upgradeTo(address)",
-      params: [NEW_COMPTROLLER_IMPLEMENTATION],
-    },
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
@@ -53,7 +45,7 @@ const vip015 = () => {
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setDirectPrice(address,uint256)",
-      params: [Mock_wstETH, "1100000000000000000"],
+      params: [Mock_wstETH, parseUnits("1.1", 18)],
     },
     { target: COMPTROLLER_LIQUID_STAKED_ETH, signature: "acceptOwnership()", params: [] },
     {
@@ -80,12 +72,12 @@ const vip015 = () => {
     {
       target: Mock_wstETH,
       signature: "approve(address,uint256)",
-      params: ["0xf93Df3135e0D555185c0BC888073374cA551C5fE", 0],
+      params: [arbitrumsepolia.POOL_REGISTRY, 0],
     },
     {
       target: Mock_wstETH,
       signature: "approve(address,uint256)",
-      params: ["0xf93Df3135e0D555185c0BC888073374cA551C5fE", parseUnits("2", 18)],
+      params: [arbitrumsepolia.POOL_REGISTRY, parseUnits("2", 18)],
     },
     {
       target: VwstETH,
@@ -103,7 +95,7 @@ const vip015 = () => {
       params: [
         [
           VwstETH,
-          parseUnits("0.93", 18),
+          parseUnits("0.9", 18),
           parseUnits("0.95", 18),
           parseUnits("2", 18),
           arbitrumsepolia.VTREASURY,
@@ -140,7 +132,7 @@ const vip015 = () => {
     {
       target: arbitrumsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [Mock_weETH, "2000000000000000000", arbitrumsepolia.GUARDIAN],
+      params: [Mock_weETH, parseUnits("2", 18), arbitrumsepolia.GUARDIAN],
     },
     {
       target: Mock_weETH,
@@ -150,7 +142,7 @@ const vip015 = () => {
     {
       target: Mock_weETH,
       signature: "approve(address,uint256)",
-      params: [arbitrumsepolia.POOL_REGISTRY, "2000000000000000000"],
+      params: [arbitrumsepolia.POOL_REGISTRY, parseUnits("2", 18)],
     },
     {
       target: VweETH,
@@ -168,12 +160,12 @@ const vip015 = () => {
       params: [
         [
           VweETH,
-          "930000000000000000",
-          "950000000000000000",
-          "2000000000000000000",
+          parseUnits("0.9", 18),
+          parseUnits("0.95", 18),
+          parseUnits("2", 18),
           arbitrumsepolia.VTREASURY,
-          "4600000000000000000000",
-          "2300000000000000000000",
+          parseUnits("4600", 18),
+          parseUnits("2300", 18),
         ],
       ],
     },
@@ -208,12 +200,12 @@ const vip015 = () => {
       params: [
         [
           VWETH,
-          "770000000000000000",
-          "800000000000000000",
+          parseUnits("0.77", 18),
+          parseUnits("0.8", 18),
           "78042235579982593",
           arbitrumsepolia.VTREASURY,
-          "14000000000000000000000",
-          "12500000000000000000000",
+          parseUnits("14000", 18),
+          parseUnits("12500", 18),
         ],
       ],
     },
