@@ -31,7 +31,7 @@ const vip352 = () => {
       ...ETHEREUM_CONVERTERS.map(converter => {
         return {
           target: converter,
-          signature:  "acceptOwnership()",
+          signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.ethereum,
         };

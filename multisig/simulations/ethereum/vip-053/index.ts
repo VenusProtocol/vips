@@ -3,7 +3,11 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip053, { CONVERTERS, CONVERTER_NETWORK, SINGLE_TOKEN_CONVERTER_BEACON } from "../../../proposals/ethereum/vip-053";
+import vip053, {
+  CONVERTERS,
+  CONVERTER_NETWORK,
+  SINGLE_TOKEN_CONVERTER_BEACON,
+} from "../../../proposals/ethereum/vip-053";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import SINGLE_TOKEN_CONVERTER_BEACON_ABI from "./abi/SingleTokenConverterBeacon.json";

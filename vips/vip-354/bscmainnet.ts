@@ -3,7 +3,6 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { CONVERTERS as ETHEREUM_CONVERTERS } from "../../multisig/proposals/ethereum/vip-053";
-import { CONVERTER_NETWORK as ETHEREUM_CONVERTER_NETWORK } from "../../multisig/proposals/ethereum/vip-053";
 
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const ETHEREUM_FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
@@ -29,7 +28,7 @@ const vip354 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "resumeConversion()", ethereum.NORMAL_TIMELOCK],
           dstChainId: LzChainId.ethereum,
-        }
+        };
       }),
 
       // Grant permissions to fast track timelock
@@ -39,7 +38,7 @@ const vip354 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "resumeConversion()", ETHEREUM_FASTTRACK_TIMELOCK],
           dstChainId: LzChainId.ethereum,
-        }
+        };
       }),
 
       // Grant permissions to critical timelock
@@ -49,7 +48,7 @@ const vip354 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "resumeConversion()", ETHEREUM_CRITICAL_TIMELOCK],
           dstChainId: LzChainId.ethereum,
-        }
+        };
       }),
     ],
     meta,

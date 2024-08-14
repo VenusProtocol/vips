@@ -7,9 +7,9 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip053 from "../../multisig/proposals/ethereum/vip-053";
 import { CONVERTERS, CONVERTER_NETWORK } from "../../multisig/proposals/ethereum/vip-053";
 import vip352 from "../../vips/vip-352/bscmainnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 

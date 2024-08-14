@@ -3,7 +3,6 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-052";
-import { CONVERTER_NETWORK as SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-052";
 
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
@@ -29,7 +28,7 @@ const vip355 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "setMinAmountToConvert(uint256)", sepolia.NORMAL_TIMELOCK],
           dstChainId: LzChainId.sepolia,
-        }
+        };
       }),
 
       // Grant permissions to fast track timelock
@@ -39,7 +38,7 @@ const vip355 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "setMinAmountToConvert(uint256)", SEPOLIA_FASTTRACK_TIMELOCK],
           dstChainId: LzChainId.sepolia,
-        }
+        };
       }),
 
       // Grant permissions to critical timelock
@@ -49,7 +48,7 @@ const vip355 = () => {
           signature: "giveCallPermission(address,string,address)",
           params: [converter, "setMinAmountToConvert(uint256)", SEPOLIA_CRITICAL_TIMELOCK],
           dstChainId: LzChainId.sepolia,
-        }
+        };
       }),
     ],
     meta,

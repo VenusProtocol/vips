@@ -7,9 +7,9 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip053 from "../../multisig/proposals/sepolia/vip-052";
 import { CONVERTERS, CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-052";
 import vip352 from "../../vips/vip-352/bsctestnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
