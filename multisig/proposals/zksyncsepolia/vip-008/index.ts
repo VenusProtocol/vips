@@ -19,7 +19,7 @@ export const VWETH_CORE = "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49";
 export const VZK_CORE = "0x92f4BD794303c0BD0791B350Be5531DB38414f47";
 const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 
-export const vip007 = () => {
+export const vip008 = () => {
   return makeProposal([
     // ACM Permissions
     {
@@ -84,4 +84,4 @@ export const vip007 = () => {
   ]);
 };
 
-export default vip007;
+export default vip008;
