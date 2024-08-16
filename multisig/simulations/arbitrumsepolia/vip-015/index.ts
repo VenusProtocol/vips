@@ -18,6 +18,7 @@ import vip015, {
   VwstETH,
   WETH,
 } from "../../../proposals/arbitrumsepolia/vip-015";
+import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -28,6 +29,9 @@ const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = arbitrumsepolia.RESILIENT_ORACLE;
 const GUARDIAN = arbitrumsepolia.GUARDIAN;
 const POOL_REGISTRY = arbitrumsepolia.POOL_REGISTRY;
+const COMPTROLLER_BEACON = "0x12Dcb8D9F1eE7Ad7410F5B36B07bcC7891ab4cEf";
+const OLD_COMPTROLLER_IMPLEMENTATION = "0x77AF9c816b0Ef51A64CF8731f77eDf65872b0973";
+const NEW_COMPTROLLER_IMPLEMENTATION = "0x6b9C91d7310BC19A9ce8a0AD7F926A72cEeb3b1D";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
@@ -97,7 +101,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   vwstETH_Liquid_staked_ETH: {
     borrowCap: "800",
     supplyCap: "8000",
-    collateralFactor: "0.9",
+    collateralFactor: "0.93",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
@@ -106,7 +110,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   vweETH_Liquid_staked_ETH: {
     borrowCap: "2300",
     supplyCap: "4600",
-    collateralFactor: "0.9",
+    collateralFactor: "0.93",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
@@ -154,17 +158,25 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(71063604, async () => {
+forking(71405439, async () => {
   let poolRegistry: Contract;
+  let comptrollerBeacon: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
+    comptrollerBeacon = await ethers.getContractAt(BEACON_ABI, COMPTROLLER_BEACON);
   });
 
   describe("Contracts setup", () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
       checkVToken(address, vTokenState[symbol]);
     }
+
+    it("comptroller should have old implementation", async () => {
+      expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
+        OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
+      );
+    });
   });
 
   describe("Post-Execution state", () => {
@@ -177,6 +189,14 @@ forking(71063604, async () => {
           interestRateModelAddresses[symbol] = await vToken.interestRateModel();
         }
       }
+    });
+
+    describe("Update comptroller beacon implementation", () => {
+      it("comptroller should have new implementation", async () => {
+        expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
+          NEW_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
+        );
+      });
     });
 
     describe("PoolRegistry state", () => {

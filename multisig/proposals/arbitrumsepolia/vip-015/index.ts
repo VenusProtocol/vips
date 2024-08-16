@@ -14,14 +14,22 @@ export const VwstETH = "0x253515E19e8b888a4CA5a0a3363B712402ce4046";
 export const VweETH = "0x75f841b14305935D8D7E806f249D9FA52EF1550B";
 export const VWETH = "0xd7057250b439c0849377bB6C3263eb8f9cf49d98";
 
+export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
+export const NEW_COMPTROLLER_IMPLEMENTATION = "0x6b9C91d7310BC19A9ce8a0AD7F926A72cEeb3b1D";
+
 const CHAINLINK_ETH_FEED = "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165";
 const STALE_PERIOD_3M = 60 * 3; // 3 minutes (for pricefeeds with heartbeat of 2 mins)
 
-export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
+const COMPTROLLER_BEACON = "0x12Dcb8D9F1eE7Ad7410F5B36B07bcC7891ab4cEf";
 
 // IL configuration
 const vip015 = () => {
   return makeProposal([
+    {
+      target: COMPTROLLER_BEACON,
+      signature: "upgradeTo(address)",
+      params: [NEW_COMPTROLLER_IMPLEMENTATION],
+    },
     {
       target: arbitrumsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
@@ -95,7 +103,7 @@ const vip015 = () => {
       params: [
         [
           VwstETH,
-          parseUnits("0.9", 18),
+          parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("2", 18),
           arbitrumsepolia.VTREASURY,
@@ -160,7 +168,7 @@ const vip015 = () => {
       params: [
         [
           VweETH,
-          parseUnits("0.9", 18),
+          parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("2", 18),
           arbitrumsepolia.VTREASURY,
