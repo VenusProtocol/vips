@@ -92,6 +92,11 @@ const vip015 = () => {
       params: [PSR],
     },
     {
+      target: VwstETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
+    },
+    {
       target: arbitrumsepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
@@ -152,6 +157,11 @@ const vip015 = () => {
       params: [PSR],
     },
     {
+      target: VweETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
+    },
+    {
       target: arbitrumsepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
@@ -190,6 +200,11 @@ const vip015 = () => {
       target: VWETH,
       signature: "setProtocolShareReserve(address)",
       params: [PSR],
+    },
+    {
+      target: VWETH,
+      signature: "setProtocolSeizeShare(uint256)",
+      params: [parseUnits("0.01", 18)],
     },
     {
       target: arbitrumsepolia.POOL_REGISTRY,

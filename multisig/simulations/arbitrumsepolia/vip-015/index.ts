@@ -293,8 +293,8 @@ forking(72596100, async () => {
             expect(market.liquidationThresholdMantissa).to.equal(parseUnits(params.liquidationThreshold, 18));
           });
 
-          it(`should set ${symbol} protocol seize share to 0.05`, async () => {
-            expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
+          it(`should set ${symbol} protocol seize share to 0.01`, async () => {
+            expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.01", 18));
           });
 
           it(`should set ${symbol} supply cap to ${params.supplyCap}`, async () => {
