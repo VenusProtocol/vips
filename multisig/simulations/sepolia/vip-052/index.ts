@@ -9,12 +9,12 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { weETHs, vip052 } from "../../../proposals/sepolia/vip-052";
+import { weETHs, vip052, ACCOUNTANT_ORACLE, MOCK_ACCOUNTANT } from "../../../proposals/sepolia/vip-052";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(6511254, async () => {
+forking(6536889, async () => {
   let resilientOracle: Contract;
 
   before(async () => {
@@ -36,7 +36,7 @@ forking(6511254, async () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(weETHs)).to.be.closeTo(parseUnits("2591", 18), parseUnits("1", 18));
+      expect(await resilientOracle.getPrice(weETHs)).to.be.closeTo(parseUnits("2662", 18), parseUnits("1", 18));
     });
   });
 });
