@@ -17,10 +17,9 @@ export const VWETH = "0xd7057250b439c0849377bB6C3263eb8f9cf49d98";
 export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
 export const NEW_COMPTROLLER_IMPLEMENTATION = "0x6b9C91d7310BC19A9ce8a0AD7F926A72cEeb3b1D";
 
-const CHAINLINK_ETH_FEED = "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165";
-const STALE_PERIOD_3M = 60 * 3; // 3 minutes (for pricefeeds with heartbeat of 2 mins)
-
 const COMPTROLLER_BEACON = "0x12Dcb8D9F1eE7Ad7410F5B36B07bcC7891ab4cEf";
+const wstETH_ONE_JUMP_ORACLE = "0xA25770DD334E4423b8f688a3694e577a5B9ddE19";
+const weETH_ONE_JUMP_ORACLE = "0x930b4aB92e4Ab9dFd044953a6aE4C48258562292";
 
 // IL configuration
 const vip015 = () => {
@@ -31,18 +30,13 @@ const vip015 = () => {
       params: [NEW_COMPTROLLER_IMPLEMENTATION],
     },
     {
-      target: arbitrumsepolia.CHAINLINK_ORACLE,
-      signature: "setTokenConfig((address,address,uint256))",
-      params: [[Mock_wstETH, CHAINLINK_ETH_FEED, STALE_PERIOD_3M]],
-    },
-    {
       target: arbitrumsepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
           Mock_wstETH,
           [
-            arbitrumsepolia.CHAINLINK_ORACLE,
+            wstETH_ONE_JUMP_ORACLE,
             "0x0000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000",
           ],
@@ -113,18 +107,13 @@ const vip015 = () => {
       ],
     },
     {
-      target: arbitrumsepolia.CHAINLINK_ORACLE,
-      signature: "setTokenConfig((address,address,uint256))",
-      params: [[Mock_weETH, CHAINLINK_ETH_FEED, STALE_PERIOD_3M]],
-    },
-    {
       target: arbitrumsepolia.RESILIENT_ORACLE,
       signature: "setTokenConfig((address,address[3],bool[3]))",
       params: [
         [
           Mock_weETH,
           [
-            arbitrumsepolia.CHAINLINK_ORACLE,
+            weETH_ONE_JUMP_ORACLE,
             "0x0000000000000000000000000000000000000000",
             "0x0000000000000000000000000000000000000000",
           ],
