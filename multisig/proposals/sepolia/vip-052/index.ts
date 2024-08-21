@@ -25,7 +25,7 @@ const vip052 = () => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [irm, "supdateJumpRateModel(uint256,uint256,uint256,uint256)", sepolia.GUARDIAN],
+        params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", sepolia.GUARDIAN],
       };
     }),
   ]);

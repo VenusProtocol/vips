@@ -30,7 +30,7 @@ const vip053 = () => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [irm, "supdateJumpRateModel(uint256,uint256,uint256,uint256)", ethereum.GUARDIAN],
+        params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", ethereum.GUARDIAN],
       };
     }),
   ]);

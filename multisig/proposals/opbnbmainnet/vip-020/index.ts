@@ -18,7 +18,7 @@ const vip019 = () => {
       return {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [irm, "supdateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbtestnet.GUARDIAN],
+        params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbtestnet.GUARDIAN],
       };
     }),
   ]);
