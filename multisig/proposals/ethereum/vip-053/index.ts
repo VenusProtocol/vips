@@ -50,17 +50,6 @@ const vip053 = () => {
         params: [rewardDistributor, "setLastRewardingBlocks(address[],uint32[],uint32[])", ethereum.GUARDIAN],
       };
     }),
-    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [
-          rewardDistributor,
-          "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
-          ethereum.GUARDIAN,
-        ],
-      };
-    }),
   ]);
 };
 
