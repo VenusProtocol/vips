@@ -21,6 +21,7 @@ forking(241112064, async () => {
   testForkedNetworkVipCommands("vip350", await vip350(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [6]);
+      await expectEvents(txResponse, [PSR_ABI], ["OwnershipTransferred"], [1]);
     },
   });
 
