@@ -179,7 +179,7 @@ const vip015 = () => {
     {
       target: arbitrumsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, "78042235579982593", arbitrumsepolia.GUARDIAN],
+      params: [WETH, parseUnits("2", 18), arbitrumsepolia.GUARDIAN],
     },
     {
       target: WETH,
@@ -189,7 +189,7 @@ const vip015 = () => {
     {
       target: WETH,
       signature: "approve(address,uint256)",
-      params: [arbitrumsepolia.POOL_REGISTRY, "78042235579982593"],
+      params: [arbitrumsepolia.POOL_REGISTRY, parseUnits("2", 18)],
     },
     {
       target: VWETH,
@@ -214,7 +214,7 @@ const vip015 = () => {
           VWETH,
           parseUnits("0.77", 18),
           parseUnits("0.8", 18),
-          "78042235579982593",
+          parseUnits("2", 18),
           arbitrumsepolia.VTREASURY,
           parseUnits("14000", 18),
           parseUnits("12500", 18),

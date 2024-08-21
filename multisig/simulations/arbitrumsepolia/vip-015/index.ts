@@ -122,7 +122,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.77",
     liquidationThreshold: "0.80",
     reserveFactor: "0.2",
-    initialSupply: ".07804223",
+    initialSupply: "2",
     vTokenReceiver: arbitrumsepolia.VTREASURY,
   },
 };
@@ -158,7 +158,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(72855450, async () => {
+forking(72883250, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
