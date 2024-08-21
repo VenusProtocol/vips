@@ -158,7 +158,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(72596100, async () => {
+forking(72855450, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
@@ -333,7 +333,7 @@ forking(72596100, async () => {
             expect(await comptroller.closeFactorMantissa()).to.equal(parseUnits("0.5", 18));
           });
 
-          it("should have liquidation incentive = 1.1", async () => {
+          it("should have liquidation incentive = 1.02", async () => {
             expect(await comptroller.liquidationIncentiveMantissa()).to.equal(parseUnits("1.02", 18));
           });
 
