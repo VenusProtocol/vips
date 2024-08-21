@@ -8,6 +8,10 @@ export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F"
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
+export const ARBITRUM_SEPOLIA_XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
+export const SEPOLIA_XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
+export const OPBNBTESTNET_XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
+
 const vip349 = () => {
   const meta = {
     version: "v2",
@@ -34,6 +38,24 @@ const vip349 = () => {
       {
         target: opbnbtestnet.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_XVS_STORE,
+        signature: "acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: SEPOLIA_XVS_STORE,
+        signature: "acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: OPBNBTESTNET_XVS_STORE,
+        signature: "acceptAdmin()",
         params: [],
         dstChainId: LzChainId.opbnbtestnet,
       },

@@ -4,9 +4,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip052, {XVS_STORE} from "../../../proposals/sepolia/vip-052";
-import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import vip052, { XVS_STORE } from "../../../proposals/sepolia/vip-052";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 

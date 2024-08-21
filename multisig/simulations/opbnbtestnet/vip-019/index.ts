@@ -5,9 +5,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip019, {XVS_STORE} from "../../../proposals/opbnbtestnet/vip-019";
-import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import vip019, { XVS_STORE } from "../../../proposals/opbnbtestnet/vip-019";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 

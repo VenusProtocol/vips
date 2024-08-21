@@ -8,6 +8,10 @@ export const ARBITRUM_ONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 
+export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
+export const ETHEREUM_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
+export const OPBNBMAINNET_XVS_STORE = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775";
+
 const vip349 = () => {
   const meta = {
     version: "v2",
@@ -34,6 +38,24 @@ const vip349 = () => {
       {
         target: opbnbmainnet.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ARBITRUM_ONE_XVS_STORE,
+        signature: "acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ETHEREUM_XVS_STORE,
+        signature: "acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: OPBNBMAINNET_XVS_STORE,
+        signature: "acceptAdmin()",
         params: [],
         dstChainId: LzChainId.opbnbmainnet,
       },
