@@ -15,6 +15,7 @@ export const BORROW_CAP = parseUnits("0", 18);
 const CF = parseUnits("0.8", 18);
 const LT = parseUnits("0.85", 18);
 export const vweETHs = "0xB3A201887396F57bad3fF50DFd02022fE1Fd1774";
+export const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
 export const vip052 = () => {
   return makeProposal([
@@ -62,6 +63,11 @@ export const vip052 = () => {
       target: vweETHs,
       signature: "setProtocolSeizeShare(uint256)",
       params: [parseUnits("0.01", 18)],
+    },
+    {
+      target: LIQUID_STAKED_COMPTROLLER,
+      signature: "setActionsPaused(address[],uint8[],bool)",
+      params: [[vweETHs], [2], true],
     },
   ]);
 };

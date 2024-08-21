@@ -9,7 +9,14 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { BORROW_CAP, SUPPLY_CAP, vip052, vweETHs, weETHs } from "../../../proposals/sepolia/vip-052";
+import {
+  BORROW_CAP,
+  LIQUID_STAKED_COMPTROLLER,
+  SUPPLY_CAP,
+  vip052,
+  vweETHs,
+  weETHs,
+} from "../../../proposals/sepolia/vip-052";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -17,7 +24,6 @@ import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
-const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 
 forking(6536889, async () => {
@@ -125,6 +131,10 @@ forking(6536889, async () => {
       await checkIsolatedPoolsComptrollers({
         [LIQUID_STAKED_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
       });
+    });
+
+    it("borrow paused", async () => {
+      expect(await comptroller.actionPaused(vweETHs, 2)).to.be.true;
     });
   });
 });
