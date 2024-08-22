@@ -1,10 +1,12 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumberish } from "ethers";
+import { BigNumberish, Signer } from "ethers";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
@@ -18,9 +20,11 @@ import vip015, {
   VwstETH,
   WETH,
 } from "../../../proposals/arbitrumsepolia/vip-015";
+import WETH_ABI from "./abi/WETH.json";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
+import MOCK_TOKEN_ABI from "./abi/mockToken.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -158,7 +162,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(72883250, async () => {
+forking(73121810, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
@@ -366,6 +370,28 @@ forking(72883250, async () => {
           );
         }
       }
+    });
+
+    describe("generic tests", async () => {
+      before(async () => {
+        await impersonateAccount(arbitrumsepolia.VTREASURY);
+        await setBalance(arbitrumsepolia.VTREASURY, ethers.utils.parseEther("5"));
+
+        const signer: Signer = await ethers.getSigner(arbitrumsepolia.VTREASURY);
+        const mockWST = await ethers.getContractAt(MOCK_TOKEN_ABI, Mock_wstETH, signer);
+        const WETH_Contract = await ethers.getContractAt(WETH_ABI, WETH, signer);
+
+        await mockWST.connect(signer).faucet("10000000000000000");
+        await WETH_Contract.connect(signer).deposit({ value: ethers.utils.parseEther("2") });
+        await WETH_Contract.connect(signer).transfer(
+          "0x807dCB6946dDF4C5C6446B1B07ACd248B08F45e2",
+          ethers.utils.parseEther("1"),
+        );
+      });
+
+      it("Isolated pools generic tests", async () => {
+        checkIsolatedPoolsComptrollers();
+      });
     });
   });
 });
