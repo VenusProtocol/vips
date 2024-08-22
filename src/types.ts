@@ -16,8 +16,7 @@ export type REMOTE_NETWORKS =
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "arbitrumsepolia"
-  | "arbitrumone"
-  | "zksyncmainnet";
+  | "arbitrumone";
 
 export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia"];
 export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet"];
