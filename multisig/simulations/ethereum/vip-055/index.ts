@@ -11,21 +11,21 @@ import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
 import {
   BORROW_CAP,
+  BaseAssets,
   LIQUID_STAKED_COMPTROLLER,
   SUPPLY_CAP,
+  USDT_PRIME_CONVERTER,
   VTOKEN_RECEIVER,
   vip055,
   vweETHs,
   weETHs,
-  BaseAssets,
-  USDT_PRIME_CONVERTER
 } from "../../../proposals/ethereum/vip-055";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
+import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import VTOKEN_ABI from "./abi/vToken.json";
 import ERC20_ABI from "./abi/erc20.json";
-import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
+import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
