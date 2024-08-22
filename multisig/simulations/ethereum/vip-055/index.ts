@@ -17,22 +17,37 @@ import {
   vip055,
   vweETHs,
   weETHs,
+  BaseAssets,
+  USDT_PRIME_CONVERTER
 } from "../../../proposals/ethereum/vip-055";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import ERC20_ABI from "./abi/erc20.json";
+import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
+const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+const weETHs_USER = "0x9e8f10574ACc2c62C6e5d19500CEd39163Da37A9";
 
 forking(20583543, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vweETHsContract: Contract;
   let comptroller: Contract;
+  let usdt: Contract;
+  let usdtPrimeConverter: Contract;
+  let weETHsContract: Contract;
 
   before(async () => {
+    await impersonateAccount(USDT_USER);
+    await impersonateAccount(weETHs_USER);
+    await impersonateAccount(ethereum.GUARDIAN);
+    await setBalance(USDT_USER, parseUnits("1000", 18));
+    await setBalance(weETHs_USER, parseUnits("1000", 18));
+
     await impersonateAccount(ethereum.NORMAL_TIMELOCK);
     await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
 
@@ -40,6 +55,9 @@ forking(20583543, async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
     vweETHsContract = await ethers.getContractAt(VTOKEN_ABI, vweETHs);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, LIQUID_STAKED_COMPTROLLER);
+    usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
+    usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
+    weETHsContract = await ethers.getContractAt(ERC20_ABI, weETHs, await ethers.provider.getSigner(weETHs_USER));
   });
 
   describe("Pre-VIP behavior", () => {
@@ -130,6 +148,28 @@ forking(20583543, async () => {
 
     it("borrow paused", async () => {
       expect(await comptroller.actionPaused(vweETHs, 2)).to.be.true;
+    });
+
+    it("weETHs conversion", async () => {
+      const usdtAmount = parseUnits("10", 6);
+      await usdt.transfer(ethereum.GUARDIAN, usdtAmount);
+      await usdt.connect(await ethers.getSigner(ethereum.GUARDIAN)).approve(usdtPrimeConverter.address, usdtAmount);
+
+      const weETHsAmount = parseUnits("0.001", 18);
+      await weETHsContract.transfer(usdtPrimeConverter.address, weETHsAmount);
+
+      const usdtBalanceBefore = await usdt.balanceOf(ethereum.GUARDIAN);
+      const weETHsBalanceBefore = await weETHsContract.balanceOf(ethereum.GUARDIAN);
+
+      await usdtPrimeConverter
+        .connect(await ethers.getSigner(ethereum.GUARDIAN))
+        .convertForExactTokens(usdtAmount, weETHsAmount, usdt.address, weETHsContract.address, ethereum.GUARDIAN);
+
+      const usdtBalanceAfter = await usdt.balanceOf(ethereum.GUARDIAN);
+      const weETHsBalanceAfter = await weETHsContract.balanceOf(ethereum.GUARDIAN);
+
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("2.638021", 6));
+      expect(weETHsBalanceAfter.sub(weETHsBalanceBefore)).to.be.equal(weETHsAmount);
     });
   });
 });
