@@ -107,7 +107,7 @@ const config: HardhatUserConfig = {
       zksync: true,
     },
     zksyncmainnet: {
-      url: process.env.ARCHIVE_NODE_zksync || "https://mainnet.era.zksync.io",
+      url: process.env.ARCHIVE_NODE_zksyncmainnet || "https://mainnet.era.zksync.io",
       chainId: 324,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
