@@ -1,9 +1,10 @@
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
-import vip355 from "../../vips/vip-355/bscmainnet";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
+
+import vip355 from "../../vips/vip-355/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(40343666, async () => {
+forking(42106572, async () => {
   testVip("vip355", await vip355(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(

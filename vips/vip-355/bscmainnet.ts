@@ -1,7 +1,7 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { makeProposal } from "src/utils";
-import { LzChainId, ProposalType } from "src/types";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId, ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
 export const ARBITRUM_ONE_BOUND_VALIDATOR = "0x2245FA2420925Cd3C2D889Ddc5bA1aefEF0E14CF";
@@ -328,7 +328,11 @@ const vip355 = () => {
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", opbnbmainnet.GUARDIAN],
+        params: [
+          opbnbmainnet.XVS_VAULT_PROXY,
+          "setRewardAmountPerBlockOrSecond(address,uint256)",
+          opbnbmainnet.GUARDIAN,
+        ],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
@@ -346,61 +350,73 @@ const vip355 = () => {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setCloseFactor(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setProtocolSeizeShare(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setInterestRateModel(address)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [OPBNBMAINNET_POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [OPBNBMAINNET_POOL_REGISTRY, "addMarket(AddMarketInput)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [OPBNBMAINNET_POOL_REGISTRY, "setPoolName(address,string)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: OPBNBMAINNET_ACM,
         signature: "revokeCallPermission(address,string,address)",
         params: [OPBNBMAINNET_POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", opbnbmainnet.GUARDIAN],
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,
