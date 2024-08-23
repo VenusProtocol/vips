@@ -17,7 +17,7 @@ const LT = parseUnits("0.85", 18);
 export const vweETHs = "0xB3A201887396F57bad3fF50DFd02022fE1Fd1774";
 export const LIQUID_STAKED_COMPTROLLER = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-export const vip052 = () => {
+export const vip056 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -72,4 +72,4 @@ export const vip052 = () => {
   ]);
 };
 
-export default vip052;
+export default vip056;

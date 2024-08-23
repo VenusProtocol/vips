@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { BaseAssets, USDT_PRIME_CONVERTER, vip052, weETHs } from "../../../proposals/sepolia/vip-052/addendum";
+import { BaseAssets, USDT_PRIME_CONVERTER, vip056, weETHs } from "../../../proposals/sepolia/vip-056/addendum";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import ERC20_ABI from "./abi/erc20.json";
 
@@ -38,7 +38,7 @@ forking(6549281, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip052());
+      await pretendExecutingVip(await vip056());
     });
 
     it("weETHs conversion", async () => {

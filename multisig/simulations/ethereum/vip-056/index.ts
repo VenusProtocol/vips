@@ -16,10 +16,10 @@ import {
   SUPPLY_CAP,
   USDT_PRIME_CONVERTER,
   VTOKEN_RECEIVER,
-  vip055,
+  vip056,
   vweETHs,
   weETHs,
-} from "../../../proposals/ethereum/vip-055";
+} from "../../../proposals/ethereum/vip-056";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -68,7 +68,7 @@ forking(20583543, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip055());
+      await pretendExecutingVip(await vip056());
     });
 
     it("check price", async () => {

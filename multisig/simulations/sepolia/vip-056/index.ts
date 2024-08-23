@@ -13,10 +13,10 @@ import {
   BORROW_CAP,
   LIQUID_STAKED_COMPTROLLER,
   SUPPLY_CAP,
-  vip052,
+  vip056,
   vweETHs,
   weETHs,
-} from "../../../proposals/sepolia/vip-052";
+} from "../../../proposals/sepolia/vip-056";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -52,7 +52,7 @@ forking(6536889, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip052());
+      await pretendExecutingVip(await vip056());
     });
 
     it("check price", async () => {

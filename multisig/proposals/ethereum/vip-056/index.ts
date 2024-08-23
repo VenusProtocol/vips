@@ -27,7 +27,7 @@ export const BaseAssets = [
   "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
 ];
 
-export const vip055 = () => {
+export const vip056 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -104,4 +104,4 @@ export const vip055 = () => {
   ]);
 };
 
-export default vip055;
+export default vip056;

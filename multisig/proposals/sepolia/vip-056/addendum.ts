@@ -14,7 +14,7 @@ export const BaseAssets = [
   "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSPrimeConverter BaseAsset
 ];
 
-export const vip052 = () => {
+export const vip056 = () => {
   return makeProposal([
     // Conversion config
     {
@@ -45,4 +45,4 @@ export const vip052 = () => {
   ]);
 };
 
-export default vip052;
+export default vip056;
