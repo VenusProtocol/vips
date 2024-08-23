@@ -173,6 +173,7 @@ export const NETWORK_ADDRESSES = {
   },
   zksyncmainnet: {
     NORMAL_TIMELOCK: "", // To be deployed
+    VTREASURY: "0xB2e9174e23382f7744CebF7e0Be54cA001D95599",
     GUARDIAN: "0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa",
   },
 };
