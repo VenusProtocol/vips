@@ -1,6 +1,5 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumberish, Signer } from "ethers";
+import { BigNumberish } from "ethers";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
@@ -20,11 +19,9 @@ import vip015, {
   VwstETH,
   WETH,
 } from "../../../proposals/arbitrumsepolia/vip-015";
-import WETH_ABI from "./abi/WETH.json";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
-import MOCK_TOKEN_ABI from "./abi/mockToken.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
