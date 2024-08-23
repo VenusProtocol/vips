@@ -162,7 +162,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(73121810, async () => {
+forking(73250686, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
@@ -373,22 +373,6 @@ forking(73121810, async () => {
     });
 
     describe("generic tests", async () => {
-      before(async () => {
-        await impersonateAccount(arbitrumsepolia.VTREASURY);
-        await setBalance(arbitrumsepolia.VTREASURY, ethers.utils.parseEther("5"));
-
-        const signer: Signer = await ethers.getSigner(arbitrumsepolia.VTREASURY);
-        const mockWST = await ethers.getContractAt(MOCK_TOKEN_ABI, Mock_wstETH, signer);
-        const WETH_Contract = await ethers.getContractAt(WETH_ABI, WETH, signer);
-
-        await mockWST.connect(signer).faucet("10000000000000000");
-        await WETH_Contract.connect(signer).deposit({ value: ethers.utils.parseEther("2") });
-        await WETH_Contract.connect(signer).transfer(
-          "0x807dCB6946dDF4C5C6446B1B07ACd248B08F45e2",
-          ethers.utils.parseEther("1"),
-        );
-      });
-
       it("Isolated pools generic tests", async () => {
         checkIsolatedPoolsComptrollers();
       });
