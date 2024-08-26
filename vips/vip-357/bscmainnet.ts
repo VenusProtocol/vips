@@ -1,4 +1,3 @@
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -37,7 +36,7 @@ export const OPBNBMAINNET_IRMs = [
   "0x31061a662A87005E5EdbC56EBAd5422eD7952084",
 ];
 
-const vip356 = () => {
+const vip357 = () => {
   const meta = {
     version: "v2",
     title: "VIP-357",
@@ -70,7 +69,7 @@ const vip356 = () => {
 
       ...OPBNBMAINNET_IRMs.map(irm => {
         return {
-          target: ETHEREUM_ACM,
+          target: OPBNBMAINNET_ACM,
           signature: "revokeCallPermission(address,string,address)",
           params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbmainnet.GUARDIAN],
           dstChainId: LzChainId.opbnbmainnet,
@@ -81,4 +80,4 @@ const vip356 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip356;
+export default vip357;

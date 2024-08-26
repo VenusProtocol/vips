@@ -1,12 +1,9 @@
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
-export const ARBITRUM_ONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
+const { ethereum } = NETWORK_ADDRESSES;
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 
 export const ETHEREUM_CONVERTERS = [
   "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE",

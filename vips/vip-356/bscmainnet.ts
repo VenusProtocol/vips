@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
+const { arbitrumone, ethereum } = NETWORK_ADDRESSES;
 export const ARBITRUM_ONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
@@ -21,7 +21,6 @@ export const ETHEREUM_REWARD_DISTRIBUTORS = [
   "0x1e25CF968f12850003Db17E0Dba32108509C4359",
 ];
 
-
 const vip356 = () => {
   const meta = {
     version: "v2",
@@ -38,21 +37,37 @@ const vip356 = () => {
         return {
           target: ARBITRUM_ONE_ACM,
           signature: "revokeCallPermission(address,string,address)",
-          params: [rewardDistributor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", ethereum.GUARDIAN],
+          params: [rewardDistributor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumone.GUARDIAN],
           dstChainId: LzChainId.arbitrumone,
         };
       }),
       {
         target: ARBITRUM_ONE_ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setLastRewardingBlock(address[],uint32[],uint32[])", ethereum.GUARDIAN],
+        params: [
+          ethers.constants.AddressZero,
+          "setLastRewardingBlock(address[],uint32[],uint32[])",
+          arbitrumone.GUARDIAN,
+        ],
         dstChainId: LzChainId.arbitrumone,
       },
       ...ARBITRUM_ONE_REWARD_DISTRIBUTORS.map(rewardDistributor => {
         return {
           target: ARBITRUM_ONE_ACM,
           signature: "revokeCallPermission(address,string,address)",
-          params: [rewardDistributor, "setLastRewardingBlocks(address[],uint32[],uint32[])", ethereum.GUARDIAN],
+          params: [rewardDistributor, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumone.GUARDIAN],
+          dstChainId: LzChainId.arbitrumone,
+        };
+      }),
+      ...ARBITRUM_ONE_REWARD_DISTRIBUTORS.map(rewardDistributor => {
+        return {
+          target: ARBITRUM_ONE_ACM,
+          signature: "revokeCallPermission(address,string,address)",
+          params: [
+            rewardDistributor,
+            "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
+            arbitrumone.GUARDIAN,
+          ],
           dstChainId: LzChainId.arbitrumone,
         };
       }),

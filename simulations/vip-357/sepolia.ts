@@ -7,7 +7,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 forking(6276156, async () => {
   testForkedNetworkVipCommands("vip357", await vip357(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [22]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [11]);
     },
   });
 });
