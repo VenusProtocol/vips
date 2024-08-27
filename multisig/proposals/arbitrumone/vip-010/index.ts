@@ -16,44 +16,6 @@ const vip010 = () => {
         params: [arbitrumone.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [rewardDistributor, "setRewardTokenSpeeds(address[],uint256[],uint256[])", arbitrumone.GUARDIAN],
-      };
-    }),
-    ...REWARD_DISTRIBUTORS.map(() => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [
-          ethers.constants.AddressZero,
-          "setLastRewardingBlock(address[],uint32[],uint32[])",
-          arbitrumone.GUARDIAN,
-        ],
-      };
-    }),
-    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [rewardDistributor, "setLastRewardingBlocks(address[],uint32[],uint32[])", arbitrumone.GUARDIAN],
-      };
-    }),
-    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [
-          rewardDistributor,
-          "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
-          arbitrumone.GUARDIAN,
-        ],
-      };
-    }),
   ]);
 };
 
