@@ -19,63 +19,6 @@ const vip053 = () => {
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setTokensDistributionSpeed(address[],uint256[])", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setMaxTokensDistributionSpeed(address[],uint256[])", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setMaxLoopsLimit(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "updateAlpha(uint128,uint128)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "updateMultipliers(address,uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setStakedAt(address[],uint256[])", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "addMarket(address,address,uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setLimit(uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setMaxLoopsLimit(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "issue(bool,address[])", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "burn(address)", ethereum.GUARDIAN],
-    },
   ]);
 };
 

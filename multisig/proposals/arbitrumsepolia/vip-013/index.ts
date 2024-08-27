@@ -19,63 +19,6 @@ const vip013 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setTokensDistributionSpeed(address[],uint256[])", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setMaxTokensDistributionSpeed(address[],uint256[])", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PRIME, "setMaxLoopsLimit(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "updateAlpha(uint128,uint128)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "updateMultipliers(address,uint256,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setStakedAt(address[],uint256[])", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "addMarket(address,address,uint256,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setLimit(uint256,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "setMaxLoopsLimit(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "issue(bool,address[])", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [PLP, "burn(address)", arbitrumsepolia.GUARDIAN],
-    },
   ]);
 };
 
