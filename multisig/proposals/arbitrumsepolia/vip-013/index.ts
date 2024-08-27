@@ -27,34 +27,6 @@ export const vip013 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
-
-    // Revoke unnecessary permissions from Guardian
-
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", arbitrumsepolia.GUARDIAN],
-    },
   ]);
 };
 

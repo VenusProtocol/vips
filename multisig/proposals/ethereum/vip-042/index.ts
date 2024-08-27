@@ -33,39 +33,6 @@ export const vip042 = () => {
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-
-    // Revoke unnecessary permissions from Guardian
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.RESILIENT_ORACLE, "setOracle(address,address,uint8)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", ethereum.GUARDIAN],
-    },
-
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [SFrxETHOracle, "setMaxAllowedPriceDifference(uint256)", ethereum.GUARDIAN],
-    },
   ]);
 };
 

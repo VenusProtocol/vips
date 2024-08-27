@@ -22,22 +22,6 @@ export const vip020 = () => {
       signature: "transferOwnership(address)",
       params: [opbnbmainnet.NORMAL_TIMELOCK],
     },
-    // Revoke unnecessary permissions from Guardian
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.RESILIENT_ORACLE, "setOracle(address,address,uint8)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opbnbmainnet.GUARDIAN],
-    },
   ]);
 };
 

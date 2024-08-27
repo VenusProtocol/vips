@@ -27,33 +27,6 @@ export const vip010 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-
-    // Revoke unnecessary permissions from Guardian
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.RESILIENT_ORACLE, "setOracle(address,address,uint8)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", arbitrumone.GUARDIAN],
-    },
   ]);
 };
 
