@@ -50,68 +50,6 @@ const vip013 = () => {
         params: [arbitrumsepolia.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setCloseFactor(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setProtocolSeizeShare(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setInterestRateModel(address)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addMarket(AddMarketInput)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "setPoolName(address,string)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", arbitrumsepolia.GUARDIAN],
-    },
   ]);
 };
 

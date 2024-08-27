@@ -67,68 +67,6 @@ const vip053 = () => {
         params: [ethereum.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setCloseFactor(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setProtocolSeizeShare(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setInterestRateModel(address)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addMarket(AddMarketInput)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "setPoolName(address,string)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", ethereum.GUARDIAN],
-    },
   ]);
 };
 

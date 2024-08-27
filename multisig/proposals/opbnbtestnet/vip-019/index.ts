@@ -49,68 +49,6 @@ const vip019 = () => {
         params: [opbnbtestnet.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setCloseFactor(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setProtocolSeizeShare(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReserveFactor(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setInterestRateModel(address)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "addMarket(AddMarketInput)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "setPoolName(address,string)", opbnbtestnet.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", opbnbtestnet.GUARDIAN],
-    },
   ]);
 };
 
