@@ -34,32 +34,6 @@ const vip052 = () => {
         params: [sepolia.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    ...CONVERTERS.map(converter => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [converter, "setMinAmountToConvert(uint256)", sepolia.GUARDIAN],
-      };
-    }),
-    ...CONVERTERS.map(converter => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [converter, "setConversionConfig(address,address,ConversionConfig)", sepolia.GUARDIAN],
-      };
-    }),
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [CONVERTER_NETWORK, "addTokenConverter(address)", sepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [CONVERTER_NETWORK, "removeTokenConverter(address)", sepolia.GUARDIAN],
-    },
   ]);
 };
 

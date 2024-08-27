@@ -34,32 +34,6 @@ const vip053 = () => {
         params: [ethereum.NORMAL_TIMELOCK],
       };
     }),
-
-    // Revoke permissions
-    ...CONVERTERS.map(converter => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [converter, "setMinAmountToConvert(uint256)", ethereum.GUARDIAN],
-      };
-    }),
-    ...CONVERTERS.map(converter => {
-      return {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [converter, "setConversionConfig(address,address,ConversionConfig)", ethereum.GUARDIAN],
-      };
-    }),
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [CONVERTER_NETWORK, "addTokenConverter(address)", ethereum.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [CONVERTER_NETWORK, "removeTokenConverter(address)", ethereum.GUARDIAN],
-    },
   ]);
 };
 
