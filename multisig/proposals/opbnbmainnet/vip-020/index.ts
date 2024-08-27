@@ -18,32 +18,6 @@ const vip020 = () => {
       signature: "setPendingAdmin(address)",
       params: [opbnbmainnet.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.XVS_VAULT_PROXY, "set(address,uint256,uint256)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [opbnbmainnet.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", opbnbmainnet.GUARDIAN],
-    },
-    {
-      target: OPBNBMAINNET_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [
-        opbnbmainnet.XVS_VAULT_PROXY,
-        "setWithdrawalLockingPeriod(address,uint256,uint256)",
-        opbnbmainnet.GUARDIAN,
-      ],
-    },
   ]);
 };
 

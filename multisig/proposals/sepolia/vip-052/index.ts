@@ -18,28 +18,6 @@ const vip053 = () => {
       signature: "setPendingAdmin(address)",
       params: [sepolia.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [sepolia.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", sepolia.GUARDIAN],
-    },
-    {
-      target: SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [sepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", sepolia.GUARDIAN],
-    },
-    {
-      target: SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [sepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", sepolia.GUARDIAN],
-    },
-    {
-      target: SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [sepolia.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", sepolia.GUARDIAN],
-    },
   ]);
 };
 

@@ -18,32 +18,6 @@ const vip010 = () => {
       signature: "setPendingAdmin(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.XVS_VAULT_PROXY, "set(address,uint256,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumone.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", arbitrumone.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_ONE_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [
-        arbitrumone.XVS_VAULT_PROXY,
-        "setWithdrawalLockingPeriod(address,uint256,uint256)",
-        arbitrumone.GUARDIAN,
-      ],
-    },
   ]);
 };
 

@@ -18,28 +18,6 @@ const vip053 = () => {
       signature: "setPendingAdmin(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.XVS_VAULT_PROXY, "set(address,uint256,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", ethereum.GUARDIAN],
-    },
-    {
-      target: ETHEREUM_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [ethereum.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", ethereum.GUARDIAN],
-    },
   ]);
 };
 

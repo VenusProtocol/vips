@@ -18,40 +18,6 @@ const vip010 = () => {
       signature: "setPendingAdmin(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
-
-    // Revoke permissions
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [
-        arbitrumsepolia.XVS_VAULT_PROXY,
-        "add(address,uint256,address,uint256,uint256)",
-        arbitrumsepolia.GUARDIAN,
-      ],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [arbitrumsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", arbitrumsepolia.GUARDIAN],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [
-        arbitrumsepolia.XVS_VAULT_PROXY,
-        "setRewardAmountPerBlockOrSecond(address,uint256)",
-        arbitrumsepolia.GUARDIAN,
-      ],
-    },
-    {
-      target: ARBITRUM_SEPOLIA_ACM,
-      signature: "revokeCallPermission(address,string,address)",
-      params: [
-        arbitrumsepolia.XVS_VAULT_PROXY,
-        "setWithdrawalLockingPeriod(address,uint256,uint256)",
-        arbitrumsepolia.GUARDIAN,
-      ],
-    },
   ]);
 };
 
