@@ -1,11 +1,9 @@
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
-const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
 export const vip042 = () => {
   return makeProposal([

@@ -3,7 +3,6 @@ import { makeProposal } from "src/utils";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
-const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
 export const vip013 = () => {
   return makeProposal([
