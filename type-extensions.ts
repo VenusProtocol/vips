@@ -11,6 +11,7 @@ declare module "hardhat/types/runtime" {
       | "opbnbtestnet"
       | "opbnbmainnet"
       | "arbitrumsepolia"
-      | "zksyncsepolia";
+      | "zksyncsepolia"
+      | "zksyncmainnet";
   }
 }

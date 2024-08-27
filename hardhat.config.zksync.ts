@@ -23,6 +23,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const BLOCK_GAS_LIMIT_PER_NETWORK = {
   zksyncsepolia: 30000000,
+  zksyncmainnet: 30000000,
 };
 
 task("multisig", "Execute multisig vip")
@@ -103,6 +104,13 @@ const config: HardhatUserConfig = {
       chainId: 300,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
+      zksync: true,
+    },
+    zksyncmainnet: {
+      url: process.env.ARCHIVE_NODE_zksyncmainnet || "https://mainnet.era.zksync.io",
+      chainId: 324,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
       zksync: true,
     },
   },
