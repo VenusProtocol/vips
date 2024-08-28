@@ -9,13 +9,13 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip354, {
+import vip357, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../vips/vip-354/bscmainnet";
+} from "../../vips/vip-357/bscmainnet";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/xvsProxyOFTSrc.json";
@@ -50,7 +50,7 @@ forking(41729228, async () => {
     );
   });
 
-  testVip("vip-354", await vip354(), {
+  testVip("vip-357", await vip357(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

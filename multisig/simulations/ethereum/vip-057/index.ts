@@ -7,13 +7,13 @@ import { LzChainId } from "src/types";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip055, {
+import vip057, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
   ZKSYNC_TRUSTED_REMOTE,
-} from "../../../proposals/ethereum/vip-055";
+} from "../../../proposals/ethereum/vip-057";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
@@ -42,7 +42,7 @@ forking(20619693, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip055());
+      await pretendExecutingVip(await vip057());
     });
 
     it("Should match trusted remote address", async () => {

@@ -12,10 +12,10 @@ export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 export const ZKSYNC_TRUSTED_REMOTE = "0x16a62b534e09a7534cd5847cfe5bf6a4b0c1b116";
 
-const vip354 = () => {
+const vip357 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-354 Enable BSC -> ZKSYNC bridge",
+    title: "VIP-357 Enable BSC -> ZKSYNC bridge",
     description: `#### Summary Enable BSC -> ZKSYNC bridge`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -60,4 +60,4 @@ const vip354 = () => {
   );
 };
 
-export default vip354;
+export default vip357;
