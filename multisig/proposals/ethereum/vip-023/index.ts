@@ -1,4 +1,4 @@
-import { makeProposal } from "../../../../src/utils";
+import { makeProposal } from "src/utils";
 
 export const REWARDS_DISTRIBUTOR = "0xDCB0CfA130496c749738Acbe2d6aA06C7C320f06";
 export const vweETH = "0xb4933AF59868986316Ed37fa865C829Eba2df0C7";

@@ -4,9 +4,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "../../../src/utils";
-import { forking, testVip } from "../../../src/vip-framework";
 import {
   DEST_CHAIN_ID,
   MAX_DAILY_RECEIVE_LIMIT,
@@ -27,7 +27,7 @@ const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const XVS_FEED = "0xBF63F430A79D4036A5900C19818aFf1fa710f206";
 
-forking(35898604, () => {
+forking(35898604, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -46,7 +46,7 @@ forking(35898604, () => {
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, XVS, XVS_FEED, NORMAL_TIMELOCK);
   });
 
-  testVip("vip251", vip251(), {
+  testVip("vip251", await vip251(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

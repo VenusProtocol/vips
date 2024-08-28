@@ -1,50 +1,178 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip002 } from "../../../proposals/arbitrumsepolia/vip-002";
-import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
+import vip002, {
+  BNB_TESTNET_ENDPOINT_ID,
+  BNB_TESTNET_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  OPBNB_TESTNET_ENDPOINT_ID,
+  OPBNB_TESTNET_TRUSTED_REMOTE,
+  SEPOLIA_ENDPOINT_ID,
+  SEPOLIA_TRUSTED_REMOTE,
+  SINGLE_RECEIVE_LIMIT,
+  XVS,
+  XVS_BRIDGE_ADMIN_PROXY,
+  XVS_BRIDGE_DEST,
+  XVS_MINT_LIMIT,
+} from "../../../proposals/arbitrumsepolia/vip-002";
+import XVS_ABI from "./abi/xvs.json";
+import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
-const vUSDT_POOL_STABLECOIN = "0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052";
-const MULTISIG = "0x1426A5Ae009c4443188DA8793751024E358A61C2";
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
+const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(52134922, () => {
-  let stableCoinPoolComptroller: Contract;
+const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
+const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
+
+const MIN_DEST_GAS = "300000";
+
+forking(36944975, async () => {
+  let xvs: Contract;
+  let xvsBridgeAdmin: Contract;
+  let xvsBridge: Contract;
 
   before(async () => {
-    await impersonateAccount(MULTISIG);
-
-    stableCoinPoolComptroller = new ethers.Contract(
-      COMPTROLLER_CORE,
-      COMPTROLLER_FACET_ABI,
-      await ethers.getSigner(MULTISIG),
-    );
-
-    await setBalance(MULTISIG, parseUnits("1000", 18));
-
-    await stableCoinPoolComptroller.setActionsPaused([vUSDT_POOL_STABLECOIN], [0, 1, 2, 3, 4, 5, 6, 7, 8], true);
-    await stableCoinPoolComptroller.setCollateralFactor(vUSDT_POOL_STABLECOIN, 0, 0);
-    await stableCoinPoolComptroller.setMarketBorrowCaps([vUSDT_POOL_STABLECOIN], [0]);
-    await stableCoinPoolComptroller.setMarketSupplyCaps([vUSDT_POOL_STABLECOIN], [0]);
+    xvs = await ethers.getContractAt(XVS_ABI, XVS);
+    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
+    xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE_DEST);
   });
 
-  describe("Pre-VIP behavior", () => {
-    it("unlist reverts", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.reverted;
+  describe("Pre-Execution state", () => {
+    it("Bridge Owner != arbitrum sepolia multisig", async () => {
+      const owner = await xvsBridgeAdmin.owner();
+      expect(owner).not.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("Trusted remote should not exist for any network(bsctestnet, opbnbtestnet, sepolia)", async () => {
+      await expect(xvsBridge.getTrustedRemoteAddress(BNB_TESTNET_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
+      await expect(xvsBridge.getTrustedRemoteAddress(OPBNB_TESTNET_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
+      await expect(xvsBridge.getTrustedRemoteAddress(SEPOLIA_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
+    });
+
+    it("Mint limit = 0", async () => {
+      const cap = await xvs.minterToCap(XVS_BRIDGE_DEST);
+      expect(cap).equals(0);
     });
   });
 
-  describe("Post-VIP behavior", async () => {
+  describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
     });
 
-    it("unlist successful", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.not.reverted;
+    it("Should set bridge owner to multisig", async () => {
+      const owner = await xvsBridgeAdmin.owner();
+      expect(owner).equals(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("Should whitelist MULTISIG and TREASURY", async () => {
+      let res = await xvsBridge.whitelist(arbitrumsepolia.NORMAL_TIMELOCK);
+      expect(res).equals(true);
+
+      res = await xvsBridge.whitelist(arbitrumsepolia.VTREASURY);
+      expect(res).equals(true);
+    });
+
+    it("Should set trusted remote address in bridge for all three networks", async () => {
+      let trustedRemote = await xvsBridge.getTrustedRemoteAddress(BNB_TESTNET_ENDPOINT_ID);
+      expect(trustedRemote).equals(BNB_TESTNET_TRUSTED_REMOTE);
+
+      trustedRemote = await xvsBridge.getTrustedRemoteAddress(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(trustedRemote).equals(OPBNB_TESTNET_TRUSTED_REMOTE);
+
+      trustedRemote = await xvsBridge.getTrustedRemoteAddress(SEPOLIA_ENDPOINT_ID);
+      expect(trustedRemote).equals(SEPOLIA_TRUSTED_REMOTE);
+    });
+
+    it("Should set minting limit in XVS token", async () => {
+      const cap = await xvs.minterToCap(XVS_BRIDGE_DEST);
+      expect(cap).equals(XVS_MINT_LIMIT);
+    });
+
+    it("Should set correct token address in bridge", async () => {
+      const token = await xvsBridge.token();
+      expect(token).equals(XVS);
+    });
+
+    it("Should set correct max daily limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxDailyLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+    });
+
+    it("Should set correct max single limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
+    });
+
+    it("Should set correct max daily receive limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+    });
+
+    it("Should set correct max single receive limit for all three networks", async () => {
+      let limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(OPBNB_TESTNET_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
+    });
+
+    it("Should set correct min destination gas", async () => {
+      let limit = await xvsBridge.minDstGasLookup(BNB_TESTNET_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
+
+      limit = await xvsBridge.minDstGasLookup(OPBNB_TESTNET_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
+
+      limit = await xvsBridge.minDstGasLookup(SEPOLIA_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DEST_GAS);
+    });
+  });
+
+  describe("Post-Execution extra checks", () => {
+    it(`should fail if someone else tries to mint XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).mint(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
+    });
+
+    it(`should fail if someone else tries to burn XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).burn(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
     });
   });
 });

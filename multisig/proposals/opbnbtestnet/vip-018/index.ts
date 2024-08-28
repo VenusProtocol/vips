@@ -1,23 +1,96 @@
-import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { makeProposal } from "src/utils";
 
-import { makeProposal } from "../../../../src/utils";
-
-const COMPTROLLER_BEACON = "0x2020BDa1F931E07B14C9d346E2f6D5943b4cd56D";
-const NEW_COMPTROLLER_IMPLEMENTATION = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
-const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
-const OPBNBTESTNET_MULTISIG = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
+const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x4F570240FF6265Fbb1C79cE824De6408F1948913";
+const { opbnbtestnet } = NETWORK_ADDRESSES;
 
 export const vip018 = () => {
   return makeProposal([
     {
-      target: COMPTROLLER_BEACON,
-      signature: "upgradeTo(address)",
-      params: [NEW_COMPTROLLER_IMPLEMENTATION],
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)", opbnbtestnet.GUARDIAN],
     },
     {
-      target: ACM,
+      target: OPBNBTESTNET_ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ethers.constants.AddressZero, "unlistMarket(address)", OPBNBTESTNET_MULTISIG],
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setReceiveVersion(uint16)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setPrecrime(address)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setMinDstGas(uint16,uint16,uint256)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setPayloadSizeLimit(uint16,uint256)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setConfig(uint16,uint16,uint256,bytes)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setMaxDailyReceiveLimit(uint256)", opbnbtestnet.GUARDIAN],
+    },
+
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "pause()", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "unpause()", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setTrustedRemoteAddress(uint16,bytes)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "addTimelocks(address[])", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setTimelockPendingAdmin(address,uint8)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)", opbnbtestnet.GUARDIAN],
+    },
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "setGuardian(address)", opbnbtestnet.GUARDIAN],
+    },
+
+    {
+      target: OPBNBTESTNET_ACM,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_NORMAL_TIMELOCK],
     },
   ]);
 };
+export default vip018;

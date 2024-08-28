@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import vip028, {
   CORE_COMPTROLLER_ADDRESS,
   CRV_ADDRESS,
@@ -28,7 +28,7 @@ import vip028, {
 } from "../../../proposals/ethereum/vip-028";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(19884052, () => {
+forking(19884052, async () => {
   let coreComptroller: Contract;
   let crvComptroller: Contract;
   let ethComptroller: Contract;
@@ -80,7 +80,7 @@ forking(19884052, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip028());
+      await pretendExecutingVip(await vip028());
     });
 
     it("check supply cap", async () => {

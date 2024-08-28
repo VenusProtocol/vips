@@ -3,10 +3,10 @@ import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { COMMUNITY_WALLET, USDT, vip296 } from "../../vips/vip-296/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasuryAbi.json";
 import USDT_ABI from "./abi/usdtAbi.json";
@@ -14,7 +14,7 @@ import USDT_ABI from "./abi/usdtAbi.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const USDT_AMOUNT = parseUnits("5000", 18);
 
-forking(38171617, () => {
+forking(38171617, async () => {
   let usdt: Contract;
   let prevBalanceTreasury: BigNumber;
 
@@ -30,7 +30,7 @@ forking(38171617, () => {
     });
   });
 
-  testVip("VIP-296 Transfer USDT to Community wallet", vip296(), {
+  testVip("VIP-296 Transfer USDT to Community wallet", await vip296(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },

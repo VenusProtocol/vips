@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, setMaxStalePeriodInBinanceOracle } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip150 } from "../../vips/vip-150";
 import RATE_MODEL_ABI from "./abi/RateModelAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
@@ -25,7 +25,7 @@ const CORE_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VWBETH = "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0";
 const BINANCE_ORACLE = "0x594810b741d136f1960141C0d8Fb4a91bE78A820";
 
-forking(30354172, () => {
+forking(30354172, async () => {
   let rateModel: Contract;
   let vTusdOld: Contract;
   let vTrxOld: Contract;
@@ -50,7 +50,7 @@ forking(30354172, () => {
     await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "WBETH");
   });
 
-  testVip("VIP-150 Risk Parameters Update", vip150(), {
+  testVip("VIP-150 Risk Parameters Update", await vip150(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

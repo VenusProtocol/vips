@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents, initMainnetUser, setMaxStaleCoreAssets } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip258 } from "../../vips/vip-258/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
@@ -23,7 +23,7 @@ const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VENUS_GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
-forking(35928235, () => {
+forking(35928235, async () => {
   let accessControlManager: Contract;
   let liquidator: Contract;
   const provider = ethers.provider;
@@ -40,7 +40,7 @@ forking(35928235, () => {
     liquidator = new ethers.Contract(LIQUIDATOR, LIQUIDATOR_ABI, provider);
   });
 
-  testVip("VIP-Liquidator Update", vip258(createInitializeData()), {
+  testVip("VIP-Liquidator Update", await vip258(createInitializeData()), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

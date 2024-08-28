@@ -3,14 +3,17 @@ import { expect } from "chai";
 import { BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
 import { vip181 } from "../../../vips/vip-181/vip-181";
 import Comptroller from "../abi/Comptroller.json";
 import IERC20Upgradeable from "../abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "../abi/VBep20DelegateAbi.json";
 import VENUS_LENS_ABI from "../abi/VenusLens.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 const VENUS_LENS = "0xfB0f09dB330dC842a6637BfB959209424BbFE8C7";
@@ -40,7 +43,7 @@ forking(32159070, async () => {
     });
   });
 
-  testVip("VIP-Diamond cut param add", vip181());
+  testVip("VIP-Diamond cut param add", await vip181());
 
   describe("After execution of vip", async () => {
     it("Fetching of VenusInitialIndex should return value", async () => {
@@ -199,7 +202,7 @@ forking(32159070, async () => {
     });
   });
 
-  testVip("VIP-Diamond Contract Migration", vip181());
+  testVip("VIP-Diamond Contract Migration", await vip181());
 
   describe("Verify Storage slots after VIP execution", async () => {
     // These tests checks the storage collision of comptroller while updating it via diamond.
@@ -368,7 +371,7 @@ forking(32159070, async () => {
   let diamondUnitroller: Contract;
 
   before(async () => {
-    await pretendExecutingVip(vip181());
+    await pretendExecutingVip(await vip181(), bscmainnet.NORMAL_TIMELOCK);
     unitroller = new ethers.Contract(UNITROLLER, Comptroller, ethers.provider);
 
     diamondUnitroller = new ethers.Contract(unitroller.address, Comptroller, ethers.provider);

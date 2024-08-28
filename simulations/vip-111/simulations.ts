@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip111 } from "../../vips/vip-111";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -16,7 +16,7 @@ const Actions = {
   BORROW: 2,
 };
 
-forking(27716649, () => {
+forking(27716649, async () => {
   const provider = ethers.provider;
 
   describe("Pre-VIP behavior", async () => {
@@ -47,7 +47,7 @@ forking(27716649, () => {
     });
   });
 
-  testVip("VIP-111 Delist BETH", vip111(), {
+  testVip("VIP-111 Delist BETH", await vip111(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [1]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewReserveFactor"], [1]);

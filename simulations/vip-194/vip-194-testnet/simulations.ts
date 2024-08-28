@@ -4,15 +4,18 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../../src/vip-framework";
-import { StorageLayout, fetchVTokenStorageIL, performVTokenBasicActions } from "../../../src/vtokenUpgradesHelper";
 import { IL_MARKETS, vip194Testnet } from "../../../vips/vip-194/vip-194-testnet";
 import BEACON_ABI from "./abi/BEACON_ABI.json";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER.json";
 import MOCK_TOKEN_ABI from "./abi/MOCK_TOKEN_ABI.json";
 import VTOKEN_ABI from "./abi/VTOKEN_ABI.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 const VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 const NEW_IMPL_VTOKEN = "0xcA408D716011169645Aa94ddc5665043C33df814";
@@ -30,7 +33,7 @@ const mintAmount = parseUnits("200", 18);
 const borrowAmount = parseUnits("50", 18);
 const repayAmount = parseUnits("50", 18);
 const redeemAmount = parseUnits("50", 18);
-forking(34543167, () => {
+forking(34543167, async () => {
   describe("Pre VIP simulations", async () => {
     before(async () => {
       [user] = await ethers.getSigners();
@@ -72,18 +75,18 @@ forking(34543167, () => {
   });
 });
 
-forking(34543167, () => {
-  testVip("VIP-194 IL VToken Upgrade of AIA", vip194Testnet(), {
+forking(34543167, async () => {
+  testVip("VIP-194 IL VToken Upgrade of AIA", await vip194Testnet(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI, BEACON_ABI], ["Upgraded", "NewReduceReservesBlockDelta"], [2, 27]);
     },
   });
 });
 
-forking(34543167, () => {
+forking(34543167, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip194Testnet());
+      await pretendExecutingVip(await vip194Testnet(), bsctestnet.NORMAL_TIMELOCK);
       [user] = await ethers.getSigners();
     });
 
@@ -135,10 +138,10 @@ forking(34543167, () => {
 });
 
 // In very first operation after upgrade the reserves will be reduced (delta > lastReduceReservesBlockNumber(0)).
-forking(34543167, () => {
+forking(34543167, async () => {
   describe("Post VIP simulations", async () => {
     before(async () => {
-      await pretendExecutingVip(vip194Testnet());
+      await pretendExecutingVip(await vip194Testnet());
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("3"));
     });
 

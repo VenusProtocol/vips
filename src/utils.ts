@@ -1,31 +1,80 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
 import { TransactionResponse } from "@ethersproject/providers";
-import { impersonateAccount, mine, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
-import { Command, Proposal, ProposalMeta, ProposalType, TokenConfig } from "./types";
+import {
+  Command,
+  LzChainId,
+  Proposal,
+  ProposalMeta,
+  ProposalType,
+  REMOTE_MAINNET_NETWORKS,
+  REMOTE_NETWORKS,
+  REMOTE_TESTNET_NETWORKS,
+  TokenConfig,
+} from "./types";
+import OmnichainProposalSender_ABI from "./vip-framework/abi/OmnichainProposalSender_ABI.json";
 import VENUS_CHAINLINK_ORACLE_ABI from "./vip-framework/abi/VenusChainlinkOracle.json";
 import BINANCE_ORACLE_ABI from "./vip-framework/abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./vip-framework/abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./vip-framework/abi/comptroller.json";
 
-export async function setForkBlock(blockNumber: number) {
+const BSCTESTNET_OMNICHAIN_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
+const BSCMAINNET_OMNICHAIN_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
+
+export const getOmnichainProposalSenderAddress = () => {
+  if (FORKED_NETWORK === "bscmainnet" || REMOTE_MAINNET_NETWORKS.includes(FORKED_NETWORK as REMOTE_NETWORKS)) {
+    return BSCMAINNET_OMNICHAIN_SENDER;
+  } else return BSCTESTNET_OMNICHAIN_SENDER;
+};
+
+export const getPayload = (proposal: Proposal) => {
+  for (let j = proposal.targets.length - 1; j >= 0; j--) {
+    if (
+      proposal.params[j][0] === LzChainId[FORKED_NETWORK as REMOTE_NETWORKS] &&
+      proposal.signatures[j] === "execute(uint16,bytes,bytes,address)"
+    ) {
+      return proposal.params[j][1];
+    }
+  }
+};
+
+const gasUsedPerCommand = 300000;
+export async function setForkBlock(_blockNumber: number) {
+  const blockNumber = config.networks.hardhat.zksync ? _blockNumber.toString(16) : _blockNumber;
   await network.provider.request({
     method: "hardhat_reset",
     params: [
       {
         forking: {
           jsonRpcUrl: config.networks.hardhat.forking?.url,
-          blockNumber: blockNumber,
+          blockNumber,
         },
       },
     ],
   });
 }
+
+export const getSourceChainId = (network: REMOTE_NETWORKS) => {
+  if (REMOTE_MAINNET_NETWORKS.includes(network as string)) {
+    return LzChainId.bscmainnet;
+  } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
+    return LzChainId.bsctestnet;
+  }
+};
+
+export const makePayload = (targets: any, values: any, signatures: any, calldatas: any, proposalType: ProposalType) => {
+  const payload = ethers.utils.defaultAbiCoder.encode(
+    ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+    [targets, values, signatures, calldatas, proposalType],
+  );
+  return payload;
+};
 
 export function getCalldatas({ signatures, params }: { signatures: string[]; params: any[][] }) {
   return params.map((args: any[], i: number) => {
@@ -36,22 +85,128 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
     return defaultAbiCoder.encode(fragment.inputs, args);
   });
 }
-
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
-  await impersonateAccount(user);
-  await setBalance(user, balance);
+  await network.provider.send("hardhat_impersonateAccount", [user]);
+  const balanceHex = toRpcQuantity(balance);
+  await network.provider.send("hardhat_setBalance", [user, balanceHex]);
+
   return ethers.getSigner(user);
 };
 
-export const makeProposal = (commands: Command[], meta?: ProposalMeta, type?: ProposalType): Proposal => {
-  return {
-    signatures: commands.map(cmd => cmd.signature),
-    targets: commands.map(cmd => cmd.target),
-    params: commands.map(cmd => cmd.params),
-    values: commands.map(cmd => cmd.value ?? "0"),
-    meta,
-    type,
-  };
+const toRpcQuantity = (x: NumberLike): string => {
+  let hex: string;
+  if (typeof x === "number" || typeof x === "bigint") {
+    // TODO: check that number is safe
+    hex = `0x${x.toString(16)}`;
+  } else if (typeof x === "string") {
+    if (!x.startsWith("0x")) {
+      throw new Error("Only 0x-prefixed hex-encoded strings are accepted");
+    }
+    hex = x;
+  } else if ("toHexString" in x) {
+    hex = x.toHexString();
+  } else if ("toString" in x) {
+    hex = x.toString(16);
+  } else {
+    throw new Error(`${x as any} cannot be converted to an RPC quantity`);
+  }
+
+  if (hex === "0x0") return hex;
+
+  return hex.startsWith("0x") ? hex.replace(/0x0+/, "0x") : `0x${hex}`;
+};
+
+export async function mineBlocks(blocks: NumberLike = 1, options: { interval?: NumberLike } = {}): Promise<void> {
+  const interval = options.interval ?? 1;
+  const blocksHex = toRpcQuantity(blocks);
+  const intervalHex = toRpcQuantity(interval);
+
+  await network.provider.request({
+    method: "hardhat_mine",
+    params: [blocksHex, intervalHex],
+  });
+}
+
+const getAdapterParam = (noOfCommands: number): string => {
+  const requiredGas = calculateGasForAdapterParam(noOfCommands);
+  const adapterParam = ethers.utils.solidityPack(["uint16", "uint256"], [1, requiredGas]);
+  return adapterParam;
+};
+
+export const calculateGasForAdapterParam = (noOfCommands: number): number => {
+  const requiredGas = (500000 + gasUsedPerCommand * noOfCommands) * 1.5;
+  return requiredGas;
+};
+const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
+  const provider = ethers.provider;
+  const OmnichainProposalSender = new ethers.Contract(
+    getOmnichainProposalSenderAddress(),
+    OmnichainProposalSender_ABI,
+    provider,
+  );
+
+  let fee;
+  if (FORKED_NETWORK === "bsctestnet" || FORKED_NETWORK === "bscmainnet") {
+    const proposalId = await OmnichainProposalSender.proposalCount();
+    const payloadWithId = ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]);
+    fee = (await OmnichainProposalSender.estimateFees(dstChainId, payloadWithId, false, adapterParams))[0].add(
+      ethers.utils.parseEther("1"),
+    );
+  } else {
+    fee = ethers.BigNumber.from("0");
+  }
+  return fee;
+};
+
+export const makeProposal = async (
+  commands: Command[],
+  meta?: ProposalMeta,
+  type?: ProposalType,
+): Promise<Proposal> => {
+  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const map = new Map<number, Command[]>();
+  const _commands = [];
+  for (const command of commands) {
+    const { dstChainId } = command;
+    if (dstChainId) {
+      const currentChainCommands = map.get(dstChainId) || [];
+      currentChainCommands.push(command);
+      map.set(dstChainId, currentChainCommands);
+    } else {
+      _commands.push(command);
+    }
+  }
+  if (_commands.length != 0) {
+    proposal.targets.push(..._commands.map(cmd => cmd.target));
+    proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
+    proposal.signatures.push(..._commands.map(cmd => cmd.signature));
+    proposal.params.push(..._commands.map(cmd => cmd.params));
+  }
+  for (const key of map.keys()) {
+    const chainCommands = map.get(key);
+    if (chainCommands) {
+      const remoteParam = makePayload(
+        chainCommands.map(cmd => cmd.target),
+        chainCommands.map(cmd => cmd.value ?? "0"),
+        chainCommands.map(cmd => cmd.signature),
+        getCalldatas({
+          signatures: chainCommands.map(cmd => cmd.signature),
+          params: chainCommands.map(cmd => cmd.params),
+        }),
+        type as ProposalType,
+      );
+      const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
+
+      proposal.targets.push(getOmnichainProposalSenderAddress());
+      const value = await getEstimateFeesForBridge(key, remoteParam, remoteAdapterParam);
+      proposal.values.push(value.toString());
+      proposal.signatures.push("execute(uint16,bytes,bytes,address)");
+      proposal.params.push([key, remoteParam, remoteAdapterParam, ethers.constants.AddressZero]);
+    } else {
+      throw "Chain Id is not supported";
+    }
+  }
+  return proposal;
 };
 
 export const setMaxStalePeriodInOracle = async (
@@ -147,7 +302,10 @@ export const setMaxStalePeriod = async (
     console.log(`Redstone Oracle is not available on ${FORKED_NETWORK}`);
   }
 
-  const normalTimelock = getForkedNetworkAddress("NORMAL_TIMELOCK");
+  const normalTimelock =
+    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+      ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+      : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
   if (tokenConfig.asset !== ethers.constants.AddressZero) {
     const mainOracle = tokenConfig.oracles[0];
@@ -193,7 +351,7 @@ export const expectEvents = async (
   for (let i = 0; i < expectedEvents.length; ++i) {
     expect(
       namedEvents.filter(it => it === expectedEvents[i]),
-      `expected a differnt number of ${expectedEvents[i]} events`,
+      `expected a different number of ${expectedEvents[i]} events`,
     ).to.have.lengthOf(expectedCounts[i]);
   }
 };
@@ -437,4 +595,28 @@ export const setMaxStaleCoreAssets = async (chainlinkAddress: string, admin: str
   for (const asset of BNB_MAINNET_ASSETS) {
     await setMaxStalePeriodInChainlinkOracle(chainlinkAddress, asset.address, asset.feed, admin);
   }
+};
+
+// Calculates the storage slot of a mapping(address => mapping(uint256=>uint256))
+// mapping slot = p
+// data[x][y]
+// Storage slot calculation (. denotes concatenation):
+// keccak256(uint256(y) . keccak256(uint256(x) . uint256(p)))
+
+export const calculateMappingStorageSlot = (key1: string, key2: number, mappingStorageSlot: number): string => {
+  // The pre-image used to compute the Storage location
+  const newKeyPreimageHalf = utils.concat([
+    // Mappings' keys in Solidity must all be word-aligned (32 bytes)
+    utils.hexZeroPad(key1, 32),
+
+    // Similarly with the slot-index into the Solidity variable layout
+    utils.hexZeroPad(BigNumber.from(mappingStorageSlot).toHexString(), 32),
+  ]);
+
+  const newKeyHalf = utils.keccak256(newKeyPreimageHalf);
+
+  const newKeyPreimage = utils.concat([utils.hexZeroPad(BigNumber.from(key2).toHexString(), 32), newKeyHalf]);
+
+  const newKey = utils.keccak256(newKeyPreimage);
+  return newKey;
 };

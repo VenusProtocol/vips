@@ -1,50 +1,72 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip018 } from "../../../proposals/opbnbtestnet/vip-018";
-import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
+import vip018 from "../../../proposals/opbnbtestnet/vip-018";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
 
-const COMPTROLLER_CORE = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";
-const vUSDT_POOL_STABLECOIN = "0xe3923805f6E117E51f5387421240a86EF1570abC";
-const MULTISIG = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
+const OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER = "0x4F570240FF6265Fbb1C79cE824De6408F1948913";
+const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+const OPBNBTESTNET_NORMAL_TIMELOCK = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
+const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(30868898, () => {
-  let stableCoinPoolComptroller: Contract;
-
+forking(30782321, async () => {
+  let acm: Contract;
+  let defaultAdminRole: string;
   before(async () => {
-    await impersonateAccount(MULTISIG);
-
-    stableCoinPoolComptroller = new ethers.Contract(
-      COMPTROLLER_CORE,
-      COMPTROLLER_FACET_ABI,
-      await ethers.getSigner(MULTISIG),
-    );
-
-    await setBalance(MULTISIG, parseUnits("1000", 18));
-
-    await stableCoinPoolComptroller.setActionsPaused([vUSDT_POOL_STABLECOIN], [0, 1, 2, 3, 4, 5, 6, 7, 8], true);
-    await stableCoinPoolComptroller.setCollateralFactor(vUSDT_POOL_STABLECOIN, 0, 0);
-    await stableCoinPoolComptroller.setMarketBorrowCaps([vUSDT_POOL_STABLECOIN], [0]);
-    await stableCoinPoolComptroller.setMarketSupplyCaps([vUSDT_POOL_STABLECOIN], [0]);
+    acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, OPBNBTESTNET_ACM);
+    defaultAdminRole = await acm.DEFAULT_ADMIN_ROLE();
   });
+  describe("Pre-VIP behaviour", async () => {
+    it("Normal Timelock does not has default admin role", async () => {
+      const hasRole = await acm.hasRole(defaultAdminRole, OPBNBTESTNET_NORMAL_TIMELOCK);
+      expect(hasRole).equals(false);
+    });
 
-  describe("Pre-VIP behavior", () => {
-    it("unlist reverts", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.reverted;
+    it("Guardian is not allowed to call retryMessage", async () => {
+      const role = ethers.utils.solidityPack(
+        ["address", "string"],
+        [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
+      );
+      const roleHash = ethers.utils.keccak256(role);
+      expect(await acm.hasRole(roleHash, opbnbtestnet.GUARDIAN)).to.be.false;
+    });
+
+    it("Guardian is not allowed to call forceResumeReceive", async () => {
+      const role = ethers.utils.solidityPack(
+        ["address", "string"],
+        [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
+      );
+      const roleHash = ethers.utils.keccak256(role);
+      expect(await acm.hasRole(roleHash, opbnbtestnet.GUARDIAN)).to.be.false;
     });
   });
-
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip018());
+      await pretendExecutingVip(await vip018());
+    });
+    it("Normal Timelock has default admin role", async () => {
+      const hasRole = await acm.hasRole(defaultAdminRole, OPBNBTESTNET_NORMAL_TIMELOCK);
+      expect(hasRole).equals(true);
+    });
+    it("Guardian is allowed to call retryMessage", async () => {
+      const role = ethers.utils.solidityPack(
+        ["address", "string"],
+        [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
+      );
+      const roleHash = ethers.utils.keccak256(role);
+      expect(await acm.hasRole(roleHash, opbnbtestnet.GUARDIAN)).to.be.true;
     });
 
-    it("unlist successful", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.not.reverted;
+    it("Guardian is allowed to call forceResumeReceive", async () => {
+      const role = ethers.utils.solidityPack(
+        ["address", "string"],
+        [OPBNBTESTNET_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
+      );
+      const roleHash = ethers.utils.keccak256(role);
+      expect(await acm.hasRole(roleHash, opbnbtestnet.GUARDIAN)).to.be.true;
     });
   });
 });

@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 // FLOKI
 export const GameFi_Comptroller = "0x1b43ea8622e76627B81665B1eCeBB4867566B963";

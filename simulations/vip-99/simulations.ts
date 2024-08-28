@@ -3,9 +3,10 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { initMainnetUser } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { vip99 } from "../../vips/vip-99";
 import IERC20_UPGRADABLE_ABI from "./abi/IERC20UpgradableAbi.json";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20DelegateAbi.json";
@@ -25,15 +26,17 @@ const NEW_VTOKEN_IMPL = "0x10FB44C481F87cb4F3ce8DE11fFd16e00EC5B670";
 const SWAP_DEBT_DELEGATE = "0x2B16DB59c6f20672C0DB46b80361E9Ca1CD8a43a";
 const BINANCE_MULTISIG = "0x6d46692f809d485A033dA95B19b556E3Ff0ACb12";
 
-forking(25918391, () => {
-  testVip("VIP-99 Delegate borrowing", vip99(), {
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+forking(25918391, async () => {
+  testVip("VIP-99 Delegate borrowing", await vip99(), {
     proposer: "0xc444949e0054a23c44fc45789738bdf64aed2391",
     supporter: "0x55A9f5374Af30E3045FB491f1da3C2E8a74d168D",
   });
 });
 
 // Ressetting the fork to prevent oracle prices from getting stale
-forking(25918391, () => {
+forking(25918391, async () => {
   let comptroller: Contract;
   let busd: Contract;
   let usdt: Contract;
@@ -63,7 +66,7 @@ forking(25918391, () => {
     const oracleAddress = await comptroller.oracle();
     oracle = new ethers.Contract(oracleAddress, PRICE_ORACLE_ABI, provider);
     swapDebtDelegate = new ethers.Contract(SWAP_DEBT_DELEGATE, SWAP_DEBT_DELEGATE_ABI, provider);
-    await pretendExecutingVip(vip99());
+    await pretendExecutingVip(await vip99(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Post-VIP contracts status", async () => {

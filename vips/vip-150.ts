@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const VTUSDOLD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
 const VTRXOLD = "0x61edcfe8dd6ba3c891cb9bec2dc7657b3b422e93";

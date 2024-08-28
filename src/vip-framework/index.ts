@@ -1,32 +1,49 @@
-import { TransactionResponse } from "@ethersproject/providers";
+import { TransactionRequest, TransactionResponse } from "@ethersproject/providers";
 import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
+import cliProgress from "cli-progress";
 import { Contract, ContractInterface } from "ethers";
-import { FORKED_NETWORK, ethers } from "hardhat";
+import { FORKED_NETWORK, ethers, network } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
-import { Proposal, SUPPORTED_NETWORKS } from "../types";
-import { getCalldatas, initMainnetUser, setForkBlock } from "../utils";
+import { Proposal, ProposalType, REMOTE_NETWORKS, SUPPORTED_NETWORKS } from "../types";
+import {
+  calculateGasForAdapterParam,
+  getCalldatas,
+  getOmnichainProposalSenderAddress,
+  getPayload,
+  getSourceChainId,
+  initMainnetUser,
+  setForkBlock,
+} from "../utils";
+import ENDPOINT_ABI from "./abi/LzEndpoint.json";
+import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import GOVERNOR_BRAVO_DELEGATE_ABI from "./abi/governorBravoDelegateAbi.json";
 
 const DEFAULT_SUPPORTER_ADDRESS = "0xc444949e0054a23c44fc45789738bdf64aed2391";
+const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
+const OMNICHAIN_GOVERNANCE_EXECUTOR =
+  NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
 
 const VOTING_PERIOD = 28800;
 
-export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES[FORKED_NETWORK as "bsctestnet" | "bscmainnet"] || {};
-
+export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK, GUARDIAN } =
+  NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
-export const forking = (blockNumber: number, fn: () => void) => {
-  describe(`At block #${blockNumber}`, () => {
-    before(async () => {
+export const forking = (blockNumber: number, fn: () => Promise<void>) => {
+  (async () => {
+    try {
+      console.log(`At block #${blockNumber}`);
       await setForkBlock(blockNumber);
-    });
-    fn();
-  });
+      await fn();
+      run();
+    } catch (e) {
+      console.error(e);
+    }
+  })();
 };
 
 export interface TestingOptions {
@@ -49,19 +66,34 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     return iface.encodeFunctionData(signature, params);
   };
 
-  await timelock.sendTransaction({
+  const feeData = await ethers.provider.getFeeData();
+  const txnParams: TransactionRequest = {
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
     data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
-    gasLimit: 8000000,
-  });
+  };
+
+  if (network.zksync && feeData.maxFeePerGas) {
+    // Sometimes the gas estimation is wrong with zksync
+    txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+  }
+
+  await timelock.sendTransaction(txnParams);
 };
 
-export const pretendExecutingVip = async (proposal: Proposal) => {
-  const impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("2.0"));
+export const pretendExecutingVip = async (proposal: Proposal, sender: string = GUARDIAN) => {
+  const impersonatedTimelock = await initMainnetUser(sender, ethers.utils.parseEther("4.0"));
+  console.log("===== Simulating vip =====");
+
+  const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+  bar.start(proposal.signatures.length, 0);
+
   for (let i = 0; i < proposal.signatures.length; ++i) {
     await executeCommand(impersonatedTimelock, proposal, i);
+    bar.update(i + 1);
   }
+
+  bar.stop();
 };
 
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
@@ -88,7 +120,6 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     before(async () => {
       await loadFixture(governanceFixture);
     });
-
     proposal.signatures.map((signature, i) => {
       it(`executes ${signature} successfully`, async () => {
         await executeCommand(impersonatedTimelock, proposal, i);
@@ -140,6 +171,71 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const blockchainProposal = await governorProxy.proposals(proposalId);
       await time.increaseTo(blockchainProposal.eta.toNumber());
       const tx = await governorProxy.connect(proposer).execute(proposalId);
+
+      if (options.callbackAfterExecution) {
+        await options.callbackAfterExecution(tx);
+      }
+    });
+  });
+};
+
+export const testForkedNetworkVipCommands = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
+  let executor: Contract;
+  let payload: string;
+  let proposalId: number;
+  let targets: any[];
+  let proposalType: ProposalType;
+  const provider = ethers.provider;
+
+  describe(`${description} execution`, () => {
+    before(async () => {
+      executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
+      payload = getPayload(proposal);
+      proposalId = await executor.lastProposalReceived();
+      proposalId++;
+      [targets, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
+        ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
+        payload,
+      );
+    });
+
+    it("should be queued succesfully", async () => {
+      const impersonatedLibrary = await initMainnetUser(
+        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
+        ethers.utils.parseEther("100"),
+      );
+      const endpoint = new ethers.Contract(
+        NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].ENDPOINT,
+        ENDPOINT_ABI,
+        provider,
+      );
+      const srcAddress = ethers.utils.solidityPack(
+        ["address", "address"],
+        [OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_GOVERNANCE_EXECUTOR],
+      );
+      const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
+      const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
+      const gasLimit = calculateGasForAdapterParam(targets.length);
+      const tx = await endpoint
+        .connect(impersonatedLibrary)
+        .receivePayload(
+          srcChainId,
+          srcAddress,
+          OMNICHAIN_GOVERNANCE_EXECUTOR,
+          inboundNonce.add(1),
+          gasLimit,
+          ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
+          { gasLimit: gasLimit },
+        );
+      await tx.wait();
+      expect(await executor.queued(proposalId)).to.be.true;
+    });
+
+    it("should be executed successfully", async () => {
+      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      const blockchainProposal = await executor.proposals(proposalId);
+      await time.increaseTo(blockchainProposal.eta.toNumber());
+      const tx = await executor.execute(proposalId);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);

@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import VTOKEN_ABI from "../abi/il_vToken.json";
 
-export async function checkVToken(
+export function checkVToken(
   vTokenAddress: string,
   {
     name,

@@ -1,46 +1,47 @@
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { makeProposal } from "../../../../src/utils";
+import { parseUnits } from "ethers/lib/utils";
+import { makeProposal } from "src/utils";
 
-const { opbnbtestnet } = NETWORK_ADDRESSES;
+const XVS_BRIDGE_ADMIN_PROXY = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+export const MIN_DEST_GAS = "300000";
 
-const VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
-const VTOKEN_IMPL = "0xd1fC255c701a42b8eDe64eE92049444FF23626A0";
-const VTOKEN_IMPL_TEMPORARY = "0xB8b90d642878C0561A85D96b540F7F0309293022";
-
-const vWBNB = "0xD36a31AcD3d901AeD998da6E24e848798378474e";
-const vWBNB_NEW_UNDERLYING = "0x4200000000000000000000000000000000000006";
+export const ARBITRUM_SEPOLIA_ENDPOINT_ID = 10231;
+export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 
 const vip012 = () => {
   return makeProposal([
     {
-      target: VTOKEN_BEACON,
-      signature: "upgradeTo(address)",
-      params: [VTOKEN_IMPL_TEMPORARY],
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, ARBITRUM_SEPOLIA_TRUSTED_REMOTE],
     },
     {
-      target: vWBNB,
-      signature: "setUnderlyingToken(address)",
-      params: [vWBNB_NEW_UNDERLYING],
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, 0, MIN_DEST_GAS],
     },
     {
-      target: VTOKEN_BEACON,
-      signature: "upgradeTo(address)",
-      params: [VTOKEN_IMPL],
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, MAX_DAILY_SEND_LIMIT],
     },
     {
-      target: opbnbtestnet.RESILIENT_ORACLE,
-      signature: "setTokenConfig((address,address[3],bool[3]))",
-      params: [
-        [
-          vWBNB_NEW_UNDERLYING,
-          [
-            opbnbtestnet.BINANCE_ORACLE,
-            "0x0000000000000000000000000000000000000000",
-            "0x0000000000000000000000000000000000000000",
-          ],
-          [true, false, false],
-        ],
-      ],
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
   ]);
 };

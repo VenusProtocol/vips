@@ -2,7 +2,7 @@ import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network
 import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
@@ -11,7 +11,10 @@ import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK");
+const NORMAL_TIMELOCK =
+  FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+    ? getForkedNetworkAddress("NORMAL_TIMELOCK")
+    : getForkedNetworkAddress("GUARDIAN");
 const DEFAULT_SUPPLIER = getForkedNetworkAddress("VTREASURY");
 const POOL_REGISTRY = getForkedNetworkAddress("POOL_REGISTRY");
 const RESILIENT_ORACLE = getForkedNetworkAddress("RESILIENT_ORACLE");
@@ -61,6 +64,8 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   await impersonateAccount(poolSupplier);
   await setBalance(poolSupplier, ethers.utils.parseEther("5"));
   await impersonateAccount(NORMAL_TIMELOCK);
+  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
+
   const signer: Signer = await ethers.getSigner(poolSupplier);
   const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
 
@@ -100,7 +105,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     } > operations - supplying ${await supplyUnderlying?.symbol()} | borrowing ${await borrowUnderlying?.symbol()}`,
   );
   const supplyUnderlyingDecimals = await supplyUnderlying?.decimals();
-  const initialSupplyAmount = parseUnits("10000", supplyUnderlyingDecimals);
+  const initialSupplyAmount = parseUnits("0.1", supplyUnderlyingDecimals);
   const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
@@ -111,7 +116,6 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   expect(await supplyMarket?.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
 
   await comptroller.enterMarkets([borrowMarket?.address, supplyMarket?.address]);
-
   let borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
   const borrowUnderlyingDecimals = await borrowUnderlying?.decimals();
 

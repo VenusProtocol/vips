@@ -5,12 +5,13 @@ import { expect } from "chai";
 import { BigNumber, BigNumberish, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { performVTokenBasicAndBehalfActions } from "src/vtokenUpgradesHelper";
 
-import { expectEvents, initMainnetUser } from "../../src/utils";
-import { forking, pretendExecutingVip, testVip } from "../../src/vip-framework";
-import { checkCorePoolComptroller } from "../../src/vip-framework/checks/checkCorePoolComptroller";
-import { checkIsolatedPoolsComptrollers } from "../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { performVTokenBasicAndBehalfActions } from "../../src/vtokenUpgradesHelper";
 import {
   COMPTROLLER_BEACON,
   CORE_MARKETS,
@@ -65,6 +66,7 @@ const NEW_MARKET_FACET = "0x9622522d94BdEe9b1d7C2CD944e3ed74B33BD9Cf";
 const NEW_POLICY_FACET = "0x95CC56f266BC95Ae2486cb0cFeda1054B4aA4086";
 
 const accounts = [...accounts1, ...accounts2];
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const provider = ethers.provider;
 let user1: SignerWithAddress;
@@ -98,7 +100,7 @@ let policyFacetFunctionSelectors: string[];
 let rewardFacetFuntionSelectors: string[];
 let setterFacetFuntionSelectors: string[];
 
-forking(36962054, () => {
+forking(36962054, async () => {
   before(async () => {
     impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
 
@@ -146,7 +148,7 @@ forking(36962054, () => {
     });
   });
 
-  testVip("VIP-276", vip276(), {
+  testVip("VIP-276", await vip276(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
@@ -236,10 +238,10 @@ forking(36962054, () => {
   });
 });
 
-forking(36962054, () => {
+forking(36962054, async () => {
   describe("onBehalfTests", () => {
     before(async () => {
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276(), bscmainnet.NORMAL_TIMELOCK);
     });
     beforeEach(async () => {
       user1 = await initMainnetUser(USER_1, parseUnits("2"));
@@ -333,7 +335,7 @@ forking(36962054, () => {
 });
 
 // core pool vToken tests
-forking(36962054, () => {
+forking(36962054, async () => {
   let vToken: Contract;
   let underlying: Contract;
   let user: SignerWithAddress;
@@ -346,7 +348,7 @@ forking(36962054, () => {
   describe("VToken Tests", () => {
     before(async () => {
       impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, parseUnits("2"));
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     for (const market of CORE_MARKETS) {
@@ -383,7 +385,7 @@ forking(36962054, () => {
 });
 
 // seizeVenus vip tests
-forking(36962054, () => {
+forking(36962054, async () => {
   const ACCOUNT_1 = "0x5a52e96bacdabb82fd05763e25335261b270efcb";
   const ACCOUNT_2 = "0xd93Dc91d7527a32199AaF6f8723292e452b871a4";
 
@@ -391,7 +393,7 @@ forking(36962054, () => {
     before(async () => {
       xvs = new ethers.Contract(XVS, VBEP_20_DELEGATE_ABI, ethers.provider);
       unitroller = new ethers.Contract(UNITROLLER, CORE_POOL_ABI, provider);
-      await pretendExecutingVip(vip276());
+      await pretendExecutingVip(await vip276(), bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("Emits events for every holders successfull seize of tokens", async () => {
@@ -407,9 +409,9 @@ forking(36962054, () => {
 });
 
 // xvs setter tests
-forking(36962054, () => {
+forking(36962054, async () => {
   beforeEach(async () => {
-    await pretendExecutingVip(vip276());
+    await pretendExecutingVip(await vip276(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   it("Should return correct xvs and xvs vtoken addresses", async () => {
@@ -551,7 +553,7 @@ forking(36962054, async () => {
       );
     }
 
-    await pretendExecutingVip(vip276());
+    await pretendExecutingVip(await vip276(), bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Verify Storage slots after VIP execution", async () => {
