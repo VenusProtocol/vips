@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip308 } from "../../vips/vip-308/bsctestnet";
+import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip357 } from "../../vips/vip-357/bsctestnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import ACM_ABI from "./abi/acm.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
@@ -19,7 +19,7 @@ const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
 const vETH = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
 
-forking(41009811, () => {
+forking(41009811, async () => {
   let comptroller: Contract;
   let stableCoinPoolComptroller: Contract;
   let vETHContract: Contract;
@@ -57,7 +57,7 @@ forking(41009811, () => {
     });
   });
 
-  testVip("VIP-308 Unlist Market", vip308(), {
+  testVip("VIP-357 Unlist Market", await vip357(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
       await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket"], [18]);

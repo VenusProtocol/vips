@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-import { cutParams as params } from "../../simulations/vip-308/utils/cut-params-testnet.json";
+import { cutParams as params } from "../../simulations/vip-357/utils/cut-params-testnet.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -16,10 +16,10 @@ export const COMPTROLLER_IMPL = "0x1D84cF2F99A0056785108Fc0649c8c84Ead1E1A8";
 export const COMPTROLLER_BEACON = "0xdddd7725c073105fb2abfcbdec16708fc4c24b74";
 export const cutParams = params;
 
-export const vip308 = () => {
+export const vip357 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-308 Unlist Market",
+    title: "VIP-357 Unlist Market",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -89,4 +89,4 @@ export const vip308 = () => {
   );
 };
 
-export default vip308;
+export default vip357;
