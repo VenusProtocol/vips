@@ -65,7 +65,7 @@ Community Wallet Refund
 
 #### References
 
-- [VIP simulation](TODO)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/369)
 `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
