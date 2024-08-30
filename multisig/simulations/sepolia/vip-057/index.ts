@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip057 } from "../../../proposals/sepolia/vip-057";
@@ -13,7 +14,7 @@ const vUSDT_POOL_STABLECOIN = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
 const vUSDT_USER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-forking(6056812, async () => {
+forking(6601024, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
@@ -50,6 +51,12 @@ forking(6056812, async () => {
 
       const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
       expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.false;
+    });
+
+    describe("generic tests", async () => {
+      it("Isolated pools generic tests", async () => {
+        checkIsolatedPoolsComptrollers();
+      });
     });
   });
 });

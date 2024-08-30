@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip016 } from "../../../proposals/arbitrumsepolia/vip-016";
@@ -12,7 +13,7 @@ const COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
 const vUSDT_POOL_STABLECOIN = "0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052";
 const MULTISIG = "0x1426A5Ae009c4443188DA8793751024E358A61C2";
 
-forking(52134922, async () => {
+forking(75563035, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
@@ -45,6 +46,12 @@ forking(52134922, async () => {
 
     it("unlist successful", async () => {
       await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.not.reverted;
+    });
+
+    describe("generic tests", async () => {
+      it("Isolated pools generic tests", async () => {
+        checkIsolatedPoolsComptrollers();
+      });
     });
   });
 });

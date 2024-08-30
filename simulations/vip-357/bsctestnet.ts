@@ -2,6 +2,7 @@ import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
@@ -12,17 +13,17 @@ import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 import IL_COMPTROLLER_FACET_ABI from "./abi/ilComptroller.json";
 import UPGRADABLE_BEACON_ABI from "./abi/upgradableBeacon.json";
 
-const USER = "0x6f057A858171e187124ddEDF034dAc63De5dE5dB";
+const USER = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 const POOL_STABLECOIN_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 const vUSDT_POOL_STABLECOIN = "0x3338988d0beb4419Acb8fE624218754053362D06";
 const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
-const vETH = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
+const vBNB = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-forking(41009811, async () => {
+forking(43437726, async () => {
   let comptroller: Contract;
   let stableCoinPoolComptroller: Contract;
-  let vETHContract: Contract;
+  let vBNBContract: Contract;
 
   before(async () => {
     await impersonateAccount(UNITROLLER);
@@ -36,7 +37,7 @@ forking(41009811, async () => {
       IL_COMPTROLLER_FACET_ABI,
       await ethers.getSigner(NORMAL_TIMELOCK),
     );
-    vETHContract = new ethers.Contract(vETH, VTOKEN_ABI, await ethers.getSigner(USER));
+    vBNBContract = new ethers.Contract(vBNB, VTOKEN_ABI, await ethers.getSigner(USER));
   });
 
   describe("Pre-VIP", () => {
@@ -52,8 +53,8 @@ forking(41009811, async () => {
     });
 
     it("Verify borrow cap 0", async () => {
-      await comptroller._setMarketBorrowCaps([vETH], [0]);
-      await expect(vETHContract.borrow(10)).to.not.be.reverted;
+      await comptroller._setMarketBorrowCaps([vBNB], [0]);
+      await expect(vBNBContract.borrow(10)).to.not.be.reverted;
     });
   });
 
@@ -85,8 +86,14 @@ forking(41009811, async () => {
     });
 
     it("Verify borrow cap 0", async () => {
-      await comptroller._setMarketBorrowCaps([vETH], [0]);
-      await expect(vETHContract.borrow(10)).to.be.revertedWith("market borrow cap is 0");
+      await comptroller._setMarketBorrowCaps([vBNB], [0]);
+      await expect(vBNBContract.borrow(10)).to.be.revertedWith("market borrow cap is 0");
+    });
+
+    describe("generic tests", async () => {
+      it("Isolated pools generic tests", async () => {
+        checkIsolatedPoolsComptrollers();
+      });
     });
   });
 });
