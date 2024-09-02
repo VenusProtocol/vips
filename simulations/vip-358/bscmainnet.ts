@@ -16,9 +16,9 @@ import vip358, {
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
 } from "../../vips/vip-358/bscmainnet";
-import XVS_ABI from "./abi/xvs.json";
-import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
-import XVS_BRIDGE_SRC_ABI from "./abi/xvsProxyOFTSrc.json";
+import XVS_ABI from "./abi/XVS.json";
+import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
+import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
