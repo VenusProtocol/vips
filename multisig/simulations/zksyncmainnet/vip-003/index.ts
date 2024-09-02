@@ -17,7 +17,7 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 const XVS_BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
-forking(42713271, async () => {
+forking(43205508, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;

@@ -3,7 +3,7 @@ import { makeProposal } from "src/utils";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
-export const XVS_STORE = "0x29FB1fEe4F469641b63978d0975cDa148Cf938Ee";
+export const XVS_STORE = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
 export const ACM = "0x526159A92A82afE5327d37Ef446b68FD9a5cA914";
 
 const vip003 = () => {
