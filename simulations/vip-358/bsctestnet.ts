@@ -6,7 +6,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
-import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip358, {
@@ -15,18 +15,17 @@ import vip358, {
   MIN_DST_GAS,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../vips/vip-358/bscmainnet";
+} from "../../vips/vip-358/bsctestnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-const XVSProxyOFTSrc = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
-const XVS_HOLDER = "0x5a52E96BAcdaBb82fd05763E25335261B270Efcb";
-const Oracle = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
+const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(41729228, async () => {
+forking(42792146, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -37,20 +36,14 @@ forking(41729228, async () => {
 
   beforeEach(async () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVS_BRIDGE_SRC_ABI, provider);
-    xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
+    xvs = new ethers.Contract(bsctestnet.XVS, XVS_ABI, provider);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-    await setMaxStalePeriodInChainlinkOracle(
-      Oracle,
-      bscmainnet.XVS,
-      ethers.constants.AddressZero,
-      bscmainnet.NORMAL_TIMELOCK,
-    );
   });
 
-  testVip("vip-358", await vip358(), {
+  testVip("vip-358 testnet", await vip358(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -71,32 +64,32 @@ forking(41729228, async () => {
 
   describe("Post-VIP behavior", () => {
     it("Should match minDestGas value", async () => {
-      expect(await bridge.minDstGasLookup(LzChainId.zksyncmainnet, 0)).to.equal(MIN_DST_GAS);
+      expect(await bridge.minDstGasLookup(LzChainId.zksyncsepolia, 0)).to.equal(MIN_DST_GAS);
     });
 
     it("Should match single send transaction limit", async () => {
-      expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.zksyncmainnet)).to.equal(SINGLE_SEND_LIMIT);
+      expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.zksyncsepolia)).to.equal(SINGLE_SEND_LIMIT);
     });
 
     it("Should match single receive transaction limit", async () => {
-      expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.zksyncmainnet)).to.equal(
+      expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.zksyncsepolia)).to.equal(
         SINGLE_RECEIVE_LIMIT,
       );
     });
 
     it("Should match max daily send limit", async () => {
-      expect(await bridge.chainIdToMaxDailyLimit(LzChainId.zksyncmainnet)).to.equal(MAX_DAILY_SEND_LIMIT);
+      expect(await bridge.chainIdToMaxDailyLimit(LzChainId.zksyncsepolia)).to.equal(MAX_DAILY_SEND_LIMIT);
     });
 
     it("Should match max daily receive limit", async () => {
-      expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.zksyncmainnet)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
+      expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.zksyncsepolia)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
     it("Should emit an event on successfull bridging of XVS", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.zksyncmainnet,
+          LzChainId.zksyncsepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -111,7 +104,7 @@ forking(41729228, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.zksyncmainnet,
+            LzChainId.zksyncsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -119,7 +112,7 @@ forking(41729228, async () => {
           ),
       )
         .to.be.emit(bridge, "SendToChain")
-        .withArgs(LzChainId.zksyncmainnet, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(LzChainId.zksyncsepolia, XVS_HOLDER, receiverAddressBytes32, amount);
       const bridgeBalAfter = await xvs.balanceOf(XVSProxyOFTSrc);
 
       expect(bridgeBalAfter.sub(bridgeBalPrev)).to.equal(amount);
@@ -131,7 +124,7 @@ forking(41729228, async () => {
 
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.zksyncmainnet,
+          LzChainId.zksyncsepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -143,7 +136,7 @@ forking(41729228, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.zksyncmainnet,
+            LzChainId.zksyncsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -154,12 +147,11 @@ forking(41729228, async () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("50000", 18);
-      const amount = parseUnits("1000", 18);
-
+      const amount = parseUnits("1700", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.zksyncmainnet,
+          LzChainId.zksyncsepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -167,12 +159,12 @@ forking(41729228, async () => {
         )
       ).nativeFee;
 
-      for (let i = 0; i < 7; i++) {
+      for (let i = 0; i < 5; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.zksyncmainnet,
+            LzChainId.zksyncsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -184,7 +176,7 @@ forking(41729228, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.zksyncmainnet,
+            LzChainId.zksyncsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
