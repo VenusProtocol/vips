@@ -46,7 +46,7 @@ const vip350 = () => {
         return {
           target: OPBNBMAINNET_ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbmainnet.GUARDIAN],
+          params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
           dstChainId: LzChainId.opbnbmainnet,
         };
       }),
