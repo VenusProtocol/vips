@@ -42,18 +42,6 @@ const vip355 = () => {
       {
         target: ARBITRUM_SEPOLIA_ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [arbitrumsepolia.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", arbitrumsepolia.GUARDIAN],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ARBITRUM_SEPOLIA_ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [arbitrumsepolia.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", arbitrumsepolia.GUARDIAN],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ARBITRUM_SEPOLIA_ACM,
-        signature: "revokeCallPermission(address,string,address)",
         params: [ARBITRUM_SEPOLIA_BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", arbitrumsepolia.GUARDIAN],
         dstChainId: LzChainId.arbitrumsepolia,
       },
