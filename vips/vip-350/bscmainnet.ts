@@ -1,10 +1,7 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-
-import { IRMs as ARBITRUMONE_IRMs } from "../../multisig/proposals/arbitrumone/vip-010";
-import { IRMs as ETHEREUM_IRMs } from "../../multisig/proposals/ethereum/vip-053";
-import { IRMs as OPBNBMAINNET_IRMs } from "../../multisig/proposals/opbnbmainnet/vip-020";
 
 export const ARBITRUMONE_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
@@ -24,32 +21,38 @@ const vip350 = () => {
   return makeProposal(
     [
       // Grant Normal Timelock permissions
-      ...ETHEREUM_IRMs.map(irm => {
-        return {
-          target: ETHEREUM_ACM,
-          signature: "giveCallPermission(address,string,address)",
-          params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", ethereum.NORMAL_TIMELOCK],
-          dstChainId: LzChainId.ethereum,
-        };
-      }),
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "updateJumpRateModel(uint256,uint256,uint256,uint256)",
+          ethereum.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
 
-      ...ARBITRUMONE_IRMs.map(irm => {
-        return {
-          target: ARBITRUMONE_ACM,
-          signature: "giveCallPermission(address,string,address)",
-          params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", arbitrumone.NORMAL_TIMELOCK],
-          dstChainId: LzChainId.arbitrumone,
-        };
-      }),
+      {
+        target: ARBITRUMONE_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "updateJumpRateModel(uint256,uint256,uint256,uint256)",
+          arbitrumone.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
 
-      ...OPBNBMAINNET_IRMs.map(irm => {
-        return {
-          target: OPBNBMAINNET_ACM,
-          signature: "giveCallPermission(address,string,address)",
-          params: [irm, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opbnbmainnet.NORMAL_TIMELOCK],
-          dstChainId: LzChainId.opbnbmainnet,
-        };
-      }),
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "updateJumpRateModel(uint256,uint256,uint256,uint256)",
+          opbnbmainnet.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
     ],
     meta,
     ProposalType.REGULAR,
