@@ -13,7 +13,7 @@ const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 const vUSDT_POOL_STABLECOIN = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
 const MULTISIG = "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0";
 
-forking(76559771, async () => {
+forking(249598943, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
