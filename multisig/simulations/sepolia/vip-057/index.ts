@@ -7,21 +7,21 @@ import { LzChainId } from "src/types";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip011, {
+import vip057, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
   ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
-} from "../../../proposals/arbitrumsepolia/vip-011";
+} from "../../../proposals/sepolia/vip-057";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const XVS = "0x877Dc896e7b13096D3827872e396927BbE704407";
-const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
+const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
 
-forking(69696597, async () => {
+forking(6460328, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -40,7 +40,7 @@ forking(69696597, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip011());
+      await pretendExecutingVip(await vip057());
     });
 
     it("Should match trusted remote address", async () => {
@@ -66,7 +66,7 @@ forking(69696597, async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(LzChainId.zksyncsepolia)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should emit an event on successful bridging of XVS (Arbitrum sepolia -> Zksync Sepolia)", async () => {
+    it("Should emit an event on successful bridging of XVS (sepolia -> Zksync Sepolia)", async () => {
       const amount = parseUnits("1", 18);
       const nativeFee = (
         await xvsBridge.estimateSendFee(
