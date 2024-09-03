@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -76,6 +77,96 @@ const vip352 = () => {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ETHEREUM_CONVERTER_NETWORK, "removeTokenConverter(address)", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // Grant permissions to Normal Timelock
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          ethereum.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // Grant permissions to fast track timelock
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", ETHEREUM_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", ETHEREUM_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          ETHEREUM_FASTTRACK_TIMELOCK,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // Grant permissions to critical timelock
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          ETHEREUM_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.ethereum,
       },
     ],

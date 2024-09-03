@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -76,6 +77,96 @@ const vip352 = () => {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [SEPOLIA_CONVERTER_NETWORK, "removeTokenConverter(address)", SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+
+      // Grant permissions to Normal Timelock
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", sepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", sepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", sepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          sepolia.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.sepolia,
+      },
+
+      // Grant permissions to fast track timelock
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", SEPOLIA_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", SEPOLIA_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", SEPOLIA_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          SEPOLIA_FASTTRACK_TIMELOCK,
+        ],
+        dstChainId: LzChainId.sepolia,
+      },
+
+      // Grant permissions to critical timelock
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "pauseConversion()", SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resumeConversion()", SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMinAmountToConvert(uint256)", SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setConversionConfig(address,address,ConversionConfig)",
+          SEPOLIA_CRITICAL_TIMELOCK,
+        ],
         dstChainId: LzChainId.sepolia,
       },
     ],
