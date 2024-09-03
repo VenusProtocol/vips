@@ -7,6 +7,8 @@ import vip013 from "../../multisig/proposals/arbitrumsepolia/vip-013";
 import { REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-013";
 import vip350 from "../../vips/vip-350/bsctestnet";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
+import { expectEvents } from "src/utils";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -16,7 +18,11 @@ forking(70004884, async () => {
     await pretendExecutingVip(await vip013());
   });
 
-  testForkedNetworkVipCommands("vip350", await vip350(), {});
+  testForkedNetworkVipCommands("vip350", await vip350(),{
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [3]);
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {

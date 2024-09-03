@@ -7,6 +7,8 @@ import vip053 from "../../multisig/proposals/ethereum/vip-053";
 import { REWARD_DISTRIBUTORS } from "../../multisig/proposals/ethereum/vip-053";
 import vip350 from "../../vips/vip-350/bscmainnet";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
+import { expectEvents } from "src/utils";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -16,7 +18,11 @@ forking(20482317, async () => {
     await pretendExecutingVip(await vip053());
   });
 
-  testForkedNetworkVipCommands("vip350", await vip350(), {});
+  testForkedNetworkVipCommands("vip350", await vip350(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [2]);
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
