@@ -82,6 +82,12 @@ const vip352 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", SEPOLIA_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", SEPOLIA_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
 
       {
         target: ARBITRUM_SEPOLIA_ACM,
@@ -155,6 +161,12 @@ const vip352 = () => {
         ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ARBITRUM_SEPOLIA_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
 
       {
         target: OPBNBTESTNET_ACM,
@@ -220,6 +232,12 @@ const vip352 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", OPBNBTESTNET_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.opbnbtestnet,
       },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", OPBNBTESTNET_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
 
       // Critical Timelock Permissions
       {
@@ -272,6 +290,12 @@ const vip352 = () => {
         target: SEPOLIA_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", SEPOLIA_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -347,6 +371,12 @@ const vip352 = () => {
         ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ARBITRUM_SEPOLIA_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
 
       {
         target: OPBNBTESTNET_ACM,
@@ -410,6 +440,12 @@ const vip352 = () => {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", OPBNBTESTNET_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", OPBNBTESTNET_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.opbnbtestnet,
       },
     ],

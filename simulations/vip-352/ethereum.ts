@@ -12,7 +12,7 @@ forking(20482317, async () => {
 
   testForkedNetworkVipCommands("vip352", await vip352(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [16]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [18]);
     },
   });
 });

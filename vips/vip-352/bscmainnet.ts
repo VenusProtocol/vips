@@ -82,6 +82,12 @@ const vip352 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ETHEREUM_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ETHEREUM_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
 
       {
         target: ARBITRUMONE_ACM,
@@ -145,6 +151,12 @@ const vip352 = () => {
         target: ARBITRUMONE_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ARBITRUMONE_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ARBITRUM_ONE_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.arbitrumone,
       },
 
@@ -212,6 +224,12 @@ const vip352 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.opbnbmainnet,
       },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", OPBNBMAINNET_FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
 
       // Critical Timelock Permissions
       {
@@ -268,6 +286,12 @@ const vip352 = () => {
         target: ETHEREUM_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ETHEREUM_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ETHEREUM_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -335,6 +359,12 @@ const vip352 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", ARBITRUM_ONE_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.arbitrumone,
       },
+      {
+        target: ARBITRUMONE_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", ARBITRUM_ONE_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
 
       {
         target: OPBNBMAINNET_ACM,
@@ -398,6 +428,12 @@ const vip352 = () => {
         target: OPBNBMAINNET_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", OPBNBMAINNET_CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", OPBNBMAINNET_CRITICAL_TIMELOCK],
         dstChainId: LzChainId.opbnbmainnet,
       },
     ],

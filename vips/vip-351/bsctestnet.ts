@@ -121,6 +121,12 @@ const vip351 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
+      {
+        target: SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", sepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
 
       {
         target: ARBITRUM_SEPOLIA_ACM,
@@ -246,6 +252,12 @@ const vip351 = () => {
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.arbitrumsepolia,
       },
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", arbitrumsepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
 
       {
         target: OPBNBTESTNET_ACM,
@@ -365,6 +377,12 @@ const vip351 = () => {
         target: OPBNBTESTNET_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setReduceReservesBlockDelta(uint256)", opbnbtestnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", opbnbtestnet.NORMAL_TIMELOCK],
         dstChainId: LzChainId.opbnbtestnet,
       },
     ],
