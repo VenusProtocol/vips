@@ -19,6 +19,7 @@ const ACM = "0x1652E12C8ABE2f0D84466F0fc1fA4286491B3BC1";
 export const BOUND_VALIDATOR = "0x482469F1DA6Ec736cacF6361Ec41621f811A6800";
 
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const STALE_PERIOD_30M = 60 * 30; // 30 minutes (pricefeeds with heartbeat of 30 minutes)
 
 const vip001 = () => {
   return makeProposal([
@@ -80,7 +81,7 @@ const vip001 = () => {
     {
       target: opsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[WBTC, CHAINLINK_BTC_FEED, STALE_PERIOD_26H]],
+      params: [[WBTC, CHAINLINK_BTC_FEED, STALE_PERIOD_30M]],
     },
     {
       target: opsepolia.RESILIENT_ORACLE,
@@ -100,7 +101,7 @@ const vip001 = () => {
     {
       target: opsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[WETH, CHAINLINK_ETH_FEED, STALE_PERIOD_26H]],
+      params: [[WETH, CHAINLINK_ETH_FEED, STALE_PERIOD_30M]],
     },
     {
       target: opsepolia.RESILIENT_ORACLE,
@@ -120,7 +121,7 @@ const vip001 = () => {
     {
       target: opsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_26H]],
+      params: [[USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_30M]],
     },
     {
       target: opsepolia.RESILIENT_ORACLE,
@@ -140,7 +141,7 @@ const vip001 = () => {
     {
       target: opsepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[USDT, CHAINLINK_USDT_FEED, STALE_PERIOD_26H]],
+      params: [[USDT, CHAINLINK_USDT_FEED, STALE_PERIOD_30M]],
     },
     {
       target: opsepolia.RESILIENT_ORACLE,
