@@ -46,7 +46,7 @@ forking(20664549, async () => {
       await pretendExecutingVip(await vip057());
     });
 
-    it("stablecoin pool market unlisted", async () => {
+    it("core pool market unlisted", async () => {
       await corePoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN);
 
       const markets = await corePoolComptroller.getAssetsIn(vUSDT_USER);
