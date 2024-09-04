@@ -7,14 +7,14 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip011 } from "../../../proposals/arbitrumone/vip-011";
-import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
+import COMPTROLLER_ABI from "./abis/comptroller.json";
 
 const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 const vUSDT_POOL_STABLECOIN = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
 const MULTISIG = "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0";
 
 forking(249598943, async () => {
-  let stableCoinPoolComptroller: Contract;
+  let corePoolComptroller: Contract;
 
   before(async () => {
     await impersonateAccount(MULTISIG);
