@@ -24,6 +24,8 @@ import vip002, {
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
+  ZKSYNC_SEPOLIA_ENDPOINT_ID,
+  ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
 } from "../../../proposals/opsepolia/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
@@ -63,6 +65,10 @@ forking(16643257, async () => {
       await expect(xvsBridge.getTrustedRemoteAddress(ARBITRUM_SEPOLIA_ENDPOINT_ID)).to.be.revertedWith(
         "LzApp: no trusted path record",
       );
+
+      await expect(xvsBridge.getTrustedRemoteAddress(ZKSYNC_SEPOLIA_ENDPOINT_ID)).to.be.revertedWith(
+        "LzApp: no trusted path record",
+      );
     });
 
     it("Mint limit = 0", async () => {
@@ -89,7 +95,7 @@ forking(16643257, async () => {
       expect(res).equals(true);
     });
 
-    it("Should set trusted remote address in bridge for all three networks", async () => {
+    it("Should set trusted remote address in bridge for all five networks", async () => {
       let trustedRemote = await xvsBridge.getTrustedRemoteAddress(BNB_TESTNET_ENDPOINT_ID);
       expect(trustedRemote).equals(BNB_TESTNET_TRUSTED_REMOTE);
 
@@ -101,6 +107,9 @@ forking(16643257, async () => {
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(ARBITRUM_SEPOLIA_ENDPOINT_ID);
       expect(trustedRemote).equals(ARBITRUM_SEPOLIA_TRUSTED_REMOTE);
+
+      trustedRemote = await xvsBridge.getTrustedRemoteAddress(ZKSYNC_SEPOLIA_ENDPOINT_ID);
+      expect(trustedRemote).equals(ZKSYNC_SEPOLIA_TRUSTED_REMOTE);
     });
 
     it("Should set minting limit in XVS token", async () => {
@@ -113,7 +122,7 @@ forking(16643257, async () => {
       expect(token).equals(XVS);
     });
 
-    it("Should set correct max daily limit for all three networks", async () => {
+    it("Should set correct max daily limit for all five networks", async () => {
       let limit = await xvsBridge.chainIdToMaxDailyLimit(BNB_TESTNET_ENDPOINT_ID);
       expect(limit).equals(MAX_DAILY_SEND_LIMIT);
 
@@ -125,9 +134,12 @@ forking(16643257, async () => {
 
       limit = await xvsBridge.chainIdToMaxDailyLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID);
       expect(limit).equals(MAX_DAILY_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyLimit(ZKSYNC_SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_SEND_LIMIT);
     });
 
-    it("Should set correct max single limit for all three networks", async () => {
+    it("Should set correct max single limit for all five networks", async () => {
       let limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
       expect(limit).equals(SINGLE_SEND_LIMIT);
 
@@ -139,9 +151,12 @@ forking(16643257, async () => {
 
       limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID);
       expect(limit).equals(SINGLE_SEND_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleTransactionLimit(ZKSYNC_SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_SEND_LIMIT);
     });
 
-    it("Should set correct max daily receive limit for all three networks", async () => {
+    it("Should set correct max daily receive limit for all five networks", async () => {
       let limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(BNB_TESTNET_ENDPOINT_ID);
       expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
 
@@ -153,9 +168,12 @@ forking(16643257, async () => {
 
       limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID);
       expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxDailyReceiveLimit(ZKSYNC_SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should set correct max single receive limit for all three networks", async () => {
+    it("Should set correct max single receive limit for all five networks", async () => {
       let limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(BNB_TESTNET_ENDPOINT_ID);
       expect(limit).equals(SINGLE_RECEIVE_LIMIT);
 
@@ -166,6 +184,9 @@ forking(16643257, async () => {
       expect(limit).equals(SINGLE_RECEIVE_LIMIT);
 
       limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ARBITRUM_SEPOLIA_ENDPOINT_ID);
+      expect(limit).equals(SINGLE_RECEIVE_LIMIT);
+
+      limit = await xvsBridge.chainIdToMaxSingleReceiveTransactionLimit(ZKSYNC_SEPOLIA_ENDPOINT_ID);
       expect(limit).equals(SINGLE_RECEIVE_LIMIT);
     });
 
@@ -180,6 +201,9 @@ forking(16643257, async () => {
       expect(limit).equals(MIN_DST_GAS);
 
       limit = await xvsBridge.minDstGasLookup(ARBITRUM_SEPOLIA_ENDPOINT_ID, 0);
+      expect(limit).equals(MIN_DST_GAS);
+
+      limit = await xvsBridge.minDstGasLookup(ZKSYNC_SEPOLIA_ENDPOINT_ID, 0);
       expect(limit).equals(MIN_DST_GAS);
     });
   });

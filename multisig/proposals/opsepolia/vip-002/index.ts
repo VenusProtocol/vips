@@ -14,11 +14,13 @@ export const BNB_TESTNET_ENDPOINT_ID = 10102;
 export const SEPOLIA_ENDPOINT_ID = 10161;
 export const OPBNB_TESTNET_ENDPOINT_ID = 10202;
 export const ARBITRUM_SEPOLIA_ENDPOINT_ID = 10231;
+export const ZKSYNC_SEPOLIA_ENDPOINT_ID = 10248;
 
 export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e331a70ea3";
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
 export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
 export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
+export const ZKSYNC_SEPOLIA_TRUSTED_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
 
 export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
@@ -249,6 +251,36 @@ const vip002 = () => {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
       params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, ZKSYNC_SEPOLIA_TRUSTED_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, 0, MIN_DST_GAS],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, MAX_DAILY_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [ZKSYNC_SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
