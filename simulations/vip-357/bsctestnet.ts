@@ -9,20 +9,20 @@ import { forking, testVip } from "../../src/vip-framework";
 import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip357 } from "../../vips/vip-357/bsctestnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import ACM_ABI from "./abi/acm.json";
-import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 import IL_COMPTROLLER_FACET_ABI from "./abi/ilComptroller.json";
 import UPGRADABLE_BEACON_ABI from "./abi/upgradableBeacon.json";
 
 const USER = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
-const POOL_STABLECOIN_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
-const vUSDT_POOL_STABLECOIN = "0x3338988d0beb4419Acb8fE624218754053362D06";
+const POOL_CORE_COMPTROLLER = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
+const vUSDT_POOL_CORE = "0x3338988d0beb4419Acb8fE624218754053362D06";
 const vUST_USER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
 const vUSDT_USER = "0x9cc6F5f16498fCEEf4D00A350Bd8F8921D304Dc9";
 const vBNB = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
 forking(43437726, async () => {
   let comptroller: Contract;
-  let stableCoinPoolComptroller: Contract;
+  let corePoolComptroller: Contract;
   let vBNBContract: Contract;
 
   before(async () => {
@@ -31,9 +31,9 @@ forking(43437726, async () => {
     await impersonateAccount(vUST_USER);
     await impersonateAccount(USER);
 
-    comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_FACET_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
-    stableCoinPoolComptroller = new ethers.Contract(
-      POOL_STABLECOIN_COMPTROLLER,
+    comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, await ethers.getSigner(NORMAL_TIMELOCK));
+    corePoolComptroller = new ethers.Contract(
+      POOL_CORE_COMPTROLLER,
       IL_COMPTROLLER_FACET_ABI,
       await ethers.getSigner(NORMAL_TIMELOCK),
     );
@@ -47,9 +47,9 @@ forking(43437726, async () => {
       expect(markets.includes(vLUNA)).to.be.true;
     });
 
-    it("stablecoin pool market not unlisted", async () => {
-      const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
-      expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.true;
+    it("core pool market not unlisted", async () => {
+      const markets = await corePoolComptroller.getAssetsIn(vUSDT_USER);
+      expect(markets.includes(vUSDT_POOL_CORE)).to.be.true;
     });
 
     it("Verify borrow cap 0", async () => {
@@ -61,7 +61,7 @@ forking(43437726, async () => {
   testVip("VIP-357 Unlist Market", await vip357(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
-      await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket"], [18]);
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [18]);
       await expectEvents(txResponse, [UPGRADABLE_BEACON_ABI], ["Upgraded"], [1]);
     },
   });
@@ -73,16 +73,16 @@ forking(43437726, async () => {
       expect(markets.includes(vLUNA)).to.be.false;
     });
 
-    it("stablecoin pool market unlisted", async () => {
-      await stableCoinPoolComptroller.setActionsPaused([vUSDT_POOL_STABLECOIN], [0, 1, 2, 3, 4, 5, 6, 7, 8], true);
-      await stableCoinPoolComptroller.setCollateralFactor(vUSDT_POOL_STABLECOIN, 0, 0);
-      await stableCoinPoolComptroller.setMarketBorrowCaps([vUSDT_POOL_STABLECOIN], [0]);
-      await stableCoinPoolComptroller.setMarketSupplyCaps([vUSDT_POOL_STABLECOIN], [0]);
+    it("core pool market unlisted", async () => {
+      await corePoolComptroller.setActionsPaused([vUSDT_POOL_CORE], [0, 1, 2, 3, 4, 5, 6, 7, 8], true);
+      await corePoolComptroller.setCollateralFactor(vUSDT_POOL_CORE, 0, 0);
+      await corePoolComptroller.setMarketBorrowCaps([vUSDT_POOL_CORE], [0]);
+      await corePoolComptroller.setMarketSupplyCaps([vUSDT_POOL_CORE], [0]);
 
-      await stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN);
+      await corePoolComptroller.unlistMarket(vUSDT_POOL_CORE);
 
-      const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
-      expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.false;
+      const markets = await corePoolComptroller.getAssetsIn(vUSDT_USER);
+      expect(markets.includes(vUSDT_POOL_CORE)).to.be.false;
     });
 
     it("Verify borrow cap 0", async () => {
