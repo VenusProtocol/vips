@@ -1,18 +1,18 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
-const { opbnbtestnet } = NETWORK_ADDRESSES;
+const { sepolia } = NETWORK_ADDRESSES;
 
-export const DEFAULT_PROXY_ADMIN = "0xB1281ADC816fba7df64B798D7A0BC4bd2a6d42f4";
+export const DEFAULT_PROXY_ADMIN = "0xe98a3110929c6650c73031756288Ec518f65e846";
 
-const vip021 = () => {
+const vip058 = () => {
   return makeProposal([
     {
       target: DEFAULT_PROXY_ADMIN,
       signature: "transferOwnership(address)",
-      params: [opbnbtestnet.NORMAL_TIMELOCK],
+      params: [sepolia.NORMAL_TIMELOCK],
     },
   ]);
 };
 
-export default vip021;
+export default vip058;
