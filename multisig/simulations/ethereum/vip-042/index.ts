@@ -39,6 +39,7 @@ forking(20267718, async () => {
       expect(await chainLinkOracle.pendingOwner()).to.equal(ethers.constants.AddressZero);
       expect(await redstoneOracle.pendingOwner()).to.equal(ethers.constants.AddressZero);
       expect(await boundValidator.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      expect(await sfrxETHOracle.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
   });
 
