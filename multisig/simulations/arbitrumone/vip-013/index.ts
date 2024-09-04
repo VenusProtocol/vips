@@ -19,6 +19,7 @@ import vip013, {
   VweETH,
   VwstETH,
   WETH,
+  vTokenReceiver,
   weETH,
   wstETH,
 } from "../../../proposals/arbitrumone/vip-013";
@@ -108,7 +109,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
-    vTokenReceiver: arbitrumone.VTREASURY,
+    vTokenReceiver: vTokenReceiver,
   },
   vweETH_Liquid_staked_ETH: {
     borrowCap: "2300",
@@ -117,7 +118,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "2",
-    vTokenReceiver: arbitrumone.VTREASURY,
+    vTokenReceiver: vTokenReceiver,
   },
   vWETH_Liquid_staked_ETH: {
     borrowCap: "12500",
@@ -125,8 +126,8 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.77",
     liquidationThreshold: "0.80",
     reserveFactor: "0.2",
-    initialSupply: "2",
-    vTokenReceiver: arbitrumone.VTREASURY,
+    initialSupply: "1.9678",
+    vTokenReceiver: vTokenReceiver,
   },
 };
 
@@ -161,7 +162,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(247228879, async () => {
+forking(249962230, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
@@ -184,30 +185,6 @@ forking(247228879, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      const WSTETH_ACCOUNT = "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf";
-      const WEETH_ACCOUNT = "0x8437d7C167dFB82ED4Cb79CD44B7a32A1dd95c77";
-      const WETH_ACCOUNT = "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336";
-
-      await impersonateAccount(WSTETH_ACCOUNT);
-      await impersonateAccount(WEETH_ACCOUNT);
-      await impersonateAccount(WETH_ACCOUNT);
-      await setBalance(WSTETH_ACCOUNT, ethers.utils.parseEther("1"));
-      await setBalance(WEETH_ACCOUNT, ethers.utils.parseEther("1"));
-      await setBalance(WETH_ACCOUNT, ethers.utils.parseEther("1"));
-
-      const wstETHSigner: Signer = await ethers.getSigner(WSTETH_ACCOUNT);
-      const weETHSigner: Signer = await ethers.getSigner(WEETH_ACCOUNT);
-      const wETHSigner: Signer = await ethers.getSigner(WETH_ACCOUNT);
-      const mockWSTToken = await ethers.getContractAt(TOKEN_ABI, wstETH, wstETHSigner);
-      const mockWeETHToken = await ethers.getContractAt(TOKEN_ABI, weETH, weETHSigner);
-      const mockWETHToken = await ethers.getContractAt(TOKEN_ABI, WETH, wETHSigner);
-
-      await mockWSTToken.connect(wstETHSigner).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("3"));
-
-      await mockWeETHToken.connect(weETHSigner).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("3"));
-
-      await mockWETHToken.connect(wETHSigner).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("3"));
-
       await pretendExecutingVip(await vip013());
 
       for (const model of interestRateModels) {
@@ -396,6 +373,19 @@ forking(247228879, async () => {
     });
 
     describe("generic tests", async () => {
+      before(async () => {
+        const ARB = "0x912CE59144191C1204E64559FE8253a0e49E6548";
+        const ARB_ACCOUNT = "0xF3FC178157fb3c87548bAA86F9d24BA38E649B58";
+
+        await impersonateAccount(ARB_ACCOUNT);
+        await setBalance(ARB_ACCOUNT, ethers.utils.parseEther("1"));
+
+        const signer: Signer = await ethers.getSigner(ARB_ACCOUNT);
+        const mockARBToken = await ethers.getContractAt(TOKEN_ABI, ARB, signer);
+
+        await mockARBToken.connect(signer).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("1"));
+      });
+
       it("Isolated pools generic tests", async () => {
         checkIsolatedPoolsComptrollers();
       });

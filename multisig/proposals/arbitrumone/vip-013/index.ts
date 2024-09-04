@@ -15,6 +15,7 @@ export const VweETH = "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88";
 export const VWETH = "0x39D6d13Ea59548637104E40e729E4aABE27FE106";
 
 export const PSR = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
+export const vTokenReceiver = "0x5A9d695c518e95CD6Ea101f2f25fC2AE18486A61";
 export const NEW_COMPTROLLER_IMPLEMENTATION = "0x49Aa45B8256DBdFE90232f88f9e676a8Ec55D286";
 
 export const COMPTROLLER_BEACON = "0x8b6c2E8672504523Ca3a29a5527EcF47fC7d43FC";
@@ -109,7 +110,7 @@ const vip013 = () => {
           parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("2", 18),
-          arbitrumone.VTREASURY,
+          vTokenReceiver,
           parseUnits("8000", 18),
           parseUnits("800", 18),
         ],
@@ -174,7 +175,7 @@ const vip013 = () => {
           parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("2", 18),
-          arbitrumone.VTREASURY,
+          vTokenReceiver,
           parseUnits("4600", 18),
           parseUnits("2300", 18),
         ],
@@ -183,7 +184,7 @@ const vip013 = () => {
     {
       target: arbitrumone.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, parseUnits("2", 18), arbitrumone.GUARDIAN],
+      params: [WETH, parseUnits("1.9678", 18), arbitrumone.GUARDIAN],
     },
     {
       target: WETH,
@@ -193,7 +194,7 @@ const vip013 = () => {
     {
       target: WETH,
       signature: "approve(address,uint256)",
-      params: [arbitrumone.POOL_REGISTRY, parseUnits("2", 18)],
+      params: [arbitrumone.POOL_REGISTRY, parseUnits("1.9678", 18)],
     },
     {
       target: VWETH,
@@ -218,8 +219,8 @@ const vip013 = () => {
           VWETH,
           parseUnits("0.77", 18),
           parseUnits("0.8", 18),
-          parseUnits("2", 18),
-          arbitrumone.VTREASURY,
+          parseUnits("1.9678", 18),
+          vTokenReceiver,
           parseUnits("14000", 18),
           parseUnits("12500", 18),
         ],
