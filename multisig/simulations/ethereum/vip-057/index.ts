@@ -35,7 +35,7 @@ forking(20664549, async () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("stablecoin pool market not unlisted", async () => {
+    it("core pool market not unlisted", async () => {
       const markets = await corePoolComptroller.getAssetsIn(vUSDT_USER);
       expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.true;
     });
