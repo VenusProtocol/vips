@@ -14,7 +14,7 @@ const vUSDT_POOL_STABLECOIN = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
 const MULTISIG = "0x14e0E151b33f9802b3e75b621c1457afc44DcAA0";
 
 forking(249598943, async () => {
-  let stableCoinPoolComptroller: Contract;
+  let corePoolComptroller: Contract;
 
   before(async () => {
     await impersonateAccount(MULTISIG);
