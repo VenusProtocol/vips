@@ -7,7 +7,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import { vip011 } from "../../../proposals/arbitrumone/vip-011";
-import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
+import COMPTROLLER_ABI from "./abis/comptroller.json";
 
 const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 const vUSDT_POOL_STABLECOIN = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
