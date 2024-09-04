@@ -2,25 +2,28 @@ import { expect } from "chai";
 import { BigNumberish, Contract } from "ethers";
 import { ethers } from "hardhat";
 
+import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/il_vToken.json";
+
+export interface TokenSpec {
+  name?: string;
+  symbol: string;
+  address: string;
+  decimals: number;
+}
+
+export interface VTokenSpec {
+  name: string;
+  symbol: string;
+  decimals: number;
+  underlying: string | TokenSpec;
+  exchangeRate: BigNumberish;
+  comptroller: string;
+}
 
 export function checkVToken(
   vTokenAddress: string,
-  {
-    name,
-    symbol,
-    decimals,
-    underlying,
-    exchangeRate,
-    comptroller,
-  }: {
-    name: string;
-    symbol: string;
-    decimals: number;
-    underlying: string;
-    exchangeRate: BigNumberish;
-    comptroller: string;
-  },
+  { name, symbol, decimals, underlying, exchangeRate, comptroller }: VTokenSpec,
 ) {
   describe(symbol, () => {
     let vToken: Contract;
@@ -41,9 +44,26 @@ export function checkVToken(
       expect(await vToken.decimals()).to.equal(decimals);
     });
 
-    it(`should have underlying = "${underlying}"`, async () => {
-      expect(await vToken.underlying()).to.equal(underlying);
-    });
+    if (typeof underlying === "string") {
+      it(`should have underlying = "${underlying}"`, async () => {
+        expect(await vToken.underlying()).to.equal(underlying);
+      });
+    } else {
+      it(`should have underlying = "${underlying.address}"`, async () => {
+        expect(await vToken.underlying()).to.equal(underlying.address);
+      });
+
+      describe("Underlying", () => {
+        const underlyingToken = new ethers.Contract(underlying.address, ERC20_ABI, ethers.provider);
+        it(`should have underlying symbol = "${underlying.symbol}"`, async () => {
+          expect(await underlyingToken.symbol()).to.equal(underlying.symbol);
+        });
+
+        it(`should have underlying decimals = "${underlying.decimals}"`, async () => {
+          expect(await underlyingToken.decimals()).to.equal(underlying.decimals);
+        });
+      });
+    }
 
     it(`should have initial exchange rate of ${exchangeRate.toString()}`, async () => {
       expect(await vToken.exchangeRateStored()).to.equal(exchangeRate);
