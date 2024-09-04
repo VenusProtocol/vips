@@ -19,11 +19,7 @@ forking(249598943, async () => {
   before(async () => {
     await impersonateAccount(MULTISIG);
 
-    corePoolComptroller = new ethers.Contract(
-      COMPTROLLER_CORE,
-      COMPTROLLER_ABI,
-      await ethers.getSigner(MULTISIG),
-    );
+    corePoolComptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, await ethers.getSigner(MULTISIG));
 
     await setBalance(MULTISIG, parseUnits("1000", 18));
 

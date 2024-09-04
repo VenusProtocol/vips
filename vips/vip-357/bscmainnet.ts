@@ -15,6 +15,7 @@ export const vUST = "0x78366446547D062f45b4C0f320cDaa6d710D87bb";
 export const vCAN = "0xeBD0070237a0713E8D94fEf1B728d3d993d290ef";
 export const COMPTROLLER_IMPL = "0x7B586Aed00C85d7E32B463DCE094B1faCA7e7e7c";
 export const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
+export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 export const cutParams = params;
 
 export const vip357 = () => {
@@ -50,6 +51,11 @@ export const vip357 = () => {
         params: [UNITROLLER, "unlistMarket(address)", CRITICAL_TIMELOCK],
       },
       {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "unlistMarket(address)", GUARDIAN],
+      },
+      {
         target: IL_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "unlistMarket(address)", NORMAL_TIMELOCK],
@@ -63,6 +69,11 @@ export const vip357 = () => {
         target: IL_ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "unlistMarket(address)", CRITICAL_TIMELOCK],
+      },
+      {
+        target: IL_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "unlistMarket(address)", GUARDIAN],
       },
       {
         target: UNITROLLER,

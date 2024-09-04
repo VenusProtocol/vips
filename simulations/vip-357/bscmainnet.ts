@@ -76,7 +76,7 @@ forking(41956001, async () => {
 
   testVip("VIP-357 Unlist Market", await vip357(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [8]);
       await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket"], [27]);
       await expectEvents(txResponse, [UPGRADABLE_BEACON_ABI], ["Upgraded"], [1]);
     },
