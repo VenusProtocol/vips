@@ -23,7 +23,10 @@ const vip318 = () => {
       {
         target: UNITROLLER,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[vUNI, vDOGE], [vUNI_SUPPLY_CAP, vDOGE_SUPPLY_CAP]],
+        params: [
+          [vUNI, vDOGE],
+          [vUNI_SUPPLY_CAP, vDOGE_SUPPLY_CAP],
+        ],
       },
     ],
     meta,
