@@ -15,7 +15,7 @@ import {
   checkRewardsDistributorPool,
 } from "src/vip-framework/checks/rewardsDistributor";
 
-import {vip012} from "../../../proposals/arbitrumone/vip-012"
+import { vip012 } from "../../../proposals/arbitrumone/vip-012";
 import vip013, {
   COMPTROLLER_LIQUID_STAKED_ETH,
   PSR,
@@ -29,7 +29,6 @@ import vip013, {
   wstETH,
 } from "../../../proposals/arbitrumone/vip-013";
 import TOKEN_ABI from "./abi/WETH.json";
-import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -41,7 +40,6 @@ const { arbitrumone } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = arbitrumone.RESILIENT_ORACLE;
 const GUARDIAN = arbitrumone.GUARDIAN;
 const POOL_REGISTRY = arbitrumone.POOL_REGISTRY;
-const OLD_COMPTROLLER_IMPLEMENTATION = "0x5d91d7b73284f62f67db484e2a7678da85354159";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 

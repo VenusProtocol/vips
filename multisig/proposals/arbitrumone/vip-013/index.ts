@@ -194,15 +194,7 @@ const vip013 = () => {
       target: arbitrumone.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [
-          VWETH,
-          "0",
-          "0",
-          parseUnits("1.9678", 18),
-          vTokenReceiver,
-          parseUnits("14000", 18),
-          parseUnits("12500", 18),
-        ],
+        [VWETH, "0", "0", parseUnits("1.9678", 18), vTokenReceiver, parseUnits("14000", 18), parseUnits("12500", 18)],
       ],
     },
     {
