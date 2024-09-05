@@ -9,12 +9,18 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import {
+  RewardsDistributorConfig,
+  checkRewardsDistributor,
+  checkRewardsDistributorPool,
+} from "src/vip-framework/checks/rewardsDistributor";
 
 import vip013, {
   COMPTROLLER_BEACON,
   COMPTROLLER_LIQUID_STAKED_ETH,
   NEW_COMPTROLLER_IMPLEMENTATION,
   PSR,
+  REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH,
   VWETH,
   VweETH,
   VwstETH,
@@ -29,6 +35,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+import XVS_ABI from "./abi/xvs.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -162,7 +169,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(249962230, async () => {
+forking(250401898, async () => {
   let poolRegistry: Contract;
   let comptrollerBeacon: Contract;
 
@@ -388,6 +395,55 @@ forking(249962230, async () => {
 
       it("Isolated pools generic tests", async () => {
         checkIsolatedPoolsComptrollers();
+      });
+    });
+
+    describe("Rewards Distributor tests", async () => {
+      let xvs: Contract;
+      before(async () => {
+        xvs = await ethers.getContractAt(XVS_ABI, arbitrumone.XVS);
+      });
+
+      it("rewards distributor should have expected number of xvs tokens", async () => {
+        expect(await xvs.balanceOf(REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH)).to.be.equal(parseUnits("15300", 18));
+      });
+
+      const rewardBasicConfig = {
+        pool: COMPTROLLER_LIQUID_STAKED_ETH,
+        address: REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH,
+        token: arbitrumone.XVS,
+      };
+
+      describe("Generic checks for rewards", async () => {
+        checkRewardsDistributorPool(COMPTROLLER_LIQUID_STAKED_ETH, 1);
+
+        const tokensRewardConfig: RewardsDistributorConfig[] = [
+          {
+            ...rewardBasicConfig,
+            vToken: VwstETH,
+            borrowSpeed: "0",
+            supplySpeed: "327932098765432",
+            totalRewardsToDistribute: parseUnits("2550", 18),
+          },
+          {
+            ...rewardBasicConfig,
+            vToken: VweETH,
+            borrowSpeed: "0",
+            supplySpeed: "327932098765432",
+            totalRewardsToDistribute: parseUnits("2550", 18),
+          },
+          {
+            ...rewardBasicConfig,
+            vToken: VWETH,
+            borrowSpeed: "918209876543209",
+            supplySpeed: "393518518518518",
+            totalRewardsToDistribute: parseUnits("10200", 18),
+          },
+        ];
+
+        for (const config of tokensRewardConfig) {
+          checkRewardsDistributor("RewardsDistributor_LiquidStakedETH_XVS", config);
+        }
       });
     });
   });

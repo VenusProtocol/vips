@@ -17,6 +17,7 @@ export const VWETH = "0x39D6d13Ea59548637104E40e729E4aABE27FE106";
 export const PSR = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 export const vTokenReceiver = "0x5A9d695c518e95CD6Ea101f2f25fC2AE18486A61";
 export const NEW_COMPTROLLER_IMPLEMENTATION = "0x49Aa45B8256DBdFE90232f88f9e676a8Ec55D286";
+export const REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH = "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D";
 
 export const COMPTROLLER_BEACON = "0x8b6c2E8672504523Ca3a29a5527EcF47fC7d43FC";
 const wstETH_ONE_JUMP_ORACLE = "0x748DeFdbaE5215cdF0C436c538804823b55D76bc";
@@ -224,6 +225,26 @@ const vip013 = () => {
           parseUnits("14000", 18),
           parseUnits("12500", 18),
         ],
+      ],
+    },
+    {
+      target: arbitrumone.VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [arbitrumone.XVS, parseUnits("15300", 18), REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH],
+    },
+    { target: REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH, signature: "acceptOwnership()", params: [] },
+    {
+      target: COMPTROLLER_LIQUID_STAKED_ETH,
+      signature: "addRewardsDistributor(address)",
+      params: [REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH],
+    },
+    {
+      target: REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [
+        [VwstETH, VweETH, VWETH],
+        ["327932098765432", "327932098765432", "393518518518518"],
+        ["0", "0", "918209876543209"],
       ],
     },
   ]);
