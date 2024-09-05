@@ -7,7 +7,7 @@ const NEW_COMPTROLLER_IMPLEMENTATION = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308
 const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 const MULTISIG = "0x1426A5Ae009c4443188DA8793751024E358A61C2";
 
-export const vip016 = () => {
+const vip016 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
@@ -21,3 +21,5 @@ export const vip016 = () => {
     },
   ]);
 };
+
+export default vip016;
