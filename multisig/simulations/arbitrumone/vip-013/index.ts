@@ -15,10 +15,9 @@ import {
   checkRewardsDistributorPool,
 } from "src/vip-framework/checks/rewardsDistributor";
 
+import {vip012} from "../../../proposals/arbitrumone/vip-012"
 import vip013, {
-  COMPTROLLER_BEACON,
   COMPTROLLER_LIQUID_STAKED_ETH,
-  NEW_COMPTROLLER_IMPLEMENTATION,
   PSR,
   REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH,
   VWETH,
@@ -115,7 +114,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.93",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
-    initialSupply: "2",
+    initialSupply: "3.55",
     vTokenReceiver: vTokenReceiver,
   },
   vweETH_Liquid_staked_ETH: {
@@ -124,14 +123,14 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.93",
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
-    initialSupply: "2",
+    initialSupply: "4",
     vTokenReceiver: vTokenReceiver,
   },
   vWETH_Liquid_staked_ETH: {
     borrowCap: "12500",
     supplyCap: "14000",
-    collateralFactor: "0.77",
-    liquidationThreshold: "0.80",
+    collateralFactor: "0",
+    liquidationThreshold: "0",
     reserveFactor: "0.2",
     initialSupply: "1.9678",
     vTokenReceiver: vTokenReceiver,
@@ -171,27 +170,39 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
 
 forking(250401898, async () => {
   let poolRegistry: Contract;
-  let comptrollerBeacon: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
-    comptrollerBeacon = await ethers.getContractAt(BEACON_ABI, COMPTROLLER_BEACON);
   });
 
   describe("Contracts setup", () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
       checkVToken(address, vTokenState[symbol]);
     }
-
-    it("comptroller should have old implementation", async () => {
-      expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
-        OLD_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
-      );
-    });
   });
 
   describe("Post-Execution state", () => {
     before(async () => {
+      // executing the vip012 to upgrade the beacon comptroller implementation
+      await pretendExecutingVip(await vip012());
+
+      const WSTETH_ACCOUNT = "0x513c7E3a9c69cA3e22550eF58AC1C0088e918FFf";
+      const WEETH_ACCOUNT = "0x8437d7C167dFB82ED4Cb79CD44B7a32A1dd95c77";
+
+      await impersonateAccount(WSTETH_ACCOUNT);
+      await impersonateAccount(WEETH_ACCOUNT);
+      await setBalance(WSTETH_ACCOUNT, ethers.utils.parseEther("1"));
+      await setBalance(WEETH_ACCOUNT, ethers.utils.parseEther("1"));
+
+      const wstETHSigner: Signer = await ethers.getSigner(WSTETH_ACCOUNT);
+      const weETHSigner: Signer = await ethers.getSigner(WEETH_ACCOUNT);
+      const mockWSTToken = await ethers.getContractAt(TOKEN_ABI, wstETH, wstETHSigner);
+      const mockWeETHToken = await ethers.getContractAt(TOKEN_ABI, weETH, weETHSigner);
+
+      await mockWSTToken.connect(wstETHSigner).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("3"));
+
+      await mockWeETHToken.connect(weETHSigner).transfer(arbitrumone.VTREASURY, ethers.utils.parseEther("3"));
+
       await pretendExecutingVip(await vip013());
 
       for (const model of interestRateModels) {
@@ -200,14 +211,6 @@ forking(250401898, async () => {
           interestRateModelAddresses[symbol] = await vToken.interestRateModel();
         }
       }
-    });
-
-    describe("Update comptroller beacon implementation", () => {
-      it("comptroller should have new implementation", async () => {
-        expect((await comptrollerBeacon.implementation()).toLowerCase()).to.equal(
-          NEW_COMPTROLLER_IMPLEMENTATION.toLowerCase(),
-        );
-      });
     });
 
     describe("PoolRegistry state", () => {
