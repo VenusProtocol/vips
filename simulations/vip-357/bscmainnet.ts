@@ -6,7 +6,19 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 
 import { expectEvents, setMaxStaleCoreAssets } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { NORMAL_TIMELOCK, UNITROLLER, vCAN, vLUNA, vUST, vip357 } from "../../vips/vip-357/bscmainnet";
+import {
+  NORMAL_TIMELOCK,
+  UNITROLLER,
+  vBUSD,
+  vCAN,
+  vLUNA,
+  vSXP,
+  vTRXOLD,
+  vTUSDOLD,
+  vUST,
+  vXVS,
+  vip357,
+} from "../../vips/vip-357/bscmainnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import ACM_ABI from "./abi/acm.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
@@ -72,12 +84,29 @@ forking(41956001, async () => {
       await comptroller._setMarketBorrowCaps([vBNB], [0]);
       await expect(vBNBContract.borrow(10)).to.not.be.reverted;
     });
+
+    it("check borrow cap is not 0", async () => {
+      let borrowCap = await comptroller.borrowCaps(vBUSD);
+      expect(borrowCap).to.be.not.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vSXP);
+      expect(borrowCap).to.be.not.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vTRXOLD);
+      expect(borrowCap).to.be.not.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vTUSDOLD);
+      expect(borrowCap).to.be.not.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vXVS);
+      expect(borrowCap).to.be.not.equal(0);
+    });
   });
 
   testVip("VIP-357 Unlist Market", await vip357(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [8]);
-      await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket"], [27]);
+      await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket", "NewBorrowCap"], [28, 5]);
       await expectEvents(txResponse, [UPGRADABLE_BEACON_ABI], ["Upgraded"], [1]);
     },
   });
@@ -113,6 +142,23 @@ forking(41956001, async () => {
     it("Verify borrow cap 0", async () => {
       await comptroller._setMarketBorrowCaps([vBNB], [0]);
       await expect(vBNBContract.borrow(10)).to.be.revertedWith("market borrow cap is 0");
+    });
+
+    it("check borrow cap 0", async () => {
+      let borrowCap = await comptroller.borrowCaps(vBUSD);
+      expect(borrowCap).to.be.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vSXP);
+      expect(borrowCap).to.be.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vTRXOLD);
+      expect(borrowCap).to.be.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vTUSDOLD);
+      expect(borrowCap).to.be.equal(0);
+
+      borrowCap = await comptroller.borrowCaps(vXVS);
+      expect(borrowCap).to.be.equal(0);
     });
 
     describe("generic tests", async () => {

@@ -17,6 +17,11 @@ export const COMPTROLLER_IMPL = "0x7B586Aed00C85d7E32B463DCE094B1faCA7e7e7c";
 export const COMPTROLLER_BEACON = "0x38B4Efab9ea1bAcD19dC81f19c4D1C2F9DeAe1B2";
 export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 export const cutParams = params;
+export const vBUSD = "0x95c78222B3D6e262426483D42CfA53685A67Ab9D";
+export const vSXP = "0x2fF3d0F6990a40261c66E1ff2017aCBc282EB6d0";
+export const vTRXOLD = "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93";
+export const vTUSDOLD = "0x08CEB3F4a7ed3500cA0982bcd0FC7816688084c3";
+export const vXVS = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
 
 export const vip357 = () => {
   const meta = {
@@ -79,6 +84,19 @@ export const vip357 = () => {
         target: UNITROLLER,
         signature: "_setActionsPaused(address[],uint8[],bool)",
         params: [[vLUNA, vUST, vCAN], [0, 1, 2, 3, 4, 5, 6, 7, 8], true],
+      },
+      {
+        target: UNITROLLER,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[vXVS], [2], true],
+      },
+      {
+        target: UNITROLLER,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [
+          [vBUSD, vSXP, vTRXOLD, vTUSDOLD, vXVS],
+          [0, 0, 0, 0, 0],
+        ],
       },
       {
         target: UNITROLLER,
