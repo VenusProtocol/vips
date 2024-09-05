@@ -445,7 +445,7 @@ forking(250401898, async () => {
         ];
 
         for (const config of tokensRewardConfig) {
-          checkRewardsDistributor("RewardsDistributor_LiquidStakedETH_XVS", config);
+          checkRewardsDistributor("RewardsDistributor_LiquidStakedETH_0_XVS", config);
         }
       });
     });

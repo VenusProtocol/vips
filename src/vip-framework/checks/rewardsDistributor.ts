@@ -37,7 +37,7 @@ type RewardsDistributorId =
   | "RewardsDistributor_Core_0_USDT"
   | "RewardsDistributor_Core_0_USDC"
   | "RewardsDistributor_Core_0_XVS"
-  | "RewardsDistributor_LiquidStakedETH_XVS"
+  | "RewardsDistributor_LiquidStakedETH_0_XVS"
   | "RewardsDistributor_Core_0_CRVUSD"
   | "RewardsDistributor_Core_0_FRAX"
   | "RewardsDistributor_Core_0_SFRAX"
