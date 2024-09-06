@@ -17,8 +17,8 @@ import {
   vTUSDOLD,
   vUST,
   vXVS,
-  vip357,
-} from "../../vips/vip-357/bscmainnet";
+  vip361,
+} from "../../vips/vip-361/bscmainnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import ACM_ABI from "./abi/acm.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
@@ -103,7 +103,7 @@ forking(41956001, async () => {
     });
   });
 
-  testVip("VIP-357 Unlist Market", await vip357(), {
+  testVip("VIP-361 Unlist Market", await vip361(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [8]);
       await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket", "NewBorrowCap"], [28, 5]);

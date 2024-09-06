@@ -6,7 +6,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip357 } from "../../vips/vip-357/bsctestnet";
+import { NORMAL_TIMELOCK, UNITROLLER, vLUNA, vUST, vip361 } from "../../vips/vip-361/bsctestnet";
 import VTOKEN_ABI from "./abi/VBep20DelegateAbi.json";
 import ACM_ABI from "./abi/acm.json";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
@@ -58,7 +58,7 @@ forking(43437726, async () => {
     });
   });
 
-  testVip("VIP-357 Unlist Market", await vip357(), {
+  testVip("VIP-361 Unlist Market", await vip361(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [6]);
       await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["ActionPausedMarket"], [18]);

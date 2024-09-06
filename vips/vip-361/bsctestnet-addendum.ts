@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 
-import { cutParams as params } from "../../simulations/vip-357/utils/cut-params-testnet.json";
+import { cutParams as params } from "../../simulations/vip-361/utils/cut-params-testnet.json";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
@@ -34,10 +34,10 @@ export const vXRP_BORROW_CAP = parseUnits("1000000", 18);
 
 export const cutParams = params;
 
-export const vip357 = () => {
+export const vip361 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-357 Fix Market Caps",
+    title: "VIP-361 Fix Market Caps",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -78,4 +78,4 @@ export const vip357 = () => {
   );
 };
 
-export default vip357;
+export default vip361;

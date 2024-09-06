@@ -32,8 +32,8 @@ import {
   vUSDT_BORROW_CAP,
   vXRP,
   vXRP_BORROW_CAP,
-  vip357,
-} from "../../vips/vip-357/bsctestnet-addendum";
+  vip361,
+} from "../../vips/vip-361/bsctestnet-addendum";
 import COMPTROLLER_FACET_ABI from "./abi/comptroller.json";
 
 forking(43437726, async () => {
@@ -89,7 +89,7 @@ forking(43437726, async () => {
     });
   });
 
-  testVip("VIP-357 Unlist Market", await vip357(), {
+  testVip("VIP-361 Unlist Market", await vip361(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_FACET_ABI], ["NewBorrowCap"], [13]);
     },
