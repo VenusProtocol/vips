@@ -7,7 +7,7 @@ const NEW_COMPTROLLER_IMPLEMENTATION = "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDc
 const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 const OPBNBTESTNET_MULTISIG = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
 
-const vip019 = () => {
+const vip016 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
@@ -22,4 +22,4 @@ const vip019 = () => {
   ]);
 };
 
-export default vip019;
+export default vip016;

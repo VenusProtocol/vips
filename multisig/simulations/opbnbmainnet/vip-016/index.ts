@@ -6,14 +6,14 @@ import { ethers } from "hardhat";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip019 } from "../../../proposals/opbnbtestnet/vip-019";
+import { vip016 } from "../../../proposals/opbnbmainnet/vip-016";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
 
-const COMPTROLLER_CORE = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";
-const vUSDT_POOL_STABLECOIN = "0xe3923805f6E117E51f5387421240a86EF1570abC";
-const MULTISIG = "0xb15f6EfEbC276A3b9805df81b5FB3D50C2A62BDf";
+const COMPTROLLER_CORE = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
+const vUSDT_POOL_STABLECOIN = "0xb7a01Ba126830692238521a1aA7E7A7509410b8e";
+const MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
-forking(38155115, async () => {
+forking(33546729, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
@@ -41,7 +41,7 @@ forking(38155115, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip019());
+      await pretendExecutingVip(await vip016());
     });
 
     it("unlist successful", async () => {

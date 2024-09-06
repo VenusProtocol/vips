@@ -7,7 +7,7 @@ const NEW_COMPTROLLER_IMPLEMENTATION = "0xD3b2431c186A2bDEB61b86D9B042B75C954004
 const ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 const MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
-export const vip020 = () => {
+export const vip016 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
