@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip016 } from "../../../proposals/opbnbtestnet/vip-016";
+import vip016 from "../../../proposals/opbnbtestnet/vip-016";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
 
 const COMPTROLLER_CORE = "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388";

@@ -14,7 +14,7 @@ const vUSDT_POOL_STABLECOIN = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
 const vUSDT_USER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-forking(6601024, async () => {
+forking(6600975, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
