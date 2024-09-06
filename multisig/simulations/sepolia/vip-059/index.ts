@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip057 } from "../../../proposals/sepolia/vip-057";
+import vip059 from "../../../proposals/sepolia/vip-059";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
 
 const COMPTROLLER_STABLECOIN = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
@@ -43,7 +43,7 @@ forking(6601024, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip057());
+      await pretendExecutingVip(await vip059());
     });
 
     it("stablecoin pool market unlisted", async () => {
