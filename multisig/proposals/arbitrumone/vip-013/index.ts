@@ -14,9 +14,12 @@ export const VwstETH = "0x9df6B5132135f14719696bBAe3C54BAb272fDb16";
 export const VweETH = "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88";
 export const VWETH = "0x39D6d13Ea59548637104E40e729E4aABE27FE106";
 
-export const PSR = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
-export const vTokenReceiver = "0x5A9d695c518e95CD6Ea101f2f25fC2AE18486A61";
+export const vTokenReceiverVwstETH = "0x5A9d695c518e95CD6Ea101f2f25fC2AE18486A61";
+export const vTokenReceiverVweETH = "0x46cba1e9b1e5db32da28428f2fb85587bcb785e7";
 export const REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH = "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D";
+export const PRIME = "0xFE69720424C954A2da05648a0FAC84f9bf11Ef49";
+export const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
+export const NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL = "0xD1e89806BAB8Cd7680DFc7425D1fA6d7D5F0C3FE";
 
 const wstETH_ONE_JUMP_ORACLE = "0x748DeFdbaE5215cdF0C436c538804823b55D76bc";
 const weETH_ONE_JUMP_ORACLE = "0x09eA4825a5e2FB2CB9a44F317c22e7D65053ea9d";
@@ -99,7 +102,7 @@ const vip013 = () => {
           parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("3.55", 18),
-          vTokenReceiver,
+          vTokenReceiverVwstETH,
           parseUnits("8000", 18),
           parseUnits("800", 18),
         ],
@@ -159,7 +162,7 @@ const vip013 = () => {
           parseUnits("0.93", 18),
           parseUnits("0.95", 18),
           parseUnits("4", 18),
-          vTokenReceiver,
+          vTokenReceiverVweETH,
           parseUnits("4600", 18),
           parseUnits("2300", 18),
         ],
@@ -194,7 +197,15 @@ const vip013 = () => {
       target: arbitrumone.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
-        [VWETH, "0", "0", parseUnits("1.9678", 18), vTokenReceiver, parseUnits("14000", 18), parseUnits("12500", 18)],
+        [
+          VWETH,
+          "0",
+          "0",
+          parseUnits("1.9678", 18),
+          arbitrumone.VTREASURY,
+          parseUnits("14000", 18),
+          parseUnits("12500", 18),
+        ],
       ],
     },
     {
@@ -216,6 +227,21 @@ const vip013 = () => {
         ["327932098765432", "327932098765432", "393518518518518"],
         ["0", "0", "918209876543209"],
       ],
+    },
+    {
+      target: NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL,
+      signature: "acceptOwnership()",
+      params: [],
+    },
+    {
+      target: COMPTROLLER_CORE,
+      signature: "setPrimeToken(address)",
+      params: [PRIME],
+    },
+    {
+      target: COMPTROLLER_LIQUID_STAKED_ETH,
+      signature: "setPrimeToken(address)",
+      params: [PRIME],
     },
   ]);
 };

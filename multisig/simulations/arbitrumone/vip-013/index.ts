@@ -17,17 +17,21 @@ import {
 
 import { vip012 } from "../../../proposals/arbitrumone/vip-012";
 import vip013, {
+  COMPTROLLER_CORE,
   COMPTROLLER_LIQUID_STAKED_ETH,
-  PSR,
+  NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL,
+  PRIME,
   REWARD_DISTRIBUTOR_LIQUID_STAKED_ETH,
   VWETH,
   VweETH,
   VwstETH,
   WETH,
-  vTokenReceiver,
+  vTokenReceiverVweETH,
+  vTokenReceiverVwstETH,
   weETH,
   wstETH,
 } from "../../../proposals/arbitrumone/vip-013";
+import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import TOKEN_ABI from "./abi/WETH.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -40,6 +44,7 @@ const { arbitrumone } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = arbitrumone.RESILIENT_ORACLE;
 const GUARDIAN = arbitrumone.GUARDIAN;
 const POOL_REGISTRY = arbitrumone.POOL_REGISTRY;
+const PSR = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
@@ -113,7 +118,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "3.55",
-    vTokenReceiver: vTokenReceiver,
+    vTokenReceiver: vTokenReceiverVwstETH,
   },
   vweETH_Liquid_staked_ETH: {
     borrowCap: "2300",
@@ -122,7 +127,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.95",
     reserveFactor: "0.25",
     initialSupply: "4",
-    vTokenReceiver: vTokenReceiver,
+    vTokenReceiver: vTokenReceiverVweETH,
   },
   vWETH_Liquid_staked_ETH: {
     borrowCap: "12500",
@@ -131,7 +136,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0",
     reserveFactor: "0.2",
     initialSupply: "1.9678",
-    vTokenReceiver: vTokenReceiver,
+    vTokenReceiver: arbitrumone.VTREASURY,
   },
 };
 
@@ -168,6 +173,9 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
 
 forking(250401898, async () => {
   let poolRegistry: Contract;
+  let coreComptroller: Contract;
+  let LSETHComptroller: Contract;
+  let nativeTokenGateway: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
@@ -333,10 +341,6 @@ forking(250401898, async () => {
             comptroller = await ethers.getContractAt(COMPTROLLER_ABI, comptrollerAddress);
           });
 
-          it("should use the correct comptroller address", async () => {
-            expect(comptroller.address).to.equal(comptrollerAddress);
-          });
-
           it("should have the correct price oracle", async () => {
             expect(await comptroller.oracle()).to.equal(RESILIENT_ORACLE);
           });
@@ -445,6 +449,31 @@ forking(250401898, async () => {
         for (const config of tokensRewardConfig) {
           checkRewardsDistributor("RewardsDistributor_LiquidStakedETH_0_XVS", config);
         }
+      });
+
+      describe("Post tx checks", () => {
+        before(async () => {
+          coreComptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+          LSETHComptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_LIQUID_STAKED_ETH);
+          nativeTokenGateway = await ethers.getContractAt(GATEWAY_ABI, NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL);
+        });
+
+        it("Should set owner to multisig", async () => {
+          expect(await nativeTokenGateway.owner()).equals(NETWORK_ADDRESSES.arbitrumone.GUARDIAN);
+        });
+
+        it("Should have correct owner vWETH and wETH addresses", async () => {
+          expect(await nativeTokenGateway.vWNativeToken()).to.be.equal(VWETH);
+          expect(await nativeTokenGateway.wNativeToken()).to.be.equal(WETH);
+        });
+
+        it("Prime for the core comptroller", async () => {
+          expect(await coreComptroller.prime()).to.be.equal(PRIME);
+        });
+
+        it("Prime for the liquid staked ETH comptroller", async () => {
+          expect(await LSETHComptroller.prime()).to.be.equal(PRIME);
+        });
       });
     });
   });
