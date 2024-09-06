@@ -6,26 +6,27 @@ import { ethers } from "hardhat";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip012 from "../../../proposals/arbitrumsepolia/vip-012";
+import vip059 from "../../../proposals/sepolia/vip-059";
 import COMPTROLLER_FACET_ABI from "./abis/comptroller.json";
 
-const COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
-const vUSDT_POOL_STABLECOIN = "0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052";
-const MULTISIG = "0x1426A5Ae009c4443188DA8793751024E358A61C2";
+const COMPTROLLER_STABLECOIN = "0x18eF8D2bee415b731C25662568dc1035001cEB2c";
+const vUSDT_POOL_STABLECOIN = "0x93dff2053D4B08823d8B39F1dCdf8497f15200f4";
+const vUSDT_USER = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+const GUARDIAN = "0x94fa6078b6b8a26F0B6EDFFBE6501B22A10470fB";
 
-forking(75563035, async () => {
+forking(6600975, async () => {
   let stableCoinPoolComptroller: Contract;
 
   before(async () => {
-    await impersonateAccount(MULTISIG);
+    await impersonateAccount(GUARDIAN);
 
     stableCoinPoolComptroller = new ethers.Contract(
-      COMPTROLLER_CORE,
+      COMPTROLLER_STABLECOIN,
       COMPTROLLER_FACET_ABI,
-      await ethers.getSigner(MULTISIG),
+      await ethers.getSigner(GUARDIAN),
     );
 
-    await setBalance(MULTISIG, parseUnits("1000", 18));
+    await setBalance(GUARDIAN, parseUnits("1000", 18));
 
     await stableCoinPoolComptroller.setActionsPaused([vUSDT_POOL_STABLECOIN], [0, 1, 2, 3, 4, 5, 6, 7, 8], true);
     await stableCoinPoolComptroller.setCollateralFactor(vUSDT_POOL_STABLECOIN, 0, 0);
@@ -34,18 +35,22 @@ forking(75563035, async () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("unlist reverts", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.reverted;
+    it("stablecoin pool market not unlisted", async () => {
+      const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
+      expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.true;
     });
   });
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip012());
+      await pretendExecutingVip(await vip059());
     });
 
-    it("unlist successful", async () => {
-      await expect(stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN)).to.be.not.reverted;
+    it("stablecoin pool market unlisted", async () => {
+      await stableCoinPoolComptroller.unlistMarket(vUSDT_POOL_STABLECOIN);
+
+      const markets = await stableCoinPoolComptroller.getAssetsIn(vUSDT_USER);
+      expect(markets.includes(vUSDT_POOL_STABLECOIN)).to.be.false;
     });
 
     describe("generic tests", async () => {
