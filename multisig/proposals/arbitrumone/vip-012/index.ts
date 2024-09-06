@@ -21,3 +21,5 @@ export const vip012 = () => {
     },
   ]);
 };
+
+export default vip012;
