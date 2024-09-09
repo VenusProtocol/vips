@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip014, { NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL } from "../../../proposals/arbitrumsepolia/vip-014";
+import vip013, { NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL } from "../../../proposals/arbitrumsepolia/vip-013/addendum";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 
 const VWETH = "0xd7057250b439c0849377bB6C3263eb8f9cf49d98";
@@ -15,7 +15,7 @@ forking(77510100, async () => {
 
   before(async () => {
     nativeTokenGateway = await ethers.getContractAt(GATEWAY_ABI, NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL);
-    await pretendExecutingVip(await vip014());
+    await pretendExecutingVip(await vip013());
   });
 
   describe("Post tx checks", () => {
