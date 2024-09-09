@@ -15,7 +15,7 @@ import {
   checkRewardsDistributorPool,
 } from "src/vip-framework/checks/rewardsDistributor";
 
-import { vip012 } from "../../../proposals/arbitrumone/vip-012";
+import vip012 from "../../../proposals/arbitrumone/vip-012";
 import vip013, {
   COMPTROLLER_CORE,
   COMPTROLLER_LIQUID_STAKED_ETH,
@@ -171,7 +171,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Liquid_staked_ETH: "",
 };
 
-forking(250401898, async () => {
+forking(251659409, async () => {
   let poolRegistry: Contract;
   let coreComptroller: Contract;
   let LSETHComptroller: Contract;
