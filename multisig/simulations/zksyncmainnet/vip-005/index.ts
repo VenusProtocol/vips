@@ -23,7 +23,7 @@ forking(43779112, async () => {
       expect(await nativeTokenGateway.owner()).equals(NETWORK_ADDRESSES.zksyncmainnet.GUARDIAN);
     });
 
-    it("Should have correct owner vWETH and wETH addresses", async () => {
+    it("Should have correct vWETH and wETH addresses", async () => {
       expect(await nativeTokenGateway.vWNativeToken()).to.be.equal(VWETH);
       expect(await nativeTokenGateway.wNativeToken()).to.be.equal(WETH);
     });
