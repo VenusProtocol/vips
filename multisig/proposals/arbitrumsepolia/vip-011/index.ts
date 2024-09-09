@@ -1,14 +1,47 @@
-import { makeProposal } from "../../../../src/utils";
+import { parseUnits } from "ethers/lib/utils";
+import { LzChainId } from "src/types";
+import { makeProposal } from "src/utils";
 
-export const PSR = "0x09267d30798B59c581ce54E861A084C6FC298666";
-export const POOL_REGISTRY = "0xf93Df3135e0D555185c0BC888073374cA551C5fE";
+const XVS_BRIDGE_ADMIN = "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8";
+
+export const MIN_DST_GAS = "300000";
+export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+export const ZKSYNC_SEPOLIA_TRUSTED_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
 
 const vip011 = () => {
   return makeProposal([
     {
-      target: PSR,
-      signature: "setPoolRegistry(address)",
-      params: [POOL_REGISTRY],
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.zksyncsepolia, ZKSYNC_SEPOLIA_TRUSTED_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [LzChainId.zksyncsepolia, 0, MIN_DST_GAS],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [LzChainId.zksyncsepolia, MAX_DAILY_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [LzChainId.zksyncsepolia, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [LzChainId.zksyncsepolia, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [LzChainId.zksyncsepolia, SINGLE_RECEIVE_LIMIT],
     },
   ]);
 };
