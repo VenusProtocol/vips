@@ -26,42 +26,42 @@ interface AssetConfig {
 const assetConfigs: AssetConfig[] = [
   {
     name: "USDC",
-    address: "0x87350147a24099bf1e7e677576f01c1415857c75",
-    price: "999933440000000000000000000000",
+    address: "0x71B49d40B10Aa76cc44954e821eB6eA038Cf196F",
+    price: "1000000000000000000000000000000",
     feed: "0x6e44e50E3cc14DD16e01C590DC1d7020cb36eD4C",
     oracle: "chainlink",
   },
   {
     name: "WBTC",
-    address: "0x149e3b3bd69f1cfc1b42b6a6a152a42e38ceebf1",
-    price: "591772870000000000000000000000000",
+    address: "0x9f5039a86AF12AB10Ff16659eA0885bb4C04d013",
+    price: "556202467546800000000000000000000",
     feed: "0x3015aa11f5c2D4Bd0f891E708C8927961b38cE7D",
     oracle: "chainlink",
   },
   {
     name: "USDT",
-    address: "0xebca682b6c15d539284432edc5b960771f0009e8",
-    price: "1000282070000000000000000000000",
+    address: "0x9AD0542c71c09B764cf58d38918892F3Ae7ecc63",
+    price: "1000328360000000000000000000000",
     feed: "0x3015aa11f5c2D4Bd0f891E708C8927961b38cE7D",
     oracle: "chainlink",
   },
   {
     name: "OP",
-    address: "0xaa5f3e2e31a13adde216a7dc4550872cc253254f",
-    price: "1469100000000000000",
+    address: "0xEC5f6eB84677F562FC568B89121C5E5C19639776",
+    price: "1458800000000000000",
     feed: "0x8907a105E562C9F3d7F2ed46539Ae36D87a15590",
     oracle: "chainlink",
   },
   {
     name: "WETH",
     address: "0x4200000000000000000000000000000000000006",
-    price: "2523120000000000000000",
+    price: "2314330000000000000000",
     feed: "0x61Ec26aA57019C486B10502285c5A3D4A4750AD7",
     oracle: "chainlink",
   },
 ];
 
-forking(16643255, async () => {
+forking(17044100, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let chainLinkOracle: Contract;
