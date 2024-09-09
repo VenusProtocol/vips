@@ -1,6 +1,6 @@
 import { makeProposal } from "src/utils";
 
-export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0x8730de2744E5e8EDC339605326B1DF9F99C0c00B";
+export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0xeEDE4e1BDaC489BD851970bE3952B729C4238A68";
 
 const vip005 = () => {
   return makeProposal([
