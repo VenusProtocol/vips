@@ -76,6 +76,11 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
   if (network.zksync && feeData.maxFeePerGas) {
     // Sometimes the gas estimation is wrong with zksync
     txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+    // Increase gas limit for pool registry commands in simulations. Sometimes it is estimated too low in complex transactions.
+    if (proposal.targets[commandIdx] === NETWORK_ADDRESSES.zksyncmainnet.POOL_REGISTRY) {
+      const gas = await timelock.estimateGas(txnParams);
+      txnParams.gasLimit = gas.mul(10);
+    }
   }
 
   await timelock.sendTransaction(txnParams);
