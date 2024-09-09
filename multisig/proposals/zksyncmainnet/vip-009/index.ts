@@ -2,8 +2,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
 export const ACM = "0x526159A92A82afE5327d37Ef446b68FD9a5cA914";
-export const PSR = "0x149899eb8e8A51157D605e687DbD939dFb5F390e";
-export const POOL_REGISTRY = "0x675075620eAaC74D7cFDAd8D0d8561bC865cDCe9";
+export const PSR = "0xA1193e941BDf34E858f7F276221B4886EfdD040b";
+export const POOL_REGISTRY = "0xFD96B926298034aed9bBe0Cca4b651E41eB87Bc4";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 const vip009 = () => {

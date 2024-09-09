@@ -12,7 +12,7 @@ import PSR_ABI from "./abi/protocolShareReserve.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
-forking(42814864, async () => {
+forking(43776444, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
