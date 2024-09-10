@@ -1,10 +1,12 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
-import { TransactionResponse } from "@ethersproject/providers";
+import { JsonRpcProvider, TransactionResponse } from "@ethersproject/providers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
+import { EthereumProvider } from "hardhat/types";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
 import {
@@ -46,6 +48,11 @@ export const getPayload = (proposal: Proposal) => {
 
 const gasUsedPerCommand = 300000;
 export async function setForkBlock(_blockNumber: number) {
+  if (network.name === "zkSyncTestNode") {
+    console.log("zkSyncTestNode network does not support forking, skipping fork");
+    return;
+  }
+
   const blockNumber = config.networks.hardhat.zksync ? _blockNumber.toString(16) : _blockNumber;
   await network.provider.request({
     method: "hardhat_reset",
@@ -86,11 +93,20 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
   });
 }
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
-  await network.provider.send("hardhat_impersonateAccount", [user]);
-  const balanceHex = toRpcQuantity(balance);
-  await network.provider.send("hardhat_setBalance", [user, balanceHex]);
+  let provider: EthereumProvider | JsonRpcProvider = network.provider;
+  let signer = await ethers.getSigner(user);
 
-  return ethers.getSigner(user);
+  if (network.name === "zkSyncTestNode") {
+    provider = new ethers.providers.JsonRpcProvider("http://localhost:8011");
+
+    signer = provider.getSigner(user) as unknown as SignerWithAddress;
+  }
+
+  await provider.send("hardhat_impersonateAccount", [user]);
+  const balanceHex = toRpcQuantity(balance);
+  await provider.send("hardhat_setBalance", [user, balanceHex]);
+
+  return signer;
 };
 
 const toRpcQuantity = (x: NumberLike): string => {
@@ -163,7 +179,17 @@ export const makeProposal = async (
   meta?: ProposalMeta,
   type?: ProposalType,
 ): Promise<Proposal> => {
-  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const proposal: Proposal = {
+    signatures: [],
+    targets: [],
+    params: [],
+    values: [],
+    gasFeeMultiplicationFactor: [],
+    gasLimitMultiplicationFactor: [],
+    meta,
+    type,
+  };
+
   const map = new Map<number, Command[]>();
   const _commands = [];
   for (const command of commands) {
@@ -181,6 +207,10 @@ export const makeProposal = async (
     proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
     proposal.signatures.push(..._commands.map(cmd => cmd.signature));
     proposal.params.push(..._commands.map(cmd => cmd.params));
+    proposal.gasFeeMultiplicationFactor?.push(
+      ..._commands.map(cmd => (cmd.gasFeeMultiplicationFactor ?? network.zksync ? 2 : 1)),
+    );
+    proposal.gasLimitMultiplicationFactor?.push(..._commands.map(cmd => cmd.gasLimitMultiplicationFactor ?? 1));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);

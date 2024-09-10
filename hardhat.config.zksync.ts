@@ -55,6 +55,19 @@ task("test", "Update fork config")
           loggingEnabled: false,
         };
     hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
+
+    if (hre.network.name === "zkSyncTestNode") {
+      try {
+        const provider = new hre.ethers.providers.JsonRpcProvider("http://localhost:8011");
+        await provider.send("eth_chainId", []);
+        console.log("Local zksync era test node is running");
+      } catch (e) {
+        throw new Error(
+          `Local zksync era test node is not running. Please run it with "yarn run local-test-node:${fork} --fork-block-number \`<fork block number of the vip>\`"`,
+        );
+      }
+    }
+
     hre.FORKED_NETWORK = fork;
 
     await runSuper(taskArguments);
@@ -111,6 +124,14 @@ const config: HardhatUserConfig = {
       chainId: 324,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
+      zksync: true,
+    },
+    zkSyncTestNode: {
+      url: "http://localhost:8011",
+      chainId: 260,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
+      timeout: 2000000000,
       zksync: true,
     },
   },
