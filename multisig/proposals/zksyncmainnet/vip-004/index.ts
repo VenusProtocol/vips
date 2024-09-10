@@ -100,7 +100,7 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", zksyncmainnet.GUARDIAN],
+      params: [ZERO_ADDRESS, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", zksyncmainnet.GUARDIAN],
     },
     {
       target: ACM,
