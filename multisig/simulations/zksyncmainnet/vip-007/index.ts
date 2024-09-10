@@ -7,6 +7,8 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
+import vip003 from "../../../proposals/zksyncmainnet/vip-003";
+import vip004 from "../../../proposals/zksyncmainnet/vip-004";
 import vip007, {
   COMPTROLLER_CORE,
   POOL_REGISTRY,
@@ -25,6 +27,8 @@ const XVS_STORE = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
 
 forking(43787868, async () => {
   before(async () => {
+    await pretendExecutingVip(await vip003());
+    await pretendExecutingVip(await vip004());
     await pretendExecutingVip(await vip007());
   });
   describe("Post-VIP behavior", async () => {
