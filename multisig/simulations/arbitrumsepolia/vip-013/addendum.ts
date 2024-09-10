@@ -4,7 +4,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip013, { NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL } from "../../../proposals/arbitrumsepolia/vip-013/addendum";
+import vip013, {
+  NATIVE_TOKEN_GATEWAY_LIQUID_STAKED_ETH_POOL,
+} from "../../../proposals/arbitrumsepolia/vip-013/addendum";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 
 const VWETH = "0xd7057250b439c0849377bB6C3263eb8f9cf49d98";
