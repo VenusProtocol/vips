@@ -68,7 +68,7 @@ export const newMarkets = {
       protocolSeizeShare: parseUnits("0.01", 18),
     },
     initialSupply: {
-      amount: parseUnits("2", 18),
+      amount: parseUnits("3.55", 18),
       vTokenReceiver: TREASURY,
     },
     interestRateModel: {
@@ -94,13 +94,13 @@ export const newMarkets = {
     riskParameters: {
       collateralFactor: parseUnits("0.9", 18),
       liquidationThreshold: parseUnits("0.93", 18),
-      supplyCap: parseUnits("125", 18),
-      borrowCap: parseUnits("65", 18),
-      reserveFactor: parseUnits("0.2", 18),
+      supplyCap: parseUnits("400", 18),
+      borrowCap: parseUnits("200", 18),
+      reserveFactor: parseUnits("0.25", 18),
       protocolSeizeShare: parseUnits("0.01", 18),
     },
     initialSupply: {
-      amount: parseUnits("2", 18),
+      amount: parseUnits("4.43236349753311919", 18),
       vTokenReceiver: TREASURY,
     },
     interestRateModel: {
@@ -124,10 +124,10 @@ export const newMarkets = {
       ...commonSpec,
     },
     riskParameters: {
-      collateralFactor: parseUnits("0.9", 18),
-      liquidationThreshold: parseUnits("0.93", 18),
-      supplyCap: parseUnits("125", 18),
-      borrowCap: parseUnits("110", 18),
+      collateralFactor: parseUnits("0", 18),
+      liquidationThreshold: parseUnits("0", 18),
+      supplyCap: parseUnits("450", 18),
+      borrowCap: parseUnits("400", 18),
       reserveFactor: parseUnits("0.15", 18),
       protocolSeizeShare: parseUnits("0.01", 18),
     },

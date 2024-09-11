@@ -111,8 +111,8 @@ export const newMarkets = {
       protocolSeizeShare: parseUnits("0.01", 18),
     },
     initialSupply: {
-      amount: parseUnits("2", 18), // TBD
-      vTokenReceiver: TREASURY, // TBD
+      amount: parseUnits("4.43236349753311919", 18),
+      vTokenReceiver: "0x46cba1e9b1e5db32da28428f2fb85587bcb785e7",
     },
     interestRateModel: {
       address: "0x7DE84548C2BaDC047C5e7F0B7f9a4ba660d10dAD",

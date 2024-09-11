@@ -25,6 +25,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 const ONE_YEAR = 365 * 24 * 3600;
+const WEETH_HOLDER = "0xC0e1C9Fec0d8888039095DA014382D027F27069D";
 
 forking(41956930, async () => {
   const provider = ethers.provider;
@@ -130,10 +131,12 @@ forking(41956930, async () => {
 
           // Initial exchange rate should account for decimal transformations such that
           // the string representation is the same (i.e. 1 vToken == 1 underlying)
+          const multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
+          const vTokenSupply = initialSupply.amount.div(multiplier);
           const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
-          const vTokenSupply = parseUnits(underlyingSupplyString, vTokenSpec.decimals);
+          const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
-          it(`should have initial supply = ${underlyingSupplyString} ${vTokenSpec.symbol}`, async () => {
+          it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
             expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
           });
 
@@ -150,6 +153,6 @@ forking(41956930, async () => {
       }
     });
 
-    checkIsolatedPoolsComptrollers();
+    checkIsolatedPoolsComptrollers({ [COMPTROLLER]: WEETH_HOLDER });
   });
 });

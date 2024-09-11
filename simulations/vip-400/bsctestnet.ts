@@ -123,10 +123,12 @@ forking(43544683, async () => {
 
           // Initial exchange rate should account for decimal transformations such that
           // the string representation is the same (i.e. 1 vToken == 1 underlying)
+          const multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
+          const vTokenSupply = initialSupply.amount.div(multiplier);
           const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
-          const vTokenSupply = parseUnits(underlyingSupplyString, vTokenSpec.decimals);
+          const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
-          it(`should have initial supply = ${underlyingSupplyString} ${vTokenSpec.symbol}`, async () => {
+          it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
             expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
           });
 
