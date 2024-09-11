@@ -48,7 +48,7 @@ forking(16643257, async () => {
   describe("Pre-Execution state", () => {
     it("Bridge Owner != opsepolia multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).not.equal(opsepolia.NORMAL_TIMELOCK);
+      expect(owner).not.equal(opsepolia.GUARDIAN);
     });
 
     it("Trusted remote should not exist for any network(bsctestnet, opbnbtestnet, sepolia)", async () => {
@@ -84,11 +84,11 @@ forking(16643257, async () => {
 
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).equals(opsepolia.NORMAL_TIMELOCK);
+      expect(owner).equals(opsepolia.GUARDIAN);
     });
 
     it("Should whitelist MULTISIG and TREASURY", async () => {
-      let res = await xvsBridge.whitelist(opsepolia.NORMAL_TIMELOCK);
+      let res = await xvsBridge.whitelist(opsepolia.GUARDIAN);
       expect(res).equals(true);
 
       res = await xvsBridge.whitelist(opsepolia.VTREASURY);

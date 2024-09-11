@@ -35,101 +35,97 @@ const vip002 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setSendVersion(uint16)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setSendVersion(uint16)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setReceiveVersion(uint16)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setReceiveVersion(uint16)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "forceResumeReceive(uint16,bytes)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "forceResumeReceive(uint16,bytes)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setOracle(address)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setOracle(address)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxSingleTransactionLimit(uint16,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxSingleTransactionLimit(uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxDailyLimit(uint16,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxDailyLimit(uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [
-        XVS_BRIDGE_ADMIN_PROXY,
-        "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-        opsepolia.NORMAL_TIMELOCK,
-      ],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxSingleReceiveTransactionLimit(uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxDailyReceiveLimit(uint16,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setMaxDailyReceiveLimit(uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "pause()", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "pause()", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "unpause()", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "unpause()", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "removeTrustedRemote(uint16)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "removeTrustedRemote(uint16)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "dropFailedMessage(uint16,bytes,uint64)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "dropFailedMessage(uint16,bytes,uint64)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setPrecrime(address)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setPrecrime(address)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setMinDstGas(uint16,uint16,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setMinDstGas(uint16,uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setPayloadSizeLimit(uint16,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setPayloadSizeLimit(uint16,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setWhitelist(address,bool)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setWhitelist(address,bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setConfig(uint16,uint16,uint256,bytes)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setConfig(uint16,uint16,uint256,bytes)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "sweepToken(address,address,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "sweepToken(address,address,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "updateSendAndCallEnabled(bool)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "updateSendAndCallEnabled(bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -144,37 +140,37 @@ const vip002 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "setTrustedRemoteAddress(uint16,bytes)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "setTrustedRemoteAddress(uint16,bytes)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS_BRIDGE_ADMIN_PROXY, "transferBridgeOwnership(address)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS_BRIDGE_ADMIN_PROXY, "transferBridgeOwnership(address)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS, "migrateMinterTokens(address,address)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS, "migrateMinterTokens(address,address)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS, "setMintCap(address,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS, "setMintCap(address,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS, "updateBlacklist(address,bool)", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS, "updateBlacklist(address,bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS, "pause()", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS, "pause()", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [XVS, "unpause()", opsepolia.NORMAL_TIMELOCK],
+      params: [XVS, "unpause()", opsepolia.GUARDIAN],
     },
     { target: XVS_BRIDGE_ADMIN_PROXY, signature: "acceptOwnership()", params: [] },
     {
@@ -184,28 +180,8 @@ const vip002 = () => {
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [BNB_TESTNET_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [BNB_TESTNET_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [OPBNB_TESTNET_ENDPOINT_ID, OPBNB_TESTNET_TRUSTED_REMOTE],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [OPBNB_TESTNET_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [OPBNB_TESTNET_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -214,43 +190,8 @@ const vip002 = () => {
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [SEPOLIA_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, ARBITRUM_SEPOLIA_TRUSTED_REMOTE],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMinDstGas(uint16,uint16,uint256)",
-      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, 0, MIN_DST_GAS],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxDailyLimit(uint16,uint256)",
-      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, MAX_DAILY_SEND_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, SINGLE_SEND_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, MAX_DAILY_RECEIVE_LIMIT],
-    },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [ARBITRUM_SEPOLIA_ENDPOINT_ID, SINGLE_RECEIVE_LIMIT],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
@@ -290,7 +231,7 @@ const vip002 = () => {
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setWhitelist(address,bool)",
-      params: [opsepolia.NORMAL_TIMELOCK, true],
+      params: [opsepolia.GUARDIAN, true],
     },
     {
       target: XVS,
