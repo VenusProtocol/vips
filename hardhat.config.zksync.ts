@@ -39,26 +39,14 @@ task("test", "Update fork config")
   .addOptionalParam("fork", "Network to fork")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
-    const hardhatConfig = fork
-      ? {
-          allowUnlimitedContractSize: false,
-          loggingEnabled: false,
-          forking: {
-            enabled: true,
-            url: process.env[`ARCHIVE_NODE_${fork}`] as string,
-          },
-          gas: "auto" as const,
-          blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
-        }
-      : {
-          allowUnlimitedContractSize: true,
-          loggingEnabled: false,
-        };
-    hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
 
     if (hre.network.name === "zkSyncTestNode") {
+      if (!process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]) {
+        throw new Error("ZKSYNC_ERA_LOCAL_TEST_NODE env variable is not set");
+      }
+
       try {
-        const provider = new hre.ethers.providers.JsonRpcProvider("http://localhost:8011");
+        const provider = new hre.ethers.providers.JsonRpcProvider(process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]);
         await provider.send("eth_chainId", []);
         console.log("Local zksync era test node is running");
       } catch (e) {
@@ -67,6 +55,29 @@ task("test", "Update fork config")
         );
       }
     }
+
+    const hardhatConfig = fork
+      ? {
+          allowUnlimitedContractSize: false,
+          loggingEnabled: false,
+          forking:
+            hre.network.name === "zkSyncTestNode"
+              ? {
+                  enabled: false,
+                  url: process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"] as string,
+                }
+              : {
+                  enabled: true,
+                  url: process.env[`ARCHIVE_NODE_${fork}`] as string,
+                },
+          gas: "auto" as const,
+          blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
+        }
+      : {
+          allowUnlimitedContractSize: true,
+          loggingEnabled: false,
+        };
+    hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
 
     hre.FORKED_NETWORK = fork;
 
@@ -127,7 +138,7 @@ const config: HardhatUserConfig = {
       zksync: true,
     },
     zkSyncTestNode: {
-      url: "http://localhost:8011",
+      url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
       chainId: 260,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,

@@ -96,8 +96,9 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   let provider: EthereumProvider | JsonRpcProvider = network.provider;
   let signer = await ethers.getSigner(user);
 
+  // zksync test node provider does not support default impersonation
   if (network.name === "zkSyncTestNode") {
-    provider = new ethers.providers.JsonRpcProvider("http://localhost:8011");
+    provider = new ethers.providers.JsonRpcProvider(config.networks.hardhat.forking?.url);
 
     signer = provider.getSigner(user) as unknown as SignerWithAddress;
   }
