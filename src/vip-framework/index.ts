@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
 import { Contract, ContractInterface } from "ethers";
-import { FORKED_NETWORK, ethers, network } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
@@ -29,8 +29,14 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR =
 
 const VOTING_PERIOD = 28800;
 
-export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK, GUARDIAN } =
-  NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
+export const {
+  DEFAULT_PROPOSER_ADDRESS,
+  GOVERNOR_PROXY,
+  NORMAL_TIMELOCK,
+  FAST_TRACK_TIMELOCK,
+  CRITICAL_TIMELOCK,
+  GUARDIAN,
+} = NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
 export const forking = (blockNumber: number, fn: () => Promise<void>) => {
@@ -66,21 +72,22 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     return iface.encodeFunctionData(signature, params);
   };
 
-  const feeData = await ethers.provider.getFeeData();
   const txnParams: TransactionRequest = {
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
     data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
   };
 
-  if (network.zksync && feeData.maxFeePerGas) {
-    // Sometimes the gas estimation is wrong with zksync
-    txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
-    // Increase gas limit for pool registry commands in simulations. Sometimes it is estimated too low in complex transactions.
-    if (proposal.targets[commandIdx] === NETWORK_ADDRESSES.zksyncmainnet.POOL_REGISTRY) {
-      const gas = await timelock.estimateGas(txnParams);
-      txnParams.gasLimit = gas.mul(10);
+  if (proposal.gasFeeMultiplicationFactor && proposal.gasFeeMultiplicationFactor[commandIdx]) {
+    const feeData = await ethers.provider.getFeeData();
+    if (feeData.maxFeePerGas) {
+      txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(proposal.gasFeeMultiplicationFactor[commandIdx]);
     }
+  }
+
+  if (proposal.gasLimitMultiplicationFactor && proposal.gasLimitMultiplicationFactor[commandIdx]) {
+    const gas = await timelock.estimateGas(txnParams);
+    txnParams.gasLimit = gas.mul(proposal.gasLimitMultiplicationFactor[commandIdx]);
   }
 
   await timelock.sendTransaction(txnParams);
@@ -110,9 +117,14 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
+    const timelockAddress = {
+      [ProposalType.REGULAR]: NORMAL_TIMELOCK,
+      [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
+      [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
+    }[proposal.type || ProposalType.REGULAR];
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
+    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(

@@ -100,7 +100,7 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", zksyncmainnet.GUARDIAN],
+      params: [ZERO_ADDRESS, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", zksyncmainnet.GUARDIAN],
     },
     {
       target: ACM,
@@ -158,6 +158,7 @@ const vip004 = () => {
       target: zksyncmainnet.POOL_REGISTRY,
       signature: "addPool(string,address,uint256,uint256,uint256)",
       params: ["Core", COMPTROLLER_CORE, parseUnits("0.5", 18), parseUnits("1.1", 18), parseUnits("100", 18)],
+      gasLimitMultiplicationFactor: 10,
     },
     {
       target: zksyncmainnet.VTREASURY,
@@ -193,6 +194,7 @@ const vip004 = () => {
           parseUnits("20", 8), // borrow cap
         ],
       ],
+      gasLimitMultiplicationFactor: 10,
     },
     {
       target: zksyncmainnet.VTREASURY,
@@ -228,6 +230,7 @@ const vip004 = () => {
           parseUnits("1700", 18), // borrow cap
         ],
       ],
+      gasLimitMultiplicationFactor: 10,
     },
     {
       target: zksyncmainnet.VTREASURY,
@@ -263,6 +266,7 @@ const vip004 = () => {
           parseUnits("4200000", 6), // borrow cap
         ],
       ],
+      gasLimitMultiplicationFactor: 10,
     },
     {
       target: zksyncmainnet.VTREASURY,
@@ -298,6 +302,7 @@ const vip004 = () => {
           parseUnits("3300000", 6), // borrow cap
         ],
       ],
+      gasLimitMultiplicationFactor: 10,
     },
     {
       target: zksyncmainnet.VTREASURY,
@@ -333,6 +338,7 @@ const vip004 = () => {
           parseUnits("12500000", 18), // borrow cap
         ],
       ],
+      gasLimitMultiplicationFactor: 10,
     },
   ]);
 };
