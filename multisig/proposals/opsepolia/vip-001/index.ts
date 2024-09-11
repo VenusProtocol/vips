@@ -178,6 +178,27 @@ const vip001 = () => {
         ],
       ],
     },
+    {
+      target: opsepolia.CHAINLINK_ORACLE,
+      signature: "setDirectPrice(address,uint256)",
+      params: [opsepolia.XVS, "7000000000000000000"], // 7$
+    },
+
+    {
+      target: opsepolia.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          opsepolia.XVS,
+          [
+            opsepolia.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [true, false, false],
+        ],
+      ],
+    },
   ]);
 };
 
