@@ -26,42 +26,42 @@ const vip001 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.RESILIENT_ORACLE, "pause()", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.RESILIENT_ORACLE, "pause()", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.RESILIENT_ORACLE, "unpause()", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.RESILIENT_ORACLE, "unpause()", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.RESILIENT_ORACLE, "setOracle(address,address,uint8)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.RESILIENT_ORACLE, "enableOracle(address,uint8,bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.RESILIENT_ORACLE, "setTokenConfig(TokenConfig)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opsepolia.NORMAL_TIMELOCK],
+      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opsepolia.GUARDIAN],
     },
     {
       target: opsepolia.RESILIENT_ORACLE,
@@ -169,6 +169,26 @@ const vip001 = () => {
       params: [
         [
           OP,
+          [
+            opsepolia.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [true, false, false],
+        ],
+      ],
+    },
+    {
+      target: opsepolia.CHAINLINK_ORACLE,
+      signature: "setDirectPrice(address,uint256)",
+      params: [opsepolia.XVS, "7000000000000000000"], // 7$
+    },
+    {
+      target: opsepolia.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          opsepolia.XVS,
           [
             opsepolia.CHAINLINK_ORACLE,
             "0x0000000000000000000000000000000000000000",

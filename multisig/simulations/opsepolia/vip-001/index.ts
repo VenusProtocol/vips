@@ -13,7 +13,7 @@ const { opsepolia } = NETWORK_ADDRESSES;
 
 const RESILIENT_ORACLE = opsepolia.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = opsepolia.CHAINLINK_ORACLE;
-const NORMAL_TIMELOCK = opsepolia.NORMAL_TIMELOCK;
+const GUARDIAN = opsepolia.GUARDIAN;
 
 interface AssetConfig {
   name: string;
@@ -59,6 +59,13 @@ const assetConfigs: AssetConfig[] = [
     feed: "0x61Ec26aA57019C486B10502285c5A3D4A4750AD7",
     oracle: "chainlink",
   },
+  {
+    name: "XVS",
+    address: "0x789482e37218f9b26d8D9115E356462fA9A37116",
+    price: "7000000000000000000",
+    feed: "",
+    oracle: "chainlink",
+  },
 ];
 
 forking(17044100, async () => {
@@ -75,9 +82,9 @@ forking(17044100, async () => {
     });
 
     it("correct pending owner", async () => {
-      expect(await resilientOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-      expect(await chainLinkOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-      expect(await boundValidator.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await resilientOracle.pendingOwner()).to.equal(GUARDIAN);
+      expect(await chainLinkOracle.pendingOwner()).to.equal(GUARDIAN);
+      expect(await boundValidator.pendingOwner()).to.equal(GUARDIAN);
     });
 
     it("should revert for unconfigured asset price request", async () => {
@@ -96,9 +103,9 @@ forking(17044100, async () => {
     });
 
     it("correct owner", async () => {
-      expect(await resilientOracle.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await chainLinkOracle.owner()).to.equal(NORMAL_TIMELOCK);
-      expect(await boundValidator.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await resilientOracle.owner()).to.equal(GUARDIAN);
+      expect(await chainLinkOracle.owner()).to.equal(GUARDIAN);
+      expect(await boundValidator.owner()).to.equal(GUARDIAN);
     });
 
     it("validate asset prices", async () => {
