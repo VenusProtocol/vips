@@ -9,7 +9,6 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip001 from "../../../proposals/opsepolia/vip-001";
 import vip004, {
   COMPTROLLER_CORE,
   MOCK_OP,
@@ -201,7 +200,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vOP_Core: "",
 };
 
-forking(17082725, async () => {
+forking(17170245, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -226,8 +225,6 @@ forking(17082725, async () => {
 
       await mockWSTToken.connect(WETHSigner).transfer(opsepolia.VTREASURY, ethers.utils.parseEther("1"));
 
-      // executing vip001 before vip004 to set the oracles for the mock tokens
-      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {

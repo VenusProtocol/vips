@@ -19,7 +19,7 @@ export const VUSDC_CORE = "0x2419606690B08060ebFd7581e0a6Ae45f1915ee9";
 export const VUSDT_CORE = "0xC23D18536E7069f924B3717B2710CA6A09e53ea9";
 export const VOP_CORE = "0x49cceCdd0b399C1b13260452893A3A835bDad5DC";
 
-export const PSR = "0x4d3785aD3767b93231C19543AA7c9BcD098F1f15";
+export const PSR = "0x0F021c29283c47DF8237741dD5a0aA22952aFc88";
 
 // IL configuration
 const vip004 = () => {
@@ -27,82 +27,82 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setCollateralFactor(address,uint256,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMarketSupplyCaps(address[],uint256[])", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMarketSupplyCaps(address[],uint256[])", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMarketBorrowCaps(address[],uint256[])", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMarketBorrowCaps(address[],uint256[])", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setCloseFactor(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setCloseFactor(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setMinLiquidatableCollateral(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setMinLiquidatableCollateral(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setActionsPaused(address[],uint256[],bool)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setActionsPaused(address[],uint256[],bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setPoolName(address,string)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setProtocolSeizeShare(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setProtocolSeizeShare(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setReserveFactor(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setReserveFactor(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setInterestRateModel(address)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setInterestRateModel(address)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "updateJumpRateModel(uint256,uint256,uint256,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -112,12 +112,12 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.POOL_REGISTRY, "addMarket(AddMarketInput)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.POOL_REGISTRY, "addMarket(AddMarketInput)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setReduceReservesBlockDelta(uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [ZERO_ADDRESS, "setReduceReservesBlockDelta(uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -164,7 +164,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_WBTC, "3553143", opsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_WBTC, "3553143", opsepolia.GUARDIAN],
     },
     {
       target: MOCK_WBTC,
@@ -204,7 +204,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, "610978879332136515", opsepolia.NORMAL_TIMELOCK],
+      params: [WETH, "610978879332136515", opsepolia.GUARDIAN],
     },
     {
       target: WETH,
@@ -244,7 +244,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_USDC, parseUnits("1800", 6), opsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_USDC, parseUnits("1800", 6), opsepolia.GUARDIAN],
     },
     {
       target: MOCK_USDC,
@@ -284,7 +284,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_USDT, parseUnits("1800", 6), opsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_USDT, parseUnits("1800", 6), opsepolia.GUARDIAN],
     },
     {
       target: MOCK_USDT,
@@ -324,7 +324,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [MOCK_OP, "610978879332136515", opsepolia.NORMAL_TIMELOCK],
+      params: [MOCK_OP, "610978879332136515", opsepolia.GUARDIAN],
     },
     {
       target: MOCK_OP,
