@@ -11,6 +11,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip400, {
   COMPTROLLER,
   POOL_REGISTRY,
+  PRIME,
   RESILIENT_ORACLE,
   WEETH,
   WSTETH,
@@ -102,6 +103,10 @@ forking(43544683, async () => {
 
       it("should have owner = NORMAL_TIMELOCK", async () => {
         expect(await comptroller.owner()).to.equal(NORMAL_TIMELOCK);
+      });
+
+      it(`should have prime token = ${PRIME}`, async () => {
+        expect(await comptroller.prime()).to.equal(PRIME);
       });
     });
 

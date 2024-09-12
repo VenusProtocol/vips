@@ -5,6 +5,7 @@ import { makeProposal } from "src/utils";
 
 export const POOL_REGISTRY = "0x9F7b01A536aFA00EF10310A162877fd792cD0666";
 export const COMPTROLLER = "0xBE609449Eb4D76AD8545f957bBE04b596E8fC529";
+export const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
 export const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 export const TREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
@@ -265,6 +266,11 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
         target: POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
         params: ["Liquid Staked ETH", COMPTROLLER, CLOSE_FACTOR, LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "setPrimeToken(address)",
+        params: [PRIME],
       },
 
       // Markets

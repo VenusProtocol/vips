@@ -13,6 +13,7 @@ import vip400, {
   CHAINLINK_ORACLE,
   COMPTROLLER,
   POOL_REGISTRY,
+  PRIME,
   RESILIENT_ORACLE,
   WEETH,
   WSTETH,
@@ -110,6 +111,10 @@ forking(41956930, async () => {
 
       it("should have owner = NORMAL_TIMELOCK", async () => {
         expect(await comptroller.owner()).to.equal(NORMAL_TIMELOCK);
+      });
+
+      it(`should have prime token = ${PRIME}`, async () => {
+        expect(await comptroller.prime()).to.equal(PRIME);
       });
     });
 

@@ -5,6 +5,7 @@ import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 export const POOL_REGISTRY = "0xC85491616Fa949E048F3aAc39fbf5b0703800667";
 export const COMPTROLLER = "0xC7859B809Ed5A2e98659ab5427D5B69e706aE26b";
+export const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 export const WSTETH = "0x4349016259FCd8eE452f696b2a7beeE31667D129";
 export const WEETH = "0x7df9372096c8ca2401f30B3dF931bEFF493f1FdC";
 export const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
@@ -241,6 +242,11 @@ const vip400 = () => {
         target: POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
         params: ["Liquid Staked ETH", COMPTROLLER, CLOSE_FACTOR, LIQUIDATION_INCENTIVE, MIN_LIQUIDATABLE_COLLATERAL],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "setPrimeToken(address)",
+        params: [PRIME],
       },
 
       // Markets
