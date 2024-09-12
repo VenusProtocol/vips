@@ -27,7 +27,9 @@ export const NETWORK_ADDRESSES = {
     DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
     GOVERNOR_PROXY: govBscmainnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBscmainnetContracts.addresses.NormalTimelock,
-    GUARDIAN: "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B ",
+    FAST_TRACK_TIMELOCK: govBscmainnetContracts.addresses.FastTrackTimelock,
+    CRITICAL_TIMELOCK: govBscmainnetContracts.addresses.CriticalTimelock,
+    GUARDIAN: "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B",
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: oracleBscmainnetContracts.addresses.ChainlinkOracle,
@@ -43,12 +45,15 @@ export const NETWORK_ADDRESSES = {
     POOL_REGISTRY: ilBscmainnetDeployedContracts.addresses.PoolRegistry,
     BINANCE_ORACLE: oracleBscmainnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBscmainnetContracts.addresses.ResilientOracle,
+    REDSTONE_ORACLE: oracleBscmainnetContracts.addresses.RedStoneOracle,
   },
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GUARDIAN: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GOVERNOR_PROXY: govBsctestnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBsctestnetContracts.addresses.NormalTimelock,
+    FAST_TRACK_TIMELOCK: govBsctestnetContracts.addresses.FastTrackTimelock,
+    CRITICAL_TIMELOCK: govBsctestnetContracts.addresses.CriticalTimelock,
     ETH_CHAINLINK_FEED: "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7",
     USDT_CHAINLINK_FEED: "0xEca2605f0BCF2BA5966372C99837b1F182d3D620",
     CHAINLINK_ORACLE: oracleBsctestnetContracts.addresses.ChainlinkOracle,
@@ -64,6 +69,7 @@ export const NETWORK_ADDRESSES = {
     POOL_REGISTRY: ilBsctestnetDeployedContracts.addresses.PoolRegistry,
     BINANCE_ORACLE: oracleBsctestnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBsctestnetContracts.addresses.ResilientOracle,
+    REDSTONE_ORACLE: oracleBsctestnetContracts.addresses.RedStoneOracle,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",
@@ -178,6 +184,8 @@ export const NETWORK_ADDRESSES = {
     XVS: "0xD78ABD81a3D57712a3af080dc4185b698Fe9ac5A",
     RESILIENT_ORACLE: "0xDe564a4C887d5ad315a19a96DC81991c98b12182",
     CHAINLINK_ORACLE: "0x4FC29E1d3fFFbDfbf822F09d20A5BE97e59F66E5",
+    XVS_VAULT_PROXY: "0xbbB3C88192a5B0DB759229BeF49DcD1f168F326F",
+    GENERIC_TEST_USER_ACCOUNT: "0x6f057A858171e187124ddEDF034dAc63De5dE5dB",
   },
   opsepolia: {
     NORMAL_TIMELOCK: "", // To be deployed
