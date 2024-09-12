@@ -145,14 +145,66 @@ export const newSpeeds: SpeedRecord[] = [
   },
 ];
 
-export const vip364 = () => {
+const vip364 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-364 XVS Emission Reduction",
-    description: ``,
-    forDescription: "I agree, Venus should reduce daily XVS emissions",
-    againstDescription: "I disagree, Venus should not reduce daily XVS emissions",
-    abstainDescription: "I am indifferent to whether Venus proceeds or not",
+    title: "VIP-364 [BNB Chain] XVS Emissions Adjustments",
+    description: `#### Summary
+
+Following the previous [community proposal](https://community.venus.io/t/emissions-adjustments-for-bnb-chain/4554/1) and following [snapshot vote](https://snapshot.org/#/venus-xvs.eth/proposal/0xbb361ec726cebc7bc78d564e65cadd447fcbf1dac0082ee1b2a8eb8251d3e0c0), this proposal adjusts the XVS emissions on the BNB Chain following an in-depth analysis of market TVL proportions and the current emission weights relative to the total market APYs. The proposed emission adjustments are detailed below.
+
+#### Monthly XVS emissions reduction details
+
+- BNB: Current allocation: 2,812 / New allocation: 0
+- BTCB: Current allocation: 2,812 / New allocation 0
+- ETH : Current allocation: 1,406 / New allocation: 0
+- USDC: Current allocation: 1,172 / New allocation:0
+- USDT: Current allocation: 1,172/ New allocation: 0
+- FDUSD: Current allocation: 300/ New allocation: 0
+- WBETH: Current allocation: 257/ New allocation: 0
+- DAI: Current allocation: 140 / New allocation: 0
+- ADA: Current allocation: 140 / New allocation: 0
+- UNI: Current allocation: 140 / New allocation: 0
+- DOT: Current allocation: 137 / New allocation: 0
+- MATIC: Current allocation:  94 / New allocation: 0
+- CAKE: Current allocation: 94 / New allocation: 0
+- TRX: Current allocation: 94 / New allocation: 0
+- LTC: Current allocation: 86 / New allocation: 0
+- XRP: Current allocation: 86 / New allocation: 0
+- LINK: Current allocation: 86 / New allocation: 0
+- BCH: Current allocation: 47 / New allocation: 0
+- FIL: Current allocation: 47 / New allocation: 0
+- DOGE  : Current allocation: 47 / New allocation: 0
+- AAVE: Current allocation: 47 / New allocation: 0
+- XVS: Current allocation:  0 / New allocation: 1,200
+
+Total new Emissions: 1,200 XVS per month.
+
+#### Sensitivity Analysis
+
+A [sensitivity analysis](https://community.venus.io/t/emissions-adjustments-for-bnb-chain/4554/1) was conducted to assess the impact of emission adjustments on market APYs, estimating how reductions in emissions might affect overall market performance.
+
+#### XVS Market Emissions
+
+The Venus Community has been advocating for several months for the XVS Market on the Core pool to be lightly Incentivized. In doing so, the XVS Market on the core pool can offer additional advantages for both the Venus protocol and its community as well as increased XVS Utility and Demand while slightly offsetting the borrow interests paid by XVS suppliers borrowing funds against these. It’s also a way to thank the XVS holders for their continuous support.
+
+#### Final Recommendations
+
+Based on the analysis, the recommendations are as follows:
+
+- **Eliminate emissions** for markets representing less than 5% of total protocol TVL.
+- **BTCB Market**: This market stands out with a low total APY of 0.04% and a utilization rate of 6%. This suggests that users are primarily supplying BTCB as collateral rather than for returns. Given this, emissions are recommended to be removed, as their absolute impact on supply APY would be minimal—an estimated reduction of just 0.01%.
+- For **all remaining markets**, the relative boost weight is below 10%, meaning emissions have a negligible effect on the total APY. Therefore, it is recommended to **remove emissions entirely** for these markets as well.
+
+By implementing these changes, the proposal aims to optimize XVS emissions, focusing on markets that contribute significantly to the overall TVL and ensuring a more effective allocation of resources across the BNB Chain.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/380)
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
@@ -171,3 +223,5 @@ export const vip364 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip364;

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { newSpeeds, vip364 } from "../../vips/vip-364/bscmainnet";
+import vip364, { newSpeeds } from "../../vips/vip-364/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
