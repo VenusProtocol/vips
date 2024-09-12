@@ -140,7 +140,7 @@ export const newSpeeds: SpeedRecord[] = [
   {
     market: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
     symbol: "vXVS",
-    supplySideSpeed: "694444444444444",
+    supplySideSpeed: "1388888888888888",
     borrowSideSpeed: "0",
   },
 ];
