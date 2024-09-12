@@ -28,7 +28,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 const ONE_YEAR = 365 * 24 * 3600;
 const WEETH_HOLDER = "0xC0e1C9Fec0d8888039095DA014382D027F27069D";
 
-forking(41956930, async () => {
+forking(42153975, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -44,18 +44,23 @@ forking(41956930, async () => {
     }
   });
 
-  testVip("LST ETH pool VIP", await vip400({ chainlinkStalePeriod: ONE_YEAR, redstoneStalePeriod: ONE_YEAR }));
+  testVip(
+    "LST ETH pool VIP",
+    await vip400({ chainlinkStalePeriod: ONE_YEAR, redstoneStalePeriod: ONE_YEAR, hardcodeWstETHPrice: true }),
+  );
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct weETH price", async () => {
         const price = await oracle.getPrice(WEETH);
-        expect(price).to.be.eq(parseUnits("2509.425684209024827300", 18));
+        expect(price).to.be.eq(parseUnits("2447.541422313822000000", 18));
       });
 
       it("has the correct wstETH price", async () => {
+        // wstETH price feed reverts in the simulation environment due to staleness check,
+        // so we have to use a stub value for testing
         const price = await oracle.getPrice(WSTETH);
-        expect(price).to.be.eq(parseUnits("2509.425684209024827300", 18)); // TODO: Use the correct feed for wstETH
+        expect(price).to.be.eq(parseUnits("2569.820220000000000000", 18));
       });
     });
 

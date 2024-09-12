@@ -27,17 +27,15 @@ export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 export const WSTETH_ONEJUMP_REDSTONE_ORACLE = "0x90dd7ae1137cC072F7740Ee0b264f2351515B98A";
-// export const WSTETH_ONEJUMP_CHAINLINK_ORACLE = "0x3C9850633e8Cb5ac5c3Da833C947E7c91EED15C4";
 export const WEETH_ONEJUMP_REDSTONE_ORACLE = "0xb661102c399630420A4B9fa0a5cF57161e5452F5";
 export const WEETH_ONEJUMP_CHAINLINK_ORACLE = "0x3b3241698692906310A65ACA199701843404E175";
 
 export const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
-export const WSTETH_CHAINLINK_FEED = ""; // TBD
 export const WEETH_CHAINLINK_FEED = "0xF37Be32598E9851f785acA86c2162e7C1A8466dd";
 export const CHAINLINK_STALE_PERIOD = 26 * 60 * 60; // 26 hours
 
 export const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
-export const WSTETH_REDSTONE_FEED = "0x9b2C948dbA5952A1f5Ab6fA16101c1392b8da1ab"; // TODO: use "0xF43a01A39Fd28950031a42861faD703147d5C8e7"
+export const WSTETH_REDSTONE_FEED = "0xa76dB2Cb356ba111cCB5a7Ca369D17E1592f42Dd";
 export const WEETH_REDSTONE_FEED = "0x9b2C948dbA5952A1f5Ab6fA16101c1392b8da1ab";
 export const REDSTONE_STALE_PERIOD = 7 * 60 * 60; // 7 hours
 
@@ -48,6 +46,7 @@ export const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53"
 export const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 export const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 
+export const FIXED_LST_PRICE = parseUnits("1.1", 18); // if wstETH price is hardcoded for the simulation
 export const CLOSE_FACTOR = parseUnits("0.5", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.02", 18);
 export const MIN_LIQUIDATABLE_COLLATERAL = parseUnits("100", 18);
@@ -173,7 +172,11 @@ enum ConversionAccessibility {
   ONLY_FOR_USERS = 3,
 }
 
-const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?: number }) => {
+const vip400 = (overrides: {
+  chainlinkStalePeriod?: number;
+  redstoneStalePeriod?: number;
+  hardcodeWstETHPrice?: boolean;
+}) => {
   const meta = {
     version: "v2",
     title: "VIP-400",
@@ -189,14 +192,6 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
   return makeProposal(
     [
       // Oracle config
-      /*
-      TBD: wstETH feed is not available on Chainlink yet
-      {
-        target: CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [WSTETH, WSTETH_CHAINLINK_FEED, chainlinkStalePeriod],
-      },
-      */
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
@@ -205,13 +200,25 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[WSTETH, WSTETH_REDSTONE_FEED, redstoneStalePeriod]],
-      },
-      {
-        target: REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
         params: [[WEETH, WEETH_REDSTONE_FEED, redstoneStalePeriod]],
       },
+      (() => {
+        // wstETH price feed reverts in the simulation environment due to staleness check,
+        // so we have to use a stub value for testing
+        if (overrides.hardcodeWstETHPrice) {
+          return {
+            target: REDSTONE_ORACLE,
+            signature: "setDirectPrice(address,uint256)",
+            params: [WSTETH, FIXED_LST_PRICE],
+          };
+        } else {
+          return {
+            target: REDSTONE_ORACLE,
+            signature: "setTokenConfig((address,address,uint256))",
+            params: [[WSTETH, WSTETH_REDSTONE_FEED, redstoneStalePeriod]],
+          };
+        }
+      })(),
       ...[WSTETH, WEETH].map((token: string) => ({
         target: BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
@@ -223,12 +230,8 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
         params: [
           [
             WSTETH,
-            [
-              WSTETH_ONEJUMP_REDSTONE_ORACLE,
-              ethers.constants.AddressZero, // WSTETH_ONEJUMP_CHAINLINK_ORACLE,
-              ethers.constants.AddressZero, // WSTETH_ONEJUMP_CHAINLINK_ORACLE,
-            ],
-            [true, false, false], // TODO: Enable WSTETH_ONEJUMP_CHAINLINK_ORACLE once the feed is available
+            [WSTETH_ONEJUMP_REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
           ],
         ],
       },

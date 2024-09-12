@@ -24,7 +24,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 
-forking(43544683, async () => {
+forking(43792201, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -42,12 +42,12 @@ forking(43544683, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct weETH price", async () => {
         const price = await oracle.getPrice(WEETH);
-        expect(price).to.be.eq(parseUnits("2749.560750277000000000", 18));
+        expect(price).to.be.eq(parseUnits("2577.630330000000000000", 18));
       });
 
       it("has the correct wstETH price", async () => {
         const price = await oracle.getPrice(WSTETH);
-        expect(price).to.be.eq(parseUnits("2749.560750277000000000", 18));
+        expect(price).to.be.eq(parseUnits("2577.630330000000000000", 18));
       });
     });
 
