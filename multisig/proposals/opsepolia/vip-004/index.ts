@@ -62,17 +62,22 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", opsepolia.GUARDIAN],
+      params: [ZERO_ADDRESS, "setForcedLiquidation(address,bool)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", opsepolia.GUARDIAN],
+      params: [opsepolia.POOL_REGISTRY, "addPool(string,address,uint256,uint256,uint256)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", opsepolia.GUARDIAN],
+      params: [opsepolia.POOL_REGISTRY, "setPoolName(address,string)", opsepolia.GUARDIAN],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [opsepolia.POOL_REGISTRY, "updatePoolMetadata(address,VenusPoolMetaData)", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
@@ -102,7 +107,7 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", opsepolia.GUARDIAN],
+      params: [ZERO_ADDRESS, "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])", opsepolia.GUARDIAN],
     },
     {
       target: ACM,
