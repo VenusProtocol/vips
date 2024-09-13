@@ -19,7 +19,7 @@ const { opsepolia } = NETWORK_ADDRESSES;
 
 const XVS_BRIDGE = "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1";
 
-forking(16742672, async () => {
+forking(17217995, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;
@@ -37,7 +37,7 @@ forking(16742672, async () => {
         const acm: Contract = await ethers.getContractAt(ACM_ABI, ACM);
         const xvs: Contract = await ethers.getContractAt(XVS_ABI, opsepolia.XVS);
         xvsMinter = await initMainnetUser(XVS_BRIDGE, ethers.utils.parseEther("1"));
-        const admin = await initMainnetUser(opsepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+        const admin = await initMainnetUser(opsepolia.GUARDIAN, ethers.utils.parseEther("1"));
         const xvsHolder = await initMainnetUser(opsepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
         await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(opsepolia.XVS, "61805555555555555");
         await xvsVault.connect(admin).resume();
@@ -55,12 +55,12 @@ forking(16742672, async () => {
 
     it("Should set xvs vault owner to multisig", async () => {
       const owner = await xvsVault.admin();
-      expect(owner).equals(opsepolia.NORMAL_TIMELOCK);
+      expect(owner).equals(opsepolia.GUARDIAN);
     });
 
     it("Should set xvs store owner to multisig", async () => {
       const owner = await xvsStore.admin();
-      expect(owner).equals(opsepolia.NORMAL_TIMELOCK);
+      expect(owner).equals(opsepolia.GUARDIAN);
     });
 
     it("Should set correct xvs store address", async () => {

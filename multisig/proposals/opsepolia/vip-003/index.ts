@@ -23,45 +23,37 @@ const vip003 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.XVS_VAULT_PROXY, "pause()", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.XVS_VAULT_PROXY, "pause()", opsepolia.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.XVS_VAULT_PROXY, "resume()", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.XVS_VAULT_PROXY, "resume()", opsepolia.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.XVS_VAULT_PROXY, "add(address,uint256,address,uint256,uint256)", opsepolia.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", opsepolia.NORMAL_TIMELOCK],
+      params: [opsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", opsepolia.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [
-        opsepolia.XVS_VAULT_PROXY,
-        "setRewardAmountPerBlockOrSecond(address,uint256)",
-        opsepolia.NORMAL_TIMELOCK,
-      ], // func name changed from setRewardAmountPerBlock to setRewardAmountPerBlockOrSecond
+      params: [opsepolia.XVS_VAULT_PROXY, "setRewardAmountPerBlockOrSecond(address,uint256)", opsepolia.GUARDIAN], // func name changed from setRewardAmountPerBlock to setRewardAmountPerBlockOrSecond
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [
-        opsepolia.XVS_VAULT_PROXY,
-        "setWithdrawalLockingPeriod(address,uint256,uint256)",
-        opsepolia.NORMAL_TIMELOCK,
-      ],
+      params: [opsepolia.XVS_VAULT_PROXY, "setWithdrawalLockingPeriod(address,uint256,uint256)", opsepolia.GUARDIAN],
     },
 
     {
