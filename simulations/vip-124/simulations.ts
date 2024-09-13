@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import { vip124 } from "../../vips/vip-124";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -15,7 +15,7 @@ const vBUSD = "0x95c78222b3d6e262426483d42cfa53685a67ab9d";
 
 const forkBlockNumber = 28829209; // Jun-05-2023 07:07:57 AM +UTC
 
-forking(forkBlockNumber, () => {
+forking(forkBlockNumber, async () => {
   let comptroller: Contract;
   const provider = ethers.provider;
 
@@ -41,7 +41,7 @@ forking(forkBlockNumber, () => {
     });
   });
 
-  testVip("VIP-124 Borrow Cap Updates", vip124(), {
+  testVip("VIP-124 Borrow Cap Updates", await vip124(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "Failure"], [3, 0]);
     },

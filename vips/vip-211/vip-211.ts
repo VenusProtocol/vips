@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const RESILIENT_ORACLE = "0x6592b5DE802159F3E74B2486b091D11a8256ab8A";
 const NEW_RESILIENT_ORACLE_IMPLEMENTATION = "0xB5d7A073d77102ad56B7482b18E7204c1a71C8B9";

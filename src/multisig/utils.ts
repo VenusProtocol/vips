@@ -1,8 +1,8 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
+import { Proposal, SUPPORTED_NETWORKS } from "src/types";
 
-import { Proposal, SUPPORTED_NETWORKS } from "../../src/types";
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 
 const DEFAULT_OPERATION = 0; // Call
@@ -84,6 +84,42 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         signMessageLibAddress: "0x37942Af543F6E8E8e8E2784fb3C989c957FE4097",
         createCallAddress: "0xD79AcAdDC21A2e7A9D15Fff711Ec47def7259DD3",
         simulateTxAccessorAddress: "0xd55A98150e0F9f5e3F6280FC25617A5C93d96007",
+      },
+    },
+    xlayertestnet: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA",
+        safeProxyFactoryAddress: "0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC",
+        multiSendAddress: "0x998739BFdAAdde7C933B942a68053933098f9EDa",
+        multiSendCallOnlyAddress: "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+        fallbackHandlerAddress: "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
+        signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
+        createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
+        simulateTxAccessorAddress: "0x727a77a074D1E6c4530e814F89E618a3298FC044",
+      },
+    },
+    zksyncsepolia: {
+      [chainId]: {
+        safeMasterCopyAddress: "0x3844DF536332845c0df8E9DD99dD7f21c9B6A271",
+        safeProxyFactoryAddress: "0xC0EbF369B02BcE19E2CB8B78BFee8E4DeB1B99fE",
+        multiSendAddress: "0xb740cb884da1549e82Ae3aB3a3586a4a7c012819",
+        multiSendCallOnlyAddress: "0x489a3314b2D4e448E1B26AaCdFEde47ba97a7668",
+        fallbackHandlerAddress: "0x5351c28B5Cac1014Eddc49735EE5F75aBA23C1dd",
+        signMessageLibAddress: "0x219f9a7E2cB8f956D1e619FCa50d98B574d02223",
+        createCallAddress: "0x6ec92E280fB7eF8bdbB3d64612Eb7485Ec4aFB45",
+        simulateTxAccessorAddress: "0x4F8ce5F350E57419F68732f1F15D761044239B8b",
+      },
+    },
+    opsepolia: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xe1Ed13Dd60b85a072401a3C4Fc7d2EaA678092F8",
+        safeProxyFactoryAddress: "0xf509dB5de5e01ce6e29EAaF8301981DE3C4c7cda",
+        multiSendAddress: "0x0A941df0A84634098abE04f52037c7Fb05C2dEd7",
+        multiSendCallOnlyAddress: "0x2694246B72e40a72B0F9137A9A0a9e818775B4dc",
+        fallbackHandlerAddress: "0x4f85CF627f6106FFDB72aBee57f143C61b6aEcA2",
+        signMessageLibAddress: "0xe5A8983525b0dC8757C47eD001C22ADB003ae372",
+        createCallAddress: "0xFf17bb26b8B702b698FE3De40C10d430742C9F47",
+        simulateTxAccessorAddress: "0xe7A7552B0Cff45E837e1422b479d2dEDE748f571",
       },
     },
     // Add more networks as needed

@@ -3,16 +3,13 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+import { checkRewardsDistributor, checkRewardsDistributorPool } from "src/vip-framework/checks/rewardsDistributor";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { checkIsolatedPoolsComptrollers } from "../../../../src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
-import {
-  checkRewardsDistributor,
-  checkRewardsDistributorPool,
-} from "../../../../src/vip-framework/checks/rewardsDistributor";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
 import {
   COMPTROLLER,
   FRAX,
@@ -86,7 +83,7 @@ const vsFrax_interestRateModel: InterestRateModelSpec = {
   jump: "2.5",
 };
 
-forking(19812613, () => {
+forking(19812613, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vFRAXContract: Contract;
@@ -117,7 +114,7 @@ forking(19812613, () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip026());
+      await pretendExecutingVip(await vip026());
     });
 
     it("check FRAX price", async () => {

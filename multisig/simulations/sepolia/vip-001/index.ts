@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip001 from "../../../proposals/sepolia/vip-001";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -81,7 +81,7 @@ const directAssetPriceConfigs: AssetDirectPriceConfig[] = [
   },
 ];
 
-forking(4744200, () => {
+forking(4744200, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
@@ -118,7 +118,7 @@ forking(4744200, () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(vip001());
+      await pretendExecutingVip(await vip001());
     });
     it("correct owner", async () => {
       expect(await resilientOracle.owner()).to.equal(NORMAL_TIMELOCK);

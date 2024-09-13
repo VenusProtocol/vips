@@ -6,6 +6,7 @@
     "./src",
     "./vips",
     "./simulations",
-    "./multisig"
+    "./multisig",
+    "./hardhat.config.zksync.ts"
   ]
 }

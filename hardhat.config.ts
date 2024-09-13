@@ -1,3 +1,5 @@
+import "module-alias/register";
+
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
@@ -26,16 +28,39 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opbnbmainnet: 100000000,
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
+  xlayertestnet: 30000000,
+  opsepolia: 30000000,
+  opmainnet: 30000000,
 };
 
 task("propose", "Propose proposal")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
-  .setAction(async function (taskArguments) {
+  .setAction(async function (taskArguments, hre) {
+    hre.FORKED_NETWORK = hre.network.name as "bscmainnet";
     const { proposalPath } = taskArguments;
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const proposeVip = require("./scripts/proposeVIP").default;
     await proposeVip(proposalPath);
   });
+
+task("proposeOnTestnet", "Propose proposal on testnet")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .setAction(async function (taskArguments, hre) {
+    hre.FORKED_NETWORK = hre.network.name as "bsctestnet";
+    const { proposalPath } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const proposeTestnetVIP = require("./scripts/proposeTestnetVIP").default;
+    await proposeTestnetVIP(proposalPath, hre.network.name);
+  });
+task("createProposal", "Create proposal objects for various destinations").setAction(async function (
+  taskArguments,
+  hre,
+) {
+  hre.FORKED_NETWORK = (hre.network.name as "bsctestnet") || "bscmainnet";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const createProposal = require("./scripts/createProposal").default;
+  await createProposal();
+});
 
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
@@ -111,7 +136,7 @@ const config: HardhatUserConfig = {
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbtestnet,
     },
     opbnbmainnet: {
-      url: process.env.ARCHIVE_NODE_opbnbtestnet || "https://opbnb-mainnet-rpc.bnbchain.org",
+      url: process.env.ARCHIVE_NODE_opbnbmainnet || "https://opbnb-mainnet-rpc.bnbchain.org",
       chainId: 204,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbmainnet,
@@ -126,12 +151,35 @@ const config: HardhatUserConfig = {
       chainId: 42161,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
+    xlayertestnet: {
+      url: process.env.ARCHIVE_NODE_xlayertestnet || "https://testrpc.xlayer.tech/",
+      chainId: 195,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    xlayermainnet: {
+      url: process.env.ARCHIVE_NODE_xlayermainnet || "https://rpc.xlayer.tech/",
+      chainId: 196,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+    },
+    opsepolia: {
+      url: process.env.ARCHIVE_NODE_opsepolia || "https://sepolia.optimism.io",
+      chainId: 11155420,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opsepolia,
+    },
+    opmainnet: {
+      url: process.env.ARCHIVE_NODE_opmainnet || "https://mainnet.optimism.io",
+      chainId: 10,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opmainnet,
+    },
   },
   paths: {
     tests: "./tests",
   },
   mocha: {
     timeout: 200000000,
+    delay: true,
   },
 };
 

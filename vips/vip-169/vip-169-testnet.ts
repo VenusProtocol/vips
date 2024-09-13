@@ -1,5 +1,5 @@
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const HAY_REWARDS_DISTRIBUTOR = "0x2aBEf3602B688493fe698EF11D27DCa43a0CE4BE";
 const SD_REWARDS_DISTRIBUTOR = "0x37fA1e5613455223F09e179DFAEBba61d7505C97";

@@ -2,14 +2,14 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-
-import { initMainnetUser } from "../../../../src/utils";
+import { initMainnetUser } from "src/utils";
 import {
   RewardsDistributorConfig,
   checkRewardsDistributor,
   checkRewardsDistributorPool,
-} from "../../../../src/vip-framework/checks/rewardsDistributor";
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework/index";
+} from "src/vip-framework/checks/rewardsDistributor";
+import { forking, pretendExecutingVip } from "src/vip-framework/index";
+
 import {
   COMPTROLLER_CORE,
   COMPTROLLER_CURVE,
@@ -37,7 +37,7 @@ import XVS_ABI from "./abi/xvs.json";
 
 const XVS_PROXY_OFT_DEST = "0x888E317606b4c590BBAD88653863e8B345702633";
 
-forking(19483115, () => {
+forking(19483115, async () => {
   let xvs: Contract;
   let xvsStoreBalPrev: BigNumber;
   describe("Generic checks", async () => {
@@ -46,7 +46,7 @@ forking(19483115, () => {
       const impersonateBridge = await initMainnetUser(XVS_PROXY_OFT_DEST, ethers.utils.parseEther("2"));
       await xvs.connect(impersonateBridge).mint(ETHEREUM_TREASURY, XVS_REWARD_AMOUNT);
       xvsStoreBalPrev = await xvs.balanceOf(XVS_STORE);
-      await pretendExecutingVip(vip006());
+      await pretendExecutingVip(await vip006());
     });
 
     it("Should increase XVSStore balance", async () => {

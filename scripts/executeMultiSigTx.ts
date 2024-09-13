@@ -1,9 +1,8 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
 import { EthAdapter } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
-
-import { createGnosisTx, getContractNetworks, getSafeAddress } from "../src/multisig/utils";
-import { SUPPORTED_NETWORKS } from "../src/types";
+import { createGnosisTx, getContractNetworks, getSafeAddress } from "src/multisig/utils";
+import { SUPPORTED_NETWORKS } from "src/types";
 
 const executeMultiSigTx = async (multisigVipPath: string) => {
   const safeOwner = ethers.provider.getSigner(0);

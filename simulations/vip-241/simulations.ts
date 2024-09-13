@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   BTC,
   BTC_AMOUNT,
@@ -26,7 +26,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import VTreasurer_ABI from "./abi/VTreasury.json";
 
-forking(35355081, () => {
+forking(35355081, async () => {
   let btc: Contract;
   let eth: Contract;
   let usdc: Contract;
@@ -61,7 +61,7 @@ forking(35355081, () => {
     plp = new ethers.Contract(PLP, PLP_ABI, ethers.provider);
   });
 
-  testVip("VIP-241", vip241(), {
+  testVip("VIP-241", await vip241(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTreasurer_ABI], ["WithdrawTreasuryBEP20"], [4]);
     },

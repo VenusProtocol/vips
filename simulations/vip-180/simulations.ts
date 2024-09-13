@@ -3,9 +3,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { expectEvents } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { expectEvents } from "../../src/utils";
-import { forking, testVip } from "../../src/vip-framework";
 import {
   CORE_POOL_COMPTROLLER,
   LIQUID_STAKED_BNB_COMPTROLLER,
@@ -19,7 +19,7 @@ import {
 } from "../../vips/vip-180";
 import COMPTROLLER_ABI from "./abi/COMPTROLLER_ABI.json";
 
-forking(32305000, () => {
+forking(32305000, async () => {
   let coreComptroller: Contract;
   let liquidStakeBnbComptroller: Contract;
 
@@ -52,7 +52,7 @@ forking(32305000, () => {
     });
   });
 
-  testVip("VIP-180 Risk Parameters Update", vip180(), {
+  testVip("VIP-180 Risk Parameters Update", await vip180(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap", "Failure"], [2, 2, 0]);
     },

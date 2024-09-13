@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, testVip } from "src/vip-framework";
 
-import { forking, testVip } from "../../src/vip-framework";
 import { vip183 } from "../../vips/vip-183";
 import IERC20 from "./abi/IERC20UpgradableAbi.json";
 
@@ -255,7 +255,7 @@ const balanceOf = async (token: string, address: string) => {
   return await tokenContract.balanceOf(address);
 };
 
-forking(32364940, () => {
+forking(32364940, async () => {
   const originalTreasuryBalances: { [address: string]: BigNumber } = {};
   const originalBuybackWalletBalances: { [address: string]: BigNumber } = {};
 
@@ -268,7 +268,7 @@ forking(32364940, () => {
     });
   });
 
-  testVip("VIP-182", vip183(), {
+  testVip("VIP-182", await vip183(), {
     proposer: "0x97a32d4506f6a35de68e0680859cdf41d077a9a9",
   });
 

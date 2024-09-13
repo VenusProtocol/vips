@@ -1,7 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../src/types";
-import { makeProposal } from "../src/utils";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 const PCS = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const VAI = "0x4bd17003473389a42daf6a0a729f6fdb328bbbd7";

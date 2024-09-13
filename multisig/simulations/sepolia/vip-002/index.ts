@@ -3,10 +3,10 @@ import { BigNumber, BigNumberish } from "ethers";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { checkVToken } from "../../../../src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "../../../../src/vip-framework/checks/interestRateModel";
 import vip002, {
   COMPTROLLER_CORE,
   COMPTROLLER_CURVE,
@@ -351,7 +351,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vCRV_Curve: "",
 };
 
-forking(4783370, () => {
+forking(4783370, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -366,7 +366,7 @@ forking(4783370, () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(vip002());
+      await pretendExecutingVip(await vip002());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

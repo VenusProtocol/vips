@@ -1,8 +1,7 @@
 import { parseUnits } from "ethers/lib/utils";
-
-import { ProposalType } from "../../src/types";
-import { makeProposal } from "../../src/utils";
-import { NORMAL_TIMELOCK } from "../../src/vip-framework";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
