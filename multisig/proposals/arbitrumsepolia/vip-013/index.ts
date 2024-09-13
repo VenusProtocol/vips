@@ -22,7 +22,7 @@ const wstETH_ONE_JUMP_ORACLE = "0x06b47B32d9C4D8f948EB3FFDB4a1ecE93794f922";
 const weETH_ONE_JUMP_ORACLE = "0x4f894aC6F5e2E2bD72632B137E28234339Db3D53";
 
 // IL configuration
-const vip015 = () => {
+const vip013 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
@@ -224,4 +224,4 @@ const vip015 = () => {
   ]);
 };
 
-export default vip015;
+export default vip013;

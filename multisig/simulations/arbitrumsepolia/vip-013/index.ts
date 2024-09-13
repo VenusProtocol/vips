@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip015, {
+import vip013, {
   COMPTROLLER_LIQUID_STAKED_ETH,
   Mock_weETH,
   Mock_wstETH,
@@ -18,7 +18,7 @@ import vip015, {
   VweETH,
   VwstETH,
   WETH,
-} from "../../../proposals/arbitrumsepolia/vip-015";
+} from "../../../proposals/arbitrumsepolia/vip-013";
 import BEACON_ABI from "./abi/beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -182,7 +182,7 @@ forking(73250686, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip015());
+      await pretendExecutingVip(await vip013());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {
