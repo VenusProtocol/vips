@@ -75,6 +75,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   const markets: string[] = await comptroller.getAllMarkets();
 
   for (const market of markets) {
+    const isListed = (await comptroller.markets(market)).isListed;
+    if (!isListed) continue;
+
     const marketData: MarketMetadata = await comptroller.markets(market);
     if (!supplyMarket && !marketData.collateralFactorMantissa.isZero()) {
       supplyMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);

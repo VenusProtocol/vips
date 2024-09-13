@@ -29,8 +29,14 @@ const OMNICHAIN_GOVERNANCE_EXECUTOR =
 
 const VOTING_PERIOD = 28800;
 
-export const { DEFAULT_PROPOSER_ADDRESS, GOVERNOR_PROXY, NORMAL_TIMELOCK, GUARDIAN } =
-  NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
+export const {
+  DEFAULT_PROPOSER_ADDRESS,
+  GOVERNOR_PROXY,
+  NORMAL_TIMELOCK,
+  FAST_TRACK_TIMELOCK,
+  CRITICAL_TIMELOCK,
+  GUARDIAN,
+} = NETWORK_ADDRESSES[(FORKED_NETWORK as "bscmainnet") || "bsctestnet"] || {};
 export const { DELAY_BLOCKS } = NETWORK_CONFIG[FORKED_NETWORK as SUPPORTED_NETWORKS];
 
 export const forking = (blockNumber: number, fn: () => Promise<void>) => {
@@ -105,9 +111,14 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
+    const timelockAddress = {
+      [ProposalType.REGULAR]: NORMAL_TIMELOCK,
+      [ProposalType.FAST_TRACK]: FAST_TRACK_TIMELOCK,
+      [ProposalType.CRITICAL]: CRITICAL_TIMELOCK,
+    }[proposal.type || ProposalType.REGULAR];
     proposer = await initMainnetUser(proposerAddress, ethers.utils.parseEther("1.0"));
     supporter = await initMainnetUser(supporterAddress, ethers.utils.parseEther("1.0"));
-    impersonatedTimelock = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("40"));
+    impersonatedTimelock = await initMainnetUser(timelockAddress, ethers.utils.parseEther("40"));
 
     // Iniitalize impl via Proxy
     governorProxy = await ethers.getContractAt(

@@ -2,12 +2,12 @@ import { ethers } from "hardhat";
 
 import { makeProposal } from "../../../../src/utils";
 
-const COMPTROLLER_BEACON = "0x12Dcb8D9F1eE7Ad7410F5B36B07bcC7891ab4cEf";
-const NEW_COMPTROLLER_IMPLEMENTATION = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
-const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
-const MULTISIG = "0x1426A5Ae009c4443188DA8793751024E358A61C2";
+const COMPTROLLER_BEACON = "0x11C3e19236ce17729FC66b74B537de00C54d44e7";
+const NEW_COMPTROLLER_IMPLEMENTATION = "0xD3b2431c186A2bDEB61b86D9B042B75C954004F6";
+const ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
+const MULTISIG = "0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207";
 
-const vip012 = () => {
+export const vip016 = () => {
   return makeProposal([
     {
       target: COMPTROLLER_BEACON,
@@ -22,4 +22,4 @@ const vip012 = () => {
   ]);
 };
 
-export default vip012;
+export default vip016;
