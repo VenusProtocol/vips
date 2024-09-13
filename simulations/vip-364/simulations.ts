@@ -9,7 +9,7 @@ import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 
-forking(42212473, () => {
+forking(42212473, async () => {
   let xvsBridge: Contract;
   let xvs: Contract;
   let bridgeXVSBalPrev: BigNumber;
@@ -22,7 +22,7 @@ forking(42212473, () => {
     bridgeXVSBalPrev = await xvs.balanceOf(XVS_BRIDGE);
   });
 
-  testVip("VIP-364", vip364(), {
+  testVip("VIP-364", await vip364(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
       await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
