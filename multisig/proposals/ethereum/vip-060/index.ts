@@ -18,7 +18,7 @@ export const LST_vWETH_XVS_REWARDS_PER_MONTH = ethers.utils.parseEther("12375");
 export const CORE_XVS_REWARDS_DISTRIBUTOR_AMOUNT = ethers.utils.parseEther("28356");
 export const LST_ETH_XVS_REWARDS_DISTRIBUTOR_AMOUNT = ethers.utils.parseEther("49500");
 
-const commands = [
+export const commands = [
   {
     distributor: CORE_XVS_REWARDS_DISTRIBUTOR,
     vToken: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65", // vWETH_CORE
@@ -102,8 +102,8 @@ const commands = [
     vToken: "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E", // vsfrxETH_LST
     supplySpeed: "0",
     borrowSpeed: "0",
-  }
-]
+  },
+];
 
 export const vip060 = () => {
   return makeProposal([
@@ -117,17 +117,13 @@ export const vip060 = () => {
       signature: "withdrawTreasuryToken(address,uint256,address)",
       params: [XVS, LST_ETH_XVS_REWARDS_DISTRIBUTOR_AMOUNT, LST_ETH_XVS_REWARDS_DISTRIBUTOR],
     },
-    ...commands.map((command) => {
+    ...commands.map(command => {
       return {
         target: command.distributor,
         signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [command.vToken],
-          [command.supplySpeed],
-          [command.borrowSpeed],
-        ],
+        params: [[command.vToken], [command.supplySpeed], [command.borrowSpeed]],
       };
-    })
+    }),
   ]);
 };
 
