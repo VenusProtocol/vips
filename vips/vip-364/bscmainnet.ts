@@ -14,6 +14,7 @@ export const BRIDGE_XVS_AMOUNT = parseUnits("77856", 18);
 export const DEST_CHAIN_ID = 101;
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+export const BSC_TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
 
 export const vip364 = () => {
   const meta = {
@@ -47,7 +48,7 @@ export const vip364 = () => {
           DEST_CHAIN_ID,
           ETHEREUM_XVS_RECEIVER,
           BRIDGE_XVS_AMOUNT,
-          [NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
+          [BSC_TREASURY, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         value: parseUnits("0.5", 18).toString(),
       },
