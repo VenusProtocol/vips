@@ -15,10 +15,10 @@ export const DEST_CHAIN_ID = 101;
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
-export const vip304 = () => {
+export const vip364 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-304",
+    title: "VIP-364",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -63,4 +63,4 @@ export const vip304 = () => {
   );
 };
 
-export default vip304;
+export default vip364;
