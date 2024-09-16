@@ -2,10 +2,10 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import { NORMAL_TIMELOCK } from "src/vip-framework";
 
-const vip364 = () => {
+const vip365 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-364 [zkSync] Configuration of markets and Prime, and enable XVS Vault",
+    title: "VIP-365 [zkSync] Configuration of markets and Prime, and enable XVS Vault",
     description: `#### Summary
 
 If passed, this VIP will perform the following actions:
@@ -162,4 +162,4 @@ Privilege commands on zkSync Era will be executed by the [Guardian wallet](https
   );
 };
 
-export default vip364;
+export default vip365;
