@@ -5,7 +5,7 @@ import { expectEventWithParams, expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { vip365 } from "../../vips/vip-365/bscmainnet";
+import { vip366 } from "../../vips/vip-366/bscmainnet";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20DelegatorAbi.json";
 
 const VBNB_CORE = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
@@ -26,7 +26,7 @@ forking(42299565, async () => {
     });
   });
 
-  testVip("VIP-365 Core Pool BNB IR Curve Update", await vip365(), {
+  testVip("VIP-366 Core Pool BNB IR Curve Update", await vip366(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewMarketInterestRateModel"], [1]);
       await expectEventWithParams(txResponse, VBEP20_DELEGATOR_ABI, "NewMarketInterestRateModel", [IR_OLD, IR_NEW]);
