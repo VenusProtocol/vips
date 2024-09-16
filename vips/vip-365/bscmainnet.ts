@@ -142,7 +142,16 @@ We applied the following security procedures for this upgrade:
 
 **Disclaimer for zkSync Era VIPs**
 
-Privilege commands on zkSync Era will be executed by the [Guardian wallet](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x18965d1db2a609964f8b6832d96371d4cbf77daab3ecb54de3818108d71ce89e), [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x2b050a3b262bc6c5084796f93769b82cac8a34c62911cf006c85826b5469a99f), [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x44e1f772b420ee5eeae26623d110c47c1151ba350375377d571498cbe0fb61e4) and [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x57e29b8a10d51202c9d5ac7cd928e83b4ab93222af755117fa849e7b3872f06f) multisig transactions will be executed. Otherwise, they will be rejected.`,
+Privilege commands on zkSync Era will be executed by the [Guardian wallet](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled.
+
+If this VIP passes, the following multisig transactions will be executed. Otherwise, they will be rejected.
+
+* [XVS vault configuration](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0xb854ce0258d98aca0af31c1f63d82d4ecc9a59790f08d839a0e4041dce34f820)
+* [Markets configuration](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x18965d1db2a609964f8b6832d96371d4cbf77daab3ecb54de3818108d71ce89e)
+* [NativeTokenGateway configuration](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x2b050a3b262bc6c5084796f93769b82cac8a34c62911cf006c85826b5469a99f)
+* [ProtocolShareReserve configuration](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x44e1f772b420ee5eeae26623d110c47c1151ba350375377d571498cbe0fb61e4)
+* [Prime configuration](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x57e29b8a10d51202c9d5ac7cd928e83b4ab93222af755117fa849e7b3872f06f)
+`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
