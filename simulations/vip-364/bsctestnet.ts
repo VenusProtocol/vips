@@ -135,7 +135,7 @@ forking(43916700, async () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("50000", 18);
-      const amount = parseUnits("1700", 18);
+      const amount = parseUnits("1420", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(LzChainId.opsepolia, receiverAddressBytes32, amount, false, defaultAdapterParams)
