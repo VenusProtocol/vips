@@ -9,10 +9,10 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import vip006 from "../../../proposals/opsepolia/vip-006";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { opsepolia } = NETWORK_ADDRESSES;
 
