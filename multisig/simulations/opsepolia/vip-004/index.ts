@@ -135,7 +135,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.7",
     liquidationThreshold: "0.75",
     reserveFactor: "0.2",
-    initialSupply: "0.61097887",
+    initialSupply: "0.4",
     vTokenReceiver: opsepolia.VTREASURY,
   },
   vUSDC_Core: {
@@ -200,7 +200,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vOP_Core: "",
 };
 
-forking(17170245, async () => {
+forking(17337900, async () => {
   let poolRegistry: Contract;
 
   before(async () => {

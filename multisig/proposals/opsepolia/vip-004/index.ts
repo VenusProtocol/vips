@@ -209,7 +209,7 @@ const vip004 = () => {
     {
       target: opsepolia.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
-      params: [WETH, "610978879332136515", opsepolia.GUARDIAN],
+      params: [WETH, parseUnits("0.4", 18), opsepolia.GUARDIAN],
     },
     {
       target: WETH,
@@ -219,7 +219,7 @@ const vip004 = () => {
     {
       target: WETH,
       signature: "approve(address,uint256)",
-      params: [opsepolia.POOL_REGISTRY, "610978879332136515"],
+      params: [opsepolia.POOL_REGISTRY, parseUnits("0.4", 18)],
     },
     {
       target: VWETH_CORE,
@@ -239,7 +239,7 @@ const vip004 = () => {
           VWETH_CORE,
           parseUnits("0.7", 18),
           parseUnits("0.75", 18),
-          "610978879332136515",
+          parseUnits("0.4", 18),
           opsepolia.VTREASURY,
           parseUnits("25", 18),
           parseUnits("16", 18),
