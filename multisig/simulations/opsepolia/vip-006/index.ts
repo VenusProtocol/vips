@@ -9,6 +9,7 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import vip006 from "../../../proposals/opsepolia/vip-006";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -18,8 +19,9 @@ const { opsepolia } = NETWORK_ADDRESSES;
 const PRIME_LIQUIDITY_PROVIDER = "0xE3EC955b94D197a8e4081844F3f25F81047A9AF5";
 const PRIME = "0x54dEb59698c628be5EEd5AD41Fd825Eb3Be89704";
 const XVS_ADMIN = "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1";
+const COMPTROLLER_CORE = "0x59d10988974223B042767aaBFb6D926863069535";
 
-forking(17228920, async () => {
+forking(17338837, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -101,6 +103,11 @@ forking(17228920, async () => {
     it("is paused", async () => {
       expect(await prime.paused()).to.be.equal(true);
       expect(await primeLiquidityProvider.paused()).to.be.equal(true);
+    });
+
+    it("set PRIME for Comptroller", async () => {
+      const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+      expect(await comptroller.prime()).to.be.equal(PRIME);
     });
 
     it("stake opsepolia.XVS", async () => {

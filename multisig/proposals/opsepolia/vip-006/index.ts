@@ -7,7 +7,7 @@ const { opsepolia } = NETWORK_ADDRESSES;
 export const ACM = "0x1652E12C8ABE2f0D84466F0fc1fA4286491B3BC1";
 export const PRIME_LIQUIDITY_PROVIDER = "0xE3EC955b94D197a8e4081844F3f25F81047A9AF5";
 export const PRIME = "0x54dEb59698c628be5EEd5AD41Fd825Eb3Be89704";
-
+export const COMPTROLLER_CORE = "0x59d10988974223B042767aaBFb6D926863069535";
 const PRIME_POOL_ID = 0;
 
 const vip006 = () => {
@@ -119,6 +119,11 @@ const vip006 = () => {
       target: PRIME_LIQUIDITY_PROVIDER,
       signature: "pauseFundsTransfer()",
       params: [],
+    },
+    {
+      target: COMPTROLLER_CORE,
+      signature: "setPrimeToken(address)",
+      params: [PRIME],
     },
     {
       target: opsepolia.XVS_VAULT_PROXY,
