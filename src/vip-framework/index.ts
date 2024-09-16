@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
 import { Contract, ContractInterface } from "ethers";
-import { FORKED_NETWORK, ethers, network } from "hardhat";
+import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 import { NETWORK_CONFIG } from "../networkConfig";
@@ -72,16 +72,22 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     return iface.encodeFunctionData(signature, params);
   };
 
-  const feeData = await ethers.provider.getFeeData();
   const txnParams: TransactionRequest = {
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
     data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
   };
 
-  if (network.zksync && feeData.maxFeePerGas) {
-    // Sometimes the gas estimation is wrong with zksync
-    txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+  if (proposal.gasFeeMultiplicationFactor && proposal.gasFeeMultiplicationFactor[commandIdx]) {
+    const feeData = await ethers.provider.getFeeData();
+    if (feeData.maxFeePerGas) {
+      txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(proposal.gasFeeMultiplicationFactor[commandIdx]);
+    }
+  }
+
+  if (proposal.gasLimitMultiplicationFactor && proposal.gasLimitMultiplicationFactor[commandIdx]) {
+    const gas = await timelock.estimateGas(txnParams);
+    txnParams.gasLimit = gas.mul(proposal.gasLimitMultiplicationFactor[commandIdx]);
   }
 
   await timelock.sendTransaction(txnParams);

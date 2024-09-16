@@ -39,14 +39,37 @@ task("test", "Update fork config")
   .addOptionalParam("fork", "Network to fork")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
+
+    if (hre.network.name === "zkSyncTestNode") {
+      if (!process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]) {
+        throw new Error("ZKSYNC_ERA_LOCAL_TEST_NODE env variable is not set");
+      }
+
+      try {
+        const provider = new hre.ethers.providers.JsonRpcProvider(process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]);
+        await provider.send("eth_chainId", []);
+        console.log("Local zksync era test node is running");
+      } catch (e) {
+        throw new Error(
+          `Local zksync era test node is not running. Please run it with "yarn run local-test-node:${fork} --fork-block-number \`<fork block number of the vip>\`"`,
+        );
+      }
+    }
+
     const hardhatConfig = fork
       ? {
           allowUnlimitedContractSize: false,
           loggingEnabled: false,
-          forking: {
-            enabled: true,
-            url: process.env[`ARCHIVE_NODE_${fork}`] as string,
-          },
+          forking:
+            hre.network.name === "zkSyncTestNode"
+              ? {
+                  enabled: false,
+                  url: process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"] as string,
+                }
+              : {
+                  enabled: true,
+                  url: process.env[`ARCHIVE_NODE_${fork}`] as string,
+                },
           gas: "auto" as const,
           blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
         }
@@ -55,6 +78,7 @@ task("test", "Update fork config")
           loggingEnabled: false,
         };
     hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
+
     hre.FORKED_NETWORK = fork;
 
     await runSuper(taskArguments);
@@ -111,6 +135,14 @@ const config: HardhatUserConfig = {
       chainId: 324,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
+      zksync: true,
+    },
+    zkSyncTestNode: {
+      url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
+      chainId: 260,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
+      timeout: 2000000000,
       zksync: true,
     },
   },
