@@ -1,10 +1,12 @@
 import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
 import vip006 from "../../../proposals/opsepolia/vip-006";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -20,6 +22,7 @@ const PRIME_LIQUIDITY_PROVIDER = "0xE3EC955b94D197a8e4081844F3f25F81047A9AF5";
 const PRIME = "0x54dEb59698c628be5EEd5AD41Fd825Eb3Be89704";
 const XVS_ADMIN = "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1";
 const COMPTROLLER_CORE = "0x59d10988974223B042767aaBFb6D926863069535";
+const XVS_STORE = "0xE888FA54b32BfaD3cE0e3C7D566EFe809a6A0143";
 
 forking(17338837, async () => {
   describe("Pre-VIP behavior", () => {
@@ -124,7 +127,16 @@ forking(17338837, async () => {
   });
 
   // Need to test the generic tests
-  // describe("generic tests", async () => {
-  //   checkXVSVault();
-  // });
+  describe("generic tests", async () => {
+    before(async () => {
+      const xvsMinter = await initMainnetUser(XVS_ADMIN, ethers.utils.parseEther("1"));
+      const xvsHolder = await initMainnetUser(opsepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("10"));
+      const xvs = await ethers.getContractAt(ERC20_ABI, opsepolia.XVS, xvsHolder);
+
+      await xvs.connect(xvsMinter).mint(opsepolia.GENERIC_TEST_USER_ACCOUNT, parseEther("10"));
+      await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
+    });
+
+    checkXVSVault();
+  });
 });
