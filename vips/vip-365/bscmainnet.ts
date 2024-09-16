@@ -1,6 +1,6 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
+import { FAST_TRACK_TIMELOCK } from "src/vip-framework";
 
 const vip365 = () => {
   const meta = {
@@ -151,14 +151,14 @@ Privilege commands on zkSync Era will be executed by the [Guardian wallet](https
   return makeProposal(
     [
       {
-        target: NORMAL_TIMELOCK,
+        target: FAST_TRACK_TIMELOCK,
         signature: "",
         params: [],
         value: "1",
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
