@@ -16,6 +16,8 @@ import {
   getPayload,
   getSourceChainId,
   initMainnetUser,
+  mineBlocks,
+  mineOnZksync,
   setForkBlock,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
@@ -242,17 +244,25 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
           inboundNonce.add(1),
           gasLimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
-          { gasLimit: gasLimit },
+          { gasLimit: gasLimit, maxFeePerGas: 2 * 10 ** 8 },
         );
       await tx.wait();
       expect(await executor.queued(proposalId)).to.be.true;
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      if (FORKED_NETWORK == "zksyncsepolia" || FORKED_NETWORK == "zksyncmainnet") {
+        await mineOnZksync((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      } else {
+        await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      }
       const blockchainProposal = await executor.proposals(proposalId);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [blockchainProposal.eta.toString(16)]);
+      await mineBlocks();
+
       await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await executor.execute(proposalId);
+      const tx = await executor.execute(proposalId, { maxFeePerGas: 200000000 });
+      await tx.wait();
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);

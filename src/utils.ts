@@ -143,6 +143,14 @@ export async function mineBlocks(blocks: NumberLike = 1, options: { interval?: N
     params: [blocksHex, intervalHex],
   });
 }
+export const mineOnZksync = async (blocks: number) => {
+  const blockTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+  // Actual timestamp on which block will get mine (assuming 1 sec/block)
+  const timestampOfBlocks = blocks * 1;
+  const targetTimestamp = blockTimestamp + timestampOfBlocks;
+  await ethers.provider.send("evm_setNextBlockTimestamp", [targetTimestamp.toString(16)]);
+  await mineBlocks();
+};
 
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
