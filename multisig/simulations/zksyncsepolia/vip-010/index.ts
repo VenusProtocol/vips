@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip009, {
+import vip010, {
   ZKSYNCSEPOLIA_ACM,
   ZKSYNCSEPOLIA_NORMAL_TIMELOCK,
   ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
@@ -46,7 +46,7 @@ forking(3771669, async () => {
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip009());
+      await pretendExecutingVip(await vip010());
     });
     it("Normal Timelock has default admin role", async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, ZKSYNCSEPOLIA_NORMAL_TIMELOCK);

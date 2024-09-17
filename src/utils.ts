@@ -48,8 +48,8 @@ export const getPayload = (proposal: Proposal) => {
 
 const gasUsedPerCommand = 300000;
 export async function setForkBlock(_blockNumber: number) {
-  if (network.name === "zkSyncTestNode") {
-    console.log("zkSyncTestNode network does not support forking, skipping fork");
+  if (network.name === "zksynctestnode") {
+    console.log("zksynctestnode network does not support forking, skipping fork");
     return;
   }
 
@@ -97,8 +97,8 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   let signer = await ethers.getSigner(user);
 
   // zksync test node provider does not support default impersonation
-  if (network.name === "zkSyncTestNode") {
-    provider = new ethers.providers.JsonRpcProvider(config.networks.hardhat.forking?.url);
+  if (network.name === "zksynctestnode" && config.networks.hardhat.forking?.url) {
+    provider = new ethers.providers.JsonRpcProvider({ url: config.networks.hardhat.forking.url, timeout: 1200000 });
 
     signer = provider.getSigner(user) as unknown as SignerWithAddress;
   }

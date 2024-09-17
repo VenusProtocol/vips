@@ -3,7 +3,7 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
-import { Contract, ContractInterface } from "ethers";
+import { BigNumber, Contract, ContractInterface } from "ethers";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
@@ -235,7 +235,16 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
       const gasLimit = calculateGasForAdapterParam(targets.length);
-      const tx = await endpoint
+
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber; gasLimit: number } = { gasLimit: gasLimit };
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      await endpoint
         .connect(impersonatedLibrary)
         .receivePayload(
           srcChainId,
@@ -244,25 +253,31 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
           inboundNonce.add(1),
           gasLimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
-          { gasLimit: gasLimit, maxFeePerGas: 2 * 10 ** 8 },
+          txnParams,
         );
-      await tx.wait();
+
       expect(await executor.queued(proposalId)).to.be.true;
     });
 
     it("should be executed successfully", async () => {
       if (FORKED_NETWORK == "zksyncsepolia" || FORKED_NETWORK == "zksyncmainnet") {
-        await mineOnZksync((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+        await mineOnZksync(DELAY_BLOCKS[proposalType]);
       } else {
-        await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+        await mine(DELAY_BLOCKS[proposalType]);
       }
       const blockchainProposal = await executor.proposals(proposalId);
-      await ethers.provider.send("evm_setNextBlockTimestamp", [blockchainProposal.eta.toString(16)]);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [blockchainProposal.eta.toHexString()]);
       await mineBlocks();
 
-      await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await executor.execute(proposalId, { maxFeePerGas: 200000000 });
-      await tx.wait();
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber } = {};
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      const tx = await executor.execute(proposalId, txnParams);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
