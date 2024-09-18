@@ -116,9 +116,6 @@ forking(125532676, async () => {
       for (let i = 0; i < assetConfigs.length; i++) {
         const assetConfig = assetConfigs[i];
         const price = await resilientOracle.getPrice(assetConfig.address);
-
-        console.log("-------------price assetConfig", assetConfig.name, " ", price);
-
         expect(price).to.be.equal(assetConfig.price);
       }
     });
