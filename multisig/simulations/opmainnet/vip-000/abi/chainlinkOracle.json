@@ -2,13 +2,8 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "vBnbAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "vaiAddress",
+        "internalType": "contract AggregatorV3Interface",
+        "name": "_sequencer",
         "type": "address"
       }
     ],
@@ -124,12 +119,6 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "requestedPriceMantissa",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
         "name": "newPriceMantissa",
         "type": "uint256"
       }
@@ -164,7 +153,20 @@
   },
   {
     "inputs": [],
-    "name": "BNB_ADDR",
+    "name": "GRACE_PERIOD_TIME",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "NATIVE_TOKEN_ADDR",
     "outputs": [
       {
         "internalType": "address",
@@ -187,7 +189,7 @@
     "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "contract IAccessControlManager",
+        "internalType": "contract IAccessControlManagerV8",
         "name": "",
         "type": "address"
       }
@@ -199,11 +201,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "vToken",
+        "name": "asset",
         "type": "address"
       }
     ],
-    "name": "getUnderlyingPrice",
+    "name": "getPrice",
     "outputs": [
       {
         "internalType": "uint256",
@@ -280,6 +282,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "sequencer",
+    "outputs": [
+      {
+        "internalType": "contract AggregatorV3Interface",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -330,7 +345,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct TokenConfig",
+        "internalType": "struct ChainlinkOracle.TokenConfig",
         "name": "tokenConfig",
         "type": "tuple"
       }
@@ -360,30 +375,12 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct TokenConfig[]",
+        "internalType": "struct ChainlinkOracle.TokenConfig[]",
         "name": "tokenConfigs_",
         "type": "tuple[]"
       }
     ],
     "name": "setTokenConfigs",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract VBep20Interface",
-        "name": "vToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "underlyingPriceMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "setUnderlyingPrice",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -428,32 +425,6 @@
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vBnb",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vai",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   }
 ]
