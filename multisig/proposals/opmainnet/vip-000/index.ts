@@ -143,7 +143,7 @@ const vip000 = () => {
     {
       target: opmainnet.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_30M]],
+      params: [[USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_26H]],
     },
     {
       target: opmainnet.RESILIENT_ORACLE,
@@ -163,7 +163,7 @@ const vip000 = () => {
     {
       target: opmainnet.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[USDT, CHAINLINK_USDT_FEED, STALE_PERIOD_30M]],
+      params: [[USDT, CHAINLINK_USDT_FEED, STALE_PERIOD_26H]],
     },
     {
       target: opmainnet.RESILIENT_ORACLE,

@@ -31,14 +31,14 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
-    price: "1000000000000000000000000000000",
+    price: "999839130000000000000000000000",
     feed: "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3",
     oracle: "chainlink",
   },
   {
     name: "USDT",
     address: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
-    price: "1000328360000000000000000000000",
+    price: "1000095310000000000000000000000",
     feed: "0xECef79E109e997bCA29c1c0897ec9d7b03647F5E",
     oracle: "chainlink",
   },
@@ -115,10 +115,12 @@ forking(125532676, async () => {
     it("validate asset prices", async () => {
       for (let i = 0; i < assetConfigs.length; i++) {
         const assetConfig = assetConfigs[i];
-        console.log("-------------price", assetConfig);
-        const price = await resilientOracle.getPrice(assetConfig.address);
-        console.log("-------------price assetConfig", price);
-        // expect(price).to.be.equal(assetConfig.price);
+        const price = await resilientOracle.getPrice(assetConfig.address);;
+
+        console.log("-------------price assetConfig", assetConfig.name, " ",  price);
+        
+        expect(price).to.be.equal(assetConfig.price);
+        
       }
     });
   });
