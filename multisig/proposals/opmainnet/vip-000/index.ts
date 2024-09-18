@@ -21,7 +21,7 @@ const USDT = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
 const OP = "0x4200000000000000000000000000000000000042";
 
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
-const STALE_PERIOD_30M = 60 * 30; // 30 minutes (pricefeeds with heartbeat of 30 minutes)
+const STALE_PERIOD_30M = 60 * 30; // 30 minutes (pricefeeds with heartbeat of 20 minutes)
 
 const vip000 = () => {
   return makeProposal([
@@ -183,7 +183,7 @@ const vip000 = () => {
     {
       target: opmainnet.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[OP, CHAINLINK_OP_FEED, STALE_PERIOD_26H]],
+      params: [[OP, CHAINLINK_OP_FEED, STALE_PERIOD_30M]],
     },
     {
       target: opmainnet.RESILIENT_ORACLE,
