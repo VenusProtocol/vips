@@ -13,12 +13,13 @@ const CHAINLINK_USDC_FEED = "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3";
 const CHAINLINK_USDT_FEED = "0xECef79E109e997bCA29c1c0897ec9d7b03647F5E";
 const CHAINLINK_OP_FEED = "0x0D276FC14719f9292D5C1eA2198673d1f4269246";
 const REDSTONE_XVS_FEED = "0x414F8f961969A8131AbE53294600c6C515E68f81";
-
 const WBTC = "0x68f180fcCe6836688e9084f035309E29Bf0A2095";
 const WETH = "0x4200000000000000000000000000000000000006";
 const USDC = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
 const USDT = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
 const OP = "0x4200000000000000000000000000000000000042";
+
+export const BOUND_VALIDATOR = "0x37A04a1eF784448377a19F2b1b67cD40c09eA505";
 
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const STALE_PERIOD_30M = 60 * 30; // 30 minutes (pricefeeds with heartbeat of 20 minutes)
@@ -78,7 +79,7 @@ const vip000 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [opmainnet.BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opmainnet.GUARDIAN],
+      params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", opmainnet.GUARDIAN],
     },
     {
       target: opmainnet.RESILIENT_ORACLE,
@@ -91,7 +92,7 @@ const vip000 = () => {
       params: [],
     },
     {
-      target: opmainnet.BOUND_VALIDATOR,
+      target: BOUND_VALIDATOR,
       signature: "acceptOwnership()",
       params: [],
     },

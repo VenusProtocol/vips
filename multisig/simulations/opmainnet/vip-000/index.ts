@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../../../src/networkAddresses";
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip000 from "../../../proposals/opmainnet/vip-000";
+import vip000, { BOUND_VALIDATOR } from "../../../proposals/opmainnet/vip-000";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -77,7 +77,7 @@ forking(125532676, async () => {
       treasury = await ethers.getContractAt(TREASURY_ABI, opmainnet.VTREASURY);
       resilientOracle = new ethers.Contract(opmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
       chainLinkOracle = new ethers.Contract(opmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, provider);
-      boundValidator = new ethers.Contract(opmainnet.BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
+      boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
     });
 
     it("correct pending owner", async () => {
