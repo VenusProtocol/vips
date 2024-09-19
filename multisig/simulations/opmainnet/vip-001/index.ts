@@ -49,7 +49,7 @@ forking(125555900, async () => {
   describe("Pre-Execution state", () => {
     it("Bridge Owner != arbitrum sepolia multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).not.equal(opmainnet.NORMAL_TIMELOCK);
+      expect(owner).not.equal(opmainnet.GUARDIAN);
     });
 
     it("Trusted remote should not exist for any network(bscmainnet, opbnbmainnet, ethereum)", async () => {
@@ -84,11 +84,11 @@ forking(125555900, async () => {
 
     it("Should set bridge owner to multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).equals(opmainnet.NORMAL_TIMELOCK);
+      expect(owner).equals(opmainnet.GUARDIAN);
     });
 
     it("Should whitelist MULTISIG and TREASURY", async () => {
-      let res = await xvsBridge.whitelist(opmainnet.NORMAL_TIMELOCK);
+      let res = await xvsBridge.whitelist(opmainnet.GUARDIAN);
       expect(res).equals(true);
 
       res = await xvsBridge.whitelist(opmainnet.VTREASURY);
@@ -122,7 +122,7 @@ forking(125555900, async () => {
       expect(token).equals(XVS);
     });
 
-    it.only("Should set correct max daily limit for all five networks", async () => {
+    it("Should set correct max daily limit for all five networks", async () => {
       let limit = await xvsBridge.chainIdToMaxDailyLimit(BNB_MAINNET_ENDPOINT_ID);
       expect(limit).equals(MAX_DAILY_SEND_LIMIT);
 
