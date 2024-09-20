@@ -12,7 +12,7 @@ import {
   checkRewardsDistributorPool,
 } from "src/vip-framework/checks/rewardsDistributor";
 
-import vip010, {
+import vip008, {
   COMPTROLLER_CORE,
   RD_XVS_REWARD_AMOUNT,
   REWARD_DISTRIBUTOR_CORE_0,
@@ -26,7 +26,7 @@ import vip010, {
   XVS,
   XVS_STORE,
   XVS_VAULT_PROXY,
-} from "../../../proposals/zksyncmainnet/vip-010";
+} from "../../../proposals/zksyncmainnet/vip-008";
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
 import XVS_ABI from "./abi/xvs.json";
 
@@ -62,7 +62,7 @@ forking(44579033, async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
       treasuryBalanceBefore = await xvs.balanceOf(zksyncmainnet.VTREASURY);
-      await pretendExecutingVip(await vip010());
+      await pretendExecutingVip(await vip008());
     });
 
     it("vTreasury balance should be updated", async () => {
