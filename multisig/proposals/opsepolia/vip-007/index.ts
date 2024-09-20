@@ -22,11 +22,6 @@ const vip007 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlocks(address[],uint32[],uint32[])", opsepolia.GUARDIAN],
-    },
-    {
-      target: ACM,
-      signature: "giveCallPermission(address,string,address)",
       params: [ZERO_ADDRESS, "setRewardTokenSpeeds(address[],uint256[],uint256[])", opsepolia.GUARDIAN],
     },
     {
