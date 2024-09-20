@@ -8,7 +8,7 @@ const { zksyncmainnet } = NETWORK_ADDRESSES;
 export const REWARD_TOKEN_SPEED = "578703703703703";
 export const XVS = zksyncmainnet.XVS;
 export const STORE_XVS_REWARD_AMOUNT = parseUnits("6000", 18);
-export const RD_XVS_REWARD_AMOUNT = parseUnits("24000", 18);
+export const RD_XVS_REWARD_AMOUNT = parseUnits("30000", 18);
 export const XVS_STORE = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
 export const XVS_VAULT_PROXY = "0xbbB3C88192a5B0DB759229BeF49DcD1f168F326F";
 export const REWARD_DISTRIBUTOR_CORE_0 = "0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894";
@@ -41,8 +41,7 @@ export const vip010 = () => {
         zksyncmainnet.GUARDIAN,
       ],
     },
-
-    // Configure pool rewards
+    // Configure XVS vault rewards
     {
       target: zksyncmainnet.VTREASURY,
       signature: "withdrawTreasuryToken(address,uint256,address)",
@@ -53,6 +52,8 @@ export const vip010 = () => {
       signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
       params: [zksyncmainnet.XVS, REWARD_TOKEN_SPEED],
     },
+
+    // Configure pool rewards
     { target: REWARD_DISTRIBUTOR_CORE_0, signature: "acceptOwnership()", params: [] },
     {
       target: zksyncmainnet.VTREASURY,
@@ -69,8 +70,8 @@ export const vip010 = () => {
       signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
       params: [
         [VWETH_CORE, VWBTC_CORE, VUSDT_CORE, VUSDC_E_CORE, VZK_CORE],
-        ["370370370370370", "370370370370370", "277777777777777", "555555555555555", "277777777777777"],
-        ["92592592592592", "92592592592592", "69444444444444", "138888888888888", "69444444444444"],
+        ["740740740740740", "740740740740740", "555555555555554", "1111111111111110", "555555555555554"],
+        ["185185185185184", "185185185185184", "138888888888888", "277777777777776", "138888888888888"],
       ],
     },
     // transfer 1500 XVS to community wallet

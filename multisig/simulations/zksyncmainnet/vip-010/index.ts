@@ -32,7 +32,7 @@ import XVS_ABI from "./abi/xvs.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
-const TREASURY_AMOUNT = parseUnits("31500", 18);
+const TREASURY_AMOUNT = parseUnits("37500", 18);
 const BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
 forking(44579033, async () => {
@@ -93,37 +93,37 @@ forking(44579033, async () => {
         {
           ...rewardBasicConfig,
           vToken: VUSDT_CORE,
-          supplySpeed: "277777777777777",
-          borrowSpeed: "69444444444444",
-          totalRewardsToDistribute: parseUnits("3600", 18),
+          supplySpeed: "555555555555554",
+          borrowSpeed: "138888888888888",
+          totalRewardsToDistribute: parseUnits("1800", 18),
         },
         {
           ...rewardBasicConfig,
           vToken: VUSDC_E_CORE,
-          supplySpeed: "555555555555555",
-          borrowSpeed: "138888888888888",
-          totalRewardsToDistribute: parseUnits("7200", 18),
+          supplySpeed: "1111111111111110",
+          borrowSpeed: "277777777777776",
+          totalRewardsToDistribute: parseUnits("3600", 18),
         },
         {
           ...rewardBasicConfig,
           vToken: VWBTC_CORE,
-          supplySpeed: "370370370370370",
-          borrowSpeed: "92592592592592",
-          totalRewardsToDistribute: parseUnits("4800", 18),
+          supplySpeed: "740740740740740",
+          borrowSpeed: "185185185185184",
+          totalRewardsToDistribute: parseUnits("2400", 18),
         },
         {
           ...rewardBasicConfig,
           vToken: VWETH_CORE,
-          supplySpeed: "370370370370370",
-          borrowSpeed: "92592592592592",
-          totalRewardsToDistribute: parseUnits("4800", 18),
+          supplySpeed: "740740740740740",
+          borrowSpeed: "185185185185184",
+          totalRewardsToDistribute: parseUnits("2400", 18),
         },
         {
           ...rewardBasicConfig,
           vToken: VZK_CORE,
-          supplySpeed: "277777777777777",
-          borrowSpeed: "69444444444444",
-          totalRewardsToDistribute: parseUnits("3600", 18),
+          supplySpeed: "555555555555554",
+          borrowSpeed: "138888888888888",
+          totalRewardsToDistribute: parseUnits("1800", 18),
         },
       ];
 

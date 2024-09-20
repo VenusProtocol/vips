@@ -14,7 +14,7 @@ export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
 export const RECEIVER_ADDRESS = ethers.utils.defaultAbiCoder.encode(["address"], [ZKSYNCMAINNET_TREASURY]);
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-export const XVS_AMOUNT = parseUnits("31500", 18);
+export const XVS_AMOUNT = parseUnits("37500", 18);
 export const DEST_CHAIN_ID = LzChainId.zksyncmainnet;
 
 export const vip368 = () => {
