@@ -1,5 +1,4 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -28,9 +27,11 @@ export const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 export const WSTETH_ONEJUMP_REDSTONE_ORACLE = "0x90dd7ae1137cC072F7740Ee0b264f2351515B98A";
 export const WEETH_ONEJUMP_REDSTONE_ORACLE = "0xb661102c399630420A4B9fa0a5cF57161e5452F5";
+export const WSTETH_ONEJUMP_CHAINLINK_ORACLE = "0x3C9850633e8Cb5ac5c3Da833C947E7c91EED15C4";
 export const WEETH_ONEJUMP_CHAINLINK_ORACLE = "0x3b3241698692906310A65ACA199701843404E175";
 
 export const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
+export const WSTETH_CHAINLINK_FEED = "0x4c75d01cfa4D998770b399246400a6dc40FB9645";
 export const WEETH_CHAINLINK_FEED = "0xF37Be32598E9851f785acA86c2162e7C1A8466dd";
 export const CHAINLINK_STALE_PERIOD = 26 * 60 * 60; // 26 hours
 
@@ -172,11 +173,7 @@ enum ConversionAccessibility {
   ONLY_FOR_USERS = 3,
 }
 
-const vip400 = (overrides: {
-  chainlinkStalePeriod?: number;
-  redstoneStalePeriod?: number;
-  hardcodeWstETHPrice?: boolean;
-}) => {
+const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?: number }) => {
   const meta = {
     version: "v2",
     title: "VIP-400",
@@ -198,27 +195,20 @@ const vip400 = (overrides: {
         params: [[WEETH, WEETH_CHAINLINK_FEED, chainlinkStalePeriod]],
       },
       {
+        target: CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[WSTETH, WSTETH_CHAINLINK_FEED, chainlinkStalePeriod]],
+      },
+      {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
         params: [[WEETH, WEETH_REDSTONE_FEED, redstoneStalePeriod]],
       },
-      (() => {
-        // wstETH price feed reverts in the simulation environment due to staleness check,
-        // so we have to use a stub value for testing
-        if (overrides.hardcodeWstETHPrice) {
-          return {
-            target: REDSTONE_ORACLE,
-            signature: "setDirectPrice(address,uint256)",
-            params: [WSTETH, FIXED_LST_PRICE],
-          };
-        } else {
-          return {
-            target: REDSTONE_ORACLE,
-            signature: "setTokenConfig((address,address,uint256))",
-            params: [[WSTETH, WSTETH_REDSTONE_FEED, redstoneStalePeriod]],
-          };
-        }
-      })(),
+      {
+        target: REDSTONE_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[WSTETH, WSTETH_REDSTONE_FEED, redstoneStalePeriod]],
+      },
       ...[WSTETH, WEETH].map((token: string) => ({
         target: BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
@@ -230,8 +220,8 @@ const vip400 = (overrides: {
         params: [
           [
             WSTETH,
-            [WSTETH_ONEJUMP_REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
+            [WSTETH_ONEJUMP_CHAINLINK_ORACLE, WSTETH_ONEJUMP_REDSTONE_ORACLE, WSTETH_ONEJUMP_REDSTONE_ORACLE],
+            [true, true, true],
           ],
         ],
       },

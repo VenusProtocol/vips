@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { setMaxStaleCoreAssets } from "src/utils";
+import { setMaxStaleCoreAssets, setRedstonePrice } from "src/utils";
 import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
@@ -14,9 +14,11 @@ import vip400, {
   COMPTROLLER,
   POOL_REGISTRY,
   PRIME,
+  REDSTONE_ORACLE,
   RESILIENT_ORACLE,
   WEETH,
   WSTETH,
+  WSTETH_REDSTONE_FEED,
   newMarkets,
 } from "../../vips/vip-400/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -28,7 +30,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 const ONE_YEAR = 365 * 24 * 3600;
 const WEETH_HOLDER = "0xC0e1C9Fec0d8888039095DA014382D027F27069D";
 
-forking(42153975, async () => {
+forking(42421700, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -36,6 +38,7 @@ forking(42153975, async () => {
 
   before(async () => {
     await setMaxStaleCoreAssets(CHAINLINK_ORACLE, NORMAL_TIMELOCK);
+    await setRedstonePrice(REDSTONE_ORACLE, WSTETH, WSTETH_REDSTONE_FEED, NORMAL_TIMELOCK);
   });
 
   describe("vTokens deployment", () => {
@@ -44,23 +47,20 @@ forking(42153975, async () => {
     }
   });
 
-  testVip(
-    "LST ETH pool VIP",
-    await vip400({ chainlinkStalePeriod: ONE_YEAR, redstoneStalePeriod: ONE_YEAR, hardcodeWstETHPrice: true }),
-  );
+  testVip("LST ETH pool VIP", await vip400({ chainlinkStalePeriod: ONE_YEAR, redstoneStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct weETH price", async () => {
         const price = await oracle.getPrice(WEETH);
-        expect(price).to.be.eq(parseUnits("2447.541422313822000000", 18));
+        expect(price).to.be.eq(parseUnits("2673.443035369846000000", 18));
       });
 
       it("has the correct wstETH price", async () => {
         // wstETH price feed reverts in the simulation environment due to staleness check,
         // so we have to use a stub value for testing
         const price = await oracle.getPrice(WSTETH);
-        expect(price).to.be.eq(parseUnits("2569.820220000000000000", 18));
+        expect(price).to.be.eq(parseUnits("3007.574086057701629044", 18));
       });
     });
 
