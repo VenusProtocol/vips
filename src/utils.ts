@@ -240,12 +240,14 @@ export const setMaxStalePeriodInBinanceOracle = async (
   await tx.wait();
 };
 
+const ONE_YEAR = 31536000;
+
 export const setMaxStalePeriodInChainlinkOracle = async (
   chainlinkOracleAddress: string,
   asset: string,
   feed: string,
   admin: string,
-  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
 ) => {
   const provider = ethers.provider;
 
@@ -265,6 +267,33 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
+};
+
+export const setRedstonePrice = async (
+  redstoneOracleAddress: string,
+  asset: string,
+  feed: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
+) => {
+  const rsOracle = new ethers.Contract(redstoneOracleAddress, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await rsOracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
+  await rsOracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
+  const price = await rsOracle.getPrice(asset);
+  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, price);
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
