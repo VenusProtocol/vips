@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { COMMUNITY_WALLET, ETH, XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, vip368 } from "../../vips/vip-368/bscmainnet";
+import { COMMUNITY_WALLET, ETH, XVS, XVS_AMOUNT, XVS_BRIDGE_SRC, vip369 } from "../../vips/vip-369/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -29,7 +29,7 @@ forking(42389720, async () => {
     oldXVSBal = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-368 Send XVS to Dest Chain(zksync mainnet)", await vip368(), {
+  testVip("VIP-369 Send XVS to Dest Chain(zksync mainnet)", await vip369(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
