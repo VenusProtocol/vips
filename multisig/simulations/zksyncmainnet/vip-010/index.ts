@@ -52,7 +52,7 @@ forking(44579033, async () => {
       await xvs.connect(bridgeSigner).mint(zksyncmainnet.VTREASURY, TREASURY_AMOUNT);
     });
 
-    it("vTreasury should hold atleast 31500 XVS", async () => {
+    it("vTreasury should hold atleast 37500 XVS", async () => {
       expect(await xvs.balanceOf(zksyncmainnet.VTREASURY)).to.be.gte(TREASURY_AMOUNT);
     });
   });
