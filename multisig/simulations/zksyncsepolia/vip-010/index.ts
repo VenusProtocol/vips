@@ -19,13 +19,12 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const XVS = "0x3AeCac43A2ebe5D8184e650403bf9F656F9D1cfA";
 const XVS_BRIDGE = "0x760461ccB2508CAAa2ECe0c28af3a4707b853043";
-const XVS_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
+const XVS_HOLDER = "0xE8C6Cf867CF962d289305ECE9b139a4116674541";
 
 forking(3768148, async () => {
   let xvs: Contract;
   let xvsBridge: Contract;
   let xvsHolderSigner: SignerWithAddress;
-  let receiver: SignerWithAddress;
   let receiverAddressBytes32: string;
   let defaultAdapterParams: string;
 
@@ -33,8 +32,7 @@ forking(3768148, async () => {
     xvs = await ethers.getContractAt(XVS_ABI, XVS);
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("5"));
-    [receiver] = await ethers.getSigners();
-    receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
+    receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [XVS_HOLDER]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
@@ -67,7 +65,7 @@ forking(3768148, async () => {
     });
 
     it("Should emit an event on successful bridging of XVS (sepolia -> Op Sepolia)", async () => {
-      const amount = parseUnits("1", 18);
+      const amount = parseUnits("0.1", 18);
       const nativeFee = (
         await xvsBridge.estimateSendFee(
           LzChainId.opsepolia,
