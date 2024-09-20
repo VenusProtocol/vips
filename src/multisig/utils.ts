@@ -122,7 +122,7 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xe7A7552B0Cff45E837e1422b479d2dEDE748f571",
       },
     },
-    // Add more networks as needed
+    // Add more testnet networks as needed
   };
 
   if (network.name in networks) {
