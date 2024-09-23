@@ -7,7 +7,6 @@ export type SUPPORTED_NETWORKS =
   | "ethereum"
   | "opbnbtestnet"
   | "opbnbmainnet"
-  | "xlayertestnet"
   | "zksyncsepolia";
 
 export type REMOTE_NETWORKS =
