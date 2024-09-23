@@ -167,10 +167,10 @@ export const CLOSE_FACTOR = parseUnits("0.5", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.02", 18);
 export const MIN_LIQUIDATABLE_COLLATERAL = parseUnits("100", 18);
 
-const vip400 = () => {
+const vip370 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-400",
+    title: "VIP-370",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -314,4 +314,4 @@ const vip400 = () => {
   );
 };
 
-export default vip400;
+export default vip370;

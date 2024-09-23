@@ -9,7 +9,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip400, {
+import vip370, {
   CHAINLINK_ORACLE,
   COMPTROLLER,
   POOL_REGISTRY,
@@ -21,7 +21,7 @@ import vip400, {
   WSTETH_REDSTONE_FEED,
   converterBaseAssets,
   newMarkets,
-} from "../../vips/vip-400/bscmainnet";
+} from "../../vips/vip-370/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
@@ -52,7 +52,7 @@ forking(42421700, async () => {
 
   testVip(
     "LST ETH pool VIP",
-    await vip400({
+    await vip370({
       chainlinkStalePeriod: ONE_YEAR,
       redstoneStalePeriod: ONE_YEAR,
     }),

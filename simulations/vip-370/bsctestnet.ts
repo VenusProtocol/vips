@@ -8,7 +8,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip400, {
+import vip370, {
   COMPTROLLER,
   POOL_REGISTRY,
   PRIME,
@@ -16,7 +16,7 @@ import vip400, {
   WEETH,
   WSTETH,
   newMarkets,
-} from "../../vips/vip-400/bsctestnet";
+} from "../../vips/vip-370/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -36,7 +36,7 @@ forking(43792201, async () => {
     }
   });
 
-  testVip("LST ETH pool VIP", await vip400());
+  testVip("LST ETH pool VIP", await vip370());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

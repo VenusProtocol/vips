@@ -174,11 +174,119 @@ enum ConversionAccessibility {
   ONLY_FOR_USERS = 3,
 }
 
-const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?: number }) => {
+const vip370 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?: number }) => {
   const meta = {
     version: "v2",
-    title: "VIP-400",
-    description: ``,
+    title: "VIP-370 Add Liquid Staked ETH pool to BNB chain",
+    description: `#### Summary
+
+If passed, this VIP will perform the following actions:
+
+- Add pool "Liquid Staked ETH" to the [PoolRegistry contract](https://bscscan.com/address/0x9F7b01A536aFA00EF10310A162877fd792cD0666) on BNB Chain
+- Add the following markets to the new pool, following the [Chaos labs recommendations](https://community.venus.io/t/support-lido-wsteth-token-in-a-new-venus-protocol-bnbchain-lst-eth-pool/4526/6):
+    - [ETH](https://bscscan.com/address/0x2170Ed0880ac9A755fd29B2688956BD959F933F8)
+    - [wstETH](https://bscscan.com/address/0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C)
+    - [weETH](https://bscscan.com/address/0x04c0599ae5a44757c0af6f9ec3b93da8976c150a)
+
+#### Description
+
+Initial risk parameters for the new pool:
+
+- Close factor: 50%
+- Liquidation incentive: 2%
+
+#### Risk parameters of the new markets
+
+Underlying token: [ETH](https://bscscan.com/address/0x2170Ed0880ac9A755fd29B2688956BD959F933F8)
+
+- Borrow cap: 450
+- Supply cap: 400
+- Collateral factor: 0
+- Liquidation threshold: 0
+- Reserve factor: 0.15
+- Bootstrap liquidity: 2 ETH - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9)
+- Interest rates:
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.035
+    - jump multiplier (yearly): 0.8
+
+Underlying token: [wstETH](https://bscscan.com/address/0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C)
+
+- Borrow cap: 50
+- Supply cap: 5
+- Collateral factor: 0.9
+- Liquidation threshold: 0.93
+- Reserve factor: 0.25
+- Bootstrap liquidity: 3.55 wstETH - provided by the [Lido project](https://bscscan.com/address/0x5A9d695c518e95CD6Ea101f2f25fC2AE18486A61)
+- Interest rates:
+    - kink: 0.45
+    - base (yearly): 0
+    - multiplier (yearly): 0.09
+    - jump multiplier (yearly): 0.75
+
+Underlying token: [weETH](https://bscscan.com/address/0x04c0599ae5a44757c0af6f9ec3b93da8976c150a)
+
+- Borrow cap: 400
+- Supply cap: 200
+- Collateral factor: 0.9
+- Liquidation threshold: 0.93
+- Reserve factor: 0.25
+- Bootstrap liquidity: 4.43236349753311919 weETH - provided by the [Ether.fi project](http://ether.fi/)
+- Interest rates:
+    - kink: 0.45
+    - base (yearly): 0
+    - multiplier (yearly): 0.09
+    - jump multiplier (yearly): 0.75
+
+Conversion incentives for wstETH and weETH are configured to 0.01% on every [Token Converter](https://docs-v4.venus.io/deployed-contracts/token-converters). This is the same incentive configured for the rest of the assets on BNB Chain in the [VIP-350](https://app.venus.io/#/governance/proposal/350?chainId=56), following the [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-token-converter/4521).
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **No changes in the deployed code.** The deployed contracts (markets, rewards, comptroller, etc.) have not been modified. It’s the same codebase used for the rest of the pools on BNB chain.
+- **Audit**: Certik, Peckshield, Hacken and Code4rena have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the markets are properly added to the pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same pool has been deployed to testnet, and used in the Venus Protocol testnet deployment
+- **Fork tests**: in a simulation environment, verifying the main actions of the protocol are executable as expected with real data
+
+The ownership of every contract has been transferred to Governance.
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+#### Contracts on mainnet
+
+- Comptroller: [0xBE609449Eb4D76AD8545f957bBE04b596E8fC529](https://bscscan.com/address/0xBE609449Eb4D76AD8545f957bBE04b596E8fC529)
+- Markets:
+    - vETH_LiquidStakedETH: [0xeCCACF760FEA7943C5b0285BD09F601505A29c05](https://bscscan.com/address/0xeCCACF760FEA7943C5b0285BD09F601505A29c05)
+    - vwstETH_LiquidStakedETH: [0x94180a3948296530024Ef7d60f60B85cfe0422c8](https://bscscan.com/address/0x94180a3948296530024Ef7d60f60B85cfe0422c8)
+    - vweETH_LiquidStakedETH: [0xc5b24f347254bD8cF8988913d1fd0F795274900F](https://bscscan.com/address/0xc5b24f347254bD8cF8988913d1fd0F795274900F)
+- Swap router: [0xfb4A3c6D25B4f66C103B4CD0C0D58D24D6b51dC1](https://bscscan.com/address/0xfb4A3c6D25B4f66C103B4CD0C0D58D24D6b51dC1)
+
+#### Contracts on testnet
+
+- Comptroller: [0xC7859B809Ed5A2e98659ab5427D5B69e706aE26b](https://testnet.bscscan.com/address/0xC7859B809Ed5A2e98659ab5427D5B69e706aE26b)
+- Markets:
+    - vETH_LiquidStakedETH: [0x46D49adF48172d2e79d813A3f4F27aB61724B01e](https://testnet.bscscan.com/address/0x46D49adF48172d2e79d813A3f4F27aB61724B01e)
+    - vwstETH_LiquidStakedETH: [0x16eb5Ce6d186B49709dD588518CD545985096Ff5](https://testnet.bscscan.com/address/0x16eb5Ce6d186B49709dD588518CD545985096Ff5)
+    - vweETH_LiquidStakedETH: [0x4BD7EfB423f06fa033404FBd0935A2097918084d](https://testnet.bscscan.com/address/0x4BD7EfB423f06fa033404FBd0935A2097918084d)
+- Swap router: [0x4A73EbD3dcA511CF3574768BD6184747342C23f2](https://testnet.bscscan.com/address/0x4A73EbD3dcA511CF3574768BD6184747342C23f2)
+
+#### References
+
+- [Repository](https://github.com/VenusProtocol/isolated-pools)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/373)
+- [Support Lido wstETH token in a new Venus Protocol BNBChain LST ETH pool](https://community.venus.io/t/support-lido-wsteth-token-in-a-new-venus-protocol-bnbchain-lst-eth-pool/4526)
+- [Support weETH collateral on Venus on BNB Chain](https://community.venus.io/t/support-weeth-collateral-on-venus-on-bnb-chain/4305)
+- [Chaos labs recommendations](https://community.venus.io/t/support-lido-wsteth-token-in-a-new-venus-protocol-bnbchain-lst-eth-pool/4526/6)
+- [Documentation](https://docs.venus.io/whats-new/isolated-pools)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -332,4 +440,4 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
   );
 };
 
-export default vip400;
+export default vip370;
