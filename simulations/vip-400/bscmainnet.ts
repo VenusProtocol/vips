@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { setMaxStaleCoreAssets, setRedstonePrice } from "src/utils";
+import { expectEvents, setMaxStaleCoreAssets, setRedstonePrice } from "src/utils";
 import { NORMAL_TIMELOCK, forking, testVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
@@ -19,16 +19,19 @@ import vip400, {
   WEETH,
   WSTETH,
   WSTETH_REDSTONE_FEED,
+  converterBaseAssets,
   newMarkets,
 } from "../../vips/vip-400/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 const ONE_YEAR = 365 * 24 * 3600;
 const WEETH_HOLDER = "0xC0e1C9Fec0d8888039095DA014382D027F27069D";
+const EXPECTED_CONVERSION_INCENTIVE = 1e14;
 
 forking(42421700, async () => {
   const provider = ethers.provider;
@@ -47,7 +50,18 @@ forking(42421700, async () => {
     }
   });
 
-  testVip("LST ETH pool VIP", await vip400({ chainlinkStalePeriod: ONE_YEAR, redstoneStalePeriod: ONE_YEAR }));
+  testVip(
+    "LST ETH pool VIP",
+    await vip400({
+      chainlinkStalePeriod: ONE_YEAR,
+      redstoneStalePeriod: ONE_YEAR,
+    }),
+    {
+      callbackAfterExecution: async (txResponse: any) => {
+        await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [12]);
+      },
+    },
+  );
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
@@ -164,5 +178,17 @@ forking(42421700, async () => {
     });
 
     checkIsolatedPoolsComptrollers({ [COMPTROLLER]: WEETH_HOLDER });
+
+    describe("Converters", () => {
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        for (const assetAddress of [WSTETH, WEETH]) {
+          it(`should set ${EXPECTED_CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${assetAddress}`, async () => {
+            const result = await converterContract.conversionConfigurations(baseAsset, assetAddress);
+            expect(result.incentive).to.equal(EXPECTED_CONVERSION_INCENTIVE);
+          });
+        }
+      }
+    });
   });
 });

@@ -51,6 +51,7 @@ export const FIXED_LST_PRICE = parseUnits("1.1", 18); // if wstETH price is hard
 export const CLOSE_FACTOR = parseUnits("0.5", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.02", 18);
 export const MIN_LIQUIDATABLE_COLLATERAL = parseUnits("100", 18);
+export const CONVERSION_INCENTIVE = 1e14;
 
 const commonSpec = {
   decimals: 8,
@@ -183,8 +184,8 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
-  const chainlinkStalePeriod = overrides.chainlinkStalePeriod || CHAINLINK_STALE_PERIOD;
-  const redstoneStalePeriod = overrides.redstoneStalePeriod || REDSTONE_STALE_PERIOD;
+  const chainlinkStalePeriod = overrides?.chainlinkStalePeriod || CHAINLINK_STALE_PERIOD;
+  const redstoneStalePeriod = overrides?.redstoneStalePeriod || REDSTONE_STALE_PERIOD;
 
   return makeProposal(
     [
@@ -318,7 +319,7 @@ const vip400 = (overrides: { chainlinkStalePeriod?: number; redstoneStalePeriod?
       // Conversions Config
       ...Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
         const tokens = [WSTETH, WEETH];
-        const conversionConfigs = tokens.map(() => [0, ConversionAccessibility.ALL]);
+        const conversionConfigs = tokens.map(() => [CONVERSION_INCENTIVE, ConversionAccessibility.ALL]);
         return {
           target: converter,
           signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
