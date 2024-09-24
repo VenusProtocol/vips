@@ -436,7 +436,7 @@ The ownership of every contract has been transferred to Governance.
       }),
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
