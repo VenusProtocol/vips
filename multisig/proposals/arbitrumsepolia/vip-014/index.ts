@@ -26,7 +26,6 @@ export const VTOKENS = [
 ];
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
 
-
 const vip014 = () => {
   return makeProposal([
     {

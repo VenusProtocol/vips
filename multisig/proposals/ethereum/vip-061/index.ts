@@ -65,7 +65,6 @@ export const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 export const SFrxETHOracle = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
 
-
 const vip061 = () => {
   return makeProposal([
     {

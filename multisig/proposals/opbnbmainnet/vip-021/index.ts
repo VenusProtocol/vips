@@ -23,7 +23,6 @@ export const XVS_BRIDGE_ADMIN_PROXY = "0x52fcE05aDbf6103d71ed2BA8Be7A31728273183
 export const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 export const BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
 
-
 const vip021 = () => {
   return makeProposal([
     {
