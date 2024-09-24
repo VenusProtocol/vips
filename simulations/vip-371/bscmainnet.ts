@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import { BRIDGE_XVS_AMOUNT, XVS, XVS_BRIDGE, vip368 } from "../../vips/vip-368/bscmainnet";
+import { BRIDGE_XVS_AMOUNT, XVS, XVS_BRIDGE, vip371 } from "../../vips/vip-371/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import REWARD_FACET_ABI from "./abi/RewardFacet.json";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
@@ -22,7 +22,7 @@ forking(42499461, async () => {
     bridgeXVSBalPrev = await xvs.balanceOf(XVS_BRIDGE);
   });
 
-  testVip("VIP-368", await vip368(), {
+  testVip("VIP-371", await vip371(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [REWARD_FACET_ABI], ["VenusGranted"], [1]);
       await expectEvents(txResponse, [XVS_BRIDGE_ABI], ["SendToChain"], [1]);
