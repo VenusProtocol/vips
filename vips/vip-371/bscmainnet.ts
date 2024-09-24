@@ -45,8 +45,8 @@ All markets in the core pool have significant participation. Therefore, as this 
 
 This proposal requests XVS funding to support the proposed incentives until January 2025. Additionally, XVS funding for the Liquid Staked ETH pool will be requested to extend rewards until January, ensuring synchronization of both emission adjustments and funding calendars. The required amounts per distributor are as follows:
 
-* **Core Pool**: 2,552 XVS per month for a total of 10,208 XVS over 4 months.
-* **LST Pool**: 5,100 XVS per month for a total of 5,100 XVS over 4 months.
+* **Core Pool:** 2,552 XVS per month for a total of 10,208 XVS over 4 months.
+* **LST Pool:** 5,100 XVS per month for a total of 5,100 XVS over 4 months.
 * **Total:** 7,652 XVS per month for a total of 15,308 XVS over 4 months.
 
 #### References
@@ -55,7 +55,7 @@ This proposal requests XVS funding to support the proposed incentives until Janu
 
 #### Disclaimer for Arbitrum one VIPs
 
-Privilege commands on Arbitrum one will be executed by the [Guardian wallet](https://arbiscan.io/address/0x14e0E151b33f9802b3e75b621c1457afc44DcAA0), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, this multisig transaction will be executed. Otherwise, it will be rejected.`,
+Privilege commands on Arbitrum one will be executed by the [Guardian wallet](https://arbiscan.io/address/0x14e0E151b33f9802b3e75b621c1457afc44DcAA0), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=arb1:0x14e0E151b33f9802b3e75b621c1457afc44DcAA0&id=multisig_0x14e0E151b33f9802b3e75b621c1457afc44DcAA0_0x05022071832b482348ebcc8f5d792a72bdf534dafd8ea190d0e94d21ec4ed647) multisig transaction will be executed. Otherwise, it will be rejected.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
