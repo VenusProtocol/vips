@@ -10,8 +10,8 @@ import {
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-  vip370,
-} from "../../vips/vip-370/bscmainnet";
+  vip371,
+} from "../../vips/vip-371/bscmainnet";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
@@ -47,7 +47,7 @@ forking(42508132, async () => {
     });
   });
 
-  testVip("vip-370", await vip370(), {
+  testVip("vip-371", await vip371(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

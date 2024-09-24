@@ -8,10 +8,10 @@ export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
 
-export const vip370 = () => {
+export const vip371 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-370 Increase XVS bridge limit for ZKsync",
+    title: "VIP-371 Increase XVS bridge limit for ZKsync",
     description: `#### Summary`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
