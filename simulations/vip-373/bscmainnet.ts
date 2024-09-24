@@ -5,9 +5,9 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip371, { COMMUNITY_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-371/bscmainnet";
+import vip373, { COMMUNITY_WALLET, TOKEN_REDEEMER, TREASURY, VUSDC, VUSDC_AMOUNT } from "../../vips/vip-373/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import VTreasurey_ABI from "./abi/VTreasury.json";
+import VTreasury_ABI from "./abi/VTreasury.json";
 
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
@@ -24,9 +24,9 @@ forking(42532215, async () => {
     prevTreasuryBalance = await vusdc.balanceOf(TREASURY);
   });
 
-  testVip("VIP-371 Transfer bootstrap liquidity needed for Optimism to the Community wallet", await vip371(), {
+  testVip("VIP-373 Transfer bootstrap liquidity needed for Optimism to the Community wallet", await vip373(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTreasurey_ABI], ["WithdrawTreasuryBEP20"], [1]);
+      await expectEvents(txResponse, [VTreasury_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },
   });
 
@@ -36,8 +36,8 @@ forking(42532215, async () => {
     });
 
     it("Should increase USDC balance of the community wallet", async () => {
-      const currUSDcBal = await usdc.balanceOf(COMMUNITY_WALLET);
-      const delta = currUSDcBal.sub(prevBalanceCommunityWallet);
+      const currUSDCBal = await usdc.balanceOf(COMMUNITY_WALLET);
+      const delta = currUSDCBal.sub(prevBalanceCommunityWallet);
       expect(delta).to.be.equal(parseUnits("25000", 18));
     });
 
