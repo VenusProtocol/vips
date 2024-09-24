@@ -42,6 +42,6 @@ export const vip372 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
