@@ -4,12 +4,12 @@ import { ethers } from "hardhat";
 import { LzChainId } from "src/types";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip014, {
+import vip015, {
   MAX_DAILY_RECEIVE_LIMIT,
   MAX_DAILY_SEND_LIMIT,
   SINGLE_RECEIVE_LIMIT,
   SINGLE_SEND_LIMIT,
-} from "../../../proposals/arbitrumone/vip-014";
+} from "../../../proposals/arbitrumone/vip-015";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
@@ -47,7 +47,7 @@ forking(256537654, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip014());
+      await pretendExecutingVip(await vip015());
     });
 
     it("Should match single send transaction limit", async () => {

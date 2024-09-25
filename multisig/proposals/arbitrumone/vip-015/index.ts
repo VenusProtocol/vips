@@ -8,7 +8,7 @@ export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
 
-const vip014 = () => {
+const vip015 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN,
@@ -32,4 +32,4 @@ const vip014 = () => {
     },
   ]);
 };
-export default vip014;
+export default vip015;
