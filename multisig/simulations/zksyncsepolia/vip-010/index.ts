@@ -64,7 +64,7 @@ forking(3768148, async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(LzChainId.opsepolia)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should emit an event on successful bridging of XVS (sepolia -> Op Sepolia)", async () => {
+    it("Should emit an event on successful bridging of XVS (ZKsync sepolia -> Op Sepolia)", async () => {
       const amount = parseUnits("0.1", 18);
       const nativeFee = (
         await xvsBridge.estimateSendFee(

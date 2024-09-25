@@ -68,7 +68,7 @@ forking(44548900, async () => {
       expect(await xvsBridge.chainIdToMaxDailyReceiveLimit(LzChainId.opmainnet)).to.equal(MAX_DAILY_RECEIVE_LIMIT);
     });
 
-    it("Should emit an event on successful bridging of XVS (Opbnb mainnet -> OP mainnet)", async () => {
+    it("Should emit an event on successful bridging of XVS (Zksync mainnet -> OP mainnet)", async () => {
       const amount = parseUnits("1", 18);
       await xvs.connect(bridgeSigner).mint(USER, amount);
       const nativeFee = (

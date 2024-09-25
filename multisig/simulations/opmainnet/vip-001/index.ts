@@ -78,7 +78,6 @@ forking(125555900, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      // await pretendExecutingVip(await vip000());
       await pretendExecutingVip(await vip001());
     });
 

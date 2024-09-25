@@ -6,7 +6,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip364, {
@@ -20,12 +20,12 @@ import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const XVSProxyOFTSrc = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
-const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+const XVS_HOLDER = "0x0D0707963952f2fBA59dD06f2b425ace40b492Fe";
 
-forking(42378700, async () => {
+forking(42563100, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -36,11 +36,17 @@ forking(42378700, async () => {
 
   beforeEach(async () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVS_BRIDGE_SRC_ABI, provider);
-    xvs = new ethers.Contract(bsctestnet.XVS, XVS_ABI, provider);
+    xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      bscmainnet.XVS,
+      "0xbf63f430a79d4036a5900c19818aff1fa710f206",
+      bscmainnet.NORMAL_TIMELOCK,
+    );
   });
 
   testVip("vip-364 testnet", await vip364(), {
@@ -135,13 +141,13 @@ forking(42378700, async () => {
 
     it("Reverts if max daily transaction limit exceed", async function () {
       const maxPlusAmount = ethers.utils.parseUnits("50000", 18);
-      const amount = parseUnits("1420", 18);
+      const amount = parseUnits("1500", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, maxPlusAmount);
       const nativeFee = (
         await bridge.estimateSendFee(LzChainId.opmainnet, receiverAddressBytes32, amount, false, defaultAdapterParams)
       ).nativeFee;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 8; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(

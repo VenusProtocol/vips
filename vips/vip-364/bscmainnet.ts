@@ -10,7 +10,7 @@ export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
 export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
 export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
-export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
+export const OP_MAINNET_TRUSTED_REMOTE = "0xbbe46baec851355c3fc4856914c47eb6cea0b8b4";
 
 const vip364 = () => {
   const meta = {
@@ -27,7 +27,7 @@ const vip364 = () => {
       {
         target: XVS_BRIDGE_ADMIN,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.opmainnet, OP_SEPOLIA_TRUSTED_REMOTE],
+        params: [LzChainId.opmainnet, OP_MAINNET_TRUSTED_REMOTE],
       },
       {
         target: XVS_BRIDGE_ADMIN,
