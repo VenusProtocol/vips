@@ -30,11 +30,7 @@ export const vip371 = () => {
       {
         target: LST_BNB_COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [
-          [vstkBNB],
-          [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET],
-          true,
-        ],
+        params: [[vstkBNB], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
       },
       {
         target: vstkBNB,
@@ -55,7 +51,7 @@ export const vip371 = () => {
         target: LST_BNB_COMPTROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [[vstkBNB], [SUPPLY_CAP]],
-      }
+      },
     ],
     meta,
     ProposalType.FAST_TRACK,
