@@ -12,10 +12,10 @@ export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
 
-const vip364 = () => {
+const vip374 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-364 Enable BSC -> OP sepolia bridge",
+    title: "VIP-374 Enable BSC -> OP sepolia bridge",
     description: `#### Summary Enable BSC -> ZKSYNC bridge`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -60,4 +60,4 @@ const vip364 = () => {
   );
 };
 
-export default vip364;
+export default vip374;
