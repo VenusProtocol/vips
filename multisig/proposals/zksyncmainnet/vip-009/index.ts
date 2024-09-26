@@ -1,9 +1,5 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
-
-const { zksyncmainnet } = NETWORK_ADDRESSES;
 
 export const CORE_POOL_COMPTROLLER = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
 export const vUSDCe = "0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D";
@@ -21,13 +17,16 @@ export const vip009 = () => {
     {
       target: CORE_POOL_COMPTROLLER,
       signature: "setMarketSupplyCaps(address[],uint256[])",
-      params: [[vUSDCe, vZK, vWETH], [vUSDCe_SUPPLY_CAP, vZK_SUPPLY_CAP, vWETH_SUPPLY_CAP]]
+      params: [
+        [vUSDCe, vZK, vWETH],
+        [vUSDCe_SUPPLY_CAP, vZK_SUPPLY_CAP, vWETH_SUPPLY_CAP],
+      ],
     },
     {
       target: CORE_POOL_COMPTROLLER,
       signature: "setMarketBorrowCaps(address[],uint256[])",
-      params: [[vUSDCe], [vUSDCe_BORROW_CAP]]
-    }
+      params: [[vUSDCe], [vUSDCe_BORROW_CAP]],
+    },
   ]);
 };
 
