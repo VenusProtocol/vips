@@ -1,14 +1,8 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
-import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip003 from "../../../proposals/zksyncmainnet/vip-003";
-import vip004 from "../../../proposals/zksyncmainnet/vip-004";
 import vip009, {
   CORE_POOL_COMPTROLLER,
   vZK,
@@ -20,8 +14,6 @@ import vip009, {
   vUSDCe_BORROW_CAP,
 } from "../../../proposals/zksyncmainnet/vip-009";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-
-const { zksyncmainnet } = NETWORK_ADDRESSES;
 
 forking(43787868, async () => {
   const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_POOL_COMPTROLLER);
