@@ -49,7 +49,7 @@ forking(42563100, async () => {
     );
   });
 
-  testVip("vip-364 testnet", await vip364(), {
+  testVip("vip-364 mainnet", await vip364(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
