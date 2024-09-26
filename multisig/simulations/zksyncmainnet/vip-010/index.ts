@@ -3,7 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip009, { CORE_POOL_COMPTROLLER, vUSDCe, vWETH, vZK } from "../../../proposals/zksyncmainnet/vip-009";
+import vip010, { CORE_POOL_COMPTROLLER, vUSDCe, vWETH, vZK } from "../../../proposals/zksyncmainnet/vip-010";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 forking(45152876, async () => {
@@ -24,7 +24,7 @@ forking(45152876, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip009());
+      await pretendExecutingVip(await vip010());
     });
     it("should have correct market supply caps", async () => {
       const vZK_SUPPLY_CAP = await comptroller.supplyCaps(vZK);

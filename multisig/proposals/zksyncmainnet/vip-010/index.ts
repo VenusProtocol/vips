@@ -12,7 +12,7 @@ export const vWETH_SUPPLY_CAP = parseUnits("3000", 18);
 
 export const vUSDCe_BORROW_CAP = parseUnits("5400000", 6);
 
-export const vip009 = () => {
+export const vip010 = () => {
   return makeProposal([
     {
       target: CORE_POOL_COMPTROLLER,
@@ -30,4 +30,4 @@ export const vip009 = () => {
   ]);
 };
 
-export default vip009;
+export default vip010;

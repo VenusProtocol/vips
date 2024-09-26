@@ -14,9 +14,9 @@ import {
   vMATIC,
   vMATIC_BORROW_CAP,
   vMATIC_SUPPLY_CAP,
-  vip371,
+  vip375,
   vstkBNB,
-} from "../../vips/vip-371/bscmainnet";
+} from "../../vips/vip-375/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
@@ -65,7 +65,7 @@ forking(42389720, async () => {
     });
   });
 
-  testVip("VIP-371", await vip371(), {
+  testVip("VIP-375", await vip375(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
