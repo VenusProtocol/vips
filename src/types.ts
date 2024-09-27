@@ -7,7 +7,6 @@ export type SUPPORTED_NETWORKS =
   | "ethereum"
   | "opbnbtestnet"
   | "opbnbmainnet"
-  | "xlayertestnet"
   | "zksyncsepolia";
 
 export type REMOTE_NETWORKS =
@@ -40,6 +39,10 @@ export interface Proposal {
   values: BigNumberish[];
   signatures: string[];
   params: any[][];
+  // 1 means no change, 2 means double the gas fee. Will always be whole numbers.
+  gasFeeMultiplicationFactor?: number[];
+  // 1 means no change, 2 means double the gas fee. Will always be whole numbers.
+  gasLimitMultiplicationFactor?: number[];
   meta?: ProposalMeta;
   type?: ProposalType;
 }
@@ -50,6 +53,10 @@ export interface Command {
   params: any[];
   value?: string;
   dstChainId?: LzChainId;
+  // only matters for simulations. For some network forks, the gas fee estimation is not accurate. Should be a whole number.
+  gasFeeMultiplicationFactor?: number;
+  // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
+  gasLimitMultiplicationFactor?: number;
 }
 
 export interface TokenConfig {

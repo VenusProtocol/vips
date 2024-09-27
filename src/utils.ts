@@ -1,10 +1,12 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
-import { TransactionResponse } from "@ethersproject/providers";
+import { JsonRpcProvider, TransactionResponse } from "@ethersproject/providers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
+import { EthereumProvider } from "hardhat/types";
 
 import { NETWORK_ADDRESSES } from "./networkAddresses";
 import {
@@ -46,6 +48,11 @@ export const getPayload = (proposal: Proposal) => {
 
 const gasUsedPerCommand = 300000;
 export async function setForkBlock(_blockNumber: number) {
+  if (network.name === "zkSyncTestNode") {
+    console.log("zkSyncTestNode network does not support forking, skipping fork");
+    return;
+  }
+
   const blockNumber = config.networks.hardhat.zksync ? _blockNumber.toString(16) : _blockNumber;
   await network.provider.request({
     method: "hardhat_reset",
@@ -86,11 +93,21 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
   });
 }
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
-  await network.provider.send("hardhat_impersonateAccount", [user]);
-  const balanceHex = toRpcQuantity(balance);
-  await network.provider.send("hardhat_setBalance", [user, balanceHex]);
+  let provider: EthereumProvider | JsonRpcProvider = network.provider;
+  let signer = await ethers.getSigner(user);
 
-  return ethers.getSigner(user);
+  // zksync test node provider does not support default impersonation
+  if (network.name === "zkSyncTestNode") {
+    provider = new ethers.providers.JsonRpcProvider(config.networks.hardhat.forking?.url);
+
+    signer = provider.getSigner(user) as unknown as SignerWithAddress;
+  }
+
+  await provider.send("hardhat_impersonateAccount", [user]);
+  const balanceHex = toRpcQuantity(balance);
+  await provider.send("hardhat_setBalance", [user, balanceHex]);
+
+  return signer;
 };
 
 const toRpcQuantity = (x: NumberLike): string => {
@@ -163,7 +180,17 @@ export const makeProposal = async (
   meta?: ProposalMeta,
   type?: ProposalType,
 ): Promise<Proposal> => {
-  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const proposal: Proposal = {
+    signatures: [],
+    targets: [],
+    params: [],
+    values: [],
+    gasFeeMultiplicationFactor: [],
+    gasLimitMultiplicationFactor: [],
+    meta,
+    type,
+  };
+
   const map = new Map<number, Command[]>();
   const _commands = [];
   for (const command of commands) {
@@ -181,6 +208,10 @@ export const makeProposal = async (
     proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
     proposal.signatures.push(..._commands.map(cmd => cmd.signature));
     proposal.params.push(..._commands.map(cmd => cmd.params));
+    proposal.gasFeeMultiplicationFactor?.push(
+      ..._commands.map(cmd => (cmd.gasFeeMultiplicationFactor ?? network.zksync ? 2 : 1)),
+    );
+    proposal.gasLimitMultiplicationFactor?.push(..._commands.map(cmd => cmd.gasLimitMultiplicationFactor ?? 1));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);
@@ -240,12 +271,14 @@ export const setMaxStalePeriodInBinanceOracle = async (
   await tx.wait();
 };
 
+const ONE_YEAR = 31536000;
+
 export const setMaxStalePeriodInChainlinkOracle = async (
   chainlinkOracleAddress: string,
   asset: string,
   feed: string,
   admin: string,
-  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
 ) => {
   const provider = ethers.provider;
 
@@ -265,6 +298,33 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
+};
+
+export const setRedstonePrice = async (
+  redstoneOracleAddress: string,
+  asset: string,
+  feed: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
+) => {
+  const rsOracle = new ethers.Contract(redstoneOracleAddress, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await rsOracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
+  await rsOracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
+  const price = await rsOracle.getPrice(asset);
+  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, price);
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
