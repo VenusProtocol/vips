@@ -32,6 +32,7 @@ export const COMPTROLLER_BEACON = "0xAE2C3F21896c02510aA187BdA0791cDA77083708";
 export const VTOKEN_BEACON = "0xfc08aADC7a1A93857f6296C3fb78aBA1d286533a";
 export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
+export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 
 export const COMPTROLLERS = [
   "0x687a01ecF6d3907658f7A7c714749fAC32336D1B",
@@ -64,6 +65,8 @@ export const XVS_BRIDGE_ADMIN_PROXY = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b9
 export const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 export const SFrxETHOracle = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
+
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const vip061 = () => {
   return makeProposal([
@@ -189,6 +192,11 @@ const vip061 = () => {
       target: ethereum.VTREASURY,
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, ethereum.NORMAL_TIMELOCK],
     },
   ]);
 };

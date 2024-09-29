@@ -62,6 +62,8 @@ export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 const vip060 = () => {
   return makeProposal([
     {
@@ -181,6 +183,11 @@ const vip060 = () => {
       target: SFrxETHOracle,
       signature: "transferOwnership(address)",
       params: [sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK],
     },
   ]);
 };

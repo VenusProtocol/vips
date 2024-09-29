@@ -26,6 +26,8 @@ export const VTOKENS = [
   "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6",
 ];
 
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 const vip014 = () => {
   return makeProposal([
     {
@@ -128,6 +130,11 @@ const vip014 = () => {
       target: arbitrumone.VTREASURY,
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, arbitrumone.NORMAL_TIMELOCK],
     },
   ]);
 };

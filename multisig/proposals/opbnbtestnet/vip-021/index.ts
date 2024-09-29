@@ -22,6 +22,8 @@ export const XVS_BRIDGE_ADMIN_PROXY = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17f
 export const XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 export const BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
 
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 const vip021 = () => {
   return makeProposal([
     {
@@ -102,6 +104,11 @@ const vip021 = () => {
       target: opbnbtestnet.VTREASURY,
       signature: "transferOwnership(address)",
       params: [opbnbtestnet.NORMAL_TIMELOCK],
+    },
+    {
+      target: ACM,
+      signature: "grantRole(bytes32,address)",
+      params: [DEFAULT_ADMIN_ROLE, opbnbtestnet.NORMAL_TIMELOCK],
     },
   ]);
 };
