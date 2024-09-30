@@ -1,5 +1,3 @@
-import { ethers } from "hardhat";
-
 import { makeProposal } from "../../../../src/utils";
 
 export const VTOKEN_BEACON = "0xfeD1d3a13597c5aBc893Af41ED5cb17e64c847c7";

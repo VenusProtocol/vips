@@ -96,6 +96,17 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     if (supplyMarket && borrowMarket) break; // Exit the loop if both supplyMarket and borrowMarket are initialized
   }
 
+  if (!supplyMarket || !borrowMarket) {
+    return;
+  }
+
+  if (FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet") {
+    await setMaxStalePeriod(
+      resilientOracle,
+      await ethers.getContractAt(ERC20_ABI, "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", signer),
+    );
+  }
+
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
   await setMaxStalePeriod(resilientOracle, borrowUnderlying as Contract);
 
@@ -112,10 +123,8 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
-
   await supplyUnderlying?.approve(supplyMarket?.address, supplyAmountScaled);
   await supplyMarket?.mint(supplyAmountScaled);
-
   expect(await supplyMarket?.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
 
   await comptroller.enterMarkets([borrowMarket?.address, supplyMarket?.address]);

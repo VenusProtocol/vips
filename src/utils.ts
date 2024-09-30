@@ -380,6 +380,16 @@ export const setMaxStalePeriod = async (
         normalTimelock,
         maxStalePeriodInSeconds,
       );
+
+      if (underlyingAsset.address === "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB") {
+        await setMaxStalePeriodInChainlinkOracle(
+          tokenConfig.oracles[1],
+          underlyingAsset.address,
+          ethers.constants.AddressZero,
+          normalTimelock,
+          maxStalePeriodInSeconds,
+        );
+      }
     }
   }
   await mine(100);
