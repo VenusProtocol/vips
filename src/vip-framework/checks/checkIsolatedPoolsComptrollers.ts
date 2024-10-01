@@ -100,7 +100,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     return;
   }
 
-  if (FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet") {
+  if (FORKED_NETWORK == "bscmainnet") {
     await setMaxStalePeriod(
       resilientOracle,
       await ethers.getContractAt(ERC20_ABI, "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", signer),
