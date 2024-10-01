@@ -62,7 +62,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   let borrowUnderlying: Contract | undefined = undefined;
 
   await impersonateAccount(poolSupplier);
-  await setBalance(poolSupplier, ethers.utils.parseEther("5"));
+  await setBalance(poolSupplier, ethers.utils.parseEther("50"));
   await impersonateAccount(NORMAL_TIMELOCK);
   await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
@@ -153,8 +153,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
   console.log(`${pool.name} > set storage`);
-  const originalOracle = await comptroller.oracle();
+  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
+  const originalOracle = await comptroller.oracle();
   await comptroller.connect(timelockSigner).setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
   expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
   await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
