@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 
-import vip377, { NEW_VTOKEN_IMPLEMENTATION, VTOKEN_BEACON } from "../../vips/vip-377/bscmainnet";
+import vip378, { NEW_VTOKEN_IMPLEMENTATION, VTOKEN_BEACON } from "../../vips/vip-378/bscmainnet";
 import VTOKEN_BEACON_ABI from "./abis/upgradableBeacon.json";
 
 forking(42702813, async () => {
@@ -19,7 +19,7 @@ forking(42702813, async () => {
     });
   });
 
-  testVip("VIP-377", await vip377(), {});
+  testVip("VIP-378", await vip378(), {});
 
   describe("Post-VIP behavior", async () => {
     it("check implementation", async () => {

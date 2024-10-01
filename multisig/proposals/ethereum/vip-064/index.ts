@@ -3,7 +3,7 @@ import { makeProposal } from "../../../../src/utils";
 export const VTOKEN_BEACON = "0xfc08aADC7a1A93857f6296C3fb78aBA1d286533a";
 export const NEW_VTOKEN_IMPLEMENTATION = "0xefdf5CcC12d8cff4a7ed4e421b95F8f69Cf2F766";
 
-export const vip063 = () => {
+export const vip064 = () => {
   return makeProposal([
     {
       target: VTOKEN_BEACON,
@@ -13,4 +13,4 @@ export const vip063 = () => {
   ]);
 };
 
-export default vip063;
+export default vip064;
