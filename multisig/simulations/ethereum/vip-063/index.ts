@@ -11,7 +11,7 @@ import {
   LIQUID_STAKED_ETH_COMPTROLLER,
   NINETY_PERCENT_CF,
   vwETH,
-} from "../../../../vips/vip-374/bscmainnet";
+} from "../../../../vips/vip-377/bscmainnet";
 import { vip063 } from "../../../proposals/ethereum/vip-063";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
