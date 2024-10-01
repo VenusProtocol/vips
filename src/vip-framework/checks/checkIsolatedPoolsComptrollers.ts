@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, ethers } from "hardhat";
+import { ORACLE_BNB } from "src/networkAddresses";
 
 import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
@@ -101,10 +102,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   }
 
   if (FORKED_NETWORK == "bscmainnet") {
-    await setMaxStalePeriod(
-      resilientOracle,
-      await ethers.getContractAt(ERC20_ABI, "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", signer),
-    );
+    await setMaxStalePeriod(resilientOracle, await ethers.getContractAt(ERC20_ABI, ORACLE_BNB, signer));
   }
 
   await setMaxStalePeriod(resilientOracle, supplyUnderlying as Contract);
