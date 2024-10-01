@@ -15,7 +15,7 @@ const vip377 = () => {
   const meta = {
     version: "v2",
     title: "VIP-377 [Ethereum] Risk Parameters Adjustments",
-    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ recommendations in this Venus community forum publication: [Chaos Labs - Risk Parameter Updates - 09/20/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-09-20-24/4581)
+    description: `This VIP will perform the following Risk Parameter actions as per Chaos Labs’ recommendations in this Venus community forum publication: [Chaos Labs - Risk Parameter Updates - 09/20/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-09-20-24/4581) (updated [here](https://community.venus.io/t/chaos-labs-risk-parameter-updates-09-20-24/4581/7)).
 
 - [WETH (Liquid Staked ETH)](https://etherscan.io/address/${vwETH}):
   - Increase Collateral Factor from 0 to ${formatUnits(NINETY_PERCENT_CF, 18)}
