@@ -59,7 +59,7 @@ const processTxBuilder = async () => {
   return processJson(batchJson);
 };
 
-const processGnosisTxBuilder = async () => {
+export const processGnosisTxBuilder = async () => {
   const safeAddress = getSafeAddress(network.name as Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">);
 
   const multisigVipPath = readline.question(
@@ -70,7 +70,12 @@ const processGnosisTxBuilder = async () => {
   const multisigTx = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTx, { chainId: network.config.chainId });
 
-  return processJson(batchJson);
+  const result = await processJson(batchJson);
+  if ((network.name === "zksyncsepolia" || network.name === "zksyncmainnet") && result) {
+    await fs.writeFile("gnosisTXBuilder.json", result);
+    return;
+  }
+  return result;
 };
 
 const processVenusAppProposal = async () => {
