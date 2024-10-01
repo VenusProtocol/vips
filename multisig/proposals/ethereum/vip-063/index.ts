@@ -7,7 +7,7 @@ import {
   vwETH,
 } from "../../../../vips/vip-374/bscmainnet";
 
-export const vip062 = () => {
+export const vip063 = () => {
   return makeProposal([
     {
       target: LIQUID_STAKED_ETH_COMPTROLLER,
@@ -22,4 +22,4 @@ export const vip062 = () => {
   ]);
 };
 
-export default vip062;
+export default vip063;

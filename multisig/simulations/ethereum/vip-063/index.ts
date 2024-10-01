@@ -12,7 +12,7 @@ import {
   NINETY_PERCENT_CF,
   vwETH,
 } from "../../../../vips/vip-374/bscmainnet";
-import { vip062 } from "../../../proposals/ethereum/vip-062";
+import { vip063 } from "../../../proposals/ethereum/vip-063";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -27,7 +27,7 @@ forking(20835289, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip062());
+      await pretendExecutingVip(await vip063());
     });
 
     it("check collateral factor and liquidation threshold", async () => {
