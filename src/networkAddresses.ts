@@ -21,6 +21,7 @@ import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/
 import { ethers } from "ethers";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;
+export const ORACLE_BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 
 export const NETWORK_ADDRESSES = {
   bscmainnet: {

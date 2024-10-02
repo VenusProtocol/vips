@@ -8,7 +8,7 @@ import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import {
   Command,
   LzChainId,
@@ -380,6 +380,16 @@ export const setMaxStalePeriod = async (
         normalTimelock,
         maxStalePeriodInSeconds,
       );
+
+      if (underlyingAsset.address === ORACLE_BNB) {
+        await setMaxStalePeriodInChainlinkOracle(
+          tokenConfig.oracles[1],
+          underlyingAsset.address,
+          ethers.constants.AddressZero,
+          normalTimelock,
+          maxStalePeriodInSeconds,
+        );
+      }
     }
   }
   await mine(100);
