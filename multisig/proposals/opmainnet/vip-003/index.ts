@@ -11,15 +11,56 @@ export const WBTC = "0x68f180fcCe6836688e9084f035309E29Bf0A2095";
 export const WETH = "0x4200000000000000000000000000000000000006";
 export const USDT = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
 export const OP = "0x4200000000000000000000000000000000000042";
+export const USDC = "0x0b2c639c533813f4aa9d7837caf62653d097ff85";
 
 export const VWBTC_CORE = "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46";
 export const VWETH_CORE = "0x66d5AE25731Ce99D46770745385e662C8e0B4025";
 export const VUSDT_CORE = "0x37ac9731B0B02df54975cd0c7240e0977a051721";
 export const VOP_CORE = "0x6b846E3418455804C1920fA4CC7a31A51C659A2D";
+export const VUSDC_CORE = "0x1C9406ee95B7af55F005996947b19F91B6D55b15";
+
+const CHAINLINK_USDC_FEED = "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3";
+const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const USDCe = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
 
 // IL configuration
 const vip003 = () => {
   return makeProposal([
+    {
+      target: opmainnet.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          USDCe,
+          [
+            opmainnet.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [false, false, false],
+        ],
+      ],
+    },
+    {
+      target: opmainnet.CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[USDC, CHAINLINK_USDC_FEED, STALE_PERIOD_26H]],
+    },
+    {
+      target: opmainnet.RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          USDC,
+          [
+            opmainnet.CHAINLINK_ORACLE,
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+          ],
+          [true, false, false],
+        ],
+      ],
+    },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",

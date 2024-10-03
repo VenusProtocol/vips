@@ -22,6 +22,7 @@ import vip003, {
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { opmainnet } = NETWORK_ADDRESSES;
@@ -57,6 +58,31 @@ interface VTokenState {
   exchangeRate: BigNumberish;
   comptroller: string;
 }
+
+interface AssetConfig {
+  name: string;
+  address: string;
+  price: string;
+  feed: string;
+  oracle: string;
+}
+
+const assetConfigs: { [key: string]: AssetConfig } = {
+  USDCe: {
+    name: "USDCe",
+    address: "0x7F5c764cBc14f9669B88837ca1490cCa17c31607",
+    price: "0",
+    feed: "0x0000000000000000000000000000000000000000",
+    oracle: "chainlink",
+  },
+  USDC: {
+    name: "USDC",
+    address: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
+    price: "999961660000000000000000000000",
+    feed: "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3",
+    oracle: "chainlink",
+  },
+};
 
 const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
   // Core Pool
@@ -206,6 +232,22 @@ forking(126091000, async () => {
           interestRateModelAddresses[symbol] = await vToken.interestRateModel();
         }
       }
+    });
+
+    describe("Oracle vaule for USDC", () => {
+      it("validate asset prices", async () => {
+        const provider = ethers.provider;
+        const resilientOracle = new ethers.Contract(opmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+
+        let assetConfig = assetConfigs.USDCe;
+        await expect(resilientOracle.getPrice(assetConfig.address)).to.be.revertedWith(
+          "invalid resilient oracle price",
+        );
+
+        assetConfig = assetConfigs.USDC;
+        const price = await resilientOracle.getPrice(assetConfig.address);
+        expect(price).to.be.equal(assetConfig.price);
+      });
     });
 
     describe("PoolRegistry state", () => {
