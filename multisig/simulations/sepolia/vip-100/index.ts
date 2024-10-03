@@ -1,6 +1,5 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -24,7 +23,7 @@ const BLOCKS_PER_YEAR = BigNumber.from(2628000);
 
 const { POOL_REGISTRY, RESILIENT_ORACLE, GUARDIAN, VTREASURY, NORMAL_TIMELOCK } = sepolia;
 
-forking(6799700, async () => {
+forking(6805700, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, ethers.provider);
   const vToken = new ethers.Contract(marketSpec.vToken.address, VTOKEN_ABI, ethers.provider);
@@ -49,11 +48,11 @@ forking(6799700, async () => {
 
     it("check price", async () => {
       expect(await resilientOracle.getPrice(marketSpec.vToken.underlying.address)).to.be.closeTo(
-        parseUnits("2484.93914048", 18),
+        parseUnits("2368.35", 18),
         parseUnits("1", 18),
       );
       expect(await resilientOracle.getUnderlyingPrice(marketSpec.vToken.address)).to.be.closeTo(
-        parseUnits("2484.93914048", 18),
+        parseUnits("2368.35", 18),
         parseUnits("1", 18),
       );
     });
