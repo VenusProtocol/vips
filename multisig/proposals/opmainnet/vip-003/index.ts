@@ -11,7 +11,7 @@ export const WBTC = "0x68f180fcCe6836688e9084f035309E29Bf0A2095";
 export const WETH = "0x4200000000000000000000000000000000000006";
 export const USDT = "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58";
 export const OP = "0x4200000000000000000000000000000000000042";
-export const USDC = "0x0b2c639c533813f4aa9d7837caf62653d097ff85";
+export const USDC = "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85";
 
 export const VWBTC_CORE = "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46";
 export const VWETH_CORE = "0x66d5AE25731Ce99D46770745385e662C8e0B4025";
@@ -340,6 +340,41 @@ const vip003 = () => {
           opmainnet.VTREASURY,
           parseUnits("3000000", 18),
           parseUnits("1500000", 18),
+        ],
+      ],
+    },
+    {
+      target: opmainnet.VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [USDC, parseUnits("5000", 6), opmainnet.GUARDIAN],
+    },
+    {
+      target: USDC,
+      signature: "approve(address,uint256)",
+      params: [opmainnet.POOL_REGISTRY, 0],
+    },
+    {
+      target: USDC,
+      signature: "approve(address,uint256)",
+      params: [opmainnet.POOL_REGISTRY, parseUnits("5000", 6)],
+    },
+    {
+      target: VUSDC_CORE,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: ["86400"],
+    },
+    {
+      target: opmainnet.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          VUSDC_CORE,
+          parseUnits("0.75", 18),
+          parseUnits("0.78", 18),
+          parseUnits("5000", 6),
+          opmainnet.VTREASURY,
+          parseUnits("10000000", 6),
+          parseUnits("9000000", 6),
         ],
       ],
     },

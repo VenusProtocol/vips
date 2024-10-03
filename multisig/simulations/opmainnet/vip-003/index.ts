@@ -11,8 +11,10 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip003, {
   COMPTROLLER_CORE,
   OP,
+  USDC,
   USDT,
   VOP_CORE,
+  VUSDC_CORE,
   VUSDT_CORE,
   VWBTC_CORE,
   VWETH_CORE,
@@ -34,13 +36,14 @@ const PSR = "0x735ed037cB0dAcf90B133370C33C08764f88140a";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vOP_Core";
+type VTokenSymbol = "vWBTC_Core" | "vWETH_Core" | "vUSDT_Core" | "vOP_Core" | "vUSDC_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
   vWBTC_Core: VWBTC_CORE,
   vWETH_Core: VWETH_CORE,
   vUSDT_Core: VUSDT_CORE,
   vOP_Core: VOP_CORE,
+  vUSDC_Core: VUSDC_CORE,
 };
 
 const tokens = {
@@ -48,6 +51,7 @@ const tokens = {
   WETH: WETH,
   USDT: USDT,
   OP: OP,
+  USDC: USDC,
 };
 
 interface VTokenState {
@@ -78,7 +82,7 @@ const assetConfigs: { [key: string]: AssetConfig } = {
   USDC: {
     name: "USDC",
     address: "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
-    price: "999961660000000000000000000000",
+    price: "999931010000000000000000000000",
     feed: "0x16a9FA2FDa030272Ce99B29CF780dFA30361E0f3",
     oracle: "chainlink",
   },
@@ -116,6 +120,14 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     decimals: 8,
     underlying: tokens.OP,
     exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  vUSDC_Core: {
+    name: "Venus USDC (Core)",
+    symbol: "vUSDC_Core",
+    decimals: 8,
+    underlying: tokens.USDC,
+    exchangeRate: parseUnits("1", 16),
     comptroller: COMPTROLLER_CORE,
   },
 };
@@ -168,6 +180,15 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "2641.14405837",
     vTokenReceiver: opmainnet.VTREASURY,
   },
+  vUSDC_Core: {
+    borrowCap: "9000000",
+    supplyCap: "10000000",
+    collateralFactor: "0.75",
+    liquidationThreshold: "0.78",
+    reserveFactor: "0.1",
+    initialSupply: "5000",
+    vTokenReceiver: opmainnet.VTREASURY,
+  },
 };
 
 interface InterestRateModelSpec {
@@ -194,7 +215,7 @@ const interestRateModels: InterestRateModelSpec[] = [
     jump: "2.5",
   },
   {
-    vTokens: ["vUSDT_Core"],
+    vTokens: ["vUSDT_Core", "vUSDC_Core"],
     kink: "0.8",
     base: "0",
     multiplier: "0.06875",
@@ -207,9 +228,10 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vWETH_Core: "",
   vUSDT_Core: "",
   vOP_Core: "",
+  vUSDC_Core: "",
 };
 
-forking(126091000, async () => {
+forking(126173640, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -271,7 +293,7 @@ forking(126091000, async () => {
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(4);
+        expect(poolVTokens).to.have.length(5);
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
         expect(poolVTokens).to.include(vTokens.vWETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);
