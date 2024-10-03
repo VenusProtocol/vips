@@ -1,6 +1,5 @@
 import { ethers } from "hardhat";
 
-import { Proposal } from "./types";
 import { getCalldatas } from "./utils";
 
 const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
@@ -8,7 +7,7 @@ const DEFAULT_GOVERNOR_PROXY = "0x2d56dC077072B53571b8252008C60e945108c75a";
 export const loadProposal = async (path: string) => {
   const proposalModule = await import(`../vips/${path}`);
   const proposalCreated = await proposalModule.default();
-  const proposal: Proposal = {
+  const proposal = {
     signatures: proposalCreated.signatures,
     targets: proposalCreated.targets,
     params: proposalCreated.params,
