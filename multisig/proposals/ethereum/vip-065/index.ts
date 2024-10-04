@@ -7,7 +7,7 @@ export const XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
 export const XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const TRANSFER_AMOUNT = parseUnits("22577", 18);
 export const XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
-export const SPEED = "33333333333333333";
+export const SPEED = "33333333333333334";
 
 export const vip065 = () => {
   return makeProposal([
