@@ -64,7 +64,10 @@ export function checkRiskParameters(
       expect(market.liquidationThresholdMantissa).to.equal(parseIfNeeded(riskParameters.liquidationThreshold, 18));
     });
 
-    it(`should set ${spec.symbol} protocol seize share to ${riskParameters.protocolSeizeShare}`, async () => {
+    it(`should set ${spec.symbol} protocol seize share to ${formatIfNeeded(
+      riskParameters.protocolSeizeShare,
+      18,
+    )}`, async () => {
       expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseIfNeeded(riskParameters.protocolSeizeShare, 18));
     });
 
