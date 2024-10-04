@@ -5,12 +5,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip379, {
+import vip380, {
   XVS_AMOUNT_TO_BRIDGE,
   XVS_BRIDGE_SRC,
   XVS_VAULT_REWARDS_SPEED,
   XVS_VAULT_TREASURY_RELEASE_AMOUNT,
-} from "../../vips/vip-379/bscmainnet";
+} from "../../vips/vip-380/bscmainnet";
 import XVS_BRIDGE_ABI from "./abi/XVSProxyOFTSrc.json";
 import XVS_VAULT_ABI from "./abi/XVSVaultProxy.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
@@ -36,7 +36,7 @@ forking(42790960, async () => {
     oldXvsBalBridge = await xvs.balanceOf(XVS_BRIDGE_SRC);
   });
 
-  testVip("VIP-379", await vip379(), {
+  testVip("VIP-380", await vip380(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY_ABI], ["FundsTransferredToXVSStore"], [1]);
     },
