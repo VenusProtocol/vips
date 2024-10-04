@@ -6,6 +6,7 @@ export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F"
 export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
 export const ARBITRUMSEPOLIA_ACM_AGGREGATOR = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
+export const OPBNBTESTNET_ACM_AGGREGATOR = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -29,13 +30,13 @@ const vip372 = () => {
       {
         target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -43,6 +44,31 @@ const vip372 = () => {
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR],
         dstChainId: LzChainId.arbitrumsepolia,
+      },
+
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
+        dstChainId: LzChainId.opbnbtestnet,
       },
     ],
     meta,
