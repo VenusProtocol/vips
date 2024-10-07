@@ -7,6 +7,7 @@ export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
 export const ARBITRUMSEPOLIA_ACM_AGGREGATOR = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 export const OPBNBTESTNET_ACM_AGGREGATOR = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
+export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0e";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -69,6 +70,31 @@ const vip372 = () => {
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
         dstChainId: LzChainId.opbnbtestnet,
+      },
+
+      {
+        target: SEPOLIA_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
       },
     ],
     meta,
