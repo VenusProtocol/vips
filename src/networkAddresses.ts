@@ -26,6 +26,7 @@ export const ORACLE_BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 export const NETWORK_ADDRESSES = {
   bscmainnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
+    ACCESS_CONTROL_MANAGER: "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555",
     GOVERNOR_PROXY: govBscmainnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBscmainnetContracts.addresses.NormalTimelock,
     FAST_TRACK_TIMELOCK: govBscmainnetContracts.addresses.FastTrackTimelock,
@@ -51,6 +52,7 @@ export const NETWORK_ADDRESSES = {
   bsctestnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GUARDIAN: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
+    ACCESS_CONTROL_MANAGER: govBsctestnetContracts.addresses.AccessControlManager,
     GOVERNOR_PROXY: govBsctestnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBsctestnetContracts.addresses.NormalTimelock,
     FAST_TRACK_TIMELOCK: govBsctestnetContracts.addresses.FastTrackTimelock,
