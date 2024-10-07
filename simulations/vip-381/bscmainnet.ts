@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip380, {
+import vip381, {
   BTC,
   BTC_DISTRIBUTION_SPEED,
   BTC_PRIME_CONVERTER,
@@ -19,7 +19,7 @@ import vip380, {
   USDT,
   USDT_DISTRIBUTION_SPEED,
   USDT_PRIME_CONVERTER,
-} from "../../vips/vip-380/bscmainnet";
+} from "../../vips/vip-381/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
@@ -38,7 +38,7 @@ forking(42825391, async () => {
     }
   });
 
-  testVip("VIP-380 Prime Adjustment", await vip380(), {
+  testVip("VIP-381 Prime Adjustment", await vip381(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
       await expectEvents(txResponse, [PLP_ABI], ["TokenDistributionSpeedUpdated"], [4]);
@@ -66,7 +66,7 @@ forking(42825391, async () => {
     });
 
     it("should update the distribution speeds in plp", async () => {
-      expect((await plp.tokenDistributionSpeeds(BTC)).times()).to.be.equal(BTC_DISTRIBUTION_SPEED);
+      expect(await plp.tokenDistributionSpeeds(BTC)).to.be.equal(BTC_DISTRIBUTION_SPEED);
       expect(await plp.tokenDistributionSpeeds(ETH)).to.be.equal(ETH_DISTRIBUTION_SPEED);
       expect(await plp.tokenDistributionSpeeds(USDC)).to.be.equal(USDC_DISTRIBUTION_SPEED);
       expect(await plp.tokenDistributionSpeeds(USDT)).to.be.equal(USDT_DISTRIBUTION_SPEED);

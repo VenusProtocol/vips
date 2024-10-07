@@ -31,29 +31,38 @@ export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const USDT_DISTRIBUTION_AMOUNT = parseUnits("262500", 18);
 export const USDT_DISTRIBUTION_SPEED = USDT_DISTRIBUTION_AMOUNT.div(BNB_BLOCKS_PER_QUARTER);
 
-const vip380 = () => {
+const vip381 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-380 ",
-    description: `If passed this VIP will modify income allocation and reward speeds for Prime markets (BTC, ETH, USDC, USDT).
+    title: "VIP-381: [BNB Chain] Prime Adjustment Proposal - Q4 2024",
+    description: `If passed, this VIP will perform the following actions following the Community proposal [Prime Adjustment Proposal - Q4 2024 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q4-2024-bnb-chain/4598) and the associated [snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x71ed2e920b20172c439477f1b21f8c9822d9692d9bcc86abea931e3aab263ed7):
 
-New income allocation proposal:
-  - BTC: 5% (0%)
-  - ETH: 15% (0%)
-  - USDC: 30% (-5%)
-  - USDT: 50% (+5%)
+- Modify the reward speeds for Prime markets
+- Modify the
 
-New reward distribution proposal:
-  - BTC: 0.41 (-0.40)
-  - ETH: 30.24 (-15.68)
-  - USDC: 157,500 (-157,500)
-  - USDT: 262,500 (-142,500)
+In summary, the changes are the following:
+
+New income distribution proposal (scoped to the 20% of the protocol reserves, allocated to Prime):
+
+- BTC: 5% (0%)
+- ETH: 15% (0%)
+- USDC: 30% (-5%)
+- USDT: 50% (+5%)
+
+3-month reward distribution recommendations:
+
+- BTC: 0.41 (-0.40)
+- ETH: 30.24 (-15.68)
+- USDC: 157,500 (-157,500)
+- USDT: 262,500 (-142,500)
+- Total rewards for 3 months: $525,000
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/)
-- Community proposal “[Prime Adjustment Proposal - Q4 2024](https://community.venus.io/t/prime-adjustment-proposal-q4-2024-bnb-chain/4598)”
-`,
+- Community proposal “[Prime Adjustment Proposal - Q4 2024 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q4-2024-bnb-chain/4598)”
+- [VIP-337: Prime Adjustment Proposal - Q3 2024](https://app.venus.io/#/governance/proposal/337?chainId=56) (previous Prime adjustment)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/405)
+- [Tokenomics](https://docs-v4.venus.io/governance/tokenomics)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -87,4 +96,4 @@ New reward distribution proposal:
   );
 };
 
-export default vip380;
+export default vip381;
