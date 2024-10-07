@@ -32,7 +32,6 @@ forking(43836268, async () => {
       await expectEvents(
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
-
         ["SetMaxDailyLimit", "SetTrustedRemoteAddress", "ExecuteRemoteProposal", "StorePayload"],
         [1, 1, 1, 0],
       );

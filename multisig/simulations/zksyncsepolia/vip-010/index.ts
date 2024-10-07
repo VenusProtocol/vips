@@ -1,17 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip010, {
-  ZKSYNCSEPOLIA_ACM,
-  ZKSYNCSEPOLIA_NORMAL_TIMELOCK,
-  ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
-} from "../../../proposals/zksyncsepolia/vip-010";
+import vip010, { ZKSYNCSEPOLIA_ACM, ZKSYNCSEPOLIA_NORMAL_TIMELOCK } from "../../../proposals/zksyncsepolia/vip-010";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManagerAbi.json";
-
-const { zksyncsepolia } = NETWORK_ADDRESSES;
 
 forking(3771669, async () => {
   let acm: Contract;
@@ -25,24 +18,6 @@ forking(3771669, async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, ZKSYNCSEPOLIA_NORMAL_TIMELOCK);
       expect(hasRole).equals(false);
     });
-
-    it("Guardian is not allowed to call retryMessage", async () => {
-      const role = ethers.utils.solidityPack(
-        ["address", "string"],
-        [ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
-      );
-      const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, zksyncsepolia.GUARDIAN)).to.be.false;
-    });
-
-    it("Guardian is not allowed to call forceResumeReceive", async () => {
-      const role = ethers.utils.solidityPack(
-        ["address", "string"],
-        [ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
-      );
-      const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, zksyncsepolia.GUARDIAN)).to.be.false;
-    });
   });
   describe("Post-VIP behavior", async () => {
     before(async () => {
@@ -51,23 +26,6 @@ forking(3771669, async () => {
     it("Normal Timelock has default admin role", async () => {
       const hasRole = await acm.hasRole(defaultAdminRole, ZKSYNCSEPOLIA_NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
-    });
-    it("Guardian is allowed to call retryMessage", async () => {
-      const role = ethers.utils.solidityPack(
-        ["address", "string"],
-        [ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
-      );
-      const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, zksyncsepolia.GUARDIAN)).to.be.true;
-    });
-
-    it("Guardian is allowed to call forceResumeReceive", async () => {
-      const role = ethers.utils.solidityPack(
-        ["address", "string"],
-        [ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
-      );
-      const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, zksyncsepolia.GUARDIAN)).to.be.true;
     });
   });
 });

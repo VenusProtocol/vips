@@ -7,7 +7,12 @@ import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip010 from "../../multisig/proposals/zksyncsepolia/vip-010";
-import vip365, { ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER } from "../../vips/vip-365/bsctestnet";
+import vip365, {
+  DEFAULT_ADMIN_ROLE,
+  ZKSYNCSEPOLIA_ACM,
+  ZKSYNCSEPOLIA_ACM_AGGREGATOR,
+  ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
+} from "../../vips/vip-365/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
@@ -16,7 +21,7 @@ const { zksyncsepolia } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0xb055e028b27d53a455a6c040a6952e44E9E615c4";
 const CRITICAL_TIMELOCK = "0x0E6138bE0FA1915efC73670a20A10EFd720a6Cc8";
 
-forking(3771669, async () => {
+forking(3880136, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -92,6 +97,10 @@ forking(3771669, async () => {
         const selector = getFunctionSelector(signature);
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
+    });
+    it("Default admin role must be revoked from ACMAggregator contract on ZKsync sepolia", async () => {
+      const acm = new ethers.Contract(ZKSYNCSEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ZKSYNCSEPOLIA_ACM_AGGREGATOR)).to.be.false;
     });
   });
 });
