@@ -23,7 +23,7 @@ const vip381 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
