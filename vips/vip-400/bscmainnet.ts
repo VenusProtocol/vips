@@ -1,3 +1,4 @@
+import { BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -13,6 +14,45 @@ const SOLVBTC_VTOKEN = "0x3e6d2c5b235070DAD569Bc40689C589db286F445";
 export const SOLVBTC_REDSTONE_FEED = "0xF5F641fF3c7E39876A76e77E84041C300DFa4550";
 const SOLVBTC_MAX_STALE_PERIOD = 7 * 3600; // 7 hours
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+
+const configureConverters = (fromAssets: string[], incentive: BigNumberish = 1e14) => {
+  const USDT = "0x55d398326f99059fF775485246999027B3197955";
+  const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+  const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+  const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+  const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+  const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+  const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+  const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+  const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+  const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+  const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
+
+  const converterBaseAssets = {
+    [RISK_FUND_CONVERTER]: USDT,
+    [USDT_PRIME_CONVERTER]: USDT,
+    [USDC_PRIME_CONVERTER]: USDC,
+    [BTCB_PRIME_CONVERTER]: BTCB,
+    [ETH_PRIME_CONVERTER]: ETH,
+    [XVS_VAULT_CONVERTER]: XVS,
+  };
+
+  enum ConversionAccessibility {
+    NONE = 0,
+    ALL = 1,
+    ONLY_FOR_CONVERTERS = 2,
+    ONLY_FOR_USERS = 3,
+  }
+
+  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
+    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
+    return {
+      target: converter,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [baseAsset, fromAssets, conversionConfigs],
+    };
+  });
+};
 
 export const marketSpec = {
   vToken: {
@@ -147,6 +187,8 @@ export const vip400 = () => {
         signature: "approve(address,uint256)",
         params: [marketSpec.vToken.address, 0],
       },
+
+      ...configureConverters([marketSpec.vToken.underlying.address]),
     ],
     meta,
     ProposalType.REGULAR,
