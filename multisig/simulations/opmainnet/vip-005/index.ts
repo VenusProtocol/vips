@@ -8,8 +8,8 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip002 from "../../../proposals/opmainnet/vip-002";
 import vip003 from "../../../proposals/opmainnet/vip-003";
+import vip004 from "../../../proposals/opmainnet/vip-004";
 import vip005, { COMPTROLLER_CORE, PRIME, PRIME_LIQUIDITY_PROVIDER } from "../../../proposals/opmainnet/vip-005";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
@@ -23,7 +23,7 @@ const { opmainnet } = NETWORK_ADDRESSES;
 const XVS_ADMIN = "0xbBe46bAec851355c3FC4856914c47eB6Cea0B8B4";
 const XVS_STORE = "0xFE548630954129923f63113923eF5373E10589d3";
 
-forking(126220729, async () => {
+forking(126400269, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -53,8 +53,8 @@ forking(126220729, async () => {
       await accounts[0].sendTransaction({ to: XVS_ADMIN, value: parseUnits("4") });
       await xvs.mint(opmainnet.GENERIC_TEST_USER_ACCOUNT, parseUnits("1000", 18));
 
-      await pretendExecutingVip(await vip002());
       await pretendExecutingVip(await vip003());
+      await pretendExecutingVip(await vip004());
     });
 
     it("prime markets", async () => {
@@ -121,7 +121,7 @@ forking(126220729, async () => {
 
       await xvs.approve(xvsVault.address, parseUnits("1000", 18));
       await xvsVault.deposit(opmainnet.XVS, 0, parseUnits("1000", 18));
-      await expect(prime.claim()).to.be.be.reverted;
+      await expect(prime.claim()).to.be.reverted;
 
       stakedAt = await prime.stakedAt(opmainnet.GENERIC_TEST_USER_ACCOUNT);
       expect(stakedAt).to.be.gt(0);

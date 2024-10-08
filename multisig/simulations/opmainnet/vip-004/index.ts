@@ -6,6 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
+import vip003 from "../../../proposals/opmainnet/vip-003";
 import vip004, { ACM, NATIVE_TOKEN_GATEWAY_CORE_POOL, PSR } from "../../../proposals/opmainnet/vip-004";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import ACM_ABI from "./abi/accessControlManager.json";
@@ -16,7 +17,7 @@ const { opmainnet } = NETWORK_ADDRESSES;
 const VWETH = "0x66d5AE25731Ce99D46770745385e662C8e0B4025";
 const WETH = "0x4200000000000000000000000000000000000006";
 
-forking(126092000, async () => {
+forking(126173640, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
@@ -27,6 +28,7 @@ forking(126092000, async () => {
 
     psrSigner = await initMainnetUser(PSR, ethers.utils.parseEther("1"));
     nativeTokenGateway = await ethers.getContractAt(GATEWAY_ABI, NATIVE_TOKEN_GATEWAY_CORE_POOL);
+    await pretendExecutingVip(await vip003());
     await pretendExecutingVip(await vip004());
   });
 

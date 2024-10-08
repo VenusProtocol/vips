@@ -297,6 +297,7 @@ forking(126173640, async () => {
         expect(poolVTokens).to.include(vTokens.vWBTC_Core);
         expect(poolVTokens).to.include(vTokens.vWETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDT_Core);
+        expect(poolVTokens).to.include(vTokens.vUSDC_Core);
         expect(poolVTokens).to.include(vTokens.vOP_Core);
       });
 
