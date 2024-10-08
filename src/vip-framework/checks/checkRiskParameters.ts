@@ -110,7 +110,7 @@ const checkILRiskParameters = (
 
 export function checkRiskParameters(
   vTokenAddress: string,
-  spec: { underlying: TokenSpec; comptroller?: string; symbol?: string; isLegacyPool: boolean },
+  spec: { underlying: TokenSpec; comptroller?: string; symbol?: string; isLegacyPool?: boolean },
   riskParameters: RiskParameters | LegacyPoolRiskParameters,
 ) {
   describe(`${spec.symbol ?? vTokenAddress} risk parameters`, () => {
