@@ -11,8 +11,6 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 export const ZKSYNCSEPOLIA_ACM_AGGREGATOR = "0x920Bb18c4bd4D7bc41Bf39933BCAa3D078641502";
 export const MAX_DAILY_LIMIT = 100;
 
-const ZKSYNCSEPOLIA_CHAIN_ID = LzChainId.zksyncsepolia;
-
 const vip365 = () => {
   const meta = {
     version: "v2",
@@ -27,18 +25,18 @@ const vip365 = () => {
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [ZKSYNCSEPOLIA_CHAIN_ID, MAX_DAILY_LIMIT],
+        params: [LzChainId.zksyncsepolia, MAX_DAILY_LIMIT],
       },
       {
         target: OMNICHAIN_PROPOSAL_SENDER,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [ZKSYNCSEPOLIA_CHAIN_ID, zksyncsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR],
+        params: [LzChainId.zksyncsepolia, zksyncsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR],
       },
       {
         target: ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: ZKSYNCSEPOLIA_CHAIN_ID,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: ZKSYNCSEPOLIA_ACM,
