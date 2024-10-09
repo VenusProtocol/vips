@@ -105,6 +105,11 @@ const vip021 = () => {
       signature: "transferOwnership(address)",
       params: [opbnbtestnet.NORMAL_TIMELOCK],
     },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setWhitelist(address,bool)",
+      params: [opbnbtestnet.NORMAL_TIMELOCK, true],
+    },
   ]);
 };
 
