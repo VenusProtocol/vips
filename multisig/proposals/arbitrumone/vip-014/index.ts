@@ -131,11 +131,6 @@ const vip014 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-    {
-      target: ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, arbitrumone.NORMAL_TIMELOCK],
-    },
   ]);
 };
 

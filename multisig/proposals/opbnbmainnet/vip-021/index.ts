@@ -106,11 +106,6 @@ const vip021 = () => {
       signature: "transferOwnership(address)",
       params: [opbnbmainnet.NORMAL_TIMELOCK],
     },
-    {
-      target: ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, opbnbmainnet.NORMAL_TIMELOCK],
-    },
   ]);
 };
 

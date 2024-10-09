@@ -131,11 +131,6 @@ const vip014 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
-    {
-      target: ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, arbitrumsepolia.NORMAL_TIMELOCK],
-    },
   ]);
 };
 

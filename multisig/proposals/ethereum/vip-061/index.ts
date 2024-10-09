@@ -193,11 +193,6 @@ const vip061 = () => {
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-    {
-      target: ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, ethereum.NORMAL_TIMELOCK],
-    },
   ]);
 };
 

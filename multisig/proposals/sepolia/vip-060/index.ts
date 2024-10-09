@@ -184,11 +184,6 @@ const vip060 = () => {
       signature: "transferOwnership(address)",
       params: [sepolia.NORMAL_TIMELOCK],
     },
-    {
-      target: ACM,
-      signature: "grantRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, sepolia.NORMAL_TIMELOCK],
-    },
   ]);
 };
 
