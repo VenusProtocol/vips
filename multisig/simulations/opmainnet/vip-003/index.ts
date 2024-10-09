@@ -1,10 +1,13 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumberish } from "ethers";
+import { BigNumberish, Signer } from "ethers";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
@@ -22,9 +25,9 @@ import vip003, {
   WETH,
 } from "../../../proposals/opmainnet/vip-003";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import TOKEN_ABI from "./abi/token.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { opmainnet } = NETWORK_ADDRESSES;
@@ -133,61 +136,155 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
 };
 
 interface RiskParameters {
-  borrowCap: string;
-  supplyCap: string;
-  collateralFactor: string;
-  liquidationThreshold: string;
-  reserveFactor: string;
+  borrowCap: BigNumber;
+  supplyCap: BigNumber;
+  collateralFactor: BigNumber;
+  liquidationThreshold: BigNumber;
+  reserveFactor: BigNumber;
+  protocolSeizeShare: BigNumber;
   initialSupply: string;
   vTokenReceiver: string;
 }
 
-const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
-  // Core Pool
+interface VTOKEN {
+  address: string;
+  name: string;
+  symbol: string;
+  underlying: {
+    address: string;
+    decimals: number;
+    symbol: string;
+  };
+  decimals: number;
+  exchangeRate: BigNumber;
+  comptroller: string;
+}
+
+const newMarkets: { [key in VTokenSymbol]: { vToken: VTOKEN; riskParameters: RiskParameters } } = {
   vWBTC_Core: {
-    borrowCap: "50",
-    supplyCap: "100",
-    collateralFactor: "0.68",
-    liquidationThreshold: "0.73",
-    reserveFactor: "0.2",
-    initialSupply: "0.07575825",
-    vTokenReceiver: opmainnet.VTREASURY,
+    vToken: {
+      address: VWBTC_CORE,
+      name: "Venus WBTC (Core)",
+      symbol: "vWBTC_Core",
+      underlying: {
+        address: WBTC,
+        decimals: 8,
+        symbol: "WBTC",
+      },
+      decimals: 8,
+      exchangeRate: parseUnits("1", 18),
+      comptroller: COMPTROLLER_CORE,
+    },
+    riskParameters: {
+      borrowCap: parseUnits("50", 8),
+      supplyCap: parseUnits("100", 8),
+      collateralFactor: parseUnits("0.68", 18),
+      liquidationThreshold: parseUnits("0.73", 18),
+      reserveFactor: parseUnits("0.2", 18),
+      protocolSeizeShare: parseUnits("5", 16),
+      initialSupply: "0.07575825",
+      vTokenReceiver: opmainnet.VTREASURY,
+    },
   },
   vWETH_Core: {
-    borrowCap: "2700",
-    supplyCap: "3000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.80",
-    reserveFactor: "0.2",
-    initialSupply: "1.86273828",
-    vTokenReceiver: opmainnet.VTREASURY,
+    vToken: {
+      address: VWETH_CORE,
+      name: "Venus WETH (Core)",
+      symbol: "vWETH_Core",
+      underlying: {
+        address: WETH,
+        decimals: 18,
+        symbol: "WETH",
+      },
+      decimals: 8,
+      exchangeRate: parseUnits("1", 28),
+      comptroller: COMPTROLLER_CORE,
+    },
+    riskParameters: {
+      borrowCap: parseUnits("2700", 18),
+      supplyCap: parseUnits("3000", 18),
+      collateralFactor: parseUnits("0.75", 18),
+      liquidationThreshold: parseUnits("0.8", 18),
+      reserveFactor: parseUnits("0.2", 18),
+      protocolSeizeShare: parseUnits("5", 16),
+      initialSupply: "1.86273828",
+      vTokenReceiver: opmainnet.VTREASURY,
+    },
   },
   vUSDT_Core: {
-    borrowCap: "3600000",
-    supplyCap: "4000000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.78",
-    reserveFactor: "0.1",
-    initialSupply: "4998.60272500",
-    vTokenReceiver: opmainnet.VTREASURY,
+    vToken: {
+      address: VUSDT_CORE,
+      name: "Venus USDT (Core)",
+      symbol: "vUSDT_Core",
+      underlying: {
+        address: USDT,
+        decimals: 6,
+        symbol: "USDT",
+      },
+      decimals: 8,
+      exchangeRate: parseUnits("1", 16),
+      comptroller: COMPTROLLER_CORE,
+    },
+    riskParameters: {
+      borrowCap: parseUnits("3600000", 6),
+      supplyCap: parseUnits("4000000", 6),
+      collateralFactor: parseUnits("0.75", 18),
+      liquidationThreshold: parseUnits("0.78", 18),
+      reserveFactor: parseUnits("0.1", 18),
+      protocolSeizeShare: parseUnits("5", 16),
+      initialSupply: "4998.60272500",
+      vTokenReceiver: opmainnet.VTREASURY,
+    },
   },
   vOP_Core: {
-    borrowCap: "1500000",
-    supplyCap: "3000000",
-    collateralFactor: "0.58",
-    liquidationThreshold: "0.63",
-    reserveFactor: "0.2",
-    initialSupply: "2641.14405837",
-    vTokenReceiver: opmainnet.VTREASURY,
+    vToken: {
+      address: VOP_CORE,
+      name: "Venus OP (Core)",
+      symbol: "vOP_Core",
+      underlying: {
+        address: OP,
+        decimals: 18,
+        symbol: "OP",
+      },
+      decimals: 8,
+      exchangeRate: parseUnits("1", 28),
+      comptroller: COMPTROLLER_CORE,
+    },
+    riskParameters: {
+      borrowCap: parseUnits("1500000", 18),
+      supplyCap: parseUnits("3000000", 18),
+      collateralFactor: parseUnits("0.58", 18),
+      liquidationThreshold: parseUnits("0.63", 18),
+      reserveFactor: parseUnits("0.2", 18),
+      protocolSeizeShare: parseUnits("5", 16),
+      initialSupply: "2641.14405837",
+      vTokenReceiver: opmainnet.VTREASURY,
+    },
   },
   vUSDC_Core: {
-    borrowCap: "9000000",
-    supplyCap: "10000000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.78",
-    reserveFactor: "0.1",
-    initialSupply: "5000",
-    vTokenReceiver: opmainnet.VTREASURY,
+    vToken: {
+      address: VUSDC_CORE,
+      name: "Venus USDC (Core)",
+      symbol: "vUSDC_Core",
+      underlying: {
+        address: USDC,
+        decimals: 6,
+        symbol: "USDC",
+      },
+      decimals: 8,
+      exchangeRate: parseUnits("1", 16),
+      comptroller: COMPTROLLER_CORE,
+    },
+    riskParameters: {
+      borrowCap: parseUnits("9000000", 6),
+      supplyCap: parseUnits("10000000", 6),
+      collateralFactor: parseUnits("0.75", 18),
+      liquidationThreshold: parseUnits("0.78", 18),
+      reserveFactor: parseUnits("0.1", 18),
+      protocolSeizeShare: parseUnits("5", 16),
+      initialSupply: "5000",
+      vTokenReceiver: opmainnet.VTREASURY,
+    },
   },
 };
 
@@ -328,61 +425,23 @@ forking(126173640, async () => {
     });
 
     describe("Initial supply", () => {
-      for (const [symbol, params] of Object.entries(riskParameters) as [VTokenSymbol, RiskParameters][]) {
-        it(`should mint initial supply of ${symbol} to ${params.vTokenReceiver}`, async () => {
+      for (const [symbol, params] of Object.entries(newMarkets) as [
+        VTokenSymbol,
+        { vToken: VTOKEN; riskParameters: RiskParameters },
+      ][]) {
+        const { riskParameters } = params;
+        it(`should mint initial supply of ${symbol} to ${riskParameters.vTokenReceiver}`, async () => {
           // Since we're distributing 1:1, decimals should be accounted for in the exchange rate
-          const expectedSupply = parseUnits(params.initialSupply, 8);
+          const expectedSupply = parseUnits(riskParameters.initialSupply, 8);
           const vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);
-          expect(await vToken.balanceOf(params.vTokenReceiver)).to.equal(expectedSupply);
+          expect(await vToken.balanceOf(riskParameters.vTokenReceiver)).to.equal(expectedSupply);
         });
       }
     });
 
     describe("Risk parameters", () => {
-      for (const [symbol, params] of Object.entries(riskParameters) as [VTokenSymbol, RiskParameters][]) {
-        describe(`${symbol} risk parameters`, () => {
-          let vToken: Contract;
-          let comptroller: Contract;
-          let underlyingDecimals: number;
-
-          before(async () => {
-            vToken = await ethers.getContractAt(VTOKEN_ABI, vTokens[symbol]);
-            comptroller = await ethers.getContractAt(COMPTROLLER_ABI, vTokenState[symbol].comptroller);
-            const underlyingAddress = vTokenState[symbol].underlying;
-            const underlying = await ethers.getContractAt(ERC20_ABI, underlyingAddress);
-            underlyingDecimals = await underlying.decimals();
-          });
-
-          it(`should set ${symbol} reserve factor to ${params.reserveFactor}`, async () => {
-            expect(await vToken.reserveFactorMantissa()).to.equal(parseUnits(params.reserveFactor, 18));
-          });
-
-          it(`should set ${symbol} collateral factor to ${params.collateralFactor}`, async () => {
-            const market = await comptroller.markets(vTokens[symbol]);
-            expect(market.collateralFactorMantissa).to.equal(parseUnits(params.collateralFactor, 18));
-          });
-
-          it(`should set ${symbol} liquidation threshold to ${params.liquidationThreshold}`, async () => {
-            const market = await comptroller.markets(vTokens[symbol]);
-            expect(market.liquidationThresholdMantissa).to.equal(parseUnits(params.liquidationThreshold, 18));
-          });
-
-          it(`should set ${symbol} protocol seize share to 0.05`, async () => {
-            expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
-          });
-
-          it(`should set ${symbol} supply cap to ${params.supplyCap}`, async () => {
-            expect(await comptroller.supplyCaps(vTokens[symbol])).to.equal(
-              parseUnits(params.supplyCap, underlyingDecimals),
-            );
-          });
-
-          it(`should set ${symbol} borrow cap to ${params.borrowCap}`, async () => {
-            expect(await comptroller.borrowCaps(vTokens[symbol])).to.equal(
-              parseUnits(params.borrowCap, underlyingDecimals),
-            );
-          });
-        });
+      for (const market of Object.values(newMarkets) as { vToken: VTOKEN; riskParameters: RiskParameters }[]) {
+        checkRiskParameters(market.vToken.address, market.vToken, market.riskParameters);
       }
     });
 
@@ -440,6 +499,23 @@ forking(126173640, async () => {
           );
         }
       }
+    });
+
+    describe("generic tests", async () => {
+      before(async () => {
+        const USDC_ACCOUNT = "0x816f722424B49Cf1275cc86DA9840Fbd5a6167e9";
+
+        await impersonateAccount(USDC_ACCOUNT);
+        await setBalance(USDC_ACCOUNT, ethers.utils.parseEther("1"));
+
+        const signer: Signer = await ethers.getSigner(USDC_ACCOUNT);
+        const mockUSDCToken = await ethers.getContractAt(TOKEN_ABI, USDC, signer);
+        await mockUSDCToken.connect(signer).transfer(opmainnet.VTREASURY, parseUnits("1", 6));
+      });
+
+      it("Isolated pools generic tests", async () => {
+        checkIsolatedPoolsComptrollers();
+      });
     });
   });
 });
