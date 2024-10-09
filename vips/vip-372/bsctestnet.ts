@@ -25,6 +25,12 @@ export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f
 export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
 export const SEPOLIA_sFrxETH_ORACLE = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
+export const ARBITRUMSEPOLIA_ACM_AGGREGATOR = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
+export const OPBNBTESTNET_ACM_AGGREGATOR = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
+export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0e";
+
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
 const { arbitrumsepolia, sepolia, opbnbtestnet } = NETWORK_ADDRESSES;
 
 const vip372 = () => {
@@ -177,6 +183,81 @@ const vip372 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.opbnbtestnet,
+      },
+
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [1],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [1],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+
+      {
+        target: SEPOLIA_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
       },
     ],
     meta,
