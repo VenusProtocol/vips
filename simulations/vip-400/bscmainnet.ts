@@ -9,10 +9,17 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip400, { PROTOCOL_SHARE_RESERVE, SOLVBTC_REDSTONE_FEED, marketSpec } from "../../vips/vip-400/bscmainnet";
+import vip400, {
+  EXPECTED_CONVERSION_INCENTIVE,
+  PROTOCOL_SHARE_RESERVE,
+  SOLVBTC_REDSTONE_FEED,
+  converterBaseAssets,
+  marketSpec,
+} from "../../vips/vip-400/bscmainnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
@@ -89,5 +96,16 @@ forking(42906500, async () => {
       marketSpec.interestRateModel,
       BLOCKS_PER_YEAR,
     );
+
+    describe("Converters", () => {
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        const asset = marketSpec.vToken.underlying.address;
+        it(`should set ${EXPECTED_CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${asset}`, async () => {
+          const result = await converterContract.conversionConfigurations(baseAsset, asset);
+          expect(result.incentive).to.equal(EXPECTED_CONVERSION_INCENTIVE);
+        });
+      }
+    });
   });
 });
