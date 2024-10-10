@@ -19,7 +19,7 @@ import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-forking(86016842, async () => {
+forking(87457288, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;

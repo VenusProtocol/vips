@@ -13,7 +13,7 @@ import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(36325286, async () => {
+forking(41684455, async () => {
   const provider = ethers.provider;
   const xvsVaultProxy = new ethers.Contract(opbnbtestnet.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);

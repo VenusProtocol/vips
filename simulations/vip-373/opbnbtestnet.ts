@@ -16,7 +16,7 @@ import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(41162234, async () => {
+forking(41684455, async () => {
   const provider = ethers.provider;
   let binanceOracle: Contract;
   let resilientOracle: Contract;

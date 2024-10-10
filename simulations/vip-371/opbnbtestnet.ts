@@ -11,7 +11,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(41162234, async () => {
+forking(41684455, async () => {
   before(async () => {
     await pretendExecutingVip(await vip021());
   });

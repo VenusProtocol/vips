@@ -26,7 +26,7 @@ import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-forking(70004884, async () => {
+forking(87457288, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;

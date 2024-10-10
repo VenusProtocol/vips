@@ -31,13 +31,13 @@ const vip371 = () => {
       {
         target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [1],
+        params: [2],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [1],
+        params: [2],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -56,13 +56,13 @@ const vip371 = () => {
       {
         target: OPBNBTESTNET_ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: OPBNBTESTNET_ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -81,13 +81,13 @@ const vip371 = () => {
       {
         target: SEPOLIA_ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.sepolia,
       },
       {

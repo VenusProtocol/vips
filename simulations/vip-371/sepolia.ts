@@ -11,7 +11,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(6831661, async () => {
+forking(6850243, async () => {
   before(async () => {
     await pretendExecutingVip(await vip060());
   });
