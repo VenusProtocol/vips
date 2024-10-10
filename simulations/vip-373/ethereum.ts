@@ -5,11 +5,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip061 from "../../multisig/proposals/ethereum/vip-061";
-import vip372, {
+import vip373, {
   ETHEREUM_BOUND_VALIDATOR,
   ETHEREUM_XVS_BRIDGE_ADMIN,
   ETHEREUM_sFrxETH_ORACLE,
-} from "../../vips/vip-372/bscmainnet";
+} from "../../vips/vip-373/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -43,7 +43,7 @@ forking(20274111, async () => {
     await pretendExecutingVip(await vip061());
   });
 
-  testForkedNetworkVipCommands("vip372", await vip372());
+  testForkedNetworkVipCommands("vip373", await vip373());
 
   describe("Post-VIP behaviour", async () => {
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {

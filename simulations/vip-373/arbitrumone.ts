@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip014 from "../../multisig/proposals/arbitrumone/vip-014";
-import vip372, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-372/bscmainnet";
+import vip373, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-373/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -36,7 +36,7 @@ forking(230362555, async () => {
     await pretendExecutingVip(await vip014());
   });
 
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip372());
+  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip373());
 
   describe("Post-VIP behaviour", async () => {
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {

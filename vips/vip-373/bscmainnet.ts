@@ -16,15 +16,15 @@ const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
 export const ARBITRUM_ONE_BOUND_VALIDATOR = "0x2245FA2420925Cd3C2D889Ddc5bA1aefEF0E14CF";
 export const ETHEREUM_BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
-export const OPBNBMAINNET_BOUND_VALIDATOR = "0xD1f80C372C6e2FA395A5574Db3e3B4DaF43dAdCE";
+export const OPBNBMAINNET_BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
 export const ETHEREUM_sFrxETH_ORACLE = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
 
 const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
 
-const vip372 = () => {
+const vip373 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-372",
+    title: "VIP-373",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -183,4 +183,4 @@ const vip372 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip372;
+export default vip373;
