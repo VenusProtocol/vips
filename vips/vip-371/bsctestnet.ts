@@ -1,29 +1,17 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  PLP as ARBITRUMSEPOLIA_PLP,
-  PRIME as ARBITRUMSEPOLIA_PRIME,
-} from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { REWARD_DISTRIBUTORS as ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { COMPTROLLERS as ARBITRUMSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { VTOKENS as ARBITRUMSEPOLIA_VTOKENS } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { POOL_REGISTRY as ARBITRUMSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-021";
-import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-021";
-import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-021";
-import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-021";
-import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-060";
-import { CONVERTER_NETWORK as SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-060";
-import { PLP as SEPOLIA_PLP, PRIME as SEPOLIA_PRIME } from "../../multisig/proposals/sepolia/vip-060";
-import { REWARD_DISTRIBUTORS as SEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/sepolia/vip-060";
-import { PSR as SEPOLIA_PSR } from "../../multisig/proposals/sepolia/vip-060";
-import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/sepolia/vip-060";
-import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-060";
-import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/sepolia/vip-060";
+export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
+export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
-const vip352 = () => {
+export const ARBITRUMSEPOLIA_ACM_AGGREGATOR = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
+export const OPBNBTESTNET_ACM_AGGREGATOR = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
+export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0e";
+
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+const vip371 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 accept ownership & give permissions to Normal Timelock",
@@ -35,149 +23,82 @@ const vip352 = () => {
   return makeProposal(
     [
       {
-        target: SEPOLIA_CONVERTER_NETWORK,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      ...SEPOLIA_CONVERTERS.map(converter => {
-        return {
-          target: converter,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.sepolia,
-        };
-      }),
-      {
-        target: SEPOLIA_PRIME,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: SEPOLIA_PLP,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: ARBITRUMSEPOLIA_PRIME,
-        signature: "acceptOwnership()",
-        params: [],
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
-        target: ARBITRUMSEPOLIA_PLP,
-        signature: "acceptOwnership()",
-        params: [],
+        target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [1],
         dstChainId: LzChainId.arbitrumsepolia,
       },
-      ...SEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-        return {
-          target: rewardDistirbutor,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.sepolia,
-        };
-      }),
+      {
+        target: ARBITRUMSEPOLIA_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [1],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
 
-      ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-        return {
-          target: rewardDistirbutor,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.arbitrumsepolia,
-        };
-      }),
       {
-        target: SEPOLIA_PSR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: ARBITRUMSEPOLIA_PSR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: OPBNBTESTNET_PSR,
-        signature: "acceptOwnership()",
-        params: [],
+        target: OPBNBTESTNET_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
-        target: SEPOLIA_POOL_REGISTRY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      ...SEPOLIA_COMPTROLLERS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.sepolia,
-        };
-      }),
-      ...SEPOLIA_VTOKENS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.sepolia,
-        };
-      }),
-
-      {
-        target: ARBITRUMSEPOLIA_POOL_REGISTRY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      ...ARBITRUMSEPOLIA_COMPTROLLERS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.arbitrumsepolia,
-        };
-      }),
-      ...ARBITRUMSEPOLIA_VTOKENS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.arbitrumsepolia,
-        };
-      }),
-
-      {
-        target: OPBNBTESTNET_POOL_REGISTRY,
-        signature: "acceptOwnership()",
-        params: [],
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
         dstChainId: LzChainId.opbnbtestnet,
       },
-      ...OPBNBTESTNET_COMPTROLLERS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.opbnbtestnet,
-        };
-      }),
-      ...OPBNBTESTNET_VTOKENS.map(comptroller => {
-        return {
-          target: comptroller,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.opbnbtestnet,
-        };
-      }),
+      {
+        target: OPBNBTESTNET_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+
+      {
+        target: SEPOLIA_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR],
+        dstChainId: LzChainId.sepolia,
+      },
     ],
     meta,
     ProposalType.REGULAR,
   );
 };
-export default vip352;
+export default vip371;

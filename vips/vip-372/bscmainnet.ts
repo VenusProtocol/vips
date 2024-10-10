@@ -20,10 +20,10 @@ import { VTOKENS as OPBNBMAINNET_VTOKENS } from "../../multisig/proposals/opbnbm
 import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbmainnet/vip-021";
 import { PSR as OPBNBMAINNET_PSR } from "../../multisig/proposals/opbnbmainnet/vip-021";
 
-const vip371 = () => {
+const vip372 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-371",
+    title: "VIP-372",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -177,4 +177,4 @@ const vip371 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip371;
+export default vip372;

@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip060, { ACM } from "../../multisig/proposals/sepolia/vip-060";
+import vip060 from "../../multisig/proposals/sepolia/vip-060";
 import vip373, {
   SEPOLIA_BOUND_VALIDATOR,
   SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -47,7 +47,6 @@ forking(6831661, async () => {
       xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, SEPOLIA_XVS_BRIDGE_ADMIN);
       xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     });
-
 
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(sepolia.NORMAL_TIMELOCK);

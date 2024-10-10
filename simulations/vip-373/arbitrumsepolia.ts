@@ -2,10 +2,9 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014, { ACM } from "../../multisig/proposals/arbitrumsepolia/vip-014";
+import vip014 from "../../multisig/proposals/arbitrumsepolia/vip-014";
 import vip373, {
   ARBITRUM_SEPOLIA_BOUND_VALIDATOR,
   ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
