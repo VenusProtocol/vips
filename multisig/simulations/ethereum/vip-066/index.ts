@@ -1,23 +1,23 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip066, {
-  WBTC,
-  WBTC_REWARD_AMOUNT_PER_BLOCK,
-  WBTC_PRIME_CONVERTER,
-  WETH,
-  WETH_REWARD_AMOUNT_PER_BLOCK,
-  WETH_PRIME_CONVERTER,
   PLP,
   PSR,
   USDC,
-  USDC_REWARD_AMOUNT_PER_BLOCK,
   USDC_PRIME_CONVERTER,
+  USDC_REWARD_AMOUNT_PER_BLOCK,
   USDT,
-  USDT_REWARD_AMOUNT_PER_BLOCK,
   USDT_PRIME_CONVERTER,
+  USDT_REWARD_AMOUNT_PER_BLOCK,
+  WBTC,
+  WBTC_PRIME_CONVERTER,
+  WBTC_REWARD_AMOUNT_PER_BLOCK,
+  WETH,
+  WETH_PRIME_CONVERTER,
+  WETH_REWARD_AMOUNT_PER_BLOCK,
 } from "../../../proposals/ethereum/vip-066";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
@@ -31,7 +31,7 @@ forking(20942802, async () => {
     before(async () => {
       psr = await ethers.getContractAt(PSR_ABI, PSR);
       plp = await ethers.getContractAt(PLP_ABI, PLP);
-  
+
       const distributionsLength = await psr.totalDistributions();
       for (let i = 0; i < distributionsLength; i++) {
         distributionTargets.push(await psr.distributionTargets(i));

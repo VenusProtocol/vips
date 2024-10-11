@@ -12,8 +12,8 @@ export const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
 export const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const USDT = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-export const BLOCKS_PER_QUARTER = 648000;
-export const WETH_AMOUNT = parseUnits("15.78", 8);
+export const BLOCKS_PER_QUARTER = 657000;
+export const WETH_AMOUNT = parseUnits("15.78", 18);
 export const WBTC_AMOUNT = parseUnits("0.04", 8);
 export const USDC_AMOUNT = parseUnits("2250", 6);
 export const USDT_AMOUNT = parseUnits("2250", 6);
@@ -41,7 +41,12 @@ export const vip066 = () => {
       signature: "setTokensDistributionSpeed(address[],uint256[])",
       params: [
         [WBTC, WETH, USDC, USDT],
-        [WBTC_REWARD_AMOUNT_PER_BLOCK, WETH_REWARD_AMOUNT_PER_BLOCK, USDC_REWARD_AMOUNT_PER_BLOCK, USDT_REWARD_AMOUNT_PER_BLOCK],
+        [
+          WBTC_REWARD_AMOUNT_PER_BLOCK,
+          WETH_REWARD_AMOUNT_PER_BLOCK,
+          USDC_REWARD_AMOUNT_PER_BLOCK,
+          USDT_REWARD_AMOUNT_PER_BLOCK,
+        ],
       ],
     },
   ]);
