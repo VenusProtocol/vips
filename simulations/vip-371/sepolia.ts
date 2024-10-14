@@ -28,7 +28,7 @@ forking(6850243, async () => {
   describe("Post-VIP behaviour", async () => {
     const acm = new ethers.Contract(ACM, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
     it("check if DEFAULT_ROLE has been revoked for ACMAggregator", async () => {
-      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR)).to.be.false;
+      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR)).to.be.false;
     });
 
     it("check few permissions", async () => {
