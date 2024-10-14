@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip014, { ACM } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import vip371, { DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR } from "../../vips/vip-371/bsctestnet";
+import vip371, { DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR } from "../../vips/vip-371/bsctestnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
