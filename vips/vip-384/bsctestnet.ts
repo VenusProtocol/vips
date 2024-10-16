@@ -31,7 +31,7 @@ export const converterBaseAssets = {
   [ETH_PRIME_CONVERTER]: ETH,
   [XVS_VAULT_CONVERTER]: XVS,
 };
-export const AMOUNT_TO_REFUND = parseUnits("5000", 18);
+export const AMOUNT_TO_REFUND = parseUnits("5000", 6);
 export const INITIAL_FUNDING = parseUnits("5000", 18);
 export const INITIAL_VTOKENS = parseUnits("5000", 8);
 
