@@ -32,8 +32,8 @@ export const converterBaseAssets = {
   [XVS_VAULT_CONVERTER]: XVS,
 };
 export const AMOUNT_TO_REFUND = parseUnits("5000", 18);
-export const INITIAL_FUNDING = parseUnits("100", 18);
-export const INITIAL_VTOKENS = parseUnits("100", 8);
+export const INITIAL_FUNDING = parseUnits("5000", 18);
+export const INITIAL_VTOKENS = parseUnits("5000", 8);
 
 const configureConverters = (fromAssets: string[], incentive: BigNumberish = EXPECTED_CONVERSION_INCENTIVE) => {
   enum ConversionAccessibility {
