@@ -33,11 +33,11 @@ const SUPPLY_CAP = parseUnits("3000000", 18);
 const COLLATERAL_FACTOR = parseUnits("0.5", 18);
 const RESERVES_BLOCK_DELTA = 100;
 const RESERVE_FACTOR = parseUnits("0.25", 18);
-const RATE_MODEL = "0x8542d63414754e2D81566C129E79325C67A3a0a3";
+const RATE_MODEL = "0xF1A8B40CA68d08EFfa31a16a83f4fd9b5c174872";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(44781175, async () => {
+forking(44785576, async () => {
   let comptroller: Contract;
   let vtwt: Contract;
   let oracle: Contract;
@@ -130,7 +130,7 @@ forking(44781175, async () => {
     it("Community wallet balance should be increased by 5,000 USDT", async () => {
       expect(await usdt.balanceOf(COMMUNITY_WALLET)).to.equal(communityBalanceBefore.add(AMOUNT_TO_REFUND));
     });
-    await checkInterestRate(RATE_MODEL, "TWT", { base: "0", kink: "0.5", multiplier: "0.2", jump: "3" });
+    await checkInterestRate(RATE_MODEL, "TWT", { base: "0.02", kink: "0.5", multiplier: "0.2", jump: "3" });
     await checkVToken(VTWT, {
       name: "Venus TWT",
       symbol: "vTWT",
