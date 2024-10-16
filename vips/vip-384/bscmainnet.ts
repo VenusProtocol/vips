@@ -4,23 +4,23 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-export const TWT = "0xb99C6B26Fdf3678c6e2aff8466E3625a0e7182f8";
-export const VTWT = "0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF";
-export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const ACCESS_CONTROL_MANAGER = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+export const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
+export const VTWT = "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc";
+export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const ACCESS_CONTROL_MANAGER = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
 export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
-export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
-const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
-const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
-const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
-const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
-const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
-const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
-const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 
 export const EXPECTED_CONVERSION_INCENTIVE = 1e14;
 export const converterBaseAssets = {
@@ -31,9 +31,9 @@ export const converterBaseAssets = {
   [ETH_PRIME_CONVERTER]: ETH,
   [XVS_VAULT_CONVERTER]: XVS,
 };
-export const AMOUNT_TO_REFUND = parseUnits("5000", 6);
-export const INITIAL_FUNDING = parseUnits("5000", 18);
-export const INITIAL_VTOKENS = parseUnits("5000", 8);
+export const AMOUNT_TO_REFUND = parseUnits("5000", 18);
+export const INITIAL_FUNDING = parseUnits("4401.074", 18);
+export const INITIAL_VTOKENS = parseUnits("4401.074", 8);
 
 const configureConverters = (fromAssets: string[], incentive: BigNumberish = EXPECTED_CONVERSION_INCENTIVE) => {
   enum ConversionAccessibility {
@@ -52,7 +52,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = EXP
     };
   });
 };
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const vip384 = () => {
   const meta = {
@@ -101,7 +101,7 @@ export const vip384 = () => {
       {
         target: VTWT,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: [100],
+        params: [28800],
       },
       {
         target: VTWT,
@@ -109,11 +109,10 @@ export const vip384 = () => {
         params: ["250000000000000000"],
       },
       {
-        target: TWT,
-        signature: "faucet(uint256)",
-        params: [INITIAL_FUNDING],
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [TWT, INITIAL_FUNDING, bscmainnet.NORMAL_TIMELOCK],
       },
-
       {
         target: TWT,
         signature: "approve(address,uint256)",
@@ -134,17 +133,10 @@ export const vip384 = () => {
       {
         target: VTWT,
         signature: "transfer(address,uint256)",
-        params: [bsctestnet.VTREASURY, INITIAL_VTOKENS],
+        params: [bscmainnet.VTREASURY, INITIAL_VTOKENS],
       },
-
       {
-        target: USDT,
-        signature: "allocateTo(address,uint256)",
-        params: [bsctestnet.VTREASURY, AMOUNT_TO_REFUND],
-      },
-
-      {
-        target: bsctestnet.VTREASURY,
+        target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDT, AMOUNT_TO_REFUND, COMMUNITY_WALLET],
       },

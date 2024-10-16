@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -21,7 +21,7 @@ import {
   VTWT,
   converterBaseAssets,
   vip384,
-} from "../../vips/vip-384/bsctestnet";
+} from "../../vips/vip-384/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VBEP20_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -31,13 +31,13 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/singleTokenConverter.json";
 const BORROW_CAP = parseUnits("1000000", 18);
 const SUPPLY_CAP = parseUnits("2000000", 18);
 const COLLATERAL_FACTOR = parseUnits("0.5", 18);
-const RESERVES_BLOCK_DELTA = 100;
+const RESERVES_BLOCK_DELTA = 28800;
 const RESERVE_FACTOR = parseUnits("0.25", 18);
-const RATE_MODEL = "0xF1A8B40CA68d08EFfa31a16a83f4fd9b5c174872";
+const RATE_MODEL = "0x2dE4739a9C68B02B54C0d8323752551d724b3cc2";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(44785576, async () => {
+forking(43168547, async () => {
   let comptroller: Contract;
   let vtwt: Contract;
   let oracle: Contract;
@@ -51,15 +51,16 @@ forking(44785576, async () => {
     oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
     usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
     communityBalanceBefore = await usdt.balanceOf(COMMUNITY_WALLET);
+    await setMaxStalePeriodInBinanceOracle("0x594810b741d136f1960141C0d8Fb4a91bE78A820", "TWT");
   });
   describe("Pre-VIP behaviour", async () => {
-    it("should have 25 markets in the core pool", async () => {
+    it("should have 31 markets in the core pool", async () => {
       const markets = await comptroller.getAllMarkets();
-      expect(markets).to.have.lengthOf(25);
+      expect(markets).to.have.lengthOf(31);
     });
   });
 
-  testVip("VIP-384-testnet Add TWT Market", await vip384(), {
+  testVip("VIP-384 Add TWT Market", await vip384(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -81,12 +82,12 @@ forking(44785576, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("should have 26 markets in the core pool", async () => {
+    it("should have 32 markets in the core pool", async () => {
       const markets = await comptroller.getAllMarkets();
-      expect(markets).to.have.lengthOf(26);
+      expect(markets).to.have.lengthOf(32);
     });
     it("has correct owner", async () => {
-      expect(await vtwt.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vtwt.admin()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("has correct ACM", async () => {
@@ -104,7 +105,7 @@ forking(44785576, async () => {
     it("sets protocol share reserve", async () => {
       expect(await vtwt.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
     });
-    it("sets Reduce Reserves Block Delta to 100", async () => {
+    it("sets Reduce Reserves Block Delta to 28800", async () => {
       expect(await vtwt.reduceReservesBlockDelta()).to.equal(RESERVES_BLOCK_DELTA);
     });
     it("sets the supply cap to 2,000,000 TWT", async () => {
@@ -116,16 +117,16 @@ forking(44785576, async () => {
       expect(newCap).to.equal(BORROW_CAP);
     });
     it("does not leave vTWT balance on the address of the timelock", async () => {
-      const timelockBalance = await vtwt.balanceOf(bsctestnet.NORMAL_TIMELOCK);
+      const timelockBalance = await vtwt.balanceOf(bscmainnet.NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
     it("moves INITIAL_VTOKENS vTWT to VENUS_TREASURY", async () => {
-      const vTokenReceiverBalance = await vtwt.balanceOf(bsctestnet.VTREASURY);
+      const vTokenReceiverBalance = await vtwt.balanceOf(bscmainnet.VTREASURY);
       expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
     });
     it("get correct price from oracle ", async () => {
       const price = await oracle.getUnderlyingPrice(VTWT);
-      expect(price).to.equal(parseUnits("0.8512", 18));
+      expect(price).to.equal(parseUnits("1.11355466", 18));
     });
     it("Community wallet balance should be increased by 5,000 USDT", async () => {
       expect(await usdt.balanceOf(COMMUNITY_WALLET)).to.equal(communityBalanceBefore.add(AMOUNT_TO_REFUND));
