@@ -154,3 +154,5 @@ export const vip384 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip384;

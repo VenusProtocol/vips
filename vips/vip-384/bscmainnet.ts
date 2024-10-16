@@ -57,11 +57,55 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const vip384 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-384 Add TWT Market to core pool on BNB",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with the Add TWT Market",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Add TWT Market",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Add TWT Market or not",
+    title: "VIP-384 [BNB Chain] Add support for TWT on Venus Core Pool",
+    description: `#### Summary
+
+If passed, this VIP will add a new market for the [TWT token](https://bscscan.com/address/0x4B0F1812e5Df2A09796481Ff14017e6005508003) on Venus Core Pool. Moreover, it will transfer 5,000 USDT to the [Community wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) to compensate for the [provision of the bootstrap liquidity for the market](https://bscscan.com/tx/0x11eefc53948862dd2f1888f6531de87451956c4c998a256181690c782d476641).
+
+#### Description
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-risk-parameter-updates-10-08-24/4606), the risk parameters for the new markets are:
+
+- Underlying token: [TWT](https://bscscan.com/address/0x4B0F1812e5Df2A09796481Ff14017e6005508003)
+- Borrow cap: 1,000,000 TWT
+- Supply cap: 2,000,000 TWT
+- Collateral factor: 50%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 4,401 TWT - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+Interest rate curve for the new market:
+
+- kink: 50%
+- base (yearly): 2%
+- multiplier (yearly): 20%
+- jump multiplier (yearly): 300%
+
+Oracle configuration:
+
+- Main oracle: [Binance oracle](https://oracle.binance.com/data-feeds/detail/bsc/TWT-USD)
+
+#### Security and additional considerations
+
+No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the core pool with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+- Mainnet TWT market (vTWT): [0x4d41a36D04D97785bcEA57b057C412b278e6Edcc](https://bscscan.com/address/0x4d41a36D04D97785bcEA57b057C412b278e6Edcc)
+- Testnet TWT market (vTWT): [0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF](https://testnet.bscscan.com/address/0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/410)
+- [Testnet deployment](https://testnet.bscscan.com/tx/0x5af480c14229d75b13cff75901e00090c78dfae8f997f645be84990b36528977)
+- Snapshot “[[BNB Chain] Add support for Trust Wallet (TWT) on Venus Core pool](https://snapshot.org/#/venus-xvs.eth/proposal/0xe58d6379604c1b27527d16dccf81ac66a1aba8c963e322dcaf79f2deb62c680e)”
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
@@ -146,3 +190,5 @@ export const vip384 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip384;
