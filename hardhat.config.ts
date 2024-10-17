@@ -30,6 +30,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumone: 30000000,
   opsepolia: 30000000,
   opmainnet: 30000000,
+  basesepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -161,6 +162,12 @@ const config: HardhatUserConfig = {
       chainId: 10,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opmainnet,
+    },
+    basesepolia: {
+      url: process.env.ARCHIVE_NODE_basesepolia || "https://sepolia.base.org",
+      chainId: 84532,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basesepolia,
     },
   },
   paths: {
