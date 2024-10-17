@@ -106,7 +106,7 @@ export const vip384 = () => {
       {
         target: VTWT,
         signature: "_setReserveFactor(uint256)",
-        params: ["250000000000000000"],
+        params: [parseUnits("0.25", 18)],
       },
       {
         target: TWT,
