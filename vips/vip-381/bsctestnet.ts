@@ -1,7 +1,7 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const IRM = "0x752B56f94c8dF2c3804c0Dd213Cf607FAa9D11b1";
+export const IRM = "0x86954c6fCA6B464269Aa7011B143c4D93Dfa1146";
 export const VBNB_ADMIN = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
 
 const vip381 = () => {

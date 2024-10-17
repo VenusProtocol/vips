@@ -8,10 +8,10 @@ import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRate
 import vip381, { IRM } from "../../vips/vip-381/bsctestnet";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 
-const OLD_IRM = "0x597F1eFCC8DD59598eD1944304814f60230BAe76";
+const OLD_IRM = "0x752B56f94c8dF2c3804c0Dd213Cf607FAa9D11b1";
 const VBNB = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 
-forking(44524703, async () => {
+forking(44812630, async () => {
   const provider = ethers.provider;
 
   const vBNB = new ethers.Contract(VBNB, VTOKEN_CORE_POOL_ABI, provider);
@@ -38,10 +38,10 @@ forking(44524703, async () => {
         base: "0",
         multiplier: "0.225",
         kink1: "0.4",
-        multiplier2: "0.5",
-        base2: "0.1",
+        multiplier2: "0.35",
+        base2: "0.21",
         kink2: "0.7",
-        jump: "6.8",
+        jump: "5",
       });
     });
   });

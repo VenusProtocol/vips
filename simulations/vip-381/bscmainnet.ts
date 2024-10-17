@@ -11,7 +11,7 @@ import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 const OLD_IRM = "0xDb8347b96c94Be24B9c077A4CDDAAD074F6480cf";
 const VBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 
-forking(42904608, async () => {
+forking(43192903, async () => {
   const provider = ethers.provider;
 
   const vBNB = new ethers.Contract(VBNB, VTOKEN_CORE_POOL_ABI, provider);
@@ -47,10 +47,10 @@ forking(42904608, async () => {
         base: "0",
         multiplier: "0.225",
         kink1: "0.4",
-        multiplier2: "0.5",
-        base2: "0.1",
+        multiplier2: "0.35",
+        base2: "0.21",
         kink2: "0.7",
-        jump: "6.8",
+        jump: "5",
       });
     });
   });
