@@ -211,5 +211,5 @@ export const NETWORK_ADDRESSES = {
   basesepolia: {
     GUARDIAN: "0xdf3b635d2b535f906BB02abb22AED71346E36a00",
     VTREASURY: "0x07e880DaA6572829cE8ABaaf0f5323A4eFC417A6",
-  }
+  },
 };
