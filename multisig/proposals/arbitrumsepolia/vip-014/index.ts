@@ -29,7 +29,6 @@ export const VTOKENS = [
 ];
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
 
-export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const vip014 = () => {
   return makeProposal([
