@@ -4,12 +4,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { ACM } from "../../multisig/proposals/opbnbtestnet/vip-021";
 import vip371, { DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR } from "../../vips/vip-371/bsctestnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
+const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
 forking(41684455, async () => {
   testForkedNetworkVipCommands("vip371", await vip371(), {

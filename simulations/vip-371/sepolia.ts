@@ -4,12 +4,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { ACM } from "../../multisig/proposals/sepolia/vip-060";
 import vip371, { DEFAULT_ADMIN_ROLE, SEPOLIA_ACM_AGGREGATOR } from "../../vips/vip-371/bsctestnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
+const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 
 forking(6850243, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip371(), {
