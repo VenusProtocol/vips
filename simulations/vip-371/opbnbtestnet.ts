@@ -2,9 +2,9 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip021, { ACM } from "../../multisig/proposals/opbnbtestnet/vip-021";
+import { ACM } from "../../multisig/proposals/opbnbtestnet/vip-021";
 import vip371, { DEFAULT_ADMIN_ROLE, OPBNBTESTNET_ACM_AGGREGATOR } from "../../vips/vip-371/bsctestnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
@@ -12,10 +12,6 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
 forking(41684455, async () => {
-  before(async () => {
-    await pretendExecutingVip(await vip021());
-  });
-
   testForkedNetworkVipCommands("vip371", await vip371(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [74]);
