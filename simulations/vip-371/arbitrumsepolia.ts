@@ -1,46 +1,81 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { ACM } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import vip371, { ARBITRUMSEPOLIA_ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-371/bsctestnet";
-import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
-import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
+import vip014 from "../../multisig/proposals/arbitrumsepolia/vip-014";
+import {
+  COMPTROLLERS,
+  PLP,
+  PRIME,
+  PSR,
+  REWARD_DISTRIBUTORS,
+  VTOKENS,
+  XVS_STORE,
+} from "../../multisig/proposals/arbitrumsepolia/vip-014";
+import vip371 from "../../vips/vip-371/bsctestnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
+import VTOKEN_ABI from "./abi/VToken.json";
+import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 forking(87457288, async () => {
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip371(), {
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [88]);
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [62]);
-      await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
-      await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["RevokePermissionsExecuted"], [1]);
-    },
+  const provider = ethers.provider;
+  let prime: Contract;
+  let plp: Contract;
+  const xvsVaultProxy = new ethers.Contract(arbitrumsepolia.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
+  const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
+
+  before(async () => {
+    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+    plp = new ethers.Contract(PLP, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
+    await pretendExecutingVip(await vip014());
   });
 
-  describe("Post-VIP behaviour", async () => {
-    const acm = new ethers.Contract(ACM, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+  testForkedNetworkVipCommands("vip371", await vip371());
 
-    it("check if DEFAULT_ROLE has been revoked for ACMAggregator", async () => {
-      expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ARBITRUMSEPOLIA_ACM_AGGREGATOR)).to.be.false;
+  describe("Post-VIP behavior", async () => {
+    it(`correct owner `, async () => {
+      expect(await prime.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      expect(await plp.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
-    it("check few permissions", async () => {
-      const role1 = ethers.utils.solidityPack(["address", "string"], [arbitrumsepolia.RESILIENT_ORACLE, "pause()"]);
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`correct owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, REWARD_DISTRIBUTOR_ABI, provider);
+        expect(await c.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
 
-      const roleHash = ethers.utils.keccak256(role1);
-      expect(await acm.hasRole(roleHash, arbitrumsepolia.NORMAL_TIMELOCK)).to.be.true;
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
 
-      const role2 = ethers.utils.solidityPack(
-        ["address", "string"],
-        [arbitrumsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)"],
-      );
+    for (const comptrollerAddress of COMPTROLLERS) {
+      it(`correct owner for ${comptrollerAddress}`, async () => {
+        const c = new ethers.Contract(comptrollerAddress, COMPTROLLER_ABI, provider);
+        expect(await c.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
 
-      const roleHash2 = ethers.utils.keccak256(role2);
-      expect(await acm.hasRole(roleHash2, arbitrumsepolia.NORMAL_TIMELOCK)).to.be.true;
+    for (const vTokenAddress of VTOKENS) {
+      it(`correct owner for ${vTokenAddress}`, async () => {
+        const v = new ethers.Contract(vTokenAddress, VTOKEN_ABI, provider);
+        expect(await v.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
+
+    it("should have the correct pending owner", async () => {
+      expect(await xvsVaultProxy.admin()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      expect(await xvsStore.admin()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
     });
   });
 });
