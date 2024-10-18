@@ -14,7 +14,7 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 const vip371 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-332 accept ownership & give permissions to Normal Timelock",
+    title: "VIP-371 grant Timelocks and revoke permissions for Guardian in Arbitrum, opBNB and Ethereum",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
