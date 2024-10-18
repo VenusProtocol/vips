@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip381, { IRM } from "../../vips/vip-381/bscmainnet";
+import vip385, { IRM } from "../../vips/vip-385/bscmainnet";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 
 const OLD_IRM = "0xDb8347b96c94Be24B9c077A4CDDAAD074F6480cf";
@@ -31,7 +31,7 @@ forking(43192903, async () => {
     });
   });
 
-  testVip("VIP-381", await vip381(), {
+  testVip("VIP-385", await vip385(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [1]);
     },
