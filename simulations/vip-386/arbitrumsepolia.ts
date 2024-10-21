@@ -3,11 +3,15 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip386, {ARBITRUM_SEPOLIA_CORE_COMPTROLLER, ARBITRUM_SEPOLIA_vUSDC, CF, LT} from "../../vips/vip-386/bsctestnet";
+import vip386, {
+  ARBITRUM_SEPOLIA_CORE_COMPTROLLER,
+  ARBITRUM_SEPOLIA_vUSDC,
+  CF,
+  LT,
+} from "../../vips/vip-386/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 forking(90517554, async () => {
-  const provider = ethers.provider;
   let comptroller: Contract;
 
   before(async () => {
