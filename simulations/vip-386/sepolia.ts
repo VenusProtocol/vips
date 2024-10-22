@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip386, { CF, LT, SEPOLIA_CORE_COMPTROLLER, SEPOLIA_vUSDC } from "../../vips/vip-386/bsctestnet";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(6917786, async () => {
   let comptroller: Contract;

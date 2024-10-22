@@ -9,7 +9,7 @@ import vip386, {
   CF,
   LT,
 } from "../../vips/vip-386/bsctestnet";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(90517554, async () => {
   let comptroller: Contract;
