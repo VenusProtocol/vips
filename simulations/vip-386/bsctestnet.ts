@@ -4,7 +4,7 @@ import vip386 from "../../vips/vip-386/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(44937867, async () => {
-  testVip("vip371 XVS vault permission proposal", await vip386(), {
+  testVip("vip386 XVS vault permission proposal", await vip386(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
