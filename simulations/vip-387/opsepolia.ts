@@ -6,23 +6,23 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip010 from "../../multisig/proposals/opsepolia/vip-007";
-import vip365, {
+import vip007 from "../../multisig/proposals/opsepolia/vip-007";
+import vip387, {
   DEFAULT_ADMIN_ROLE,
   OPSEPOLIA_ACM,
   OPSEPOLIA_ACM_AGGREGATOR,
   OPSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-384/bsctestnet";
+} from "../../vips/vip-387/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { opsepolia } = NETWORK_ADDRESSES;
-const FAST_TRACK_TIMELOCK = "0xb055e028b27d53a455a6c040a6952e44E9E615c4";
-const CRITICAL_TIMELOCK = "0x0E6138bE0FA1915efC73670a20A10EFd720a6Cc8";
+const FAST_TRACK_TIMELOCK = "0xe0Fa35b6279dd802C382ae54c50C8B16deaC0885";
+const CRITICAL_TIMELOCK = "0x45d2263c6E0dbF84eBffB1Ee0b80aC740607990B";
 
-forking(18850742, async () => {
+forking(18889503, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -36,18 +36,18 @@ forking(18850742, async () => {
     );
     executorOwner = new ethers.Contract(OPSEPOLIA_OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vip010());
+    await pretendExecutingVip(await vip007());
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on ZKsync sepolia", async () => {
+    it("Normal Timelock has default admin role on OP sepolia", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, OPSEPOLIA_ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, opsepolia.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
     });
   });
 
-  testForkedNetworkVipCommands("vip365 configures bridge", await vip365(), {
+  testForkedNetworkVipCommands("vip387 configures bridge", await vip387(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [39]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
@@ -110,7 +110,7 @@ forking(18850742, async () => {
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
     });
-    it("Default admin role must be revoked from ACMAggregator contract on ZKsync sepolia", async () => {
+    it("Default admin role must be revoked from ACMAggregator contract on OP sepolia", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, OPSEPOLIA_ACM_AGGREGATOR)).to.be.false;
     });
     it("Guardian and all timelocks are allowed to call retryMessage ", async () => {

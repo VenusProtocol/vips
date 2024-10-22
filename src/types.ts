@@ -7,7 +7,9 @@ export type SUPPORTED_NETWORKS =
   | "ethereum"
   | "opbnbtestnet"
   | "opbnbmainnet"
-  | "zksyncsepolia";
+  | "zksyncsepolia"
+  | "opsepolia"
+  | "opmainnet";
 
 export type REMOTE_NETWORKS =
   | "sepolia"
@@ -15,10 +17,12 @@ export type REMOTE_NETWORKS =
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "arbitrumsepolia"
-  | "arbitrumone";
+  | "arbitrumone"
+  | "opsepolia"
+  | "opmainnet";
 
-export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia"];
-export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet"];
+export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia", "opsepolia"];
+export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet", "opmainnet"];
 export interface ProposalMeta {
   version: string;
   title: string;
