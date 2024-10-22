@@ -8,12 +8,12 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip400, {
+import vip387, {
   EXPECTED_CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
   converterBaseAssets,
   marketSpec,
-} from "../../vips/vip-400/bsctestnet";
+} from "../../vips/vip-387/bsctestnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -39,7 +39,7 @@ forking(44523500, async () => {
     });
   });
 
-  testVip("VIP-400", await vip400(), {});
+  testVip("VIP-387", await vip387(), {});
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {

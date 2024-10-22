@@ -4,28 +4,26 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 const { VTREASURY, RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER } =
-  NETWORK_ADDRESSES.bscmainnet;
-export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
-const SOLVBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
-const SOLVBTC_VTOKEN = "0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea";
-export const SOLVBTC_REDSTONE_FEED = "0xF5F641fF3c7E39876A76e77E84041C300DFa4550";
-const SOLVBTC_MAX_STALE_PERIOD = 7 * 3600; // 7 hours
+  NETWORK_ADDRESSES.bsctestnet;
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+const SOLVBTC = "0x6855E14A6df91b8E4D55163d068E9ef2530fd4CE";
+const SOLVBTC_VTOKEN = "0xA38110ae4451A86ab754695057d5B5a9BEAd0387";
+const FIXED_SOLVBTC_PRICE = parseUnits("60000", 18);
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
-const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
-const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
-const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
-const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
-const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
-const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
+const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
+const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
+const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
+const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
+const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
 
 export const EXPECTED_CONVERSION_INCENTIVE = 1e14;
 export const converterBaseAssets = {
@@ -35,6 +33,40 @@ export const converterBaseAssets = {
   [BTCB_PRIME_CONVERTER]: BTCB,
   [ETH_PRIME_CONVERTER]: ETH,
   [XVS_VAULT_CONVERTER]: XVS,
+};
+
+export const marketSpec = {
+  vToken: {
+    address: SOLVBTC_VTOKEN,
+    name: "Venus SolvBTC",
+    symbol: "vSolvBTC",
+    underlying: {
+      address: SOLVBTC,
+      decimals: 18,
+      symbol: "SolvBTC",
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: UNITROLLER,
+    isLegacyPool: true,
+  },
+  interestRateModel: {
+    address: "0x12b88631a2033c0e9afA36b295cdFCf49493E89e",
+    base: "0",
+    multiplier: "0.09",
+    jump: "2",
+    kink: "0.5",
+  },
+  initialSupply: {
+    amount: parseUnits("0.1572404", 18),
+    vTokenReceiver: VTREASURY,
+  },
+  riskParameters: {
+    supplyCap: parseUnits("100", 18),
+    borrowCap: parseUnits("55", 18),
+    collateralFactor: parseUnits("0.75", 18),
+    reserveFactor: parseUnits("0.2", 18),
+  },
 };
 
 const configureConverters = (fromAssets: string[], incentive: BigNumberish = EXPECTED_CONVERSION_INCENTIVE) => {
@@ -55,44 +87,10 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = EXP
   });
 };
 
-export const marketSpec = {
-  vToken: {
-    address: SOLVBTC_VTOKEN,
-    name: "Venus SolvBTC",
-    symbol: "vSolvBTC",
-    underlying: {
-      address: SOLVBTC,
-      decimals: 18,
-      symbol: "SolvBTC",
-    },
-    decimals: 8,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: UNITROLLER,
-    isLegacyPool: true,
-  },
-  interestRateModel: {
-    address: "0xf092558eD27Df036144f6d92cC657BAc9682A324",
-    base: "0",
-    multiplier: "0.09",
-    jump: "2",
-    kink: "0.5",
-  },
-  initialSupply: {
-    amount: parseUnits("0.1572404", 18),
-    vTokenReceiver: "0xD5bAa0C3d61Ba3f4899565f269e5f9b186AAf14B",
-  },
-  riskParameters: {
-    supplyCap: parseUnits("100", 18),
-    borrowCap: parseUnits("55", 18),
-    collateralFactor: parseUnits("0.75", 18),
-    reserveFactor: parseUnits("0.2", 18),
-  },
-};
-
-export const vip400 = () => {
+export const vip387 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-400",
+    title: "VIP-387",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -104,8 +102,8 @@ export const vip400 = () => {
       // Configure Oracle
       {
         target: REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[marketSpec.vToken.underlying.address, SOLVBTC_REDSTONE_FEED, SOLVBTC_MAX_STALE_PERIOD]],
+        signature: "setDirectPrice(address,uint256)",
+        params: [marketSpec.vToken.underlying.address, FIXED_SOLVBTC_PRICE],
       },
 
       {
@@ -169,9 +167,9 @@ export const vip400 = () => {
 
       // Mint initial supply
       {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpec.vToken.underlying.address, marketSpec.initialSupply.amount, NORMAL_TIMELOCK],
+        target: marketSpec.vToken.underlying.address,
+        signature: "faucet(uint256)",
+        params: [marketSpec.initialSupply.amount],
       },
       {
         target: marketSpec.vToken.underlying.address,
@@ -196,4 +194,4 @@ export const vip400 = () => {
   );
 };
 
-export default vip400;
+export default vip387;
