@@ -1,0 +1,25 @@
+import { expect } from "chai";
+import { Contract } from "ethers";
+import { ethers } from "hardhat";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+
+import vip386, { CF, LT, SEPOLIA_CORE_COMPTROLLER, SEPOLIA_vUSDC } from "../../vips/vip-386/bsctestnet";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
+
+forking(6931241, async () => {
+  let comptroller: Contract;
+
+  before(async () => {
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, SEPOLIA_CORE_COMPTROLLER);
+  });
+
+  testForkedNetworkVipCommands("vip386", await vip386());
+
+  describe("Post-VIP behavior", async () => {
+    it("check CF and LT", async () => {
+      const market = await comptroller.markets(SEPOLIA_vUSDC);
+      expect(market.collateralFactorMantissa).to.equal(CF);
+      expect(market.liquidationThresholdMantissa).to.equal(LT);
+    });
+  });
+});
