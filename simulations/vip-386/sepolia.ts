@@ -6,7 +6,7 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import vip386, { CF, LT, SEPOLIA_CORE_COMPTROLLER, SEPOLIA_vUSDC } from "../../vips/vip-386/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(6917786, async () => {
+forking(6931241, async () => {
   let comptroller: Contract;
 
   before(async () => {

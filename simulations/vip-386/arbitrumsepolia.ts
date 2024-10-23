@@ -11,7 +11,7 @@ import vip386, {
 } from "../../vips/vip-386/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(90517554, async () => {
+forking(91093615, async () => {
   let comptroller: Contract;
 
   before(async () => {
