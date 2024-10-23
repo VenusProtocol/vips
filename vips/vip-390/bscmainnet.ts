@@ -2,15 +2,18 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const VTREASURY = "0xf322942f644a996a617bd29c16bd7d231d9f35e9";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 
 export const VANGUARD_VINTAGE = "0xDeA0b46950dDc377E71800deba8F52456A7E42EE";
 export const COMMUNITY = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const CHAOS_LABS = "0xb98D807cDD58a35d2Fca300bEBC06ac39A7CE038";
 export const CERTIK = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
 
+const VUSDC_AMOUNT = parseUnits("6512000", 8); // assuming 1 USDC=40.65040650 ~ 40.7 vUSDC
 export const VANGUARD_VINTAGE_AMOUNT_USDT = parseUnits("17895", 18);
 export const COMMUNITY_BELNCRYPTO_AMOUNT_USDT = parseUnits("93800", 18);
 export const CHAOS_LABS_AMOUNT_USDC = parseUnits("160000", 18);
@@ -53,6 +56,16 @@ If passed this VIP will perform the following actions:
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDT, COMMUNITY_BELNCRYPTO_AMOUNT_USDT, COMMUNITY],
+      },
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [vUSDC, VUSDC_AMOUNT, TOKEN_REDEEMER],
+      },
+      {
+        target: TOKEN_REDEEMER,
+        signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
+        params: [vUSDC, VTREASURY, CHAOS_LABS_AMOUNT_USDC, VTREASURY],
       },
       {
         target: VTREASURY,

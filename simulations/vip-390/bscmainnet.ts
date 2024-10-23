@@ -20,7 +20,7 @@ import vip390, {
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
-forking(43336691, async () => {
+forking(43341367, async () => {
   let usdc: Contract;
   let usdt: Contract;
 
@@ -41,7 +41,7 @@ forking(43336691, async () => {
 
   testVip("VIP-390", await vip390(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [5]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [6]);
     },
   });
 
