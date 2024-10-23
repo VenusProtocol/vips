@@ -11,10 +11,10 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
-forking(87457288, async () => {
+forking(91072072, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip371(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [88]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [194]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [62]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["RevokePermissionsExecuted"], [1]);

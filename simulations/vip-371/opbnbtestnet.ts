@@ -11,10 +11,10 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 const ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 
-forking(41684455, async () => {
+forking(42828856, async () => {
   testForkedNetworkVipCommands("vip371", await vip371(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [74]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [154]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [48]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["RevokePermissionsExecuted"], [1]);
