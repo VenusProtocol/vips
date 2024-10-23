@@ -15,7 +15,7 @@ export const CERTIK = "0x4cf605b238e9c3c72d0faed64d12426e4a54ee12";
 
 const VUSDC_AMOUNT = parseUnits("6512000", 8); // assuming 1 USDC=40.65040650 ~ 40.7 vUSDC
 export const VANGUARD_VINTAGE_AMOUNT_USDT = parseUnits("17895", 18);
-export const COMMUNITY_BELNCRYPTO_AMOUNT_USDT = parseUnits("93800", 18);
+export const COMMUNITY_BEINCRYPTO_AMOUNT_USDT = parseUnits("93800", 18);
 export const CHAOS_LABS_AMOUNT_USDC = parseUnits("160000", 18);
 export const COMMUNITY_SOURCECONTROL_AMOUNT_USDT = parseUnits("24000", 18);
 export const CERTIK_AMOUNT_USDT = parseUnits("35000", 18);
@@ -55,7 +55,7 @@ If passed this VIP will perform the following actions:
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, COMMUNITY_BELNCRYPTO_AMOUNT_USDT, COMMUNITY],
+        params: [USDT, COMMUNITY_BEINCRYPTO_AMOUNT_USDT, COMMUNITY],
       },
       {
         target: VTREASURY,
@@ -65,12 +65,7 @@ If passed this VIP will perform the following actions:
       {
         target: TOKEN_REDEEMER,
         signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
-        params: [vUSDC, VTREASURY, CHAOS_LABS_AMOUNT_USDC, VTREASURY],
-      },
-      {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, CHAOS_LABS_AMOUNT_USDC, CHAOS_LABS],
+        params: [vUSDC, CHAOS_LABS, CHAOS_LABS_AMOUNT_USDC, VTREASURY],
       },
       {
         target: VTREASURY,

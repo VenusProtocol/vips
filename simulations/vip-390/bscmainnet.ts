@@ -10,7 +10,7 @@ import vip390, {
   CHAOS_LABS,
   CHAOS_LABS_AMOUNT_USDC,
   COMMUNITY,
-  COMMUNITY_BELNCRYPTO_AMOUNT_USDT,
+  COMMUNITY_BEINCRYPTO_AMOUNT_USDT,
   COMMUNITY_SOURCECONTROL_AMOUNT_USDT,
   USDC,
   USDT,
@@ -41,7 +41,7 @@ forking(43341367, async () => {
 
   testVip("VIP-390", await vip390(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [6]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [5]);
     },
   });
 
@@ -56,7 +56,7 @@ forking(43341367, async () => {
       expect(usdtBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VINTAGE_AMOUNT_USDT);
       expect(usdcBalanceOfChaosLabs.sub(prevUSDCBalanceOfChaosLabs)).to.equal(CHAOS_LABS_AMOUNT_USDC);
       expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(
-        BigNumber.from(COMMUNITY_BELNCRYPTO_AMOUNT_USDT).add(COMMUNITY_SOURCECONTROL_AMOUNT_USDT),
+        BigNumber.from(COMMUNITY_BEINCRYPTO_AMOUNT_USDT).add(COMMUNITY_SOURCECONTROL_AMOUNT_USDT),
       );
     });
   });
