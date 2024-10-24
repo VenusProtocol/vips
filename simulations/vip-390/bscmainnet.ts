@@ -12,17 +12,20 @@ import vip390, {
   COMMUNITY,
   COMMUNITY_BEINCRYPTO_AMOUNT_USDT,
   COMMUNITY_SOURCECONTROL_AMOUNT_USDT,
+  TOKEN_REDEEMER,
   USDC,
   USDT,
   VANGUARD_VINTAGE,
   VANGUARD_VINTAGE_AMOUNT_USDT,
+  vUSDC,
 } from "../../vips/vip-390/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
-forking(43341367, async () => {
+forking(43390658, async () => {
   let usdc: Contract;
   let usdt: Contract;
+  let vusdc: Contract;
 
   let prevUSDTBalanceOfVanguard: BigNumber;
   let prevUSDTBalanceOfCommunity: BigNumber;
@@ -32,6 +35,7 @@ forking(43341367, async () => {
   before(async () => {
     usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
     usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
+    vusdc = new ethers.Contract(vUSDC, ERC20_ABI, ethers.provider);
 
     prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VINTAGE);
     prevUSDTBalanceOfCommunity = await usdt.balanceOf(COMMUNITY);
@@ -58,6 +62,14 @@ forking(43341367, async () => {
       expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(
         BigNumber.from(COMMUNITY_BEINCRYPTO_AMOUNT_USDT).add(COMMUNITY_SOURCECONTROL_AMOUNT_USDT),
       );
+    });
+
+    it("Leaves no USDC in the redeemer helper contract", async () => {
+      expect(await usdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
+    });
+
+    it("Leaves no vUSDC in the redeemer helper contract", async () => {
+      expect(await vusdc.balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
   });
 });
