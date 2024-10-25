@@ -3,9 +3,11 @@ import { makeProposal } from "src/utils";
 
 export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
+export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 
 export const ARBITRUM_ACM_AGGREGATOR = "0x74AFeA28456a683b8fF907699Ff77138edef00f3";
 export const OPBNBMAINNET_ACM_AGGREGATOR = "0x6dB5e303289fea2E83F7d442470210045592AD93";
+export const ETHEREUM_ACM_AGGREGATOR = "0xb78772bed6995551b64e54Cdb8e09800d86C73ee";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -68,6 +70,37 @@ const vip371 = () => {
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, OPBNBMAINNET_ACM_AGGREGATOR],
         dstChainId: LzChainId.opbnbmainnet,
+      },
+
+      {
+        target: ETHEREUM_ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ETHEREUM_ACM_AGGREGATOR],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [1],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [0],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ETHEREUM_ACM_AGGREGATOR],
+        dstChainId: LzChainId.ethereum,
       },
     ],
     meta,

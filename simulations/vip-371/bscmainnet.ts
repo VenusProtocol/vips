@@ -10,7 +10,7 @@ forking(43428406, async () => {
         txResponse,
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
-        [2, 0],
+        [3, 0],
       );
     },
   });
