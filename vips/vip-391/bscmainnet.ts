@@ -43,8 +43,11 @@ VIP simulation:
       {
         target: CORE_COMPTROLLER,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[vLTC, vAAVE], [vLTC_BORROW_CAP, vAAVE_BORROW_CAP]],
-      }
+        params: [
+          [vLTC, vAAVE],
+          [vLTC_BORROW_CAP, vAAVE_BORROW_CAP],
+        ],
+      },
     ],
     meta,
     ProposalType.FAST_TRACK,
