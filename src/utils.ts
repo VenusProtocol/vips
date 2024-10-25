@@ -405,7 +405,7 @@ export const expectEvents = async (
   const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
     // @ts-expect-error @TODO type is wrong
-    return receipt.events
+    return (receipt.events || receipt.logs)
       .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;
