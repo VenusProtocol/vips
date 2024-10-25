@@ -15,27 +15,29 @@ export const vTWT_DEFI_SUPPLY_CAP = parseUnits("700000", 18);
 export const vTWT_DEFI_COLLATERAL_FACTOR = 0;
 export const vTWT_DEFI_LIQUIDATION_THRESHOLD = parseUnits("0.6", 18);
 
-export const vip391 = () => {
+export const vip388 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-391 Risk Parameters Adjustment (LTC, AAVE on Core pool and TWT on Defi pool)",
-    description: `If passed, this VIP will perform the following actions as per Chaos Labs’ latest recommendations in this Venus community forum publication.
+    title: "VIP-388 [BNB Chain] Risk Parameters Adjustments (LTC, AAVE, TWT)",
+    description: `If passed, this VIP will perform the following actions as per Chaos Labs’ latest recommendations in this Venus community forum publication:
 
-It would update the following caps on BNB Chain, following this forum publication: [Chaos Labs - ]
+[Chaos Labs - Risk Parameter Updates - 10/23/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-10-23-24/4668)
 
 - [LTC (Core pool)](https://bscscan.com/address/0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B):
-    - increase supply cap from 120K LTC to 240K LTC
-    - increase borrow cap from 10K LTC to 20K LTC
+    - Increase supply cap, from 120K LTC to 240K LTC
+    - Increase borrow cap, from 10K LTC to 20K LTC
 - [AAVE (Core pool)](https://bscscan.com/address/0x26DA28954763B92139ED49283625ceCAf52C6f94):
-    - increase borrow cap from 2K AAVE to 3K AAVE
-- [TWT (Defi pool)](https://bscscan.com/address/0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F):
-    - decrease collateral factor from 50% to 0%
-    - increase supply cap from 300K TWT to 700K TWT
+    - Increase borrow cap, from 2K AAVE to 3K AAVE
 
-Review the Chaos Labs’ recommendations for a deeper analysis.
+[TWT Migration Specifications](https://community.venus.io/t/chaos-labs-risk-parameter-updates-10-08-24/4606/7)
 
-VIP simulation: 
-`,
+- [TWT (DeFi pool)](https://bscscan.com/address/0x736bf1D21A28b5DC19A1aC8cA71Fc2856C23c03F):
+    - Set collateral factor to 0% (from 50%). Keep the liquidation threshold at 60%
+    - Decrease supply cap, from 3M TWT to 700K TWT
+
+Complete analysis and details of these recommendations are available in the above publications.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/415](https://github.com/VenusProtocol/vips/pull/415)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -72,4 +74,4 @@ VIP simulation:
   );
 };
 
-export default vip391;
+export default vip388;

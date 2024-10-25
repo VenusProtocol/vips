@@ -15,8 +15,8 @@ import {
   vTWT_DEFI,
   vTWT_DEFI_COLLATERAL_FACTOR,
   vTWT_DEFI_SUPPLY_CAP,
-  vip391,
-} from "../../vips/vip-391/bscmainnet";
+  vip388,
+} from "../../vips/vip-388/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import DEFI_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 
@@ -70,7 +70,7 @@ forking(43422150, async () => {
     });
   });
 
-  testVip("VIP-391", await vip391(), {
+  testVip("VIP-388", await vip388(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap"], [2, 2]);
     },
