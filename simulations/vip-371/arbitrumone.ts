@@ -10,6 +10,8 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
+const FAST_TRACK_TIMELOCK = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
+const CRITICAL_TIMELOCK = "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674";
 
 forking(267530159, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip371(), {
@@ -41,6 +43,22 @@ forking(267530159, async () => {
 
       const roleHash2 = ethers.utils.keccak256(role2);
       expect(await acm.hasRole(roleHash2, arbitrumone.NORMAL_TIMELOCK)).to.be.true;
+
+      const role3 = ethers.utils.solidityPack(
+        ["address", "string"],
+        [arbitrumone.XVS, "migrateMinterTokens(address,address)"],
+      );
+
+      const roleHash3 = ethers.utils.keccak256(role3);
+      expect(await acm.hasRole(roleHash3, FAST_TRACK_TIMELOCK)).to.be.true;
+
+      const role4 = ethers.utils.solidityPack(
+        ["address", "string"],
+        [arbitrumone.XVS, "updateBlacklist(address,bool)"],
+      );
+
+      const roleHash4 = ethers.utils.keccak256(role4);
+      expect(await acm.hasRole(roleHash4, CRITICAL_TIMELOCK)).to.be.true;
     });
   });
 });
