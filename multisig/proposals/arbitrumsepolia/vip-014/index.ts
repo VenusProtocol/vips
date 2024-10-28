@@ -11,7 +11,7 @@ export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
 export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
 
-const vip016 = () => {
+const vip014 = () => {
   return makeProposal([
     {
       target: XVS_BRIDGE_ADMIN,
@@ -46,4 +46,4 @@ const vip016 = () => {
   ]);
 };
 
-export default vip016;
+export default vip014;
