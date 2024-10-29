@@ -50,7 +50,11 @@ const vip389 = () => {
         target: sepolia.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
-          [EIGEN, [sepolia.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
+          [
+            EIGEN,
+            [sepolia.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+          ],
         ],
         dstChainId: LzChainId.sepolia,
       },

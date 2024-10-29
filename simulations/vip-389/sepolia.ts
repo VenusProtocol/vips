@@ -1,45 +1,59 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip389, { BORROW_CAP,
+import vip389, {
+  BORROW_CAP,
+  BaseAssets,
   CORE_COMPTROLLER,
-  SUPPLY_CAP,
-  vEIGEN,
   EIGEN,
-  PRICE } from "../../vips/vip-389/bsctestnet";
+  PRICE,
+  SUPPLY_CAP,
+  USDT_PRIME_CONVERTER,
+  vEIGEN,
+} from "../../vips/vip-389/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
+import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { BigNumber, Contract } from "ethers";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
-import { parseUnits } from "ethers/lib/utils";
-import { checkVToken } from "src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
+const USDT_USER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 
-forking(6964722, async () => {
+forking(6969766, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vEIGENContract: Contract;
   let comptroller: Contract;
   let eigenContract: Contract;
+  let usdtPrimeConverter: Contract;
+  let usdt: Contract;
 
   before(async () => {
-    // await impersonateAccount(sepolia.NORMAL_TIMELOCK);
-    // await setBalance(sepolia.NORMAL_TIMELOCK, parseUnits("1000", 18));
+    await impersonateAccount(sepolia.NORMAL_TIMELOCK);
+    await setBalance(sepolia.NORMAL_TIMELOCK, parseUnits("1000", 18));
+    await impersonateAccount(USDT_USER);
+    await setBalance(USDT_USER, parseUnits("1000", 18));
+    await impersonateAccount(USDT_PRIME_CONVERTER);
+    await setBalance(USDT_PRIME_CONVERTER, parseUnits("1000", 18));
 
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, sepolia.RESILIENT_ORACLE);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
     vEIGENContract = await ethers.getContractAt(VTOKEN_ABI, vEIGEN);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
     eigenContract = await ethers.getContractAt(ERC20_ABI, EIGEN, await ethers.getSigner(sepolia.NORMAL_TIMELOCK));
+    usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
+    usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
   });
 
   testForkedNetworkVipCommands("vip389", await vip389());
@@ -47,9 +61,7 @@ forking(6964722, async () => {
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {
       expect(await resilientOracle.getPrice(EIGEN)).to.be.equal(PRICE);
-      expect(await resilientOracle.getUnderlyingPrice(vEIGEN)).to.be.equal(
-        PRICE
-      );
+      expect(await resilientOracle.getUnderlyingPrice(vEIGEN)).to.be.equal(PRICE);
     });
 
     it("should have 12 markets in core pool", async () => {
@@ -111,15 +123,39 @@ forking(6964722, async () => {
         IR,
         "vEIGENContract_Core",
         { base: "0.02", multiplier: "0.15", jump: "3", kink: "0.45" },
-        BigNumber.from(2628000),
+        BigNumber.from(2252571),
       );
     });
 
-    // it("check Pool", async () => {
-    //   await eigenContract.faucet(parseUnits("100", 18));
-    //   await checkIsolatedPoolsComptrollers({
-    //     [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
-    //   });
-    // });
+    it("check Pool", async () => {
+      await eigenContract.faucet(parseUnits("100", 18));
+      await checkIsolatedPoolsComptrollers({
+        [CORE_COMPTROLLER]: sepolia.NORMAL_TIMELOCK,
+      });
+    });
+
+    it("EIGEN conversion", async () => {
+      const usdtAmount = parseUnits("10", 6);
+      await usdt.connect(await ethers.getSigner(sepolia.NORMAL_TIMELOCK)).faucet(usdtAmount);
+      await usdt
+        .connect(await ethers.getSigner(sepolia.NORMAL_TIMELOCK))
+        .approve(usdtPrimeConverter.address, usdtAmount);
+
+      const eigenAmount = parseUnits("2", 18);
+      await eigenContract.connect(await ethers.getSigner(usdtPrimeConverter.address)).faucet(eigenAmount);
+
+      const usdtBalanceBefore = await usdt.balanceOf(sepolia.NORMAL_TIMELOCK);
+      const eigenBalanceBefore = await eigenContract.balanceOf(sepolia.NORMAL_TIMELOCK);
+
+      await usdtPrimeConverter
+        .connect(await ethers.getSigner(sepolia.NORMAL_TIMELOCK))
+        .convertForExactTokens(usdtAmount, eigenAmount, usdt.address, eigenContract.address, sepolia.NORMAL_TIMELOCK);
+
+      const usdtBalanceAfter = await usdt.balanceOf(sepolia.NORMAL_TIMELOCK);
+      const eigenBalanceAfter = await eigenContract.balanceOf(sepolia.NORMAL_TIMELOCK);
+
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("7", 6));
+      expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eigenAmount);
+    });
   });
 });
