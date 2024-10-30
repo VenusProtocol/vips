@@ -90,12 +90,6 @@ const vip391 = () => {
         params: [[veBTC, CF, LT, INITIAL_SUPPLY, sepolia.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
         dstChainId: LzChainId.sepolia,
       },
-      {
-        target: veBTC,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.01", 18)],
-        dstChainId: LzChainId.sepolia,
-      },
 
       // Conversion config
       {
