@@ -154,7 +154,7 @@ forking(6969766, async () => {
       const usdtBalanceAfter = await usdt.balanceOf(sepolia.NORMAL_TIMELOCK);
       const eigenBalanceAfter = await eigenContract.balanceOf(sepolia.NORMAL_TIMELOCK);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("7", 6));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
       expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eigenAmount);
     });
   });

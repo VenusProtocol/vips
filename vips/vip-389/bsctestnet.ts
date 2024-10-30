@@ -28,6 +28,7 @@ export const BaseAssets = [
   "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHPrimeConverter BaseAsset
   "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSPrimeConverter BaseAsset
 ];
+const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 
 const vip389 = () => {
   const meta = {
@@ -101,31 +102,31 @@ const vip389 = () => {
       {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [EIGEN], [[0, 1]]],
+        params: [BaseAssets[0], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [EIGEN], [[0, 1]]],
+        params: [BaseAssets[1], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [EIGEN], [[0, 1]]],
+        params: [BaseAssets[2], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [EIGEN], [[0, 1]]],
+        params: [BaseAssets[3], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [EIGEN], [[0, 1]]],
+        params: [BaseAssets[4], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
     ],
