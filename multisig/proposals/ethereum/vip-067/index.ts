@@ -6,8 +6,8 @@ import { ethers } from "hardhat";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-export const EIGEN = "0xec53bf9167f50cdeb3ae105f56099aaab9061f83";
-const INITIAL_SUPPLY = parseUnits("0", 18);
+export const EIGEN = "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83";
+const INITIAL_SUPPLY = parseUnits("500", 18);
 export const SUPPLY_CAP = parseUnits("3000000", 18);
 export const BORROW_CAP = parseUnits("1500000", 18);
 const CF = parseUnits("0.5", 18);
@@ -52,6 +52,11 @@ export const vip067 = () => {
 
     // Add Market
     {
+      target: ethereum.VTREASURY,
+      signature: "withdrawTreasuryToken(address,uint256,address)",
+      params: [EIGEN, INITIAL_SUPPLY, ethereum.GUARDIAN],
+    },
+    {
       target: EIGEN,
       signature: "approve(address,uint256)",
       params: [ethereum.POOL_REGISTRY, 0],
@@ -72,7 +77,6 @@ export const vip067 = () => {
       target: ethereum.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [[vEIGEN, CF, LT, INITIAL_SUPPLY, ethereum.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
-      
     },
     {
       target: vEIGEN,
