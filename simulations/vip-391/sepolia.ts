@@ -13,9 +13,9 @@ import vip391, {
   BORROW_CAP,
   BaseAssets,
   CORE_COMPTROLLER,
-  eBTC,
   SUPPLY_CAP,
   USDT_PRIME_CONVERTER,
+  eBTC,
   veBTC,
 } from "../../vips/vip-391/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -29,7 +29,7 @@ const { sepolia } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 const USDT_USER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 
-forking(6969766, async () => {
+forking(6976822, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let veBTCContract: Contract;
@@ -59,8 +59,8 @@ forking(6969766, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(eBTC)).to.be.equal("0");
-      expect(await resilientOracle.getUnderlyingPrice(veBTC)).to.be.equal("0");
+      expect(await resilientOracle.getPrice(eBTC)).to.be.equal(parseUnits("720189057123700", 18));
+      expect(await resilientOracle.getUnderlyingPrice(veBTC)).to.be.equal(parseUnits("720189057123700", 18));
     });
 
     it("should have 12 markets in core pool", async () => {
@@ -78,7 +78,7 @@ forking(6969766, async () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("0.00000005", 18);
+      const expectedSupply = parseUnits("0.14471345", 8);
       expect(await veBTCContract.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
     });
 
@@ -87,10 +87,10 @@ forking(6969766, async () => {
       expect(await comptroller.supplyCaps(veBTC)).equals(SUPPLY_CAP);
     });
 
-    it("should set veBTC collateral factor to 50% and Liquidation threshold to 60%", async () => {
+    it("should set veBTC collateral factor to 68% and Liquidation threshold to 72%", async () => {
       const market = await comptroller.markets(veBTC);
-      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.5", 18));
-      expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.6", 18));
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.68", 18));
+      expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.72", 18));
     });
 
     it("check protocol share reserve", async () => {
@@ -98,7 +98,7 @@ forking(6969766, async () => {
     });
 
     it("check reserve factor", async () => {
-      expect(await veBTCContract.reserveFactorMantissa()).equals(parseUnits("0.25", 18));
+      expect(await veBTCContract.reserveFactorMantissa()).equals(parseUnits("0.2", 18));
     });
 
     it("check protocol seize share", async () => {
@@ -111,7 +111,7 @@ forking(6969766, async () => {
         symbol: "veBTC",
         decimals: 8,
         underlying: eBTC,
-        exchangeRate: parseUnits("10000000000", 18),
+        exchangeRate: parseUnits("10000000000", 8),
         comptroller: CORE_COMPTROLLER,
       });
     });
@@ -121,8 +121,8 @@ forking(6969766, async () => {
       checkInterestRate(
         IR,
         "veBTCContract_Core",
-        { base: "0.02", multiplier: "0.15", jump: "3", kink: "0.45" },
-        BigNumber.from(2252571),
+        { base: "0", multiplier: "0.09", jump: "2", kink: "0.45" },
+        BigNumber.from(2628000),
       );
     });
 
@@ -134,13 +134,13 @@ forking(6969766, async () => {
     });
 
     it("eBTC conversion", async () => {
-      const usdtAmount = parseUnits("10", 6);
+      const usdtAmount = parseUnits("50000", 6);
       await usdt.connect(await ethers.getSigner(sepolia.NORMAL_TIMELOCK)).faucet(usdtAmount);
       await usdt
         .connect(await ethers.getSigner(sepolia.NORMAL_TIMELOCK))
         .approve(usdtPrimeConverter.address, usdtAmount);
 
-      const eBTCAmount = parseUnits("2", 18);
+      const eBTCAmount = parseUnits("0.5", 8);
       await eBTCContract.connect(await ethers.getSigner(usdtPrimeConverter.address)).faucet(eBTCAmount);
 
       const usdtBalanceBefore = await usdt.balanceOf(sepolia.NORMAL_TIMELOCK);
@@ -153,7 +153,7 @@ forking(6969766, async () => {
       const usdtBalanceAfter = await usdt.balanceOf(sepolia.NORMAL_TIMELOCK);
       const eBTCBalanceAfter = await eBTCContract.balanceOf(sepolia.NORMAL_TIMELOCK);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("36005.852271", 6));
       expect(eBTCBalanceAfter.sub(eBTCBalanceBefore)).to.be.equal(eBTCAmount);
     });
   });

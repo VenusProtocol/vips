@@ -6,8 +6,8 @@ import { makeProposal } from "src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-export const MOCK_ACCOUNTANT = "0xb4a5E8d4ba737fb27D6C5c43521fF1Da391c6CAE";
-export const ACCOUNTANT_ORACLE = "0xE621e50f74CfAdeeb059eEe1AdCd6e20cEe9E1a6";
+export const MOCK_ACCOUNTANT = "0x01466F572A9F1A0353A491187D32DfB28F2BF94c";
+export const ACCOUNTANT_ORACLE = "0xD819F6fC189691A78Ff226Da51F63597e679b601";
 export const eBTC = "0xd48392CCf3fe028023D0783E570DFc71996859d7";
 const RATE = parseUnits("1", 8);
 const INITIAL_SUPPLY = parseUnits("0.14471345", 8);
@@ -48,6 +48,7 @@ const vip391 = () => {
         target: MOCK_ACCOUNTANT,
         signature: "setRate(uint256)",
         params: [RATE],
+        dstChainId: LzChainId.sepolia,
       },
       {
         target: sepolia.RESILIENT_ORACLE,
@@ -55,6 +56,7 @@ const vip391 = () => {
         params: [
           [eBTC, [ACCOUNTANT_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
         ],
+        dstChainId: LzChainId.sepolia,
       },
 
       // Add Market
