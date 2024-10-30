@@ -57,72 +57,72 @@ forking(21079955, async () => {
     });
 
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(eBTC)).to.be.equal(parseUnits("3.0196419", 18));
-      expect(await resilientOracle.getUnderlyingPrice(veBTC)).to.be.equal(parseUnits("3.0196419", 18));
+      expect(await resilientOracle.getPrice(eBTC)).to.be.equal(parseUnits("71835.7052865100", 28));
+      expect(await resilientOracle.getUnderlyingPrice(veBTC)).to.be.equal(parseUnits("71835.7052865100", 28));
     });
 
-    // it("should have 12 markets in core pool", async () => {
-    //   const poolVTokens = await comptroller.getAllMarkets();
-    //   expect(poolVTokens).to.have.lengthOf(12);
-    // });
+    it("should have 10 markets in core pool", async () => {
+      const poolVTokens = await comptroller.getAllMarkets();
+      expect(poolVTokens).to.have.lengthOf(10);
+    });
 
-    // it("should add veBTC to the pool", async () => {
-    //   const registeredVToken = await poolRegistry.getVTokenForAsset(comptroller.address, eBTC);
-    //   expect(registeredVToken).to.equal(veBTC);
-    // });
+    it("should add veBTC to the pool", async () => {
+      const registeredVToken = await poolRegistry.getVTokenForAsset(comptroller.address, eBTC);
+      expect(registeredVToken).to.equal(veBTC);
+    });
 
-    // it("check ownership", async () => {
-    //   expect(await veBTCContract.owner()).to.equal(ethereum.GUARDIAN);
-    // });
+    it("check ownership", async () => {
+      expect(await veBTCContract.owner()).to.equal(ethereum.GUARDIAN);
+    });
 
-    // it("check supply", async () => {
-    //   const expectedSupply = parseUnits("0.14471345", 8);
-    //   expect(await veBTCContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
-    // });
+    it("check supply", async () => {
+      const expectedSupply = parseUnits("0.14471345", 8);
+      expect(await veBTCContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+    });
 
-    // it("check borrow and supply caps", async () => {
-    //   expect(await comptroller.borrowCaps(veBTC)).equals(BORROW_CAP);
-    //   expect(await comptroller.supplyCaps(veBTC)).equals(SUPPLY_CAP);
-    // });
+    it("check borrow and supply caps", async () => {
+      expect(await comptroller.borrowCaps(veBTC)).equals(BORROW_CAP);
+      expect(await comptroller.supplyCaps(veBTC)).equals(SUPPLY_CAP);
+    });
 
-    // it("should set veBTC collateral factor to 68% and Liquidation threshold to 72%", async () => {
-    //   const market = await comptroller.markets(veBTC);
-    //   expect(market.collateralFactorMantissa).to.equal(parseUnits("0.68", 18));
-    //   expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.72", 18));
-    // });
+    it("should set veBTC collateral factor to 68% and Liquidation threshold to 72%", async () => {
+      const market = await comptroller.markets(veBTC);
+      expect(market.collateralFactorMantissa).to.equal(parseUnits("0.68", 18));
+      expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0.72", 18));
+    });
 
-    // it("check protocol share reserve", async () => {
-    //   expect(await veBTCContract.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
-    // });
+    it("check protocol share reserve", async () => {
+      expect(await veBTCContract.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
+    });
 
-    // it("check reserve factor", async () => {
-    //   expect(await veBTCContract.reserveFactorMantissa()).equals(parseUnits("0.25", 18));
-    // });
+    it("check reserve factor", async () => {
+      expect(await veBTCContract.reserveFactorMantissa()).equals(parseUnits("0.2", 18));
+    });
 
-    // it("check protocol seize share", async () => {
-    //   expect(await veBTCContract.protocolSeizeShareMantissa()).equals(parseUnits("0.01", 18));
-    // });
+    it("check protocol seize share", async () => {
+      expect(await veBTCContract.protocolSeizeShareMantissa()).equals(parseUnits("0.01", 18));
+    });
 
-    // it("check vToken", async () => {
-    //   checkVToken(veBTC, {
-    //     name: "Venus eBTC",
-    //     symbol: "veBTC",
-    //     decimals: 8,
-    //     underlying: eBTC,
-    //     exchangeRate: parseUnits("10000000000", 18),
-    //     comptroller: CORE_COMPTROLLER,
-    //   });
-    // });
+    it("check vToken", async () => {
+      checkVToken(veBTC, {
+        name: "Venus eBTC",
+        symbol: "veBTC",
+        decimals: 8,
+        underlying: eBTC,
+        exchangeRate: parseUnits("10000000000", 8),
+        comptroller: CORE_COMPTROLLER,
+      });
+    });
 
-    // it("check IR", async () => {
-    //   const IR = await veBTCContract.interestRateModel();
-    //   checkInterestRate(
-    //     IR,
-    //     "veBTCContract_Core",
-    //     { base: "0.02", multiplier: "0.15", jump: "3", kink: "0.45" },
-    //     BigNumber.from(2252571),
-    //   );
-    // });
+    it("check IR", async () => {
+      const IR = await veBTCContract.interestRateModel();
+      checkInterestRate(
+        IR,
+        "veBTCContract_Core",
+        { base: "0", multiplier: "0.09", jump: "2", kink: "0.45" },
+        BigNumber.from(2628000),
+      );
+    });
 
     // it("check Pool", async () => {
     //   await eBTCContract.faucet(parseUnits("100", 18));
