@@ -11,10 +11,10 @@ export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const vip371 = () => {
+const vip391 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-371 grant Timelocks and revoke permissions for Guardian in Arbitrum, opBNB and Ethereum",
+    title: "VIP-391 grant Timelocks and revoke permissions for Guardian in Arbitrum, opBNB and Ethereum",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -107,4 +107,4 @@ const vip371 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip371;
+export default vip391;

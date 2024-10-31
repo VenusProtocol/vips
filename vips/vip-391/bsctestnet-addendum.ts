@@ -9,10 +9,10 @@ export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const vip371 = () => {
+const vip391 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-371: Fix Sepolia and OPBNBTestnet permissions",
+    title: "VIP-391: Fix Sepolia and OPBNBTestnet permissions",
     description: `### Fix chainlink permissions for sepolia and bound validator permissions for opbnbtestnet`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -62,4 +62,4 @@ const vip371 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip371;
+export default vip391;

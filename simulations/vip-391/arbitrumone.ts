@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip371, { ARBITRUM_ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-371/bscmainnet";
+import vip391, { ARBITRUM_ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-391/bscmainnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
@@ -14,7 +14,7 @@ const FAST_TRACK_TIMELOCK = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
 const CRITICAL_TIMELOCK = "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674";
 
 forking(267530159, async () => {
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip371(), {
+  testForkedNetworkVipCommands("VIP 391 Multichain Governance - Permissions", await vip391(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [190]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [52]);
