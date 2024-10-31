@@ -1,5 +1,10 @@
+import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+import { NORMAL_TIMELOCK } from "src/vip-framework";
+
+const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+export const BNB_AMOUNT = parseUnits("5", 18);
 
 export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
@@ -22,6 +27,12 @@ const vip371 = () => {
   };
   return makeProposal(
     [
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [BNB_AMOUNT, NORMAL_TIMELOCK],
+        value: "0",
+      },
       {
         target: ARBITRUM_ACM,
         signature: "grantRole(bytes32,address)",
