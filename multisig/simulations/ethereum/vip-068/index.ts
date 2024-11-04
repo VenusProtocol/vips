@@ -1,31 +1,34 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip068, {
+  BORROW_CAP,
+  BaseAssets,
+  CORE_COMPTROLLER,
+  SUPPLY_CAP,
+  USDT_PRIME_CONVERTER,
   eBTC,
   veBTC,
-  CORE_COMPTROLLER,
-  USDT_PRIME_CONVERTER,
-  BaseAssets,
-  BORROW_CAP, SUPPLY_CAP
 } from "../../../proposals/ethereum/vip-068";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
-import { parseUnits } from "ethers/lib/utils";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+
 const { ethereum } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
-const USDT_USER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
+const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+const eBTC_USER = "0x7aCDF2012aAC69D70B86677FE91eb66e08961880";
 
 forking(21079955, async () => {
   let resilientOracle: Contract;
@@ -42,6 +45,8 @@ forking(21079955, async () => {
       await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
       await impersonateAccount(USDT_USER);
       await setBalance(USDT_USER, parseUnits("1000", 18));
+      await impersonateAccount(eBTC_USER);
+      await setBalance(eBTC_USER, parseUnits("1000", 18));
       await impersonateAccount(USDT_PRIME_CONVERTER);
       await setBalance(USDT_PRIME_CONVERTER, parseUnits("1000", 18));
 
@@ -124,35 +129,29 @@ forking(21079955, async () => {
       );
     });
 
-    // it("check Pool", async () => {
-    //   await eBTCContract.faucet(parseUnits("100", 18));
-    //   await checkIsolatedPoolsComptrollers({
-    //     [CORE_COMPTROLLER]: ethereum.NORMAL_TIMELOCK,
-    //   });
-    // });
+    it("check Pool", async () => {
+      await checkIsolatedPoolsComptrollers();
+    });
 
-    // it("eBTC conversion", async () => {
-    //   const usdtAmount = parseUnits("10", 6);
-    //   await usdt.connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK)).faucet(usdtAmount);
-    //   await usdt
-    //     .connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK))
-    //     .approve(usdtPrimeConverter.address, usdtAmount);
+    it("eBTC conversion", async () => {
+      const usdtAmount = parseUnits("10000", 6);
+      await usdt.connect(await ethers.getSigner(USDT_USER)).approve(usdtPrimeConverter.address, usdtAmount);
 
-    //   const eBTCAmount = parseUnits("2", 18);
-    //   await eBTCContract.connect(await ethers.getSigner(usdtPrimeConverter.address)).faucet(eBTCAmount);
+      const eBTCAmount = parseUnits("0.1", 8);
+      await eBTCContract.connect(await ethers.getSigner(eBTC_USER)).transfer(usdtPrimeConverter.address, eBTCAmount);
 
-    //   const usdtBalanceBefore = await usdt.balanceOf(ethereum.NORMAL_TIMELOCK);
-    //   const eBTCBalanceBefore = await eBTCContract.balanceOf(ethereum.NORMAL_TIMELOCK);
+      const usdtBalanceBefore = await usdt.balanceOf(USDT_USER);
+      const eigenBalanceBefore = await eBTCContract.balanceOf(USDT_USER);
 
-    //   await usdtPrimeConverter
-    //     .connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK))
-    //     .convertForExactTokens(usdtAmount, eBTCAmount, usdt.address, eBTCContract.address, ethereum.NORMAL_TIMELOCK);
+      await usdtPrimeConverter
+        .connect(await ethers.getSigner(USDT_USER))
+        .convertForExactTokens(usdtAmount, eBTCAmount, usdt.address, eBTCContract.address, USDT_USER);
 
-    //   const usdtBalanceAfter = await usdt.balanceOf(ethereum.NORMAL_TIMELOCK);
-    //   const eBTCBalanceAfter = await eBTCContract.balanceOf(ethereum.NORMAL_TIMELOCK);
+      const usdtBalanceAfter = await usdt.balanceOf(USDT_USER);
+      const eigenBalanceAfter = await eBTCContract.balanceOf(USDT_USER);
 
-    //   expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
-    //   expect(eBTCBalanceAfter.sub(eBTCBalanceBefore)).to.be.equal(eBTCAmount);
-    // });
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("7186.148530", 6));
+      expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eBTCAmount);
+    });
   });
 });
