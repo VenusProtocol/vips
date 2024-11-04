@@ -1,31 +1,33 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
+import { checkVToken } from "src/vip-framework/checks/checkVToken";
+import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
 import vip067, {
-  EIGEN,
-  vEIGEN,
-  CORE_COMPTROLLER,
-  USDT_PRIME_CONVERTER,
+  BORROW_CAP,
   BaseAssets,
-  BORROW_CAP, SUPPLY_CAP
+  CORE_COMPTROLLER,
+  EIGEN,
+  SUPPLY_CAP,
+  USDT_PRIME_CONVERTER,
+  vEIGEN,
 } from "../../../proposals/ethereum/vip-067";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
-import { parseUnits } from "ethers/lib/utils";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
-import { checkVToken } from "src/vip-framework/checks/checkVToken";
-import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
+
 const { ethereum } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
-const USDT_USER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
+const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const EIGEN_USER = "0x56A59D9cF7bc539ADc29537280023543C5c38A00";
 
 forking(21079955, async () => {
@@ -56,8 +58,9 @@ forking(21079955, async () => {
       usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
       usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
 
-      const eigen = await ethers.getContractAt(ERC20_ABI, EIGEN, await ethers.getSigner(EIGEN_USER));
-      await eigen.transfer(ethereum.VTREASURY, parseUnits("500", 18));
+      await eigenContract
+        .connect(await ethers.getSigner(EIGEN_USER))
+        .transfer(ethereum.VTREASURY, parseUnits("500", 18));
 
       await pretendExecutingVip(await vip067());
     });
@@ -130,35 +133,29 @@ forking(21079955, async () => {
       );
     });
 
-    // it("check Pool", async () => {
-    //   await eigenContract.faucet(parseUnits("100", 18));
-    //   await checkIsolatedPoolsComptrollers({
-    //     [CORE_COMPTROLLER]: ethereum.NORMAL_TIMELOCK,
-    //   });
-    // });
+    it("check Pool", async () => {
+      await checkIsolatedPoolsComptrollers();
+    });
 
-    // it("EIGEN conversion", async () => {
-    //   const usdtAmount = parseUnits("10", 6);
-    //   await usdt.connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK)).faucet(usdtAmount);
-    //   await usdt
-    //     .connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK))
-    //     .approve(usdtPrimeConverter.address, usdtAmount);
+    it("EIGEN conversion", async () => {
+      const usdtAmount = parseUnits("10", 6);
+      await usdt.connect(await ethers.getSigner(USDT_USER)).approve(usdtPrimeConverter.address, usdtAmount);
 
-    //   const eigenAmount = parseUnits("2", 18);
-    //   await eigenContract.connect(await ethers.getSigner(usdtPrimeConverter.address)).faucet(eigenAmount);
+      const eigenAmount = parseUnits("2", 18);
+      await eigenContract.connect(await ethers.getSigner(EIGEN_USER)).transfer(usdtPrimeConverter.address, eigenAmount);
 
-    //   const usdtBalanceBefore = await usdt.balanceOf(ethereum.NORMAL_TIMELOCK);
-    //   const eigenBalanceBefore = await eigenContract.balanceOf(ethereum.NORMAL_TIMELOCK);
+      const usdtBalanceBefore = await usdt.balanceOf(USDT_USER);
+      const eigenBalanceBefore = await eigenContract.balanceOf(USDT_USER);
 
-    //   await usdtPrimeConverter
-    //     .connect(await ethers.getSigner(ethereum.NORMAL_TIMELOCK))
-    //     .convertForExactTokens(usdtAmount, eigenAmount, usdt.address, eigenContract.address, ethereum.NORMAL_TIMELOCK);
+      await usdtPrimeConverter
+        .connect(await ethers.getSigner(USDT_USER))
+        .convertForExactTokens(usdtAmount, eigenAmount, usdt.address, eigenContract.address, USDT_USER);
 
-    //   const usdtBalanceAfter = await usdt.balanceOf(ethereum.NORMAL_TIMELOCK);
-    //   const eigenBalanceAfter = await eigenContract.balanceOf(ethereum.NORMAL_TIMELOCK);
+      const usdtBalanceAfter = await usdt.balanceOf(USDT_USER);
+      const eigenBalanceAfter = await eigenContract.balanceOf(USDT_USER);
 
-    //   expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
-    //   expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eigenAmount);
-    // });
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
+      expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eigenAmount);
+    });
   });
 });

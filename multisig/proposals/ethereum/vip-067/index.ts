@@ -1,8 +1,8 @@
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { makeProposal } from "../../../../src/utils";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ethers } from "hardhat";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -29,7 +29,7 @@ export const BaseAssets = [
 ];
 const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 const CHAINLINK_FEED = "0xf2917e602C2dCa458937fad715bb1E465305A4A1";
-const MAX_STALE_PERIOD =  30 * 3600; 
+const MAX_STALE_PERIOD = 30 * 3600;
 
 export const vip067 = () => {
   return makeProposal([
@@ -65,13 +65,11 @@ export const vip067 = () => {
       target: EIGEN,
       signature: "approve(address,uint256)",
       params: [ethereum.POOL_REGISTRY, INITIAL_SUPPLY],
-      
     },
     {
       target: vEIGEN,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["7200"],
-      
     },
     {
       target: ethereum.POOL_REGISTRY,
@@ -82,7 +80,6 @@ export const vip067 = () => {
       target: vEIGEN,
       signature: "setProtocolSeizeShare(uint256)",
       params: [parseUnits("0.01", 18)],
-      
     },
 
     // Conversion config
@@ -90,31 +87,26 @@ export const vip067 = () => {
       target: USDT_PRIME_CONVERTER,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [BaseAssets[0], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
-      
     },
     {
       target: USDC_PRIME_CONVERTER,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [BaseAssets[1], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
-      
     },
     {
       target: WBTC_PRIME_CONVERTER,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [BaseAssets[2], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
-      
     },
     {
       target: WETH_PRIME_CONVERTER,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [BaseAssets[3], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
-      
     },
     {
       target: XVS_VAULT_CONVERTER,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [BaseAssets[4], [EIGEN], [[CONVERSION_INCENTIVE, 1]]],
-      
     },
   ]);
 };
