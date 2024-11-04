@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from "chai";
-import { BigNumber, Contract, Signer } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { initMainnetUser } from "src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
 import vip015, {
@@ -24,7 +22,9 @@ import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
-forking(92376372, async () => {
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
+
+forking(94278700, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -59,6 +59,10 @@ forking(92376372, async () => {
 
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);
+    });
+
+    it("prime should have correct pool registry address", async () => {
+      expect(await prime.poolRegistry()).to.be.equal(arbitrumsepolia.POOL_REGISTRY);
     });
 
     it("Comptroller lst and core should have correct Prime token address", async () => {
