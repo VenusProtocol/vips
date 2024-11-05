@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip392, { VETH_LST_IRM, vETH_CORE_IRM, vETH_CORE, vETH_LST } from "../../vips/vip-392/bscmainnet";
+import vip392, { VETH_LST_IRM, vETH_CORE, vETH_CORE_IRM, vETH_LST } from "../../vips/vip-392/bscmainnet";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 
 forking(43743361, async () => {

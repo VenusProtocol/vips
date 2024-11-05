@@ -1,12 +1,11 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { vip068, IRM, vETH_CORE, vETH_LST } from "../../../proposals/ethereum/vip-068";
+import { IRM, vETH_CORE, vETH_LST, vip068 } from "../../../proposals/ethereum/vip-068";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 forking(21121545, async () => {
@@ -25,7 +24,7 @@ forking(21121545, async () => {
 
     it("check it correctly sets new interest rate model", async () => {
       const BLOCKS_PER_YEAR = BigNumber.from(2628000);
-      
+
       let interestRateModel = await vETHCore.interestRateModel();
       expect(interestRateModel).to.equal(IRM);
       interestRateModel = await vETHLST.interestRateModel();
