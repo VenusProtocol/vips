@@ -22,7 +22,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a yea
 
 forking(48211836, async () => {
   describe("Post-Execution state", () => {
-    let allMarkets: any;
+    let allMarkets: string[];
     let vToken: Contract;
     let comptroller: Contract;
 
