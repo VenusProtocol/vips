@@ -4,12 +4,12 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip068, {
+import vip391, {
   BORROW_CAP,
   BaseAssets,
   CORE_COMPTROLLER,
@@ -17,7 +17,7 @@ import vip068, {
   USDT_PRIME_CONVERTER,
   eBTC,
   veBTC,
-} from "../../../proposals/ethereum/vip-068";
+} from "../../vips/vip-391/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -30,7 +30,7 @@ const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const eBTC_USER = "0x7aCDF2012aAC69D70B86677FE91eb66e08961880";
 
-forking(21079955, async () => {
+forking(6976822, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let veBTCContract: Contract;
@@ -39,28 +39,28 @@ forking(21079955, async () => {
   let usdtPrimeConverter: Contract;
   let usdt: Contract;
 
+  before(async () => {
+    await impersonateAccount(ethereum.NORMAL_TIMELOCK);
+    await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
+    await impersonateAccount(USDT_USER);
+    await setBalance(USDT_USER, parseUnits("1000", 18));
+    await impersonateAccount(eBTC_USER);
+    await setBalance(eBTC_USER, parseUnits("1000", 18));
+    await impersonateAccount(USDT_PRIME_CONVERTER);
+    await setBalance(USDT_PRIME_CONVERTER, parseUnits("1000", 18));
+
+    resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
+    veBTCContract = await ethers.getContractAt(VTOKEN_ABI, veBTC);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
+    eBTCContract = await ethers.getContractAt(ERC20_ABI, eBTC, await ethers.getSigner(ethereum.NORMAL_TIMELOCK));
+    usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
+    usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
+  });
+
+  testForkedNetworkVipCommands("vip391", await vip391());
+
   describe("Post-VIP behavior", async () => {
-    before(async () => {
-      await impersonateAccount(ethereum.NORMAL_TIMELOCK);
-      await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
-      await impersonateAccount(USDT_USER);
-      await setBalance(USDT_USER, parseUnits("1000", 18));
-      await impersonateAccount(eBTC_USER);
-      await setBalance(eBTC_USER, parseUnits("1000", 18));
-      await impersonateAccount(USDT_PRIME_CONVERTER);
-      await setBalance(USDT_PRIME_CONVERTER, parseUnits("1000", 18));
-
-      resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, ethereum.RESILIENT_ORACLE);
-      poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
-      veBTCContract = await ethers.getContractAt(VTOKEN_ABI, veBTC);
-      comptroller = await ethers.getContractAt(COMPTROLLER_ABI, CORE_COMPTROLLER);
-      eBTCContract = await ethers.getContractAt(ERC20_ABI, eBTC, await ethers.getSigner(ethereum.NORMAL_TIMELOCK));
-      usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
-      usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
-
-      await pretendExecutingVip(await vip068());
-    });
-
     it("check price", async () => {
       expect(await resilientOracle.getPrice(eBTC)).to.be.equal(parseUnits("71835.7052865100", 28));
       expect(await resilientOracle.getUnderlyingPrice(veBTC)).to.be.equal(parseUnits("71835.7052865100", 28));
