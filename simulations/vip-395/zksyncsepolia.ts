@@ -12,7 +12,7 @@ import vip365, {
   ZKSYNCSEPOLIA_ACM,
   ZKSYNCSEPOLIA_ACM_AGGREGATOR,
   ZKSYNCSEPOLIA_OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-365/bsctestnet";
+} from "../../vips/vip-395/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
