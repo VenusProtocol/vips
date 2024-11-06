@@ -30,10 +30,10 @@ export const BaseAssets = [
 ];
 const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 
-const vip389 = () => {
+const vip393 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-389",
+    title: "VIP-393",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -134,4 +134,4 @@ const vip389 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip389;
+export default vip393;

@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip389, {
+import vip393, {
   BORROW_CAP,
   BaseAssets,
   CORE_COMPTROLLER,
@@ -17,7 +17,7 @@ import vip389, {
   SUPPLY_CAP,
   USDT_PRIME_CONVERTER,
   vEIGEN,
-} from "../../vips/vip-389/bscmainnet";
+} from "../../vips/vip-393/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -30,7 +30,7 @@ const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const EIGEN_USER = "0x56A59D9cF7bc539ADc29537280023543C5c38A00";
 
-forking(6969766, async () => {
+forking(21130180, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vEIGENContract: Contract;
@@ -58,7 +58,7 @@ forking(6969766, async () => {
     usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
   });
 
-  testForkedNetworkVipCommands("vip389", await vip389());
+  testForkedNetworkVipCommands("vip393", await vip393());
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {

@@ -33,11 +33,60 @@ const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 const CHAINLINK_FEED = "0xf2917e602C2dCa458937fad715bb1E465305A4A1";
 const MAX_STALE_PERIOD = 30 * 3600;
 
-const vip389 = () => {
+const vip393 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-389",
-    description: `### Description`,
+    title: "VIP-393 [Ethereum] New EIGEN market in the Core pool",
+    description: `####Summary
+
+If passed, following the Community proposal “[Support EIGEN as collateral on Venus Protocol Ethereum Core Pool](https://community.venus.io/t/support-eigen-as-collateral-on-venus-protocol-ethereum-core-pool/4615)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x171c3ffba6886856609e3db5b2a701a4cdeb73ab91fb7a165387475234729b6b), this VIP adds a market for [EIGEN](https://etherscan.io/address/0xec53bf9167f50cdeb3ae105f56099aaab9061f83) into the Core pool on Ethereum, and refunds the [Community Wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) the provided bootstrap liquidity.
+
+#### Description
+
+#### Risk parameters
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/support-eigen-as-collateral-on-venus-protocol-ethereum-core-pool/4615/8), the risk parameters for the new market are:
+
+Underlying token: [EIGEN](https://etherscan.io/address/0xec53bf9167f50cdeb3ae105f56099aaab9061f83)
+
+- Borrow cap: 1,500,000
+- Supply cap: 3,000,000
+- Collateral factor: 50%
+- Liquidation threshold: 60%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 1,854.88 EIGEN - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 2%
+- multiplier (yearly): 15%
+- jump multiplier (yearly): 300%
+
+#### Oracles configuration
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Ethereum](https://etherscan.io/address/0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94) is used for EIGEN, with the [Chainlink feed](https://etherscan.io/address/0xf2917e602C2dCa458937fad715bb1E465305A4A1) for this asset as the main oracle.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Core pool on Ethereum, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to Sepolia, and used in the Venus Protocol testnet deployment
+
+The Community Wallet [provided the bootstrap liquidity](https://etherscan.io/tx/0x84c524c8f37f3cb30cad66befe760ad46d51dbfdf371a1347c82d3cbe76df50e) (1,854.88 EIGEN), spending 5,000 USDC, that will be refunded in this VIP with funds from the Venus Treasury on BNB Chain.
+
+#### Deployed contracts
+
+- Mainnet vEIGEN_Core: [0x256AdDBe0a387c98f487e44b85c29eb983413c5e](https://etherscan.io/address/0x256AdDBe0a387c98f487e44b85c29eb983413c5e)
+- Testnet vEIGEN_Core: [0x6DB4aDbA8F144a57a397b57183BF619e957040B1](https://sepolia.etherscan.io/address/0x6DB4aDbA8F144a57a397b57183BF619e957040B1)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/419)
+- [Deployment to Sepolia](https://testnet.bscscan.com/tx/0xde0347163b1259ea955c3e83ffd9de7d856e9adbacc4f1b84cd24a06c05a0aaa)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -142,4 +191,4 @@ const vip389 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip389;
+export default vip393;

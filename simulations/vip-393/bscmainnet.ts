@@ -1,11 +1,12 @@
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip389, { COMMUNITY_WALLET, USDC } from "../../vips/vip-389/bscmainnet";
+import vip393, { COMMUNITY_WALLET, USDC } from "../../vips/vip-393/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import ERC20_ABI from "./abi/erc20.json";
 
@@ -22,7 +23,7 @@ forking(43777987, async () => {
     oldUsdcTreasuryBalance = await usdc.balanceOf(bscmainnet.VTREASURY);
   });
 
-  testVip("vip389", await vip389(), {
+  testVip("vip393", await vip393(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
