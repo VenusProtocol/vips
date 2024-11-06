@@ -9,7 +9,7 @@ export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 export const EIGEN = "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83";
-const INITIAL_SUPPLY = parseUnits("1854.883016", 18);
+const INITIAL_SUPPLY = parseUnits("349.618192", 18);
 export const SUPPLY_CAP = parseUnits("3000000", 18);
 export const BORROW_CAP = parseUnits("1500000", 18);
 const CF = parseUnits("0.5", 18);
@@ -33,7 +33,7 @@ const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 const CHAINLINK_FEED = "0xf2917e602C2dCa458937fad715bb1E465305A4A1";
 const MAX_STALE_PERIOD = 30 * 3600;
 
-const vip393 = () => {
+const vip393 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-393 [Ethereum] New EIGEN market in the Core pool",
@@ -96,12 +96,12 @@ The Community Wallet [provided the bootstrap liquidity](https://etherscan.io/tx/
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDC, parseUnits("5000", 18), COMMUNITY_WALLET],
+        params: [USDC, parseUnits("6000", 18), COMMUNITY_WALLET],
       },
       {
         target: ethereum.CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[EIGEN, CHAINLINK_FEED, MAX_STALE_PERIOD]],
+        params: [[EIGEN, CHAINLINK_FEED, maxStalePeriod || MAX_STALE_PERIOD]],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -118,12 +118,6 @@ The Community Wallet [provided the bootstrap liquidity](https://etherscan.io/tx/
       },
 
       // Add Market
-      {
-        target: ethereum.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [EIGEN, INITIAL_SUPPLY, ethereum.GUARDIAN],
-        dstChainId: LzChainId.ethereum,
-      },
       {
         target: EIGEN,
         signature: "approve(address,uint256)",
@@ -146,12 +140,6 @@ The Community Wallet [provided the bootstrap liquidity](https://etherscan.io/tx/
         target: ethereum.POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [[vEIGEN, CF, LT, INITIAL_SUPPLY, ethereum.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: vEIGEN,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.01", 18)],
         dstChainId: LzChainId.ethereum,
       },
 

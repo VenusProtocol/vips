@@ -30,7 +30,9 @@ const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const EIGEN_USER = "0x56A59D9cF7bc539ADc29537280023543C5c38A00";
 
-forking(21130180, async () => {
+const ONE_YEAR = 365 * 24 * 3600;
+
+forking(21131771, async () => {
   let resilientOracle: Contract;
   let poolRegistry: Contract;
   let vEIGENContract: Contract;
@@ -58,12 +60,12 @@ forking(21130180, async () => {
     usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
   });
 
-  testForkedNetworkVipCommands("vip393", await vip393());
+  testForkedNetworkVipCommands("vip393", await vip393(ONE_YEAR));
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {
-      expect(await resilientOracle.getPrice(EIGEN)).to.be.equal(parseUnits("3.0196419", 18));
-      expect(await resilientOracle.getUnderlyingPrice(vEIGEN)).to.be.equal(parseUnits("3.0196419", 18));
+      expect(await resilientOracle.getPrice(EIGEN)).to.be.equal(parseUnits("2.94577903", 18));
+      expect(await resilientOracle.getUnderlyingPrice(vEIGEN)).to.be.equal(parseUnits("2.94577903", 18));
     });
 
     it("should have 10 markets in core pool", async () => {
@@ -81,7 +83,7 @@ forking(21130180, async () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("500", 8);
+      const expectedSupply = parseUnits("349.618192", 8);
       expect(await vEIGENContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
     });
 
@@ -105,7 +107,7 @@ forking(21130180, async () => {
     });
 
     it("check protocol seize share", async () => {
-      expect(await vEIGENContract.protocolSeizeShareMantissa()).equals(parseUnits("0.01", 18));
+      expect(await vEIGENContract.protocolSeizeShareMantissa()).equals(parseUnits("0.05", 18));
     });
 
     it("check vToken", async () => {

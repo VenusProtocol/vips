@@ -38,8 +38,8 @@ forking(43777987, async () => {
     it("Verify that the community wallet has received the correct amount of USDC", async () => {
       const walletBalance = await usdc.balanceOf(COMMUNITY_WALLET);
       const treasuryBalance = await usdc.balanceOf(bscmainnet.VTREASURY);
-      expect(walletBalance).to.eq(oldUsdcWalletBalance.add(parseUnits("5000", 18)));
-      expect(treasuryBalance).to.eq(oldUsdcTreasuryBalance.sub(parseUnits("5000", 18)));
+      expect(walletBalance).to.eq(oldUsdcWalletBalance.add(parseUnits("6000", 18)));
+      expect(treasuryBalance).to.eq(oldUsdcTreasuryBalance.sub(parseUnits("6000", 18)));
     });
   });
 });
