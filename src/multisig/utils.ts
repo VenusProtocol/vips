@@ -86,18 +86,6 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xd55A98150e0F9f5e3F6280FC25617A5C93d96007",
       },
     },
-    xlayertestnet: {
-      [chainId]: {
-        safeMasterCopyAddress: "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA",
-        safeProxyFactoryAddress: "0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC",
-        multiSendAddress: "0x998739BFdAAdde7C933B942a68053933098f9EDa",
-        multiSendCallOnlyAddress: "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
-        fallbackHandlerAddress: "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
-        signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
-        createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
-        simulateTxAccessorAddress: "0x727a77a074D1E6c4530e814F89E618a3298FC044",
-      },
-    },
     zksyncsepolia: {
       [chainId]: {
         safeMasterCopyAddress: "0x3844DF536332845c0df8E9DD99dD7f21c9B6A271",
@@ -122,7 +110,7 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xe7A7552B0Cff45E837e1422b479d2dEDE748f571",
       },
     },
-    // Add more networks as needed
+    // Add more testnet networks as needed
   };
 
   if (network.name in networks) {

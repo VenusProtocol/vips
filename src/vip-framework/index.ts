@@ -61,7 +61,11 @@ export interface TestingOptions {
   callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
-const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
+const executeCommand = async (
+  timelock: SignerWithAddress,
+  proposal: Proposal,
+  commandIdx: number,
+): Promise<TransactionResponse> => {
   const encodeMethodCall = (signature: string, params: any[]): string => {
     if (signature === "") {
       return "0x";
@@ -92,22 +96,25 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     txnParams.gasLimit = gas.mul(proposal.gasLimitMultiplicationFactor[commandIdx]);
   }
 
-  await timelock.sendTransaction(txnParams);
+  const tx = await timelock.sendTransaction(txnParams);
+  return tx;
 };
 
 export const pretendExecutingVip = async (proposal: Proposal, sender: string = GUARDIAN) => {
   const impersonatedTimelock = await initMainnetUser(sender, ethers.utils.parseEther("4.0"));
   console.log("===== Simulating vip =====");
-
+  const txResponses = [];
   const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   bar.start(proposal.signatures.length, 0);
 
   for (let i = 0; i < proposal.signatures.length; ++i) {
-    await executeCommand(impersonatedTimelock, proposal, i);
+    const txResponse = await executeCommand(impersonatedTimelock, proposal, i);
+    txResponses.push(txResponse);
     bar.update(i + 1);
   }
 
   bar.stop();
+  return txResponses;
 };
 
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
@@ -118,6 +125,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
 
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
+
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,

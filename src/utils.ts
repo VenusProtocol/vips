@@ -8,7 +8,7 @@ import { BigNumber, Contract, utils } from "ethers";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
-import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import {
   Command,
   LzChainId,
@@ -279,12 +279,14 @@ export const setMaxStalePeriodInBinanceOracle = async (
   await tx.wait();
 };
 
+const ONE_YEAR = 31536000;
+
 export const setMaxStalePeriodInChainlinkOracle = async (
   chainlinkOracleAddress: string,
   asset: string,
   feed: string,
   admin: string,
-  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
 ) => {
   const provider = ethers.provider;
 
@@ -304,6 +306,33 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
+};
+
+export const setRedstonePrice = async (
+  redstoneOracleAddress: string,
+  asset: string,
+  feed: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
+) => {
+  const rsOracle = new ethers.Contract(redstoneOracleAddress, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await rsOracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
+  await rsOracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
+  const price = await rsOracle.getPrice(asset);
+  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, price);
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
@@ -359,6 +388,16 @@ export const setMaxStalePeriod = async (
         normalTimelock,
         maxStalePeriodInSeconds,
       );
+
+      if (underlyingAsset.address === ORACLE_BNB) {
+        await setMaxStalePeriodInChainlinkOracle(
+          tokenConfig.oracles[1],
+          underlyingAsset.address,
+          ethers.constants.AddressZero,
+          normalTimelock,
+          maxStalePeriodInSeconds,
+        );
+      }
     }
   }
   await mine(100);
@@ -374,7 +413,7 @@ export const expectEvents = async (
   const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
     // @ts-expect-error @TODO type is wrong
-    return receipt.events
+    return (receipt.events || receipt.logs)
       .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;

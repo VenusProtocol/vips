@@ -7,7 +7,6 @@ export type SUPPORTED_NETWORKS =
   | "ethereum"
   | "opbnbtestnet"
   | "opbnbmainnet"
-  | "xlayertestnet"
   | "zksyncsepolia";
 
 export type REMOTE_NETWORKS =
@@ -78,4 +77,6 @@ export enum LzChainId {
   arbitrumone = 110,
   zksyncsepolia = 10248,
   zksyncmainnet = 165,
+  opsepolia = 10232,
+  opmainnet = 111,
 }

@@ -26,6 +26,16 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   zksyncmainnet: 30000000,
 };
 
+task("createProposal", "Create proposal objects for various destinations").setAction(async function (
+  taskArguments,
+  hre,
+) {
+  hre.FORKED_NETWORK = (hre.network.name as "zksyncsepolia") || "zksyncmainnet";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const createProposal = require("./scripts/createProposal").processGnosisTxBuilder;
+  await createProposal();
+});
+
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments) {

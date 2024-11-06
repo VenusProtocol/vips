@@ -1,160 +1,222 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
+
+const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+
+export interface SpeedRecord {
+  market: string;
+  symbol: string;
+  supplySideSpeed: string;
+  borrowSideSpeed: string;
+}
+
+export const newSpeeds: SpeedRecord[] = [
+  {
+    market: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
+    symbol: "vUSDC",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
+    symbol: "vUSDT",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xA07c5b74C9B40447a954e1466938b865b6BBea36",
+    symbol: "vBNB",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
+    symbol: "vBTC",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
+    symbol: "vETH",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B",
+    symbol: "vLTC",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xB248a295732e0225acd3337607cc01068e3b9c10",
+    symbol: "vXRP",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176",
+    symbol: "vBCH",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x1610bc33319e9398de5f57B33a5b184c806aD217",
+    symbol: "vDOT",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f",
+    symbol: "vLINK",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1",
+    symbol: "vDAI",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343",
+    symbol: "vFIL",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec",
+    symbol: "vADA",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xec3422Ef92B2fb59e84c8B02Ba73F1fE84Ed8D71",
+    symbol: "vDOGE",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8",
+    symbol: "vMATIC",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x86aC3974e2BD0d60825230fa6F355fF11409df5c",
+    symbol: "vCAKE",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x26DA28954763B92139ED49283625ceCAf52C6f94",
+    symbol: "vAAVE",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
+    symbol: "vTRX",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x6CFdEc747f37DAf3b87a35a1D9c8AD3063A1A8A0",
+    symbol: "vWBETH",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba",
+    symbol: "vFDUSD",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x27FF564707786720C71A2e5c1490A63266683612",
+    symbol: "vUNI",
+    supplySideSpeed: "0",
+    borrowSideSpeed: "0",
+  },
+  {
+    market: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
+    symbol: "vXVS",
+    supplySideSpeed: "1388888888888888",
+    borrowSideSpeed: "0",
+  },
+];
 
 const vip364 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-364 [zkSync] Configuration of markets and Prime, and enable XVS Vault",
+    title: "VIP-364 [BNB Chain] XVS Emissions Adjustments",
     description: `#### Summary
 
-If passed, this VIP will perform the following actions:
+Following the previous [community proposal](https://community.venus.io/t/emissions-adjustments-for-bnb-chain/4554/1) and following [snapshot vote](https://snapshot.org/#/venus-xvs.eth/proposal/0xbb361ec726cebc7bc78d564e65cadd447fcbf1dac0082ee1b2a8eb8251d3e0c0), this proposal adjusts the XVS emissions on the BNB Chain following an in-depth analysis of market TVL proportions and the current emission weights relative to the total market APYs. The proposed emission adjustments are detailed below.
 
-- Configure the XVS Vault on zkSync Era, including the changes described in the [VIP-360](https://app.venus.io/#/governance/proposal/360)
-- Configure the Venus markets on zkSync Era, for [WBTC](https://explorer.zksync.io/address/0xbbeb516fb02a01611cbbe0453fe3c580d7281011), [WETH](https://era.zksync.network/token/0x5aea5775959fbc2557cc8789bc1bf90a239d9a91), [USDC.e](https://explorer.zksync.io/address/0x3355df6d4c9c3035724fd0e3914de96a5a83aaf4), [USDT](https://explorer.zksync.io/address/0x493257fd37edb34451f62edf8d2a0c418852ba4c) and [ZK](https://explorer.zksync.io/address/0x5a7d6b2f92c77fad6ccabd7ee0624e64907eaf3e)
-- Configure the [ProtocolShareReserve](https://explorer.zksync.io/address/0xA1193e941BDf34E858f7F276221B4886EfdD040b) contract on zkSync Era
-- Configure the [NativeTokenGateway](https://explorer.zksync.io/address/0xeEDE4e1BDaC489BD851970bE3952B729C4238A68) contact for the Venus market of WETH, accepting deposits and withdrawals of ETH
-- Configure the [Prime](https://explorer.zksync.io/address/0xdFe62Dcba3Ce0A827439390d7d45Af8baE599978) contract on zkSync Era, allowing users to stake XVS into the XVSVault to start their qualification period
+#### Monthly XVS emissions reduction details
 
-#### Description
+- BNB: Current allocation: 2,812 / New allocation: 0
+- BTCB: Current allocation: 2,812 / New allocation 0
+- ETH : Current allocation: 1,406 / New allocation: 0
+- USDC: Current allocation: 1,172 / New allocation:0
+- USDT: Current allocation: 1,172/ New allocation: 0
+- FDUSD: Current allocation: 300/ New allocation: 0
+- WBETH: Current allocation: 257/ New allocation: 0
+- DAI: Current allocation: 140 / New allocation: 0
+- ADA: Current allocation: 140 / New allocation: 0
+- UNI: Current allocation: 140 / New allocation: 0
+- DOT: Current allocation: 137 / New allocation: 0
+- MATIC: Current allocation:  94 / New allocation: 0
+- CAKE: Current allocation: 94 / New allocation: 0
+- TRX: Current allocation: 94 / New allocation: 0
+- LTC: Current allocation: 86 / New allocation: 0
+- XRP: Current allocation: 86 / New allocation: 0
+- LINK: Current allocation: 86 / New allocation: 0
+- BCH: Current allocation: 47 / New allocation: 0
+- FIL: Current allocation: 47 / New allocation: 0
+- DOGE  : Current allocation: 47 / New allocation: 0
+- AAVE: Current allocation: 47 / New allocation: 0
+- XVS: Current allocation:  0 / New allocation: 1,200
 
-Following the [Chaos labs recommendations](https://community.venus.io/t/deploy-venus-protocol-on-zksync-era/4472/12), if passed, this VIP will enable the following Venus markets on zkSync Era:
+Total new Emissions: 1,200 XVS per month.
 
-Underlying token: [WBTC](https://explorer.zksync.io/address/0xbbeb516fb02a01611cbbe0453fe3c580d7281011)
+#### Sensitivity Analysis
 
-- Borrow cap: 20
-- Supply cap: 40
-- Collateral factor: 0.77
-- Liquidation threshold: 0.8
-- Reserve factor: 0.25
-- Bootstrap liquidity: 0.075 WBTC - provided by the Venus Treasury
+A [sensitivity analysis](https://community.venus.io/t/emissions-adjustments-for-bnb-chain/4554/1) was conducted to assess the impact of emission adjustments on market APYs, estimating how reductions in emissions might affect overall market performance.
 
-Underlying token: [WETH](https://era.zksync.network/token/0x5aea5775959fbc2557cc8789bc1bf90a239d9a91)
+#### XVS Market Emissions
 
-- Borrow cap: 1,700
-- Supply cap: 2,000
-- Collateral factor: 0.77
-- Liquidation threshold: 0.8
-- Reserve factor: 0.25
-- Bootstrap liquidity: 1.5 WETH - provided by the Venus Treasury
+The Venus Community has been advocating for several months for the XVS Market on the Core pool to be lightly Incentivized. In doing so, the XVS Market on the core pool can offer additional advantages for both the Venus protocol and its community as well as increased XVS Utility and Demand while slightly offsetting the borrow interests paid by XVS suppliers borrowing funds against these. It’s also a way to thank the XVS holders for their continuous support.
 
-Underlying token: [USDC.e](https://explorer.zksync.io/address/0x3355df6d4c9c3035724fd0e3914de96a5a83aaf4)
+#### Final Recommendations
 
-- Borrow cap: 4,200,000
-- Supply cap: 5,000,000
-- Collateral factor: 0.72
-- Liquidation threshold: 0.75
-- Reserve factor: 0.1
-- Bootstrap liquidity: 5,000 USDC.e - provided by the Venus Treasury
+Based on the analysis, the recommendations are as follows:
 
-Underlying token: [USDT](https://explorer.zksync.io/address/0x493257fd37edb34451f62edf8d2a0c418852ba4c)
+- **Eliminate emissions** for markets representing less than 5% of total protocol TVL.
+- **BTCB Market**: This market stands out with a low total APY of 0.04% and a utilization rate of 6%. This suggests that users are primarily supplying BTCB as collateral rather than for returns. Given this, emissions are recommended to be removed, as their absolute impact on supply APY would be minimal—an estimated reduction of just 0.01%.
+- For **all remaining markets**, the relative boost weight is below 10%, meaning emissions have a negligible effect on the total APY. Therefore, it is recommended to **remove emissions entirely** for these markets as well.
 
-- Borrow cap: 3,300,000
-- Supply cap: 4,000,000
-- Collateral factor: 0.77
-- Liquidation threshold: 0.8
-- Reserve factor: 0.1
-- Bootstrap liquidity: 5,000 USDT - provided by the Venus Treasury
+By implementing these changes, the proposal aims to optimize XVS emissions, focusing on markets that contribute significantly to the overall TVL and ensuring a more effective allocation of resources across the BNB Chain.
 
-Underlying token: [ZK](https://explorer.zksync.io/address/0x5a7d6b2f92c77fad6ccabd7ee0624e64907eaf3e)
+#### References
 
-- Borrow cap: 12,500,000
-- Supply cap: 25,000,000
-- Collateral factor: 0.35
-- Liquidation threshold: 0.4
-- Reserve factor: 0.25
-- Bootstrap liquidity: 25,000 ZK - provided by the Venus Treasury
-
-Initial interest rate curves for the new markets:
-
-- Underlying token: WBTC
-    - kink: 0.45
-    - base (yearly): 0
-    - multiplier (yearly): 0.09
-    - jump multiplier (yearly): 2
-- Underlying token: WETH
-    - kink: 0.8
-    - base (yearly): 0
-    - multiplier (yearly): 0.0425
-    - jump multiplier (yearly): 0.8
-- Underlying token: USDC.e, USDT
-    - kink: 0.8
-    - base (yearly): 0
-    - multiplier (yearly): 0.0875
-    - jump multiplier (yearly): 0.8
-- Underlying token: ZK
-    - kink: 0.45
-    - base (yearly): 0.02
-    - multiplier (yearly): 0.2
-    - jump multiplier (yearly): 3
-
-Initial risk parameters for the new pool:
-
-- Close factor: 50%
-- Liquidation incentive: 10%
-
-Oracles:
-
-- WBTC: [Chainlink](https://explorer.zksync.io/address/0x4Cba285c15e3B540C474A114a7b135193e4f1EA6) (main)
-- WETH: [Chainlink](https://explorer.zksync.io/address/0x6D41d1dc818112880b40e26BD6FD347E41008eDA) (main)
-- USDC.e: [Chainlink](https://explorer.zksync.io/address/0x1824D297C6d6D311A204495277B63e943C2D376E) (main)
-- USDT: [Chainlink](https://explorer.zksync.io/address/0xB615075979AE1836B476F651f1eB79f0Cd3956a9) (main)
-- ZK: [RedStone](https://explorer.zksync.io/address/0x5efDb74da192584746c96EcCe138681Ec1501218) (main) and [Chainlink](https://explorer.zksync.io/address/0xD1ce60dc8AE060DDD17cA8716C96f193bC88DD13) (pivot and fallback)
-
-#### Security and additional considerations
-
-We applied the following security procedures for this upgrade:
-
-- **VIP execution simulation:** in a simulation environment, checking ownership of the contracts and validating the usual operations on the markets
-- **Deployment on testnet:** the same contracts have been deployed to testnet, and used in the Venus Protocol testnet deployment
-- **Audit:** Certik, Quantstamp and Fairyproof have audited the deployed code
-
-#### Audit reports
-
-- [Certik audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/aa1f7ae61b07839231ec16e9c4143905785d7aae/audits/088_timeBased_certik_20240117.pdf) (2024/01/17)
-- [Quantstamp audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/470416836922656783eab52ded54744489e8c345/audits/089_timeBased_quantstamp_20240319.pdf) (2024/03/19)
-- [Fairyproof audit report](https://github.com/VenusProtocol/isolated-pools/blob/aa1f7ae61b07839231ec16e9c4143905785d7aae/audits/094_timeBased_fairyproof_20240304.pdf) (2024/03/04)
-
-#### Deployed contracts on zkSync Era
-
-- Pool registry: [0xFD96B926298034aed9bBe0Cca4b651E41eB87Bc4](https://explorer.zksync.io/address/0xFD96B926298034aed9bBe0Cca4b651E41eB87Bc4)
-- Comptroller: [0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1](https://explorer.zksync.io/address/0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1)
-- Markets:
-    - vWBTC_Core: [0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719](https://explorer.zksync.io/address/0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719)
-    - vWETH_Core: [0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8](https://explorer.zksync.io/address/0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8)
-    - vUSDC.e_Core: [0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D](https://explorer.zksync.io/address/0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D)
-    - vUSDT_Core: [0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46](https://explorer.zksync.io/address/0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46)
-    - vZK_Core: [0x697a70779C1A03Ba2BD28b7627a902BFf831b616](https://explorer.zksync.io/address/0x697a70779C1A03Ba2BD28b7627a902BFf831b616)
-- [ProtocolShareReserve](https://explorer.zksync.io/address/0xA1193e941BDf34E858f7F276221B4886EfdD040b)
-- [NativeTokenGateway](https://explorer.zksync.io/address/0xeEDE4e1BDaC489BD851970bE3952B729C4238A68)
-- [Prime](https://explorer.zksync.io/address/0xdFe62Dcba3Ce0A827439390d7d45Af8baE599978)
-- [PrimeLiquidityProvider](https://explorer.zksync.io/address/0x0EDE6d7fB474614C5D3d5a16581628bb96CB5dff)
-
-**References**
-
-- [VIP simulation - adding Venus markets](https://github.com/VenusProtocol/vips/pull/377)
-- [VIP simulation - ProtocolShareReserve](https://github.com/VenusProtocol/vips/pull/367)
-- [VIP simulation - NativeTokenGateway](https://github.com/VenusProtocol/vips/pull/368)
-- [VIP simulation - Prime](https://github.com/VenusProtocol/vips/pull/378)
-- [[VRC] Deploy Venus Protocol on zkSync Era](https://community.venus.io/t/deploy-venus-protocol-on-zksync-era/4472)
-- Snapshot ["Deploy Venus Protocol on zkSync Era"](https://snapshot.org/#/venus-xvs.eth/proposal/0x56aec6471ddf25eddc0a39e00ab1bbb98477fe67576cd84c7993f7d37729a717)
-- [Documentation](https://docs-v4.venus.io/)
-
-**Disclaimer for zkSync Era VIPs**
-
-Privilege commands on zkSync Era will be executed by the [Guardian wallet](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x18965d1db2a609964f8b6832d96371d4cbf77daab3ecb54de3818108d71ce89e), [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x2b050a3b262bc6c5084796f93769b82cac8a34c62911cf006c85826b5469a99f), [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x44e1f772b420ee5eeae26623d110c47c1151ba350375377d571498cbe0fb61e4) and [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x57e29b8a10d51202c9d5ac7cd928e83b4ab93222af755117fa849e7b3872f06f) multisig transactions will be executed. Otherwise, they will be rejected.`,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/380)
+- [Documentation](https://docs-v4.venus.io/)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
     [
       {
-        target: NORMAL_TIMELOCK,
-        signature: "",
-        params: [],
-        value: "1",
+        target: COMPTROLLER,
+        signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
+        params: [
+          newSpeeds.map(s => s.market),
+          newSpeeds.map(s => s.supplySideSpeed),
+          newSpeeds.map(s => s.borrowSideSpeed),
+        ],
       },
     ],
     meta,
