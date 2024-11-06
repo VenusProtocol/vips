@@ -4,10 +4,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { ethereum } = NETWORK_ADDRESSES;
+const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
+export const COMMUNITY_WALLET = "0xc444949e0054A23c44Fc45789738bdF64aed2391";
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 export const EIGEN = "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83";
-const INITIAL_SUPPLY = parseUnits("500", 18);
+const INITIAL_SUPPLY = parseUnits("1854.883016", 18);
 export const SUPPLY_CAP = parseUnits("3000000", 18);
 export const BORROW_CAP = parseUnits("1500000", 18);
 const CF = parseUnits("0.5", 18);
@@ -42,6 +44,11 @@ const vip389 = () => {
   };
   return makeProposal(
     [
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDC, parseUnits("5000", 18), COMMUNITY_WALLET],
+      },
       {
         target: ethereum.CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
