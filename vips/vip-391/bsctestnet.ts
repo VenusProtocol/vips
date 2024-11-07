@@ -35,7 +35,7 @@ const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 const vip391 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-391",
+    title: "VIP-391 [Ethereum] New eBTC market in the Core pool",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
