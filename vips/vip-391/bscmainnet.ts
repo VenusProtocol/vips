@@ -56,12 +56,6 @@ const vip391 = () => {
 
       // Add Market
       {
-        target: ethereum.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [eBTC, INITIAL_SUPPLY, ethereum.GUARDIAN],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
         target: eBTC,
         signature: "approve(address,uint256)",
         params: [ethereum.POOL_REGISTRY, 0],

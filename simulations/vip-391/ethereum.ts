@@ -4,11 +4,13 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { setMaxStalePeriod } from "src/utils";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip068 from "../../multisig/proposals/ethereum/vip-068";
 import vip391, {
   BORROW_CAP,
   BaseAssets,
@@ -24,12 +26,12 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 const PROTOCOL_SHARE_RESERVE = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const USDT_USER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 const eBTC_USER = "0x7aCDF2012aAC69D70B86677FE91eb66e08961880";
+const ONE_YEAR = 365 * 24 * 3600;
 
 forking(21130278, async () => {
   let resilientOracle: Contract;
@@ -42,6 +44,8 @@ forking(21130278, async () => {
   let wbtc: Contract;
 
   before(async () => {
+    await pretendExecutingVip(await vip068());
+
     await impersonateAccount(ethereum.NORMAL_TIMELOCK);
     await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
     await impersonateAccount(USDT_USER);
@@ -58,9 +62,14 @@ forking(21130278, async () => {
     eBTCContract = await ethers.getContractAt(ERC20_ABI, eBTC, await ethers.getSigner(ethereum.NORMAL_TIMELOCK));
     usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
     usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
-    wbtc = await ethers.getContractAt(ERC20_ABI, "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", await ethers.getSigner(ethereum.NORMAL_TIMELOCK));
+    wbtc = await ethers.getContractAt(
+      ERC20_ABI,
+      "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      await ethers.getSigner(ethereum.NORMAL_TIMELOCK),
+    );
 
-    await setMaxStalePeriod(resilientOracle, wbtc, 10000000000);
+    await setMaxStalePeriod(resilientOracle, wbtc, ONE_YEAR);
+    await setMaxStalePeriod(resilientOracle, usdt, ONE_YEAR);
   });
 
   testForkedNetworkVipCommands("vip391", await vip391());
@@ -155,7 +164,7 @@ forking(21130278, async () => {
       const usdtBalanceAfter = await usdt.balanceOf(USDT_USER);
       const eigenBalanceAfter = await eBTCContract.balanceOf(USDT_USER);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("7186.148530", 6));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("7458.923455", 6));
       expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eBTCAmount);
     });
   });
