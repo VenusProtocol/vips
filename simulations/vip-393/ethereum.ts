@@ -5,11 +5,12 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod } from "src/utils";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip067 from "../../multisig/proposals/ethereum/vip-067";
 import vip393, {
   BORROW_CAP,
   BaseAssets,
@@ -43,6 +44,8 @@ forking(21131771, async () => {
   let usdt: Contract;
 
   before(async () => {
+    await pretendExecutingVip(await vip067());
+
     await impersonateAccount(ethereum.NORMAL_TIMELOCK);
     await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
     await impersonateAccount(USDT_USER);
@@ -86,7 +89,7 @@ forking(21131771, async () => {
     });
 
     it("check supply", async () => {
-      const expectedSupply = parseUnits("349.618192", 8);
+      const expectedSupply = parseUnits("2204.50120800", 8);
       expect(await vEIGENContract.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
     });
 
