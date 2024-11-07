@@ -71,7 +71,7 @@ forking(48280698, async () => {
       expect(await executor.proposalTimelocks(2)).equals(CRITICAL_TIMELOCK);
 
       // Check trusted remote
-      expect(await executor.trustedRemoteLookup(LzChainId.bsctestnet)).equals(
+      expect(await executor.trustedRemoteLookup(LzChainId.bscmainnet)).equals(
         ethers.utils.solidityPack(
           ["address", "address"],
           [getOmnichainProposalSenderAddress(), zksyncmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR],
