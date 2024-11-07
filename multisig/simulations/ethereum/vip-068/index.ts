@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import vip067, { EIGEN } from "../../../proposals/ethereum/vip-067";
+import vip068, { EIGEN } from "../../../proposals/ethereum/vip-068";
 import ERC20_ABI from "./abi/erc20.json";
 
 forking(21135461, async () => {
@@ -14,7 +14,7 @@ forking(21135461, async () => {
   describe("Post-VIP behavior", async () => {
     before(async () => {
       eigenContract = new ethers.Contract(EIGEN, ERC20_ABI, ethers.provider);
-      await pretendExecutingVip(await vip067());
+      await pretendExecutingVip(await vip068());
     });
 
     it("check balance", async () => {

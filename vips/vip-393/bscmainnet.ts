@@ -37,7 +37,7 @@ const vip393 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-393 [Ethereum] New EIGEN market in the Core pool",
-    description: `####Summary
+    description: `#### Summary
 
 If passed, following the Community proposal “[Support EIGEN as collateral on Venus Protocol Ethereum Core Pool](https://community.venus.io/t/support-eigen-as-collateral-on-venus-protocol-ethereum-core-pool/4615)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x171c3ffba6886856609e3db5b2a701a4cdeb73ab91fb7a165387475234729b6b), this VIP adds a market for [EIGEN](https://etherscan.io/address/0xec53bf9167f50cdeb3ae105f56099aaab9061f83) into the Core pool on Ethereum, and refunds the [Community Wallet](https://bscscan.com/address/0xc444949e0054A23c44Fc45789738bdF64aed2391) the provided bootstrap liquidity.
 
@@ -55,7 +55,7 @@ Underlying token: [EIGEN](https://etherscan.io/address/0xec53bf9167f50cdeb3ae105
 - Liquidation threshold: 60%
 - Reserve factor: 25%
 
-Bootstrap liquidity: 1,854.88 EIGEN - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+Bootstrap liquidity: 2,204.50 EIGEN - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
 
 Interest rate curve for the new market:
 
@@ -75,7 +75,7 @@ We applied the following security procedures for this upgrade:
 - **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Core pool on Ethereum, with the right parameters and the expected bootstrap liquidity
 - **Deployment on testnet**: the same market has been deployed to Sepolia, and used in the Venus Protocol testnet deployment
 
-The Community Wallet [provided the bootstrap liquidity](https://etherscan.io/tx/0x84c524c8f37f3cb30cad66befe760ad46d51dbfdf371a1347c82d3cbe76df50e) (1,854.88 EIGEN), spending 5,000 USDC, that will be refunded in this VIP with funds from the Venus Treasury on BNB Chain.
+The Community Wallet provided the bootstrap liquidity ([here](https://etherscan.io/tx/0x84c524c8f37f3cb30cad66befe760ad46d51dbfdf371a1347c82d3cbe76df50e) and [here](https://etherscan.io/tx/0x0e06e43adf7d02decff5dc38c2678d3b1366880000ef2f6605a08cd17c2159fa)), spending 6,000 USDC, that will be refunded in this VIP with funds from the [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9). Part of the bootstrap liquidity is available on the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0xd0d5a8d8203443471dff3f7330dc3b62bb6e43aac2bd5003b08f84da15673f5b) multisig transaction will be executed to withdraw those funds, allowing Governance to supply them to the new EIGEN market.
 
 #### Deployed contracts
 
