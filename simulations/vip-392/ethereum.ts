@@ -1,37 +1,34 @@
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { forking, pretendExecutingVip } from "../../../../src/vip-framework";
-import { IRM, vETH_CORE, vETH_LST, vip068 } from "../../../proposals/ethereum/vip-068";
+import vip392, { ETHEREUM_IRM, ETHEREUM_vETH_CORE, ETHEREUM_vETH_LST } from "../../vips/vip-392/bscmainnet";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-forking(21121545, async () => {
+forking(21131771, async () => {
   let vETHCore: Contract;
   let vETHLST: Contract;
 
   before(async () => {
-    vETHCore = await ethers.getContractAt(VTOKEN_ABI, vETH_CORE);
-    vETHLST = await ethers.getContractAt(VTOKEN_ABI, vETH_LST);
+    vETHCore = await ethers.getContractAt(VTOKEN_ABI, ETHEREUM_vETH_CORE);
+    vETHLST = await ethers.getContractAt(VTOKEN_ABI, ETHEREUM_vETH_LST);
   });
 
-  describe("Post-VIP behavior", async () => {
-    before(async () => {
-      await pretendExecutingVip(await vip068());
-    });
+  testForkedNetworkVipCommands("vip392", await vip392());
 
+  describe("Post-VIP behavior", async () => {
     it("check it correctly sets new interest rate model", async () => {
       const BLOCKS_PER_YEAR = BigNumber.from(2628000);
 
       let interestRateModel = await vETHCore.interestRateModel();
-      expect(interestRateModel).to.equal(IRM);
+      expect(interestRateModel).to.equal(ETHEREUM_IRM);
       interestRateModel = await vETHLST.interestRateModel();
-      expect(interestRateModel).to.equal(IRM);
+      expect(interestRateModel).to.equal(ETHEREUM_IRM);
 
       checkInterestRate(
-        IRM,
+        ETHEREUM_IRM,
         "vETH",
         {
           base: "0",
