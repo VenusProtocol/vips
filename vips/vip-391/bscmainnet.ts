@@ -79,12 +79,6 @@ const vip391 = () => {
         params: [[veBTC, CF, LT, INITIAL_SUPPLY, ethereum.VTREASURY, SUPPLY_CAP, BORROW_CAP]],
         dstChainId: LzChainId.ethereum,
       },
-      {
-        target: veBTC,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.01", 18)],
-        dstChainId: LzChainId.ethereum,
-      },
 
       // Conversion config
       {
