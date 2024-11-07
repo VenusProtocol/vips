@@ -4,6 +4,7 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -58,6 +59,8 @@ forking(21131771, async () => {
     eigenContract = await ethers.getContractAt(ERC20_ABI, EIGEN, await ethers.getSigner(ethereum.NORMAL_TIMELOCK));
     usdtPrimeConverter = await ethers.getContractAt(PRIME_CONVERTER_ABI, USDT_PRIME_CONVERTER);
     usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
+
+    await setMaxStalePeriod(resilientOracle, usdt, ONE_YEAR);
   });
 
   testForkedNetworkVipCommands("vip393", await vip393(ONE_YEAR));
@@ -152,7 +155,7 @@ forking(21131771, async () => {
       const usdtBalanceAfter = await usdt.balanceOf(USDT_USER);
       const eigenBalanceAfter = await eigenContract.balanceOf(USDT_USER);
 
-      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("6.999301", 6));
+      expect(usdtBalanceBefore.sub(usdtBalanceAfter)).to.be.equal(parseUnits("5.890787", 6));
       expect(eigenBalanceAfter.sub(eigenBalanceBefore)).to.be.equal(eigenAmount);
     });
   });
