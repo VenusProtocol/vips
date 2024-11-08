@@ -30,7 +30,7 @@ const WETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 const WETH_CHAINLINK_FEED = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419";
 const PUFETH_HOLDER = "0xDdA0483184E75a5579ef9635ED14BacCf9d50283";
 
-const { POOL_REGISTRY, RESILIENT_ORACLE, REDSTONE_ORACLE, GUARDIAN, VTREASURY, CHAINLINK_ORACLE } = ethereum;
+const { POOL_REGISTRY, RESILIENT_ORACLE, REDSTONE_ORACLE, GUARDIAN, CHAINLINK_ORACLE } = ethereum;
 
 forking(21130180, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -94,7 +94,7 @@ forking(21130180, async () => {
 
     it("check supply", async () => {
       const expectedSupply = parseUnits("5", 8);
-      expect(await vToken.balanceOf(VTREASURY)).to.equal(expectedSupply);
+      expect(await vToken.balanceOf("0x495aeBf595D4C641af21A2a021C983C6565CA1A2")).to.equal(expectedSupply);
     });
 
     it("has correct protocol share reserve", async () => {
