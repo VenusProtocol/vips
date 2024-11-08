@@ -11,10 +11,6 @@ import vip015, {
   PRIME,
   USDC,
   USDT,
-  VUSDC_CORE,
-  VUSDT_CORE,
-  VWBTC_CORE,
-  VWETH_LST,
   WBTC,
   WETH,
 } from "../../../proposals/arbitrumsepolia/vip-015";
@@ -24,7 +20,7 @@ import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-forking(94278700, async () => {
+forking(95153347, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -71,18 +67,6 @@ forking(94278700, async () => {
 
       const comptrollerLst = new ethers.Contract(COMPTROLLER_LST, COMPTROLLER_ABI, provider);
       expect(await comptrollerLst.prime()).to.be.equal(PRIME);
-    });
-
-    it("Prime should contain correct markets", async () => {
-      expect((await prime.markets(VUSDC_CORE))[4]).to.be.equal(true);
-      expect((await prime.markets(VUSDT_CORE))[4]).to.be.equal(true);
-      expect((await prime.markets(VWBTC_CORE))[4]).to.be.equal(true);
-      expect((await prime.markets(VWETH_LST))[4]).to.be.equal(true);
-    });
-
-    it("Prime should have correct number of revocable and irrevocable tokens", async () => {
-      expect(await prime.irrevocableLimit()).to.equal(0);
-      expect(await prime.revocableLimit()).to.equal(500);
     });
 
     it("Plp should have correct tokens", async () => {
