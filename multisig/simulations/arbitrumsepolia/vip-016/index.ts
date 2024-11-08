@@ -7,9 +7,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip016, {
-  XVS_VAULT_TREASURY,
-} from "../../../proposals/arbitrumsepolia/vip-016";
+import vip016, { XVS_VAULT_TREASURY } from "../../../proposals/arbitrumsepolia/vip-016";
 import {
   CONVERTER_NETWORK,
   USDC_PRIME_CONVERTER,

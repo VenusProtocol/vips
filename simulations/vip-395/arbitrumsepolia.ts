@@ -7,9 +7,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip015 from "../../multisig/proposals/arbitrumsepolia/vip-015";
-import vip016, {
-  XVS_VAULT_TREASURY,
-} from "../../multisig/proposals/arbitrumsepolia/vip-016";
+import vip016, { XVS_VAULT_TREASURY } from "../../multisig/proposals/arbitrumsepolia/vip-016";
 import {
   CONVERTER_NETWORK,
   USDC_PRIME_CONVERTER,
@@ -65,7 +63,11 @@ forking(95542429, async () => {
     usdtPrimeConverter = new ethers.Contract(USDT_PRIME_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, provider);
 
     converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
-    protocolShareReserve = new ethers.Contract(ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY, PROTOCOL_SHARE_RESERVE_ABI, provider);
+    protocolShareReserve = new ethers.Contract(
+      ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY,
+      PROTOCOL_SHARE_RESERVE_ABI,
+      provider,
+    );
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
 
     await pretendExecutingVip(await vip015());
@@ -221,7 +223,9 @@ forking(95542429, async () => {
       expect(await usdtPrimeConverter.balanceOf(USDC)).to.equal(
         usdcBalanceOfUsdtPrimeConverterPrevious.sub(amountOutMantissa),
       );
-      expect(await usdt.balanceOf(ARBITRUM_SEPOLIA_PLP)).to.equal(BigNumber.from(usdtBalanceOfUsdtPrimePrevious).add(amountInMantissa));
+      expect(await usdt.balanceOf(ARBITRUM_SEPOLIA_PLP)).to.equal(
+        BigNumber.from(usdtBalanceOfUsdtPrimePrevious).add(amountInMantissa),
+      );
     });
 
     it("ConvertForExactTokens should work properly", async () => {
@@ -248,7 +252,9 @@ forking(95542429, async () => {
       expect(await usdtPrimeConverter.balanceOf(USDC)).to.equal(
         usdcBalanceOfUsdtPrimeConverterPrevious.sub(amountOutMantissa),
       );
-      expect(await usdt.balanceOf(ARBITRUM_SEPOLIA_PLP)).to.equal(BigNumber.from(usdtBalanceOfUsdtPrimePrevious).add(amountInMantissa));
+      expect(await usdt.balanceOf(ARBITRUM_SEPOLIA_PLP)).to.equal(
+        BigNumber.from(usdtBalanceOfUsdtPrimePrevious).add(amountInMantissa),
+      );
     });
 
     it("Private conversion should occur on updateAssetsState", async () => {
