@@ -110,6 +110,18 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xe7A7552B0Cff45E837e1422b479d2dEDE748f571",
       },
     },
+    unichainsepolia: {
+      [chainId]: {
+        safeMasterCopyAddress: "0xe336a5962Ab178E2856BEd37230777BF551302fE",
+        safeProxyFactoryAddress: "0xCE103033E5341a0830e6971DD61deb18b237E54B",
+        multiSendAddress: "0xd58De9D288831482346fA36e6bdc16925d9cFC85",
+        multiSendCallOnlyAddress: "0x4873593fC8e788eFc06287327749fdDe08C0146b",
+        fallbackHandlerAddress: "0x76D20797A41Da59Df96a6726F2c7D365b84be9Ac",
+        signMessageLibAddress: "0xDB94695bB4E974adfCD116351aF427937AD3a4b5",
+        createCallAddress: "0x474761AC5c317d93B76d8dc5388A9F38B5412E2C",
+        simulateTxAccessorAddress: "0xf95b731E477c3d16c3C68E7c9c766CBf6E190D49",
+      },
+    },
     // Add more testnet networks as needed
   };
 
