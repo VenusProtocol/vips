@@ -10,8 +10,8 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip068 from "../../multisig/proposals/ethereum/vip-068";
-import vip391, {
+import vip069 from "../../multisig/proposals/ethereum/vip-069";
+import vip394, {
   BORROW_CAP,
   BaseAssets,
   CORE_COMPTROLLER,
@@ -19,7 +19,7 @@ import vip391, {
   USDT_PRIME_CONVERTER,
   eBTC,
   veBTC,
-} from "../../vips/vip-391/bscmainnet";
+} from "../../vips/vip-394/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -44,7 +44,7 @@ forking(21130278, async () => {
   let wbtc: Contract;
 
   before(async () => {
-    await pretendExecutingVip(await vip068());
+    await pretendExecutingVip(await vip069());
 
     await impersonateAccount(ethereum.NORMAL_TIMELOCK);
     await setBalance(ethereum.NORMAL_TIMELOCK, parseUnits("1000", 18));
@@ -72,7 +72,7 @@ forking(21130278, async () => {
     await setMaxStalePeriod(resilientOracle, usdt, ONE_YEAR);
   });
 
-  testForkedNetworkVipCommands("vip391", await vip391());
+  testForkedNetworkVipCommands("vip394", await vip394());
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {

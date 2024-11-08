@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip391, {
+import vip394, {
   BORROW_CAP,
   BaseAssets,
   CORE_COMPTROLLER,
@@ -17,7 +17,7 @@ import vip391, {
   USDT_PRIME_CONVERTER,
   eBTC,
   veBTC,
-} from "../../vips/vip-391/bsctestnet";
+} from "../../vips/vip-394/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_CONVERTER_ABI from "./abi/PrimeConverter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -55,7 +55,7 @@ forking(6976822, async () => {
     usdt = await ethers.getContractAt(ERC20_ABI, BaseAssets[0], await ethers.provider.getSigner(USDT_USER));
   });
 
-  testForkedNetworkVipCommands("vip391", await vip391());
+  testForkedNetworkVipCommands("vip394", await vip394());
 
   describe("Post-VIP behavior", async () => {
     it("check price", async () => {

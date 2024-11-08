@@ -8,7 +8,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 export const eBTC = "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642";
 export const INITIAL_SUPPLY = parseUnits("0.14471345", 8);
 
-export const vip068 = () => {
+export const vip069 = () => {
   return makeProposal([
     {
       target: ethereum.VTREASURY,
@@ -18,4 +18,4 @@ export const vip068 = () => {
   ]);
 };
 
-export default vip068;
+export default vip069;
