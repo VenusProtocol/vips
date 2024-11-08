@@ -11,7 +11,7 @@ const PUFETH_VTOKEN = "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e";
 const LST_ETH_COMPTROLLER = "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3";
 const REDUCE_RESERVES_BLOCK_DELTA = "7200";
 
-const { POOL_REGISTRY, VTREASURY, REDSTONE_ORACLE, RESILIENT_ORACLE } = ethereum;
+const { POOL_REGISTRY, REDSTONE_ORACLE, RESILIENT_ORACLE } = ethereum;
 
 export const marketSpec = {
   vToken: {
@@ -36,7 +36,7 @@ export const marketSpec = {
   },
   initialSupply: {
     amount: parseUnits("5", 18),
-    vTokenReceiver: VTREASURY,
+    vTokenReceiver: "0x495aeBf595D4C641af21A2a021C983C6565CA1A2",
   },
   riskParameters: {
     supplyCap: parseUnits("3000", 18),
