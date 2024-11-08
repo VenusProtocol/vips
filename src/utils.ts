@@ -72,6 +72,8 @@ export const getSourceChainId = (network: REMOTE_NETWORKS) => {
     return LzChainId.bscmainnet;
   } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
     return LzChainId.bsctestnet;
+  } else {
+    throw new Error("Network is not registered. Please register it.");
   }
 };
 

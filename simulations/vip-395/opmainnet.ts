@@ -22,7 +22,7 @@ const { opmainnet } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x508bD9C31E8d6760De04c70fe6c2b24B3cDea7E7";
 const CRITICAL_TIMELOCK = "0xB82479bc345CAA7326D7d21306972033226fC185";
 
-forking(127726072, async () => {
+forking(127735654, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
