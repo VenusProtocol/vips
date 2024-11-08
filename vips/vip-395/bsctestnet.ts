@@ -1,6 +1,29 @@
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+
+import {
+  ACM,
+  BaseAssets,
+  CONVERTER_NETWORK,
+  USDCPrimeConverterTokenOuts,
+  USDC_PRIME_CONVERTER,
+  USDTPrimeConverterTokenOuts,
+  USDT_PRIME_CONVERTER,
+  WBTCPrimeConverterTokenOuts,
+  WBTC_PRIME_CONVERTER,
+  WETHPrimeConverterTokenOuts,
+  WETH_PRIME_CONVERTER,
+  XVSVaultConverterTokenOuts,
+  XVS_VAULT_CONVERTER,
+} from "../../multisig/proposals/arbitrumsepolia/vip-016/Addresses";
+import {
+  addConverterNetworkCommands,
+  incentiveAndAccessibilities,
+} from "../../multisig/proposals/arbitrumsepolia/vip-016/commands";
+
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
 
@@ -21,6 +44,10 @@ export const ARBITRUM_SEPOLIA_VUSDT_CORE = "0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a
 export const ARBITRUM_SEPOLIA_VUSDC_CORE = "0xd9d1e754464eFc7493B177d2c7be04816E089b4C";
 export const ARBITRUM_SEPOLIA_VWBTC_CORE = "0x49FB90A5815904649C44B87001a160C1301D6a2C";
 export const ARBITRUM_SEPOLIA_VWETH_LST = "0xd7057250b439c0849377bB6C3263eb8f9cf49d98";
+
+export const ARBITRUM_SEPOLIA_XVS_VAULT_TREASURY = "0x309b71a417dA9CfA8aC47e6038000B1739d9A3A6";
+export const ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY = "0x09267d30798B59c581ce54E861A084C6FC298666";
+export const ARBITRUM_SEPOLIA_VTREASURY = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 
 export const MAX_DAILY_LIMIT = 100;
 
@@ -98,6 +125,72 @@ const vip395 = () => {
         ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CONVERTER_NETWORK, "addTokenConverter(address)", arbitrumsepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [CONVERTER_NETWORK, "removeTokenConverter(address)", arbitrumsepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ARBITRUM_SEPOLIA_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", arbitrumsepolia.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY,
+        signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
+        params: [
+          [
+            [0, 6000, ARBITRUM_SEPOLIA_VTREASURY],
+            [0, 2000, XVS_VAULT_CONVERTER],
+            [0, 500, USDC_PRIME_CONVERTER], // 25% of the Prime allocation
+            [0, 500, USDT_PRIME_CONVERTER], // 25% of the Prime allocation
+            [0, 300, WBTC_PRIME_CONVERTER], // 15% of the Prime allocation
+            [0, 700, WETH_PRIME_CONVERTER], // 35% of the Prime allocation
+            [1, 8000, ARBITRUM_SEPOLIA_VTREASURY],
+            [1, 2000, XVS_VAULT_CONVERTER],
+          ],
+        ],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[0], USDTPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[1], USDCPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: WBTC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[2], WBTCPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: WETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[3], WETHPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[4], XVSVaultConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      ...addConverterNetworkCommands,
     ],
     meta,
     ProposalType.REGULAR,

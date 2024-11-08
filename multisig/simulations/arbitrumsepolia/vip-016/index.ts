@@ -8,10 +8,6 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
 import vip016, {
-  COMPTROLLER_CORE,
-  PLP,
-  PROTOCOL_SHARE_RESERVE_PROXY,
-  VTREASURY,
   XVS_VAULT_TREASURY,
 } from "../../../proposals/arbitrumsepolia/vip-016";
 import {
@@ -34,6 +30,12 @@ const USDT_HOLDER = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 const USDC_HOLDER = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 const USDT = "0xf3118a17863996B9F2A073c9A66Faaa664355cf8";
 const USDC = "0x86f096B1D970990091319835faF3Ee011708eAe8";
+
+const COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
+const PLP = "0xE82c2c10F55D3268126C29ec813dC6F086904694";
+const PROTOCOL_SHARE_RESERVE_PROXY = "0x09267d30798B59c581ce54E861A084C6FC298666";
+const VTREASURY = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
+
 forking(94312350, async () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
