@@ -9,7 +9,7 @@ import vip395, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/v
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-const { zksyncmainnet } = NETWORK_ADDRESSES;
+const { zksyncmainnet, opmainnet } = NETWORK_ADDRESSES;
 
 forking(43770901, async () => {
   const provider = ethers.provider;
@@ -34,21 +34,28 @@ forking(43770901, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["SetMaxDailyLimit", "SetTrustedRemoteAddress", "ExecuteRemoteProposal", "StorePayload"],
-        [1, 1, 1, 0],
+        [2, 2, 2, 0],
       );
     },
   });
 
   describe("Post-VIP behavior", () => {
-    it("Daily limit should be 100 of zksyncmainnet", async () => {
+    it("Daily limit should be 100 of zksyncmainnet and opmainnet", async () => {
       expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.zksyncmainnet)).to.equals(MAX_DAILY_LIMIT);
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.opmainnet)).to.equals(MAX_DAILY_LIMIT);
     });
 
-    it("Trusted remote should be set of zksyncmainnet", async () => {
+    it("Trusted remote should be set of zksyncmainnet and opmainnet", async () => {
       expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.zksyncmainnet)).to.be.equals(
         ethers.utils.solidityPack(
           ["address", "address"],
           [zksyncmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
+        ),
+      );
+      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.opmainnet)).to.be.equals(
+        ethers.utils.solidityPack(
+          ["address", "address"],
+          [opmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
         ),
       );
     });
