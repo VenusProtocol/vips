@@ -95,12 +95,32 @@ task("test", "Update fork config")
     await runSuper(taskArguments);
   });
 
+// Pretend that Cancun hardfork was activated at block 0
+const assumeCancun = {
+  hardforkHistory: {
+    cancun: 0,
+  },
+};
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
       loggingEnabled: false,
+      // Forking networks with unknown hardfork activation history causes errors in
+      // new versions of Hardhat. Following https://github.com/NomicFoundation/hardhat/pull/5394,
+      // we assume Cancun hardfork was active from the beginning for all unknown chains
+      chains: {
+        56: assumeCancun,
+        97: assumeCancun,
+        5611: assumeCancun,
+        204: assumeCancun,
+        421614: assumeCancun,
+        42161: assumeCancun,
+        11155420: assumeCancun,
+        10: assumeCancun,
+      },
     },
     bsctestnet: {
       url: process.env.ARCHIVE_NODE_bsctestnet || "https://data-seed-prebsc-1-s1.binance.org:8545",
