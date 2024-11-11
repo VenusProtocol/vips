@@ -26,6 +26,7 @@ export type REMOTE_NETWORKS =
 
 export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia", "opsepolia"];
 export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet", "opmainnet"];
+
 export interface ProposalMeta {
   version: string;
   title: string;
