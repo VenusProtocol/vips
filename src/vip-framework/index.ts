@@ -270,6 +270,8 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
     it("should be executed successfully", async () => {
       if (FORKED_NETWORK == "zksyncsepolia" || FORKED_NETWORK == "zksyncmainnet") {
         await mineOnZksync(DELAY_BLOCKS[proposalType]);
+        const [signer] = await ethers.getSigners();
+        await initMainnetUser(signer.address, ethers.utils.parseEther("2"));
       } else {
         await mine(DELAY_BLOCKS[proposalType]);
       }
