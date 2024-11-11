@@ -40,7 +40,7 @@ forking(127735654, async () => {
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on ZKsync mainnet", async () => {
+    it("Normal Timelock has default admin role on OP mainnet", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, OP_MAINNET_ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, opmainnet.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
