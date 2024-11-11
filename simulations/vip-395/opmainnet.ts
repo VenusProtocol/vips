@@ -110,7 +110,7 @@ forking(127735654, async () => {
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
     });
-    it("Default admin role must be revoked from ACMAggregator contract on ZKsync mainnet", async () => {
+    it("Default admin role must be revoked from ACMAggregator contract on OP mainnet", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, OP_MAINNET_ACM_AGGREGATOR)).to.be.false;
     });
     it("Guardian and all timelocks are allowed to call retryMessage ", async () => {
