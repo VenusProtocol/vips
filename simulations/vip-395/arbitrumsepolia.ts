@@ -49,7 +49,7 @@ const USDC = "0x86f096B1D970990091319835faF3Ee011708eAe8";
 const ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY = "0x09267d30798B59c581ce54E861A084C6FC298666";
 const ARBITRUM_SEPOLIA_VTREASURY = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 
-forking(95542429, async () => {
+forking(96329874, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let converterNetwork: Contract;

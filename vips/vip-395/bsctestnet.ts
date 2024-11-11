@@ -64,15 +64,6 @@ const vip395 = () => {
   return makeProposal(
     [
       {
-        target: ARBITRUM_SEPOLIA_PLP,
-        signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [
-          [ARBITRUM_SEPOLIA_WETH, ARBITRUM_SEPOLIA_WBTC, ARBITRUM_SEPOLIA_USDC, ARBITRUM_SEPOLIA_USDT],
-          [0, 0, 0, 0],
-        ],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
         target: ARBITRUM_SEPOLIA_PRIME,
         signature: "addMarket(address,address,uint256,uint256)",
         params: [
