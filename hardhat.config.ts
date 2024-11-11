@@ -5,6 +5,7 @@ import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
 import { ethers } from "ethers";
 import { HardhatUserConfig, task } from "hardhat/config";
+import { ChainId } from "src/chains";
 
 import "./type-extensions";
 
@@ -112,19 +113,19 @@ const config: HardhatUserConfig = {
       // new versions of Hardhat. Following https://github.com/NomicFoundation/hardhat/pull/5394,
       // we assume Cancun hardfork was active from the beginning for all unknown chains
       chains: {
-        56: assumeCancun,
-        97: assumeCancun,
-        5611: assumeCancun,
-        204: assumeCancun,
-        421614: assumeCancun,
-        42161: assumeCancun,
-        11155420: assumeCancun,
-        10: assumeCancun,
+        [ChainId.bscmainnet]: assumeCancun,
+        [ChainId.bsctestnet]: assumeCancun,
+        [ChainId.opbnbtestnet]: assumeCancun,
+        [ChainId.opbnbmainnet]: assumeCancun,
+        [ChainId.arbitrumsepolia]: assumeCancun,
+        [ChainId.arbitrumone]: assumeCancun,
+        [ChainId.opsepolia]: assumeCancun,
+        [ChainId.opmainnet]: assumeCancun,
       },
     },
     bsctestnet: {
       url: process.env.ARCHIVE_NODE_bsctestnet || "https://data-seed-prebsc-1-s1.binance.org:8545",
-      chainId: 97,
+      chainId: ChainId.bsctestnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       gasPrice: ethers.utils.parseUnits("10", "gwei").toNumber(),
       gasMultiplier: 10,
@@ -133,52 +134,53 @@ const config: HardhatUserConfig = {
     },
     bscmainnet: {
       url: process.env.ARCHIVE_NODE_bscmainnet || "https://bsc-dataseed.binance.org/",
+      chainId: ChainId.bscmainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.bscmainnet,
     },
     sepolia: {
       url: process.env.ARCHIVE_NODE_sepolia || "https://ethereum-sepolia.blockpi.network/v1/rpc/public",
-      chainId: 11155111,
+      chainId: ChainId.sepolia,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.sepolia,
     },
     ethereum: {
       url: process.env.ARCHIVE_NODE_ethereum || "https://ethereum.blockpi.network/v1/rpc/public",
-      chainId: 1,
+      chainId: ChainId.ethereum,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.ethereum,
     },
     opbnbtestnet: {
       url: process.env.ARCHIVE_NODE_opbnbtestnet || "https://opbnb-testnet-rpc.bnbchain.org",
-      chainId: 5611,
+      chainId: ChainId.opbnbtestnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbtestnet,
     },
     opbnbmainnet: {
       url: process.env.ARCHIVE_NODE_opbnbmainnet || "https://opbnb-mainnet-rpc.bnbchain.org",
-      chainId: 204,
+      chainId: ChainId.opbnbmainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opbnbmainnet,
     },
     arbitrumsepolia: {
       url: process.env.ARCHIVE_NODE_arbitrumsepolia || "https://sepolia-rollup.arbitrum.io/rpc",
-      chainId: 421614,
+      chainId: ChainId.arbitrumsepolia,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
     arbitrumone: {
       url: process.env.ARCHIVE_NODE_arbitrumone || "https://arb1.arbitrum.io/rpc",
-      chainId: 42161,
+      chainId: ChainId.arbitrumone,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
     opsepolia: {
       url: process.env.ARCHIVE_NODE_opsepolia || "https://sepolia.optimism.io",
-      chainId: 11155420,
+      chainId: ChainId.opsepolia,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opsepolia,
     },
     opmainnet: {
       url: process.env.ARCHIVE_NODE_opmainnet || "https://mainnet.optimism.io",
-      chainId: 10,
+      chainId: ChainId.opmainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opmainnet,
     },
