@@ -6,7 +6,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip015 from "../../multisig/proposals/zksyncmainnet/vip-015";
+import vip016 from "../../multisig/proposals/zksyncmainnet/vip-016";
 import vip395, {
   DEFAULT_ADMIN_ROLE,
   ZKSYNCMAINNET_ACM,
@@ -36,7 +36,7 @@ forking(48280698, async () => {
     );
     executorOwner = new ethers.Contract(ZKSYNCMAINNET_OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vip015());
+    await pretendExecutingVip(await vip016());
   });
 
   describe("Pre-VIP behaviour", async () => {
