@@ -79,14 +79,64 @@ enum ConversionAccessibility {
   ONLY_FOR_USERS = 3,
 }
 
-export const vip400 = () => {
+export const vip395 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-400",
-    description: `### Description`,
-    forDescription: "I agree that Venus Protocol should proceed with this proposal",
-    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+    title: "VIP-395 [Ethereum] New pufETH market in the Liquid Staked ETH pool",
+    description: `#### Summary
+
+If passed, following the Community proposal “[Proposal for Listing pufETH on Venus](https://community.venus.io/t/proposal-for-listing-pufeth-on-venus/4572)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0xea592b48d56f18309e713e5faa8776b1191172175091af365f3bf3853f5536a6), this VIP adds a market for [pufETH](https://etherscan.io/address/0xD9A442856C234a39a81a089C06451EBAa4306a72) into the Liquid Staked ETH pool on Ethereum.
+
+#### Description
+
+#### Risk parameters
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-for-listing-pufeth-on-venus/4572/8), the risk parameters for the new market are:
+
+Underlying token: [pufETH](https://etherscan.io/address/0xD9A442856C234a39a81a089C06451EBAa4306a72)
+
+- Borrow cap: 3,000
+- Supply cap: 300
+- Collateral factor: 80%
+- Liquidation threshold: 85%
+- Reserve factor: 20%
+
+Bootstrap liquidity: 5 pufETH - provided by [Puffer Finance](https://etherscan.io/address/0x495aeBf595D4C641af21A2a021C983C6565CA1A2).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 4.5%
+- jump multiplier (yearly): 200%
+
+#### Oracles configuration
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Ethereum](https://etherscan.io/address/0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94) is used for pufETH, using under the hood the market price for pufETH/ETH provided by RedStone ([feed](https://etherscan.io/address/0x76A495b0bFfb53ef3F0E94ef0763e03cE410835C)), and the ETH/USD price provided by the ResilientOracle.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation:** in a simulation environment, validating the new market is properly added to the Liquid Staked ETH pool on Ethereum, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet:** the same market has been deployed to Sepolia, and used in the Venus Protocol testnet deployment
+
+The bootstrap liquidity is available on the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x25e0dbb5234ea065c8679f298abb1b2998f08b314e34d3bd3237c5c724c96ea0) multisig transaction will be executed to withdraw those funds, allowing Governance to supply them to the new pufETH market.
+
+#### Deployed contracts
+
+- Mainnet vpufETH_LiquidStakedETH: [0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e](https://etherscan.io/address/0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e)
+- Testnet vpufETH_LiquidStakedETH: [0x1E4d64B7c6f1F71969E5137B5Ee8cBa9Ab9c9356](https://sepolia.etherscan.io/address/0x1E4d64B7c6f1F71969E5137B5Ee8cBa9Ab9c9356)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/401)
+- [Deployment to Sepolia](https://sepolia.etherscan.io/tx/0x7c27c86bbabc084c2cb30c46c4acebbe849974eebf25318455f7dad6fac2065f)
+- [Documentation](https://docs-v4.venus.io/)
+`,
+    forDescription: "Process to configure and launch the new market",
+    againstDescription: "Defer configuration and launch of the new market",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
@@ -170,4 +220,4 @@ export const vip400 = () => {
   );
 };
 
-export default vip400;
+export default vip395;

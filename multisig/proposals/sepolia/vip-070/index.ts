@@ -49,7 +49,7 @@ export const marketSpec = {
 
 const pufETH_ONE_JUMP_REDSTONE_ORACLE = "0xB6aA35247097a2711CF4941DECD00b858124d959";
 
-export const vip100 = () => {
+export const vip070 = () => {
   return makeProposal([
     // Configure Oracle
     {
@@ -113,4 +113,4 @@ export const vip100 = () => {
   ]);
 };
 
-export default vip100;
+export default vip070;

@@ -8,7 +8,7 @@ const { VTREASURY, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.ethereum;
 export const PUFETH = "0xD9A442856C234a39a81a089C06451EBAa4306a72";
 const INITIAL_SUPPLY = parseUnits("5", 18);
 
-export const vip100 = () => {
+export const vip070 = () => {
   return makeProposal([
     {
       target: VTREASURY,
@@ -18,4 +18,4 @@ export const vip100 = () => {
   ]);
 };
 
-export default vip100;
+export default vip070;
