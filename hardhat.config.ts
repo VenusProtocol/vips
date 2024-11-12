@@ -29,6 +29,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 30000000,
   arbitrumone: 30000000,
   opsepolia: 30000000,
+  unichainsepolia: 30000000,
   opmainnet: 30000000,
 };
 
@@ -161,6 +162,13 @@ const config: HardhatUserConfig = {
       chainId: 10,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.opmainnet,
+    },
+    unichainsepolia: {
+      url: process.env.ARCHIVE_NODE_unichainsepolia || "https://sepolia.unichain.org",
+      chainId: 1301,
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainsepolia,
+
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
     },
   },
   paths: {
