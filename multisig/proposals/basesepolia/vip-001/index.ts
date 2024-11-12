@@ -15,7 +15,8 @@ export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e33
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
 export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
 export const ARBITRUM_SEPOLIA_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
-export const ZYSYNC_SEPOLIA_REMOTE = "0x760461ccB2508CAAa2ECe0c28af3a4707b853043";
+export const ZYSYNC_SEPOLIA_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
+export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 
@@ -181,6 +182,16 @@ const vip001 = () => {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [LzChainId.arbitrumsepolia, ARBITRUM_SEPOLIA_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.zksyncsepolia, ZYSYNC_SEPOLIA_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
