@@ -7,7 +7,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip392, { ARBITRUM_IRM, ARBITRUM_vETH_CORE, ARBITRUM_vETH_LST } from "../../vips/vip-392/bscmainnet";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-forking(271980750, async () => {
+forking(273956364, async () => {
   let vETHCore: Contract;
   let vETHLST: Contract;
 
