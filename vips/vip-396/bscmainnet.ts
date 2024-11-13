@@ -1,6 +1,10 @@
 import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+import { NORMAL_TIMELOCK } from "src/vip-framework";
+
+const TREASURY = "0xF322942f644A996A617BD29c16bd7d231d9F35E9";
+export const BNB_AMOUNT = parseUnits("10", 18);
 
 export const BSC_VETH_LST_IRM = "0x49a06B82b3c907AB140879F73f1d8dE262962c30";
 export const BSC_vETH_CORE_IRM = "0x3aa125788FC6b9F801772baEa887aA40328015e9";
@@ -71,6 +75,8 @@ If passed, this VIP will perform the following actions as per Chaos Labs’ late
 
 Complete analysis and details of these recommendations are available in the above publications.
 
+Moreover, this VIP will transfer 10 BNB from the [Venus Treasury on BNB](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to the [Normal Timelock](https://bscscan.com/address/0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396) contract, to fund the cross-chain messages.
+
 VIP simulation: [https://github.com/VenusProtocol/vips/pull/422](https://github.com/VenusProtocol/vips/pull/422)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -79,7 +85,12 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/422](https://github.
 
   return makeProposal(
     [
-      
+      {
+        target: TREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [BNB_AMOUNT, NORMAL_TIMELOCK],
+        value: "0",
+      },
       {
         target: BSC_vETH_CORE,
         signature: "_setInterestRateModel(address)",
@@ -133,7 +144,7 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/422](https://github.
       },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.REGULAR,
   );
 };
 

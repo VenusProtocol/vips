@@ -18,6 +18,7 @@ import vip396, {
 import COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
+import TREASURY_ABI from "./abi/VTreasuryAbi.json";
 
 forking(43743361, async () => {
   const provider = ethers.provider;
@@ -46,6 +47,8 @@ forking(43743361, async () => {
       );
 
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap"], [1, 1]);
+
+      await expectEvents(txResponse, [TREASURY_ABI], ["WithdrawTreasuryBNB"], [1]);
     },
   });
 
