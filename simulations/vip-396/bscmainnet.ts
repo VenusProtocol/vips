@@ -48,7 +48,7 @@ forking(43743361, async () => {
 
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "NewSupplyCap"], [1, 1]);
 
-      await expectEvents(txResponse, [TREASURY_ABI], ["WithdrawTreasuryBNB"], [1]);
+      await expectEvents(txResponse, [TREASURY_ABI], ["WithdrawTreasuryBNB"], [3]);
     },
   });
 
