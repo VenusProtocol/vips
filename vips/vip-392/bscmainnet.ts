@@ -71,7 +71,7 @@ const vip392 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
