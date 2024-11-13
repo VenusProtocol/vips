@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip392, {
+import vip396, {
   BORROW_CAP,
   BSC_VETH_LST_IRM,
   BSC_vETH_CORE,
@@ -14,7 +14,7 @@ import vip392, {
   COMPTROLLER,
   SUPPLY_CAP,
   vFDUSD,
-} from "../../vips/vip-392/bscmainnet";
+} from "../../vips/vip-396/bscmainnet";
 import COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
@@ -36,7 +36,7 @@ forking(43743361, async () => {
     });
   });
 
-  testVip("VIP-392", await vip392(), {
+  testVip("VIP-396", await vip396(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

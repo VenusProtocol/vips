@@ -4,31 +4,27 @@ import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip392, { ARBITRUM_IRM, ARBITRUM_vETH_CORE, ARBITRUM_vETH_LST } from "../../vips/vip-392/bscmainnet";
+import vip396, { OPBNB_IRM, OPBNB_vETH_CORE } from "../../vips/vip-396/bscmainnet";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-forking(273956364, async () => {
+forking(39230450, async () => {
   let vETHCore: Contract;
-  let vETHLST: Contract;
 
   before(async () => {
-    vETHCore = await ethers.getContractAt(VTOKEN_ABI, ARBITRUM_vETH_CORE);
-    vETHLST = await ethers.getContractAt(VTOKEN_ABI, ARBITRUM_vETH_LST);
+    vETHCore = await ethers.getContractAt(VTOKEN_ABI, OPBNB_vETH_CORE);
   });
 
-  testForkedNetworkVipCommands("vip392", await vip392());
+  testForkedNetworkVipCommands("vip396", await vip396());
 
   describe("Post-VIP behavior", async () => {
     it("check it correctly sets new interest rate model", async () => {
       const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-      let interestRateModel = await vETHCore.interestRateModel();
-      expect(interestRateModel).to.equal(ARBITRUM_IRM);
-      interestRateModel = await vETHLST.interestRateModel();
-      expect(interestRateModel).to.equal(ARBITRUM_IRM);
+      const interestRateModel = await vETHCore.interestRateModel();
+      expect(interestRateModel).to.equal(OPBNB_IRM);
 
       checkInterestRate(
-        ARBITRUM_IRM,
+        OPBNB_IRM,
         "vETH",
         {
           base: "0",

@@ -23,11 +23,55 @@ export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const SUPPLY_CAP = parseUnits("100000000", 18);
 export const BORROW_CAP = parseUnits("80000000", 18);
 
-const vip392 = () => {
+const vip396 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-392",
-    description: ``,
+    title: "VIP-396 Risk Parameters Adjustments (ETH, FDUSD)",
+    description: `#### Description
+
+If passed, this VIP will perform the following actions as per Chaos Labs’ latest recommendations in these Venus community forum publications:
+
+[Chaos Labs - Risk Parameter Updates - 11/11/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-11-11-24/4718)
+
+- BNB Chain
+    - [ETH - Core pool](https://bscscan.com/address/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8)
+        - Current kink: 85%. Recommendation: 90%
+        - Current multiplier: 0.0425. Recommendation: 0.03
+        - Current jump multiplier: 2. Recommendation: 4.5
+    - [ETH - Liquid Staked ETH](https://bscscan.com/address/0xeCCACF760FEA7943C5b0285BD09F601505A29c05)
+        - Current kink: 80%. Recommendation: 90%
+        - Current multiplier: 0.035. Recommendation: 0.03
+        - Current jump multiplier: 0.8. Recommendation: 4.5
+- Ethereum
+    - [WETH - Core](https://etherscan.io/address/0x7c8ff7d2A1372433726f879BD945fFb250B94c65)
+        - Current kink: 80%. Recommendation: 90%
+        - Current multiplier: 0.09. Recommendation: 0.03
+        - Current jump multiplier: 0.75. Recommendation: 4.5
+    - [WETH - Liquid Staked ETH](https://etherscan.io/address/0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2)
+        - Current jump multiplier: 0.8. Recommendation: 4.5
+- Arbitrum
+    - [WETH - Core](https://arbiscan.io/address/0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0)
+        - Current kink: 80%. Recommendation: 90%
+        - Current multiplier: 0.035. Recommendation: 0.03
+        - Current jump multiplier: 2.5. Recommendation: 4.5
+    - [WETH - Liquid Staked ETH](https://arbiscan.io/address/0x39D6d13Ea59548637104E40e729E4aABE27FE106)
+        - Current kink: 80%. Recommendation: 90%
+        - Current multiplier: 0.035. Recommendation: 0.03
+        - Current jump multiplier: 2.5. Recommendation: 4.5
+- opBNB
+    - [ETH - Core](https://opbnbscan.com/address/0x509e81eF638D489936FA85BC58F52Df01190d26C)
+        - Current kink: 45%. Recommendation: 90%
+        - Current jump multiplier: 1. Recommendation: 4.5
+
+[Chaos Labs - Risk Parameter Updates - 11/13/24](https://community.venus.io/t/chaos-labs-risk-parameter-updates-11-13-24/4722)
+
+- [FDUSD (Core pool)](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba):
+    - Increase supply cap, from 45M FDUSD to 100M FDUSD
+    - Increase borrow cap, from 40M FDUSD to 80M FDUSD
+
+Complete analysis and details of these recommendations are available in the above publications.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/422](https://github.com/VenusProtocol/vips/pull/422)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -35,6 +79,7 @@ const vip392 = () => {
 
   return makeProposal(
     [
+      
       {
         target: BSC_vETH_CORE,
         signature: "_setInterestRateModel(address)",
@@ -92,4 +137,4 @@ const vip392 = () => {
   );
 };
 
-export default vip392;
+export default vip396;
