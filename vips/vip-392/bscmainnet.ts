@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -16,6 +17,11 @@ export const ETHEREUM_IRM = "0x2F81dAA9de0fD60fb9B105Cfc5b67A31Fda547b6";
 
 export const OPBNB_vETH_CORE = "0x509e81eF638D489936FA85BC58F52Df01190d26C";
 export const OPBNB_IRM = "0x0d75544019e3015eEbF61F26595D08d60f3aC841";
+
+export const vFDUSD = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba";
+export const COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+export const SUPPLY_CAP = parseUnits("100000000", 18);
+export const BORROW_CAP = parseUnits("80000000", 18);
 
 const vip392 = () => {
   const meta = {
@@ -68,6 +74,17 @@ const vip392 = () => {
         signature: "setInterestRateModel(address)",
         params: [OPBNB_IRM],
         dstChainId: LzChainId.opbnbmainnet,
+      },
+
+      {
+        target: COMPTROLLER,
+        signature: "_setMarketSupplyCaps(address[],uint256[])",
+        params: [[vFDUSD], [SUPPLY_CAP]],
+      },
+      {
+        target: COMPTROLLER,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[vFDUSD], [BORROW_CAP]],
       },
     ],
     meta,
