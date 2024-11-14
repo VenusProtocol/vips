@@ -17,9 +17,9 @@ import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
-const XVS_BRIDGE = "0x8d9eC252984Ed6524ABE5EB19f02bDAdC9a868f1";
+const XVS_BRIDGE = "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD";
 
-forking(17901277, async () => {
+forking(17905242, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;
