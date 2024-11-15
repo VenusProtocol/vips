@@ -7,8 +7,8 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
 import vip003, { ACM, PSR } from "../../../proposals/basesepolia/vip-003";
-import ACM_ABI from "./abi/accessControlManager.json";
-import PSR_ABI from "./abi/protocolShareReserve.json";
+import ACM_ABI from "./abi/AccessControlManager.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
