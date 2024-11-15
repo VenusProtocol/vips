@@ -52,6 +52,16 @@ const vip000 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
+      params: [basesepolia.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", basesepolia.GUARDIAN],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [basesepolia.REDSTONE_ORACLE, "setDirectPrice(address,uint256)", basesepolia.GUARDIAN],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
       params: [BOUND_VALIDATOR, "setValidateConfig(ValidateConfig)", basesepolia.GUARDIAN],
     },
     {
@@ -61,6 +71,11 @@ const vip000 = () => {
     },
     {
       target: basesepolia.CHAINLINK_ORACLE,
+      signature: "acceptOwnership()",
+      params: [],
+    },
+    {
+      target: basesepolia.REDSTONE_ORACLE,
       signature: "acceptOwnership()",
       params: [],
     },

@@ -33,7 +33,7 @@ const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
 
 const MIN_DEST_GAS = "300000";
 
-forking(17833974, async () => {
+forking(17905242, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -45,7 +45,7 @@ forking(17833974, async () => {
   });
 
   describe("Pre-Execution state", () => {
-    it("Bridge Owner != arbitrum sepolia multisig", async () => {
+    it("Bridge Owner != base sepolia multisig", async () => {
       const owner = await xvsBridgeAdmin.owner();
       expect(owner).not.equal(basesepolia.GUARDIAN);
     });
