@@ -20,6 +20,8 @@ import vip004, {
   WETH,
   VCBBTC_CORE,
   MOCK_cbBTC,
+  VUSDC_CORE,
+  VWETH_CORE
 } from "../../../proposals/basesepolia/vip-004";
 import TOKEN_ABI from "./abi/WETH.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -35,22 +37,18 @@ const POOL_REGISTRY = basesepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-type VTokenSymbol = "VCBBTC_CORE"; //| "vWETH_Core" | "vUSDT_Core" | "vUSDC_Core" | "vOP_Core";
+type VTokenSymbol = "VCBBTC_CORE" | "vWETH_Core"  | "vUSDC_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
   VCBBTC_CORE: VCBBTC_CORE,
-  // vWETH_Core: VWETH_CORE,
-  // vUSDT_Core: VUSDT_CORE,
-  // vUSDC_Core: VUSDC_CORE,
-  // vOP_Core: VOP_CORE,
+  vWETH_Core: VWETH_CORE,
+  vUSDC_Core: VUSDC_CORE,
 };
 
 const tokens = {
   cbBTC: MOCK_cbBTC,
-  // WETH: WETH,
-  // USDT: MOCK_USDT,
-  // USDC: MOCK_USDC,
-  // OP: MOCK_OP,
+  WETH: WETH,
+  USDC: MOCK_USDC,
 };
 
 interface VTokenState {
@@ -72,22 +70,22 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     exchangeRate: parseUnits("1", 18),
     comptroller: COMPTROLLER_CORE,
   },
-  // vWETH_Core: {
-  //   name: "Venus WETH (Core)",
-  //   symbol: "vWETH_Core",
-  //   decimals: 8,
-  //   underlying: tokens.WETH,
-  //   exchangeRate: parseUnits("1", 28),
-  //   comptroller: COMPTROLLER_CORE,
-  // },
-  // vUSDC_Core: {
-  //   name: "Venus USDC (Core)",
-  //   symbol: "vUSDC_Core",
-  //   decimals: 8,
-  //   underlying: tokens.USDC,
-  //   exchangeRate: parseUnits("1", 16),
-  //   comptroller: COMPTROLLER_CORE,
-  // },
+  vWETH_Core: {
+    name: "Venus WETH (Core)",
+    symbol: "vWETH_Core",
+    decimals: 8,
+    underlying: tokens.WETH,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  vUSDC_Core: {
+    name: "Venus USDC (Core)",
+    symbol: "vUSDC_Core",
+    decimals: 8,
+    underlying: tokens.USDC,
+    exchangeRate: parseUnits("1", 16),
+    comptroller: COMPTROLLER_CORE,
+  },
 };
 
 interface RiskParameters {
@@ -111,24 +109,24 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "0.6",
     vTokenReceiver: basesepolia.VTREASURY,
   },
-  // vWETH_Core: {
-  //   borrowCap: "16",
-  //   supplyCap: "25",
-  //   collateralFactor: "0.7",
-  //   liquidationThreshold: "0.75",
-  //   reserveFactor: "0.2",
-  //   initialSupply: "0.4",
-  //   vTokenReceiver: basesepolia.VTREASURY,
-  // },
-  // vUSDC_Core: {
-  //   borrowCap: "130000",
-  //   supplyCap: "150000",
-  //   collateralFactor: "0.75",
-  //   liquidationThreshold: "0.77",
-  //   reserveFactor: "0.1",
-  //   initialSupply: "1800",
-  //   vTokenReceiver: basesepolia.VTREASURY,
-  // },
+  vWETH_Core: {
+    borrowCap: "16",
+    supplyCap: "25",
+    collateralFactor: "0.7",
+    liquidationThreshold: "0.75",
+    reserveFactor: "0.2",
+    initialSupply: "0.6",
+    vTokenReceiver: basesepolia.VTREASURY,
+  },
+  vUSDC_Core: {
+    borrowCap: "130000",
+    supplyCap: "150000",
+    collateralFactor: "0.75",
+    liquidationThreshold: "0.77",
+    reserveFactor: "0.1",
+    initialSupply: "2000",
+    vTokenReceiver: basesepolia.VTREASURY,
+  },
 };
 
 interface InterestRateModelSpec {
@@ -141,27 +139,25 @@ interface InterestRateModelSpec {
 
 const interestRateModels: InterestRateModelSpec[] = [
   {
-    vTokens: ["VCBBTC_CORE"], //"vWETH_Core", "vOP_Core"
+    vTokens: ["VCBBTC_CORE", "vWETH_Core"],
     kink: "0.45",
     base: "0",
     multiplier: "0.09",
     jump: "3",
   },
-  // {
-  //   vTokens: ["vUSDC_Core", "vUSDT_Core"],
-  //   kink: "0.8",
-  //   base: "0",
-  //   multiplier: "0.075",
-  //   jump: "2.5",
-  // },
+  {
+    vTokens: ["vUSDC_Core"],
+    kink: "0.8",
+    base: "0",
+    multiplier: "0.075",
+    jump: "2.5",
+  },
 ];
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   VCBBTC_CORE: "",
-  // vWETH_Core: "",
-  // vUSDT_Core: "",
-  // vUSDC_Core: "",
-  // vOP_Core: "",
+  vWETH_Core: "",
+  vUSDC_Core: "",
 };
 
 forking(17951440, async () => {
@@ -226,10 +222,8 @@ forking(17951440, async () => {
         const poolVTokens = await comptroller.getAllMarkets();
         expect(poolVTokens).to.have.lengthOf(5);
         expect(poolVTokens).to.include(vTokens.VCBBTC_CORE);
-        // expect(poolVTokens).to.include(vTokens.vWETH_Core);
-        // expect(poolVTokens).to.include(vTokens.vUSDT_Core);
-        // expect(poolVTokens).to.include(vTokens.vUSDC_Core);
-        // expect(poolVTokens).to.include(vTokens.vOP_Core);
+        expect(poolVTokens).to.include(vTokens.vWETH_Core);
+        expect(poolVTokens).to.include(vTokens.vUSDC_Core);
       });
 
       for (const [symbol, { underlying }] of Object.entries(vTokenState) as [VTokenSymbol, VTokenState][]) {

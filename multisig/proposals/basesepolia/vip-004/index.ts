@@ -17,6 +17,7 @@ export const VUSDC_CORE = "0xa9beA75098F55EE8415bf6E1B451512964D70e4b";
 
 export const PSR = "0x4Ae3D77Ece08Ec3E5f5842B195f746bd3bCb8d73";
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const STALE_PERIOD_24M = 60 * 24; // 24 minutes
 
 // IL configuration
 const vip004 = () => {
@@ -42,6 +43,7 @@ const vip004 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [ZERO_ADDRESS, "setLiquidationIncentive(uint256)", basesepolia.GUARDIAN],
     },
+    
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
@@ -164,7 +166,17 @@ const vip004 = () => {
     {
       target: basesepolia.CHAINLINK_ORACLE,
       signature: "setTokenConfig((address,address,uint256))",
-      params: [[MOCK_cbBTC, "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165", STALE_PERIOD_26H]],
+      params: [[MOCK_cbBTC, "0x0FB99723Aee6f420beAD13e6bBB79b7E6F034298", STALE_PERIOD_26H]],
+    },
+    {
+      target: basesepolia.CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[WETH, "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1", STALE_PERIOD_24M]],
+    },
+    {
+      target: basesepolia.CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[MOCK_USDC, "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165", STALE_PERIOD_24M]],
     },
 
 
@@ -176,130 +188,125 @@ const vip004 = () => {
     },
 
     // Add cbBTC market
-    // {
-    //   target: MOCK_cbBTC,
-    //   signature: "faucet(uint256)",
-    //   params: [parseUnits("0.6", 8)],
-    // },
-    // {
-    //   target: MOCK_cbBTC,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, 0],
-    // },
-    // {
-    //   target: MOCK_cbBTC,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, parseUnits("0.6", 8)],
-    // },
-    // {
-    //   target: VCBBTC_CORE,
-    //   signature: "setReduceReservesBlockDelta(uint256)",
-    //   params: ["86400"],
-    // },
-    // {
-    //   target: VCBBTC_CORE,
-    //   signature: "setProtocolShareReserve(address)",
-    //   params: [PSR],
-    // },
-    // {
-    //   target: basesepolia.POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       VCBBTC_CORE,
-    //       parseUnits("0.7", 18),
-    //       parseUnits("0.75", 18),
-    //       parseUnits("0.6", 8),
-    //       basesepolia.VTREASURY,
-    //       parseUnits("25", 8),
-    //       parseUnits("16", 8),
-    //     ],
-    //   ],
-    // },
+    {
+      target: MOCK_cbBTC,
+      signature: "faucet(uint256)",
+      params: [parseUnits("0.6", 8)],
+    },
+    {
+      target: MOCK_cbBTC,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, 0],
+    },
+    {
+      target: MOCK_cbBTC,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, parseUnits("0.6", 8)],
+    },
+    {
+      target: VCBBTC_CORE,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: ["86400"],
+    },
+    {
+      target: VCBBTC_CORE,
+      signature: "setProtocolShareReserve(address)",
+      params: [PSR],
+    },
+    {
+      target: basesepolia.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          VCBBTC_CORE,
+          parseUnits("0.7", 18),
+          parseUnits("0.75", 18),
+          parseUnits("0.6", 8),
+          basesepolia.VTREASURY,
+          parseUnits("25", 8),
+          parseUnits("16", 8),
+        ],
+      ],
+    },
 
     // Add WETH market
-    // {
-    //   target: basesepolia.VTREASURY,
-    //   signature: "withdrawTreasuryToken(address,uint256,address)",
-    //   params: [WETH, parseUnits("0.4", 18), basesepolia.GUARDIAN],
-    // },
-    // {
-    //   target: WETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, 0],
-    // },
-    // {
-    //   target: WETH,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, parseUnits("0.4", 18)],
-    // },
-    // {
-    //   target: VWETH_CORE,
-    //   signature: "setReduceReservesBlockDelta(uint256)",
-    //   params: ["86400"],
-    // },
-    // {
-    //   target: VWETH_CORE,
-    //   signature: "setProtocolShareReserve(address)",
-    //   params: [PSR],
-    // },
-    // {
-    //   target: basesepolia.POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       VWETH_CORE,
-    //       parseUnits("0.7", 18),
-    //       parseUnits("0.75", 18),
-    //       parseUnits("0.4", 18),
-    //       basesepolia.VTREASURY,
-    //       parseUnits("25", 18),
-    //       parseUnits("16", 18),
-    //     ],
-    //   ],
-    // },
+    {
+      target: WETH,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, 0],
+    },
+    {
+      target: WETH,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, parseUnits("0.6", 18)],
+    },
+    {
+      target: VWETH_CORE,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: ["86400"],
+    },
+    {
+      target: VWETH_CORE,
+      signature: "setProtocolShareReserve(address)",
+      params: [PSR],
+    },
+    {
+      target: basesepolia.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          VWETH_CORE,
+          parseUnits("0.7", 18),
+          parseUnits("0.75", 18),
+          parseUnits("0.6", 18),
+          basesepolia.VTREASURY,
+          parseUnits("25", 18),
+          parseUnits("16", 18),
+        ],
+      ],
+    },
 
     // Add USDC market
-    // {
-    //   target: basesepolia.VTREASURY,
-    //   signature: "withdrawTreasuryToken(address,uint256,address)",
-    //   params: [MOCK_USDC, parseUnits("1800", 6), basesepolia.GUARDIAN],
-    // },
-    // {
-    //   target: MOCK_USDC,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, 0],
-    // },
-    // {
-    //   target: MOCK_USDC,
-    //   signature: "approve(address,uint256)",
-    //   params: [basesepolia.POOL_REGISTRY, parseUnits("1800", 6)],
-    // },
-    // {
-    //   target: VUSDC_CORE,
-    //   signature: "setReduceReservesBlockDelta(uint256)",
-    //   params: ["86400"],
-    // },
-    // {
-    //   target: VUSDC_CORE,
-    //   signature: "setProtocolShareReserve(address)",
-    //   params: [PSR],
-    // },
-    // {
-    //   target: basesepolia.POOL_REGISTRY,
-    //   signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-    //   params: [
-    //     [
-    //       VUSDC_CORE,
-    //       parseUnits("0.75", 18),
-    //       parseUnits("0.77", 18),
-    //       parseUnits("1800", 6),
-    //       basesepolia.VTREASURY,
-    //       parseUnits("150000", 6),
-    //       parseUnits("130000", 6),
-    //     ],
-    //   ],
-    // },
+    {
+      target: MOCK_USDC,
+      signature: "faucet(uint256)",
+      params: [parseUnits("2000", 6)],
+    },
+    {
+      target: MOCK_USDC,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, 0],
+    },
+    {
+      target: MOCK_USDC,
+      signature: "approve(address,uint256)",
+      params: [basesepolia.POOL_REGISTRY, parseUnits("2000", 6)],
+    },
+    {
+      target: VUSDC_CORE,
+      signature: "setReduceReservesBlockDelta(uint256)",
+      params: ["86400"],
+    },
+    {
+      target: VUSDC_CORE,
+      signature: "setProtocolShareReserve(address)",
+      params: [PSR],
+    },
+    {
+      target: basesepolia.POOL_REGISTRY,
+      signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+      params: [
+        [
+          VUSDC_CORE,
+          parseUnits("0.75", 18),
+          parseUnits("0.77", 18),
+          parseUnits("2000", 6),
+          basesepolia.VTREASURY,
+          parseUnits("150000", 6),
+          parseUnits("130000", 6),
+        ],
+      ],
+    },
   ]);
 };
 
