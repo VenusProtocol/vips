@@ -17,15 +17,13 @@ import {
   WETH_PRIME_CONVERTER,
   XVSVaultConverterTokenOuts,
   XVS_VAULT_CONVERTER,
-} from "../../multisig/proposals/arbitrumsepolia/vip-016/Addresses";
+} from "../../multisig/proposals/arbitrumsepolia/vip-019/Addresses";
 import {
   addConverterNetworkCommands,
   incentiveAndAccessibilities,
-} from "../../multisig/proposals/arbitrumsepolia/vip-016/commands";
+} from "../../multisig/proposals/arbitrumsepolia/vip-019/commands";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
-
-export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
 
 export const ARBITRUM_SEPOLIA_COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
 export const ARBITRUM_SEPOLIA_COMPTROLLER_LST = "0x3D04F926b2a165BBa17FBfccCCB61513634fa5e4";
@@ -36,9 +34,6 @@ export const ARBITRUM_SEPOLIA_USDT = "0xf3118a17863996B9F2A073c9A66Faaa664355cf8
 export const ARBITRUM_SEPOLIA_USDC = "0x86f096B1D970990091319835faF3Ee011708eAe8";
 export const ARBITRUM_SEPOLIA_WBTC = "0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D";
 export const ARBITRUM_SEPOLIA_WETH = "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73";
-export const ARBITRUM_SEPOLIA_PRIME_NEW_IMPLEMENTATION = "0x507866eCb585275E006D9098867a0e9B08C11CCe"; // contains the setter for the pool registry address
-export const ARBITRUM_SEPOLIA_PRIME_OLD_IMPLEMENTATION = "0x255EFC81Ba715FA7C2C27bdd983A3CeF9BB07fEf";
-export const ARBITRUM_SEPOLIA_PROXY_ADMIN = "0xA78A1Df376c3CEeBC5Fab574fe6EdDbbF76fd03e";
 
 export const ARBITRUM_SEPOLIA_VUSDT_CORE = "0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052";
 export const ARBITRUM_SEPOLIA_VUSDC_CORE = "0xd9d1e754464eFc7493B177d2c7be04816E089b4C";
@@ -49,12 +44,10 @@ export const ARBITRUM_SEPOLIA_XVS_VAULT_TREASURY = "0x309b71a417dA9CfA8aC47e6038
 export const ARBITRUM_SEPOLIA_PROTOCOL_SHARE_RESERVE_PROXY = "0x09267d30798B59c581ce54E861A084C6FC298666";
 export const ARBITRUM_SEPOLIA_VTREASURY = "0x4e7ab1fD841E1387Df4c91813Ae03819C33D5bdB";
 
-export const MAX_DAILY_LIMIT = 100;
-
 const vip395 = () => {
   const meta = {
     version: "v2",
-    title: "vip395",
+    title: "vip395 arbitrum sepolia Prime configuration",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor on SEPOLIA & OPBNBTESTNET chains`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",

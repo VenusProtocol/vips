@@ -6,20 +6,18 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip015 from "../../multisig/proposals/arbitrumsepolia/vip-015";
-import vip016, { XVS_VAULT_TREASURY } from "../../multisig/proposals/arbitrumsepolia/vip-016";
+import vip018 from "../../multisig/proposals/arbitrumsepolia/vip-018";
+import vip019, { XVS_VAULT_TREASURY } from "../../multisig/proposals/arbitrumsepolia/vip-019";
 import {
   CONVERTER_NETWORK,
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
   converters,
-} from "../../multisig/proposals/arbitrumsepolia/vip-016/Addresses";
-import CONVERTER_NETWORK_ABI from "../../multisig/simulations/arbitrumsepolia/vip-016/abi/ConverterNetwork.json";
-import ERC20_ABI from "../../multisig/simulations/arbitrumsepolia/vip-016/abi/ERC20.json";
-import PROTOCOL_SHARE_RESERVE_ABI from "../../multisig/simulations/arbitrumsepolia/vip-016/abi/ProtocolShareReserve.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "../../multisig/simulations/arbitrumsepolia/vip-016/abi/SingleTokenConverter.json";
-import XVS_VAULT_TREASURY_ABI from "../../multisig/simulations/arbitrumsepolia/vip-016/abi/XVSVaultTreasury.json";
+} from "../../multisig/proposals/arbitrumsepolia/vip-019/Addresses";
+import CONVERTER_NETWORK_ABI from "../../multisig/simulations/arbitrumsepolia/vip-019/abi/ConverterNetwork.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "../../multisig/simulations/arbitrumsepolia/vip-019/abi/SingleTokenConverter.json";
+import XVS_VAULT_TREASURY_ABI from "../../multisig/simulations/arbitrumsepolia/vip-019/abi/XVSVaultTreasury.json";
 import vip395, {
   ARBITRUM_SEPOLIA_COMPTROLLER_CORE,
   ARBITRUM_SEPOLIA_COMPTROLLER_LST,
@@ -34,9 +32,11 @@ import vip395, {
   ARBITRUM_SEPOLIA_WBTC,
   ARBITRUM_SEPOLIA_WETH,
 } from "../../vips/vip-395/bsctestnet";
+import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
+import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const XVS = "0x877Dc896e7b13096D3827872e396927BbE704407";
@@ -70,8 +70,8 @@ forking(96329874, async () => {
     );
     xvsVaultTreasury = new ethers.Contract(XVS_VAULT_TREASURY, XVS_VAULT_TREASURY_ABI, provider);
 
-    await pretendExecutingVip(await vip015());
-    await pretendExecutingVip(await vip016());
+    await pretendExecutingVip(await vip018());
+    await pretendExecutingVip(await vip019());
   });
 
   describe("Pre-VIP behaviour", () => {

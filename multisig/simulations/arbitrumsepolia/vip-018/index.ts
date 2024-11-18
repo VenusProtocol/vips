@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip015, {
+import vip018, {
   COMPTROLLER_CORE,
   COMPTROLLER_LST,
   PLP,
@@ -13,7 +13,7 @@ import vip015, {
   USDT,
   WBTC,
   WETH,
-} from "../../../proposals/arbitrumsepolia/vip-015";
+} from "../../../proposals/arbitrumsepolia/vip-018";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -51,7 +51,7 @@ forking(95153347, async () => {
     let plp: Contract;
 
     before(async () => {
-      await pretendExecutingVip(await vip015());
+      await pretendExecutingVip(await vip018());
 
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);

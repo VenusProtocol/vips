@@ -16,7 +16,7 @@ export const PRIME_NEW_IMPLEMENTATION = "0x507866eCb585275E006D9098867a0e9B08C11
 export const PRIME_OLD_IMPLEMENTATION = "0x255EFC81Ba715FA7C2C27bdd983A3CeF9BB07fEf";
 export const PROXY_ADMIN = "0xA78A1Df376c3CEeBC5Fab574fe6EdDbbF76fd03e";
 
-const vip015 = () => {
+const vip018 = () => {
   return makeProposal([
     {
       target: PROXY_ADMIN,
@@ -51,4 +51,4 @@ const vip015 = () => {
   ]);
 };
 
-export default vip015;
+export default vip018;

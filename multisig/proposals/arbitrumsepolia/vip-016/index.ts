@@ -1,29 +1,48 @@
+import { parseUnits } from "ethers/lib/utils";
+import { LzChainId } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { CONVERTER_NETWORK } from "./Addresses";
-import {
-  acceptOwnershipCommandsAllConverters,
-  callPermissionCommandsAllConverter,
-  setConverterNetworkCommands,
-} from "./commands";
+const XVS_BRIDGE_ADMIN = "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8";
 
-export const XVS_VAULT_TREASURY = "0x309b71a417dA9CfA8aC47e6038000B1739d9A3A6";
+export const MIN_DST_GAS = "300000";
+export const SINGLE_SEND_LIMIT = parseUnits("10000", 18);
+export const MAX_DAILY_SEND_LIMIT = parseUnits("50000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("10200", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("51000", 18);
+export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
 
 const vip016 = () => {
   return makeProposal([
-    ...acceptOwnershipCommandsAllConverters,
     {
-      target: XVS_VAULT_TREASURY,
-      signature: "acceptOwnership()",
-      params: [],
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
     },
     {
-      target: CONVERTER_NETWORK,
-      signature: "acceptOwnership()",
-      params: [],
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [LzChainId.opsepolia, 0, MIN_DST_GAS],
     },
-    ...callPermissionCommandsAllConverter,
-    ...setConverterNetworkCommands,
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [LzChainId.opsepolia, MAX_DAILY_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [LzChainId.opsepolia, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [LzChainId.opsepolia, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [LzChainId.opsepolia, SINGLE_RECEIVE_LIMIT],
+    },
   ]);
 };
 
