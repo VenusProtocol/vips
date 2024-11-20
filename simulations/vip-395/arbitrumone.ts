@@ -17,6 +17,7 @@ import {
   XVS_VAULT_TREASURY,
   converters,
 } from "../../multisig/proposals/arbitrumone/vip-018/addresses";
+import RESILIENT_ORACLE_ABI from "../../multisig/simulations/arbitrumone/vip-001/abi/resilientOracle.json";
 import CONVERTER_NETWORK_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/SingleTokenConverter.json";
 import XVS_VAULT_TREASURY_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/XVSVaultTreasury.json";
@@ -162,7 +163,7 @@ forking(276417316, async () => {
     before(async () => {
       usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
       usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
-      resilientOracle = new ethers.Contract(arbitrumone.RESILIENT_ORACLE, ORACLE, provider);
+      resilientOracle = new ethers.Contract(arbitrumone.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
       [, user1] = await ethers.getSigners();
       user1Address = await user1.getAddress();
