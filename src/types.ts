@@ -7,7 +7,8 @@ export type SUPPORTED_NETWORKS =
   | "ethereum"
   | "opbnbtestnet"
   | "opbnbmainnet"
-  | "zksyncsepolia";
+  | "zksyncsepolia"
+  | "basesepolia";
 
 export type REMOTE_NETWORKS =
   | "sepolia"
@@ -17,8 +18,15 @@ export type REMOTE_NETWORKS =
   | "arbitrumsepolia"
   | "arbitrumone";
 
-export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia"];
-export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet"];
+export const REMOTE_TESTNET_NETWORKS = [
+  "sepolia",
+  "opbnbtestnet",
+  "arbitrumsepolia",
+  "zksyncsepolia",
+  "opsepolia",
+  "basesepolia",
+];
+export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet", "opmainnet"];
 export interface ProposalMeta {
   version: string;
   title: string;
@@ -78,4 +86,5 @@ export enum LzChainId {
   zksyncmainnet = 165,
   opsepolia = 10232,
   opmainnet = 111,
+  basesepolia = 10245,
 }
