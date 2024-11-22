@@ -9,19 +9,15 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip000 from "../../../proposals/basesepolia/vip-000";
-import vip001 from "../../../proposals/basesepolia/vip-001";
-import vip002 from "../../../proposals/basesepolia/vip-002";
-import vip003 from "../../../proposals/basesepolia/vip-003";
 import vip004, {
   COMPTROLLER_CORE,
   MOCK_USDC,
-  PSR,
-  WETH,
-  VCBBTC_CORE,
   MOCK_cbBTC,
+  PSR,
+  VCBBTC_CORE,
   VUSDC_CORE,
-  VWETH_CORE
+  VWETH_CORE,
+  WETH,
 } from "../../../proposals/basesepolia/vip-004";
 import TOKEN_ABI from "./abi/WETH.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -37,7 +33,7 @@ const POOL_REGISTRY = basesepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-type VTokenSymbol = "VCBBTC_CORE" | "vWETH_Core"  | "vUSDC_Core";
+type VTokenSymbol = "VCBBTC_CORE" | "vWETH_Core" | "vUSDC_Core";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
   VCBBTC_CORE: VCBBTC_CORE,
@@ -160,7 +156,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Core: "",
 };
 
-forking(17951440, async () => {
+forking(18252509, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -185,10 +181,6 @@ forking(17951440, async () => {
 
       await mockWSTToken.connect(WETHSigner).transfer(basesepolia.VTREASURY, ethers.utils.parseEther("1"));
 
-      await pretendExecutingVip(await vip000());
-      await pretendExecutingVip(await vip001());
-      await pretendExecutingVip(await vip002());
-      await pretendExecutingVip(await vip003());
       await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {
@@ -220,7 +212,7 @@ forking(17951440, async () => {
       it("should register Core pool vTokens in Core pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(5);
+        expect(poolVTokens).to.have.lengthOf(3);
         expect(poolVTokens).to.include(vTokens.VCBBTC_CORE);
         expect(poolVTokens).to.include(vTokens.vWETH_Core);
         expect(poolVTokens).to.include(vTokens.vUSDC_Core);
