@@ -5,12 +5,12 @@ import { LzChainId } from "src/types";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip389, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/vip-389/bsctestnet";
+import vip399, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/vip-399/bsctestnet-zksyncsepolia";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-const { opsepolia } = NETWORK_ADDRESSES;
-forking(44927774, async () => {
+const { zksyncsepolia } = NETWORK_ADDRESSES;
+forking(43836268, async () => {
   const provider = ethers.provider;
   const omnichainProposalSender = new ethers.Contract(
     OMNICHAIN_PROPOSAL_SENDER,
@@ -20,14 +20,14 @@ forking(44927774, async () => {
 
   describe("Pre-VIP behaviour", () => {
     it("Daily limit should be 0", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.opsepolia)).to.equals(0);
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.zksyncsepolia)).to.equals(0);
     });
     it("Trusted remote should not be set", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.opsepolia)).to.be.equals("0x");
+      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.zksyncsepolia)).to.be.equals("0x");
     });
   });
 
-  testVip("vip389 give permissions to timelock", await vip389(), {
+  testVip("vip399 give permissions to timelock", await vip399(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -39,15 +39,15 @@ forking(44927774, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("Daily limit should be 100 of opsepolia", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.opsepolia)).to.equals(MAX_DAILY_LIMIT);
+    it("Daily limit should be 100 of zksyncsepolia", async () => {
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.zksyncsepolia)).to.equals(MAX_DAILY_LIMIT);
     });
 
-    it("Trusted remote should be set of opsepolia", async () => {
-      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.opsepolia)).to.be.equals(
+    it("Trusted remote should be set of zksyncsepolia", async () => {
+      expect(await omnichainProposalSender.trustedRemoteLookup(LzChainId.zksyncsepolia)).to.be.equals(
         ethers.utils.solidityPack(
           ["address", "address"],
-          [opsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
+          [zksyncsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
         ),
       );
     });
