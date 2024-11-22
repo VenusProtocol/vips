@@ -71,18 +71,18 @@ forking(276102872, async () => {
 
     describe("Converters configuration", () => {
       describe("Owner checks", () => {
-        it("Timelock should be the owner of all converters", async () => {
+        it("GUARDIAN should be the owner of all converters", async () => {
           for (const converter of converters) {
             const Converter = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
             expect(await Converter.owner()).to.equal(arbitrumone.GUARDIAN);
           }
         });
 
-        it("Timelock should be the owner of ConverterNetwork", async () => {
+        it("GUARDIAN should be the owner of ConverterNetwork", async () => {
           expect(await converterNetwork.owner()).to.equal(arbitrumone.GUARDIAN);
         });
 
-        it("Timelock should be the owner of XVSVaultTreasury", async () => {
+        it("GUARDIAN should be the owner of XVSVaultTreasury", async () => {
           expect(await xvsVaultTreasury.owner()).to.equal(arbitrumone.GUARDIAN);
         });
       });

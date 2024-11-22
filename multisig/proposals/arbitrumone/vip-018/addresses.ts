@@ -41,5 +41,3 @@ export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
 export const WBTCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
 export const WETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
 export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
-console.log("-------------- USDT", USDTPrimeConverterTokenOuts);
-console.log("-------------- USDC", USDCPrimeConverterTokenOuts);
