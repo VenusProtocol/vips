@@ -3,7 +3,7 @@ import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriodForAllAssets } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip018 from "../../multisig/proposals/arbitrumone/vip-018";
@@ -13,6 +13,8 @@ import {
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_PRIME_CONVERTER,
+  WBTC,
+  WETH,
   XVS,
   XVS_VAULT_CONVERTER,
   XVS_VAULT_TREASURY,
@@ -160,6 +162,8 @@ forking(278099102, async () => {
     let user1Address: string;
     let resilientOracle: Contract;
     let xvs: Contract;
+    let weth: Contract;
+    let wbtc: Contract;
 
     const amount = parseUnits("1000", 6);
 
@@ -167,6 +171,9 @@ forking(278099102, async () => {
       usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
       usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
       xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
+      weth = new ethers.Contract(WETH, ERC20_ABI, provider);
+      xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
+      wbtc = new ethers.Contract(WBTC, ERC20_ABI, provider);
 
       resilientOracle = new ethers.Contract(arbitrumone.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
@@ -178,8 +185,7 @@ forking(278099102, async () => {
 
       await usdt.connect(usdtHolder).transfer(user1Address, amount);
       await usdc.connect(usdcHolder).transfer(user1Address, amount);
-      await setMaxStalePeriod(resilientOracle, usdt);
-      await setMaxStalePeriod(resilientOracle, usdc);
+      await setMaxStalePeriodForAllAssets(resilientOracle, [usdt, usdc, weth, wbtc, xvs]);
     });
 
     it("PSR should have correct distribution configs", async () => {
@@ -298,7 +304,6 @@ forking(278099102, async () => {
 
     it("claim prime token", async () => {
       const xvsUserSigner = await initMainnetUser(XVS_USER, parseUnits("10"));
-      await setMaxStalePeriod(resilientOracle, xvs);
       await expect(prime.connect(xvsUserSigner).claim()).not.to.be.reverted;
     });
   });
