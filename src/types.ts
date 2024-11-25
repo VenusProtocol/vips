@@ -12,17 +12,7 @@ export type SUPPORTED_NETWORKS =
   | "opsepolia"
   | "opmainnet";
 
-export type REMOTE_NETWORKS =
-  | "sepolia"
-  | "ethereum"
-  | "opbnbtestnet"
-  | "opbnbmainnet"
-  | "arbitrumsepolia"
-  | "arbitrumone"
-  | "zksyncsepolia"
-  | "zksyncmainnet"
-  | "opsepolia"
-  | "opmainnet";
+export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 
 export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia", "opsepolia"];
 export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet", "opmainnet"];
