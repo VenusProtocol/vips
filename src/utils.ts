@@ -402,6 +402,12 @@ export const setMaxStalePeriod = async (
   await mine(100);
 };
 
+export const setMaxStalePeriodForAllAssets = async (resilientOracle: Contract, assets: Contract[]): Promise<void> => {
+  for (const asset of assets) {
+    await setMaxStalePeriod(resilientOracle, asset);
+  }
+};
+
 export const expectEvents = async (
   txResponse: TransactionResponse,
   abis: (string | JsonFragment[])[],
