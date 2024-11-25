@@ -31,7 +31,7 @@ import vip395, {
   ARBITRUM_SEPOLIA_VWETH_LST,
   ARBITRUM_SEPOLIA_WBTC,
   ARBITRUM_SEPOLIA_WETH,
-} from "../../vips/vip-398/bsctestnet";
+} from "../../vips/vip-400/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import PRIME_ABI from "./abi/Prime.json";

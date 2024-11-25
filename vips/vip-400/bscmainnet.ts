@@ -44,10 +44,10 @@ export const ARBITRUM_XVS_VAULT_TREASURY = "0xb076D4f15c08D7A7B89466327Ba71bc7e1
 export const ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 export const ARBITRUM_VTREASURY = "0x8a662ceAC418daeF956Bc0e6B2dd417c80CDA631";
 
-const vip398 = () => {
+const vip400 = () => {
   const meta = {
     version: "v2",
-    title: "vip398 arbitrum Prime configuration",
+    title: "vip400 arbitrum Prime configuration",
     description: `#### Description
     This VIP will grant permission to timelocks and performs the necessary configuration of OmnichainProposalSender on BNB chain and OmnichainProposalExecutor`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -181,4 +181,4 @@ const vip398 = () => {
   );
 };
 
-export default vip398;
+export default vip400;

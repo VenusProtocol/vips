@@ -31,7 +31,7 @@ const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 const COMPTROLLER_LST = "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16";
 const PRIME = "0xFE69720424C954A2da05648a0FAC84f9bf11Ef49";
 
-forking(276102872, async () => {
+forking(278226922, async () => {
   const provider = ethers.provider;
   let converterNetwork: Contract;
   let xvsVaultTreasury: Contract;

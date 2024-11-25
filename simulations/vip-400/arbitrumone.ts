@@ -24,7 +24,7 @@ import RESILIENT_ORACLE_ABI from "../../multisig/simulations/arbitrumone/vip-001
 import CONVERTER_NETWORK_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/ConverterNetwork.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/SingleTokenConverter.json";
 import XVS_VAULT_TREASURY_ABI from "../../multisig/simulations/arbitrumone/vip-018/abi/XVSVaultTreasury.json";
-import vip398, {
+import vip400, {
   ARBITRUM_COMPTROLLER_CORE,
   ARBITRUM_COMPTROLLER_LST,
   ARBITRUM_PLP,
@@ -37,7 +37,7 @@ import vip398, {
   ARBITRUM_VWETH_LST,
   ARBITRUM_WBTC,
   ARBITRUM_WETH,
-} from "../../vips/vip-398/bscmainnet";
+} from "../../vips/vip-400/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
@@ -51,7 +51,7 @@ const XVS_USER = "0xC469eCb73159b88957965758002bBE1807532814";
 
 const ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 
-forking(278099102, async () => {
+forking(278226922, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let converterNetwork: Contract;
@@ -86,7 +86,7 @@ forking(278099102, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP 398", await vip398(), {
+  testForkedNetworkVipCommands("VIP 400", await vip400(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PRIME_ABI], ["MarketAdded"], [4]);
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated"], [1]);
