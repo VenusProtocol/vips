@@ -1,13 +1,12 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
-import { CONVERTER_NETWORK, PLP, USDC, USDT, WBTC, WETH, XVS_VAULT_TREASURY, ACM } from "./addresses";
+import { ACM, CONVERTER_NETWORK, PLP, USDC, USDT, WBTC, WETH, XVS_VAULT_TREASURY } from "./addresses";
 import {
   acceptOwnershipCommandsAllConverters,
   callPermissionCommandsAllConverter,
   setConverterNetworkCommands,
 } from "./commands";
-
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 const vip018 = () => {
