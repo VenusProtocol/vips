@@ -51,7 +51,7 @@ task("test", "Update fork config")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
 
-    if (hre.network.name === "zkSyncTestNode") {
+    if (hre.network.name === "zksynctestnode") {
       if (!process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]) {
         throw new Error("ZKSYNC_ERA_LOCAL_TEST_NODE env variable is not set");
       }
@@ -72,7 +72,7 @@ task("test", "Update fork config")
           allowUnlimitedContractSize: false,
           loggingEnabled: false,
           forking:
-            hre.network.name === "zkSyncTestNode"
+            hre.network.name === "zksynctestnode"
               ? {
                   enabled: false,
                   url: process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"] as string,
@@ -160,9 +160,9 @@ const config: HardhatUserConfig = {
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
       zksync: true,
     },
-    zkSyncTestNode: {
+    zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 260,
+      chainId: 300, // change it to 300 for zksyncsepolia
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,
