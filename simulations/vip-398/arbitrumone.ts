@@ -13,8 +13,6 @@ import {
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_PRIME_CONVERTER,
-  WBTC_PRIME_CONVERTER,
-  WETH_PRIME_CONVERTER,
   XVS,
   XVS_VAULT_CONVERTER,
   XVS_VAULT_TREASURY,
@@ -47,7 +45,7 @@ import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 const { arbitrumone } = NETWORK_ADDRESSES;
 const USDT_HOLDER = "0x3931dAb967C3E2dbb492FE12460a66d0fe4cC857";
 const USDC_HOLDER = "0x47c031236e19d024b42f8AE6780E44A573170703";
-const XVS_USER = "0xf805cEf7E0125811d0E64c597A66aE55cFc54143";
+const XVS_USER = "0xC469eCb73159b88957965758002bBE1807532814";
 
 const ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 
@@ -182,7 +180,6 @@ forking(278099102, async () => {
       await usdc.connect(usdcHolder).transfer(user1Address, amount);
       await setMaxStalePeriod(resilientOracle, usdt);
       await setMaxStalePeriod(resilientOracle, usdc);
-      await setMaxStalePeriod(resilientOracle, xvs);
     });
 
     it("PSR should have correct distribution configs", async () => {
@@ -300,25 +297,9 @@ forking(278099102, async () => {
     });
 
     it("claim prime token", async () => {
-      await network.provider.send("hardhat_setCode", [XVS_USER, "0x"]);
-      const xvsUserSigner = await initMainnetUser(XVS_USER, parseUnits("1"));
-
-      await expect(prime.connect(xvsUserSigner).claim()).to.be.revertedWithCustomError(prime, "Unauthorized");
-
-      let interestAccrued = await prime.callStatic.getInterestAccrued(USDT_PRIME_CONVERTER, XVS_USER);
-      expect(interestAccrued).to.be.equal(0);
-
-      interestAccrued = await prime.callStatic.getInterestAccrued(USDC_PRIME_CONVERTER, XVS_USER);
-      expect(interestAccrued).to.be.equal(0);
-
-      interestAccrued = await prime.callStatic.getInterestAccrued(WBTC_PRIME_CONVERTER, XVS_USER);
-      expect(interestAccrued).to.be.equal(0);
-
-      interestAccrued = await prime.callStatic.getInterestAccrued(WETH_PRIME_CONVERTER, XVS_USER);
-      expect(interestAccrued).to.be.equal(0);
-
-      interestAccrued = await prime.callStatic.getInterestAccrued(XVS_VAULT_CONVERTER, XVS_USER);
-      expect(interestAccrued).to.be.equal(0);
+      const xvsUserSigner = await initMainnetUser(XVS_USER, parseUnits("10"));
+      await setMaxStalePeriod(resilientOracle, xvs);
+      await expect(prime.connect(xvsUserSigner).claim()).not.to.be.reverted;
     });
   });
 });
