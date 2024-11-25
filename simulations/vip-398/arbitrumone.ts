@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
@@ -13,6 +13,9 @@ import {
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_PRIME_CONVERTER,
+  WBTC_PRIME_CONVERTER,
+  WETH_PRIME_CONVERTER,
+  XVS,
   XVS_VAULT_CONVERTER,
   XVS_VAULT_TREASURY,
   converters,
@@ -44,10 +47,11 @@ import PROTOCOL_SHARE_RESERVE_ABI from "./abi/ProtocolShareReserve.json";
 const { arbitrumone } = NETWORK_ADDRESSES;
 const USDT_HOLDER = "0x3931dAb967C3E2dbb492FE12460a66d0fe4cC857";
 const USDC_HOLDER = "0x47c031236e19d024b42f8AE6780E44A573170703";
+const XVS_USER = "0xf805cEf7E0125811d0E64c597A66aE55cFc54143";
 
 const ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 
-forking(276417316, async () => {
+forking(278099102, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let converterNetwork: Contract;
@@ -157,12 +161,15 @@ forking(276417316, async () => {
     let usdcHolder: Signer;
     let user1Address: string;
     let resilientOracle: Contract;
+    let xvs: Contract;
 
     const amount = parseUnits("1000", 6);
 
     before(async () => {
       usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
       usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
+      xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
+
       resilientOracle = new ethers.Contract(arbitrumone.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
       [, user1] = await ethers.getSigners();
@@ -175,6 +182,7 @@ forking(276417316, async () => {
       await usdc.connect(usdcHolder).transfer(user1Address, amount);
       await setMaxStalePeriod(resilientOracle, usdt);
       await setMaxStalePeriod(resilientOracle, usdc);
+      await setMaxStalePeriod(resilientOracle, xvs);
     });
 
     it("PSR should have correct distribution configs", async () => {
@@ -289,6 +297,28 @@ forking(276417316, async () => {
         plpBalanceForUsdcPrevious.add(amount),
         parseUnits("1", 7),
       );
+    });
+
+    it("claim prime token", async () => {
+      await network.provider.send("hardhat_setCode", [XVS_USER, "0x"]);
+      const xvsUserSigner = await initMainnetUser(XVS_USER, parseUnits("1"));
+
+      await expect(prime.connect(xvsUserSigner).claim()).to.be.revertedWithCustomError(prime, "Unauthorized");
+
+      let interestAccrued = await prime.callStatic.getInterestAccrued(USDT_PRIME_CONVERTER, XVS_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(USDC_PRIME_CONVERTER, XVS_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(WBTC_PRIME_CONVERTER, XVS_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(WETH_PRIME_CONVERTER, XVS_USER);
+      expect(interestAccrued).to.be.equal(0);
+
+      interestAccrued = await prime.callStatic.getInterestAccrued(XVS_VAULT_CONVERTER, XVS_USER);
+      expect(interestAccrued).to.be.equal(0);
     });
   });
 });
