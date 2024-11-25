@@ -363,7 +363,11 @@ export const setMaxStalePeriod = async (
   }
 
   const normalTimelock =
-    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+  FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+  || FORKED_NETWORK == "arbitrumone" || FORKED_NETWORK == "arbitrumsepolia"
+  || FORKED_NETWORK == "ethereum" || FORKED_NETWORK == "sepolia"
+  || FORKED_NETWORK == "opbnbmainnet" || FORKED_NETWORK == "opbnbtestnet"
+
       ? getForkedNetworkAddress("NORMAL_TIMELOCK")
       : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
