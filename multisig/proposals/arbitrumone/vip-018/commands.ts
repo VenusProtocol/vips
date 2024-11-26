@@ -1,7 +1,7 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
-import { ACM, Assets, CONVERTER_NETWORK, converters } from "./addresses";
+import { ACM, Assets, CONVERTER_NETWORK, XVS_VAULT_TREASURY, converters } from "./addresses";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -67,7 +67,7 @@ const generateAddConverterNetworkCommands = () => {
   }));
 };
 
-function generateCallPermissionCommands(convertersArray: string[]): CallPermission[] {
+function generateCallPermissionCommandsOnConverters(convertersArray: string[]): CallPermission[] {
   return convertersArray.flatMap(converter => [
     ...timelocks.flatMap(timelock => [
       grant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
@@ -80,6 +80,14 @@ function generateCallPermissionCommands(convertersArray: string[]): CallPermissi
   ]);
 }
 
+function generateCallPermissionCommandsOnMisc(): CallPermission[] {
+  return timelocks.flatMap(timelock => [
+    grant(CONVERTER_NETWORK, "addTokenConverter(address)", timelock),
+    grant(CONVERTER_NETWORK, "removeTokenConverter(address)", timelock),
+    grant(XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock),
+  ]);
+}
+
 export const incentiveAndAccessibilities = new Array(Assets.length - 1).fill(incentiveAndAccessibility);
 
 export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
@@ -88,4 +96,7 @@ export const setConverterNetworkCommands = generateSetConverterNetworkCommands()
 
 export const addConverterNetworkCommands = generateAddConverterNetworkCommands();
 
-export const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands(converters);
+export const callPermissionCommands: CallPermission[] = [
+  ...generateCallPermissionCommandsOnConverters(converters),
+  ...generateCallPermissionCommandsOnMisc(),
+];

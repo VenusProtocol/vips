@@ -2,11 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
 import { ACM, CONVERTER_NETWORK, PLP, USDC, USDT, WBTC, WETH, XVS_VAULT_TREASURY } from "./addresses";
-import {
-  acceptOwnershipCommandsAllConverters,
-  callPermissionCommandsAllConverter,
-  setConverterNetworkCommands,
-} from "./commands";
+import { acceptOwnershipCommandsAllConverters, callPermissionCommands, setConverterNetworkCommands } from "./commands";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 const vip018 = () => {
@@ -32,7 +28,7 @@ const vip018 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [arbitrumone.REDSTONE_ORACLE, "setTokenConfig(TokenConfig)", arbitrumone.GUARDIAN],
     },
-    ...callPermissionCommandsAllConverter,
+    ...callPermissionCommands,
     ...setConverterNetworkCommands,
   ]);
 };
