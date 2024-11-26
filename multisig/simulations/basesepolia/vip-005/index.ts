@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
@@ -22,6 +23,8 @@ const XVS = "0xE657EDb5579B82135a274E85187927C42E38C021";
 const GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const GENERIC_TEST_USER_ACCOUNT = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
 const XVS_ADMIN = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
+
+const basesepolia = NETWORK_ADDRESSES.basesepolia;
 
 forking(18426741, async () => {
   describe("Pre-VIP behavior", () => {
@@ -51,6 +54,7 @@ forking(18426741, async () => {
 
       await accounts[0].sendTransaction({ to: XVS_ADMIN, value: parseUnits("4") });
       await xvs.mint(GENERIC_TEST_USER_ACCOUNT, parseUnits("1000", 18));
+      await xvs.mint(basesepolia.GENERIC_TEST_USER_ACCOUNT, parseUnits("1000", 18));
     });
 
     it("prime markets", async () => {
