@@ -5,6 +5,9 @@ import { ACM, Assets, CONVERTER_NETWORK, converters } from "./addresses";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = arbitrumone;
+const timelocks = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
+
 type IncentiveAndAccessibility = [number, number];
 
 interface AcceptOwnership {
@@ -64,32 +67,20 @@ const generateAddConverterNetworkCommands = () => {
   }));
 };
 
-function generateCallPermissionCommands(ConvertersArray: string[]): CallPermission[] {
-  const callPermissionCommandsArray: CallPermission[] = [];
-
-  for (const converter of ConvertersArray) {
-    const config1 = grant(
-      converter,
-      "setConversionConfig(address,address,ConversionConfig)",
-      arbitrumone.NORMAL_TIMELOCK,
-    );
-    const config2 = grant(converter, "pauseConversion()", arbitrumone.NORMAL_TIMELOCK);
-    const config3 = grant(converter, "resumeConversion()", arbitrumone.NORMAL_TIMELOCK);
-    const config4 = grant(converter, "setMinAmountToConvert(uint256)", arbitrumone.NORMAL_TIMELOCK);
-
-    callPermissionCommandsArray.push(config1);
-    callPermissionCommandsArray.push(config2);
-    callPermissionCommandsArray.push(config3);
-    callPermissionCommandsArray.push(config4);
-  }
-  return callPermissionCommandsArray;
+function generateCallPermissionCommands(convertersArray: string[]): CallPermission[] {
+  return convertersArray.flatMap(converter => [
+    ...timelocks.flatMap(timelock => [
+      grant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
+      grant(converter, "pauseConversion()", timelock),
+      grant(converter, "resumeConversion()", timelock),
+      grant(converter, "setMinAmountToConvert(uint256)", timelock),
+    ]),
+    grant(converter, "pauseConversion()", GUARDIAN),
+    grant(converter, "resumeConversion()", GUARDIAN),
+  ]);
 }
 
-export const incentiveAndAccessibilities: IncentiveAndAccessibility[] = [];
-
-for (let i = 0; i < Assets.length - 1; i++) {
-  incentiveAndAccessibilities.push(incentiveAndAccessibility);
-}
+export const incentiveAndAccessibilities = new Array(Assets.length - 1).fill(incentiveAndAccessibility);
 
 export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
 

@@ -25,6 +25,8 @@ import {
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = arbitrumone;
+
 export const ARBITRUM_COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 export const ARBITRUM_COMPTROLLER_LST = "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16";
 export const ARBITRUM_PRIME = "0xFE69720424C954A2da05648a0FAC84f9bf11Ef49";
@@ -43,6 +45,8 @@ export const ARBITRUM_VWETH_LST = "0x39D6d13Ea59548637104E40e729E4aABE27FE106";
 export const ARBITRUM_XVS_VAULT_TREASURY = "0xb076D4f15c08D7A7B89466327Ba71bc7e1311b58";
 export const ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY = "0xF9263eaF7eB50815194f26aCcAB6765820B13D41";
 export const ARBITRUM_VTREASURY = "0x8a662ceAC418daeF956Bc0e6B2dd417c80CDA631";
+
+const timelocks = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
 const vip400 = () => {
   const meta = {
@@ -109,24 +113,26 @@ const vip400 = () => {
         ],
         dstChainId: LzChainId.arbitrumone,
       },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CONVERTER_NETWORK, "addTokenConverter(address)", arbitrumone.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CONVERTER_NETWORK, "removeTokenConverter(address)", arbitrumone.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ARBITRUM_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", arbitrumone.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
-      },
+      ...timelocks.flatMap(timelock => [
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [CONVERTER_NETWORK, "addTokenConverter(address)", timelock],
+          dstChainId: LzChainId.arbitrumone,
+        },
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [CONVERTER_NETWORK, "removeTokenConverter(address)", timelock],
+          dstChainId: LzChainId.arbitrumone,
+        },
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [ARBITRUM_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock],
+          dstChainId: LzChainId.arbitrumone,
+        },
+      ]),
       {
         target: ARBITRUM_PROTOCOL_SHARE_RESERVE_PROXY,
         signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
