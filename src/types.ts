@@ -78,4 +78,5 @@ export enum LzChainId {
   zksyncmainnet = 165,
   opsepolia = 10232,
   opmainnet = 111,
+  basesepolia = 10245,
 }
