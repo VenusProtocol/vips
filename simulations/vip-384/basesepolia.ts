@@ -8,12 +8,12 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 
 import vip006 from "../../multisig/proposals/basesepolia/vip-006";
 import vip384, {
-  DEFAULT_ADMIN_ROLE,
   ACM,
   ACM_AGGREGATOR,
+  DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
 } from "../../vips/vip-384/bsctestnet";
-// import ACMAggregator_ABI from "./abi/ACMAggregator.json";
+import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
@@ -22,7 +22,7 @@ const { basesepolia } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x3dFA652D3aaDcb93F9EA7d160d674C441AaA8EE2";
 const CRITICAL_TIMELOCK = "0xbeDb7F2d0617292364bA4D73cf016c0f6BB5542E";
 
-forking(18507489, async () => {
+forking(18510243, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -49,8 +49,8 @@ forking(18507489, async () => {
 
   testForkedNetworkVipCommands("vip384 configures bridge", await vip384(), {
     callbackAfterExecution: async txResponse => {
-      // await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [39]);
-      // await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [233]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
     },
   });
 
@@ -80,7 +80,7 @@ forking(18507489, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(4);
+      expect(await executor.last24HourCommandsReceived()).equals(5);
 
       // Check function registry
       const functionSignatures: string[] = [

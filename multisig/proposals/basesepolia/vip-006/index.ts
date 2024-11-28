@@ -1,5 +1,6 @@
-import { makeProposal } from "../../../../src/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+
+import { makeProposal } from "../../../../src/utils";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
