@@ -50,9 +50,14 @@ const calculateBorrowableAmount = async (
   const supplyTokenUSDAmountScaled = suppliedAmount.mul(supplyTokenPrice).div(EXP_SCALE);
   const borrowableAmountUSD = supplyTokenUSDAmountScaled.mul(supplyMarketCF).div(EXP_SCALE);
   const borrowTokenPriceScaled = borrowTokenPrice.mul(parseUnits("1", borrowUnderlyingDecimals)).div(EXP_SCALE); // scaled to 18 decimals
-  const borrowTokenAmount = borrowableAmountUSD.div(borrowTokenPriceScaled);
+  const borrowTokenAmountScaled = borrowableAmountUSD.div(borrowTokenPriceScaled);
+  const borrowTokenAmount = parseUnits(borrowTokenAmountScaled.toString(), borrowUnderlyingDecimals);
+  await borrowMarket.accrueInterest();
+  const cash = await borrowMarket.getCash();
+  const reserves = await borrowMarket.totalReserves();
+  const availableCash = cash.sub(reserves).mul(9).div(10); // applying 0.9 factor to account for interests
 
-  return parseUnits(borrowTokenAmount.toString(), borrowUnderlyingDecimals);
+  return borrowTokenAmount.gt(availableCash) ? availableCash : borrowTokenAmount;
 };
 
 const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
