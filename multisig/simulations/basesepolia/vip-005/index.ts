@@ -9,7 +9,10 @@ import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
 import vip001 from "../../../proposals/basesepolia/vip-001";
 import vip002 from "../../../proposals/basesepolia/vip-002";
+import vip003 from "../../../proposals/basesepolia/vip-003";
+import vip004 from "../../../proposals/basesepolia/vip-004";
 import { vip005 } from "../../../proposals/basesepolia/vip-005";
+import COMPTROLLER_ABI from "./abis/Comptroller.json";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
@@ -17,16 +20,17 @@ import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
 const XVS_VAULT_PROXY = "0xA0D5C7FD3c498ea0a0FDeBaDe3a83D56DA8E2356";
-const PRIME_LIQUIDITY_PROVIDER = "0x48Cbe3cC65ca042a4f0bA23A43bBF5F1F4d47DFa";
-const PRIME = "0xCE199d89431E63B262D6dbe398C6653117028A88";
+const PRIME_LIQUIDITY_PROVIDER = "0x792c51fb738145a39E18935D17E6B8F3A56F6bfa";
+const PRIME = "0xF0168dde19Ce84B07530B9eD7c32C3292ebBb19B";
 const XVS = "0xE657EDb5579B82135a274E85187927C42E38C021";
 const GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const GENERIC_TEST_USER_ACCOUNT = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
 const XVS_ADMIN = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
+const COMPTROLLER_CORE = "0x272795dd6c5355CF25765F36043F34014454Eb5b";
 
 const basesepolia = NETWORK_ADDRESSES.basesepolia;
 
-forking(18426741, async () => {
+forking(18511313, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -36,6 +40,8 @@ forking(18426741, async () => {
     before(async () => {
       await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip002());
+      await pretendExecutingVip(await vip003());
+      await pretendExecutingVip(await vip004());
 
       await impersonateAccount(GUARDIAN);
       await impersonateAccount(XVS_ADMIN);
@@ -120,6 +126,11 @@ forking(18426741, async () => {
 
     it("xvs vault is resumed", async () => {
       expect(await xvsVault.vaultPaused()).to.be.equal(false);
+    });
+
+    it("prime in comptroller", async () => {
+      const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+      expect(await comptroller.prime()).to.be.equal(PRIME);
     });
 
     describe("generic tests", async () => {
