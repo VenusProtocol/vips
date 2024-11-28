@@ -14,11 +14,11 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
-forking(91072072, async () => {
+forking(4236122, async () => {
   testForkedNetworkVipCommands("VIP 405 Multichain Governance - Permissions", await vip405(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [194]);
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [62]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [190]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [54]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["RevokePermissionsExecuted"], [1]);
     },
