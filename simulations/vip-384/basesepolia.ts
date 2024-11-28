@@ -22,7 +22,7 @@ const { basesepolia } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x3dFA652D3aaDcb93F9EA7d160d674C441AaA8EE2";
 const CRITICAL_TIMELOCK = "0xbeDb7F2d0617292364bA4D73cf016c0f6BB5542E";
 
-forking(18510243, async () => {
+forking(18511708, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
