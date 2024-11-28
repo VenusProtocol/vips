@@ -226,6 +226,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         ENDPOINT_ABI,
         provider,
       );
+
       const srcAddress = ethers.utils.solidityPack(
         ["address", "address"],
         [OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_GOVERNANCE_EXECUTOR],

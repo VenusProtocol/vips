@@ -15,9 +15,10 @@ export type REMOTE_NETWORKS =
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "arbitrumsepolia"
-  | "arbitrumone";
+  | "arbitrumone"
+  | "basesepolia";
 
-export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia"];
+export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia", "zksyncsepolia", "basesepolia"];
 export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet"];
 export interface ProposalMeta {
   version: string;
