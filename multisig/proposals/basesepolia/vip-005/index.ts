@@ -2,15 +2,22 @@ import { makeProposal } from "../../../../src/utils";
 
 const ACM = "0x724138223D8F76b519fdE715f60124E7Ce51e051";
 const XVS_VAULT_PROXY = "0xA0D5C7FD3c498ea0a0FDeBaDe3a83D56DA8E2356";
-const PRIME_LIQUIDITY_PROVIDER = "0x48Cbe3cC65ca042a4f0bA23A43bBF5F1F4d47DFa";
-const PRIME = "0xCE199d89431E63B262D6dbe398C6653117028A88";
+const PRIME_LIQUIDITY_PROVIDER = "0x792c51fb738145a39E18935D17E6B8F3A56F6bfa";
+const PRIME = "0xF0168dde19Ce84B07530B9eD7c32C3292ebBb19B";
 const GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const XVS = "0xE657EDb5579B82135a274E85187927C42E38C021";
+const POOL_REGISTRY = "0xCa330282BEeb07a81963336d0bf8f5f34317916c";
+const COMPTROLLER_CORE = "0x272795dd6c5355CF25765F36043F34014454Eb5b";
 
 const PRIME_POOL_ID = 0;
 
 export const vip005 = () => {
   return makeProposal([
+    {
+      target: PRIME,
+      signature: "initializeV2(address)",
+      params: [POOL_REGISTRY],
+    },
     {
       target: PRIME_LIQUIDITY_PROVIDER,
       signature: "acceptOwnership()",
@@ -118,6 +125,11 @@ export const vip005 = () => {
       target: XVS_VAULT_PROXY,
       signature: "resume()",
       params: [],
+    },
+    {
+      target: COMPTROLLER_CORE,
+      signature: "setPrimeToken(address)",
+      params: [PRIME],
     },
   ]);
 };
