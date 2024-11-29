@@ -23,7 +23,7 @@ export const VTOKENS = [
 ];
 export const BOUND_VALIDATOR = "0xC76284488E57554A457A75a8b166fB2ADAB430dB";
 
-const vip014 = () => {
+const vip007 = () => {
   return makeProposal([
     {
       target: DEFAULT_PROXY_ADMIN,
@@ -127,4 +127,4 @@ const vip014 = () => {
   ]);
 };
 
-export default vip014;
+export default vip007;
