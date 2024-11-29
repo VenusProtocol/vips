@@ -1,8 +1,6 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { basesepolia } = NETWORK_ADDRESSES;
 export const ACM = "0x724138223D8F76b519fdE715f60124E7Ce51e051";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM_AGGREGATOR = "0xd82A217713F6c61f3ed4199cdEEDfbB80e5E4562";
@@ -24,18 +22,18 @@ const vip389 = () => {
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
         dstChainId: LzChainId.basesepolia,
       },
-      // {
-      //   target: ACM_AGGREGATOR,
-      //   signature: "executeRevokePermissions(uint256)",
-      //   params: [1],
-      //   dstChainId: LzChainId.basesepolia,
-      // },
-      // {
-      //   target: ACM,
-      //   signature: "revokeRole(bytes32,address)",
-      //   params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-      //   dstChainId: LzChainId.basesepolia,
-      // },
+      {
+        target: ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [1],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+        dstChainId: LzChainId.basesepolia,
+      },
     ],
     meta,
     ProposalType.REGULAR,
