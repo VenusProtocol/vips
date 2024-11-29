@@ -1,4 +1,3 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 

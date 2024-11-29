@@ -31,7 +31,6 @@ import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
-import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistrbutor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTOKEN_BEACON_ABI from "./abi/VTokenBeacon.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
@@ -77,7 +76,7 @@ forking(18512748, async () => {
       await pretendExecutingVip(await vip004());
       await pretendExecutingVip(await vip005());
       await pretendExecutingVip(await vip006());
-      
+
       proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);
@@ -103,7 +102,6 @@ forking(18512748, async () => {
       expect(await prime.pendingOwner()).to.equal(ethers.constants.AddressZero);
       expect(await plp.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
-
 
     it("pending owner of psr", async () => {
       expect(await psr.pendingOwner()).to.equal(ethers.constants.AddressZero);
@@ -164,7 +162,6 @@ forking(18512748, async () => {
       expect(await plp.pendingOwner()).to.equal(basesepolia.NORMAL_TIMELOCK);
     });
 
-   
     it("pending owner of psr", async () => {
       expect(await psr.pendingOwner()).to.equal(basesepolia.NORMAL_TIMELOCK);
     });
