@@ -19,7 +19,7 @@ const { basesepolia } = NETWORK_ADDRESSES;
 
 const XVS_BRIDGE = "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD";
 
-forking(17905242, async () => {
+forking(18691727, async () => {
   let xvsVault: Contract;
   let xvsStore: Contract;
   let xvsMinter: SignerWithAddress;

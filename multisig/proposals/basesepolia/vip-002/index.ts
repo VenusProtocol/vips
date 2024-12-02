@@ -3,7 +3,7 @@ import { makeProposal } from "src/utils";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
-export const XVS_STORE = "0x0ff9Ec1118f1E332CF4DE2A685110316af60F9fD";
+export const XVS_STORE = "0x059f1eA3973738C649d63bF4dA18221ecA418cDC";
 export const ACM = "0x724138223D8F76b519fdE715f60124E7Ce51e051";
 
 const vip002 = () => {
@@ -63,7 +63,7 @@ const vip002 = () => {
     {
       target: basesepolia.XVS_VAULT_PROXY,
       signature: "add(address,uint256,address,uint256,uint256)",
-      params: [basesepolia.XVS, 100, basesepolia.XVS, "0", 604800],
+      params: [basesepolia.XVS, 100, basesepolia.XVS, "0", 300],
     },
     {
       target: basesepolia.XVS_VAULT_PROXY,
