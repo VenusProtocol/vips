@@ -4,7 +4,6 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip001 from "../../../proposals/basesepolia/vip-001";
 import vip002 from "../../../proposals/basesepolia/vip-002";
 import vip003 from "../../../proposals/basesepolia/vip-003";
 import vip004 from "../../../proposals/basesepolia/vip-004";
@@ -49,7 +48,7 @@ const CHAINLINK_ORACLE = basesepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = basesepolia.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = basesepolia.NORMAL_TIMELOCK;
 
-forking(18512748, async () => {
+forking(18696318, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;
@@ -70,7 +69,6 @@ forking(18512748, async () => {
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip002());
       await pretendExecutingVip(await vip003());
       await pretendExecutingVip(await vip004());
