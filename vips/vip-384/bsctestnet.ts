@@ -53,7 +53,7 @@ const vip389 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [2],
+        params: [3],
         dstChainId: LzChainId.basesepolia,
       },
       {
