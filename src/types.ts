@@ -10,8 +10,7 @@ export type SUPPORTED_NETWORKS =
   | "zksyncsepolia"
   | "zksyncmainnet"
   | "opsepolia"
-  | "opmainnet"
-  | "basesepolia";
+  | "opmainnet";
 
 export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 

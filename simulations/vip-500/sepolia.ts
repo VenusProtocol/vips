@@ -8,7 +8,6 @@ import { checkXVSBridge } from "./checkXVSBridge";
 
 forking(7124205, async () => {
   await checkXVSBridge(
-    LzChainId.sepolia,
     LzChainId.basesepolia,
     NETWORK_ADDRESSES.sepolia,
     vip500,

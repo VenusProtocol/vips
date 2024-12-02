@@ -1,4 +1,3 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
@@ -17,7 +16,6 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 const XVS_HOLDER = "0x000000000000000000000000000000000000dEaD";
 
 export async function checkXVSBridge(
-  forkedLzChainId: number | undefined,
   remoteLzChainId: number | undefined,
   networkAddresses: { [key: string]: any },
   vip: () => Promise<Proposal>,
@@ -43,9 +41,9 @@ export async function checkXVSBridge(
     resilientOracle = new ethers.Contract(networkAddresses.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
     // Let's fund the XVS_HOLDER wallet with some XVS tokens
-    await impersonateAccount(bridge.address);
-    await setBalance(bridge.address, parseUnits("1", 18));
-    xvs = new ethers.Contract(networkAddresses.XVS, XVS_ABI, await ethers.getSigner(bridge.address));
+    const impersonatedBridge = await initMainnetUser(bridge.address, parseUnits("1", 18));
+
+    xvs = new ethers.Contract(networkAddresses.XVS, XVS_ABI, impersonatedBridge);
     await xvs.mint(XVS_HOLDER, parseUnits("10000", 18));
   });
 
