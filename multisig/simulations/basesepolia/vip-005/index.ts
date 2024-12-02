@@ -7,7 +7,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip001 from "../../../proposals/basesepolia/vip-001";
 import vip002 from "../../../proposals/basesepolia/vip-002";
 import vip003 from "../../../proposals/basesepolia/vip-003";
 import vip004 from "../../../proposals/basesepolia/vip-004";
@@ -19,9 +18,9 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
-const XVS_VAULT_PROXY = "0xA0D5C7FD3c498ea0a0FDeBaDe3a83D56DA8E2356";
-const PRIME_LIQUIDITY_PROVIDER = "0x792c51fb738145a39E18935D17E6B8F3A56F6bfa";
-const PRIME = "0xF0168dde19Ce84B07530B9eD7c32C3292ebBb19B";
+const XVS_VAULT_PROXY = "0x9b5D0aDfCEcC8ed422d714EcbcE2FFA436e269B8";
+const PRIME_LIQUIDITY_PROVIDER = "0xb5BA66311C5f9A5C9d3CeE0183F5426DD694dE37";
+const PRIME = "0x15A1AC7fA14C5900Ba93853375d66b6bB6A83B50";
 const XVS = "0xE657EDb5579B82135a274E85187927C42E38C021";
 const GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const GENERIC_TEST_USER_ACCOUNT = "0x2DDd1c54B7d32C773484D23ad8CB4F0251d330Fc";
@@ -30,7 +29,7 @@ const COMPTROLLER_CORE = "0x272795dd6c5355CF25765F36043F34014454Eb5b";
 
 const basesepolia = NETWORK_ADDRESSES.basesepolia;
 
-forking(18511313, async () => {
+forking(18692020, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -38,7 +37,6 @@ forking(18511313, async () => {
     let xvs: Contract;
 
     before(async () => {
-      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip002());
       await pretendExecutingVip(await vip003());
       await pretendExecutingVip(await vip004());
