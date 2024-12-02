@@ -122,6 +122,7 @@ const config: HardhatUserConfig = {
         [ChainId.arbitrumone]: assumeCancun,
         [ChainId.opsepolia]: assumeCancun,
         [ChainId.opmainnet]: assumeCancun,
+        [ChainId.basesepolia]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -187,7 +188,7 @@ const config: HardhatUserConfig = {
     },
     basesepolia: {
       url: process.env.ARCHIVE_NODE_basesepolia || "https://sepolia.base.org",
-      chainId: 84532,
+      chainId: ChainId.basesepolia,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basesepolia,
     },
