@@ -8,7 +8,7 @@ import vip385, { ACM, ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 
-forking(18511708, async () => {
+forking(18695738, async () => {
   await pretendExecutingVip(await vip006());
   testForkedNetworkVipCommands("VIP 385 Multichain Governance - Revoke", await vip385(), {
     callbackAfterExecution: async txResponse => {
