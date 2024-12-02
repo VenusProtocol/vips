@@ -8,15 +8,12 @@ export type SUPPORTED_NETWORKS =
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "zksyncsepolia"
+  | "zksyncmainnet"
+  | "opsepolia"
+  | "opmainnet"
   | "basesepolia";
 
-export type REMOTE_NETWORKS =
-  | "sepolia"
-  | "ethereum"
-  | "opbnbtestnet"
-  | "opbnbmainnet"
-  | "arbitrumsepolia"
-  | "arbitrumone";
+export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 
 export const REMOTE_TESTNET_NETWORKS = [
   "sepolia",

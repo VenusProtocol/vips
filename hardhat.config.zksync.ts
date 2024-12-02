@@ -7,6 +7,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
+import { ChainId } from "src/chains";
 
 import "./type-extensions";
 
@@ -94,6 +95,13 @@ task("test", "Update fork config")
     await runSuper(taskArguments);
   });
 
+// Pretend that Cancun hardfork was activated at block 0
+const assumeCancun = {
+  hardforkHistory: {
+    cancun: 0,
+  },
+};
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   zksolc: {
@@ -132,6 +140,11 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       loggingEnabled: false,
       zksync: true,
+      chains: {
+        [ChainId.zksyncmainnet]: assumeCancun,
+        [ChainId.zksyncsepolia]: assumeCancun,
+        [ChainId.zkSyncTestNode]: assumeCancun,
+      },
     },
     zksyncsepolia: {
       url: process.env.ARCHIVE_NODE_zksyncsepolia || "https://sepolia.era.zksync.dev",
@@ -149,7 +162,7 @@ const config: HardhatUserConfig = {
     },
     zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 300,
+      chainId: 300, // change it to 300 for zksyncsepolia
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,
