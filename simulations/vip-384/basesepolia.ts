@@ -40,7 +40,7 @@ forking(18695738, async () => {
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on OP sepolia", async () => {
+    it("Normal Timelock has default admin role on base sepolia", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, basesepolia.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
