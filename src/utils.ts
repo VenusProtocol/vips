@@ -48,8 +48,8 @@ export const getPayload = (proposal: Proposal) => {
 
 const gasUsedPerCommand = 300000;
 export async function setForkBlock(_blockNumber: number) {
-  if (network.name === "zkSyncTestNode") {
-    console.log("zkSyncTestNode network does not support forking, skipping fork");
+  if (network.name === "zksynctestnode") {
+    console.log("zksynctestnode network does not support forking, skipping fork");
     return;
   }
 
@@ -72,6 +72,8 @@ export const getSourceChainId = (network: REMOTE_NETWORKS) => {
     return LzChainId.bscmainnet;
   } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
     return LzChainId.bsctestnet;
+  } else {
+    throw new Error("Network is not registered. Please register it.");
   }
 };
 
@@ -97,8 +99,8 @@ export const initMainnetUser = async (user: string, balance: NumberLike) => {
   let signer = await ethers.getSigner(user);
 
   // zksync test node provider does not support default impersonation
-  if (network.name === "zkSyncTestNode") {
-    provider = new ethers.providers.JsonRpcProvider(config.networks.hardhat.forking?.url);
+  if (network.name === "zksynctestnode" && config.networks.hardhat.forking?.url) {
+    provider = new ethers.providers.JsonRpcProvider({ url: config.networks.hardhat.forking.url, timeout: 1200000 });
 
     signer = provider.getSigner(user) as unknown as SignerWithAddress;
   }
@@ -143,6 +145,14 @@ export async function mineBlocks(blocks: NumberLike = 1, options: { interval?: N
     params: [blocksHex, intervalHex],
   });
 }
+export const mineOnZksync = async (blocks: number) => {
+  const blockTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+  // Actual timestamp on which block will get mine (assuming 1 sec/block)
+  const timestampOfBlocks = blocks * 1;
+  const targetTimestamp = blockTimestamp + timestampOfBlocks;
+  await ethers.provider.send("evm_setNextBlockTimestamp", [targetTimestamp.toString(16)]);
+  await mineBlocks();
+};
 
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
@@ -363,7 +373,14 @@ export const setMaxStalePeriod = async (
   }
 
   const normalTimelock =
-    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+    FORKED_NETWORK == "bscmainnet" ||
+    FORKED_NETWORK == "bsctestnet" ||
+    FORKED_NETWORK == "arbitrumone" ||
+    FORKED_NETWORK == "arbitrumsepolia" ||
+    FORKED_NETWORK == "ethereum" ||
+    FORKED_NETWORK == "sepolia" ||
+    FORKED_NETWORK == "opbnbmainnet" ||
+    FORKED_NETWORK == "opbnbtestnet"
       ? getForkedNetworkAddress("NORMAL_TIMELOCK")
       : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
@@ -395,6 +412,12 @@ export const setMaxStalePeriod = async (
   await mine(100);
 };
 
+export const setMaxStalePeriodForAllAssets = async (resilientOracle: Contract, assets: Contract[]): Promise<void> => {
+  for (const asset of assets) {
+    await setMaxStalePeriod(resilientOracle, asset);
+  }
+};
+
 export const expectEvents = async (
   txResponse: TransactionResponse,
   abis: (string | JsonFragment[])[],
@@ -405,7 +428,7 @@ export const expectEvents = async (
   const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
     // @ts-expect-error @TODO type is wrong
-    return receipt.events
+    return (receipt.events || receipt.logs)
       .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;
