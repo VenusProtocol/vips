@@ -15,8 +15,6 @@ export const VCBBTC_CORE = "0x776f14D624aBdAfa912d6Cd0864976DdaF5Ca4a7";
 export const VWETH_CORE = "0x436E5A07F58AAA86277e8b992bC3e596eC423d09";
 export const VUSDC_CORE = "0xA31D67c056Aadc2501535f2776bF1157904f810e";
 
-export const PSR = "0x4Ae3D77Ece08Ec3E5f5842B195f746bd3bCb8d73";
-
 // IL configuration
 const vip004 = () => {
   return makeProposal([
@@ -189,11 +187,6 @@ const vip004 = () => {
       params: ["86400"],
     },
     {
-      target: VCBBTC_CORE,
-      signature: "setProtocolShareReserve(address)",
-      params: [PSR],
-    },
-    {
       target: basesepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
@@ -232,11 +225,6 @@ const vip004 = () => {
       params: ["86400"],
     },
     {
-      target: VWETH_CORE,
-      signature: "setProtocolShareReserve(address)",
-      params: [PSR],
-    },
-    {
       target: basesepolia.POOL_REGISTRY,
       signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
       params: [
@@ -272,11 +260,6 @@ const vip004 = () => {
       target: VUSDC_CORE,
       signature: "setReduceReservesBlockDelta(uint256)",
       params: ["86400"],
-    },
-    {
-      target: VUSDC_CORE,
-      signature: "setProtocolShareReserve(address)",
-      params: [PSR],
     },
     {
       target: basesepolia.POOL_REGISTRY,
