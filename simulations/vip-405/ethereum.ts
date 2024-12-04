@@ -10,8 +10,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-// Simulations are not working as of now
-forking(21315180, async () => {
+forking(21327971, async () => {
   testForkedNetworkVipCommands("VIP 405 Multichain Governance - Permissions", await vip405(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [2]);

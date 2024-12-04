@@ -88,13 +88,13 @@ const vip405 = () => {
       {
         target: ETHEREUM_ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [5],
+        params: [2],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [3],
+        params: [1],
         dstChainId: LzChainId.ethereum,
       },
       {
