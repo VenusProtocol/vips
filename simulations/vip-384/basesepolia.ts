@@ -40,7 +40,7 @@ forking(18695738, async () => {
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on base sepolia", async () => {
+    it("Normal Timelock has default admin role on OP sepolia", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, basesepolia.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
@@ -49,8 +49,10 @@ forking(18695738, async () => {
 
   testForkedNetworkVipCommands("vip384 configures bridge", await vip384(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [39]);
-      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [233]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [60]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["RevokePermissionsExecuted"], [1]);
     },
   });
 
@@ -80,7 +82,7 @@ forking(18695738, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(4);
+      expect(await executor.last24HourCommandsReceived()).equals(6);
 
       // Check function registry
       const functionSignatures: string[] = [

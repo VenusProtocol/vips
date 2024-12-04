@@ -51,6 +51,18 @@ const vip389 = () => {
         dstChainId: LzChainId.basesepolia,
       },
       {
+        target: ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [3],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: ACM_AGGREGATOR,
+        signature: "executeRevokePermissions(uint256)",
+        params: [2],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
