@@ -40,7 +40,7 @@ forking(18695738, async () => {
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on OP sepolia", async () => {
+    it("Normal Timelock has default admin role on base sepolia", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, basesepolia.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
@@ -112,7 +112,7 @@ forking(18695738, async () => {
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
     });
-    it("Default admin role must be revoked from ACMAggregator contract on OP sepolia", async () => {
+    it("Default admin role must be revoked from ACMAggregator contract on base sepolia", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
     });
     it("Guardian and all timelocks are allowed to call retryMessage ", async () => {
