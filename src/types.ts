@@ -23,6 +23,7 @@ export const REMOTE_TESTNET_NETWORKS = [
   "basesepolia",
 ];
 export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone", "zksyncmainnet", "opmainnet"];
+
 export interface ProposalMeta {
   version: string;
   title: string;
