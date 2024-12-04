@@ -2,22 +2,21 @@ import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip002, { ACM, XVS_STORE } from "../../../proposals/basesepolia/vip-002";
-import ACM_ABI from "./abi/acm.json";
+import vip002, { XVS_STORE } from "../../../proposals/basesepolia/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
 import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
-const XVS_BRIDGE = "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD";
+const XVS_BRIDGE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
 
 forking(18691727, async () => {
   let xvsVault: Contract;
@@ -34,17 +33,12 @@ forking(18691727, async () => {
   describe("Post tx checks", () => {
     describe("Generic checks", async () => {
       before(async () => {
-        const acm: Contract = await ethers.getContractAt(ACM_ABI, ACM);
         const xvs: Contract = await ethers.getContractAt(XVS_ABI, basesepolia.XVS);
         xvsMinter = await initMainnetUser(XVS_BRIDGE, ethers.utils.parseEther("1"));
         const admin = await initMainnetUser(basesepolia.GUARDIAN, ethers.utils.parseEther("1"));
         const xvsHolder = await initMainnetUser(basesepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
         await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(basesepolia.XVS, "61805555555555555");
         await xvsVault.connect(admin).resume();
-        // Giving call permissions to call the functions as xvs bridge vip is not executed now.
-        await acm.connect(admin).giveCallPermission(basesepolia.XVS, "mint(address,uint256)", XVS_BRIDGE);
-        await acm.connect(admin).giveCallPermission(basesepolia.XVS, "setMintCap(address,uint256)", admin.address);
-        await xvs.connect(admin).setMintCap(XVS_BRIDGE, parseUnits("100", 18));
         await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"));
 
         await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
