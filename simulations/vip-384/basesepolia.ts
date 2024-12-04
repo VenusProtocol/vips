@@ -49,8 +49,8 @@ forking(18695738, async () => {
 
   testForkedNetworkVipCommands("vip384 configures bridge", await vip384(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [233]);
-      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [39]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
     },
   });
 
@@ -80,7 +80,7 @@ forking(18695738, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(5);
+      expect(await executor.last24HourCommandsReceived()).equals(4);
 
       // Check function registry
       const functionSignatures: string[] = [
