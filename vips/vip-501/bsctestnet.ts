@@ -59,7 +59,7 @@ const vip501 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [2],
+        params: [3],
         dstChainId: LzChainId.basesepolia,
       },
       {

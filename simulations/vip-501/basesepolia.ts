@@ -22,7 +22,7 @@ const { basesepolia } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x3dFA652D3aaDcb93F9EA7d160d674C441AaA8EE2";
 const CRITICAL_TIMELOCK = "0xbeDb7F2d0617292364bA4D73cf016c0f6BB5542E";
 
-forking(18695738, async () => {
+forking(18783561, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -51,7 +51,7 @@ forking(18695738, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [233]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [60]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [50]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["RevokePermissionsExecuted"], [1]);
     },
   });
