@@ -7,12 +7,12 @@ import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip006 from "../../multisig/proposals/basesepolia/vip-006";
-import vip384, {
+import vip501, {
   ACM,
   ACM_AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-384/bsctestnet";
+} from "../../vips/vip-501/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
@@ -47,7 +47,7 @@ forking(18695738, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip384 configures bridge", await vip384(), {
+  testForkedNetworkVipCommands("vip501 configures bridge", await vip501(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [233]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
