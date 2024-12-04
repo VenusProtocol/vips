@@ -8,7 +8,7 @@ export const ACM_AGGREGATOR = "0xd82A217713F6c61f3ed4199cdEEDfbB80e5E4562";
 const vip389 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-389 Enable Multichain Governance on op sepolia",
+    title: "VIP-389 Enable Multichain Governance on base sepolia",
     description: `### Summary`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -20,6 +20,12 @@ const vip389 = () => {
         target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [3],
         dstChainId: LzChainId.basesepolia,
       },
       {

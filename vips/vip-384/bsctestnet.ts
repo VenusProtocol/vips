@@ -14,7 +14,7 @@ export const MAX_DAILY_LIMIT = 100;
 const vip389 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-389 Enable Multichain Governance on op sepolia",
+    title: "VIP-389 Enable Multichain Governance on base sepolia",
     description: `### Summary`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
