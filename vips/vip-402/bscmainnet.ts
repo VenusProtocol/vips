@@ -82,8 +82,58 @@ enum ConversionAccessibility {
 export const vip402 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-402",
-    description: `LBTC`,
+    title: "VIP-402 [Ethereum] New LBTC market in the Core pool",
+    description: `#### Summary
+
+If passed, following the Community proposal “[Proposal: List Lombard’s LBTC on Venus Core Pool](https://community.venus.io/t/proposal-list-lombards-lbtc-on-venus-core-pool/4686)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x52e69ceb6f4c6496f61e003d7f210f9188ea28e317d982bf806452785e36c2d3), this VIP adds a market for [LBTC](https://etherscan.io/address/0x8236a87084f8B84306f72007F36F2618A5634494) into the Core pool on Ethereum.
+
+#### Description
+
+#### Risk parameters
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-list-lombards-lbtc-on-venus-core-pool/4686/8), the risk parameters for the new market are:
+
+Underlying token: [LBTC](https://etherscan.io/address/0x8236a87084f8B84306f72007F36F2618A5634494)
+
+- Borrow cap: 45
+- Supply cap: 450
+- Collateral factor: 73.5%
+- Liquidation threshold: 78.5%
+- Reserve factor: 20%
+
+Bootstrap liquidity: 0.1 LBTC provided by [Lombard](https://etherscan.io/address/0xCb09Ab3F6254437d225Ed3CABEBe0949782E2372) and 0.006 LBTC provided by the [Venus Treasury](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 200%
+
+#### Oracles configuration
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Ethereum](https://etherscan.io/address/0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94) is used for LBTC, using under the hood the market price for LBTC/BTC provided by RedStone ([feed](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81)), and the WBTC/USD price provided by the ResilientOracle.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation:** in a simulation environment, validating the new market is properly added to the Core pool on Ethereum, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet:** the same market has been deployed to Sepolia, and used in the Venus Protocol testnet deployment
+
+The bootstrap liquidity is available on the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA). If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=eth:0x285960C5B22fD66A736C7136967A3eB15e93CC67&id=multisig_0x285960C5B22fD66A736C7136967A3eB15e93CC67_0x43ca005267e6c7807eb34e689521533639ffc7a8ef4c581480f6ae3a4937ae04) multisig transaction will be executed to withdraw those funds, allowing Governance to supply them to the new LBTC market.
+
+#### Deployed contracts
+
+- Mainnet vLBTC_Core: [0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91](https://etherscan.io/address/0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91)
+- Testnet vLBTC_Core: [0x315F064cF5B5968fE1655436e1856F3ca558d395](https://sepolia.etherscan.io/address/0x315F064cF5B5968fE1655436e1856F3ca558d395)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/434)
+- [Deployment to Sepolia](https://sepolia.etherscan.io/tx/0x1a62bddd52e82d97dfe43316d941f65c9d2f137ae7cead23a9139c284cfc4570)
+- [Documentation](https://docs-v4.venus.io/)
+`,
     forDescription: "Process to configure and launch the new market",
     againstDescription: "Defer configuration and launch of the new market",
     abstainDescription: "No opinion on the matter",
