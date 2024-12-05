@@ -30,34 +30,34 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
-    price: "999940000000000000000000000000",
+    price: "999851370000000000000000000000",
     feed: "0x7e860098F58bBFC8648a4311b374B1D669a2bc6B",
     oracle: "chainlink",
   },
   {
     name: "cbBTC",
     address: "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
-    price: "975122118780000000000000000000000",
+    price: "1016348804938700000000000000000000",
     feed: "0x07DA0E54543a844a80ABE69c8A12F22B3aA59f9D",
     oracle: "chainlink",
   },
   {
     name: "WETH",
     address: "0x4200000000000000000000000000000000000006",
-    price: "3361650000000000000000",
+    price: "3896117684480000000000",
     feed: "0x71041dddad3595F9CEd3DcCFBe3D1F4b0a16Bb70",
     oracle: "chainlink",
   },
   {
     name: "XVS",
     address: "0xebB7873213c8d1d9913D8eA39Aa12d74cB107995",
-    price: "3361650000000000000000",
+    price: "11299870550000000000",
     feed: "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0",
     oracle: "redstone",
   },
 ];
 
-forking(23258443, async () => {
+forking(23312856, async () => {
   const provider = ethers.provider;
   let treasury: Contract;
   let resilientOracle: Contract;
