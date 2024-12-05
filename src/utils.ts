@@ -5,6 +5,7 @@ import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/ty
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
 import { EthereumProvider } from "hardhat/types";
 
@@ -316,6 +317,7 @@ export const setRedstonePrice = async (
   feed: string,
   admin: string,
   maxStalePeriodInSeconds: number = ONE_YEAR,
+  { tokenDecimals }: { tokenDecimals?: number } = {},
 ) => {
   const rsOracle = new ethers.Contract(redstoneOracleAddress, CHAINLINK_ORACLE_ABI, ethers.provider);
   const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
@@ -334,7 +336,19 @@ export const setRedstonePrice = async (
     maxStalePeriod: maxStalePeriodInSeconds,
   });
   const price = await rsOracle.getPrice(asset);
-  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, price);
+
+  // Since our oracle adjusts the configured price for token decimals internally,
+  // we need to do the reverse operation here so that the result of the getPrice()
+  // call before setting the direct value is equal to the result of the same call
+  // after we set the price
+  const decimalDelta = 18 - (tokenDecimals ?? 18);
+  const adjustedPrice = price.div(parseUnits("1", decimalDelta));
+  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, adjustedPrice);
+  const priceAfter = await rsOracle.getPrice(asset);
+
+  if (!price.eq(priceAfter)) {
+    throw new Error("Price is not correctly configured, try setting token decimals");
+  }
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
