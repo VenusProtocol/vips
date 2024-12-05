@@ -123,6 +123,8 @@ const config: HardhatUserConfig = {
         [ChainId.arbitrumone]: assumeCancun,
         [ChainId.opsepolia]: assumeCancun,
         [ChainId.opmainnet]: assumeCancun,
+        [ChainId.basesepolia]: assumeCancun,
+        [ChainId.basemainnet]: assumeCancun,
       },
     },
     bsctestnet: {
