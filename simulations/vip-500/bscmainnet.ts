@@ -4,31 +4,31 @@ import { ethers } from "hardhat";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip390, {
+import vip500, {
   CERTIK,
   CERTIK_AMOUNT_USDT,
   CHAOS_LABS,
   CHAOS_LABS_AMOUNT_USDC,
-  COMMUNITY,
-  COMMUNITY_BEINCRYPTO_AMOUNT_USDT,
-  COMMUNITY_SOURCECONTROL_AMOUNT_USDT,
+  VENUS_STARS_TREASURY,
+  VENUS_STARS_BEINCRYPTO_AMOUNT_USDT,
+  VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT,
   TOKEN_REDEEMER,
   USDC,
   USDT,
-  VANGUARD_VINTAGE,
-  VANGUARD_VINTAGE_AMOUNT_USDT,
+  VANGUARD_VANTAGE_TREASURY,
+  VANGUARD_VANTAGE_AMOUNT_USDT,
   vUSDC,
-} from "../../vips/vip-390/bscmainnet";
+} from "../../vips/vip-500/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
-forking(43390658, async () => {
+forking(44644162, async () => {
   let usdc: Contract;
   let usdt: Contract;
   let vusdc: Contract;
 
   let prevUSDTBalanceOfVanguard: BigNumber;
-  let prevUSDTBalanceOfCommunity: BigNumber;
+  let prevUSDTBalanceOfVenusStars: BigNumber;
   let prevUSDCBalanceOfChaosLabs: BigNumber;
   let prevUSDTBalanceOfCertik: BigNumber;
 
@@ -37,13 +37,13 @@ forking(43390658, async () => {
     usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
     vusdc = new ethers.Contract(vUSDC, ERC20_ABI, ethers.provider);
 
-    prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VINTAGE);
-    prevUSDTBalanceOfCommunity = await usdt.balanceOf(COMMUNITY);
+    prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
+    prevUSDTBalanceOfVenusStars = await usdt.balanceOf(VENUS_STARS_TREASURY);
     prevUSDCBalanceOfChaosLabs = await usdc.balanceOf(CHAOS_LABS);
     prevUSDTBalanceOfCertik = await usdt.balanceOf(CERTIK);
   });
 
-  testVip("VIP-390", await vip390(), {
+  testVip("VIP-500", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [5]);
     },
@@ -52,15 +52,15 @@ forking(43390658, async () => {
   describe("Post-VIP behavior", async () => {
     it("check balances", async () => {
       const usdtBalanceOfCertik = await usdt.balanceOf(CERTIK);
-      const usdtBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VINTAGE);
+      const usdtBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
       const usdcBalanceOfChaosLabs = await usdc.balanceOf(CHAOS_LABS);
-      const usdtBalanceOfCommunity = await usdt.balanceOf(COMMUNITY);
+      const usdtBalanceOfVenusStars = await usdt.balanceOf(VENUS_STARS_TREASURY);
 
       expect(usdtBalanceOfCertik.sub(prevUSDTBalanceOfCertik)).to.equal(CERTIK_AMOUNT_USDT);
-      expect(usdtBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VINTAGE_AMOUNT_USDT);
+      expect(usdtBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VANTAGE_AMOUNT_USDT);
       expect(usdcBalanceOfChaosLabs.sub(prevUSDCBalanceOfChaosLabs)).to.equal(CHAOS_LABS_AMOUNT_USDC);
-      expect(usdtBalanceOfCommunity.sub(prevUSDTBalanceOfCommunity)).to.equal(
-        BigNumber.from(COMMUNITY_BEINCRYPTO_AMOUNT_USDT).add(COMMUNITY_SOURCECONTROL_AMOUNT_USDT),
+      expect(usdtBalanceOfVenusStars.sub(prevUSDTBalanceOfVenusStars)).to.equal(
+        BigNumber.from(VENUS_STARS_BEINCRYPTO_AMOUNT_USDT).add(VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT),
       );
     });
 
