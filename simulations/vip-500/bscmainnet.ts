@@ -9,14 +9,14 @@ import vip500, {
   CERTIK_AMOUNT_USDT,
   CHAOS_LABS,
   CHAOS_LABS_AMOUNT_USDC,
-  VENUS_STARS_TREASURY,
-  VENUS_STARS_BEINCRYPTO_AMOUNT_USDT,
-  VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT,
   TOKEN_REDEEMER,
   USDC,
   USDT,
-  VANGUARD_VANTAGE_TREASURY,
   VANGUARD_VANTAGE_AMOUNT_USDT,
+  VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT,
+  VANGUARD_VANTAGE_TREASURY,
+  VENUS_STARS_BEINCRYPTO_AMOUNT_USDT,
+  VENUS_STARS_TREASURY,
   vUSDC,
 } from "../../vips/vip-500/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -57,11 +57,11 @@ forking(44644162, async () => {
       const usdtBalanceOfVenusStars = await usdt.balanceOf(VENUS_STARS_TREASURY);
 
       expect(usdtBalanceOfCertik.sub(prevUSDTBalanceOfCertik)).to.equal(CERTIK_AMOUNT_USDT);
-      expect(usdtBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VANTAGE_AMOUNT_USDT);
-      expect(usdcBalanceOfChaosLabs.sub(prevUSDCBalanceOfChaosLabs)).to.equal(CHAOS_LABS_AMOUNT_USDC);
-      expect(usdtBalanceOfVenusStars.sub(prevUSDTBalanceOfVenusStars)).to.equal(
-        BigNumber.from(VENUS_STARS_BEINCRYPTO_AMOUNT_USDT).add(VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT),
+      expect(usdtBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(
+        BigNumber.from(VANGUARD_VANTAGE_AMOUNT_USDT).add(VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT),
       );
+      expect(usdcBalanceOfChaosLabs.sub(prevUSDCBalanceOfChaosLabs)).to.equal(CHAOS_LABS_AMOUNT_USDC);
+      expect(usdtBalanceOfVenusStars.sub(prevUSDTBalanceOfVenusStars)).to.equal(VENUS_STARS_BEINCRYPTO_AMOUNT_USDT);
     });
 
     it("Leaves no USDC in the redeemer helper contract", async () => {
