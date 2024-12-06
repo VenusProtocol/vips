@@ -9,6 +9,7 @@ import { initMainnetUser } from "src/utils";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
+import vip001 from "../../../proposals/basemainnet/vip-001";
 import vip002, { XVS_STORE } from "../../../proposals/basemainnet/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -27,6 +28,7 @@ forking(23341826, async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, basemainnet.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
 
+    await pretendExecutingVip(await vip001());
     await pretendExecutingVip(await vip002());
   });
 
