@@ -32,7 +32,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opsepolia: 60000000,
   opmainnet: 60000000,
   basesepolia: 60000000,
-  basemainnet: 60000000,
+  basemainnet: 198000000,
 };
 
 task("propose", "Propose proposal")
