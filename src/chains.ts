@@ -3,7 +3,6 @@ export enum ChainId {
   sepolia = 11155111,
   bscmainnet = 56,
   bsctestnet = 97,
-  basesepolia = 84532,
   opbnbtestnet = 5611,
   opbnbmainnet = 204,
   arbitrumsepolia = 421614,
@@ -13,4 +12,6 @@ export enum ChainId {
   zksyncsepolia = 300,
   zksyncmainnet = 324,
   zkSyncTestNode = 260,
+  basesepolia = 84532,
+  basemainnet = 8453,
 }
