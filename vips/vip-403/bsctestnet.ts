@@ -17,10 +17,10 @@ export const BSCTESTNET_ACM_AGGREGATOR = "0xB59523628D92f914ec6624Be4281397E8aFD
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const vip405 = () => {
+const vip403 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-405 Multichain Governance",
+    title: "VIP-403 Multichain Governance",
     description: `#### Summary`,
 
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -167,4 +167,4 @@ const vip405 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip405;
+export default vip403;

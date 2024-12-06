@@ -17,7 +17,7 @@ export const BSC_ACM_AGGREGATOR = "0x8b443Ea6726E56DF4C4F62f80F0556bB9B2a7c64";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const vip405 = () => {
+const vip403 = () => {
   const meta = {
     version: "v2",
     title: "VIP-405 Multichain Governance - Permissions on Optimism and Zksync",
@@ -167,4 +167,4 @@ const vip405 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip405;
+export default vip403;

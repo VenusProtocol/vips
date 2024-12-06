@@ -4,18 +4,18 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip405, {
+import vip403, {
   DEFAULT_ADMIN_ROLE,
   ZKSYNCSEPOLIA_ACM,
   ZKSYNCSEPOLIA_ACM_AGGREGATOR,
-} from "../../vips/vip-405/bsctestnet";
+} from "../../vips/vip-403/bsctestnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
 forking(4236122, async () => {
-  testForkedNetworkVipCommands("VIP 405 Multichain Governance - Permissions", await vip405(), {
+  testForkedNetworkVipCommands("VIP 403 Multichain Governance - Permissions", await vip403(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [190]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [54]);

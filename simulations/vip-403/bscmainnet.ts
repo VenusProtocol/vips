@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip405, { BSC_ACM, BSC_ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-405/bscmainnet";
+import vip403, { BSC_ACM, BSC_ACM_AGGREGATOR, DEFAULT_ADMIN_ROLE } from "../../vips/vip-403/bscmainnet";
 import ACM_COMMANDS_AGGREGATOR_ABI from "./abi/ACMCommandsAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
@@ -13,7 +13,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 const GUARDIAN3 = "0x3a3284dc0faffb0b5f0d074c4c704d14326c98cf";
 
 forking(44521298, async () => {
-  testVip("VIP 405 Multichain Governance - Permissions", await vip405(), {
+  testVip("VIP 403 Multichain Governance - Permissions", await vip403(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
