@@ -13,6 +13,10 @@ declare module "hardhat/types/runtime" {
       | "arbitrumone"
       | "arbitrumsepolia"
       | "zksyncsepolia"
-      | "zksyncmainnet";
+      | "zksyncmainnet"
+      | "basesepolia"
+      | "basemainnet"
+      | "opsepolia"
+      | "opmainnet";
   }
 }

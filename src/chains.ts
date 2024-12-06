@@ -12,4 +12,6 @@ export enum ChainId {
   zksyncsepolia = 300,
   zksyncmainnet = 324,
   zkSyncTestNode = 260,
+  basesepolia = 84532,
+  basemainnet = 8453,
 }
