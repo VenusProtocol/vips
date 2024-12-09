@@ -20,10 +20,10 @@ export const CHAOS_LABS_AMOUNT_USDC = parseUnits("160000", 18);
 export const VANGUARD_VANTAGE_SOURCECONTROL_AMOUNT_USDT = parseUnits("24000", 18);
 export const CERTIK_AMOUNT_USDT = parseUnits("52500", 18);
 
-export const vip500 = () => {
+export const vip404 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-500 Payments to providers and Refunds",
+    title: "VIP-404 Payments to providers and Refunds",
     description: `#### Summary
 
 If passed this VIP will perform the following actions:
@@ -115,4 +115,4 @@ If passed this VIP will perform the following actions:
   );
 };
 
-export default vip500;
+export default vip404;
