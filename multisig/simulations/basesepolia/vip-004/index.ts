@@ -13,7 +13,6 @@ import vip004, {
   COMPTROLLER_CORE,
   MOCK_USDC,
   MOCK_cbBTC,
-  PSR,
   VCBBTC_CORE,
   VUSDC_CORE,
   VWETH_CORE,
@@ -26,6 +25,8 @@ import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
+
+const PSR = "0x4Ae3D77Ece08Ec3E5f5842B195f746bd3bCb8d73";
 
 const RESILIENT_ORACLE = basesepolia.RESILIENT_ORACLE;
 const GUARDIAN = basesepolia.GUARDIAN;
