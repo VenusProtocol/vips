@@ -54,6 +54,8 @@ forking(44745851, async () => {
         ["NewMarketInterestRateModel", "NewReserveFactor"],
         [1, 1],
       );
+
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap"], [1]);
     },
   });
 
