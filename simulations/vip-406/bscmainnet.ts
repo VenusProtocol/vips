@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip403, { BORROW_CAP, GAMEFI_COMPTROLLER, IRM, vFLOKI } from "../../vips/vip-403/bscmainnet";
+import vip406, { BORROW_CAP, GAMEFI_COMPTROLLER, IRM, vFLOKI } from "../../vips/vip-406/bscmainnet";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -46,7 +46,7 @@ forking(44745851, async () => {
     });
   });
 
-  testVip("VIP-403", await vip403(), {
+  testVip("VIP-406", await vip406(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
