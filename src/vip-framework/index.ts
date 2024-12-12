@@ -3,7 +3,7 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
-import { Contract, ContractInterface } from "ethers";
+import { BigNumber, Contract, ContractInterface } from "ethers";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
@@ -16,6 +16,8 @@ import {
   getPayload,
   getSourceChainId,
   initMainnetUser,
+  mineBlocks,
+  mineOnZksync,
   setForkBlock,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
@@ -59,7 +61,11 @@ export interface TestingOptions {
   callbackAfterExecution?: (trx: TransactionResponse) => void;
 }
 
-const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, commandIdx: number): Promise<void> => {
+const executeCommand = async (
+  timelock: SignerWithAddress,
+  proposal: Proposal,
+  commandIdx: number,
+): Promise<TransactionResponse> => {
   const encodeMethodCall = (signature: string, params: any[]): string => {
     if (signature === "") {
       return "0x";
@@ -90,22 +96,25 @@ const executeCommand = async (timelock: SignerWithAddress, proposal: Proposal, c
     txnParams.gasLimit = gas.mul(proposal.gasLimitMultiplicationFactor[commandIdx]);
   }
 
-  await timelock.sendTransaction(txnParams);
+  const tx = await timelock.sendTransaction(txnParams);
+  return tx;
 };
 
 export const pretendExecutingVip = async (proposal: Proposal, sender: string = GUARDIAN) => {
   const impersonatedTimelock = await initMainnetUser(sender, ethers.utils.parseEther("4.0"));
   console.log("===== Simulating vip =====");
-
+  const txResponses = [];
   const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
   bar.start(proposal.signatures.length, 0);
 
   for (let i = 0; i < proposal.signatures.length; ++i) {
-    await executeCommand(impersonatedTimelock, proposal, i);
+    const txResponse = await executeCommand(impersonatedTimelock, proposal, i);
+    txResponses.push(txResponse);
     bar.update(i + 1);
   }
 
   bar.stop();
+  return txResponses;
 };
 
 export const testVip = (description: string, proposal: Proposal, options: TestingOptions = {}) => {
@@ -116,6 +125,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
 
   const governanceFixture = async (): Promise<void> => {
     const proposerAddress = options.proposer ?? DEFAULT_PROPOSER_ADDRESS;
+
     const supporterAddress = options.supporter ?? DEFAULT_SUPPORTER_ADDRESS;
     const timelockAddress = {
       [ProposalType.REGULAR]: NORMAL_TIMELOCK,
@@ -234,7 +244,16 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
       const gasLimit = calculateGasForAdapterParam(targets.length);
-      const tx = await endpoint
+
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber; gasLimit: number } = { gasLimit: gasLimit };
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      await endpoint
         .connect(impersonatedLibrary)
         .receivePayload(
           srcChainId,
@@ -243,17 +262,33 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
           inboundNonce.add(1),
           gasLimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
-          { gasLimit: gasLimit },
+          txnParams,
         );
-      await tx.wait();
+
       expect(await executor.queued(proposalId)).to.be.true;
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      if (FORKED_NETWORK == "zksyncsepolia" || FORKED_NETWORK == "zksyncmainnet") {
+        await mineOnZksync(DELAY_BLOCKS[proposalType]);
+        const [signer] = await ethers.getSigners();
+        await initMainnetUser(signer.address, ethers.utils.parseEther("2"));
+      } else {
+        await mine(DELAY_BLOCKS[proposalType]);
+      }
       const blockchainProposal = await executor.proposals(proposalId);
-      await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await executor.execute(proposalId);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [blockchainProposal.eta.toHexString()]);
+      await mineBlocks();
+
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber } = {};
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      const tx = await executor.execute(proposalId, txnParams);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
