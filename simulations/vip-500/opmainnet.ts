@@ -6,7 +6,7 @@ import vip500, { BASE_MAINNET_TRUSTED_REMOTE, MIN_DST_GAS, remoteBridgeEntries }
 import { RemoteBridgeEntry } from "../../vips/vip-500/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(128909555, async () => {
+forking(129222970, async () => {
   await checkXVSBridge(
     LzChainId.basemainnet,
     NETWORK_ADDRESSES.opmainnet,
