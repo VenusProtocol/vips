@@ -8,7 +8,7 @@ import { PSR } from "../../multisig/proposals/basesepolia/vip-003";
 import vip006 from "../../multisig/proposals/basesepolia/vip-006";
 import vip007 from "../../multisig/proposals/basesepolia/vip-007";
 import { PLP, PRIME } from "../../multisig/proposals/basesepolia/vip-007";
-import vip386, {
+import vip502, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
   VTOKENS,
@@ -16,19 +16,19 @@ import vip386, {
   XVS_BRIDGE_ADMIN,
   XVS_STORE,
 } from "../../vips/vip-502/bsctestnet";
-import COMPTROLLER_ABI from "../vip-386/abi/Comptroller.json";
-import PRIME_ABI from "../vip-386/abi/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "../vip-386/abi/PrimeLiquidityProvider.json";
-import PSR_ABI from "../vip-386/abi/ProtocolShareReserve.json";
-import VTOKEN_ABI from "../vip-386/abi/VToken.json";
-import XVS_STORE_ABI from "../vip-386/abi/XVSStore.json";
-import XVS_VAULT_PROXY_ABI from "../vip-386/abi/XVSVaultProxy.json";
-import BOUND_VALIDATOR_ABI from "../vip-386/abi/boundValidator.json";
-import CHAINLINK_ORACLE_ABI from "../vip-386/abi/chainlinkOracle.json";
-import RESILLIENT_ORACLE_ABI from "../vip-386/abi/resilientOracle.json";
-import TREASURY_ABI from "../vip-386/abi/treasury.json";
-import XVS_BRIDGE_ABI from "../vip-386/abi/xvsBridge.json";
-import XVS_BRIDGE_ADMIN_ABI from "../vip-386/abi/xvsBridgeAdmin.json";
+import COMPTROLLER_ABI from "../vip-502/abi/Comptroller.json";
+import PRIME_ABI from "../vip-502/abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "../vip-502/abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "../vip-502/abi/ProtocolShareReserve.json";
+import VTOKEN_ABI from "../vip-502/abi/VToken.json";
+import XVS_STORE_ABI from "../vip-502/abi/XVSStore.json";
+import XVS_VAULT_PROXY_ABI from "../vip-502/abi/XVSVaultProxy.json";
+import BOUND_VALIDATOR_ABI from "../vip-502/abi/boundValidator.json";
+import CHAINLINK_ORACLE_ABI from "../vip-502/abi/chainlinkOracle.json";
+import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
+import TREASURY_ABI from "../vip-502/abi/treasury.json";
+import XVS_BRIDGE_ABI from "../vip-502/abi/xvsBridge.json";
+import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
@@ -61,7 +61,7 @@ forking(19113058, async () => {
     await pretendExecutingVip(await vip007());
   });
 
-  testForkedNetworkVipCommands("vip386", await vip386());
+  testForkedNetworkVipCommands("vip502", await vip502());
 
   describe("Post-VIP behavior", async () => {
     it(`correct owner `, async () => {

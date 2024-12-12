@@ -2,24 +2,24 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { PSR } from "../../multisig/proposals/basesepolia/vip-003";
-import { PLP, PRIME } from "../../multisig/proposals/basesepolia/vip-007";
+import { PSR } from "../../multisig/proposals/basemainnet/vip-003";
+import { PLP, PRIME } from "../../multisig/proposals/basemainnet/vip-007";
 
-export const BOUND_VALIDATOR = "0xC76284488E57554A457A75a8b166fB2ADAB430dB";
-export const POOL_REGISTRY = "0xCa330282BEeb07a81963336d0bf8f5f34317916c";
+export const BOUND_VALIDATOR = "0x66dDE062D3DC1BB5223A0096EbB89395d1f11DB0";
+export const POOL_REGISTRY = "0xeef902918DdeCD773D4B422aa1C6e1673EB9136F";
 export const VTOKENS = [
-  "0x776f14D624aBdAfa912d6Cd0864976DdaF5Ca4a7",
-  "0x436E5A07F58AAA86277e8b992bC3e596eC423d09",
-  "0xA31D67c056Aadc2501535f2776bF1157904f810e",
+  "0x3cb752d175740043Ec463673094e06ACDa2F9a2e",
+  "0xEB8A79bD44cF4500943bf94a2b4434c95C008599",
+  "0x7bBd1005bB24Ec84705b04e1f2DfcCad533b6D72",
 ];
-export const COMPTROLLERS = ["0x272795dd6c5355CF25765F36043F34014454Eb5b"];
-export const XVS_STORE = "0x059f1eA3973738C649d63bF4dA18221ecA418cDC";
-export const XVS_BRIDGE_ADMIN = "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD";
-export const XVS_BRIDGE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
+export const COMPTROLLERS = ["0x0C7973F9598AA62f9e03B94E92C967fD5437426C"];
+export const XVS_STORE = "0x11b084Cfa559a82AAC0CcD159dBea27899c7955A";
+export const XVS_BRIDGE_ADMIN = "0x6303FEcee7161bF959d65df4Afb9e1ba5701f78e";
+export const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const basesepolia = NETWORK_ADDRESSES.basesepolia;
+const basemainnet = NETWORK_ADDRESSES.basemainnet;
 const vip502 = () => {
   const meta = {
     version: "v2",
@@ -35,34 +35,34 @@ const vip502 = () => {
         target: PRIME,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
         target: PLP,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
 
       {
         target: PSR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
 
       {
         target: POOL_REGISTRY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       ...COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.basesepolia,
+          dstChainId: LzChainId.basemainnet,
         };
       }),
       ...VTOKENS.map(comptroller => {
@@ -70,57 +70,57 @@ const vip502 = () => {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.basesepolia,
+          dstChainId: LzChainId.basemainnet,
         };
       }),
       {
-        target: basesepolia.XVS_VAULT_PROXY,
+        target: basemainnet.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
 
       {
         target: XVS_STORE,
         signature: "acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
         target: XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
-        target: basesepolia.CHAINLINK_ORACLE,
+        target: basemainnet.CHAINLINK_ORACLE,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
         target: BOUND_VALIDATOR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
-        target: basesepolia.REDSTONE_ORACLE,
+        target: basemainnet.REDSTONE_ORACLE,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
-        target: basesepolia.RESILIENT_ORACLE,
+        target: basemainnet.RESILIENT_ORACLE,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
       {
-        target: basesepolia.VTREASURY,
+        target: basemainnet.VTREASURY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.basemainnet,
       },
     ],
     meta,
