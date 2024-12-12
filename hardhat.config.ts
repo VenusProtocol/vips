@@ -32,6 +32,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opsepolia: 60000000,
   opmainnet: 60000000,
   basesepolia: 60000000,
+  basemainnet: 198000000,
 };
 
 task("propose", "Propose proposal")
@@ -122,6 +123,8 @@ const config: HardhatUserConfig = {
         [ChainId.arbitrumone]: assumeCancun,
         [ChainId.opsepolia]: assumeCancun,
         [ChainId.opmainnet]: assumeCancun,
+        [ChainId.basesepolia]: assumeCancun,
+        [ChainId.basemainnet]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -190,6 +193,12 @@ const config: HardhatUserConfig = {
       chainId: 84532,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basesepolia,
+    },
+    basemainnet: {
+      url: process.env.ARCHIVE_NODE_basemainnet || "https://mainnet.base.org",
+      chainId: 8453,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basemainnet,
     },
   },
   paths: {
