@@ -29,14 +29,14 @@ interface AssetConfig {
 const assetConfigs: AssetConfig[] = [
   {
     name: "USDC",
-    address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     price: "999851370000000000000000000000",
     feed: "0x7e860098F58bBFC8648a4311b374B1D669a2bc6B",
     oracle: "chainlink",
   },
   {
     name: "cbBTC",
-    address: "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf",
+    address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
     price: "1016348804938700000000000000000000",
     feed: "0x07DA0E54543a844a80ABE69c8A12F22B3aA59f9D",
     oracle: "chainlink",
