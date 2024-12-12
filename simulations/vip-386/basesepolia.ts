@@ -71,7 +71,7 @@ forking(18554627, async () => {
     await pretendExecutingVip(await vip007());
   });
 
-  testForkedNetworkVipCommands("vip371", await vip386());
+  testForkedNetworkVipCommands("vip386", await vip386());
 
   describe("Post-VIP behavior", async () => {
     it(`correct owner `, async () => {
