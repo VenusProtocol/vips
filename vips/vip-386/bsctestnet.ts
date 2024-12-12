@@ -92,7 +92,7 @@ const vip371 = () => {
         target: XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: CHAIN_ID,
+        dstChainId: LzChainId.basesepolia,
       },
       {
         target: basesepolia.CHAINLINK_ORACLE,
