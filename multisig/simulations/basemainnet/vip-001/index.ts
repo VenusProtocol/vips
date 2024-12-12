@@ -94,22 +94,22 @@ forking(23313750, async () => {
 
     it("Should set trusted remote address in bridge for all six networks", async () => {
       let trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.bscmainnet);
-      expect(trustedRemote).equals(BNB_MAINNET_TRUSTED_REMOTE);
+      expect(trustedRemote).equals(BNB_MAINNET_TRUSTED_REMOTE.toLowerCase());
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.opbnbmainnet);
-      expect(trustedRemote).equals(OPBNB_TRUSTED_REMOTE);
+      expect(trustedRemote).equals(OPBNB_TRUSTED_REMOTE.toLowerCase());
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.ethereum);
-      expect(trustedRemote).equals(ETHEREUM_TRUSTED_REMOTE);
+      expect(trustedRemote).equals(ETHEREUM_TRUSTED_REMOTE.toLowerCase());
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.arbitrumone);
-      expect(trustedRemote).equals(ARBITRUM_REMOTE);
+      expect(trustedRemote).equals(ARBITRUM_REMOTE.toLowerCase());
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.opmainnet);
-      expect(trustedRemote).equals(OP_TRUSTED_REMOTE);
+      expect(trustedRemote).equals(OP_TRUSTED_REMOTE.toLowerCase());
 
       trustedRemote = await xvsBridge.getTrustedRemoteAddress(LzChainId.zksyncmainnet);
-      expect(trustedRemote).equals(ZYSYNC_REMOTE);
+      expect(trustedRemote).equals(ZYSYNC_REMOTE.toLowerCase());
     });
 
     it("Should set minting limit in XVS token", async () => {

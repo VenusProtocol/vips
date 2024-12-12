@@ -196,7 +196,7 @@ const config: HardhatUserConfig = {
     },
     basemainnet: {
       url: process.env.ARCHIVE_NODE_basemainnet || "https://mainnet.base.org",
-      chainId: 8453,
+      chainId: ChainId.basemainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basemainnet,
     },
