@@ -7,7 +7,7 @@ import { Proposal } from "src/types";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { RemoteBridgeEntry } from "../../vips/vip-500/types";
+import { RemoteBridgeEntry } from "../../vips/vip-407/types";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";

@@ -4,14 +4,14 @@ import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import { RemoteBridgeCommand, RemoteBridgeEntry } from "./types";
 
-export const BASE_MAINNET_TRUSTED_REMOTE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
+export const BASE_SEPOLIA_TRUSTED_REMOTE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
 
 export const MIN_DST_GAS = "300000";
 
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {
-    bridgeAdmin: "0x70d644877b7b73800E9073BCFCE981eAaB6Dbc21",
-    proxyOFT: "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854",
+    bridgeAdmin: "0xB164Cb262328Ca44a806bA9e3d4094931E658513",
+    proxyOFT: "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0",
     dstChainId: undefined,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
@@ -19,45 +19,45 @@ export const remoteBridgeEntries: RemoteBridgeEntry[] = [
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
   {
-    bridgeAdmin: "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96",
-    proxyOFT: "0x888E317606b4c590BBAD88653863e8B345702633",
-    dstChainId: LzChainId.ethereum,
+    bridgeAdmin: "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B",
+    proxyOFT: "0xc340b7d3406502F43dC11a988E4EC5bbE536E642",
+    dstChainId: LzChainId.sepolia,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
     maxDailyReceiveLimit: parseUnits("102000", 18),
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
   {
-    bridgeAdmin: "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831",
-    proxyOFT: "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2",
-    dstChainId: LzChainId.opbnbmainnet,
+    bridgeAdmin: "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff",
+    proxyOFT: "0xA03205bC635A772E533E7BE36b5701E331a70ea3",
+    dstChainId: LzChainId.opbnbtestnet,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
     maxDailyReceiveLimit: parseUnits("102000", 18),
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
   {
-    bridgeAdmin: "0xf5d81C6F7DAA3F97A6265C8441f92eFda22Ad784",
-    proxyOFT: "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6",
-    dstChainId: LzChainId.arbitrumone,
+    bridgeAdmin: "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8",
+    proxyOFT: "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4",
+    dstChainId: LzChainId.arbitrumsepolia,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
     maxDailyReceiveLimit: parseUnits("102000", 18),
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
   {
-    bridgeAdmin: "0x2471043F05Cc41A6051dd6714DC967C7BfC8F902",
-    proxyOFT: "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116",
-    dstChainId: LzChainId.zksyncmainnet,
+    bridgeAdmin: "0x28cfE3f2D7D8944FAd162a058260ec922C19065E",
+    proxyOFT: "0x760461ccB2508CAAa2ECe0c28af3a4707b853043",
+    dstChainId: LzChainId.zksyncsepolia,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
     maxDailyReceiveLimit: parseUnits("102000", 18),
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
   {
-    bridgeAdmin: "0x3c307DF1Bf3198a2417d9CA86806B307D147Ddf7",
-    proxyOFT: "0xbBe46bAec851355c3FC4856914c47eB6Cea0B8B4",
-    dstChainId: LzChainId.opmainnet,
+    bridgeAdmin: "0x6bBcB95eCF9BEc9AE91d5Ad227783e3913145321",
+    proxyOFT: "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1",
+    dstChainId: LzChainId.opsepolia,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
     maxDailyReceiveLimit: parseUnits("102000", 18),
@@ -70,43 +70,43 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
-      params: [LzChainId.basemainnet, BASE_MAINNET_TRUSTED_REMOTE],
+      params: [LzChainId.basesepolia, BASE_SEPOLIA_TRUSTED_REMOTE],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMinDstGas(uint16,uint16,uint256)",
-      params: [LzChainId.basemainnet, 0, MIN_DST_GAS],
+      params: [LzChainId.basesepolia, 0, MIN_DST_GAS],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxDailyLimit(uint16,uint256)",
-      params: [LzChainId.basemainnet, remoteBridgeEntry.maxDailyLimit],
+      params: [LzChainId.basesepolia, remoteBridgeEntry.maxDailyLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-      params: [LzChainId.basemainnet, remoteBridgeEntry.maxSingleTransactionLimit],
+      params: [LzChainId.basesepolia, remoteBridgeEntry.maxSingleTransactionLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [LzChainId.basemainnet, remoteBridgeEntry.maxDailyReceiveLimit],
+      params: [LzChainId.basesepolia, remoteBridgeEntry.maxDailyReceiveLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [LzChainId.basemainnet, remoteBridgeEntry.maxSingleReceiveTransactionLimit],
+      params: [LzChainId.basesepolia, remoteBridgeEntry.maxSingleReceiveTransactionLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
   ];
 }
 
-const vip500 = () => {
+const vip407 = () => {
   const meta = {
     version: "v2",
     title: "VIP-500 Enable Base sepolia bridge",
@@ -119,4 +119,4 @@ const vip500 = () => {
   return makeProposal(remoteBridgeEntries.flatMap(getRemoteBridgeCommands), meta, ProposalType.REGULAR);
 };
 
-export default vip500;
+export default vip407;

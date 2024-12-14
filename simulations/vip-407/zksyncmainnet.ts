@@ -3,8 +3,8 @@ import { LzChainId } from "src/types";
 import { setRedstonePrice } from "src/utils";
 import { forking } from "src/vip-framework";
 
-import vip500, { BASE_MAINNET_TRUSTED_REMOTE, MIN_DST_GAS, remoteBridgeEntries } from "../../vips/vip-500/bscmainnet";
-import { RemoteBridgeEntry } from "../../vips/vip-500/types";
+import vip407, { BASE_MAINNET_TRUSTED_REMOTE, MIN_DST_GAS, remoteBridgeEntries } from "../../vips/vip-407/bscmainnet";
+import { RemoteBridgeEntry } from "../../vips/vip-407/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
 forking(51152831, async () => {
@@ -24,7 +24,7 @@ forking(51152831, async () => {
   await checkXVSBridge(
     LzChainId.basemainnet,
     NETWORK_ADDRESSES.zksyncmainnet,
-    vip500,
+    vip407,
     BASE_MAINNET_TRUSTED_REMOTE,
     remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.zksyncmainnet) as RemoteBridgeEntry,
     MIN_DST_GAS,
