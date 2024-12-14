@@ -398,7 +398,9 @@ export const setMaxStalePeriod = async (
     FORKED_NETWORK == "opmainnet" ||
     FORKED_NETWORK == "opsepolia" ||
     FORKED_NETWORK == "zksyncmainnet" ||
-    FORKED_NETWORK == "zksyncsepolia"
+    FORKED_NETWORK == "zksyncsepolia" ||
+    FORKED_NETWORK == "basemainnet" ||
+    FORKED_NETWORK == "basesepolia"
       ? getForkedNetworkAddress("NORMAL_TIMELOCK")
       : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);

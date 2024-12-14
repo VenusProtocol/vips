@@ -6,7 +6,6 @@ declare module "hardhat/types/runtime" {
     FORKED_NETWORK?:
       | "bsctestnet"
       | "bscmainnet"
-      | "basesepolia"
       | "sepolia"
       | "ethereum"
       | "opbnbtestnet"
