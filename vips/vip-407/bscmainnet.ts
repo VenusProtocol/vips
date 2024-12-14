@@ -184,7 +184,7 @@ We applied the following security procedures for this upgrade:
 
 #### Disclaimer for Base commands
 
-Privilege commands on Base will be executed by the [Guardian wallet](https://basescan.org/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, this and this multisig transactions will be executed. Otherwise, they will be rejected.`,
+Privilege commands on Base will be executed by the [Guardian wallet](https://basescan.org/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C), until the [Multichain Governance](https://docs-v4.venus.io/technical-reference/reference-technical-articles/multichain-governance) contracts are fully enabled. If this VIP passes, [this](https://app.safe.global/transactions/tx?safe=base:0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C&id=multisig_0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C_0xa02d7c91d257b744460c4f016621e606a0e2254a04613de91d2913b1163a98dd) and [this](https://app.safe.global/transactions/tx?safe=base:0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C&id=multisig_0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C_0x55f214cc475c1678aeb4612c6d281b530fbcbf5ec8af120d52d60f8e9b441558) multisig transactions will be executed. Otherwise, they will be rejected.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
