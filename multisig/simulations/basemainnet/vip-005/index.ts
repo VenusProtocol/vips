@@ -1,23 +1,19 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers, network } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip000 from "../../../proposals/basemainnet/vip-000";
-import vip001 from "../../../proposals/basemainnet/vip-001";
-import vip002 from "../../../proposals/basemainnet/vip-002";
 import vip003 from "../../../proposals/basemainnet/vip-003";
-import vip004, { USDC, WETH, cbBTC } from "../../../proposals/basemainnet/vip-004";
+import vip004 from "../../../proposals/basemainnet/vip-004";
 import { vip005 } from "../../../proposals/basemainnet/vip-005";
 import COMPTROLLER_ABI from "./abis/Comptroller.json";
 import ERC20_ABI from "./abis/ERC20.json";
 import PRIME_ABI from "./abis/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abis/PrimeLiquidityProvider.json";
-import TOKEN_ABI from "./abis/WETH.json";
 import XVS_ABI from "./abis/XVS.json";
 import XVS_VAULT_ABI from "./abis/XVSVault.json";
 
@@ -32,7 +28,7 @@ const COMPTROLLER_CORE = "0x0C7973F9598AA62f9e03B94E92C967fD5437426C";
 
 const basemainnet = NETWORK_ADDRESSES.basemainnet;
 
-forking(23475595, async () => {
+forking(23761056, async () => {
   describe("Pre-VIP behavior", () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -40,33 +36,7 @@ forking(23475595, async () => {
     let xvs: Contract;
 
     before(async () => {
-      await pretendExecutingVip(await vip000());
-      await pretendExecutingVip(await vip001());
-      await pretendExecutingVip(await vip002());
       await pretendExecutingVip(await vip003());
-
-      const WETH_ACCOUNT = "0x6446021F4E396dA3df4235C62537431372195D38";
-      const USDC_ACCOUNT = "0x0B0A5886664376F59C351ba3f598C8A8B4D0A6f3";
-      const cbBTC_ACCOUNT = "0xF877ACaFA28c19b96727966690b2f44d35aD5976";
-
-      await impersonateAccount(WETH_ACCOUNT);
-      await impersonateAccount(USDC_ACCOUNT);
-      await impersonateAccount(cbBTC_ACCOUNT);
-      await setBalance(WETH_ACCOUNT, ethers.utils.parseEther("1"));
-      await setBalance(USDC_ACCOUNT, ethers.utils.parseEther("1"));
-      await setBalance(cbBTC_ACCOUNT, ethers.utils.parseEther("1"));
-
-      const WETHSigner: Signer = await ethers.getSigner(WETH_ACCOUNT);
-      const USDCSigner: Signer = await ethers.getSigner(USDC_ACCOUNT);
-      const cbBTCSigner: Signer = await ethers.getSigner(cbBTC_ACCOUNT);
-      const wethToken = await ethers.getContractAt(TOKEN_ABI, WETH, WETHSigner);
-      const usdcToken = await ethers.getContractAt(TOKEN_ABI, USDC, USDCSigner);
-      const cbBTCToken = await ethers.getContractAt(TOKEN_ABI, cbBTC, cbBTCSigner);
-
-      await wethToken.connect(WETHSigner).transfer(basemainnet.VTREASURY, parseUnits("2", 18));
-      await usdcToken.connect(USDCSigner).transfer(basemainnet.VTREASURY, parseUnits("5000", 6));
-      await cbBTCToken.connect(cbBTCSigner).transfer(basemainnet.VTREASURY, parseUnits("0.05", 8));
-
       await pretendExecutingVip(await vip004());
 
       await impersonateAccount(GUARDIAN);
