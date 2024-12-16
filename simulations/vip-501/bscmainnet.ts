@@ -1,13 +1,22 @@
 import { expect } from "chai";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip501, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/vip-501/bscmainnet";
+import vip501, {
+  MAX_DAILY_LIMIT,
+  OMNICHAIN_PROPOSAL_SENDER,
+  USDT,
+  USDT_AMOUNT,
+  VENUS_STARS_TREASURY,
+} from "../../vips/vip-501/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+import VTREASURY_ABI from "./abi/VtreasuryAbi.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 forking(44757538, async () => {
@@ -17,8 +26,15 @@ forking(44757538, async () => {
     OMNICHAIN_PROPOSAL_SENDER_ABI,
     provider,
   );
+  let usdt: Contract;
+  let balanceOfVenusStartsTreasury: BigNumber;
 
   describe("Pre-VIP behaviour", () => {
+    before(async () => {
+      usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
+      balanceOfVenusStartsTreasury = await usdt.balanceOf(VENUS_STARS_TREASURY);
+    });
+
     it("Daily limit should be 0", async () => {
       expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.basemainnet)).to.equals(0);
     });
@@ -35,6 +51,7 @@ forking(44757538, async () => {
         ["SetMaxDailyLimit", "SetTrustedRemoteAddress", "ExecuteRemoteProposal", "StorePayload"],
         [1, 1, 1, 0],
       );
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
     },
   });
 
@@ -50,6 +67,11 @@ forking(44757538, async () => {
           [basemainnet.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_PROPOSAL_SENDER],
         ),
       );
+    });
+
+    it("check usdt balance of VenusStartsTreasury", async () => {
+      const newBalanceOfVenusStartsTreasury = await usdt.balanceOf(VENUS_STARS_TREASURY);
+      expect(newBalanceOfVenusStartsTreasury).to.equals(balanceOfVenusStartsTreasury.add(USDT_AMOUNT));
     });
   });
 });
