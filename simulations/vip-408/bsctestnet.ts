@@ -5,7 +5,7 @@ import { LzChainId } from "src/types";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip501, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/vip-501/bsctestnet";
+import vip408, { MAX_DAILY_LIMIT, OMNICHAIN_PROPOSAL_SENDER } from "../../vips/vip-408/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -27,7 +27,7 @@ forking(46020691, async () => {
     });
   });
 
-  testVip("vip501 give permissions to timelock", await vip501(), {
+  testVip("vip408 give permissions to timelock", await vip408(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
