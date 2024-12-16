@@ -20,7 +20,7 @@ export const VPT_sUSDE_27MAR2025_ETHENA = "0x4975ECc52179b49ECE4B8328601572f07a1
 export const VsUSDe_Ethena = "0xb17abC45289EE8075447853D4E443f1E7e36fF99";
 export const VUSDC_Ethena = "0xf3c213775e0592108350Bd0A1864d7e581fBd3a0";
 
-const ERC4626ORACLE = "0x4EeA919A68db78572f5B2bb69815D325923AE5AD";
+const ERC4626ORACLE = "0xa79EC375573f213860320cd401F2D90913AC28FF";
 const MockPendleOracle_PT_USDe_27MAR2025 = "0x063a57223EE477d7CB959bc7328d3A06494931A9";
 const MockPendleOracle_PT_sUSDe_27MAR2025 = "0x981217A0bb898752543D54cE782DAfb7427b9B54";
 const PendleOracle_PT_USDe_27MAR2025 = "0xFad31F9f22ED81F4aa998A12B51ED9f2169C7D3E";
@@ -34,6 +34,7 @@ const TWAP_DURATION = 1800;
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
+const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";
 
 export const vip407 = () => {
   const meta = {
@@ -55,7 +56,7 @@ export const vip407 = () => {
       {
         target: BOUND_VALIDATOR,
         signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[MockPT_USDe_27MAR2025, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
+        params: [[MockUSDe, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -74,11 +75,7 @@ export const vip407 = () => {
         target: sepolia.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
-          [
-            MockPT_USDe_27MAR2025,
-            [sepolia.REDSTONE_ORACLE, sepolia.CHAINLINK_ORACLE, sepolia.CHAINLINK_ORACLE],
-            [true, true, true],
-          ],
+          [MockUSDe, [sepolia.REDSTONE_ORACLE, sepolia.CHAINLINK_ORACLE, sepolia.CHAINLINK_ORACLE], [true, true, true]],
         ],
         dstChainId: LzChainId.sepolia,
       },
@@ -98,7 +95,7 @@ export const vip407 = () => {
       {
         target: MockPendleOracle_PT_USDe_27MAR2025,
         signature: "setPtToAssetRate(address,uint32,uint256)",
-        params: [VPT_USDe_27MAR2025_ETHENA, TWAP_DURATION, EXCHANGE_RATE],
+        params: [ADDRESS_ONE, TWAP_DURATION, EXCHANGE_RATE],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -117,7 +114,7 @@ export const vip407 = () => {
       {
         target: MockPendleOracle_PT_sUSDe_27MAR2025,
         signature: "setPtToAssetRate(address,uint32,uint256)",
-        params: [MockPT_sUSDE_27MAR2025, TWAP_DURATION, EXCHANGE_RATE],
+        params: [ADDRESS_ONE, TWAP_DURATION, EXCHANGE_RATE],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -143,7 +140,7 @@ export const vip407 = () => {
       {
         target: sepolia.POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
-        params: ["Core", COMPTROLLER_ETHENA, parseUnits("0.5", 18), parseUnits("1.04", 18), parseUnits("100", 18)],
+        params: ["Ethena", COMPTROLLER_ETHENA, parseUnits("0.5", 18), parseUnits("1.04", 18), parseUnits("100", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {

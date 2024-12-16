@@ -61,7 +61,7 @@ export const vip408 = () => {
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [MocksUSDe, parseUnits("10653", 6), sepolia.NORMAL_TIMELOCK],
+        params: [MocksUSDe, parseUnits("10653", 18), sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -73,7 +73,7 @@ export const vip408 = () => {
       {
         target: MocksUSDe,
         signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, parseUnits("10653", 6)],
+        params: [sepolia.POOL_REGISTRY, parseUnits("10653", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -101,7 +101,7 @@ export const vip408 = () => {
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [MockUSDC, parseUnits("10000", 18), sepolia.NORMAL_TIMELOCK],
+        params: [MockUSDC, parseUnits("10000", 6), sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -113,7 +113,7 @@ export const vip408 = () => {
       {
         target: MockUSDC,
         signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, parseUnits("10000", 18)],
+        params: [sepolia.POOL_REGISTRY, parseUnits("10000", 6)],
         dstChainId: LzChainId.sepolia,
       },
       {

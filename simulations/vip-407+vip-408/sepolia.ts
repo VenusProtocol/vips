@@ -177,7 +177,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Ethena: "",
 };
 
-forking(7270036, async () => {
+forking(7291756, async () => {
   let poolRegistry: Contract;
   let noOfPools: BigNumber;
 
