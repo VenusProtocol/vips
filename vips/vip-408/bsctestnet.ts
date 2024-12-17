@@ -9,12 +9,12 @@ const COMPTROLLER_ETHENA = "0x05Cdc6c3dceA796971Db0d9edDbC7C56f2176D1c";
 
 const MockPT_USDe_27MAR2025 = "0x74671106a04496199994787B6BcB064d08afbCCf";
 const MockPT_sUSDE_27MAR2025 = "0x3EBa2Aa29eC2498c2124523634324d4ce89c8579";
-const MocksUSDe = "0xD28894b4A8AB53Ce55965AfD330b55C2DbB3E07D";
+const MocksUSDe = "0xA3A3e5ecEA56940a4Ae32d0927bfd8821DdA848A";
 const MockUSDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 
 const VPT_USDe_27MAR2025_ETHENA = "0x11B3a14D9F4182b841bBb48637B26ecCC527A30c";
 const VPT_sUSDE_27MAR2025_ETHENA = "0x4975ECc52179b49ECE4B8328601572f07a1fC51D";
-const VsUSDe_Ethena = "0xb17abC45289EE8075447853D4E443f1E7e36fF99";
+const VsUSDe_Ethena = "0x4DD1e84040Fe689aDDfeE1996b225e3b193d6A8D";
 const VUSDC_Ethena = "0xf3c213775e0592108350Bd0A1864d7e581fBd3a0";
 
 export const underlyingAddress = [MockPT_USDe_27MAR2025, MockPT_sUSDE_27MAR2025, MocksUSDe, MockUSDC];
@@ -138,15 +138,24 @@ export const vip408 = () => {
         ],
         dstChainId: LzChainId.sepolia,
       },
+      {
+        target: VsUSDe_Ethena,
+        signature: "setProtocolSeizeShare(uint256)",
+        params: [parseUnits("0.0010", 18)],
+        dstChainId: LzChainId.sepolia,
+      },
+
+      {
+        target: VUSDC_Ethena,
+        signature: "setProtocolSeizeShare(uint256)",
+        params: [parseUnits("0.0020", 18)],
+        dstChainId: LzChainId.sepolia,
+      },
 
       {
         target: COMPTROLLER_ETHENA,
         signature: "setActionsPaused(address[],uint256[],bool)",
-        params: [
-          [VPT_USDe_27MAR2025_ETHENA, VPT_sUSDE_27MAR2025_ETHENA, VsUSDe_Ethena, VUSDC_Ethena],
-          [3, 3, 3, 8],
-          true,
-        ],
+        params: [[VsUSDe_Ethena, VUSDC_Ethena], [3, 7], true],
         dstChainId: LzChainId.sepolia,
       },
 

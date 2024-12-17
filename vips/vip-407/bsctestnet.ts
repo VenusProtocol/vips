@@ -11,16 +11,16 @@ export const COMPTROLLER_ETHENA = "0x05Cdc6c3dceA796971Db0d9edDbC7C56f2176D1c";
 
 export const MockPT_USDe_27MAR2025 = "0x74671106a04496199994787B6BcB064d08afbCCf";
 export const MockPT_sUSDE_27MAR2025 = "0x3EBa2Aa29eC2498c2124523634324d4ce89c8579";
-export const MocksUSDe = "0xD28894b4A8AB53Ce55965AfD330b55C2DbB3E07D";
+export const MocksUSDe = "0xA3A3e5ecEA56940a4Ae32d0927bfd8821DdA848A";
 export const MockUSDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 const MockUSDe = "0x8bAe3E12870a002A0D4b6Eb0F0CBf91b29d9806F";
 
 export const VPT_USDe_27MAR2025_ETHENA = "0x11B3a14D9F4182b841bBb48637B26ecCC527A30c";
 export const VPT_sUSDE_27MAR2025_ETHENA = "0x4975ECc52179b49ECE4B8328601572f07a1fC51D";
-export const VsUSDe_Ethena = "0xb17abC45289EE8075447853D4E443f1E7e36fF99";
+export const VsUSDe_Ethena = "0x4DD1e84040Fe689aDDfeE1996b225e3b193d6A8D";
 export const VUSDC_Ethena = "0xf3c213775e0592108350Bd0A1864d7e581fBd3a0";
 
-const ERC4626ORACLE = "0xa79EC375573f213860320cd401F2D90913AC28FF";
+const sUSDE_ERC4626ORACLE = "0xeD4E76bAbA330287Ca2D8d5857da6703bc653621";
 const MockPendleOracle_PT_USDe_27MAR2025 = "0x063a57223EE477d7CB959bc7328d3A06494931A9";
 const MockPendleOracle_PT_sUSDe_27MAR2025 = "0x981217A0bb898752543D54cE782DAfb7427b9B54";
 const PendleOracle_PT_USDe_27MAR2025 = "0xFad31F9f22ED81F4aa998A12B51ED9f2169C7D3E";
@@ -85,7 +85,7 @@ export const vip407 = () => {
         params: [
           [
             MocksUSDe,
-            [ERC4626ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [sUSDE_ERC4626ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
           ],
         ],
@@ -237,16 +237,9 @@ export const vip407 = () => {
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: VsUSDe_Ethena,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.0010", 18)],
-        dstChainId: LzChainId.sepolia,
-      },
-
-      {
-        target: VUSDC_Ethena,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.0020", 18)],
+        target: COMPTROLLER_ETHENA,
+        signature: "setActionsPaused(address[],uint256[],bool)",
+        params: [[VPT_USDe_27MAR2025_ETHENA, VPT_sUSDE_27MAR2025_ETHENA], [3, 3], true],
         dstChainId: LzChainId.sepolia,
       },
     ],
