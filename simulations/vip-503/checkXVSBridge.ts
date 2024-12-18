@@ -21,7 +21,6 @@ export async function checkXVSBridge(
   vip: () => Promise<Proposal>,
   trustedRemote: string,
   bridgeConfiguration: RemoteBridgeEntry,
-  minDstGas: string,
 ) {
   const provider = ethers.provider;
   let resilientOracle: Contract;
@@ -49,14 +48,7 @@ export async function checkXVSBridge(
 
   testForkedNetworkVipCommands("VIP", await vip(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_SRC_ABI],
-        [
-          "SetTrustedRemoteAddress",
-        ],
-        [1],
-      );
+      await expectEvents(txResponse, [XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_SRC_ABI], ["SetTrustedRemoteAddress"], [1]);
     },
   });
 

@@ -1,12 +1,8 @@
-import { parseUnits } from "ethers/lib/utils";
-
 import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import { RemoteBridgeCommand, RemoteBridgeEntry } from "./types";
 
 export const BASE_MAINNET_TRUSTED_REMOTE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
-
-export const MIN_DST_GAS = "300000";
 
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {

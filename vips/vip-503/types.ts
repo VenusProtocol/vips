@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-
 import { LzChainId } from "../../src/types";
 
 export type RemoteBridgeEntry = {
