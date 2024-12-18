@@ -1,11 +1,9 @@
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip408 from "../../vips/vip-408/bsctestnet";
 import vip502 from "../../vips/vip-502/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "../vip-502/abi/OmnichainProposalSender.json";
 
-forking(46598366, async () => {
-  testVip("VIP-408 Multichain Governance", await vip408(), {});
+forking(46602737, async () => {
   testVip("VIP-502 Transfer ownership to Governance", await vip502(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
