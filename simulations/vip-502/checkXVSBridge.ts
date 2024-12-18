@@ -7,9 +7,9 @@ import { Proposal } from "src/types";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { RemoteBridgeEntry } from "../../vips/vip-503/types";
+import { RemoteBridgeEntry } from "../../vips/vip-502/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
-import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
+import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
