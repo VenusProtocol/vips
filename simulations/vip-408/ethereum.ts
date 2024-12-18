@@ -8,7 +8,7 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { COMPTROLLER_ETHENA, MockUSDC, MocksUSDe, vip407 } from "../../vips/vip-407/bsctestnet";
+import { COMPTROLLER_ETHENA, USDC, sUSDe, vip407 } from "../../vips/vip-407/bscmainnet";
 import {
   CONVERSION_INCENTIVE,
   VUSDC_Ethena,
@@ -16,7 +16,7 @@ import {
   converterBaseAssets,
   underlyingAddress,
   vip408,
-} from "../../vips/vip-408/bsctestnet";
+} from "../../vips/vip-408/bscmainnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -24,7 +24,7 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { sepolia } = NETWORK_ADDRESSES;
+const { ethereum } = NETWORK_ADDRESSES;
 
 const BLOCKS_PER_YEAR = BigNumber.from(2628000);
 
@@ -49,7 +49,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     name: "Venus sUSDe (Ethena)",
     symbol: "vsUSDe_Ethena",
     decimals: 8,
-    underlying: MocksUSDe,
+    underlying: sUSDe,
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_ETHENA,
   },
@@ -57,7 +57,7 @@ const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
     name: "Venus USDC (Ethena)",
     symbol: "vUSDC_Ethena",
     decimals: 8,
-    underlying: MockUSDC,
+    underlying: USDC,
     exchangeRate: parseUnits("1", 16),
     comptroller: COMPTROLLER_ETHENA,
   },
@@ -83,7 +83,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.92",
     reserveFactor: "0",
     initialSupply: "10000",
-    vTokenReceiver: sepolia.VTREASURY,
+    vTokenReceiver: ethereum.VTREASURY,
     protocolSeizeShareMantissa: "0.010",
     price: parseUnits("1", 18),
   },
@@ -94,7 +94,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0",
     reserveFactor: "0.1",
     initialSupply: "10000",
-    vTokenReceiver: sepolia.VTREASURY,
+    vTokenReceiver: ethereum.VTREASURY,
     protocolSeizeShareMantissa: "0.020",
     price: BigNumber.from("999987420000000000000000000000"),
   },
@@ -127,7 +127,7 @@ forking(7302561, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
-    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, sepolia.POOL_REGISTRY);
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, ethereum.POOL_REGISTRY);
   });
 
   describe("Contracts setup", async () => {
@@ -159,7 +159,7 @@ forking(7302561, async () => {
       it("should register Ethena pool in PoolRegistry", async () => {
         const pool = registeredPools[4];
         expect(pool.name).to.equal("Ethena");
-        expect(pool.creator).to.equal(sepolia.NORMAL_TIMELOCK);
+        expect(pool.creator).to.equal(ethereum.NORMAL_TIMELOCK);
         expect(pool.comptroller).to.equal(COMPTROLLER_ETHENA);
       });
       it("should register Ethena pool vTokens in Ethena pool Comptroller", async () => {
@@ -181,7 +181,7 @@ forking(7302561, async () => {
       for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
         it(`should transfer ownership of ${symbol} to GUARDIAN`, async () => {
           const vToken = await ethers.getContractAt(VTOKEN_ABI, address);
-          expect(await vToken.owner()).to.equal(sepolia.GUARDIAN);
+          expect(await vToken.owner()).to.equal(ethereum.GUARDIAN);
         });
       }
     });
@@ -261,7 +261,7 @@ forking(7302561, async () => {
           });
 
           it("should have the correct price oracle", async () => {
-            expect(await comptroller.oracle()).to.equal(sepolia.RESILIENT_ORACLE);
+            expect(await comptroller.oracle()).to.equal(ethereum.RESILIENT_ORACLE);
           });
 
           it("should have close factor = 0.5", async () => {
@@ -277,7 +277,7 @@ forking(7302561, async () => {
           });
 
           it("should have owner = GUARDIAN", async () => {
-            expect(await comptroller.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+            expect(await comptroller.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
           });
         });
       };
@@ -303,7 +303,7 @@ forking(7302561, async () => {
       }
     });
     it("Check Price", async () => {
-      const resilientOracle = new ethers.Contract(sepolia.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+      const resilientOracle = new ethers.Contract(ethereum.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
       for (const [symbol, params] of Object.entries(riskParameters) as [VTokenSymbol, RiskParameters][]) {
         expect(await resilientOracle.getPrice(vTokenState[symbol].underlying)).equals(params.price);
