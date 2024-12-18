@@ -11,11 +11,8 @@ const MockPT_USDe_27MAR2025 = "0x74671106a04496199994787B6BcB064d08afbCCf";
 const MockPT_sUSDE_27MAR2025 = "0x3EBa2Aa29eC2498c2124523634324d4ce89c8579";
 const MocksUSDe = "0xA3A3e5ecEA56940a4Ae32d0927bfd8821DdA848A";
 const MockUSDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
-
-const VPT_USDe_27MAR2025_ETHENA = "0x11B3a14D9F4182b841bBb48637B26ecCC527A30c";
-const VPT_sUSDE_27MAR2025_ETHENA = "0x4975ECc52179b49ECE4B8328601572f07a1fC51D";
-const VsUSDe_Ethena = "0x4DD1e84040Fe689aDDfeE1996b225e3b193d6A8D";
-const VUSDC_Ethena = "0xf3c213775e0592108350Bd0A1864d7e581fBd3a0";
+export const VsUSDe_Ethena = "0x643a2BE96e7675Ca34bcceCB33F4f0fECA1ba9fC";
+export const VUSDC_Ethena = "0x466fe60aE3d8520e49D67e3483626786Ba0E6416";
 
 export const underlyingAddress = [MockPT_USDe_27MAR2025, MockPT_sUSDE_27MAR2025, MocksUSDe, MockUSDC];
 
@@ -61,7 +58,7 @@ export const vip408 = () => {
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [MocksUSDe, parseUnits("10653", 18), sepolia.NORMAL_TIMELOCK],
+        params: [MocksUSDe, parseUnits("10000", 18), sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -73,7 +70,7 @@ export const vip408 = () => {
       {
         target: MocksUSDe,
         signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, parseUnits("10653", 18)],
+        params: [sepolia.POOL_REGISTRY, parseUnits("10000", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -90,7 +87,7 @@ export const vip408 = () => {
             VsUSDe_Ethena,
             parseUnits("0.9", 18),
             parseUnits("0.92", 18),
-            parseUnits("10653", 18),
+            parseUnits("10000", 18),
             sepolia.VTREASURY,
             parseUnits("50000000", 18),
             parseUnits("0", 18),
@@ -154,8 +151,8 @@ export const vip408 = () => {
 
       {
         target: COMPTROLLER_ETHENA,
-        signature: "setActionsPaused(address[],uint256[],bool)",
-        params: [[VsUSDe_Ethena, VUSDC_Ethena], [3, 7], true],
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VsUSDe_Ethena, VUSDC_Ethena], [2, 7], true],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -182,13 +179,16 @@ export const vip408 = () => {
         dstChainId: LzChainId.sepolia,
       })),
 
-      ...Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => ({
-        target: converter,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [baseAsset, [MockUSDC], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
-        dstChainId: LzChainId.sepolia,
-      })),
+      ...Object.entries(converterBaseAssets)
+        .filter(([, baseAsset]) => baseAsset !== MockUSDC) // Skip if base asset is USDC
+        .map(([converter, baseAsset]: [string, string]) => ({
+          target: converter,
+          signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+          params: [baseAsset, [MockUSDC], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
+          dstChainId: LzChainId.sepolia,
+        })),
     ],
+
     meta,
     ProposalType.REGULAR,
   );
