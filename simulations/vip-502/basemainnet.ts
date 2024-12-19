@@ -30,6 +30,7 @@ import CHAINLINK_ORACLE_ABI from "../vip-502/abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
 import TREASURY_ABI from "../vip-502/abi/treasury.json";
 import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
+import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
@@ -45,6 +46,7 @@ forking(23908020, async () => {
   let boundValidator: Contract;
   let xvsBridgeAdmin: Contract;
   let treasury: Contract;
+  let poolRegistry: Contract;
 
   before(async () => {
     await impersonateAccount(basemainnet.NORMAL_TIMELOCK);
@@ -63,6 +65,7 @@ forking(23908020, async () => {
       basemainnet.VTREASURY,
       await ethers.getSigner(basemainnet.NORMAL_TIMELOCK),
     );
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, basemainnet.POOL_REGISTRY);
 
     await pretendExecutingVip(await vip003());
     await pretendExecutingVip(await vip004());
@@ -122,6 +125,9 @@ forking(23908020, async () => {
     });
     it("Normal Timelock should be the owner of the Vtreasury", async () => {
       expect(await treasury.owner()).equals(basemainnet.NORMAL_TIMELOCK);
+    });
+    it("Normal Timelock should be the owner of the PoolRegistry", async () => {
+      expect(await poolRegistry.owner()).equals(basemainnet.NORMAL_TIMELOCK);
     });
     it("can transfer tokens from the treasury", async () => {
       const prevBalance = await provider.getBalance(basemainnet.NORMAL_TIMELOCK);
