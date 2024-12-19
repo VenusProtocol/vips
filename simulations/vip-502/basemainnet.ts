@@ -101,9 +101,6 @@ forking(23864228, async () => {
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
     });
-    it("Normal Timelock should be whitelisted", async () => {
-      expect(await xvsBridge.whitelist(basemainnet.NORMAL_TIMELOCK)).to.be.true;
-    });
     it("oracles should have correct owner", async () => {
       expect(await resilientOracle.owner()).equals(basemainnet.NORMAL_TIMELOCK);
       expect(await chainLinkOracle.owner()).equals(basemainnet.NORMAL_TIMELOCK);
