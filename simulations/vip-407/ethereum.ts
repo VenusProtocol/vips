@@ -10,6 +10,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
   COMPTROLLER_ETHENA,
+  PRIME,
   PT_USDe_27MAR2025,
   PT_sUSDE_27MAR2025,
   VPT_USDe_27MAR2025_ETHENA,
@@ -277,6 +278,10 @@ forking(7302561, async () => {
 
           it("should have owner = NORMAL TIMELOCK", async () => {
             expect(await comptroller.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+          });
+
+          it("should have prime token set", async () => {
+            expect(await comptroller.prime()).to.equal(PRIME);
           });
         });
       };

@@ -83,7 +83,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10619.58410473",
     vTokenReceiver: sepolia.VTREASURY,
     protocolSeizeShareMantissa: "0.004",
-    price: parseUnits("1", 18),
+    price: parseUnits("1.1", 18),
   },
   "vPT-sUSDE-27MAR2025_Ethena": {
     borrowCap: "0",
@@ -94,7 +94,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10653.07272377",
     vTokenReceiver: sepolia.VTREASURY,
     protocolSeizeShareMantissa: "0.004",
-    price: parseUnits("1", 18),
+    price: parseUnits("1.1", 18),
   },
 };
 

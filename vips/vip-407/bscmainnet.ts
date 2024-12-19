@@ -15,6 +15,7 @@ export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const USDe = "0x4c9edd5852cd905f086c759e8383e09bff1e68b3";
 export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
+export const PRIME = "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39";
 
 export const VPT_USDe_27MAR2025_ETHENA = "";
 export const VPT_sUSDE_27MAR2025_ETHENA = "";
@@ -27,7 +28,7 @@ const BOUND_VALIDATOR = "";
 const REDSTONE_USDe_FEED = "0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58";
 const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
-export const EXCHANGE_RATE = parseUnits("1", 18);
+export const EXCHANGE_RATE = parseUnits("1.1", 18);
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
@@ -230,6 +231,11 @@ export const vip407 = () => {
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[VPT_USDe_27MAR2025_ETHENA, VPT_sUSDE_27MAR2025_ETHENA], [2, 2], true],
         dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: COMPTROLLER_ETHENA,
+        signature: "setPrimeToken(address)",
+        params: [PRIME],
       },
     ],
     meta,

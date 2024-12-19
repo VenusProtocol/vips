@@ -17,6 +17,7 @@ const MockUSDe = "0x8bAe3E12870a002A0D4b6Eb0F0CBf91b29d9806F";
 
 export const VPT_USDe_27MAR2025_ETHENA = "0xf2C00a9C3314f7997721253c49276c8531a30803";
 export const VPT_sUSDE_27MAR2025_ETHENA = "0x6c87587b1813eAf5571318E2139048b04eAaFf97";
+export const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
 
 const sUSDE_ERC4626ORACLE = "0xeD4E76bAbA330287Ca2D8d5857da6703bc653621";
 const MockPendleOracle_PT_USDe_27MAR2025 = "0x063a57223EE477d7CB959bc7328d3A06494931A9";
@@ -27,7 +28,7 @@ const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 
 const CHAINLINK_USDe_FEED = "0x55ec7c3ed0d7CB5DF4d3d8bfEd2ecaf28b4638fb";
 
-export const EXCHANGE_RATE = parseUnits("1", 18);
+export const EXCHANGE_RATE = parseUnits("1.1", 18);
 const TWAP_DURATION = 1800;
 const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
@@ -239,6 +240,11 @@ export const vip407 = () => {
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[VPT_USDe_27MAR2025_ETHENA, VPT_sUSDE_27MAR2025_ETHENA], [2, 2], true],
         dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: COMPTROLLER_ETHENA,
+        signature: "setPrimeToken(address)",
+        params: [PRIME],
       },
     ],
     meta,
