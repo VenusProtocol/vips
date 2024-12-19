@@ -93,7 +93,7 @@ forking(23864228, async () => {
       });
     }
 
-    it("should have the correct pending owner", async () => {
+    it("should have the correct owner", async () => {
       expect(await xvsVaultProxy.admin()).to.equal(basemainnet.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(basemainnet.NORMAL_TIMELOCK);
     });
