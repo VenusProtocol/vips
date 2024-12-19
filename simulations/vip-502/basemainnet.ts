@@ -69,7 +69,7 @@ forking(23864228, async () => {
   testForkedNetworkVipCommands("vip502", await vip502());
 
   describe("Post-VIP behavior", async () => {
-    it(`correct owner `, async () => {
+    it(`correct owner for Prime`, async () => {
       expect(await prime.owner()).to.equal(basemainnet.NORMAL_TIMELOCK);
       expect(await plp.owner()).to.equal(basemainnet.NORMAL_TIMELOCK);
     });
