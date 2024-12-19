@@ -144,7 +144,7 @@ export const vip407 = () => {
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [MockPT_USDe_27MAR2025, parseUnits("10619", 18), sepolia.NORMAL_TIMELOCK],
+        params: [MockPT_USDe_27MAR2025, parseUnits("10619.584104736976014893", 18), sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -156,7 +156,7 @@ export const vip407 = () => {
       {
         target: MockPT_USDe_27MAR2025,
         signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, parseUnits("10619", 18)],
+        params: [sepolia.POOL_REGISTRY, parseUnits("10619.584104736976014893", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -173,7 +173,7 @@ export const vip407 = () => {
             VPT_USDe_27MAR2025_ETHENA,
             parseUnits("0.86", 18),
             parseUnits("0.88", 18),
-            parseUnits("10619", 18),
+            parseUnits("10619.584104736976014893", 18),
             sepolia.VTREASURY,
             parseUnits("850000", 18),
             parseUnits("0", 18),
@@ -184,7 +184,7 @@ export const vip407 = () => {
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [MockPT_sUSDE_27MAR2025, parseUnits("10653", 18), sepolia.NORMAL_TIMELOCK],
+        params: [MockPT_sUSDE_27MAR2025, parseUnits("10653.072723772024710328", 18), sepolia.NORMAL_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -196,7 +196,7 @@ export const vip407 = () => {
       {
         target: MockPT_sUSDE_27MAR2025,
         signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, parseUnits("10653", 18)],
+        params: [sepolia.POOL_REGISTRY, parseUnits("10653.072723772024710328", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -213,7 +213,7 @@ export const vip407 = () => {
             VPT_sUSDE_27MAR2025_ETHENA,
             parseUnits("0.85", 18),
             parseUnits("0.87", 18),
-            parseUnits("10653", 18),
+            parseUnits("10653.072723772024710328", 18),
             sepolia.VTREASURY,
             parseUnits("12000000", 18),
             parseUnits("0", 18),

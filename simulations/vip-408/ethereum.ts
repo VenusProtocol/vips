@@ -11,6 +11,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { COMPTROLLER_ETHENA, USDC, sUSDe, vip407 } from "../../vips/vip-407/bscmainnet";
 import {
   CONVERSION_INCENTIVE,
+  VTOKEN_RECEIVER,
   VUSDC_Ethena,
   VsUSDe_Ethena,
   converterBaseAssets,
@@ -83,7 +84,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.92",
     reserveFactor: "0",
     initialSupply: "10000",
-    vTokenReceiver: ethereum.VTREASURY,
+    vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.010",
     price: parseUnits("1", 18),
   },
@@ -94,7 +95,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0",
     reserveFactor: "0.1",
     initialSupply: "10000",
-    vTokenReceiver: ethereum.VTREASURY,
+    vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.020",
     price: BigNumber.from("999987420000000000000000000000"),
   },

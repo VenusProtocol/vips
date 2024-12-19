@@ -14,6 +14,7 @@ export const PT_sUSDE_27MAR2025 = "0xe00bd3df25fb187d6abbb620b3dfd19839947b81";
 export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const USDe = "0x4c9edd5852cd905f086c759e8383e09bff1e68b3";
+export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 
 export const VPT_USDe_27MAR2025_ETHENA = "";
 export const VPT_sUSDE_27MAR2025_ETHENA = "";
@@ -134,7 +135,7 @@ export const vip407 = () => {
       {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [PT_USDe_27MAR2025, parseUnits("10619", 18), ethereum.NORMAL_TIMELOCK],
+        params: [PT_USDe_27MAR2025, parseUnits("10619.584104736976014893", 18), ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -146,7 +147,7 @@ export const vip407 = () => {
       {
         target: PT_USDe_27MAR2025,
         signature: "approve(address,uint256)",
-        params: [ethereum.POOL_REGISTRY, parseUnits("10619", 18)],
+        params: [ethereum.POOL_REGISTRY, parseUnits("10619.584104736976014893", 18)],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -163,8 +164,8 @@ export const vip407 = () => {
             VPT_USDe_27MAR2025_ETHENA,
             parseUnits("0.86", 18),
             parseUnits("0.88", 18),
-            parseUnits("10619", 18),
-            ethereum.VTREASURY,
+            parseUnits("10619.584104736976014893", 18),
+            VTOKEN_RECEIVER,
             parseUnits("850000", 18),
             parseUnits("0", 18),
           ],
@@ -174,7 +175,7 @@ export const vip407 = () => {
       {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [PT_sUSDE_27MAR2025, parseUnits("10653", 18), ethereum.NORMAL_TIMELOCK],
+        params: [PT_sUSDE_27MAR2025, parseUnits("10653.072723772024710328", 18), ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -186,7 +187,7 @@ export const vip407 = () => {
       {
         target: PT_sUSDE_27MAR2025,
         signature: "approve(address,uint256)",
-        params: [ethereum.POOL_REGISTRY, parseUnits("10653", 18)],
+        params: [ethereum.POOL_REGISTRY, parseUnits("10653.072723772024710328", 18)],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -203,8 +204,8 @@ export const vip407 = () => {
             VPT_sUSDE_27MAR2025_ETHENA,
             parseUnits("0.85", 18),
             parseUnits("0.87", 18),
-            parseUnits("10653", 18),
-            ethereum.VTREASURY,
+            parseUnits("10653.072723772024710328", 18),
+            VTOKEN_RECEIVER,
             parseUnits("12000000", 18),
             parseUnits("0", 18),
           ],

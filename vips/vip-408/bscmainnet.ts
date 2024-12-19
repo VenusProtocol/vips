@@ -13,6 +13,7 @@ const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 export const VsUSDe_Ethena = "";
 export const VUSDC_Ethena = "";
+export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 
 export const underlyingAddress = [PT_USDe_27MAR2025, PT_sUSDE_27MAR2025, sUSDe, USDC];
 
@@ -87,7 +88,7 @@ export const vip408 = () => {
             parseUnits("0.9", 18),
             parseUnits("0.92", 18),
             parseUnits("10000", 18),
-            ethereum.VTREASURY,
+            VTOKEN_RECEIVER,
             parseUnits("50000000", 18),
             parseUnits("0", 18),
           ],
@@ -127,7 +128,7 @@ export const vip408 = () => {
             parseUnits("0", 18),
             parseUnits("0", 18),
             parseUnits("10000", 6),
-            ethereum.VTREASURY,
+            VTOKEN_RECEIVER,
             parseUnits("50000000", 6),
             parseUnits("46000000", 6),
           ],
