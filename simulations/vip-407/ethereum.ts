@@ -4,10 +4,11 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip072 from "../../multisig/proposals/ethereum/vip-072/index";
 import {
   COMPTROLLER_ETHENA,
   PRIME,
@@ -46,7 +47,7 @@ interface VTokenState {
 
 const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
   "vPT-USDe-27MAR2025_Ethena": {
-    name: "Venus PT-USDe-27MAR2025(Ethena)",
+    name: "Venus PT-USDe-27MAR2025 (Ethena)",
     symbol: "vPT-USDe-27MAR2025_Ethena",
     decimals: 8,
     underlying: PT_USDe_27MAR2025,
@@ -85,7 +86,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10619.58410473",
     vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.004",
-    price: parseUnits("1", 18),
+    price: BigNumber.from("944429637438332035"),
   },
   "vPT-sUSDE-27MAR2025_Ethena": {
     borrowCap: "0",
@@ -96,7 +97,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10653.07272377",
     vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.004",
-    price: parseUnits("1", 18),
+    price: BigNumber.from("951397618866433430"),
   },
 };
 
@@ -123,7 +124,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   "vPT-sUSDE-27MAR2025_Ethena": "",
 };
 
-forking(7302561, async () => {
+forking(21442115, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -136,6 +137,7 @@ forking(7302561, async () => {
     }
   });
 
+  await pretendExecutingVip(await vip072());
   testForkedNetworkVipCommands("Ethena pool", await vip407());
 
   describe("Post-Execution state", () => {
@@ -152,11 +154,11 @@ forking(7302561, async () => {
       before(async () => {
         registeredPools = await poolRegistry.getAllPools();
       });
-      it("should have 5 pools", async () => {
-        expect(registeredPools).to.have.lengthOf(5);
+      it("should have 4 pools", async () => {
+        expect(registeredPools).to.have.lengthOf(4);
       });
       it("should register Ethena pool in PoolRegistry", async () => {
-        const pool = registeredPools[4];
+        const pool = registeredPools[3];
         expect(pool.name).to.equal("Ethena");
         expect(pool.creator).to.equal(ethereum.NORMAL_TIMELOCK);
         expect(pool.comptroller).to.equal(COMPTROLLER_ETHENA);

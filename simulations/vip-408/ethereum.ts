@@ -4,10 +4,12 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip072 from "../../multisig/proposals/ethereum/vip-072/index";
 import { COMPTROLLER_ETHENA, USDC, sUSDe, vip407 } from "../../vips/vip-407/bscmainnet";
 import {
   CONVERSION_INCENTIVE,
@@ -86,7 +88,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10000",
     vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.010",
-    price: parseUnits("1", 18),
+    price: BigNumber.from("1139893399046785532"),
   },
   vUSDC_Ethena: {
     borrowCap: "46000000",
@@ -97,7 +99,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     initialSupply: "10000",
     vTokenReceiver: VTOKEN_RECEIVER,
     protocolSeizeShareMantissa: "0.020",
-    price: BigNumber.from("999987420000000000000000000000"),
+    price: BigNumber.from("1000006520000000000000000000000"),
   },
 };
 
@@ -124,7 +126,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Ethena: "",
 };
 
-forking(7302561, async () => {
+forking(21442115, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -137,6 +139,7 @@ forking(7302561, async () => {
     }
   });
 
+  await pretendExecutingVip(await vip072());
   testForkedNetworkVipCommands("Ethena pool", await vip407());
   testForkedNetworkVipCommands("Ethena pool", await vip408());
 
@@ -155,10 +158,10 @@ forking(7302561, async () => {
         registeredPools = await poolRegistry.getAllPools();
       });
       it("should have 5 pools", async () => {
-        expect(registeredPools).to.have.lengthOf(5);
+        expect(registeredPools).to.have.lengthOf(4);
       });
       it("should register Ethena pool in PoolRegistry", async () => {
-        const pool = registeredPools[4];
+        const pool = registeredPools[3];
         expect(pool.name).to.equal("Ethena");
         expect(pool.creator).to.equal(ethereum.NORMAL_TIMELOCK);
         expect(pool.comptroller).to.equal(COMPTROLLER_ETHENA);
@@ -306,10 +309,23 @@ forking(7302561, async () => {
     it("Check Price", async () => {
       const resilientOracle = new ethers.Contract(ethereum.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
+      await setMaxStalePeriodInChainlinkOracle(
+        ethereum.CHAINLINK_ORACLE,
+        USDC,
+        ethers.constants.AddressZero,
+        ethereum.NORMAL_TIMELOCK,
+      );
       for (const [symbol, params] of Object.entries(riskParameters) as [VTokenSymbol, RiskParameters][]) {
         expect(await resilientOracle.getPrice(vTokenState[symbol].underlying)).equals(params.price);
         expect(await resilientOracle.getUnderlyingPrice(vTokens[symbol])).equals(params.price);
       }
+    });
+
+    it("should pause actions", async () => {
+      const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
+
+      expect(await comptroller.actionPaused(VsUSDe_Ethena, 2)).to.be.true;
+      expect(await comptroller.actionPaused(VsUSDe_Ethena, 7)).to.be.true;
     });
 
     describe("Converters", () => {

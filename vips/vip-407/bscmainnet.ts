@@ -7,29 +7,29 @@ import { makeProposal } from "src/utils";
 const { ethereum } = NETWORK_ADDRESSES;
 
 export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
-export const COMPTROLLER_ETHENA = "";
+export const COMPTROLLER_ETHENA = "0x562d2b6FF1dbf5f63E233662416782318cC081E4";
 
-export const PT_USDe_27MAR2025 = "0x8a47b431a7d947c6a3ed6e42d501803615a97eaa";
-export const PT_sUSDE_27MAR2025 = "0xe00bd3df25fb187d6abbb620b3dfd19839947b81";
+export const PT_USDe_27MAR2025 = "0x8A47b431A7D947c6a3ED6E42d501803615a97EAa";
+export const PT_sUSDE_27MAR2025 = "0xE00bd3Df25fb187d6ABBB620b3dfd19839947b81";
 export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const USDe = "0x4c9edd5852cd905f086c759e8383e09bff1e68b3";
 export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 export const PRIME = "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39";
 
-export const VPT_USDe_27MAR2025_ETHENA = "";
-export const VPT_sUSDE_27MAR2025_ETHENA = "";
+export const VPT_USDe_27MAR2025_ETHENA = "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B";
+export const VPT_sUSDE_27MAR2025_ETHENA = "0xCca202a95E8096315E3F19E46e19E1b326634889";
 
-const sUSDE_ERC4626ORACLE = "";
-const PendleOracle_PT_USDe_27MAR2025 = "";
-const PendleOracle_PT_sUSDe_27MAR2025 = "";
-const BOUND_VALIDATOR = "";
+const sUSDE_ERC4626ORACLE = "0x67841858BCCA8dF50B962d6A314722a6AEC0970e";
+const PendleOracle_PT_USDe_27MAR2025 = "0x721C02F98bE5ef916F6574E53700a25473742093";
+const PendleOracle_PT_sUSDe_27MAR2025 = "0x17B49f36878c401C1fE4D7Bf6D9CeBAAFBf4edE2";
+const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 
 const REDSTONE_USDe_FEED = "0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58";
 const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
 export const EXCHANGE_RATE = parseUnits("1.1", 18);
-const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const STALE_PERIOD_26H = 60 * 60 * 260; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 
@@ -65,7 +65,7 @@ export const vip407 = () => {
       {
         target: ethereum.REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [USDe, REDSTONE_USDe_FEED, STALE_PERIOD_26H],
+        params: [[USDe, REDSTONE_USDe_FEED, STALE_PERIOD_26H]],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -236,6 +236,7 @@ export const vip407 = () => {
         target: COMPTROLLER_ETHENA,
         signature: "setPrimeToken(address)",
         params: [PRIME],
+        dstChainId: LzChainId.ethereum,
       },
     ],
     meta,

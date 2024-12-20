@@ -5,14 +5,14 @@ import { makeProposal } from "src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const COMPTROLLER_ETHENA = "";
+const COMPTROLLER_ETHENA = "0x562d2b6FF1dbf5f63E233662416782318cC081E4";
 
 const PT_USDe_27MAR2025 = "0x8a47b431a7d947c6a3ed6e42d501803615a97eaa";
 const PT_sUSDE_27MAR2025 = "0xe00bd3df25fb187d6abbb620b3dfd19839947b81";
 const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 const USDC = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-export const VsUSDe_Ethena = "";
-export const VUSDC_Ethena = "";
+export const VsUSDe_Ethena = "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0";
+export const VUSDC_Ethena = "0xa8e7f9473635a5CB79646f14356a9Fc394CA111A";
 export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 
 export const underlyingAddress = [PT_USDe_27MAR2025, PT_sUSDE_27MAR2025, sUSDe, USDC];
