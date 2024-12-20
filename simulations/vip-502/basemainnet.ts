@@ -5,19 +5,18 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip003, { PSR } from "../../multisig/proposals/basemainnet/vip-003";
-import vip004 from "../../multisig/proposals/basemainnet/vip-004";
-import vip005 from "../../multisig/proposals/basemainnet/vip-005";
-import vip006 from "../../multisig/proposals/basemainnet/vip-006";
+import { PSR } from "../../multisig/proposals/basemainnet/vip-003";
 import vip007 from "../../multisig/proposals/basemainnet/vip-007";
-import { PLP, PRIME } from "../../multisig/proposals/basemainnet/vip-007";
-import vip502, {
+import {
   BOUND_VALIDATOR,
   COMPTROLLERS,
+  PLP,
+  PRIME,
   VTOKENS,
-  XVS_BRIDGE_ADMIN,
+  XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-} from "../../vips/vip-502/bscmainnet";
+} from "../../multisig/proposals/basemainnet/vip-007";
+import vip502 from "../../vips/vip-502/bscmainnet";
 import COMPTROLLER_ABI from "../vip-502/abi/Comptroller.json";
 import PRIME_ABI from "../vip-502/abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "../vip-502/abi/PrimeLiquidityProvider.json";
@@ -34,7 +33,7 @@ import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
-forking(23908020, async () => {
+forking(23950456, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -59,18 +58,13 @@ forking(23908020, async () => {
     redstoneOracle = new ethers.Contract(basemainnet.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     resilientOracle = new ethers.Contract(basemainnet.RESILIENT_ORACLE, RESILLIENT_ORACLE_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
-    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN);
+    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
     treasury = await ethers.getContractAt(
       TREASURY_ABI,
       basemainnet.VTREASURY,
       await ethers.getSigner(basemainnet.NORMAL_TIMELOCK),
     );
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, basemainnet.POOL_REGISTRY);
-
-    await pretendExecutingVip(await vip003());
-    await pretendExecutingVip(await vip004());
-    await pretendExecutingVip(await vip005());
-    await pretendExecutingVip(await vip006());
     await pretendExecutingVip(await vip007());
   });
 

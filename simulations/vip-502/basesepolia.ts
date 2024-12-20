@@ -5,16 +5,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { PSR } from "../../multisig/proposals/basesepolia/vip-003";
-import vip007 from "../../multisig/proposals/basesepolia/vip-007";
-import { PLP, PRIME } from "../../multisig/proposals/basesepolia/vip-007";
-import vip502, {
+import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
   VTOKENS,
-  XVS_BRIDGE,
-  XVS_BRIDGE_ADMIN,
+  XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-} from "../../vips/vip-502/bsctestnet";
+} from "../../multisig/proposals/basesepolia/vip-007";
+import { PLP, PRIME } from "../../multisig/proposals/basesepolia/vip-007";
+import vip502 from "../../vips/vip-502/bsctestnet";
 import COMPTROLLER_ABI from "../vip-502/abi/Comptroller.json";
 import PRIME_ABI from "../vip-502/abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "../vip-502/abi/PrimeLiquidityProvider.json";
@@ -28,6 +27,8 @@ import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
 import TREASURY_ABI from "../vip-502/abi/treasury.json";
 import XVS_BRIDGE_ABI from "../vip-502/abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
+
+const XVS_BRIDGE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
@@ -52,7 +53,7 @@ forking(19374669, async () => {
     redstoneOracle = new ethers.Contract(basesepolia.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     resilientOracle = new ethers.Contract(basesepolia.RESILIENT_ORACLE, RESILLIENT_ORACLE_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
-    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN);
+    xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     treasury = await ethers.getContractAt(TREASURY_ABI, basesepolia.VTREASURY);
 

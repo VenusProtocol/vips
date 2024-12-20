@@ -8,7 +8,7 @@ import vip502, { BASE_MAINNET_TRUSTED_REMOTE, remoteBridgeEntries } from "../../
 import { RemoteBridgeEntry } from "../../vips/vip-502/bscmainnet";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(129453114, async () => {
+forking(129545958, async () => {
   before(async () => {
     const ONE_YEAR = 31536000;
     const XVS_REDSTONE_FEED = "0x414F8f961969A8131AbE53294600c6C515E68f81";

@@ -3,7 +3,16 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { PSR } from "../../multisig/proposals/basemainnet/vip-003";
-import { PLP, PRIME } from "../../multisig/proposals/basemainnet/vip-007";
+import {
+  BOUND_VALIDATOR,
+  COMPTROLLERS,
+  PLP,
+  POOL_REGISTRY,
+  PRIME,
+  VTOKENS,
+  XVS_BRIDGE_ADMIN_PROXY,
+  XVS_STORE,
+} from "../../multisig/proposals/basemainnet/vip-007";
 
 export type RemoteBridgeEntry = {
   bridgeAdmin: string;
@@ -17,20 +26,6 @@ export type RemoteBridgeCommand = {
   params: any[];
   dstChainId: LzChainId | undefined;
 };
-
-export const BOUND_VALIDATOR = "0x66dDE062D3DC1BB5223A0096EbB89395d1f11DB0";
-export const POOL_REGISTRY = "0xeef902918DdeCD773D4B422aa1C6e1673EB9136F";
-export const VTOKENS = [
-  "0x3cb752d175740043Ec463673094e06ACDa2F9a2e",
-  "0xEB8A79bD44cF4500943bf94a2b4434c95C008599",
-  "0x7bBd1005bB24Ec84705b04e1f2DfcCad533b6D72",
-];
-export const COMPTROLLERS = ["0x0C7973F9598AA62f9e03B94E92C967fD5437426C"];
-export const XVS_STORE = "0x11b084Cfa559a82AAC0CcD159dBea27899c7955A";
-export const XVS_BRIDGE_ADMIN = "0x6303FEcee7161bF959d65df4Afb9e1ba5701f78e";
-export const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
-
-export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 export const BASE_MAINNET_TRUSTED_REMOTE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
 
@@ -146,7 +141,7 @@ const vip502 = () => {
         dstChainId: LzChainId.basemainnet,
       },
       {
-        target: XVS_BRIDGE_ADMIN,
+        target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.basemainnet,
