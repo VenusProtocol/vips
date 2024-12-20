@@ -15,6 +15,7 @@ import vip007, {
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
 } from "../../multisig/proposals/basemainnet/vip-007";
+import vip408 from "../../vips/vip-408/bscmainnet";
 import vip502 from "../../vips/vip-502/bscmainnet";
 import COMPTROLLER_ABI from "../vip-502/abi/Comptroller.json";
 import PRIME_ABI from "../vip-502/abi/Prime.json";
@@ -35,7 +36,7 @@ const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
-forking(23957731, async () => {
+forking(23958718, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -80,6 +81,7 @@ forking(23957731, async () => {
     });
   });
 
+  testForkedNetworkVipCommands("vip408", await vip408());
   testForkedNetworkVipCommands("vip502", await vip502());
 
   describe("Post-VIP behavior", async () => {
