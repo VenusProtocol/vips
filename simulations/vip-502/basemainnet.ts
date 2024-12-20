@@ -5,13 +5,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { PSR } from "../../multisig/proposals/basemainnet/vip-003";
-import vip007 from "../../multisig/proposals/basemainnet/vip-007";
-import {
+import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
   PLP,
   PRIME,
+  PSR,
   VTOKENS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
@@ -28,12 +27,15 @@ import BOUND_VALIDATOR_ABI from "../vip-502/abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "../vip-502/abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
 import TREASURY_ABI from "../vip-502/abi/treasury.json";
+import XVS_BRIDGE_ABI from "../vip-502/abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
+const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
+
 const { basemainnet } = NETWORK_ADDRESSES;
 
-forking(23950456, async () => {
+forking(23957731, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
@@ -44,6 +46,7 @@ forking(23950456, async () => {
   let resilientOracle: Contract;
   let boundValidator: Contract;
   let xvsBridgeAdmin: Contract;
+  let xvsBridge: Contract;
   let treasury: Contract;
   let poolRegistry: Contract;
 
@@ -59,6 +62,7 @@ forking(23950456, async () => {
     resilientOracle = new ethers.Contract(basemainnet.RESILIENT_ORACLE, RESILLIENT_ORACLE_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
     xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
+    xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
     treasury = await ethers.getContractAt(
       TREASURY_ABI,
       basemainnet.VTREASURY,
@@ -110,6 +114,9 @@ forking(23950456, async () => {
 
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
+    });
+    it("Normal Timelock should be whitelisted", async () => {
+      expect(await xvsBridge.whitelist(basemainnet.NORMAL_TIMELOCK)).to.be.true;
     });
     it("oracles should have correct owner", async () => {
       expect(await resilientOracle.owner()).equals(basemainnet.NORMAL_TIMELOCK);

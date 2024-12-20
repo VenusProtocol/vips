@@ -4,10 +4,10 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { PSR } from "../../multisig/proposals/basesepolia/vip-003";
 import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
+  PSR,
   VTOKENS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,

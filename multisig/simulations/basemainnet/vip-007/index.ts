@@ -4,10 +4,6 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip003 from "../../../proposals/basemainnet/vip-003";
-import vip004 from "../../../proposals/basemainnet/vip-004";
-import vip005 from "../../../proposals/basemainnet/vip-005";
-import vip006 from "../../../proposals/basemainnet/vip-006";
 import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
@@ -47,7 +43,7 @@ const CHAINLINK_ORACLE = basemainnet.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = basemainnet.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = basemainnet.NORMAL_TIMELOCK;
 
-forking(23864228, async () => {
+forking(23957731, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;
@@ -68,11 +64,6 @@ forking(23864228, async () => {
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip003());
-      await pretendExecutingVip(await vip004());
-      await pretendExecutingVip(await vip005());
-      await pretendExecutingVip(await vip006());
-
       proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, DEFAULT_PROXY_ADMIN_ABI, provider);
       prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
       plp = new ethers.Contract(PLP, PLP_ABI, provider);

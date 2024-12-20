@@ -176,6 +176,12 @@ const vip502 = () => {
         params: [],
         dstChainId: LzChainId.basemainnet,
       },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setWhitelist(address,bool)",
+        params: [basemainnet.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.basemainnet,
+      },
       ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
     ],
     meta,
