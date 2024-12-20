@@ -3,7 +3,7 @@ import { forking, testVip } from "../../src/vip-framework";
 import vip407 from "../../vips/vip-407/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(46452753, async () => {
+forking(45031950, async () => {
   testVip("Ethena", await vip407(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
