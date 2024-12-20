@@ -17,7 +17,6 @@ const MockUSDe = "0x8bAe3E12870a002A0D4b6Eb0F0CBf91b29d9806F";
 
 export const VPT_USDe_27MAR2025_ETHENA = "0xf2C00a9C3314f7997721253c49276c8531a30803";
 export const VPT_sUSDE_27MAR2025_ETHENA = "0x6c87587b1813eAf5571318E2139048b04eAaFf97";
-export const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
 
 const sUSDE_ERC4626ORACLE = "0xeD4E76bAbA330287Ca2D8d5857da6703bc653621";
 const MockPendleOracle_PT_USDe_27MAR2025 = "0x063a57223EE477d7CB959bc7328d3A06494931A9";
@@ -240,11 +239,6 @@ export const vip407 = () => {
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[VPT_USDe_27MAR2025_ETHENA, VPT_sUSDE_27MAR2025_ETHENA], [2, 2], true],
         dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: COMPTROLLER_ETHENA,
-        signature: "setPrimeToken(address)",
-        params: [PRIME],
       },
     ],
     meta,

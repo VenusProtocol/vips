@@ -11,6 +11,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { COMPTROLLER_ETHENA, MockUSDC, MocksUSDe, vip407 } from "../../vips/vip-407/bsctestnet";
 import {
   CONVERSION_INCENTIVE,
+  PRIME,
   VUSDC_Ethena,
   VsUSDe_Ethena,
   converterBaseAssets,
@@ -278,6 +279,10 @@ forking(7302561, async () => {
 
           it("should have owner = GUARDIAN", async () => {
             expect(await comptroller.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+          });
+
+          it("Prime for the comptroller", async () => {
+            expect(await comptroller.prime()).to.be.equal(PRIME);
           });
         });
       };

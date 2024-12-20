@@ -13,6 +13,7 @@ const MocksUSDe = "0xA3A3e5ecEA56940a4Ae32d0927bfd8821DdA848A";
 const MockUSDC = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
 export const VsUSDe_Ethena = "0x643a2BE96e7675Ca34bcceCB33F4f0fECA1ba9fC";
 export const VUSDC_Ethena = "0x466fe60aE3d8520e49D67e3483626786Ba0E6416";
+export const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
 
 export const underlyingAddress = [MockPT_USDe_27MAR2025, MockPT_sUSDE_27MAR2025, MocksUSDe, MockUSDC];
 
@@ -55,6 +56,12 @@ export const vip408 = () => {
   };
   return makeProposal(
     [
+      {
+        target: COMPTROLLER_ETHENA,
+        signature: "setPrimeToken(address)",
+        params: [PRIME],
+        dstChainId: LzChainId.sepolia,
+      },
       {
         target: sepolia.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
