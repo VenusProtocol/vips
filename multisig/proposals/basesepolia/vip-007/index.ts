@@ -119,11 +119,6 @@ const vip007 = () => {
       signature: "transferOwnership(address)",
       params: [basesepolia.NORMAL_TIMELOCK],
     },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setWhitelist(address,bool)",
-      params: [basesepolia.NORMAL_TIMELOCK, true],
-    },
   ]);
 };
 

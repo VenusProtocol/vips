@@ -32,7 +32,7 @@ const XVS_BRIDGE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
-forking(19374669, async () => {
+forking(19465734, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;

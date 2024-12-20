@@ -117,6 +117,12 @@ const vip502 = () => {
         params: [],
         dstChainId: LzChainId.basesepolia,
       },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setWhitelist(address,bool)",
+        params: [basesepolia.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.basesepolia,
+      },
     ],
     meta,
     ProposalType.REGULAR,
