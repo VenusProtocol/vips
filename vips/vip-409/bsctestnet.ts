@@ -15,10 +15,10 @@ import {
 } from "../../multisig/proposals/basesepolia/vip-007";
 
 const basesepolia = NETWORK_ADDRESSES.basesepolia;
-const vip502 = () => {
+const vip409 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-502",
+    title: "VIP-409",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -128,4 +128,4 @@ const vip502 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip502;
+export default vip409;

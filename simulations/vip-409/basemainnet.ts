@@ -17,20 +17,20 @@ import vip007, {
   XVS_STORE,
 } from "../../multisig/proposals/basemainnet/vip-007";
 import vip408 from "../../vips/vip-408/bscmainnet";
-import vip502 from "../../vips/vip-502/bscmainnet";
-import COMPTROLLER_ABI from "../vip-502/abi/Comptroller.json";
-import PRIME_ABI from "../vip-502/abi/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "../vip-502/abi/PrimeLiquidityProvider.json";
-import PSR_ABI from "../vip-502/abi/ProtocolShareReserve.json";
-import VTOKEN_ABI from "../vip-502/abi/VToken.json";
-import XVS_STORE_ABI from "../vip-502/abi/XVSStore.json";
-import XVS_VAULT_PROXY_ABI from "../vip-502/abi/XVSVaultProxy.json";
-import BOUND_VALIDATOR_ABI from "../vip-502/abi/boundValidator.json";
-import CHAINLINK_ORACLE_ABI from "../vip-502/abi/chainlinkOracle.json";
-import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
-import TREASURY_ABI from "../vip-502/abi/treasury.json";
-import XVS_BRIDGE_ABI from "../vip-502/abi/xvsBridge.json";
-import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
+import vip409 from "../../vips/vip-409/bscmainnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import VTOKEN_ABI from "./abi/VToken.json";
+import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
+import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
+import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
+import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import TREASURY_ABI from "./abi/treasury.json";
+import XVS_BRIDGE_ABI from "./abi/xvsBridge.json";
+import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
@@ -84,7 +84,7 @@ forking(23958718, async () => {
   });
 
   testForkedNetworkVipCommands("vip408", await vip408());
-  testForkedNetworkVipCommands("vip502", await vip502());
+  testForkedNetworkVipCommands("vip409", await vip409());
 
   describe("Post-VIP behavior", async () => {
     it(`correct owner for Prime`, async () => {
