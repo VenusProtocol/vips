@@ -6,6 +6,7 @@ import { PSR } from "../../multisig/proposals/basemainnet/vip-003";
 import {
   BOUND_VALIDATOR,
   COMPTROLLERS,
+  NATIVE_TOKEN_GATEWAY,
   PLP,
   POOL_REGISTRY,
   PRIME,
@@ -172,6 +173,12 @@ const vip502 = () => {
       },
       {
         target: basemainnet.VTREASURY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: NATIVE_TOKEN_GATEWAY,
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.basemainnet,

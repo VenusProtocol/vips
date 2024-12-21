@@ -9,6 +9,7 @@ import vip007, {
   COMPTROLLERS,
   COMPTROLLER_BEACON,
   DEFAULT_PROXY_ADMIN,
+  NATIVE_TOKEN_GATEWAY,
   PLP,
   PRIME,
   PSR,
@@ -21,6 +22,7 @@ import vip007, {
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -61,6 +63,7 @@ forking(23957731, async () => {
   let redstoneOracle: Contract;
   let boundValidator: Contract;
   let treasury: Contract;
+  let nativeTokenGateway: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
@@ -80,6 +83,7 @@ forking(23957731, async () => {
       redstoneOracle = new ethers.Contract(REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
       treasury = await ethers.getContractAt(TREASURY_ABI, NETWORK_ADDRESSES.basemainnet.VTREASURY);
+      nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, provider);
     });
 
     it("owner of proxy admin is guardian", async () => {
@@ -185,6 +189,10 @@ forking(23957731, async () => {
 
     it("correct pending owner", async () => {
       expect(await xvsStore.pendingAdmin()).to.equal(NORMAL_TIMELOCK);
+    });
+
+    it("should set correct pending owner for NativeTokenGateway", async () => {
+      expect(await nativeTokenGateway.pendingOwner()).to.equal(NORMAL_TIMELOCK);
     });
 
     it("Should set bridge pending owner to Normal Timelock", async () => {

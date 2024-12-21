@@ -8,6 +8,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
+  NATIVE_TOKEN_GATEWAY,
   PLP,
   PRIME,
   PSR,
@@ -30,6 +31,7 @@ import RESILLIENT_ORACLE_ABI from "../vip-502/abi/resilientOracle.json";
 import TREASURY_ABI from "../vip-502/abi/treasury.json";
 import XVS_BRIDGE_ABI from "../vip-502/abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "../vip-502/abi/xvsBridgeAdmin.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
 const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
@@ -112,6 +114,11 @@ forking(23958718, async () => {
     it("should have the correct owner", async () => {
       expect(await xvsVaultProxy.admin()).to.equal(basemainnet.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(basemainnet.NORMAL_TIMELOCK);
+    });
+
+    it("should set the correct owner for NativeTokenGateway", async () => {
+      const ntg = new ethers.Contract(NATIVE_TOKEN_GATEWAY, NATIVE_TOKEN_GATEWAY_ABI, ethers.provider);
+      expect(await ntg.owner()).to.equal(basemainnet.NORMAL_TIMELOCK);
     });
 
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {

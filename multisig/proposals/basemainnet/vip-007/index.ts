@@ -10,6 +10,7 @@ export const COMPTROLLER_BEACON = "0x1b6dE1C670db291bcbF793320a42dbBD858E67aC";
 export const VTOKEN_BEACON = "0x87a6476510368c4Bfb70d04A3B0e5a881eC7f0d1";
 export const ACM = "0x9E6CeEfDC6183e4D0DF8092A9B90cDF659687daB";
 export const POOL_REGISTRY = "0xeef902918DdeCD773D4B422aa1C6e1673EB9136F";
+export const NATIVE_TOKEN_GATEWAY = "0x8e890ca3829c740895cdEACd4a3BE36ff9343643";
 
 export const COMPTROLLERS = ["0x0C7973F9598AA62f9e03B94E92C967fD5437426C"];
 export const XVS_STORE = "0x11b084Cfa559a82AAC0CcD159dBea27899c7955A";
@@ -116,6 +117,11 @@ const vip007 = () => {
     },
     {
       target: basemainnet.VTREASURY,
+      signature: "transferOwnership(address)",
+      params: [basemainnet.NORMAL_TIMELOCK],
+    },
+    {
+      target: NATIVE_TOKEN_GATEWAY,
       signature: "transferOwnership(address)",
       params: [basemainnet.NORMAL_TIMELOCK],
     },
