@@ -161,32 +161,17 @@ export const vip408 = () => {
       ...Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => ({
         target: converter,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [baseAsset, [PT_USDe_27MAR2025], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
+        params: [
+          baseAsset,
+          [PT_USDe_27MAR2025, PT_sUSDE_27MAR2025, sUSDe],
+          [
+            [CONVERSION_INCENTIVE, ConversionAccessibility.ALL],
+            [CONVERSION_INCENTIVE, ConversionAccessibility.ALL],
+            [CONVERSION_INCENTIVE, ConversionAccessibility.ALL],
+          ],
+        ],
         dstChainId: LzChainId.ethereum,
       })),
-
-      ...Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => ({
-        target: converter,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [baseAsset, [PT_sUSDE_27MAR2025], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
-        dstChainId: LzChainId.ethereum,
-      })),
-
-      ...Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => ({
-        target: converter,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [baseAsset, [sUSDe], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
-        dstChainId: LzChainId.ethereum,
-      })),
-
-      ...Object.entries(converterBaseAssets)
-        .filter(([, baseAsset]) => baseAsset !== USDC) // Skip if base asset is USDC
-        .map(([converter, baseAsset]: [string, string]) => ({
-          target: converter,
-          signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-          params: [baseAsset, [USDC], [[CONVERSION_INCENTIVE, ConversionAccessibility.ALL]]],
-          dstChainId: LzChainId.ethereum,
-        })),
     ],
 
     meta,
