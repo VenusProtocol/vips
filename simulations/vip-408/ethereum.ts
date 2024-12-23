@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
@@ -157,7 +158,7 @@ forking(21442115, async () => {
       before(async () => {
         registeredPools = await poolRegistry.getAllPools();
       });
-      it("should have 5 pools", async () => {
+      it("should have 4 pools", async () => {
         expect(registeredPools).to.have.lengthOf(4);
       });
       it("should register Ethena pool in PoolRegistry", async () => {
@@ -287,6 +288,7 @@ forking(21442115, async () => {
       };
 
       checkComptroller(COMPTROLLER_ETHENA, "Ethena");
+      checkIsolatedPoolsComptrollers();
     });
 
     it("Interest rates", async () => {
@@ -325,7 +327,6 @@ forking(21442115, async () => {
       const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
 
       expect(await comptroller.actionPaused(VsUSDe_Ethena, 2)).to.be.true;
-      expect(await comptroller.actionPaused(VsUSDe_Ethena, 7)).to.be.true;
     });
 
     describe("Converters", () => {

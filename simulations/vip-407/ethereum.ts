@@ -27,7 +27,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 14 seconds
+const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 15 seconds
 
 type VTokenSymbol = "vPT-USDe-27MAR2025_Ethena" | "vPT-sUSDE-27MAR2025_Ethena";
 
@@ -315,6 +315,12 @@ forking(21442115, async () => {
         expect(await resilientOracle.getPrice(vTokenState[symbol].underlying)).equals(params.price);
         expect(await resilientOracle.getUnderlyingPrice(vTokens[symbol])).equals(params.price);
       }
+    });
+
+    it("should pause actions", async () => {
+      const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
+      expect(await comptroller.actionPaused(VPT_USDe_27MAR2025_ETHENA, 2)).to.be.true;
+      expect(await comptroller.actionPaused(VPT_sUSDE_27MAR2025_ETHENA, 2)).to.be.true;
     });
   });
 });

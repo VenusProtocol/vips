@@ -152,7 +152,7 @@ export const vip408 = () => {
       {
         target: COMPTROLLER_ETHENA,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VsUSDe_Ethena, VUSDC_Ethena], [2, 7], true],
+        params: [[VsUSDe_Ethena], [2], true],
         dstChainId: LzChainId.ethereum,
       },
 
