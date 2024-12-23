@@ -19,6 +19,8 @@ import vip007, {
 import vip408 from "../../vips/vip-408/bscmainnet";
 import vip409 from "../../vips/vip-409/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
+import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
@@ -31,8 +33,6 @@ import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_BRIDGE_ABI from "./abi/xvsBridge.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
-import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
-import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 
 const XVS_BRIDGE = "0x3dD92fB51a5d381Ae78E023dfB5DD1D45D2426Cd";
 

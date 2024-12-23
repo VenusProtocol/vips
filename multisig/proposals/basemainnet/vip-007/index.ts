@@ -68,9 +68,9 @@ const vip007 = () => {
         params: [basemainnet.NORMAL_TIMELOCK],
       };
     }),
-    ...VTOKENS.map(comptroller => {
+    ...VTOKENS.map(vToken => {
       return {
-        target: comptroller,
+        target: vToken,
         signature: "transferOwnership(address)",
         params: [basemainnet.NORMAL_TIMELOCK],
       };
