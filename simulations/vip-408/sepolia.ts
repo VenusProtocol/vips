@@ -9,17 +9,8 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import { COMPTROLLER_ETHENA, MockUSDC, MocksUSDe, vip407 } from "../../vips/vip-407/bsctestnet";
-import {
-  CONVERSION_INCENTIVE,
-  PRIME,
-  VUSDC_Ethena,
-  VsUSDe_Ethena,
-  converterBaseAssets,
-  underlyingAddress,
-  vip408,
-} from "../../vips/vip-408/bsctestnet";
+import { PRIME, VUSDC_Ethena, VsUSDe_Ethena, vip408 } from "../../vips/vip-408/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -316,18 +307,11 @@ forking(7302561, async () => {
       }
     });
 
-    describe("Converters", () => {
-      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
-        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
-        for (const asset of underlyingAddress) {
-          it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${asset}`, async () => {
-            if (baseAsset != asset) {
-              const result = await converterContract.conversionConfigurations(baseAsset, asset);
-              expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
-            }
-          });
-        }
-      }
+    it("should pause actions", async () => {
+      const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
+
+      expect(await comptroller.actionPaused(VsUSDe_Ethena, 2)).to.be.true;
+      expect(await comptroller.actionPaused(VsUSDe_Ethena, 7)).to.be.true;
     });
   });
 });
