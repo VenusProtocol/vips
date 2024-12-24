@@ -201,21 +201,23 @@ export const emissions = [
   },
 ];
 
-const commands = emissions.map(emission => {
-  const speed = emission.newAllocation.div(emission.blocksOrSecondsPerMonth);
-  return {
-    target: emission.rewardsDistributor,
-    signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-    params: [
-      [emission.vToken],
-      [emission.isSupplierAllocation ? speed : 0],
-      [emission.isBorrowerAllocation ? speed : 0],
-    ],
-    dstChainId: emission.chainId,
-  };
-}).reduce((accumulator, currentValue) => {
+const commands = emissions
+  .map(emission => {
+    const speed = emission.newAllocation.div(emission.blocksOrSecondsPerMonth);
+    return {
+      target: emission.rewardsDistributor,
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [
+        [emission.vToken],
+        [emission.isSupplierAllocation ? speed : 0],
+        [emission.isBorrowerAllocation ? speed : 0],
+      ],
+      dstChainId: emission.chainId,
+    };
+  })
+  .reduce((accumulator: any, currentValue: any) => {
     const command = accumulator.find(
-      it => it.target == currentValue.target && it.dstChainId == currentValue.dstChainId,
+      (it: any) => it.target == currentValue.target && it.dstChainId == currentValue.dstChainId,
     );
     if (!command) {
       accumulator.push(currentValue);
