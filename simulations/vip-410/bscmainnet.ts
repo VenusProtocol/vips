@@ -1,14 +1,14 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { expect } from "chai";
+import { Contract } from "ethers";
+import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip410, {BSC_XVS_VAULT, BSC_COMPTROLLER, BSC_XVS, BSC_XVS_MARKET} from "../../vips/vip-410/bscmainnet";
+import vip410, { BSC_COMPTROLLER, BSC_XVS, BSC_XVS_MARKET, BSC_XVS_VAULT } from "../../vips/vip-410/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import { Contract } from "ethers";
-import { ethers } from "hardhat";
-import { expect } from "chai";
 
 forking(45126615, async () => {
   let comptroller: Contract;
@@ -26,11 +26,11 @@ forking(45126615, async () => {
 
     it("check VAI vault rate", async () => {
       expect(await comptroller.venusVAIVaultRate()).to.equals("4340277777777780");
-    })
+    });
 
     it("check XVS market speed", async () => {
       expect(await comptroller.venusSupplySpeeds(BSC_XVS_MARKET)).to.equals("1388888888888888");
-    })
+    });
   });
 
   testVip("vip-410", await vip410(), {
@@ -58,10 +58,10 @@ forking(45126615, async () => {
 
     it("check VAI vault rate", async () => {
       expect(await comptroller.venusVAIVaultRate()).to.equals("3255787037037037");
-    })
+    });
 
     it("check XVS market speed", async () => {
       expect(await comptroller.venusSupplySpeeds(BSC_XVS_MARKET)).to.equals("1027397260273972");
-    })
-  })
+    });
+  });
 });

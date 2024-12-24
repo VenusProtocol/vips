@@ -1,11 +1,10 @@
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { LzChainId } from "src/types";
 
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
-import { LzChainId } from "src/types";
 
-export const ZKSYNC_BLOCKS_PER_MONTH = 2592000; 
+export const ZKSYNC_BLOCKS_PER_MONTH = 2592000;
 export const ARBITRUM_BLOCKS_PER_MONTH = 2592000;
 export const ETHEREUM_BLOCKS_PER_MONTH = 216000;
 export const BSC_BLOCKS_PER_MONTH = 876000;
@@ -24,7 +23,7 @@ export const BSC_XVS_VAULT = "0x051100480289e704d20e9DB4804837068f3f9204";
 export const ZKSYNC_XVS = "0xD78ABD81a3D57712a3af080dc4185b698Fe9ac5A";
 export const ETHEREYM_XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const ARBITRUM_XVS = "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52";
-export const BSC_XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63"
+export const BSC_XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const ZKSYNC_XVS_VAULT_REWARD = "405092592592592";
 export const ETHEREYM_XVS_VAULT_REWARD = "23333333333333333";
@@ -37,10 +36,9 @@ export const BSC_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const BSC_VAI_VAULT_RATE = "3255787037037037";
 export const BSC_XVS_VAULT_RATE = "15312500000000000";
 
-const emissions = [
+export const emissions = [
   {
     chainId: LzChainId.zksyncmainnet,
-    currentAllocation: ethers.utils.parseEther("900"),
     newAllocation: ethers.utils.parseEther("630"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -50,7 +48,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.zksyncmainnet,
-    currentAllocation: ethers.utils.parseEther("1200"),
     newAllocation: ethers.utils.parseEther("600"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -60,7 +57,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.zksyncmainnet,
-    currentAllocation: ethers.utils.parseEther("1200"),
     newAllocation: ethers.utils.parseEther("600"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -70,7 +66,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.zksyncmainnet,
-    currentAllocation: ethers.utils.parseEther("900"),
     newAllocation: ethers.utils.parseEther("450"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -80,7 +75,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.zksyncmainnet,
-    currentAllocation: ethers.utils.parseEther("1800"),
     newAllocation: ethers.utils.parseEther("900"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -90,7 +84,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.ethereum,
-    currentAllocation: ethers.utils.parseEther("633"),
     newAllocation: ethers.utils.parseEther("475"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -100,7 +93,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.ethereum,
-    currentAllocation: ethers.utils.parseEther("1898"),
     newAllocation: ethers.utils.parseEther("949"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -110,7 +102,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.ethereum,
-    currentAllocation: ethers.utils.parseEther("2279"),
     newAllocation: ethers.utils.parseEther("1709"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -120,7 +111,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.ethereum,
-    currentAllocation: ethers.utils.parseEther("2279"),
     newAllocation: ethers.utils.parseEther("1709"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -130,7 +120,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.ethereum,
-    currentAllocation: ethers.utils.parseEther("12375"),
     newAllocation: ethers.utils.parseEther("3713"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -140,7 +129,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("319"),
     newAllocation: ethers.utils.parseEther("239"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -150,7 +138,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("319"),
     newAllocation: ethers.utils.parseEther("239"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -160,7 +147,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("638"),
     newAllocation: ethers.utils.parseEther("319"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -170,7 +156,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("638"),
     newAllocation: ethers.utils.parseEther("479"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -180,7 +165,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("638"),
     newAllocation: ethers.utils.parseEther("479"),
     isSupplierAllocation: false,
     isBorrowerAllocation: true,
@@ -190,7 +174,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("3400"),
     newAllocation: ethers.utils.parseEther("1020"),
     isSupplierAllocation: true,
     isBorrowerAllocation: false,
@@ -200,7 +183,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("850"),
     newAllocation: ethers.utils.parseEther("0"),
     isSupplierAllocation: false,
     isBorrowerAllocation: false,
@@ -210,7 +192,6 @@ const emissions = [
   },
   {
     chainId: LzChainId.arbitrumone,
-    currentAllocation: ethers.utils.parseEther("850"),
     newAllocation: ethers.utils.parseEther("0"),
     isSupplierAllocation: false,
     isBorrowerAllocation: false,
@@ -218,7 +199,7 @@ const emissions = [
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
     blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
   },
-]
+];
 
 const commands = emissions.map(emission => {
   const speed = emission.newAllocation.div(emission.blocksPerMonth);
@@ -230,9 +211,9 @@ const commands = emissions.map(emission => {
       [emission.isSupplierAllocation ? speed : 0],
       [emission.isBorrowerAllocation ? speed : 0],
     ],
-    dstChainId: emission.chainId
+    dstChainId: emission.chainId,
   };
-})
+});
 
 export const vip410 = () => {
   const meta = {
@@ -251,41 +232,35 @@ export const vip410 = () => {
         target: ZKSYNC_XVS_VAULT,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [ZKSYNC_XVS, ZKSYNC_XVS_VAULT_REWARD],
-        dstChainId: LzChainId.zksyncmainnet
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ETHEREYM_XVS_VAULT,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [ETHEREYM_XVS, ETHEREYM_XVS_VAULT_REWARD],
-        dstChainId: LzChainId.ethereum
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ARBITRUM_XVS_VAULT,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [ARBITRUM_XVS, ARBITRUM_XVS_VAULT_REWARD],
-        dstChainId: LzChainId.arbitrumone
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: BSC_COMPTROLLER,
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [BSC_XVS_MARKET],
-          [BSC_XVS_MARKET_SUPPLY_REWARD_MONTHLY.div(BSC_BLOCKS_PER_MONTH)],
-          [0],
-        ],
+        params: [[BSC_XVS_MARKET], [BSC_XVS_MARKET_SUPPLY_REWARD_MONTHLY.div(BSC_BLOCKS_PER_MONTH)], [0]],
       },
       {
         target: BSC_COMPTROLLER,
         signature: "_setVenusVAIVaultRate(uint256)",
-        params: [
-          BSC_VAI_VAULT_RATE
-        ],
+        params: [BSC_VAI_VAULT_RATE],
       },
       {
         target: BSC_XVS_VAULT,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [BSC_XVS, BSC_XVS_VAULT_RATE],
-      }
+      },
     ],
     meta,
     ProposalType.REGULAR,
