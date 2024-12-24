@@ -35,13 +35,13 @@ forking(288053557, async () => {
         isBorrowerAllocation,
         vToken,
         rewardsDistributor,
-        blocksPerMonth,
+        blocksOrSecondsPerMonth,
       } of emissions) {
         if (chainId == LzChainId.arbitrumone) {
           const rewardDistirbutor = new ethers.Contract(rewardsDistributor, REWARDS_DISTRIBUTOR_ABI, ethers.provider);
           if (isSupplierAllocation) {
             expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(
-              newAllocation.div(blocksPerMonth),
+              newAllocation.div(blocksOrSecondsPerMonth),
             );
             expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(0);
           }
@@ -49,7 +49,7 @@ forking(288053557, async () => {
           if (isBorrowerAllocation) {
             expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(0);
             expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(
-              newAllocation.div(blocksPerMonth),
+              newAllocation.div(blocksOrSecondsPerMonth),
             );
           }
         }

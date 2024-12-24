@@ -4,8 +4,8 @@ import { LzChainId } from "src/types";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const ZKSYNC_BLOCKS_PER_MONTH = 2592000;
-export const ARBITRUM_BLOCKS_PER_MONTH = 2592000;
+export const ZKSYNC_SECONDS_PER_MONTH = 2592000;
+export const ARBITRUM_SECONDS_PER_MONTH = 2592000;
 export const ETHEREUM_BLOCKS_PER_MONTH = 216000;
 export const BSC_BLOCKS_PER_MONTH = 864000;
 
@@ -44,7 +44,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x697a70779C1A03Ba2BD28b7627a902BFf831b616",
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
-    blocksPerMonth: ZKSYNC_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
@@ -53,7 +53,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8",
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
-    blocksPerMonth: ZKSYNC_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
@@ -62,7 +62,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719",
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
-    blocksPerMonth: ZKSYNC_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
@@ -71,7 +71,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46",
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
-    blocksPerMonth: ZKSYNC_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
@@ -80,7 +80,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D",
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
-    blocksPerMonth: ZKSYNC_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
@@ -89,7 +89,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
@@ -98,7 +98,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
@@ -107,7 +107,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
@@ -116,7 +116,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
@@ -125,7 +125,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_LST,
-    blocksPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -134,7 +134,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -143,7 +143,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -152,7 +152,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0xaDa57840B372D4c28623E87FC175dE8490792811",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -161,7 +161,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -170,7 +170,7 @@ export const emissions = [
     isBorrowerAllocation: true,
     vToken: "0x7D8609f8da70fF9027E9bc5229Af4F6727662707",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -179,7 +179,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x39D6d13Ea59548637104E40e729E4aABE27FE106",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -188,7 +188,7 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x9df6B5132135f14719696bBAe3C54BAb272fDb16",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
@@ -197,12 +197,12 @@ export const emissions = [
     isBorrowerAllocation: false,
     vToken: "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88",
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
-    blocksPerMonth: ARBITRUM_BLOCKS_PER_MONTH,
+    blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
 ];
 
 const commands = emissions.map(emission => {
-  const speed = emission.newAllocation.div(emission.blocksPerMonth);
+  const speed = emission.newAllocation.div(emission.blocksOrSecondsPerMonth);
   return {
     target: emission.rewardsDistributor,
     signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
