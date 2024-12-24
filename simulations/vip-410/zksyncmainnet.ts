@@ -39,25 +39,13 @@ forking(52050098, async () => {
       } of emissions) {
         if (chainId == LzChainId.zksyncmainnet) {
           const rewardDistirbutor = new ethers.Contract(rewardsDistributor, REWARDS_DISTRIBUTOR_ABI, ethers.provider);
-          if (isSupplierAllocation) {
-            expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(
-              newAllocation.div(blocksOrSecondsPerMonth),
-            );
-          }
+          expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(
+            isSupplierAllocation ? newAllocation.div(blocksOrSecondsPerMonth) : 0,
+          );
 
-          if (!isBorrowerAllocation) {
-            expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(0);
-          }
-
-          if (isBorrowerAllocation) {
-            expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(
-              newAllocation.div(blocksOrSecondsPerMonth),
-            );
-          }
-
-          if (!isSupplierAllocation) {
-            expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(0);
-          }
+          expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(
+            isBorrowerAllocation ? newAllocation.div(blocksOrSecondsPerMonth) : 0,
+          );
         }
       }
     });
