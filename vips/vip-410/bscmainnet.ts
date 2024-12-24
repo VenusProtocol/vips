@@ -213,7 +213,19 @@ const commands = emissions.map(emission => {
     ],
     dstChainId: emission.chainId,
   };
-});
+}).reduce((accumulator, currentValue) => {
+    const command = accumulator.find(
+      it => it.target == currentValue.target && it.dstChainId == currentValue.dstChainId,
+    );
+    if (!command) {
+      accumulator.push(currentValue);
+    } else {
+      command.params[0].push(currentValue.params[0][0]);
+      command.params[1].push(currentValue.params[1][0]);
+      command.params[2].push(currentValue.params[2][0]);
+    }
+    return accumulator;
+  }, []);
 
 export const vip410 = () => {
   const meta = {
