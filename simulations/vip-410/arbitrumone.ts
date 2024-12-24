@@ -20,7 +20,7 @@ forking(288053557, async () => {
         txResponse,
         [REWARDS_DISTRIBUTOR_ABI],
         ["RewardTokenSupplySpeedUpdated", "RewardTokenBorrowSpeedUpdated"],
-        [5, 6],
+        [7, 6],
       );
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },

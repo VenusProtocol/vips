@@ -40,162 +40,162 @@ export const emissions = [
   {
     chainId: LzChainId.zksyncmainnet,
     newAllocation: ethers.utils.parseEther("630"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x697a70779C1A03Ba2BD28b7627a902BFf831b616",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x697a70779C1A03Ba2BD28b7627a902BFf831b616", // ZK
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
     blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
     newAllocation: ethers.utils.parseEther("600"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8", // WETH
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
     blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
     newAllocation: ethers.utils.parseEther("600"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719", // WBTC
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
     blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
     newAllocation: ethers.utils.parseEther("450"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46", // USDT
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
     blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.zksyncmainnet,
     newAllocation: ethers.utils.parseEther("900"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D", // USDC.e
     rewardsDistributor: ZKSYNC_XVS_REWARDS_DISTRIBUTOR,
     blocksOrSecondsPerMonth: ZKSYNC_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
     newAllocation: ethers.utils.parseEther("475"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x7c8ff7d2A1372433726f879BD945fFb250B94c65", // WETH
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
     newAllocation: ethers.utils.parseEther("949"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x8716554364f20BCA783cb2BAA744d39361fd1D8d", // WBTC
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
     newAllocation: ethers.utils.parseEther("1709"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E", // USDT
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
     newAllocation: ethers.utils.parseEther("1709"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb", // USDC
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.ethereum,
     newAllocation: ethers.utils.parseEther("3713"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a (slightly) change
+    vToken: "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2", // WETH
     rewardsDistributor: ETHEREUM_XVS_REWARDS_DISTRIBUTOR_LST,
     blocksOrSecondsPerMonth: ETHEREUM_BLOCKS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("239"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6", // ARB
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("239"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0", // WETH
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("319"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0xaDa57840B372D4c28623E87FC175dE8490792811",
+    isSupplierAllocation: true, // it implies a change
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0xaDa57840B372D4c28623E87FC175dE8490792811", // WBTC
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("479"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD", // USDT
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("479"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: true,
-    vToken: "0x7D8609f8da70fF9027E9bc5229Af4F6727662707",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: true, // it implies a change
+    vToken: "0x7D8609f8da70fF9027E9bc5229Af4F6727662707", // USDC
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("1020"),
-    isSupplierAllocation: true,
-    isBorrowerAllocation: false,
-    vToken: "0x39D6d13Ea59548637104E40e729E4aABE27FE106",
+    isSupplierAllocation: true, // no changes w.r.t. the current speeds
+    isBorrowerAllocation: false, // it implies a change
+    vToken: "0x39D6d13Ea59548637104E40e729E4aABE27FE106", // WETH
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("0"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: false,
-    vToken: "0x9df6B5132135f14719696bBAe3C54BAb272fDb16",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: false, // no changes w.r.t. the current speeds
+    vToken: "0x9df6B5132135f14719696bBAe3C54BAb272fDb16", // wstETH
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
   {
     chainId: LzChainId.arbitrumone,
     newAllocation: ethers.utils.parseEther("0"),
-    isSupplierAllocation: false,
-    isBorrowerAllocation: false,
-    vToken: "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88",
+    isSupplierAllocation: false, // it implies a change
+    isBorrowerAllocation: false, // no changes w.r.t. the current speeds
+    vToken: "0x246a35E79a3a0618535A469aDaF5091cAA9f7E88", // weETH
     rewardsDistributor: ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST,
     blocksOrSecondsPerMonth: ARBITRUM_SECONDS_PER_MONTH,
   },
