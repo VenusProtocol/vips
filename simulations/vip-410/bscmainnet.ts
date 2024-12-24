@@ -61,7 +61,7 @@ forking(45126615, async () => {
     });
 
     it("check XVS market speed", async () => {
-      expect(await comptroller.venusSupplySpeeds(BSC_XVS_MARKET)).to.equals("1027397260273972");
+      expect(await comptroller.venusSupplySpeeds(BSC_XVS_MARKET)).to.equals("1041666666666666");
     });
   });
 });

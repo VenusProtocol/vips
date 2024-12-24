@@ -5,9 +5,9 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip410, {
-  ETHEREYM_XVS,
-  ETHEREYM_XVS_VAULT,
-  ETHEREYM_XVS_VAULT_REWARD,
+  ETHEREUM_XVS,
+  ETHEREUM_XVS_VAULT,
+  ETHEREUM_XVS_VAULT_REWARD,
   emissions,
 } from "../../vips/vip-410/bscmainnet";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
@@ -51,8 +51,8 @@ forking(21470971, async () => {
     });
 
     it("check xvs vault speed", async () => {
-      const xvsVault = new ethers.Contract(ETHEREYM_XVS_VAULT, XVS_VAULT_ABI, ethers.provider);
-      expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(ETHEREYM_XVS)).to.equals(ETHEREYM_XVS_VAULT_REWARD);
+      const xvsVault = new ethers.Contract(ETHEREUM_XVS_VAULT, XVS_VAULT_ABI, ethers.provider);
+      expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(ETHEREUM_XVS)).to.equals(ETHEREUM_XVS_VAULT_REWARD);
     });
   });
 });

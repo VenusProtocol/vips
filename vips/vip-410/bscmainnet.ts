@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { LzChainId } from "src/types";
+import { Command, LzChainId } from "src/types";
 
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
@@ -16,17 +16,17 @@ export const ARBITRUM_XVS_REWARDS_DISTRIBUTOR_CORE = "0x53b488baA4052094495b6De9
 export const ARBITRUM_XVS_REWARDS_DISTRIBUTOR_LST = "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D";
 
 export const ZKSYNC_XVS_VAULT = "0xbbB3C88192a5B0DB759229BeF49DcD1f168F326F";
-export const ETHEREYM_XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
+export const ETHEREUM_XVS_VAULT = "0xA0882C2D5DF29233A092d2887A258C2b90e9b994";
 export const ARBITRUM_XVS_VAULT = "0x8b79692AAB2822Be30a6382Eb04763A74752d5B4";
 export const BSC_XVS_VAULT = "0x051100480289e704d20e9DB4804837068f3f9204";
 
 export const ZKSYNC_XVS = "0xD78ABD81a3D57712a3af080dc4185b698Fe9ac5A";
-export const ETHEREYM_XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
+export const ETHEREUM_XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
 export const ARBITRUM_XVS = "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52";
 export const BSC_XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const ZKSYNC_XVS_VAULT_REWARD = "405092592592592";
-export const ETHEREYM_XVS_VAULT_REWARD = "23333333333333333";
+export const ETHEREUM_XVS_VAULT_REWARD = "23333333333333333";
 export const ARBITRUM_XVS_VAULT_REWARD = "405092592592592";
 
 export const BSC_XVS_MARKET = "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D";
@@ -215,7 +215,7 @@ const commands = emissions
       dstChainId: emission.chainId,
     };
   })
-  .reduce((accumulator: any, currentValue: any) => {
+  .reduce((accumulator: Command[], currentValue: Command) => {
     const command = accumulator.find(
       (it: any) => it.target == currentValue.target && it.dstChainId == currentValue.dstChainId,
     );
@@ -232,8 +232,66 @@ const commands = emissions
 export const vip410 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-410 Market Emission Adjustment",
-    description: ``,
+    title: "VIP-410 Emissions Adjustments Across All Chains",
+    description: `#### Summary
+
+Following the community proposal [Proposal: Emissions Adjustments Across All Chains](https://community.venus.io/t/proposal-emissions-adjustments-across-all-chains/4777), and the [associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x8033a801d152e88511475c117e114a3a2e4037d5a7252a2bea40e78a36b72d51), if passed, this VIP will perform the following actions:
+
+- Adjust the XVS emissions on BNB Chain, Ethereum, Arbitrum one and ZKSync Era markets
+- Reduce the XVS emissions in the XVS Vaults of the mentioned networks
+- Reduce the XVS emissions in the VAI Vault on BNB Chain
+
+The sum of the current emissions is 2,238.8 XVS/day, and after the change the daily emission of XVS in these networks will be 1,012.4 XVS/day (a 55% reduction).
+
+#### Details
+
+Specifically, the changes in the monthly XVS emissions are:
+
+**BNB Chain.**
+
+- Core pool
+  - XVS. From 1,200 XVS/month to 900 XVS/month (100% for suppliers, and 0% for borrowers)
+  - XVS Vault: from 18,900 XVS/month to 13,230 XVS/month
+  - VAI Vault: from 3,750 XVS/month to 2,813 XVS/month
+
+**Ethereum.**
+
+- Core pool
+  - WETH. From 633 XVS/month to 475 XVS/month (100% for suppliers, and 0% for borrowers)
+  - WBTC. From 1,898 XVS/month to 949 XVS/month (100% for suppliers, and 0% for borrowers)
+  - USDT. From 2,279 XVS/month to 1,709 XVS/month (0% for suppliers, and 100% for borrowers)
+  - USDC. From 2,279 XVS/month to 1,709 XVS/month (0% for suppliers, and 100% for borrowers)
+- Liquid Staked ETH pool
+  - From 12,375 XVS/month to 3,713 XVS/month (100% for suppliers, and 0% for borrowers)
+- XVS Vault: from 7,200 XVS/month to 5,040 XVS/month
+
+**ZKSync Era.**
+
+- Core pool
+  - ZKSync. From 900 XVS/month to 630 XVS/month (100% for suppliers, and 0% for borrowers)
+  - ETH. From 1,200 XVS/month to 600 XVS/month (100% for suppliers, and 0% for borrowers)
+  - BTC. From 1,200 XVS/month to 600 XVS/month (100% for suppliers, and 0% for borrowers)
+  - USDT. From 900 XVS/month to 450 XVS/month (0% for suppliers, and 100% for borrowers)
+  - USDC.e. From 1,800 XVS/month to 900 XVS/month (0% for suppliers, and 100% for borrowers)
+- XVS Vault: from 1,500 XVS/month to 1,050 XVS/month
+
+**Arbitrum one.**
+
+- Core pool
+  - ARB. From 319 XVS/month to 239 XVS/month (100% for suppliers, and 0% for borrowers)
+  - WETH. From 319 XVS/month to 239 XVS/month (100% for suppliers, and 0% for borrowers)
+  - WBTC. From 638 XVS/month to 319 XVS/month (100% for suppliers, and 0% for borrowers)
+  - USDT. From 638 XVS/month to 479 XVS/month (0% for suppliers, and 100% for borrowers)
+  - USDC. From 638 XVS/month to 479 XVS/month (0% for suppliers, and 100% for borrowers)
+- Liquid Staked ETH pool
+  - WETH. From 3,400 XVS/month to 1,020 XVS/month (100% for suppliers, and 0% for borrowers)
+  - wstETH. From 850 XVS/month to 0 XVS/month (0% for suppliers, and 0% for borrowers)
+  - weETH. From 850 XVS/month to 0 XVS/month (0% for suppliers, and 0% for borrowers)
+- XVS Vault: from 1,500 XVS/month to 1,050 XVS/month
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/443)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -249,9 +307,9 @@ export const vip410 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
-        target: ETHEREYM_XVS_VAULT,
+        target: ETHEREUM_XVS_VAULT,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
-        params: [ETHEREYM_XVS, ETHEREYM_XVS_VAULT_REWARD],
+        params: [ETHEREUM_XVS, ETHEREUM_XVS_VAULT_REWARD],
         dstChainId: LzChainId.ethereum,
       },
       {
