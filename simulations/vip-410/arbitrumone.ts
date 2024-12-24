@@ -43,14 +43,20 @@ forking(288053557, async () => {
             expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(
               newAllocation.div(blocksOrSecondsPerMonth),
             );
+          }
+
+          if (!isBorrowerAllocation) {
             expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(0);
           }
 
           if (isBorrowerAllocation) {
-            expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(0);
             expect(await rewardDistirbutor.rewardTokenBorrowSpeeds(vToken)).to.equals(
               newAllocation.div(blocksOrSecondsPerMonth),
             );
+          }
+
+          if (!isSupplierAllocation) {
+            expect(await rewardDistirbutor.rewardTokenSupplySpeeds(vToken)).to.equals(0);
           }
         }
       }
