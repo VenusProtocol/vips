@@ -14,13 +14,13 @@ import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 forking(288053557, async () => {
-  testForkedNetworkVipCommands("VIP 403 Multichain Governance - Permissions", await vip410(), {
+  testForkedNetworkVipCommands("VIP 410", await vip410(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [REWARDS_DISTRIBUTOR_ABI],
         ["RewardTokenSupplySpeedUpdated", "RewardTokenBorrowSpeedUpdated"],
-        [7, 6],
+        [5, 6],
       );
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },

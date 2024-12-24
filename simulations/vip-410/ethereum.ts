@@ -14,7 +14,7 @@ import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 forking(21470971, async () => {
-  testForkedNetworkVipCommands("VIP 403 Multichain Governance - Permissions", await vip410(), {
+  testForkedNetworkVipCommands("VIP 410", await vip410(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
