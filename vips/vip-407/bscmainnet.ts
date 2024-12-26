@@ -28,7 +28,7 @@ const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 const REDSTONE_USDe_FEED = "0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58";
 const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
-const STALE_PERIOD_26H = 60 * 60 * 260; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 
