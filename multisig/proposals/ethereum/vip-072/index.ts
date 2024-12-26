@@ -3,7 +3,7 @@ import { makeProposal } from "src/utils";
 
 const { VTREASURY, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.ethereum;
 
-export const vip071 = () => {
+export const vip072 = () => {
   return makeProposal([
     {
       target: VTREASURY,
@@ -13,4 +13,4 @@ export const vip071 = () => {
   ]);
 };
 
-export default vip071;
+export default vip072;
