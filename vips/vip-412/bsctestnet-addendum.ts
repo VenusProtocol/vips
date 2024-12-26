@@ -56,10 +56,10 @@ export const WBTCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
 export const WETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
 export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
 
-export const vip409 = () => {
+export const vip412Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-409 [Sepolia] New Ethena pool (Part-III)",
+    title: "VIP-412 [Sepolia] New Ethena pool (Part-III)",
     description: `#### Summary`,
     forDescription: "Process to configure and launch the new pool",
     againstDescription: "Defer configuration and launch of the new pool",
@@ -150,4 +150,4 @@ export const vip409 = () => {
   );
 };
 
-export default vip409;
+export default vip412Addendum;

@@ -1,13 +1,13 @@
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
 import vip072 from "../../../proposals/ethereum/vip-072";
 import VTREASURY_ABI from "./abi/VTreasury.json";
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
-import { parseUnits } from "ethers/lib/utils";
-import { Contract } from "ethers";
 
 const { VTREASURY, GUARDIAN, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.ethereum;
 
@@ -31,8 +31,8 @@ forking(21442115, async () => {
       await pretendExecutingVip(await vip072());
     });
 
-    it("transfers ownership to normal timelock", async () => {      
-      expect(await vTreasury.pendingOwner()).to.equal(NORMAL_TIMELOCK)
+    it("transfers ownership to normal timelock", async () => {
+      expect(await vTreasury.pendingOwner()).to.equal(NORMAL_TIMELOCK);
       await vTreasury.acceptOwnership();
       expect(await vTreasury.owner()).to.equal(NORMAL_TIMELOCK);
     });

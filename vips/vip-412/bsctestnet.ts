@@ -17,10 +17,10 @@ export const PRIME = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
 
 export const underlyingAddress = [MockPT_USDe_27MAR2025, MockPT_sUSDE_27MAR2025, MocksUSDe, MockUSDC];
 
-export const vip408 = () => {
+export const vip412 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-408 [Sepolia] New Ethena pool (Part-II)",
+    title: "VIP-412 [Sepolia] New Ethena pool (Part-II)",
     description: `#### Summary`,
     forDescription: "Process to configure and launch the new pool",
     againstDescription: "Defer configuration and launch of the new pool",
@@ -141,4 +141,4 @@ export const vip408 = () => {
   );
 };
 
-export default vip408;
+export default vip412;

@@ -34,10 +34,10 @@ const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";
 
-export const vip407 = () => {
+export const vip411 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-407 [Sepolia] New Ethena pool",
+    title: "VIP-411 [Sepolia] New Ethena pool",
     description: `#### Summary`,
     forDescription: "Process to configure and launch the new pool",
     againstDescription: "Defer configuration and launch of the new pool",
@@ -246,4 +246,4 @@ export const vip407 = () => {
   );
 };
 
-export default vip407;
+export default vip411;

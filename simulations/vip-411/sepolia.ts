@@ -14,8 +14,8 @@ import {
   MockPT_sUSDE_27MAR2025,
   VPT_USDe_27MAR2025_ETHENA,
   VPT_sUSDE_27MAR2025_ETHENA,
-  vip407,
-} from "../../vips/vip-407/bsctestnet";
+  vip411,
+} from "../../vips/vip-411/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -134,7 +134,7 @@ forking(7302561, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("Ethena pool", await vip407());
+  testForkedNetworkVipCommands("Ethena pool", await vip411());
 
   describe("Post-Execution state", () => {
     before(async () => {

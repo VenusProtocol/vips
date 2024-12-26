@@ -2,15 +2,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { vip407 } from "../../vips/vip-407/bsctestnet";
-import { underlyingAddress, vip408 } from "../../vips/vip-408/bsctestnet";
-import { CONVERSION_INCENTIVE, converterBaseAssets, vip409 } from "../../vips/vip-409/bsctestnet";
+import { vip411 } from "../../vips/vip-411/bsctestnet";
+import { underlyingAddress, vip412 } from "../../vips/vip-412/bsctestnet";
+import { CONVERSION_INCENTIVE, converterBaseAssets, vip412Addendum } from "../../vips/vip-412/bsctestnet-addendum";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 
 forking(7302561, async () => {
-  testForkedNetworkVipCommands("Ethena pool 1", await vip407());
-  testForkedNetworkVipCommands("Ethena pool 2", await vip408());
-  testForkedNetworkVipCommands("Ethena pool 3", await vip409());
+  testForkedNetworkVipCommands("Ethena pool 1", await vip411());
+  testForkedNetworkVipCommands("Ethena pool 2", await vip412());
+  testForkedNetworkVipCommands("Ethena pool 3", await vip412Addendum());
 
   describe("Post-Execution state", async () => {
     describe("Converters", () => {

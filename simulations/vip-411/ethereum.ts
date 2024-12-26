@@ -4,25 +4,22 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip072 from "../../multisig/proposals/ethereum/vip-072/index";
-import { COMPTROLLER_ETHENA, USDC, sUSDe, vip407 } from "../../vips/vip-407/bscmainnet";
 import {
-  CONVERSION_INCENTIVE,
+  COMPTROLLER_ETHENA,
+  PRIME,
+  PT_USDe_27MAR2025,
+  PT_sUSDE_27MAR2025,
+  VPT_USDe_27MAR2025_ETHENA,
+  VPT_sUSDE_27MAR2025_ETHENA,
   VTOKEN_RECEIVER,
-  VUSDC_Ethena,
-  VsUSDe_Ethena,
-  converterBaseAssets,
-  underlyingAddress,
-  vip408,
-} from "../../vips/vip-408/bscmainnet";
+  vip411,
+} from "../../vips/vip-411/bscmainnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -30,13 +27,14 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-const BLOCKS_PER_YEAR = BigNumber.from(2628000);
+const BLOCKS_PER_YEAR = BigNumber.from("2628000"); // assuming a block is mined every 15 seconds
+const ONE_YEAR = 365 * 24 * 3600;
 
-type VTokenSymbol = "vsUSDe_Ethena" | "vUSDC_Ethena";
+type VTokenSymbol = "vPT-USDe-27MAR2025_Ethena" | "vPT-sUSDE-27MAR2025_Ethena";
 
 const vTokens: { [key in VTokenSymbol]: string } = {
-  vsUSDe_Ethena: VsUSDe_Ethena,
-  vUSDC_Ethena: VUSDC_Ethena,
+  "vPT-USDe-27MAR2025_Ethena": VPT_USDe_27MAR2025_ETHENA,
+  "vPT-sUSDE-27MAR2025_Ethena": VPT_sUSDE_27MAR2025_ETHENA,
 };
 
 interface VTokenState {
@@ -49,20 +47,20 @@ interface VTokenState {
 }
 
 const vTokenState: { [key in VTokenSymbol]: VTokenState } = {
-  vsUSDe_Ethena: {
-    name: "Venus sUSDe (Ethena)",
-    symbol: "vsUSDe_Ethena",
+  "vPT-USDe-27MAR2025_Ethena": {
+    name: "Venus PT-USDe-27MAR2025 (Ethena)",
+    symbol: "vPT-USDe-27MAR2025_Ethena",
     decimals: 8,
-    underlying: sUSDe,
+    underlying: PT_USDe_27MAR2025,
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_ETHENA,
   },
-  vUSDC_Ethena: {
-    name: "Venus USDC (Ethena)",
-    symbol: "vUSDC_Ethena",
+  "vPT-sUSDE-27MAR2025_Ethena": {
+    name: "Venus PT-sUSDE-27MAR2025 (Ethena)",
+    symbol: "vPT-sUSDE-27MAR2025_Ethena",
     decimals: 8,
-    underlying: USDC,
-    exchangeRate: parseUnits("1", 16),
+    underlying: PT_sUSDE_27MAR2025,
+    exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_ETHENA,
   },
 };
@@ -80,27 +78,27 @@ interface RiskParameters {
 }
 
 const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
-  vsUSDe_Ethena: {
+  "vPT-USDe-27MAR2025_Ethena": {
     borrowCap: "0",
-    supplyCap: "50000000",
-    collateralFactor: "0.9",
-    liquidationThreshold: "0.92",
+    supplyCap: "850000",
+    collateralFactor: "0.86",
+    liquidationThreshold: "0.88",
     reserveFactor: "0",
-    initialSupply: "10000",
+    initialSupply: "10619.58410473",
     vTokenReceiver: VTOKEN_RECEIVER,
-    protocolSeizeShareMantissa: "0.010",
-    price: BigNumber.from("1139893399046785532"),
+    protocolSeizeShareMantissa: "0.004",
+    price: BigNumber.from("950417733216075981"),
   },
-  vUSDC_Ethena: {
-    borrowCap: "46000000",
-    supplyCap: "50000000",
-    collateralFactor: "0",
-    liquidationThreshold: "0",
-    reserveFactor: "0.1",
-    initialSupply: "10000",
+  "vPT-sUSDE-27MAR2025_Ethena": {
+    borrowCap: "0",
+    supplyCap: "12000000",
+    collateralFactor: "0.85",
+    liquidationThreshold: "0.87",
+    reserveFactor: "0",
+    initialSupply: "10653.07272377",
     vTokenReceiver: VTOKEN_RECEIVER,
-    protocolSeizeShareMantissa: "0.020",
-    price: BigNumber.from("1000006520000000000000000000000"),
+    protocolSeizeShareMantissa: "0.004",
+    price: BigNumber.from("956341412036494277"),
   },
 };
 
@@ -114,20 +112,20 @@ interface InterestRateModelSpec {
 
 const interestRateModels: InterestRateModelSpec[] = [
   {
-    vTokens: ["vUSDC_Ethena"],
-    kink: "0.92",
+    vTokens: ["vPT-USDe-27MAR2025_Ethena", "vPT-sUSDE-27MAR2025_Ethena"],
+    kink: "0.8",
     base: "0",
-    multiplier: "0.16304",
-    jump: "2.5",
+    multiplier: "0.08",
+    jump: "0.8",
   },
 ];
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
-  vsUSDe_Ethena: "",
-  vUSDC_Ethena: "",
+  "vPT-USDe-27MAR2025_Ethena": "",
+  "vPT-sUSDE-27MAR2025_Ethena": "",
 };
 
-forking(21442115, async () => {
+forking(21488201, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -141,8 +139,7 @@ forking(21442115, async () => {
   });
 
   await pretendExecutingVip(await vip072());
-  testForkedNetworkVipCommands("Ethena pool", await vip407());
-  testForkedNetworkVipCommands("Ethena pool", await vip408());
+  testForkedNetworkVipCommands("Ethena pool", await vip411(ONE_YEAR));
 
   describe("Post-Execution state", () => {
     before(async () => {
@@ -170,10 +167,11 @@ forking(21442115, async () => {
       it("should register Ethena pool vTokens in Ethena pool Comptroller", async () => {
         const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.have.lengthOf(4);
-        expect(poolVTokens).to.include(vTokens.vUSDC_Ethena);
-        expect(poolVTokens).to.include(vTokens.vsUSDe_Ethena);
+        expect(poolVTokens).to.have.lengthOf(2);
+        expect(poolVTokens).to.include(vTokens["vPT-USDe-27MAR2025_Ethena"]);
+        expect(poolVTokens).to.include(vTokens["vPT-sUSDE-27MAR2025_Ethena"]);
       });
+
       for (const [symbol, { underlying }] of Object.entries(vTokenState) as [VTokenSymbol, VTokenState][]) {
         it(`should register ${symbol} in PoolRegistry`, async () => {
           const registeredVToken = await poolRegistry.getVTokenForAsset(vTokenState[symbol].comptroller, underlying);
@@ -281,14 +279,17 @@ forking(21442115, async () => {
             expect(await comptroller.minLiquidatableCollateral()).to.equal(parseUnits("100", 18));
           });
 
-          it("should have owner = GUARDIAN", async () => {
+          it("should have owner = NORMAL TIMELOCK", async () => {
             expect(await comptroller.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+          });
+
+          it("should have prime token set", async () => {
+            expect(await comptroller.prime()).to.equal(PRIME);
           });
         });
       };
 
       checkComptroller(COMPTROLLER_ETHENA, "Ethena");
-      checkIsolatedPoolsComptrollers();
     });
 
     it("Interest rates", async () => {
@@ -311,12 +312,6 @@ forking(21442115, async () => {
     it("Check Price", async () => {
       const resilientOracle = new ethers.Contract(ethereum.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
-      await setMaxStalePeriodInChainlinkOracle(
-        ethereum.CHAINLINK_ORACLE,
-        USDC,
-        ethers.constants.AddressZero,
-        ethereum.NORMAL_TIMELOCK,
-      );
       for (const [symbol, params] of Object.entries(riskParameters) as [VTokenSymbol, RiskParameters][]) {
         expect(await resilientOracle.getPrice(vTokenState[symbol].underlying)).equals(params.price);
         expect(await resilientOracle.getUnderlyingPrice(vTokens[symbol])).equals(params.price);
@@ -325,22 +320,8 @@ forking(21442115, async () => {
 
     it("should pause actions", async () => {
       const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_ETHENA);
-
-      expect(await comptroller.actionPaused(VsUSDe_Ethena, 2)).to.be.true;
-    });
-
-    describe("Converters", () => {
-      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
-        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
-        for (const asset of underlyingAddress) {
-          it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${asset}`, async () => {
-            if (baseAsset != asset) {
-              const result = await converterContract.conversionConfigurations(baseAsset, asset);
-              expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
-            }
-          });
-        }
-      }
+      expect(await comptroller.actionPaused(VPT_USDe_27MAR2025_ETHENA, 2)).to.be.true;
+      expect(await comptroller.actionPaused(VPT_sUSDE_27MAR2025_ETHENA, 2)).to.be.true;
     });
   });
 });

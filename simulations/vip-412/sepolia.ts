@@ -8,8 +8,8 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { COMPTROLLER_ETHENA, MockUSDC, MocksUSDe, vip407 } from "../../vips/vip-407/bsctestnet";
-import { PRIME, VUSDC_Ethena, VsUSDe_Ethena, vip408 } from "../../vips/vip-408/bsctestnet";
+import { COMPTROLLER_ETHENA, MockUSDC, MocksUSDe, vip411 } from "../../vips/vip-411/bsctestnet";
+import { PRIME, VUSDC_Ethena, VsUSDe_Ethena, vip412 } from "../../vips/vip-412/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -128,8 +128,8 @@ forking(7302561, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("Ethena pool", await vip407());
-  testForkedNetworkVipCommands("Ethena pool", await vip408());
+  testForkedNetworkVipCommands("Ethena pool", await vip411());
+  testForkedNetworkVipCommands("Ethena pool", await vip412());
 
   describe("Post-Execution state", () => {
     before(async () => {
