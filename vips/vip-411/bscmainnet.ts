@@ -32,9 +32,8 @@ export const BSC_TWO_KINKS_IRM = "0x4D712A88Ff15a7147a9966c5ED2ccb392F1760c9";
 export const ZKSYNC_TWO_KINKS_IRM = "0x61E98E6a1F37649543156DC995E0dfe466B31a2e";
 
 export const BSC_DAI_TUSD_IRM = "0x0be3ca99FBBE16b86C3b00E2C4c30C3892F31647";
-export const BSC_USDT_DEFI_GAMEFI_IRM = "0xB4b4eB2CDA57F304945A96123acae80Fb873a601";
-export const BSC_USDT_MEME_IRM = "0xd109E4cbd098581Caa78fD3b259DEFaF14baBd06";
-export const BSC_USDT_TRON_IRM = "0xF1606ac127E5759E2876b85138E69e0740B5E20c";
+export const BSC_USDT_DEFI_GAMEFI_TRON_IRM = "0xB4b4eB2CDA57F304945A96123acae80Fb873a601";
+export const BSC_USDT_MEME_IRM = "0xb92d4Be4532868CDEd9f5Df6eAb3507a3bC542e5";
 export const ETHEREUM_DAI_TUSD_FRAX_IRM = "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9";
 export const ETHEREUM_crvUSD_IRM = "0x837996e7d74222965ACf1fdd478926e07336a291";
 
@@ -145,12 +144,12 @@ export const vip411 = () => {
       {
         target: vUSDT_BSC_DEFI,
         signature: "setInterestRateModel(address)",
-        params: [BSC_USDT_DEFI_GAMEFI_IRM],
+        params: [BSC_USDT_DEFI_GAMEFI_TRON_IRM],
       },
       {
         target: vUSDT_BSC_GAMEFI,
         signature: "setInterestRateModel(address)",
-        params: [BSC_USDT_DEFI_GAMEFI_IRM],
+        params: [BSC_USDT_DEFI_GAMEFI_TRON_IRM],
       },
       {
         target: vUSDT_BSC_MEME,
@@ -160,7 +159,7 @@ export const vip411 = () => {
       {
         target: vUSDT_BSC_TRON,
         signature: "setInterestRateModel(address)",
-        params: [BSC_USDT_TRON_IRM],
+        params: [BSC_USDT_DEFI_GAMEFI_TRON_IRM],
       },
     ],
     meta,

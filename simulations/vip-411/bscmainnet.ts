@@ -6,15 +6,44 @@ import { checkInterestRate, checkTwoKinksInterestRate } from "src/vip-framework/
 import vip411, {
   BSC_DAI_TUSD_IRM,
   BSC_TWO_KINKS_IRM,
-  BSC_USDT_DEFI_GAMEFI_IRM,
+  BSC_USDT_DEFI_GAMEFI_TRON_IRM,
   BSC_USDT_MEME_IRM,
-  BSC_USDT_TRON_IRM,
+  vDAI_BSC_CORE,
+  vTUSD_BSC_CORE,
+  vUSDT_BSC_GAMEFI,
+  vUSDT_BSC_MEME,
+  vUSDT_BSC_TRON,
+  vUSDT_BSC_DEFI,
+  vUSDC_BSC_CORE,
+  vUSDT_BSC_CORE
 } from "../../vips/vip-411/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTOKEN_ABI from "./abi/VToken.json";
+import { ethers } from "hardhat";
+import { expect } from "chai";
 
-forking(45235835, async () => {
-  describe("Pre-VIP behaviour", () => {
+forking(45237826, async () => {
+  describe("Pre-VIP behaviour", async () => {
+    it("check IRM address", async () => {
+      let vToken = new ethers.Contract(vDAI_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805");
+
+      vToken = new ethers.Contract(vTUSD_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805");
+
+      vToken = new ethers.Contract(vUSDT_BSC_DEFI, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0x3aB2e4594D9C81455b330B423Dec61E49EB11667");
+
+      vToken = new ethers.Contract(vUSDT_BSC_GAMEFI, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0x3aB2e4594D9C81455b330B423Dec61E49EB11667");
+
+      vToken = new ethers.Contract(vUSDT_BSC_MEME, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0xDdeb3556b325D5578575c6eF0F855b73D2323E34");
+
+      vToken = new ethers.Contract(vUSDT_BSC_TRON, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals("0x009cdFB248e021f58A34B50dc2A7601EA72d14Ac");
+    })
+
     checkInterestRate("0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805", "DAI_TUSD_CORE", {
       base: "0",
       multiplier: "0.1",
@@ -58,6 +87,32 @@ forking(45235835, async () => {
   });
 
   describe("Post-VIP behavior", () => {
+    it("check IRM address", async () => {
+      let vToken = new ethers.Contract(vDAI_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_DAI_TUSD_IRM);
+
+      vToken = new ethers.Contract(vTUSD_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_DAI_TUSD_IRM);
+
+      vToken = new ethers.Contract(vUSDT_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_TWO_KINKS_IRM);
+
+      vToken = new ethers.Contract(vUSDC_BSC_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_TWO_KINKS_IRM);
+
+      vToken = new ethers.Contract(vUSDT_BSC_DEFI, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_USDT_DEFI_GAMEFI_TRON_IRM);
+
+      vToken = new ethers.Contract(vUSDT_BSC_GAMEFI, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_USDT_DEFI_GAMEFI_TRON_IRM);
+
+      vToken = new ethers.Contract(vUSDT_BSC_MEME, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_USDT_MEME_IRM);
+
+      vToken = new ethers.Contract(vUSDT_BSC_TRON, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(BSC_USDT_DEFI_GAMEFI_TRON_IRM);
+    })
+
     checkTwoKinksInterestRate(BSC_TWO_KINKS_IRM, "USDC_USDT_CORE", {
       base: "0",
       multiplier: "0.15",
@@ -75,27 +130,20 @@ forking(45235835, async () => {
       kink: "0.8",
     });
 
-    checkInterestRate(BSC_USDT_DEFI_GAMEFI_IRM, "USDT_DEFI_GAMEFI_CORE", {
+    checkInterestRate(BSC_USDT_DEFI_GAMEFI_TRON_IRM, "USDT_DEFI_GAMEFI_CORE", {
       base: "0.02",
       multiplier: "0.2",
       jump: "2.5",
       kink: "0.8",
     });
 
-    // Fix this IRM
     checkInterestRate(BSC_USDT_MEME_IRM, "USDT_MEME_CORE", {
-      base: "0.03",
-      multiplier: "0.2",
-      jump: "2.5",
-      kink: "0.6",
-    });
-
-    // Fix this IRM
-    checkInterestRate(BSC_USDT_TRON_IRM, "USDT_TRON_CORE", {
       base: "0",
       multiplier: "0.2",
       jump: "2.5",
       kink: "0.8",
     });
+
+    
   });
 });
