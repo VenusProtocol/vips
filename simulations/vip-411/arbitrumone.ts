@@ -1,9 +1,15 @@
+import { expect } from "chai";
 import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip411, { ARBITRUM_TWO_KINKS_IRM } from "../../vips/vip-411/bscmainnet";
+import vip411, {
+  ARBITRUM_TWO_KINKS_IRM,
+  vUSDC_ARBITRUM_CORE,
+  vUSDT_ARBITRUM_CORE,
+} from "../../vips/vip-411/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const ARB_BLOCKS_PER_YEAR = 31_536_000;
@@ -16,6 +22,14 @@ forking(289107554, async () => {
   });
 
   describe("Post-VIP behaviour", async () => {
+    it("check IRM address", async () => {
+      let vToken = new ethers.Contract(vUSDC_ARBITRUM_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(ARBITRUM_TWO_KINKS_IRM);
+
+      vToken = new ethers.Contract(vUSDT_ARBITRUM_CORE, VTOKEN_ABI, ethers.provider);
+      expect(await vToken.interestRateModel()).to.equals(ARBITRUM_TWO_KINKS_IRM);
+    });
+
     checkTwoKinksInterestRateIL(
       ARBITRUM_TWO_KINKS_IRM,
       "USDC_USDT_CORE",

@@ -1,4 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { expect } from "chai";
+import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -10,17 +12,15 @@ import vip411, {
   BSC_USDT_MEME_IRM,
   vDAI_BSC_CORE,
   vTUSD_BSC_CORE,
+  vUSDC_BSC_CORE,
+  vUSDT_BSC_CORE,
+  vUSDT_BSC_DEFI,
   vUSDT_BSC_GAMEFI,
   vUSDT_BSC_MEME,
   vUSDT_BSC_TRON,
-  vUSDT_BSC_DEFI,
-  vUSDC_BSC_CORE,
-  vUSDT_BSC_CORE
 } from "../../vips/vip-411/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import { ethers } from "hardhat";
-import { expect } from "chai";
 
 forking(45237826, async () => {
   describe("Pre-VIP behaviour", async () => {
@@ -42,7 +42,7 @@ forking(45237826, async () => {
 
       vToken = new ethers.Contract(vUSDT_BSC_TRON, VTOKEN_ABI, ethers.provider);
       expect(await vToken.interestRateModel()).to.equals("0x009cdFB248e021f58A34B50dc2A7601EA72d14Ac");
-    })
+    });
 
     checkInterestRate("0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805", "DAI_TUSD_CORE", {
       base: "0",
@@ -111,7 +111,7 @@ forking(45237826, async () => {
 
       vToken = new ethers.Contract(vUSDT_BSC_TRON, VTOKEN_ABI, ethers.provider);
       expect(await vToken.interestRateModel()).to.equals(BSC_USDT_DEFI_GAMEFI_TRON_IRM);
-    })
+    });
 
     checkTwoKinksInterestRate(BSC_TWO_KINKS_IRM, "USDC_USDT_CORE", {
       base: "0",
@@ -143,7 +143,5 @@ forking(45237826, async () => {
       jump: "2.5",
       kink: "0.8",
     });
-
-    
   });
 });
