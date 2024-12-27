@@ -1,5 +1,4 @@
-import { ethers } from "hardhat";
-import { Command, LzChainId } from "src/types";
+import { LzChainId } from "src/types";
 
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";

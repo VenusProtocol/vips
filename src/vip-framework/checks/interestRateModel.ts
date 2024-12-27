@@ -120,7 +120,6 @@ export function checkTwoKinksInterestRate(
   });
 }
 
-
 export function checkTwoKinksInterestRateIL(
   rateModelAddress: string,
   symbol: string,
