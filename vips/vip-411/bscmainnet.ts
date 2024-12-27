@@ -125,22 +125,22 @@ export const vip411 = () => {
       },
       {
         target: vUSDC_BSC_CORE,
-        signature: "setInterestRateModel(address)",
+        signature: "_setInterestRateModel(address)",
         params: [BSC_TWO_KINKS_IRM],
       },
       {
         target: vUSDT_BSC_CORE,
-        signature: "setInterestRateModel(address)",
+        signature: "_setInterestRateModel(address)",
         params: [BSC_TWO_KINKS_IRM],
       },
       {
         target: vDAI_BSC_CORE,
-        signature: "setInterestRateModel(address)",
+        signature: "_setInterestRateModel(address)",
         params: [BSC_DAI_TUSD_IRM],
       },
       {
         target: vTUSD_BSC_CORE,
-        signature: "setInterestRateModel(address)",
+        signature: "_setInterestRateModel(address)",
         params: [BSC_DAI_TUSD_IRM],
       },
       {
