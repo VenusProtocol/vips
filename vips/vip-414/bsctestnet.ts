@@ -132,7 +132,7 @@ export const CLOSE_FACTOR = parseUnits("0.5", 18);
 export const LIQUIDATION_INCENTIVE = parseUnits("1.03", 18);
 export const MIN_LIQUIDATABLE_COLLATERAL = parseUnits("100", 18);
 
-const vip500 = () => {
+const vip414 = () => {
   const meta = {
     version: "v2",
     title: "BTC pool on BNB chain",
@@ -278,4 +278,4 @@ const vip500 = () => {
   );
 };
 
-export default vip500;
+export default vip414;
