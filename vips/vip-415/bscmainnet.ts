@@ -37,11 +37,53 @@ export const BSC_USDT_MEME_IRM = "0xb92d4Be4532868CDEd9f5Df6eAb3507a3bC542e5";
 export const ETHEREUM_DAI_TUSD_FRAX_IRM = "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9";
 export const ETHEREUM_crvUSD_IRM = "0x837996e7d74222965ACf1fdd478926e07336a291";
 
-export const vip411 = () => {
+export const vip415 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-411",
-    description: ``,
+    title: "VIP-415 Risk Parameters Adjustments (Stablecoins)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in this Venus community forum publication: [Stablecoin Interest Rate Adjustment and 2-Kink Model Integration](https://community.venus.io/t/stablecoin-interest-rate-adjustment-and-2-kink-model-integration/4774).
+
+- Set a **Two Kinks Interest Rate Model** with the following parameters, for the following markets:
+    - Parameters:
+        - Base rate 1: 0
+        - Base rate 2: 0
+        - Multiplier 1: 0.15
+        - Multiplier 2: 0.9
+        - Kink 1: 0.8
+        - Kink 2: 0.9
+        - JumpMultiplier: 3
+    - Markets:
+        - BNB Chain
+            - [USDC (Core)](https://bscscan.com/address/0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8)
+            - [USDT (Core)](https://bscscan.com/address/0xfD5840Cd36d94D7229439859C0112a4185BC0255)
+        - Ethereum
+            - [USDC (Core)](https://etherscan.io/address/0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb)
+            - [USDT (Core)](https://etherscan.io/address/0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E)
+        - Arbitrum one
+            - [USDC (Core)](https://arbiscan.io/address/0x7D8609f8da70fF9027E9bc5229Af4F6727662707)
+            - [USDT (Core)](https://arbiscan.io/address/0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD)
+        - ZKSync Era
+            - [USDC (Core)](https://explorer.zksync.io/address/0x84064c058F2EFea4AB648bB6Bd7e40f83fFDe39a)
+            - [USDC.e (Core)](https://explorer.zksync.io/address/0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D)
+            - [USDT (Core)](https://explorer.zksync.io/address/0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46)
+- Update the multiplier of the following markets:
+    - BNB Chain
+        - [DAI (Core)](https://bscscan.com/address/0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1). From 0.1 to 0.175
+        - [TUSD (Core)](https://bscscan.com/address/0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E). From 0.1 to 0.175
+        - [USDT (DeFi)](https://bscscan.com/address/0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854). From 0.135 to 0.2
+        - [USDT (GameFi)](https://bscscan.com/address/0x4978591f17670A846137d9d613e333C38dc68A37). From 0.135 to 0.2
+        - [USDT (Meme)](https://bscscan.com/address/0x4a9613D06a241B76b81d3777FCe3DDd1F61D4Bd0). From 0.175 to 0.2
+        - [USDT (Tron)](https://bscscan.com/address/0x281E5378f99A4bc55b295ABc0A3E7eD32Deba059). From 0.1 to 0.2
+    - Ethereum
+        - [DAI (Core)](https://etherscan.io/address/0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657). From 0.0875 to 0.175
+        - [crvUSD (Core)](https://etherscan.io/address/0x672208C10aaAA2F9A6719F449C4C8227bc0BC202). From 0.15 to 0.2
+        - [crvUSD (Curve)](https://etherscan.io/address/0x2d499800239C4CD3012473Cb1EAE33562F0A6933). From 0.125 to 0.2
+        - [TUSD (Core)](https://etherscan.io/address/0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b). From 0.0875 to 0.175
+        - [FRAX (Core)](https://etherscan.io/address/0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95). From 0.15 to 0.175
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/445](https://github.com/VenusProtocol/vips/pull/445)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -167,4 +209,4 @@ export const vip411 = () => {
   );
 };
 
-export default vip411;
+export default vip415;

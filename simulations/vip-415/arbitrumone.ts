@@ -5,17 +5,17 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip411, {
+import vip415, {
   ARBITRUM_TWO_KINKS_IRM,
   vUSDC_ARBITRUM_CORE,
   vUSDT_ARBITRUM_CORE,
-} from "../../vips/vip-411/bscmainnet";
+} from "../../vips/vip-415/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const ARB_BLOCKS_PER_YEAR = 31_536_000;
 
 forking(289107554, async () => {
-  testForkedNetworkVipCommands("VIP 411", await vip411(), {
+  testForkedNetworkVipCommands("VIP 415", await vip415(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [2]);
     },

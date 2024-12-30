@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip411, {
+import vip415, {
   ETHEREUM_DAI_TUSD_FRAX_IRM,
   ETHEREUM_TWO_KINKS_IRM,
   ETHEREUM_crvUSD_IRM,
@@ -16,7 +16,7 @@ import vip411, {
   vUSDT_ETHEREUM_CORE,
   vcrvUSD_ETHEREUM_CORE,
   vcrvUSD_ETHEREUM_CURVE,
-} from "../../vips/vip-411/bscmainnet";
+} from "../../vips/vip-415/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const ETH_BLOCKS_PER_YEAR = 2_628_000; // assuming a block is mined every 12 seconds
@@ -77,7 +77,7 @@ forking(21492940, async () => {
     );
   });
 
-  testForkedNetworkVipCommands("VIP 411", await vip411(), {
+  testForkedNetworkVipCommands("VIP 415", await vip415(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [7]);
     },
