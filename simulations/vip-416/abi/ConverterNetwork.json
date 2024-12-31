@@ -1,0 +1,205 @@
+[
+  { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+  { "inputs": [], "name": "ConverterAlreadyExists", "type": "error" },
+  { "inputs": [], "name": "ConverterDoesNotExist", "type": "error" },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "loopsLimit", "type": "uint256" }],
+    "name": "InvalidMaxLoopsLimit",
+    "type": "error"
+  },
+  { "inputs": [], "name": "InvalidTokenConverterAddress", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "loopsLimit", "type": "uint256" },
+      { "internalType": "uint256", "name": "requiredLoops", "type": "uint256" }
+    ],
+    "name": "MaxLoopsLimitExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "sender", "type": "address" },
+      { "internalType": "address", "name": "calledContract", "type": "address" },
+      { "internalType": "string", "name": "methodSignature", "type": "string" }
+    ],
+    "name": "Unauthorized",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ZeroAddressNotAllowed", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "converter", "type": "address" }],
+    "name": "ConverterAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": true, "internalType": "address", "name": "converter", "type": "address" }],
+    "name": "ConverterRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [{ "indexed": false, "internalType": "uint8", "name": "version", "type": "uint8" }],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint256", "name": "oldMaxLoopsLimit", "type": "uint256" },
+      { "indexed": false, "internalType": "uint256", "name": "newmaxLoopsLimit", "type": "uint256" }
+    ],
+    "name": "MaxLoopsLimitUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "oldAccessControlManager", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "newAccessControlManager", "type": "address" }
+    ],
+    "name": "NewAccessControlManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  { "inputs": [], "name": "acceptOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [],
+    "name": "accessControlManager",
+    "outputs": [{ "internalType": "contract IAccessControlManagerV8", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "contract IAbstractTokenConverter", "name": "_tokenConverter", "type": "address" }],
+    "name": "addTokenConverter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "allConverters",
+    "outputs": [{ "internalType": "contract IAbstractTokenConverter", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_tokenAddressIn", "type": "address" },
+      { "internalType": "address", "name": "_tokenAddressOut", "type": "address" }
+    ],
+    "name": "findTokenConverters",
+    "outputs": [
+      { "internalType": "address[]", "name": "converters", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "convertersBalance", "type": "uint256[]" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_tokenAddressIn", "type": "address" },
+      { "internalType": "address", "name": "_tokenAddressOut", "type": "address" }
+    ],
+    "name": "findTokenConvertersForConverters",
+    "outputs": [
+      { "internalType": "address[]", "name": "converters", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "convertersBalance", "type": "uint256[]" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getAllConverters",
+    "outputs": [{ "internalType": "contract IAbstractTokenConverter[]", "name": "converters", "type": "address[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_accessControlManager", "type": "address" },
+      { "internalType": "uint256", "name": "_loopsLimit", "type": "uint256" }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "_tokenConverter", "type": "address" }],
+    "name": "isTokenConverter",
+    "outputs": [{ "internalType": "bool", "name": "isConverter", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "maxLoopsLimit",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "contract IAbstractTokenConverter", "name": "_tokenConverter", "type": "address" }],
+    "name": "removeTokenConverter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  {
+    "inputs": [{ "internalType": "address", "name": "accessControlManager_", "type": "address" }],
+    "name": "setAccessControlManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "limit", "type": "uint256" }],
+    "name": "setMaxLoopsLimit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
