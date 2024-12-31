@@ -2,6 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { CONVERTERS as ARBITRUM_SEPOLIA_CONVERTERS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
 
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
@@ -210,6 +211,14 @@ const vip417 = () => {
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.sepolia,
+        };
+      }),
+      ...ARBITRUM_SEPOLIA_CONVERTERS.map(converter => {
+        return {
+          target: converter,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumsepolia,
         };
       }),
     ],

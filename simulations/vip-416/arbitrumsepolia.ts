@@ -7,6 +7,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip014 from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import {
   COMPTROLLERS,
+  CONVERTER_NETWORK,
   PLP,
   PRIME,
   PSR,
@@ -15,6 +16,7 @@ import {
 } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import vip416 from "../../vips/vip-416/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
@@ -37,6 +39,11 @@ forking(112147102, async () => {
   testForkedNetworkVipCommands("vip416", await vip416());
 
   describe("Post-VIP behavior", async () => {
+    it(`owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
+
     it(`correct owner `, async () => {
       expect(await prime.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
       expect(await plp.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);

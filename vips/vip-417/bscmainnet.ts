@@ -2,6 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { CONVERTERS as ARBITRUM_ONE_CONVERTERS } from "../../multisig/proposals/arbitrumone/vip-019";
 import { CONVERTERS as ETHEREUM_CONVERTERS } from "../../multisig/proposals/ethereum/vip-073";
 
 export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
@@ -203,6 +204,14 @@ const vip417 = () => {
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.ethereum,
+        };
+      }),
+      ...ARBITRUM_ONE_CONVERTERS.map(converter => {
+        return {
+          target: converter,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumone,
         };
       }),
     ],

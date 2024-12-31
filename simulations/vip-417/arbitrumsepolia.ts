@@ -4,11 +4,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014, { XVS_STORE } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import vip014, { CONVERTERS, XVS_STORE } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import vip417, {
   ARBITRUM_SEPOLIA_BOUND_VALIDATOR,
   ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
 } from "../../vips/vip-417/bsctestnet";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -48,6 +49,13 @@ forking(112147102, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip417());
 
   describe("Post-VIP behaviour", async () => {
+    for (const converter of CONVERTERS) {
+      it(`owner for ${converter}`, async () => {
+        const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        expect(await c.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
+
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(arbitrumsepolia.NORMAL_TIMELOCK);
     });

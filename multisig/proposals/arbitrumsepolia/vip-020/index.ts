@@ -16,6 +16,16 @@ export const COMPTROLLERS = ["0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208"];
 export const XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 export const XVS_BRIDGE_ADMIN_PROXY = "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8";
 export const XVS = "0x877Dc896e7b13096D3827872e396927BbE704407";
+export const CONVERTERS = [
+  "0x309b71a417dA9CfA8aC47e6038000B1739d9A3A6",
+  "0xFC0ec257d3ec4D673cB4e2CD3827C202e75fd0be",
+  "0xE88ed530597bc8D50e8CfC0EecAAFf6A93248C74",
+  "0x3089F46caf6611806caA39Ffaf672097156b893a",
+  "0x0d1e90c1F86CD1c1dF514B493c5985B3FD9CD6C8",
+  "0x99942a033454Cef6Ffb2843886C8b2E658E7D5fd",
+];
+export const SINGLE_TOKEN_CONVERTER_BEACON = "0xC77D0F75f1e4e3720DA1D2F5D809F439125a2Fd4";
+export const CONVERTER_NETWORK = "0x9dD63dC8DADf90B67511939C00607484567B0D7A";
 
 export const VTOKENS = [
   "0x49FB90A5815904649C44B87001a160C1301D6a2C",
@@ -36,6 +46,23 @@ const vip020 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
+    // {
+    //   target: SINGLE_TOKEN_CONVERTER_BEACON,
+    //   signature: "transferOwnership(address)",
+    //   params: [arbitrumsepolia.NORMAL_TIMELOCK],
+    // },
+    {
+      target: CONVERTER_NETWORK,
+      signature: "transferOwnership(address)",
+      params: [arbitrumsepolia.NORMAL_TIMELOCK],
+    },
+    ...CONVERTERS.map(converter => {
+      return {
+        target: converter,
+        signature: "transferOwnership(address)",
+        params: [arbitrumsepolia.NORMAL_TIMELOCK],
+      };
+    }),
     {
       target: PRIME,
       signature: "transferOwnership(address)",

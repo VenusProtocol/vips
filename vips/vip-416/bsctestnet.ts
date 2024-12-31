@@ -10,6 +10,7 @@ import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsep
 import { COMPTROLLERS as ARBITRUMSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { VTOKENS as ARBITRUMSEPOLIA_VTOKENS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { POOL_REGISTRY as ARBITRUMSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { CONVERTER_NETWORK as ARBITRUM_SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-024";
@@ -39,7 +40,12 @@ const vip416 = () => {
         params: [],
         dstChainId: LzChainId.sepolia,
       },
-
+      {
+        target: ARBITRUM_SEPOLIA_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
       {
         target: SEPOLIA_PRIME,
         signature: "acceptOwnership()",

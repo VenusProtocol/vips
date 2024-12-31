@@ -7,6 +7,7 @@ import { COMPTROLLERS as ARBITRUMONE_COMPTROLLERS } from "../../multisig/proposa
 import { VTOKENS as ARBITRUMONE_VTOKENS } from "../../multisig/proposals/arbitrumone/vip-019";
 import { POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY } from "../../multisig/proposals/arbitrumone/vip-019";
 import { PSR as ARBITRUMONE_PSR } from "../../multisig/proposals/arbitrumone/vip-019";
+import { CONVERTER_NETWORK as ARBITRUM_ONE_CONVERTER_NETWORK } from "../../multisig/proposals/arbitrumone/vip-019";
 import { CONVERTER_NETWORK as ETHEREUM_CONVERTER_NETWORK } from "../../multisig/proposals/ethereum/vip-073";
 import { PLP as ETHEREUM_PLP, PRIME as ETHEREUM_PRIME } from "../../multisig/proposals/ethereum/vip-073";
 import { REWARD_DISTRIBUTORS as ETHEREUM_REWARD_DISTRIBUTORS } from "../../multisig/proposals/ethereum/vip-073";
@@ -36,7 +37,12 @@ const vip416 = () => {
         params: [],
         dstChainId: LzChainId.ethereum,
       },
-
+      {
+        target: ARBITRUM_ONE_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
       {
         target: ETHEREUM_PRIME,
         signature: "acceptOwnership()",

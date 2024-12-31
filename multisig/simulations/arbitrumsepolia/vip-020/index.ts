@@ -11,11 +11,14 @@ import vip020, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
   COMPTROLLER_BEACON,
+  CONVERTERS,
+  CONVERTER_NETWORK,
   DEFAULT_PROXY_ADMIN,
   PLP,
   PRIME,
   PSR,
   REWARD_DISTRIBUTORS,
+  SINGLE_TOKEN_CONVERTER_BEACON,
   VTOKENS,
   VTOKEN_BEACON,
   XVS,
@@ -24,12 +27,15 @@ import vip020, {
 } from "../../../proposals/arbitrumsepolia/vip-020";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
+import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistrbutor.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import SINGLE_TOKEN_CONVERTER_BEACON_ABI from "./abi/SingleTokenConverterBeacon.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTOKEN_BEACON_ABI from "./abi/VTokenBeacon.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
@@ -85,6 +91,23 @@ forking(112147102, async () => {
       redstoneOracle = new ethers.Contract(REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
       treasury = await ethers.getContractAt(TREASURY_ABI, NETWORK_ADDRESSES.arbitrumsepolia.VTREASURY);
+    });
+
+    for (const converter of CONVERTERS) {
+      it(`should have no pending owner for ${converter}`, async () => {
+        const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
+
+    // it(`should have guardian as owner for converer beacon`, async () => {
+    //   const c = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, SINGLE_TOKEN_CONVERTER_BEACON_ABI, provider);
+    //   expect(await c.owner()).to.equal(arbitrumone.GUARDIAN); // check and fix this.
+    // });
+
+    it(`should have no pending owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
     it("owner of proxy admin is guardian", async () => {
@@ -150,6 +173,23 @@ forking(112147102, async () => {
   describe("Post-VIP behavior", async () => {
     before(async () => {
       await pretendExecutingVip(await vip020());
+    });
+
+    for (const converter of CONVERTERS) {
+      it(`should have no pending owner for ${converter}`, async () => {
+        const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
+
+    // it(`should have guardian as owner for converer beacon`, async () => {
+    //   const c = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, SINGLE_TOKEN_CONVERTER_BEACON_ABI, provider);
+    //   expect(await c.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+    // });
+
+    it(`should have no pending owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.pendingOwner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
     it("owner of proxy admin is timelock", async () => {
