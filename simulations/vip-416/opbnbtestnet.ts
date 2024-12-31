@@ -3,20 +3,17 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip021, { COMPTROLLERS, PSR, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import vip416 from "../../vips/vip-350/bsctestnet";
+import vip021, { COMPTROLLERS, PSR, VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import vip416 from "../../vips/vip-416/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(41684455, async () => {
+forking(48788035, async () => {
   const provider = ethers.provider;
-  const xvsVaultProxy = new ethers.Contract(opbnbtestnet.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
-  const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
 
   before(async () => {
     await pretendExecutingVip(await vip021());
@@ -43,10 +40,5 @@ forking(41684455, async () => {
         expect(await v.owner()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);
       });
     }
-
-    it("should have the correct pending owner", async () => {
-      expect(await xvsVaultProxy.admin()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);
-      expect(await xvsStore.admin()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);
-    });
   });
 });

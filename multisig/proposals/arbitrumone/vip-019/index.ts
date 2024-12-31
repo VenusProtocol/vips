@@ -134,11 +134,6 @@ const vip019 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setWhitelist(address,bool)",
-      params: [arbitrumone.NORMAL_TIMELOCK, true],
-    },
   ]);
 };
 

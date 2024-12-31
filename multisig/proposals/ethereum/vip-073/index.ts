@@ -192,11 +192,6 @@ const vip073 = () => {
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },
-    {
-      target: XVS_BRIDGE_ADMIN_PROXY,
-      signature: "setWhitelist(address,bool)",
-      params: [ethereum.NORMAL_TIMELOCK, true],
-    },
   ]);
 };
 

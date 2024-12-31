@@ -12,7 +12,6 @@ import {
   PSR,
   REWARD_DISTRIBUTORS,
   VTOKENS,
-  XVS_STORE,
 } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import vip416 from "../../vips/vip-416/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -21,17 +20,13 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import XVS_STORE_ABI from "./abi/XVSStore.json";
-import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
-forking(87457288, async () => {
+forking(112147102, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
-  const xvsVaultProxy = new ethers.Contract(arbitrumsepolia.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
-  const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
 
   before(async () => {
     prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
@@ -72,10 +67,5 @@ forking(87457288, async () => {
         expect(await v.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
       });
     }
-
-    it("should have the correct pending owner", async () => {
-      expect(await xvsVaultProxy.admin()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
-      expect(await xvsStore.admin()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
-    });
   });
 });

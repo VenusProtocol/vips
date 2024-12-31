@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract, Signer } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
 import vip020, {
@@ -45,7 +48,7 @@ const CHAINLINK_ORACLE = arbitrumsepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = arbitrumsepolia.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = arbitrumsepolia.NORMAL_TIMELOCK;
 
-forking(112142624, async () => {
+forking(112147102, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

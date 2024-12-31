@@ -45,7 +45,7 @@ const CHAINLINK_ORACLE = arbitrumone.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = arbitrumone.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = arbitrumone.NORMAL_TIMELOCK;
 
-forking(241039405, async () => {
+forking(290585586, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

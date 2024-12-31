@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014 from "../../multisig/proposals/arbitrumone/vip-014";
+import vip014 from "../../multisig/proposals/arbitrumone/vip-019";
 import {
   COMPTROLLERS,
   PLP,
@@ -12,7 +12,6 @@ import {
   PSR,
   REWARD_DISTRIBUTORS,
   VTOKENS,
-  XVS_STORE,
 } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip416 from "../../vips/vip-416/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -21,17 +20,13 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import XVS_STORE_ABI from "./abi/XVSStore.json";
-import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(241112064, async () => {
+forking(290585586, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;
-  const xvsVaultProxy = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
-  const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
 
   before(async () => {
     prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
@@ -73,10 +68,5 @@ forking(241112064, async () => {
         expect(await v.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }
-
-    it("should have the correct pending owner", async () => {
-      expect(await xvsVaultProxy.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
-      expect(await xvsStore.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
-    });
   });
 });

@@ -2,6 +2,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
+
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
 export const SEPOLIA_CRITICAL_TIMELOCK = "0xA24A7A65b8968a749841988Bd7d05F6a94329fDe";
@@ -21,7 +23,7 @@ const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 const ARBITRUM_SEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
 export const ARBITRUM_SEPOLIA_BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
-export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B4171ad514d6f9B";
+export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
 export const SEPOLIA_sFrxETH_ORACLE = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
@@ -184,6 +186,32 @@ const vip417 = () => {
         params: [],
         dstChainId: LzChainId.opbnbtestnet,
       },
+      {
+        target: OPBNBTESTNET_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [opbnbtestnet.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [arbitrumsepolia.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: SEPOLIA_XVS_BRIDGE_ADMIN,
+        signature: "setWhitelist(address,bool)",
+        params: [sepolia.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.sepolia,
+      },
+      ...SEPOLIA_CONVERTERS.map(converter => {
+        return {
+          target: converter,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.sepolia,
+        };
+      }),
     ],
     meta,
     ProposalType.REGULAR,

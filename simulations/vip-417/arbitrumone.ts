@@ -4,8 +4,10 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014 from "../../multisig/proposals/arbitrumone/vip-014";
+import vip014, { XVS_STORE } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip417, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-417/bscmainnet";
+import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -16,7 +18,7 @@ import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(230362555, async () => {
+forking(290585586, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;
@@ -25,6 +27,8 @@ forking(230362555, async () => {
   let treasury: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
+  const xvsVaultProxy = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
+  const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
   before(async () => {
     chainLinkOracle = new ethers.Contract(arbitrumone.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     redstoneOracle = new ethers.Contract(arbitrumone.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, provider);
@@ -53,6 +57,10 @@ forking(230362555, async () => {
     });
     it("Normal Timelock should be the owner of the Vtreasury", async () => {
       expect(await treasury.owner()).equals(arbitrumone.NORMAL_TIMELOCK);
+    });
+    it("should have the correct pending owner", async () => {
+      expect(await xvsVaultProxy.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      expect(await xvsStore.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
     });
   });
 });
