@@ -21,7 +21,7 @@ const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
 const ARBITRUM_SEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
 export const ARBITRUM_SEPOLIA_BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
-export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3721ad514d6f9B";
+export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B4171ad514d6f9B";
 export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
 export const SEPOLIA_sFrxETH_ORACLE = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
@@ -33,7 +33,7 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 
 const { arbitrumsepolia, sepolia, opbnbtestnet } = NETWORK_ADDRESSES;
 
-const vip372 = () => {
+const vip417 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 accept ownership & give permissions to Normal Timelock",
@@ -189,4 +189,4 @@ const vip372 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip372;
+export default vip417;

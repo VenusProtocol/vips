@@ -5,11 +5,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip060 from "../../multisig/proposals/sepolia/vip-060";
-import vip372, {
+import vip417, {
   SEPOLIA_BOUND_VALIDATOR,
   SEPOLIA_XVS_BRIDGE_ADMIN,
   SEPOLIA_sFrxETH_ORACLE,
-} from "../../vips/vip-372/bsctestnet";
+} from "../../vips/vip-417/bsctestnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -38,7 +38,7 @@ forking(6850243, async () => {
     await pretendExecutingVip(await vip060());
   });
 
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip372());
+  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip417());
 
   describe("Post-VIP behaviour", async () => {
     let xvsBridgeAdmin: Contract;

@@ -14,7 +14,7 @@ import {
   VTOKENS,
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumsepolia/vip-014";
-import vip371 from "../../vips/vip-371/bsctestnet";
+import vip416 from "../../vips/vip-416/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -39,7 +39,7 @@ forking(87457288, async () => {
     await pretendExecutingVip(await vip014());
   });
 
-  testForkedNetworkVipCommands("vip371", await vip371());
+  testForkedNetworkVipCommands("vip416", await vip416());
 
   describe("Post-VIP behavior", async () => {
     it(`correct owner `, async () => {

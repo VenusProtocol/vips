@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip021, { COMPTROLLERS, PSR, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbtestnet/vip-021";
-import vip371 from "../../vips/vip-350/bsctestnet";
+import vip416 from "../../vips/vip-350/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -22,7 +22,7 @@ forking(41684455, async () => {
     await pretendExecutingVip(await vip021());
   });
 
-  testForkedNetworkVipCommands("vip371", await vip371());
+  testForkedNetworkVipCommands("vip416", await vip416());
 
   describe("Post-VIP behavior", async () => {
     it(`correct owner for psr`, async () => {

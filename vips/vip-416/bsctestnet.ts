@@ -23,7 +23,7 @@ import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/s
 import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-060";
 import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/sepolia/vip-060";
 
-const vip371 = () => {
+const vip416 = () => {
   const meta = {
     version: "v2",
     title: "VIP-332 accept ownership & give permissions to Normal Timelock",
@@ -180,4 +180,4 @@ const vip371 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip371;
+export default vip416;

@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip021 from "../../multisig/proposals/opbnbtestnet/vip-021";
-import vip372, { OPBNBTESTNET_BOUND_VALIDATOR, OPBNBTESTNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-372/bsctestnet";
+import vip417, { OPBNBTESTNET_BOUND_VALIDATOR, OPBNBTESTNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-417/bsctestnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -34,7 +34,7 @@ forking(41684455, async () => {
     await pretendExecutingVip(await vip021());
   });
 
-  testForkedNetworkVipCommands("vip372", await vip372(), {});
+  testForkedNetworkVipCommands("vip417", await vip417(), {});
 
   describe("Post-VIP behaviour", async () => {
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
