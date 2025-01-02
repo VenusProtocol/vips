@@ -19,6 +19,7 @@ import {
   mineBlocks,
   mineOnZksync,
   setForkBlock,
+  validateProposal,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
@@ -165,6 +166,10 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
       let tx;
+
+      // Validates target address
+      await validateProposal(targets);
+
       if (proposal.type === undefined || proposal.type === null) {
         tx = await governorProxy
           .connect(proposer)
@@ -224,6 +229,8 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
         payload,
       );
+      // Validates target address
+      await validateProposal(targets);
     });
 
     it("should be queued succesfully", async () => {
