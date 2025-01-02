@@ -21,6 +21,7 @@ import vip019, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  NTGs
 } from "../../../proposals/arbitrumone/vip-019";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
@@ -43,6 +44,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -93,6 +95,13 @@ forking(290585586, async () => {
     for (const converter of CONVERTERS) {
       it(`should have no pending owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
         expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
       });
     }
@@ -175,6 +184,13 @@ forking(290585586, async () => {
     for (const converter of CONVERTERS) {
       it(`should have no pending owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
         expect(await c.pendingOwner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }

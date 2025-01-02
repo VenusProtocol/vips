@@ -15,6 +15,7 @@ import vip024, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  NTGs
 } from "../../../proposals/opbnbtestnet/vip-024";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
@@ -30,6 +31,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
@@ -66,6 +68,13 @@ forking(48788035, async () => {
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
       treasury = await ethers.getContractAt(TREASURY_ABI, NETWORK_ADDRESSES.opbnbtestnet.VTREASURY);
     });
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
 
     it("owner of proxy admin is guardian", async () => {
       expect(await proxyAdmin.owner()).to.equal(opbnbtestnet.GUARDIAN);
@@ -118,6 +127,13 @@ forking(48788035, async () => {
     before(async () => {
       await pretendExecutingVip(await vip024());
     });
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);
+      });
+    }
 
     it("owner of proxy admin is timelock", async () => {
       expect(await proxyAdmin.owner()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);

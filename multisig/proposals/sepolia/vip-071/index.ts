@@ -64,6 +64,10 @@ export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const NTGs = [
+  "0xb8fD67f215117FADeF06447Af31590309750529D",
+  "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407"
+]
 
 const vip071 = () => {
   return makeProposal([
@@ -185,6 +189,13 @@ const vip071 = () => {
       signature: "transferOwnership(address)",
       params: [sepolia.NORMAL_TIMELOCK],
     },
+    ...NTGs.map(NTG => {
+      return {
+        target: NTG,
+        signature: "transferOwnership(address)",
+        params: [sepolia.NORMAL_TIMELOCK],
+      };
+    })
   ]);
 };
 

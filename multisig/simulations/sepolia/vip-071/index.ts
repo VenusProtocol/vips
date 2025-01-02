@@ -22,6 +22,7 @@ import vip071, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  NTGs
 } from "../../../proposals/sepolia/vip-071";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
@@ -44,6 +45,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import SFRAXETH_ORACLE_ABI from "./abi/sFrxETHOracle.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
@@ -90,6 +92,13 @@ forking(7393932, async () => {
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
       sfrxETHOracle = new ethers.Contract(SFrxETHOracle, SFRAXETH_ORACLE_ABI, provider);
     });
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
 
     it("owner of proxy admin is guardian", async () => {
       expect(await proxyAdmin.owner()).to.equal(sepolia.GUARDIAN);
@@ -176,6 +185,13 @@ forking(7393932, async () => {
     before(async () => {
       await pretendExecutingVip(await vip071());
     });
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      });
+    }
 
     it("owner of proxy admin is timelock", async () => {
       expect(await proxyAdmin.owner()).to.equal(sepolia.NORMAL_TIMELOCK);

@@ -41,6 +41,11 @@ export const VTOKENS = [
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
+export const NTGs = [
+  "0xc8e51418cadc001157506b306C6d0b878f1ff755",
+  "0xD1e89806BAB8Cd7680DFc7425D1fA6d7D5F0C3FE"
+]
+
 const vip019 = () => {
   return makeProposal([
     {
@@ -161,6 +166,13 @@ const vip019 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
+    ...NTGs.map(ntg => {
+      return {
+        target: ntg,
+        signature: "transferOwnership(address)",
+        params: [arbitrumone.NORMAL_TIMELOCK],
+      };
+    })
   ]);
 };
 

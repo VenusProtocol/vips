@@ -22,6 +22,7 @@ import vip073, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  NTGs
 } from "../../../proposals/ethereum/vip-073";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
@@ -45,6 +46,7 @@ import SFRAXETH_ORACLE_ABI from "./abi/sFrxETHOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -108,6 +110,14 @@ forking(21523966, async () => {
         expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
       });
     }
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
+
 
     it("pending owner of psr", async () => {
       expect(await psr.pendingOwner()).to.equal(ethers.constants.AddressZero);
@@ -179,6 +189,13 @@ forking(21523966, async () => {
     before(async () => {
       await pretendExecutingVip(await vip073());
     });
+
+    for (const ntg of NTGs) {
+      it(`should have no pending owner for ${ntg}`, async () => {
+        const c = new ethers.Contract(ntg, NTG_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethereum.NORMAL_TIMELOCK);
+      });
+    }
 
     it("owner of proxy admin is timelock", async () => {
       expect(await proxyAdmin.owner()).to.equal(ethereum.NORMAL_TIMELOCK);

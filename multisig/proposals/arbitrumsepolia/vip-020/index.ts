@@ -38,6 +38,10 @@ export const VTOKENS = [
   "0x253515E19e8b888a4CA5a0a3363B712402ce4046",
 ];
 export const BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
+export const NTGs = [
+  "0x196b19C2037863409C65CbF63592ae2a3CD2Dc2C",
+  "0x63cEE24b12648E36d708163587aC17a777096a47",
+];
 
 const vip020 = () => {
   return makeProposal([
@@ -159,6 +163,13 @@ const vip020 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
+    ...NTGs.map(ntg => {
+      return {
+        target: ntg,
+        signature: "transferOwnership(address)",
+        params: [arbitrumsepolia.NORMAL_TIMELOCK],
+      };
+    })
   ]);
 };
 
