@@ -251,8 +251,9 @@ export const makeProposal = async (
   return proposal;
 };
 
-export const validateProposal = async (contractAddresses: string[]) => {
+export const validateTargetAddresses = async (contractAddresses: string[]) => {
   for (let i = 0; i < contractAddresses.length; i++) {
+    // If there is no contract currently deployed, the result is "0x"
     const bytecode = await ethers.provider.getCode(contractAddresses[i]);
     if (bytecode.length === 2) {
       throw new Error(`Invalid address ${contractAddresses[i]}`);

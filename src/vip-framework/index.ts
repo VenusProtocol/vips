@@ -19,7 +19,7 @@ import {
   mineBlocks,
   mineOnZksync,
   setForkBlock,
-  validateProposal,
+  validateTargetAddresses,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
@@ -168,7 +168,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       let tx;
 
       // Validates target address
-      await validateProposal(targets);
+      await validateTargetAddresses(targets);
 
       if (proposal.type === undefined || proposal.type === null) {
         tx = await governorProxy
@@ -230,10 +230,10 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         payload,
       );
       // Validates target address
-      await validateProposal(targets);
     });
 
     it("should be queued succesfully", async () => {
+      await validateTargetAddresses(targets);
       const impersonatedLibrary = await initMainnetUser(
         NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
         ethers.utils.parseEther("100"),
