@@ -13,10 +13,10 @@ import vip417, {
 } from "../../vips/vip-417/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(45437328, async () => {
   const provider = ethers.provider;
-  const coreComptroller = new ethers.Contract(CORE_COMPTROLLER, CORE_COMPTROLLER_ABI, provider);
   const xvs = new ethers.Contract(XVS, ERC20_ABI, provider);
   let xvsStorePReviousBalance = await xvs.balanceOf(XVS_STORE);
   let comptrollerPreviousXVSBalance = await xvs.balanceOf(CORE_COMPTROLLER);
@@ -27,6 +27,12 @@ forking(45437328, async () => {
 
   testVip("VIP-417", await vip417(), {
     callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [3, 0],
+      );
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["VenusGranted"], [1]);
     },
   });
