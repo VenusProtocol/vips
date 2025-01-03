@@ -5,8 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip017, {VTREASURY} from "../../../proposals/zksyncmainnet/vip-017";
-
+import vip017, { VTREASURY } from "../../../proposals/zksyncmainnet/vip-017";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
@@ -23,6 +22,6 @@ forking(52786809, async () => {
 
     it("check pending owner of VTreasury", async () => {
       expect(await treasury.pendingOwner()).to.be.equal(zksyncmainnet.NORMAL_TIMELOCK);
-    })
+    });
   });
 });

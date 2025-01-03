@@ -3,38 +3,40 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
+import vip019 from "../../multisig/proposals/arbitrumone/vip-019/index";
 import {
-  ETHEREUM_REWARD_DISTRIBUTION_TARGETS,
-  ETHEREUM_TOTAL_AMOUNT,
-  ETHEREUM_VTREASURY,
-  ETHEREUM_XVS,
+  ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS,
+  ARBITRUM_ONE_TOTAL_AMOUNT,
+  ARBITRUM_ONE_VTREASURY,
+  ARBITRUM_ONE_XVS,
   vip417,
 } from "../../vips/vip-417/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 
-const BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
+const BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 
-forking(21543323, async () => {
+forking(291539000, async () => {
   const previousBalances: Record<string, BigNumber> = {};
-  const xvs = new ethers.Contract(ETHEREUM_XVS, XVS_ABI, ethers.provider);
+  const xvs = new ethers.Contract(ARBITRUM_ONE_XVS, XVS_ABI, ethers.provider);
 
   before(async () => {
-    for (const { target } of ETHEREUM_REWARD_DISTRIBUTION_TARGETS) {
+    for (const { target } of ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("1000000", 18));
-    await xvs.connect(await ethers.getSigner(BRIDGE)).mint(ETHEREUM_VTREASURY, ETHEREUM_TOTAL_AMOUNT);
+    await xvs.connect(await ethers.getSigner(BRIDGE)).mint(ARBITRUM_ONE_VTREASURY, ARBITRUM_ONE_TOTAL_AMOUNT);
   });
 
+  await pretendExecutingVip(await vip019());
   testForkedNetworkVipCommands("XVS Bridging", await vip417());
 
   describe("Post-Execution state", () => {
     it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ETHEREUM_REWARD_DISTRIBUTION_TARGETS) {
+      for (const { target, amount } of ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
           console.log(balance, previousBalances[target]);
