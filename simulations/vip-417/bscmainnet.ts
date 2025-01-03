@@ -12,6 +12,7 @@ forking(45437328, async () => {
   const provider = ethers.provider;
   const xvs = new ethers.Contract(XVS, XVS_ABI, provider);
   let xvsStorePReviousBalance = await xvs.balanceOf(XVS_STORE);
+  const comptrollerPreviousXVSBalance = await xvs.balanceOf(CORE_COMPTROLLER);
 
   before(async () => {
     xvsStorePReviousBalance = await xvs.balanceOf(XVS_STORE);

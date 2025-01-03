@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip017 from "../../multisig/proposals/zksyncmainnet/vip-017/index";
@@ -13,13 +14,16 @@ import {
   ZKSYNCMAINNET_XVS,
   vip417,
 } from "../../vips/vip-417/bscmainnet";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 import XVS_ABI from "./abi/XVS.json";
 
+const { zksyncmainnet } = NETWORK_ADDRESSES;
 const BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
 forking(52786809, async () => {
   const previousBalances: Record<string, BigNumber> = {};
   const xvs = new ethers.Contract(ZKSYNCMAINNET_XVS, XVS_ABI, ethers.provider);
+  const vTreasury = new ethers.Contract(ZKSYNCMAINNET_VTREASURY, VTREASURY_ABI, ethers.provider);
 
   before(async () => {
     for (const { target } of ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS) {
@@ -43,6 +47,10 @@ forking(52786809, async () => {
           expect(balance).to.equal(previousBalances[target].add(amount));
         });
       }
+    });
+
+    it("owner of VTreasury should be the timelock", async () => {
+      expect(await vTreasury.owner()).to.be.equal(zksyncmainnet.NORMAL_TIMELOCK);
     });
   });
 });
