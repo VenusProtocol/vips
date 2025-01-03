@@ -251,6 +251,16 @@ export const makeProposal = async (
   return proposal;
 };
 
+export const validateTargetAddresses = async (contractAddresses: string[], signatures: string[]) => {
+  for (let i = 0; i < contractAddresses.length; i++) {
+    // If there is no contract currently deployed, the result is "0x"
+    const bytecode = await ethers.provider.getCode(contractAddresses[i]);
+    if (bytecode.length === 2 && signatures[i].length !== 0) {
+      throw new Error(`Invalid address ${contractAddresses[i]}`);
+    }
+  }
+};
+
 export const setMaxStalePeriodInOracle = async (
   comptrollerAddress: string,
   maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
