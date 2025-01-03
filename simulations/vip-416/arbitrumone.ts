@@ -13,6 +13,7 @@ import {
   PSR,
   REWARD_DISTRIBUTORS,
   VTOKENS,
+  NTGs
 } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip416 from "../../vips/vip-416/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -22,6 +23,7 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -73,6 +75,13 @@ forking(290585586, async () => {
       it(`correct owner for ${vTokenAddress}`, async () => {
         const v = new ethers.Contract(vTokenAddress, VTOKEN_ABI, provider);
         expect(await v.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const ntgAddress of NTGs) {
+      it(`correct owner for ${ntgAddress}`, async () => {
+        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
+        expect(await ntg.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }
   });
