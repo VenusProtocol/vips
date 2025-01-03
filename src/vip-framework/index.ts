@@ -168,7 +168,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       let tx;
 
       // Validates target address
-      await validateTargetAddresses(targets);
+      await validateTargetAddresses(targets, signatures);
 
       if (proposal.type === undefined || proposal.type === null) {
         tx = await governorProxy
@@ -215,7 +215,8 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let executor: Contract;
   let payload: string;
   let proposalId: number;
-  let targets: any[];
+  let targets: string[];
+  let signatures: string[];
   let proposalType: ProposalType;
   const provider = ethers.provider;
 
@@ -225,7 +226,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
       proposalId++;
-      [targets, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
+      [targets, , signatures, , proposalType] = ethers.utils.defaultAbiCoder.decode(
         ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
         payload,
       );
@@ -233,7 +234,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
     });
 
     it("should be queued succesfully", async () => {
-      await validateTargetAddresses(targets);
+      await validateTargetAddresses(targets, signatures);
       const impersonatedLibrary = await initMainnetUser(
         NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
         ethers.utils.parseEther("100"),
