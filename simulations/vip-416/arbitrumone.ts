@@ -27,7 +27,7 @@ import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(290585586, async () => {
+forking(291641176, async () => {
   const provider = ethers.provider;
   let prime: Contract;
   let plp: Contract;

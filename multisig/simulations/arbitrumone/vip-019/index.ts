@@ -53,7 +53,7 @@ const CHAINLINK_ORACLE = arbitrumone.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = arbitrumone.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = arbitrumone.NORMAL_TIMELOCK;
 
-forking(290585586, async () => {
+forking(291641176, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;
@@ -106,10 +106,10 @@ forking(290585586, async () => {
       });
     }
 
-    // it(`should have guardian as owner for converer beacon`, async () => {
-    //   const c = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, SINGLE_TOKEN_CONVERTER_BEACON_ABI, provider);
-    //   expect(await c.owner()).to.equal(arbitrumone.GUARDIAN); // check and fix this.
-    // });
+    it(`should have guardian as owner for converer beacon`, async () => {
+      const c = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, SINGLE_TOKEN_CONVERTER_BEACON_ABI, provider);
+      expect(await c.owner()).to.equal(arbitrumone.GUARDIAN); // check and fix this.
+    });
 
     it(`should have no pending owner for converter network`, async () => {
       const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);

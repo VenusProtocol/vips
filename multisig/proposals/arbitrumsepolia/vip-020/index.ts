@@ -50,11 +50,11 @@ const vip020 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumsepolia.NORMAL_TIMELOCK],
     },
-    // {
-    //   target: SINGLE_TOKEN_CONVERTER_BEACON,
-    //   signature: "transferOwnership(address)",
-    //   params: [arbitrumsepolia.NORMAL_TIMELOCK],
-    // },
+    {
+      target: SINGLE_TOKEN_CONVERTER_BEACON,
+      signature: "transferOwnership(address)",
+      params: [arbitrumsepolia.NORMAL_TIMELOCK],
+    },
     {
       target: CONVERTER_NETWORK,
       signature: "transferOwnership(address)",

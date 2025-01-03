@@ -53,11 +53,11 @@ const vip019 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-    // {
-    //   target: SINGLE_TOKEN_CONVERTER_BEACON,
-    //   signature: "transferOwnership(address)",
-    //   params: [arbitrumone.NORMAL_TIMELOCK],
-    // },
+    {
+      target: SINGLE_TOKEN_CONVERTER_BEACON,
+      signature: "transferOwnership(address)",
+      params: [arbitrumone.NORMAL_TIMELOCK],
+    },
     {
       target: CONVERTER_NETWORK,
       signature: "transferOwnership(address)",
