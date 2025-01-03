@@ -34,12 +34,12 @@ export const ETHEREUM_REWARD_DISTRIBUTION_TARGETS = [
     amount: parseUnits("14526", 18),
     treasury: ETHEREUM_VTREASURY
   },
-  {
-    target: "0x5f65A7b60b4F91229B8484F80bc2EEc52758EAf9",
-    dstChainId: LzChainId.ethereum,
-    amount: parseUnits("0", 18),
-    treasury: ETHEREUM_VTREASURY
-  },
+  // {
+  //   target: "0x5f65A7b60b4F91229B8484F80bc2EEc52758EAf9",
+  //   dstChainId: LzChainId.ethereum,
+  //   amount: parseUnits("0", 18),
+  //   treasury: ETHEREUM_VTREASURY
+  // },
   {
     target: "0x1e25CF968f12850003Db17E0Dba32108509C4359",
     dstChainId: LzChainId.ethereum,
