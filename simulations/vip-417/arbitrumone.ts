@@ -8,7 +8,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 
 import vip019 from "../../multisig/proposals/arbitrumone/vip-019/index";
 import {
-  ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS,
+  ARBITRUM_ONE_TARGETS,
   ARBITRUM_ONE_TOTAL_AMOUNT,
   ARBITRUM_ONE_VTREASURY,
   ARBITRUM_ONE_XVS,
@@ -26,7 +26,7 @@ forking(291539000, async () => {
   const vTreasury = new ethers.Contract(ARBITRUM_ONE_VTREASURY, VTREASURY_ABI, ethers.provider);
 
   before(async () => {
-    for (const { target } of ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS) {
+    for (const { target } of ARBITRUM_ONE_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
@@ -40,7 +40,7 @@ forking(291539000, async () => {
 
   describe("Post-Execution state", () => {
     it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS) {
+      for (const { target, amount } of ARBITRUM_ONE_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
           console.log(balance, previousBalances[target]);

@@ -21,7 +21,7 @@ export const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 const BRIDGE_FEES = parseUnits("0.05", 18);
 
-export const ETHEREUM_REWARD_DISTRIBUTION_TARGETS = [
+export const ETHEREUM_TARGETS = [
   {
     target: "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B",
     dstChainId: LzChainId.ethereum,
@@ -42,7 +42,7 @@ export const ETHEREUM_REWARD_DISTRIBUTION_TARGETS = [
   },
 ];
 
-export const ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS = [
+export const ARBITRUM_ONE_TARGETS = [
   {
     target: "0x84266F552756cBed893b1FFA85248cD99501e3ce",
     dstChainId: LzChainId.arbitrumone,
@@ -63,7 +63,7 @@ export const ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS = [
   },
 ];
 
-export const ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS = [
+export const ZKSYNCMAINNET_TARGETS = [
   {
     target: "0x84266F552756cBed893b1FFA85248cD99501e3ce",
     dstChainId: LzChainId.zksyncmainnet,
@@ -136,12 +136,6 @@ export const vip417 = () => {
         value: BRIDGE_FEES.toString(),
       },
       {
-        target: ETHEREUM_VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [ETHEREUM_XVS, ETHEREUM_TOTAL_AMOUNT, ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
         target: XVS_BRIDGE,
         signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
         params: [
@@ -152,12 +146,6 @@ export const vip417 = () => {
           [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         value: BRIDGE_FEES.toString(),
-      },
-      {
-        target: ARBITRUM_ONE_VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [ARBITRUM_ONE_XVS, ARBITRUM_ONE_TOTAL_AMOUNT, ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: XVS_BRIDGE,
@@ -171,25 +159,19 @@ export const vip417 = () => {
         ],
         value: BRIDGE_FEES.toString(),
       },
-      {
-        target: ZKSYNCMAINNET_VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [ZKSYNCMAINNET_XVS, ZKSYNCMAINNET_TOTAL_AMOUNT, ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      ...ETHEREUM_REWARD_DISTRIBUTION_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
+      ...ETHEREUM_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
         target: treasury,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ETHEREUM_XVS, amount, target],
         dstChainId,
       })),
-      ...ARBITRUM_ONE_REWARD_DISTRIBUTION_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
+      ...ARBITRUM_ONE_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
         target: treasury,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ARBITRUM_ONE_XVS, amount, target],
         dstChainId,
       })),
-      ...ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
+      ...ZKSYNCMAINNET_TARGETS.map(({ target, dstChainId, amount, treasury }) => ({
         target: treasury,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ZKSYNCMAINNET_XVS, amount, target],

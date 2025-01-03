@@ -8,7 +8,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 
 import vip017 from "../../multisig/proposals/zksyncmainnet/vip-017/index";
 import {
-  ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS,
+  ZKSYNCMAINNET_TARGETS,
   ZKSYNCMAINNET_TOTAL_AMOUNT,
   ZKSYNCMAINNET_VTREASURY,
   ZKSYNCMAINNET_XVS,
@@ -26,7 +26,7 @@ forking(52786809, async () => {
   const vTreasury = new ethers.Contract(ZKSYNCMAINNET_VTREASURY, VTREASURY_ABI, ethers.provider);
 
   before(async () => {
-    for (const { target } of ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS) {
+    for (const { target } of ZKSYNCMAINNET_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
@@ -40,7 +40,7 @@ forking(52786809, async () => {
 
   describe("Post-Execution state", () => {
     it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ZKSYNCMAINNET_REWARD_DISTRIBUTION_TARGETS) {
+      for (const { target, amount } of ZKSYNCMAINNET_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
           console.log(balance, previousBalances[target]);

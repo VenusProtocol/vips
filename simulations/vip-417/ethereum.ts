@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import {
-  ETHEREUM_REWARD_DISTRIBUTION_TARGETS,
+  ETHEREUM_TARGETS,
   ETHEREUM_TOTAL_AMOUNT,
   ETHEREUM_VTREASURY,
   ETHEREUM_XVS,
@@ -21,7 +21,7 @@ forking(21543323, async () => {
   const xvs = new ethers.Contract(ETHEREUM_XVS, XVS_ABI, ethers.provider);
 
   before(async () => {
-    for (const { target } of ETHEREUM_REWARD_DISTRIBUTION_TARGETS) {
+    for (const { target } of ETHEREUM_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
@@ -34,7 +34,7 @@ forking(21543323, async () => {
 
   describe("Post-Execution state", () => {
     it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ETHEREUM_REWARD_DISTRIBUTION_TARGETS) {
+      for (const { target, amount } of ETHEREUM_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
           console.log(balance, previousBalances[target]);
