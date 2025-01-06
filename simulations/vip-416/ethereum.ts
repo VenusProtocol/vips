@@ -4,10 +4,9 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip061 from "../../multisig/proposals/ethereum/vip-073";
-import { COMPTROLLERS, PSR, REWARD_DISTRIBUTORS, VTOKENS } from "../../multisig/proposals/ethereum/vip-073";
+import { COMPTROLLERS, REWARD_DISTRIBUTORS, VTOKENS } from "../../multisig/proposals/ethereum/vip-073";
 import vip416 from "../../vips/vip-416/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
@@ -29,11 +28,6 @@ forking(21523966, async () => {
         expect(await c.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
       });
     }
-
-    it(`correct owner for psr`, async () => {
-      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
-      expect(await psr.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
-    });
 
     for (const comptrollerAddress of COMPTROLLERS) {
       it(`correct owner for ${comptrollerAddress}`, async () => {

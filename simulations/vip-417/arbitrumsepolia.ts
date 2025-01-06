@@ -14,6 +14,7 @@ import vip014, {
   VTOKENS,
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { PSR, REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import vip417, {
   ARBITRUM_SEPOLIA_BOUND_VALIDATOR,
   ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -23,6 +24,8 @@ import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import NTG_ABI from "./abi/NativeTokenGateway.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
@@ -122,5 +125,17 @@ forking(112786263, async () => {
         expect(await ntg.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
       });
     }
+
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`correct owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, REWARD_DISTRIBUTOR_ABI, provider);
+        expect(await c.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+      });
+    }
+
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
+    });
   });
 });

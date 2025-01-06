@@ -4,10 +4,11 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip021, { COMPTROLLERS, NTGs, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import vip021, { COMPTROLLERS, NTGs, PSR, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import vip417, { OPBNBTESTNET_BOUND_VALIDATOR, OPBNBTESTNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-417/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import NTG_ABI from "./abi/NativeTokenGateway.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -44,6 +45,10 @@ forking(48788035, async () => {
   testForkedNetworkVipCommands("vip417", await vip417(), {});
 
   describe("Post-VIP behaviour", async () => {
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(opbnbtestnet.NORMAL_TIMELOCK);
+    });
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(opbnbtestnet.NORMAL_TIMELOCK);
     });

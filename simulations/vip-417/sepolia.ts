@@ -10,6 +10,8 @@ import vip060, {
   NTGs,
   PLP,
   PRIME,
+  PSR,
+  REWARD_DISTRIBUTORS,
   XVS_STORE,
 } from "../../multisig/proposals/sepolia/vip-071";
 import vip417, {
@@ -21,6 +23,8 @@ import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import NTG_ABI from "./abi/NativeTokenGateway.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -66,6 +70,18 @@ forking(7393932, async () => {
     before(async () => {
       xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, SEPOLIA_XVS_BRIDGE_ADMIN);
       xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
+    });
+
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`correct owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, REWARD_DISTRIBUTOR_ABI, provider);
+        expect(await c.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      });
+    }
+
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
     });
 
     for (const converter of CONVERTERS) {

@@ -10,6 +10,7 @@ import vip061, {
   NTGs,
   PLP,
   PRIME,
+  PSR,
   XVS_STORE,
 } from "../../multisig/proposals/ethereum/vip-073";
 import vip417, {
@@ -21,6 +22,7 @@ import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import NTG_ABI from "./abi/NativeTokenGateway.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -69,6 +71,11 @@ forking(21523966, async () => {
   testForkedNetworkVipCommands("vip417", await vip417());
 
   describe("Post-VIP behaviour", async () => {
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+    });
+
     for (const converter of CONVERTERS) {
       it(`owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, SINGLE_TOKEN_CONVERTER_ABI, provider);

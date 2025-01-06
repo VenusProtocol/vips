@@ -1,11 +1,6 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { REWARD_DISTRIBUTORS as ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
-import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsepolia/vip-020";
-import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { REWARD_DISTRIBUTORS as SEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/sepolia/vip-071";
-import { PSR as SEPOLIA_PSR } from "../../multisig/proposals/sepolia/vip-071";
 import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/sepolia/vip-071";
 import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-071";
 
@@ -20,42 +15,6 @@ const vip416 = () => {
   };
   return makeProposal(
     [
-      ...SEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-        return {
-          target: rewardDistirbutor,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.sepolia,
-        };
-      }),
-
-      ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
-        return {
-          target: rewardDistirbutor,
-          signature: "acceptOwnership()",
-          params: [],
-          dstChainId: LzChainId.arbitrumsepolia,
-        };
-      }),
-      {
-        target: SEPOLIA_PSR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: ARBITRUMSEPOLIA_PSR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: OPBNBTESTNET_PSR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.opbnbtestnet,
-      },
-
       ...SEPOLIA_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,

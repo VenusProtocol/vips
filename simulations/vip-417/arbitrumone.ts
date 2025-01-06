@@ -11,6 +11,7 @@ import vip014, {
   NTGs,
   PLP,
   PRIME,
+  PSR,
   VTOKENS,
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumone/vip-019";
@@ -20,6 +21,7 @@ import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import NTG_ABI from "./abi/NativeTokenGateway.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
@@ -119,5 +121,10 @@ forking(291641176, async () => {
         expect(await ntg.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }
+
+    it(`correct owner for psr`, async () => {
+      const psr = new ethers.Contract(PSR, PSR_ABI, provider);
+      expect(await psr.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+    });
   });
 });
