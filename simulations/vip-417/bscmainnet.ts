@@ -36,7 +36,7 @@ forking(45437328, async () => {
       expect(xvsStoreBalance).to.equal(xvsStorePReviousBalance.add(XVS_STORE_AMOUNT));
     });
 
-    it("should transfer XVS to the Comptroller", async () => {
+    it("should transfer XVS from the Comptroller", async () => {
       const comptrollerXVSBalance = await xvs.balanceOf(CORE_COMPTROLLER);
       expect(comptrollerXVSBalance).to.equal(comptrollerPreviousXVSBalance.sub(TOTAL_XVS));
     });
