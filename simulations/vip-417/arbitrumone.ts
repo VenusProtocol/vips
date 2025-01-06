@@ -31,31 +31,27 @@ forking(291539000, async () => {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
-    previousTreasuryBalance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
-
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("1000000", 18));
     await xvs.connect(await ethers.getSigner(BRIDGE)).mint(ARBITRUM_ONE_VTREASURY, ARBITRUM_ONE_TOTAL_AMOUNT);
+
+    previousTreasuryBalance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
   });
 
   await pretendExecutingVip(await vip019());
   testForkedNetworkVipCommands("XVS Bridging", await vip417());
 
   describe("Post-Execution state", () => {
-    it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ARBITRUM_ONE_TARGETS) {
-        it(`should transfer ${amount} XVS to ${target}`, async () => {
-          const balance = await xvs.balanceOf(target);
-          expect(balance).to.equal(previousBalances[target].add(amount));
-        });
-      }
-    });
-
-    it("should transfer XVS from the treasury", async () => {
-      it(`should transfer ${ARBITRUM_ONE_TOTAL_AMOUNT} XVS to the targets`, async () => {
-        const balance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
-        expect(balance).to.equal(previousTreasuryBalance.sub(ARBITRUM_ONE_TOTAL_AMOUNT));
+    for (const { target, amount } of ARBITRUM_ONE_TARGETS) {
+      it(`should transfer ${amount} XVS to ${target}`, async () => {
+        const balance = await xvs.balanceOf(target);
+        expect(balance).to.equal(previousBalances[target].add(amount));
       });
+    }
+
+    it(`should transfer ${ARBITRUM_ONE_TOTAL_AMOUNT} XVS to the targets`, async () => {
+      const balance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
+      expect(balance).to.equal(previousTreasuryBalance.sub(ARBITRUM_ONE_TOTAL_AMOUNT));
     });
 
     it("owner of VTreasury should be the timelock", async () => {

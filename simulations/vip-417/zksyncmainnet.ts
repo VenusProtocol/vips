@@ -1,9 +1,10 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip017 from "../../multisig/proposals/zksyncmainnet/vip-017/index";
@@ -31,35 +32,31 @@ forking(52786809, async () => {
       previousBalances[target] = await xvs.balanceOf(target);
     }
 
-    previousTreasuryBalance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
-
-    await impersonateAccount(BRIDGE);
+    const xvsMinter = await initMainnetUser(BRIDGE, ethers.utils.parseEther("1"));
     await setBalance(BRIDGE, parseUnits("1000000", 18));
-    await xvs.connect(await ethers.getSigner(BRIDGE)).mint(ZKSYNCMAINNET_VTREASURY, ZKSYNCMAINNET_TOTAL_AMOUNT);
+    await xvs.connect(xvsMinter).mint(ZKSYNCMAINNET_VTREASURY, ZKSYNCMAINNET_TOTAL_AMOUNT);
+
+    previousTreasuryBalance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
   });
 
   await pretendExecutingVip(await vip017());
   testForkedNetworkVipCommands("XVS Bridging", await vip417());
 
   describe("Post-Execution state", () => {
-    it("should transfer XVS from the treasury", async () => {
-      for (const { target, amount } of ZKSYNCMAINNET_TARGETS) {
-        it(`should transfer ${amount} XVS to ${target}`, async () => {
-          const balance = await xvs.balanceOf(target);
-          expect(balance).to.equal(previousBalances[target].add(amount));
-        });
-      }
-    });
+    for (const { target, amount } of ZKSYNCMAINNET_TARGETS) {
+      it(`should transfer ${amount} XVS to ${target}`, async () => {
+        const balance = await xvs.balanceOf(target);
+        expect(balance).to.equal(previousBalances[target].add(amount));
+      });
+    }
 
     it("owner of VTreasury should be the timelock", async () => {
       expect(await vTreasury.owner()).to.be.equal(zksyncmainnet.NORMAL_TIMELOCK);
     });
 
-    it("should transfer XVS from the treasury", async () => {
-      it(`should transfer ${ZKSYNCMAINNET_TOTAL_AMOUNT} XVS to the targets`, async () => {
-        const balance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
-        expect(balance).to.equal(previousTreasuryBalance.sub(ZKSYNCMAINNET_TOTAL_AMOUNT));
-      });
+    it(`should transfer ${ZKSYNCMAINNET_TOTAL_AMOUNT} XVS to the targets`, async () => {
+      const balance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
+      expect(balance).to.equal(previousTreasuryBalance.sub(ZKSYNCMAINNET_TOTAL_AMOUNT));
     });
   });
 });
