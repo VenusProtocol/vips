@@ -4,7 +4,7 @@ import { makeProposal } from "src/utils";
 export const VTREASURY = "0xB2e9174e23382f7744CebF7e0Be54cA001D95599";
 const zksyncmainnet = NETWORK_ADDRESSES.zksyncmainnet;
 
-const vip017 = () => {
+const vip018 = () => {
   return makeProposal([
     {
       target: VTREASURY,
@@ -14,4 +14,4 @@ const vip017 = () => {
   ]);
 };
 
-export default vip017;
+export default vip018;

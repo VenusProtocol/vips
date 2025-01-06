@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip417, { CORE_COMPTROLLER, TOTAL_XVS, XVS, XVS_STORE, XVS_STORE_AMOUNT } from "../../vips/vip-417/bscmainnet";
+import vip419, { CORE_COMPTROLLER, TOTAL_XVS, XVS, XVS_STORE, XVS_STORE_AMOUNT } from "../../vips/vip-419/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -18,7 +18,7 @@ forking(45437328, async () => {
     xvsStorePReviousBalance = await xvs.balanceOf(XVS_STORE);
   });
 
-  testVip("VIP-417", await vip417(), {
+  testVip("VIP-419", await vip419(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

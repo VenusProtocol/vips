@@ -7,14 +7,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip017 from "../../multisig/proposals/zksyncmainnet/vip-017/index";
+import vip018 from "../../multisig/proposals/zksyncmainnet/vip-018/index";
 import {
   ZKSYNCMAINNET_TARGETS,
   ZKSYNCMAINNET_TOTAL_AMOUNT,
   ZKSYNCMAINNET_VTREASURY,
   ZKSYNCMAINNET_XVS,
-  vip417,
-} from "../../vips/vip-417/bscmainnet";
+  vip419,
+} from "../../vips/vip-419/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import XVS_ABI from "./abi/XVS.json";
 
@@ -39,8 +39,8 @@ forking(52786809, async () => {
     previousTreasuryBalance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
   });
 
-  await pretendExecutingVip(await vip017());
-  testForkedNetworkVipCommands("XVS Bridging", await vip417());
+  await pretendExecutingVip(await vip018());
+  testForkedNetworkVipCommands("XVS Bridging", await vip419());
 
   describe("Post-Execution state", () => {
     for (const { target, amount } of ZKSYNCMAINNET_TARGETS) {

@@ -10,8 +10,8 @@ import {
   ETHEREUM_TOTAL_AMOUNT,
   ETHEREUM_VTREASURY,
   ETHEREUM_XVS,
-  vip417,
-} from "../../vips/vip-417/bscmainnet";
+  vip419,
+} from "../../vips/vip-419/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 
 const BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
@@ -33,7 +33,7 @@ forking(21543323, async () => {
     previousTreasuryBalance = await xvs.balanceOf(ETHEREUM_VTREASURY);
   });
 
-  testForkedNetworkVipCommands("XVS Bridging", await vip417());
+  testForkedNetworkVipCommands("XVS Bridging", await vip419());
 
   describe("Post-Execution state", () => {
     for (const { target, amount } of ETHEREUM_TARGETS) {

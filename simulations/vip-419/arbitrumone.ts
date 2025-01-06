@@ -12,8 +12,8 @@ import {
   ARBITRUM_ONE_TOTAL_AMOUNT,
   ARBITRUM_ONE_VTREASURY,
   ARBITRUM_ONE_XVS,
-  vip417,
-} from "../../vips/vip-417/bscmainnet";
+  vip419,
+} from "../../vips/vip-419/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import XVS_ABI from "./abi/XVS.json";
 
@@ -39,7 +39,7 @@ forking(291539000, async () => {
   });
 
   await pretendExecutingVip(await vip019());
-  testForkedNetworkVipCommands("XVS Bridging", await vip417());
+  testForkedNetworkVipCommands("XVS Bridging", await vip419());
 
   describe("Post-Execution state", () => {
     for (const { target, amount } of ARBITRUM_ONE_TARGETS) {

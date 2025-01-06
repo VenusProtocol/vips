@@ -84,11 +84,53 @@ export const ETHEREUM_TOTAL_AMOUNT = parseUnits("40785", 18);
 export const ARBITRUM_ONE_TOTAL_AMOUNT = parseUnits("11475", 18);
 export const ZKSYNCMAINNET_TOTAL_AMOUNT = parseUnits("12690", 18);
 
-export const vip417 = () => {
+export const vip419 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-417",
-    description: ``,
+    title: "VIP-419 XVS Emissions Funding Proposal",
+    description: `#### Summary
+
+If passed, this VIP will perform the following actions:
+
+- Bridge 40,785 XVS from the [Core pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [XVS Store](https://etherscan.io/address/0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B) and some RewardsDistributor contracts on Ethereum
+- Bridge 11,475 XVS from the [Core pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [XVS Store](https://arbiscan.io/address/0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e) and some RewardsDistributor contracts on Arbitrum one
+- Bridge 12,690 XVS from the [Core pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [XVS Store](https://explorer.zksync.io/address/0x84266F552756cBed893b1FFA85248cD99501e3ce) and some RewardsDistributor contracts on ZKsync Era
+- Transfer 39,690 XVS from the [Core pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359) contract on BNB Chain
+- Transfer Venus Treasury contracts on Arbitrum one and ZKsync Era to Omnichain Governance
+
+#### Details
+
+Building on the approved [Emissions Adjustments Across All Chains](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x8033a801d152e88511475c117e114a3a2e4037d5a7252a2bea40e78a36b72d51), this proposal seeks to fund the reward distributors for an additional three months to maintain XVS emissions and continue monitoring market performance. The required amounts for each chain and location are as follows:
+
+- Ethereum Mainnet: 40,785 XVS
+    - [XVS Store](https://etherscan.io/address/0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B): 15,120 XVS
+    - [RewardsDistributor_Core_2](https://etherscan.io/address/0x886767B62C7ACD601672607373048FFD96Cf27B2): 14,526 XVS
+    - [RewardsDistributor_Liquid Staked ETH_3](https://etherscan.io/address/0x1e25CF968f12850003Db17E0Dba32108509C4359): 11,139 XVS
+- Arbitrum one: 11,475 XVS
+    - [XVS Store](https://arbiscan.io/address/0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e): 3,150 XVS
+    - [RewardsDistributor_Core_0](https://arbiscan.io/address/0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a): 5,265 XVS
+    - [RewardsDistributor_Liquid Staked ETH_0](https://arbiscan.io/address/0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D): 3,060 XVS
+- ZKsync Era: 12,690 XVS
+    - [XVS Store](https://explorer.zksync.io/address/0x84266F552756cBed893b1FFA85248cD99501e3ce): 3,150 XVS
+    - [RewardsDistributor_Core_0](https://explorer.zksync.io/address/0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894): 9,540 XVS
+- BNB Chain: 39,690 XVS
+    - [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359): 39,690 XVS
+
+Source of funds: [Comptroller contract on BNB Chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+
+Complete analysis and details of these recommendations are available in the community post “[XVS Emissions Funding Proposal](https://community.venus.io/t/xvs-emissions-funding-proposal/4809)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xf11cb1798e2fa6382f4b9ea7469685eb547abeb4899e70f36ab165ff5b69ec8e)).
+
+To transfer the Venus Treasury on [Arbitrum one](https://arbiscan.io/address/0x8a662ceac418daef956bc0e6b2dd417c80cda631) and [ZKsync Era](https://explorer.zksync.io/address/0xB2e9174e23382f7744CebF7e0Be54cA001D95599) to the Normal Timelock contracts on those networks, [this](https://app.safe.global/transactions/tx?safe=arb1:0x14e0E151b33f9802b3e75b621c1457afc44DcAA0&id=multisig_0x14e0E151b33f9802b3e75b621c1457afc44DcAA0_0x9cc276513e198544b736419e11902ca2f6463dc2b2251915bedc43e83503cdff) and [this](https://app.safe.global/transactions/tx?safe=zksync:0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa&id=multisig_0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa_0x239b2b57cf205df7c3e410982c5dabe26cf7a7ec4f5d10f07d8d0c9cc6a5ceed) transactions are required, where the two steps transfer is initiated by the Guardian wallets. If this VIP passes, those transactions will be executed. Otherwise, they will be rejected.
+
+#### References
+
+- [Venus Treasury on Arbitrum one](https://arbiscan.io/address/0x8a662ceac418daef956bc0e6b2dd417c80cda631)
+- [Venus Treasury on ZKsync Era](https://explorer.zksync.io/address/0xB2e9174e23382f7744CebF7e0Be54cA001D95599)
+- [Normal Timelock on Arbitrum one](https://arbiscan.io/address/0x4b94589Cc23F618687790036726f744D602c4017)
+- [Normal Timelock on ZKsync Era](https://explorer.zksync.io/address/0x093565Bc20AA326F4209eBaF3a26089272627613)
+- [Guardian on Arbitrum one](https://arbiscan.io/address/0x14e0e151b33f9802b3e75b621c1457afc44dcaa0)
+- [Guardian on ZKsync Era](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/452)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -183,4 +225,4 @@ export const vip417 = () => {
   );
 };
 
-export default vip417;
+export default vip419;
