@@ -18,12 +18,15 @@ const BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 
 forking(21543323, async () => {
   const previousBalances: Record<string, BigNumber> = {};
+  let previousTreasuryBalance: BigNumber;
   const xvs = new ethers.Contract(ETHEREUM_XVS, XVS_ABI, ethers.provider);
 
   before(async () => {
     for (const { target } of ETHEREUM_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
+
+    previousTreasuryBalance = await xvs.balanceOf(ETHEREUM_VTREASURY);
 
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("1000000", 18));
@@ -37,10 +40,16 @@ forking(21543323, async () => {
       for (const { target, amount } of ETHEREUM_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
-          console.log(balance, previousBalances[target]);
           expect(balance).to.equal(previousBalances[target].add(amount));
         });
       }
+    });
+
+    it("should transfer XVS from the treasury", async () => {
+      it(`should transfer ${ETHEREUM_TOTAL_AMOUNT} XVS to the targets`, async () => {
+        const balance = await xvs.balanceOf(ETHEREUM_VTREASURY);
+        expect(balance).to.equal(previousTreasuryBalance.sub(ETHEREUM_TOTAL_AMOUNT));
+      });
     });
   });
 });

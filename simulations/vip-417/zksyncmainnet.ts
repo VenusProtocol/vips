@@ -22,6 +22,7 @@ const BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
 forking(52786809, async () => {
   const previousBalances: Record<string, BigNumber> = {};
+  let previousTreasuryBalance: BigNumber;
   const xvs = new ethers.Contract(ZKSYNCMAINNET_XVS, XVS_ABI, ethers.provider);
   const vTreasury = new ethers.Contract(ZKSYNCMAINNET_VTREASURY, VTREASURY_ABI, ethers.provider);
 
@@ -29,6 +30,8 @@ forking(52786809, async () => {
     for (const { target } of ZKSYNCMAINNET_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
+
+    previousTreasuryBalance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
 
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("1000000", 18));
@@ -43,7 +46,6 @@ forking(52786809, async () => {
       for (const { target, amount } of ZKSYNCMAINNET_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
-          console.log(balance, previousBalances[target]);
           expect(balance).to.equal(previousBalances[target].add(amount));
         });
       }
@@ -51,6 +53,13 @@ forking(52786809, async () => {
 
     it("owner of VTreasury should be the timelock", async () => {
       expect(await vTreasury.owner()).to.be.equal(zksyncmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("should transfer XVS from the treasury", async () => {
+      it(`should transfer ${ZKSYNCMAINNET_TOTAL_AMOUNT} XVS to the targets`, async () => {
+        const balance = await xvs.balanceOf(ZKSYNCMAINNET_VTREASURY);
+        expect(balance).to.equal(previousTreasuryBalance.sub(ZKSYNCMAINNET_TOTAL_AMOUNT));
+      });
     });
   });
 });

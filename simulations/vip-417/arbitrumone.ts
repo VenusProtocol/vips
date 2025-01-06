@@ -22,6 +22,7 @@ const BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 
 forking(291539000, async () => {
   const previousBalances: Record<string, BigNumber> = {};
+  let previousTreasuryBalance: BigNumber;
   const xvs = new ethers.Contract(ARBITRUM_ONE_XVS, XVS_ABI, ethers.provider);
   const vTreasury = new ethers.Contract(ARBITRUM_ONE_VTREASURY, VTREASURY_ABI, ethers.provider);
 
@@ -29,6 +30,8 @@ forking(291539000, async () => {
     for (const { target } of ARBITRUM_ONE_TARGETS) {
       previousBalances[target] = await xvs.balanceOf(target);
     }
+
+    previousTreasuryBalance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
 
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("1000000", 18));
@@ -43,10 +46,16 @@ forking(291539000, async () => {
       for (const { target, amount } of ARBITRUM_ONE_TARGETS) {
         it(`should transfer ${amount} XVS to ${target}`, async () => {
           const balance = await xvs.balanceOf(target);
-          console.log(balance, previousBalances[target]);
           expect(balance).to.equal(previousBalances[target].add(amount));
         });
       }
+    });
+
+    it("should transfer XVS from the treasury", async () => {
+      it(`should transfer ${ARBITRUM_ONE_TOTAL_AMOUNT} XVS to the targets`, async () => {
+        const balance = await xvs.balanceOf(ARBITRUM_ONE_VTREASURY);
+        expect(balance).to.equal(previousTreasuryBalance.sub(ARBITRUM_ONE_TOTAL_AMOUNT));
+      });
     });
 
     it("owner of VTreasury should be the timelock", async () => {

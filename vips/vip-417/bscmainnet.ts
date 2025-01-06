@@ -6,17 +6,19 @@ import { LzChainId } from "src/types";
 import { ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
-export const CORE_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
+const { arbitrumone, ethereum, zksyncmainnet, bscmainnet } = NETWORK_ADDRESSES;
+
+export const CORE_COMPTROLLER = bscmainnet.UNITROLLER;
 export const TOTAL_XVS = parseUnits("104640", 18);
 export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 export const XVS_STORE_AMOUNT = parseUnits("39690", 18);
-export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-export const ETHEREUM_VTREASURY = "0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA";
-export const ARBITRUM_ONE_VTREASURY = "0x8a662ceAC418daeF956Bc0e6B2dd417c80CDA631";
-export const ZKSYNCMAINNET_VTREASURY = "0xB2e9174e23382f7744CebF7e0Be54cA001D95599";
-export const ETHEREUM_XVS = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A";
-export const ARBITRUM_ONE_XVS = "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52";
-export const ZKSYNCMAINNET_XVS = "0xD78ABD81a3D57712a3af080dc4185b698Fe9ac5A";
+export const XVS = bscmainnet.XVS;
+export const ETHEREUM_VTREASURY = ethereum.VTREASURY;
+export const ARBITRUM_ONE_VTREASURY = arbitrumone.VTREASURY;
+export const ZKSYNCMAINNET_VTREASURY = zksyncmainnet.VTREASURY;
+export const ETHEREUM_XVS = ethereum.XVS;
+export const ARBITRUM_ONE_XVS = arbitrumone.XVS;
+export const ZKSYNCMAINNET_XVS = zksyncmainnet.XVS;
 export const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 const BRIDGE_FEES = parseUnits("0.05", 18);
@@ -81,8 +83,6 @@ export const ZKSYNCMAINNET_TARGETS = [
 export const ETHEREUM_TOTAL_AMOUNT = parseUnits("40785", 18);
 export const ARBITRUM_ONE_TOTAL_AMOUNT = parseUnits("11475", 18);
 export const ZKSYNCMAINNET_TOTAL_AMOUNT = parseUnits("12690", 18);
-
-const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const vip417 = () => {
   const meta = {
