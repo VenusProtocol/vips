@@ -1,56 +1,28 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip060 from "../../multisig/proposals/sepolia/vip-071";
-import {
-  COMPTROLLERS,
-  CONVERTER_NETWORK,
-  PLP,
-  PRIME,
-  PSR,
-  REWARD_DISTRIBUTORS,
-  VTOKENS,
-  NTGs
-} from "../../multisig/proposals/sepolia/vip-071";
+import { COMPTROLLERS, PSR, REWARD_DISTRIBUTORS, VTOKENS } from "../../multisig/proposals/sepolia/vip-071";
 import vip416 from "../../vips/vip-416/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
-import PRIME_ABI from "./abi/Prime.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
 forking(7393932, async () => {
   const provider = ethers.provider;
-  let prime: Contract;
-  let plp: Contract;
 
   before(async () => {
-    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
-    plp = new ethers.Contract(PLP, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
     await pretendExecutingVip(await vip060());
   });
 
   testForkedNetworkVipCommands("vip350", await vip416());
 
   describe("Post-VIP behavior", async () => {
-    it(`owner for converter network`, async () => {
-      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
-      expect(await c.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
-    });
-
-    it(`correct owner `, async () => {
-      expect(await prime.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
-      expect(await plp.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
-    });
-
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
       it(`correct owner for ${rewardDistributor}`, async () => {
         const c = new ethers.Contract(rewardDistributor, REWARD_DISTRIBUTOR_ABI, provider);
@@ -74,13 +46,6 @@ forking(7393932, async () => {
       it(`correct owner for ${vTokenAddress}`, async () => {
         const v = new ethers.Contract(vTokenAddress, VTOKEN_ABI, provider);
         expect(await v.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
-      });
-    }
-
-    for (const ntgAddress of NTGs) {
-      it(`correct owner for ${ntgAddress}`, async () => {
-        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
-        expect(await ntg.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
       });
     }
   });

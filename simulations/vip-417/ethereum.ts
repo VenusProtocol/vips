@@ -4,12 +4,23 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip061, { CONVERTERS, XVS_STORE } from "../../multisig/proposals/ethereum/vip-073";
+import vip061, {
+  CONVERTERS,
+  CONVERTER_NETWORK,
+  NTGs,
+  PLP,
+  PRIME,
+  XVS_STORE,
+} from "../../multisig/proposals/ethereum/vip-073";
 import vip417, {
   ETHEREUM_BOUND_VALIDATOR,
   ETHEREUM_XVS_BRIDGE_ADMIN,
   ETHEREUM_sFrxETH_ORACLE,
 } from "../../vips/vip-417/bscmainnet";
+import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -34,6 +45,9 @@ forking(21523966, async () => {
   let boundValidator: Contract;
   let sfraxETH: Contract;
   let treasury: Contract;
+  let prime: Contract;
+  let plp: Contract;
+
   const xvsVaultProxy = new ethers.Contract(ethereum.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
 
@@ -46,6 +60,9 @@ forking(21523966, async () => {
     boundValidator = new ethers.Contract(ETHEREUM_BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
     sfraxETH = new ethers.Contract(ETHEREUM_sFrxETH_ORACLE, SFRAXETH_ORACLE_ABI, provider);
     treasury = await ethers.getContractAt(TREASURY_ABI, ethereum.VTREASURY);
+    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+    plp = new ethers.Contract(PLP, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
+
     await pretendExecutingVip(await vip061());
   });
 
@@ -79,5 +96,21 @@ forking(21523966, async () => {
       expect(await xvsVaultProxy.admin()).to.equal(ethereum.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(ethereum.NORMAL_TIMELOCK);
     });
+    it(`owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+    });
+
+    it(`correct owner `, async () => {
+      expect(await prime.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+      expect(await plp.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+    });
+
+    for (const ntgAddress of NTGs) {
+      it(`correct owner for ${ntgAddress}`, async () => {
+        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
+        expect(await ntg.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+      });
+    }
   });
 });

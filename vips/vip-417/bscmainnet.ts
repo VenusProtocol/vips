@@ -3,7 +3,21 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { CONVERTERS as ARBITRUM_ONE_CONVERTERS } from "../../multisig/proposals/arbitrumone/vip-019";
+import { PLP as ARBITRUMONE_PLP, PRIME as ARBITRUMONE_PRIME } from "../../multisig/proposals/arbitrumone/vip-019";
+import { COMPTROLLERS as ARBITRUMONE_COMPTROLLERS } from "../../multisig/proposals/arbitrumone/vip-019";
+import { VTOKENS as ARBITRUMONE_VTOKENS } from "../../multisig/proposals/arbitrumone/vip-019";
+import { POOL_REGISTRY as ARBITRUMONE_POOL_REGISTRY } from "../../multisig/proposals/arbitrumone/vip-019";
+import { NTGs as ARBITRUMONE_NTGs } from "../../multisig/proposals/arbitrumone/vip-019";
+import { CONVERTER_NETWORK as ARBITRUM_ONE_CONVERTER_NETWORK } from "../../multisig/proposals/arbitrumone/vip-019";
 import { CONVERTERS as ETHEREUM_CONVERTERS } from "../../multisig/proposals/ethereum/vip-073";
+import { CONVERTER_NETWORK as ETHEREUM_CONVERTER_NETWORK } from "../../multisig/proposals/ethereum/vip-073";
+import { PLP as ETHEREUM_PLP, PRIME as ETHEREUM_PRIME } from "../../multisig/proposals/ethereum/vip-073";
+import { POOL_REGISTRY as ETHEREUM_POOL_REGISTRY } from "../../multisig/proposals/ethereum/vip-073";
+import { NTGs as ETHEREUM_NTGs } from "../../multisig/proposals/ethereum/vip-073";
+import { COMPTROLLERS as OPBNBMAINNET_COMPTROLLERS } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { VTOKENS as OPBNBMAINNET_VTOKENS } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { NTGs as OPBNBMAINNET_NTGs } from "../../multisig/proposals/opbnbmainnet/vip-024";
 
 export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 export const ETHEREUM_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
@@ -212,6 +226,116 @@ const vip417 = () => {
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.arbitrumone,
+        };
+      }),
+      {
+        target: ETHEREUM_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ARBITRUM_ONE_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ETHEREUM_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ETHEREUM_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ARBITRUMONE_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ARBITRUMONE_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ETHEREUM_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ARBITRUMONE_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      ...ARBITRUMONE_COMPTROLLERS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumone,
+        };
+      }),
+      ...ARBITRUMONE_VTOKENS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumone,
+        };
+      }),
+      {
+        target: OPBNBMAINNET_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      ...OPBNBMAINNET_COMPTROLLERS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbmainnet,
+        };
+      }),
+      ...OPBNBMAINNET_VTOKENS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbmainnet,
+        };
+      }),
+      ...ARBITRUMONE_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumone,
+        };
+      }),
+      ...ETHEREUM_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.ethereum,
+        };
+      }),
+      ...OPBNBMAINNET_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbmainnet,
         };
       }),
     ],

@@ -4,8 +4,11 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip021, { XVS_STORE } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import vip021, { COMPTROLLERS, NTGs, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbmainnet/vip-024";
 import vip417, { OPBNBMAINNET_BOUND_VALIDATOR, OPBNBMAINNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-417/bscmainnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 import BINANCE_ORACLE_API from "./abi/binanceOracle.json";
@@ -62,5 +65,25 @@ forking(43912806, async () => {
       expect(await xvsVaultProxy.admin()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
     });
+    for (const comptrollerAddress of COMPTROLLERS) {
+      it(`correct owner for ${comptrollerAddress}`, async () => {
+        const c = new ethers.Contract(comptrollerAddress, COMPTROLLER_ABI, provider);
+        expect(await c.owner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const vTokenAddress of VTOKENS) {
+      it(`correct owner for ${vTokenAddress}`, async () => {
+        const v = new ethers.Contract(vTokenAddress, VTOKEN_ABI, provider);
+        expect(await v.owner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const ntgAddress of NTGs) {
+      it(`correct owner for ${ntgAddress}`, async () => {
+        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
+        expect(await ntg.owner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
+      });
+    }
   });
 });

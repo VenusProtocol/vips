@@ -4,9 +4,24 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014, { CONVERTERS, XVS_STORE } from "../../multisig/proposals/arbitrumone/vip-019";
+import vip014, {
+  COMPTROLLERS,
+  CONVERTERS,
+  CONVERTER_NETWORK,
+  NTGs,
+  PLP,
+  PRIME,
+  VTOKENS,
+  XVS_STORE,
+} from "../../multisig/proposals/arbitrumone/vip-019";
 import vip417, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-417/bscmainnet";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -19,7 +34,7 @@ import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(290585586, async () => {
+forking(291641176, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;
@@ -28,6 +43,9 @@ forking(290585586, async () => {
   let treasury: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
+  let prime: Contract;
+  let plp: Contract;
+
   const xvsVaultProxy = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
   before(async () => {
@@ -38,6 +56,9 @@ forking(290585586, async () => {
     treasury = await ethers.getContractAt(TREASURY_ABI, arbitrumone.VTREASURY);
     xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, ARBITRUM_XVS_BRIDGE_ADMIN);
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE);
+    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+    plp = new ethers.Contract(PLP, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
+
     await pretendExecutingVip(await vip014());
   });
 
@@ -69,5 +90,34 @@ forking(290585586, async () => {
       expect(await xvsVaultProxy.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);
     });
+    it(`correct owner `, async () => {
+      expect(await prime.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      expect(await plp.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+    });
+    it(`owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+    });
+
+    for (const comptrollerAddress of COMPTROLLERS) {
+      it(`correct owner for ${comptrollerAddress}`, async () => {
+        const c = new ethers.Contract(comptrollerAddress, COMPTROLLER_ABI, provider);
+        expect(await c.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const vTokenAddress of VTOKENS) {
+      it(`correct owner for ${vTokenAddress}`, async () => {
+        const v = new ethers.Contract(vTokenAddress, VTOKEN_ABI, provider);
+        expect(await v.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      });
+    }
+
+    for (const ntgAddress of NTGs) {
+      it(`correct owner for ${ntgAddress}`, async () => {
+        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
+        expect(await ntg.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+      });
+    }
   });
 });

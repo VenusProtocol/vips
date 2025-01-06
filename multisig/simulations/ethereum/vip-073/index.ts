@@ -11,6 +11,7 @@ import vip073, {
   CONVERTERS,
   CONVERTER_NETWORK,
   DEFAULT_PROXY_ADMIN,
+  NTGs,
   PLP,
   PRIME,
   PSR,
@@ -22,12 +23,12 @@ import vip073, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-  NTGs
 } from "../../../proposals/ethereum/vip-073";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -46,7 +47,6 @@ import SFRAXETH_ORACLE_ABI from "./abi/sFrxETHOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
-import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -117,7 +117,6 @@ forking(21523966, async () => {
         expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
       });
     }
-
 
     it("pending owner of psr", async () => {
       expect(await psr.pendingOwner()).to.equal(ethers.constants.AddressZero);

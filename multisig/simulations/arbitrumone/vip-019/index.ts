@@ -11,6 +11,7 @@ import vip019, {
   CONVERTERS,
   CONVERTER_NETWORK,
   DEFAULT_PROXY_ADMIN,
+  NTGs,
   PLP,
   PRIME,
   PSR,
@@ -21,12 +22,12 @@ import vip019, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-  NTGs
 } from "../../../proposals/arbitrumone/vip-019";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -44,7 +45,6 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
-import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 

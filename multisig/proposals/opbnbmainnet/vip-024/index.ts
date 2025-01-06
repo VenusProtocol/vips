@@ -24,9 +24,7 @@ export const XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 export const BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const NTGs = [
-  "0x7bAf6019C90B93aD30f8aD6a2EcCD2B11427b29f"
-]
+export const NTGs = ["0x7bAf6019C90B93aD30f8aD6a2EcCD2B11427b29f"];
 
 const vip024 = () => {
   return makeProposal([
@@ -115,7 +113,7 @@ const vip024 = () => {
         signature: "transferOwnership(address)",
         params: [opbnbmainnet.NORMAL_TIMELOCK],
       };
-    })
+    }),
   ]);
 };
 

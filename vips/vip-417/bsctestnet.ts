@@ -3,7 +3,24 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { CONVERTERS as ARBITRUM_SEPOLIA_CONVERTERS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import {
+  PLP as ARBITRUMSEPOLIA_PLP,
+  PRIME as ARBITRUMSEPOLIA_PRIME,
+} from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { COMPTROLLERS as ARBITRUMSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { VTOKENS as ARBITRUMSEPOLIA_VTOKENS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { POOL_REGISTRY as ARBITRUMSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { CONVERTER_NETWORK as ARBITRUM_SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { NTGs as ARBITRUMSEPOLIA_NTGs } from "../../multisig/proposals/arbitrumsepolia/vip-020";
+import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import { NTGs as OPBNBTESTNET_NTGs } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
+import { CONVERTER_NETWORK as SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-071";
+import { PLP as SEPOLIA_PLP, PRIME as SEPOLIA_PRIME } from "../../multisig/proposals/sepolia/vip-071";
+import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/sepolia/vip-071";
+import { NTGs as SEPOLIA_NTGs } from "../../multisig/proposals/sepolia/vip-071";
 
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
@@ -219,6 +236,117 @@ const vip417 = () => {
           signature: "acceptOwnership()",
           params: [],
           dstChainId: LzChainId.arbitrumsepolia,
+        };
+      }),
+      {
+        target: SEPOLIA_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ARBITRUM_SEPOLIA_CONVERTER_NETWORK,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: SEPOLIA_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: SEPOLIA_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ARBITRUMSEPOLIA_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ARBITRUMSEPOLIA_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: SEPOLIA_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ARBITRUMSEPOLIA_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      ...ARBITRUMSEPOLIA_COMPTROLLERS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumsepolia,
+        };
+      }),
+      ...ARBITRUMSEPOLIA_VTOKENS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumsepolia,
+        };
+      }),
+
+      {
+        target: OPBNBTESTNET_POOL_REGISTRY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      ...OPBNBTESTNET_COMPTROLLERS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbtestnet,
+        };
+      }),
+      ...OPBNBTESTNET_VTOKENS.map(comptroller => {
+        return {
+          target: comptroller,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbtestnet,
+        };
+      }),
+      ...SEPOLIA_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.sepolia,
+        };
+      }),
+      ...ARBITRUMSEPOLIA_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.arbitrumsepolia,
+        };
+      }),
+      ...OPBNBTESTNET_NTGs.map(ntg => {
+        return {
+          target: ntg,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.opbnbtestnet,
         };
       }),
     ],

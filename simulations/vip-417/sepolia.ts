@@ -4,12 +4,23 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip060, { CONVERTERS, XVS_STORE } from "../../multisig/proposals/sepolia/vip-071";
+import vip060, {
+  CONVERTERS,
+  CONVERTER_NETWORK,
+  NTGs,
+  PLP,
+  PRIME,
+  XVS_STORE,
+} from "../../multisig/proposals/sepolia/vip-071";
 import vip417, {
   SEPOLIA_BOUND_VALIDATOR,
   SEPOLIA_XVS_BRIDGE_ADMIN,
   SEPOLIA_sFrxETH_ORACLE,
 } from "../../vips/vip-417/bsctestnet";
+import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
@@ -30,6 +41,9 @@ forking(7393932, async () => {
   let resilientOracle: Contract;
   let boundValidator: Contract;
   let sfraxETH: Contract;
+  let prime: Contract;
+  let plp: Contract;
+
   const xvsVaultProxy = new ethers.Contract(sepolia.XVS_VAULT_PROXY, XVS_VAULT_PROXY_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, XVS_STORE_ABI, provider);
 
@@ -39,7 +53,8 @@ forking(7393932, async () => {
     resilientOracle = new ethers.Contract(sepolia.RESILIENT_ORACLE, RESILLIENT_ORACLE_ABI, provider);
     boundValidator = new ethers.Contract(SEPOLIA_BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, provider);
     sfraxETH = new ethers.Contract(SEPOLIA_sFrxETH_ORACLE, SFRAXETH_ORACLE_ABI, provider);
-
+    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+    plp = new ethers.Contract(PLP, PRIME_LIQUIDITY_PROVIDER_ABI, provider);
     await pretendExecutingVip(await vip060());
   });
 
@@ -77,5 +92,21 @@ forking(7393932, async () => {
       expect(await xvsVaultProxy.admin()).to.equal(sepolia.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(sepolia.NORMAL_TIMELOCK);
     });
+
+    it(`owner for converter network`, async () => {
+      const c = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+      expect(await c.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+    });
+
+    it(`correct owner `, async () => {
+      expect(await prime.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      expect(await plp.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+    });
+    for (const ntgAddress of NTGs) {
+      it(`correct owner for ${ntgAddress}`, async () => {
+        const ntg = new ethers.Contract(ntgAddress, NTG_ABI, provider);
+        expect(await ntg.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      });
+    }
   });
 });

@@ -9,17 +9,18 @@ import vip024, {
   COMPTROLLERS,
   COMPTROLLER_BEACON,
   DEFAULT_PROXY_ADMIN,
+  NTGs,
   PSR,
   VTOKENS,
   VTOKEN_BEACON,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-  NTGs
 } from "../../../proposals/opbnbmainnet/vip-024";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import COMPTROLLER_BEACON_ABI from "./abi/ComptrollerBeacon.json";
 import DEFAULT_PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import NTG_ABI from "./abi/NativeTokenGateway.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -31,7 +32,6 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
-import NTG_ABI from "./abi/NativeTokenGateway.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 
@@ -75,7 +75,6 @@ forking(43912806, async () => {
         expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
       });
     }
-
 
     it("owner of proxy admin is guardian", async () => {
       expect(await proxyAdmin.owner()).to.equal(opbnbmainnet.GUARDIAN);
@@ -135,7 +134,6 @@ forking(43912806, async () => {
         expect(await c.pendingOwner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
       });
     }
-
 
     it("owner of proxy admin is timelock", async () => {
       expect(await proxyAdmin.owner()).to.equal(opbnbmainnet.NORMAL_TIMELOCK);
