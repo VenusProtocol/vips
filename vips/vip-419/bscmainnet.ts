@@ -21,7 +21,7 @@ export const ARBITRUM_ONE_XVS = arbitrumone.XVS;
 export const ZKSYNCMAINNET_XVS = zksyncmainnet.XVS;
 export const XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-const BRIDGE_FEES = parseUnits("0.05", 18);
+const BRIDGE_FEES = parseUnits("0.5", 18);
 
 export const ETHEREUM_TARGETS = [
   {
