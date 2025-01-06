@@ -44,7 +44,7 @@ export const ETHEREUM_TARGETS = [
 
 export const ARBITRUM_ONE_TARGETS = [
   {
-    target: "0x84266F552756cBed893b1FFA85248cD99501e3ce",
+    target: "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e",
     dstChainId: LzChainId.arbitrumone,
     amount: parseUnits("3150", 18),
     treasury: ARBITRUM_ONE_VTREASURY,
