@@ -82,7 +82,7 @@ export const ETHEREUM_TOTAL_AMOUNT = parseUnits("40785", 18);
 export const ARBITRUM_ONE_TOTAL_AMOUNT = parseUnits("11475", 18);
 export const ZKSYNCMAINNET_TOTAL_AMOUNT = parseUnits("12690", 18);
 
-const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const vip417 = () => {
   const meta = {
