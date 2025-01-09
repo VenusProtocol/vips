@@ -29,7 +29,7 @@ import {
 } from "./addresses";
 
 export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
-const { arbitrumsepolia } = NETWORK_ADDRESSES;
+const { arbitrumone } = NETWORK_ADDRESSES;
 
 const vip421 = () => {
   const meta = {
@@ -44,86 +44,81 @@ const vip421 = () => {
   return makeProposal(
     [
       ...arbitrumConverters.flatMap(converter => [
-        ...[
-          arbitrumsepolia.NORMAL_TIMELOCK,
-          arbitrumsepolia.FAST_TRACK_TIMELOCK,
-          arbitrumsepolia.CRITICAL_TIMELOCK,
-        ].flatMap(timelock => [
-          arbitrumGrant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
-          arbitrumGrant(converter, "pauseConversion()", timelock),
-          arbitrumGrant(converter, "resumeConversion()", timelock),
-          arbitrumGrant(converter, "setMinAmountToConvert(uint256)", timelock),
-        ]),
+        ...[arbitrumone.NORMAL_TIMELOCK, arbitrumone.FAST_TRACK_TIMELOCK, arbitrumone.CRITICAL_TIMELOCK].flatMap(
+          timelock => [
+            arbitrumGrant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
+            arbitrumGrant(converter, "pauseConversion()", timelock),
+            arbitrumGrant(converter, "resumeConversion()", timelock),
+            arbitrumGrant(converter, "setMinAmountToConvert(uint256)", timelock),
+          ],
+        ),
       ]),
-      ...[
-        arbitrumsepolia.NORMAL_TIMELOCK,
-        arbitrumsepolia.FAST_TRACK_TIMELOCK,
-        arbitrumsepolia.CRITICAL_TIMELOCK,
-      ].flatMap(timelock => [
-        arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "addTokenConverter(address)", timelock),
-        arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "removeTokenConverter(address)", timelock),
-        arbitrumGrant(ARBITRUM_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock),
-      ]),
+      ...[arbitrumone.NORMAL_TIMELOCK, arbitrumone.FAST_TRACK_TIMELOCK, arbitrumone.CRITICAL_TIMELOCK].flatMap(
+        timelock => [
+          arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "addTokenConverter(address)", timelock),
+          arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "removeTokenConverter(address)", timelock),
+          arbitrumGrant(ARBITRUM_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock),
+        ],
+      ),
       {
         target: ARBITRUM_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[0], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[1], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[2], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[3], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[4], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.arbitrumone,
       },
-
       {
         target: ETHEREUM_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [ethereumBaseAssets[0], [ethereumUSDTPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [ethereumBaseAssets[1], [ethereumUSDCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [ethereumBaseAssets[2], [ethereumWBTCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [ethereumBaseAssets[3], [ethereumWETHPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [ethereumBaseAssets[4], [ethereumXVSVaultConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
     ],
 
