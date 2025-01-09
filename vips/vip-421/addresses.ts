@@ -91,11 +91,11 @@ export const sepoliaAssets = [
 // Function to filter assets based on a base asset
 const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
 
-export const sepoliaUSDTPrimeConverterTokenOuts = filterAssets(SepoliaAssets, SepoliaBaseAssets[0]);
-export const sepoliaUSDCPrimeConverterTokenOuts = filterAssets(SepoliaAssets, SepoliaBaseAssets[1]);
-export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(SepoliaAssets, SepoliaBaseAssets[2]);
-export const sepoliaWETHPrimeConverterTokenOuts = filterAssets(SepoliaAssets, SepoliaBaseAssets[3]);
-export const sepoliaXVSVaultConverterTokenOuts = filterAssets(SepoliaAssets, SepoliaBaseAssets[4]);
+export const sepoliaUSDTPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[0]);
+export const sepoliaUSDCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[1]);
+export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[2]);
+export const sepoliaWETHPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[3]);
+export const sepoliaXVSVaultConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[4]);
 
 export const arbitrumBaseAssets = [
   "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", // USDT USDTPrimeConverter BaseAsset
