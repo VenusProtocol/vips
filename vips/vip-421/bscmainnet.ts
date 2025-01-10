@@ -1,23 +1,18 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import {
-  ARBITRUM_CONVERTER_NETWORK,
   ARBITRUM_USDC_PRIME_CONVERTER,
   ARBITRUM_USDT_PRIME_CONVERTER,
   ARBITRUM_WBTC_PRIME_CONVERTER,
   ARBITRUM_WETH_PRIME_CONVERTER,
   ARBITRUM_XVS_VAULT_CONVERTER,
-  ARBITRUM_XVS_VAULT_TREASURY,
   ETHEREUM_USDC_PRIME_CONVERTER,
   ETHEREUM_USDT_PRIME_CONVERTER,
   ETHEREUM_WBTC_PRIME_CONVERTER,
   ETHEREUM_WETH_PRIME_CONVERTER,
   ETHEREUM_XVS_VAULT_CONVERTER,
   arbitrumBaseAssets,
-  arbitrumConverters,
-  arbitrumGrant,
   arbitrumIncentiveAndAccessibilities,
   arbitrumTokenAddresses,
   ethereumBaseAssets,
@@ -29,7 +24,6 @@ import {
 } from "./addresses";
 
 export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
-const { arbitrumone } = NETWORK_ADDRESSES;
 
 const vip421 = () => {
   const meta = {
@@ -43,23 +37,6 @@ const vip421 = () => {
 
   return makeProposal(
     [
-      ...arbitrumConverters.flatMap(converter => [
-        ...[arbitrumone.NORMAL_TIMELOCK, arbitrumone.FAST_TRACK_TIMELOCK, arbitrumone.CRITICAL_TIMELOCK].flatMap(
-          timelock => [
-            arbitrumGrant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
-            arbitrumGrant(converter, "pauseConversion()", timelock),
-            arbitrumGrant(converter, "resumeConversion()", timelock),
-            arbitrumGrant(converter, "setMinAmountToConvert(uint256)", timelock),
-          ],
-        ),
-      ]),
-      ...[arbitrumone.NORMAL_TIMELOCK, arbitrumone.FAST_TRACK_TIMELOCK, arbitrumone.CRITICAL_TIMELOCK].flatMap(
-        timelock => [
-          arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "addTokenConverter(address)", timelock),
-          arbitrumGrant(ARBITRUM_CONVERTER_NETWORK, "removeTokenConverter(address)", timelock),
-          arbitrumGrant(ARBITRUM_XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock),
-        ],
-      ),
       {
         target: ARBITRUM_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",

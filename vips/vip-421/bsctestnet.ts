@@ -1,4 +1,3 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -14,8 +13,6 @@ import {
   SEPOLIA_WETH_PRIME_CONVERTER,
   SEPOLIA_XVS_VAULT_CONVERTER,
   arbitrumSepoliaBaseAssets,
-  arbitrumSepoliaConverters,
-  arbitrumSepoliaGrant,
   arbitrumSepoliaIncentiveAndAccessibilities,
   arbitrumSepoliaTokenAddresses,
   sepoliaBaseAssets,
@@ -27,7 +24,6 @@ import {
 } from "./addresses";
 
 export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
-const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
 const vip421 = () => {
   const meta = {
@@ -41,18 +37,6 @@ const vip421 = () => {
 
   return makeProposal(
     [
-      ...arbitrumSepoliaConverters.flatMap(converter => [
-        ...[
-          arbitrumsepolia.NORMAL_TIMELOCK,
-          arbitrumsepolia.FAST_TRACK_TIMELOCK,
-          arbitrumsepolia.CRITICAL_TIMELOCK,
-        ].flatMap(timelock => [
-          arbitrumSepoliaGrant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
-          arbitrumSepoliaGrant(converter, "pauseConversion()", timelock),
-          arbitrumSepoliaGrant(converter, "resumeConversion()", timelock),
-          arbitrumSepoliaGrant(converter, "setMinAmountToConvert(uint256)", timelock),
-        ]),
-      ]),
       {
         target: ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",

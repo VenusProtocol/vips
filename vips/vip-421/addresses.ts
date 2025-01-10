@@ -16,14 +16,6 @@ export const ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER = "0x99942a033454Cef6Ffb284388
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 
-export const arbitrumSepoliaConverters = [
-  ARBITRUM_SEPOLIA_USDC_PRIME_CONVERTER,
-  ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER,
-  ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER,
-  ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER,
-  ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER,
-];
-
 export const arbitrumSepoliaTokenAddresses = [
   "0x4371bb358aB5cC192E481543417D2F67b8781731", // ARB
   "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34", // weETH
@@ -47,13 +39,6 @@ export interface Command {
   // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
   gasLimitMultiplicationFactor?: number;
 }
-
-export const arbitrumSepoliaGrant = (target: string, signature: string, caller: string): Command => ({
-  target: ARBITRUM_SEPOLIA_ACM,
-  signature: "giveCallPermission(address,string,address)",
-  params: [target, signature, caller],
-  dstChainId: LzChainId.arbitrumsepolia,
-});
 
 export const sepoliaBaseAssets = [
   "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTPrimeConverter BaseAsset
@@ -112,29 +97,12 @@ export const ARBITRUM_WETH_PRIME_CONVERTER = "0x4aCB90ddD6df24dC6b0D50df84C94e72
 export const ARBITRUM_XVS_VAULT_CONVERTER = "0x9c5A7aB705EA40876c1B292630a3ff2e0c213DB1";
 
 export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
-export const ARBITRUM_CONVERTER_NETWORK = "0x2F6672C9A0988748b0172D97961BecfD9DC6D6d5";
-export const ARBITRUM_XVS_VAULT_TREASURY = "0xb076D4f15c08D7A7B89466327Ba71bc7e1311b58";
-
-export const arbitrumConverters = [
-  ARBITRUM_USDC_PRIME_CONVERTER,
-  ARBITRUM_USDT_PRIME_CONVERTER,
-  ARBITRUM_WBTC_PRIME_CONVERTER,
-  ARBITRUM_WETH_PRIME_CONVERTER,
-  ARBITRUM_XVS_VAULT_CONVERTER,
-];
 
 export const arbitrumTokenAddresses = [
   "0x912CE59144191C1204E64559FE8253a0e49E6548", // ARB
   "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe", // weETH
   "0x5979D7b546E38E414F7E9822514be443A4800529", // wstETH
 ];
-
-export const arbitrumGrant = (target: string, signature: string, caller: string): Command => ({
-  target: ARBITRUM_ACM,
-  signature: "giveCallPermission(address,string,address)",
-  params: [target, signature, caller],
-  dstChainId: LzChainId.arbitrumsepolia,
-});
 
 export const arbitrumIncentiveAndAccessibilities = [
   [0, 1],
