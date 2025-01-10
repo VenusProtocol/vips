@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { ETHEREUM_XVS_AMOUNT, ETHEREUM_XVS_SPEED, vip421 } from "../../vips/vip-421/bscmainnet";
+import { ETHEREUM_XVS_AMOUNT, ETHEREUM_XVS_SPEED, vip422 } from "../../vips/vip-422/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -20,7 +20,7 @@ forking(21593471, async () => {
     xvsStorePreviousBalance = await xvs.balanceOf(XVS_STORE);
   });
 
-  testForkedNetworkVipCommands("XVS", await vip421());
+  testForkedNetworkVipCommands("XVS", await vip422());
 
   describe("Post-Execution state", () => {
     it("should transfer XVS to the store", async () => {
