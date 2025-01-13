@@ -15,7 +15,7 @@ export const arbitrumSepoliaBaseAssets = [
   ARBITRUM_SEPOLIA_USDC, // USDCPrimeConverter BaseAsset
   ARBITRUM_SEPOLIA_WBTC, // WBTCPrimeConverter BaseAsset
   ARBITRUM_SEPOLIA_WETH, // WETHPrimeConverter BaseAsset
-  ARBITRUM_SEPOLIA_XVS, // XVSPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_XVS, // XVSVaultConverter BaseAsset
 ];
 
 export const ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER = "0xFC0ec257d3ec4D673cB4e2CD3827C202e75fd0be";
@@ -49,7 +49,7 @@ export const sepoliaBaseAssets = [
   "0x772d68929655ce7234C8C94256526ddA66Ef641E", // USDC USDCPrimeConverter BaseAsset
   "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b", // WBTC WBTCPrimeConverter BaseAsset
   "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHPrimeConverter BaseAsset
-  "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSPrimeConverter BaseAsset
+  "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSVaultConverter BaseAsset
 ];
 
 export const SEPOLIA_USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
@@ -88,14 +88,24 @@ export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, se
 export const sepoliaWETHPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[3]);
 export const sepoliaXVSVaultConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[4]);
 
-export const incentiveAndAccessibilities = new Array(sepoliaAssets.length - 1).fill([CONVERSION_INCENTIVE, 1]);
+export const incentiveAndAccessibilitiesSepolia = new Array(sepoliaAssets.length - 1).fill([CONVERSION_INCENTIVE, 1]);
+
+export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
+export const ARBITRUM_ARB = "0x912CE59144191C1204E64559FE8253a0e49E6548";
+export const ARBITRUM_WEETH = "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe";
+export const ARBITRUM_WSTETH = "0x5979D7b546E38E414F7E9822514be443A4800529";
+export const ARBITRUM_USDT = "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9";
+export const ARBITRUM_USDC = "0xaf88d065e77c8cC2239327C5EDb3A432268e5831";
+export const ARBITRUM_WBTC = "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f";
+export const ARBITRUM_WETH = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
+export const ARBITRUM_XVS = "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52";
 
 export const arbitrumBaseAssets = [
-  "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", // USDT USDTPrimeConverter BaseAsset
-  "0xaf88d065e77c8cC2239327C5EDb3A432268e5831", // USDC USDCPrimeConverter BaseAsset
-  "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f", // WBTC WBTCPrimeConverter BaseAsset
-  "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1", // WETH WETHPrimeConverter BaseAsset
-  "0xc1Eb7689147C81aC840d4FF0D298489fc7986d52", // XVS XVSPrimeConverter BaseAsset
+  ARBITRUM_USDT, // USDTPrimeConverter BaseAsset
+  ARBITRUM_USDC, // USDCPrimeConverter BaseAsset
+  ARBITRUM_WBTC, // WBTCPrimeConverter BaseAsset
+  ARBITRUM_WETH, // WETHPrimeConverter BaseAsset
+  ARBITRUM_XVS, // XVSVaultConverter BaseAsset
 ];
 
 export const ARBITRUM_USDT_PRIME_CONVERTER = "0x435Fac1B002d5D31f374E07c0177A1D709d5DC2D";
@@ -104,13 +114,7 @@ export const ARBITRUM_WBTC_PRIME_CONVERTER = "0xF91369009c37f029aa28AF89709a3523
 export const ARBITRUM_WETH_PRIME_CONVERTER = "0x4aCB90ddD6df24dC6b0D50df84C94e72012026d0";
 export const ARBITRUM_XVS_VAULT_CONVERTER = "0x9c5A7aB705EA40876c1B292630a3ff2e0c213DB1";
 
-export const ARBITRUM_ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
-
-export const arbitrumTokenAddresses = [
-  "0x912CE59144191C1204E64559FE8253a0e49E6548", // ARB
-  "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe", // weETH
-  "0x5979D7b546E38E414F7E9822514be443A4800529", // wstETH
-];
+export const arbitrumTokenAddresses = [ARBITRUM_ARB, ARBITRUM_WEETH, ARBITRUM_WSTETH];
 
 export const arbitrumIncentiveAndAccessibilities = [
   [0, 1],
@@ -123,7 +127,7 @@ export const ethereumBaseAssets = [
   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC USDCPrimeConverter BaseAsset
   "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC WBTCPrimeConverter BaseAsset
   "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH WETHPrimeConverter BaseAsset
-  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSPrimeConverter BaseAsset
+  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSVaultConverter BaseAsset
 ];
 
 export const ETHEREUM_USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
@@ -152,6 +156,8 @@ export const ethereumAssets = [
   "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110", // ezETH
   "0x917ceE801a67f933F2e6b33fC0cD1ED2d5909D88", // weETHs
 ];
+
+export const incentiveAndAccessibilitiesEthereum = new Array(ethereumAssets.length - 1).fill([CONVERSION_INCENTIVE, 1]);
 
 export const ethereumUSDTPrimeConverterTokenOuts = filterAssets(ethereumAssets, ethereumBaseAssets[0]);
 export const ethereumUSDCPrimeConverterTokenOuts = filterAssets(ethereumAssets, ethereumBaseAssets[1]);
