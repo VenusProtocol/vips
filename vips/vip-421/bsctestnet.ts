@@ -15,6 +15,7 @@ import {
   arbitrumSepoliaBaseAssets,
   arbitrumSepoliaIncentiveAndAccessibilities,
   arbitrumSepoliaTokenAddresses,
+  incentiveAndAccessibilitiesSepolia,
   sepoliaBaseAssets,
   sepoliaUSDCPrimeConverterTokenOuts,
   sepoliaUSDTPrimeConverterTokenOuts,
@@ -22,8 +23,6 @@ import {
   sepoliaWETHPrimeConverterTokenOuts,
   sepoliaXVSVaultConverterTokenOuts,
 } from "./addresses";
-
-export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
 
 const vip421 = () => {
   const meta = {
@@ -91,31 +90,31 @@ const vip421 = () => {
       {
         target: SEPOLIA_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[0], [sepoliaUSDTPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [sepoliaBaseAssets[0], sepoliaUSDTPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[1], [sepoliaUSDCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [sepoliaBaseAssets[1], sepoliaUSDCPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[2], [sepoliaWBTCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [sepoliaBaseAssets[2], sepoliaWBTCPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[3], [sepoliaWETHPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [sepoliaBaseAssets[3], sepoliaWETHPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: SEPOLIA_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[4], [sepoliaXVSVaultConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [sepoliaBaseAssets[4], sepoliaXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
         dstChainId: LzChainId.sepolia,
       },
     ],

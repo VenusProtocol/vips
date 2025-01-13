@@ -73,6 +73,8 @@ export const sepoliaAssets = [
   "0xE233527306c2fa1E159e251a2E5893334505A5E0", // weETHs
 ];
 
+export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
+
 // Function to filter assets based on a base asset
 const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
 
@@ -81,6 +83,11 @@ export const sepoliaUSDCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, se
 export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[2]);
 export const sepoliaWETHPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[3]);
 export const sepoliaXVSVaultConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[4]);
+
+export const incentiveAndAccessibilitiesSepolia = new Array(sepoliaAssets.length - 1).fill([
+  SEPOLIA_CONVERSION_INCENTIVE,
+  1,
+]);
 
 export const arbitrumBaseAssets = [
   "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", // USDT USDTPrimeConverter BaseAsset
