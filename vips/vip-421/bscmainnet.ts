@@ -21,9 +21,8 @@ import {
   ethereumWBTCPrimeConverterTokenOuts,
   ethereumWETHPrimeConverterTokenOuts,
   ethereumXVSVaultConverterTokenOuts,
+  incentiveAndAccessibilitiesEthereum,
 } from "./addresses";
-
-export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
 
 const vip421 = () => {
   const meta = {
@@ -70,31 +69,31 @@ const vip421 = () => {
       {
         target: ETHEREUM_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[0], [ethereumUSDTPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [ethereumBaseAssets[0], ethereumUSDTPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[1], [ethereumUSDCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [ethereumBaseAssets[1], ethereumUSDCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[2], [ethereumWBTCPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [ethereumBaseAssets[2], ethereumWBTCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[3], [ethereumWETHPrimeConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [ethereumBaseAssets[3], ethereumWETHPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ETHEREUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[4], [ethereumXVSVaultConverterTokenOuts], [[SEPOLIA_CONVERSION_INCENTIVE, 1]]],
+        params: [ethereumBaseAssets[4], ethereumXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
     ],
