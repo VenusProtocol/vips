@@ -1,11 +1,21 @@
 import { LzChainId } from "src/types";
 
+export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
+export const ARBITRUM_SEPOLIA_ARB = "0x4371bb358aB5cC192E481543417D2F67b8781731";
+export const ARBITRUM_SEPOLIA_WEETH = "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34";
+export const ARBITRUM_SEPOLIA_WSTETH = "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE";
+export const ARBITRUM_SEPOLIA_USDT = "0xf3118a17863996B9F2A073c9A66Faaa664355cf8";
+export const ARBITRUM_SEPOLIA_USDC = "0x86f096B1D970990091319835faF3Ee011708eAe8";
+export const ARBITRUM_SEPOLIA_WBTC = "0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D";
+export const ARBITRUM_SEPOLIA_WETH = "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73";
+export const ARBITRUM_SEPOLIA_XVS = "0x877Dc896e7b13096D3827872e396927BbE704407";
+
 export const arbitrumSepoliaBaseAssets = [
-  "0xf3118a17863996B9F2A073c9A66Faaa664355cf8", // USDT USDTPrimeConverter BaseAsset
-  "0x86f096B1D970990091319835faF3Ee011708eAe8", // USDC USDCPrimeConverter BaseAsset
-  "0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D", // WBTC WBTCPrimeConverter BaseAsset
-  "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73", // WETH WETHPrimeConverter BaseAsset
-  "0x877Dc896e7b13096D3827872e396927BbE704407", // XVS XVSPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_USDT, // USDTPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_USDC, // USDCPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_WBTC, // WBTCPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_WETH, // WETHPrimeConverter BaseAsset
+  ARBITRUM_SEPOLIA_XVS, // XVSPrimeConverter BaseAsset
 ];
 
 export const ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER = "0xFC0ec257d3ec4D673cB4e2CD3827C202e75fd0be";
@@ -14,13 +24,7 @@ export const ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER = "0x3089F46caf6611806caA39Ff
 export const ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER = "0x0d1e90c1F86CD1c1dF514B493c5985B3FD9CD6C8";
 export const ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER = "0x99942a033454Cef6Ffb2843886C8b2E658E7D5fd";
 
-export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
-
-export const arbitrumSepoliaTokenAddresses = [
-  "0x4371bb358aB5cC192E481543417D2F67b8781731", // ARB
-  "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34", // weETH
-  "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE", // wstETH
-];
+export const arbitrumSepoliaTokenAddresses = [ARBITRUM_SEPOLIA_ARB, ARBITRUM_SEPOLIA_WEETH, ARBITRUM_SEPOLIA_WSTETH];
 
 export const arbitrumSepoliaIncentiveAndAccessibilities = [
   [0, 1],
@@ -73,7 +77,7 @@ export const sepoliaAssets = [
   "0xE233527306c2fa1E159e251a2E5893334505A5E0", // weETHs
 ];
 
-export const SEPOLIA_CONVERSION_INCENTIVE = 3e14;
+export const CONVERSION_INCENTIVE = 3e14;
 
 // Function to filter assets based on a base asset
 const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
@@ -84,10 +88,7 @@ export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, se
 export const sepoliaWETHPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[3]);
 export const sepoliaXVSVaultConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[4]);
 
-export const incentiveAndAccessibilitiesSepolia = new Array(sepoliaAssets.length - 1).fill([
-  SEPOLIA_CONVERSION_INCENTIVE,
-  1,
-]);
+export const incentiveAndAccessibilities = new Array(sepoliaAssets.length - 1).fill([CONVERSION_INCENTIVE, 1]);
 
 export const arbitrumBaseAssets = [
   "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", // USDT USDTPrimeConverter BaseAsset
