@@ -12,10 +12,16 @@ import {
   ARBITRUM_SEPOLIA_USDT,
   ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER,
   ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER,
+  ARBITRUM_SEPOLIA_WEETH,
   ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER,
+  ARBITRUM_SEPOLIA_WSTETH,
   ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER,
   arbitrumSepoliaBaseAssets,
-  arbitrumSepoliaTokenAddresses,
+  arbitrumSepoliaUSDCPrimeConverterTokenOuts,
+  arbitrumSepoliaUSDTPrimeConverterTokenOuts,
+  arbitrumSepoliaWBTCPrimeConverterTokenOuts,
+  arbitrumSepoliaWETHPrimeConverterTokenOuts,
+  arbitrumSepoliaXVSVaultConverterTokenOuts,
 } from "../../vips/vip-421/addresses";
 import vip421 from "../../vips/vip-421/bsctestnet";
 import CONVERTER_ABI from "./abi/Converter.json";
@@ -23,84 +29,121 @@ import ERC20_ABI from "./abi/erc20.json";
 
 const ARB_HOLDER = "0x02EB950C215D12d723b44a18CfF098C6E166C531";
 const USDT_HOLDER = "0xFd7dA20ea0bE63ACb0852f97E950376E7E4a817D";
+const arbitrumSeploiaAssets = [ARBITRUM_SEPOLIA_ARB, ARBITRUM_SEPOLIA_WEETH, ARBITRUM_SEPOLIA_WSTETH];
 
 forking(114598133, async () => {
   let converter;
   describe("Pre VIP", () => {
-    arbitrumSepoliaTokenAddresses.map(token => {
+    arbitrumSepoliaUSDTPrimeConverterTokenOuts.map(token => {
       it(`Incentives in USDT converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[0], token);
         expect(incentiveAndAccess[0]).to.equal(0);
-        expect(incentiveAndAccess[1]).to.equal(0);
+        if (arbitrumSeploiaAssets.includes(token)) {
+          expect(incentiveAndAccess[1]).to.equal(0);
+        } else {
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }
       });
+    });
 
+    arbitrumSepoliaUSDCPrimeConverterTokenOuts.map(token => {
       it(`Incentives in USDC converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_USDC_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[1], token);
         expect(incentiveAndAccess[0]).to.equal(0);
-        expect(incentiveAndAccess[1]).to.equal(0);
+        if (arbitrumSeploiaAssets.includes(token)) {
+          expect(incentiveAndAccess[1]).to.equal(0);
+        } else {
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }
       });
+    });
 
+    arbitrumSepoliaWBTCPrimeConverterTokenOuts.map(token => {
       it(`Incentives in WBTC converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[2], token);
         expect(incentiveAndAccess[0]).to.equal(0);
-        expect(incentiveAndAccess[1]).to.equal(0);
+        if (arbitrumSeploiaAssets.includes(token)) {
+          expect(incentiveAndAccess[1]).to.equal(0);
+        } else {
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }
       });
+    });
 
+    arbitrumSepoliaWETHPrimeConverterTokenOuts.map(token => {
       it(`Incentives in WETH converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[3], token);
         expect(incentiveAndAccess[0]).to.equal(0);
-        expect(incentiveAndAccess[1]).to.equal(0);
+        if (arbitrumSeploiaAssets.includes(token)) {
+          expect(incentiveAndAccess[1]).to.equal(0);
+        } else {
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }
       });
+    });
 
+    arbitrumSepoliaXVSVaultConverterTokenOuts.map(token => {
       it(`Incentives in XVS vault converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[4], token);
         expect(incentiveAndAccess[0]).to.equal(0);
-        expect(incentiveAndAccess[1]).to.equal(0);
+        if (arbitrumSeploiaAssets.includes(token)) {
+          expect(incentiveAndAccess[1]).to.equal(0);
+        } else {
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }
       });
     });
   });
 
   testForkedNetworkVipCommands("vip421", await vip421(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [15]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [35]);
     },
   });
 
   describe("Post VIP", () => {
-    arbitrumSepoliaTokenAddresses.map(token => {
+    arbitrumSepoliaUSDTPrimeConverterTokenOuts.map(token => {
       it(`Incentives in USDT converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_USDT_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[0], token);
         expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
         expect(incentiveAndAccess[1]).to.equal(1);
       });
+    });
 
+    arbitrumSepoliaUSDCPrimeConverterTokenOuts.map(token => {
       it(`Incentives in USDC converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_USDC_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[1], token);
         expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
         expect(incentiveAndAccess[1]).to.equal(1);
       });
+    });
 
+    arbitrumSepoliaWBTCPrimeConverterTokenOuts.map(token => {
       it(`Incentives in WBTC converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[2], token);
         expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
         expect(incentiveAndAccess[1]).to.equal(1);
       });
+    });
 
+    arbitrumSepoliaWETHPrimeConverterTokenOuts.map(token => {
       it(`Incentives in WETH converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[3], token);
         expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
         expect(incentiveAndAccess[1]).to.equal(1);
       });
+    });
 
+    arbitrumSepoliaXVSVaultConverterTokenOuts.map(token => {
       it(`Incentives in XVS vault converter for ${token}`, async () => {
         converter = await ethers.getContractAt(CONVERTER_ABI, ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER);
         const incentiveAndAccess = await converter.conversionConfigurations(arbitrumSepoliaBaseAssets[4], token);

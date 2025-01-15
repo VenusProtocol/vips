@@ -9,7 +9,11 @@ import {
   ARBITRUM_XVS_VAULT_CONVERTER,
   arbitrumBaseAssets,
   arbitrumIncentiveAndAccessibilities,
-  arbitrumTokenAddresses,
+  arbitrumUSDCPrimeConverterTokenOuts,
+  arbitrumUSDTPrimeConverterTokenOuts,
+  arbitrumWBTCPrimeConverterTokenOuts,
+  arbitrumWETHPrimeConverterTokenOuts,
+  arbitrumXVSVaultConverterTokenOuts,
 } from "./addresses";
 
 const vip421 = () => {
@@ -27,31 +31,31 @@ const vip421 = () => {
       {
         target: ARBITRUM_USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[0], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[0], arbitrumUSDTPrimeConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[1], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[1], arbitrumUSDCPrimeConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[2], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[2], arbitrumWBTCPrimeConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[3], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[3], arbitrumWETHPrimeConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ARBITRUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[4], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[4], arbitrumXVSVaultConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
       },
     ],

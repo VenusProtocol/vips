@@ -1,4 +1,5 @@
-import { LzChainId } from "src/types";
+// Function to filter assets based on a base asset
+const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
 
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const ARBITRUM_SEPOLIA_ARB = "0x4371bb358aB5cC192E481543417D2F67b8781731";
@@ -24,25 +25,35 @@ export const ARBITRUM_SEPOLIA_WBTC_PRIME_CONVERTER = "0x3089F46caf6611806caA39Ff
 export const ARBITRUM_SEPOLIA_WETH_PRIME_CONVERTER = "0x0d1e90c1F86CD1c1dF514B493c5985B3FD9CD6C8";
 export const ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER = "0x99942a033454Cef6Ffb2843886C8b2E658E7D5fd";
 
-export const arbitrumSepoliaTokenAddresses = [ARBITRUM_SEPOLIA_ARB, ARBITRUM_SEPOLIA_WEETH, ARBITRUM_SEPOLIA_WSTETH];
-
-export const arbitrumSepoliaIncentiveAndAccessibilities = [
-  [1e14, 1],
-  [1e14, 1],
-  [1e14, 1],
+export const arbitrumSepoliaAssets = [
+  ARBITRUM_SEPOLIA_ARB,
+  ARBITRUM_SEPOLIA_WEETH,
+  ARBITRUM_SEPOLIA_WSTETH,
+  ...arbitrumSepoliaBaseAssets,
 ];
 
-export interface Command {
-  target: string;
-  signature: string;
-  params: any[];
-  value?: string;
-  dstChainId?: LzChainId;
-  // only matters for simulations. For some network forks, the gas fee estimation is not accurate. Should be a whole number.
-  gasFeeMultiplicationFactor?: number;
-  // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
-  gasLimitMultiplicationFactor?: number;
-}
+export const arbitrumSepoliaIncentiveAndAccessibilities = new Array(arbitrumSepoliaAssets.length - 1).fill([1e14, 1]);
+
+export const arbitrumSepoliaUSDTPrimeConverterTokenOuts = filterAssets(
+  arbitrumSepoliaAssets,
+  arbitrumSepoliaBaseAssets[0],
+);
+export const arbitrumSepoliaUSDCPrimeConverterTokenOuts = filterAssets(
+  arbitrumSepoliaAssets,
+  arbitrumSepoliaBaseAssets[1],
+);
+export const arbitrumSepoliaWBTCPrimeConverterTokenOuts = filterAssets(
+  arbitrumSepoliaAssets,
+  arbitrumSepoliaBaseAssets[2],
+);
+export const arbitrumSepoliaWETHPrimeConverterTokenOuts = filterAssets(
+  arbitrumSepoliaAssets,
+  arbitrumSepoliaBaseAssets[3],
+);
+export const arbitrumSepoliaXVSVaultConverterTokenOuts = filterAssets(
+  arbitrumSepoliaAssets,
+  arbitrumSepoliaBaseAssets[4],
+);
 
 export const sepoliaBaseAssets = [
   "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTPrimeConverter BaseAsset
@@ -79,9 +90,6 @@ export const sepoliaAssets = [
 
 export const CONVERSION_INCENTIVE = 3e14;
 
-// Function to filter assets based on a base asset
-const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
-
 export const sepoliaUSDTPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[0]);
 export const sepoliaUSDCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[1]);
 export const sepoliaWBTCPrimeConverterTokenOuts = filterAssets(sepoliaAssets, sepoliaBaseAssets[2]);
@@ -114,13 +122,15 @@ export const ARBITRUM_WBTC_PRIME_CONVERTER = "0xF91369009c37f029aa28AF89709a3523
 export const ARBITRUM_WETH_PRIME_CONVERTER = "0x4aCB90ddD6df24dC6b0D50df84C94e72012026d0";
 export const ARBITRUM_XVS_VAULT_CONVERTER = "0x9c5A7aB705EA40876c1B292630a3ff2e0c213DB1";
 
-export const arbitrumTokenAddresses = [ARBITRUM_ARB, ARBITRUM_WEETH, ARBITRUM_WSTETH];
+export const arbitrumAssets = [ARBITRUM_ARB, ARBITRUM_WEETH, ARBITRUM_WSTETH, ...arbitrumBaseAssets];
 
-export const arbitrumIncentiveAndAccessibilities = [
-  [0, 1],
-  [0, 1],
-  [0, 1],
-];
+export const arbitrumIncentiveAndAccessibilities = new Array(arbitrumAssets.length - 1).fill([1e14, 1]);
+
+export const arbitrumUSDTPrimeConverterTokenOuts = filterAssets(arbitrumAssets, arbitrumBaseAssets[0]);
+export const arbitrumUSDCPrimeConverterTokenOuts = filterAssets(arbitrumAssets, arbitrumBaseAssets[1]);
+export const arbitrumWBTCPrimeConverterTokenOuts = filterAssets(arbitrumAssets, arbitrumBaseAssets[2]);
+export const arbitrumWETHPrimeConverterTokenOuts = filterAssets(arbitrumAssets, arbitrumBaseAssets[3]);
+export const arbitrumXVSVaultConverterTokenOuts = filterAssets(arbitrumAssets, arbitrumBaseAssets[4]);
 
 export const ethereumBaseAssets = [
   "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT USDTPrimeConverter BaseAsset

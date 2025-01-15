@@ -14,7 +14,11 @@ import {
   SEPOLIA_XVS_VAULT_CONVERTER,
   arbitrumSepoliaBaseAssets,
   arbitrumSepoliaIncentiveAndAccessibilities,
-  arbitrumSepoliaTokenAddresses,
+  arbitrumSepoliaUSDCPrimeConverterTokenOuts,
+  arbitrumSepoliaUSDTPrimeConverterTokenOuts,
+  arbitrumSepoliaWBTCPrimeConverterTokenOuts,
+  arbitrumSepoliaWETHPrimeConverterTokenOuts,
+  arbitrumSepoliaXVSVaultConverterTokenOuts,
   incentiveAndAccessibilitiesSepolia,
   sepoliaBaseAssets,
   sepoliaUSDCPrimeConverterTokenOuts,
@@ -41,7 +45,7 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           arbitrumSepoliaBaseAssets[0],
-          arbitrumSepoliaTokenAddresses,
+          arbitrumSepoliaUSDTPrimeConverterTokenOuts,
           arbitrumSepoliaIncentiveAndAccessibilities,
         ],
         dstChainId: LzChainId.arbitrumsepolia,
@@ -51,7 +55,7 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           arbitrumSepoliaBaseAssets[1],
-          arbitrumSepoliaTokenAddresses,
+          arbitrumSepoliaUSDCPrimeConverterTokenOuts,
           arbitrumSepoliaIncentiveAndAccessibilities,
         ],
         dstChainId: LzChainId.arbitrumsepolia,
@@ -61,7 +65,7 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           arbitrumSepoliaBaseAssets[2],
-          arbitrumSepoliaTokenAddresses,
+          arbitrumSepoliaWBTCPrimeConverterTokenOuts,
           arbitrumSepoliaIncentiveAndAccessibilities,
         ],
         dstChainId: LzChainId.arbitrumsepolia,
@@ -71,7 +75,7 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           arbitrumSepoliaBaseAssets[3],
-          arbitrumSepoliaTokenAddresses,
+          arbitrumSepoliaWETHPrimeConverterTokenOuts,
           arbitrumSepoliaIncentiveAndAccessibilities,
         ],
         dstChainId: LzChainId.arbitrumsepolia,
@@ -81,7 +85,7 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           arbitrumSepoliaBaseAssets[4],
-          arbitrumSepoliaTokenAddresses,
+          arbitrumSepoliaXVSVaultConverterTokenOuts,
           arbitrumSepoliaIncentiveAndAccessibilities,
         ],
         dstChainId: LzChainId.arbitrumsepolia,
