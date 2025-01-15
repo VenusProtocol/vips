@@ -5,19 +5,19 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip021, { COMPTROLLERS, NTGs, PSR, VTOKENS, XVS_STORE } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import vip418, { OPBNBTESTNET_BOUND_VALIDATOR, OPBNBTESTNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bsctestnet";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import NTG_ABI from "./abi/NativeTokenGateway.json";
-import PSR_ABI from "./abi/ProtocolShareReserve.json";
-import VTOKEN_ABI from "./abi/VToken.json";
-import XVS_STORE_ABI from "./abi/XVSStore.json";
-import XVS_VAULT_PROXY_ABI from "./abi/XVSVaultProxy.json";
-import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
-import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
-import RESILLIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import TREASURY_ABI from "./abi/treasury.json";
-import XVS_BRIDGE_ABI from "./abi/xvsBridge.json";
-import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
+import vip416, { OPBNBTESTNET_BOUND_VALIDATOR, OPBNBTESTNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-416/bsctestnet";
+import COMPTROLLER_ABI from "../vip-416/abi/Comptroller.json";
+import NTG_ABI from "../vip-416/abi/NativeTokenGateway.json";
+import PSR_ABI from "../vip-416/abi/ProtocolShareReserve.json";
+import VTOKEN_ABI from "../vip-416/abi/VToken.json";
+import XVS_STORE_ABI from "../vip-416/abi/XVSStore.json";
+import XVS_VAULT_PROXY_ABI from "../vip-416/abi/XVSVaultProxy.json";
+import BOUND_VALIDATOR_ABI from "../vip-416/abi/boundValidator.json";
+import CHAINLINK_ORACLE_ABI from "../vip-416/abi/chainlinkOracle.json";
+import RESILLIENT_ORACLE_ABI from "../vip-416/abi/resilientOracle.json";
+import TREASURY_ABI from "../vip-416/abi/treasury.json";
+import XVS_BRIDGE_ABI from "../vip-416/abi/xvsBridge.json";
+import XVS_BRIDGE_ADMIN_ABI from "../vip-416/abi/xvsBridgeAdmin.json";
 
 const XVS_BRIDGE = "0xA03205bC635A772E533E7BE36b5701E331a70ea3";
 const { opbnbtestnet } = NETWORK_ADDRESSES;
@@ -42,7 +42,7 @@ forking(48788035, async () => {
     await pretendExecutingVip(await vip021());
   });
 
-  testForkedNetworkVipCommands("vip418", await vip418(), {});
+  testForkedNetworkVipCommands("vip416", await vip416(), {});
 
   describe("Post-VIP behaviour", async () => {
     it(`correct owner for psr`, async () => {
