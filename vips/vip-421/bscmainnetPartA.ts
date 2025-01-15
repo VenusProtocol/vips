@@ -7,21 +7,9 @@ import {
   ARBITRUM_WBTC_PRIME_CONVERTER,
   ARBITRUM_WETH_PRIME_CONVERTER,
   ARBITRUM_XVS_VAULT_CONVERTER,
-  ETHEREUM_USDC_PRIME_CONVERTER,
-  ETHEREUM_USDT_PRIME_CONVERTER,
-  ETHEREUM_WBTC_PRIME_CONVERTER,
-  ETHEREUM_WETH_PRIME_CONVERTER,
-  ETHEREUM_XVS_VAULT_CONVERTER,
   arbitrumBaseAssets,
   arbitrumIncentiveAndAccessibilities,
   arbitrumTokenAddresses,
-  ethereumBaseAssets,
-  ethereumUSDCPrimeConverterTokenOuts,
-  ethereumUSDTPrimeConverterTokenOuts,
-  ethereumWBTCPrimeConverterTokenOuts,
-  ethereumWETHPrimeConverterTokenOuts,
-  ethereumXVSVaultConverterTokenOuts,
-  incentiveAndAccessibilitiesEthereum,
 } from "./addresses";
 
 const vip421 = () => {
@@ -65,36 +53,6 @@ const vip421 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [arbitrumBaseAssets[4], arbitrumTokenAddresses, arbitrumIncentiveAndAccessibilities],
         dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: ETHEREUM_USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[0], ethereumUSDTPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[1], ethereumUSDCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[2], ethereumWBTCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[3], ethereumWETHPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[4], ethereumXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
       },
     ],
 

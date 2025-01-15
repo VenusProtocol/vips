@@ -17,7 +17,7 @@ import {
   arbitrumBaseAssets,
   arbitrumTokenAddresses,
 } from "../../vips/vip-421/addresses";
-import vip421 from "../../vips/vip-421/bscmainnet";
+import vip421 from "../../vips/vip-421/bscmainnetPartA";
 import CONVERTER_ABI from "./abi/Converter.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/erc20.json";

@@ -18,10 +18,11 @@ import {
   ethereumWETHPrimeConverterTokenOuts,
   ethereumXVSVaultConverterTokenOuts,
 } from "../../vips/vip-421/addresses";
-import vip421 from "../../vips/vip-421/bscmainnet";
+import vip421PartB from "../../vips/vip-421/bscmainnetPartB";
+import vip421PartC from "../../vips/vip-421/bscmainnetPartC";
 import CONVERTER_ABI from "./abi/Converter.json";
 
-forking(21616427, async () => {
+forking(21630221, async () => {
   let converter: Contract;
 
   describe("Incentives before VIP", () => {
@@ -45,7 +46,6 @@ forking(21616427, async () => {
         ethereumUSDCPrimeConverterTokenOuts.map(async token => {
           converter = await ethers.getContractAt(CONVERTER_ABI, ETHEREUM_USDC_PRIME_CONVERTER);
           const incentiveAndAccess = await converter.conversionConfigurations(ethereumBaseAssets[1], token);
-          console.log("incentiveAndAccess", incentiveAndAccess, token);
           if (token === "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A") {
             expect(incentiveAndAccess[0]).to.equal("0");
           } else {
@@ -98,9 +98,15 @@ forking(21616427, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip421", await vip421(), {
+  testForkedNetworkVipCommands("vip421", await vip421PartB(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [120]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [72]);
+    },
+  });
+
+  testForkedNetworkVipCommands("vip421", await vip421PartC(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [48]);
     },
   });
 
