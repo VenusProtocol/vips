@@ -1,16 +1,16 @@
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip417 from "../../vips/vip-417/bsctestnet";
+import vip418 from "../../vips/vip-418/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(46981374, async () => {
-  testVip("vip417 XVS vault permission proposal", await vip417(), {
+forking(40343666, async () => {
+  testVip("vip418 XVS vault permission proposal", await vip418(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
-        [1, 0],
+        [3, 0],
       );
     },
   });
