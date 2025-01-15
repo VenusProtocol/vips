@@ -16,29 +16,29 @@ import { PLP as ETHEREUM_PLP, PRIME as ETHEREUM_PRIME } from "../../multisig/pro
 import { POOL_REGISTRY as ETHEREUM_POOL_REGISTRY } from "../../multisig/proposals/ethereum/vip-073";
 import { NTGs as ETHEREUM_NTGs } from "../../multisig/proposals/ethereum/vip-073";
 import { PSR as ETHEREUM_PSR } from "../../multisig/proposals/ethereum/vip-073";
-import { COMPTROLLERS as OPBNBMAINNET_COMPTROLLERS } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { VTOKENS as OPBNBMAINNET_VTOKENS } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { NTGs as OPBNBMAINNET_NTGs } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { PSR as OPBNBMAINNET_PSR } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { COMPTROLLERS as ZKSYNCMAINNET_COMPTROLLERS } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { VTOKENS as ZKSYNCMAINNET_VTOKENS } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { POOL_REGISTRY as ZKSYNCMAINNET_POOL_REGISTRY } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { NTGs as ZKSYNCMAINNET_NTGs } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { PSR as ZKSYNCMAINNET_PSR } from "../../multisig/proposals/zksyncmainnet/vip-017";
 
 export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 export const ETHEREUM_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
-export const OPBNBMAINNET_XVS_STORE = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775";
+export const ZKSYNCMAINNET_XVS_STORE = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
 export const ETHEREUM_XVS_BRIDGE_ADMIN = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c992b96";
-export const OPBNBMAINNET_XVS_BRIDGE_ADMIN = "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831";
+export const ZKSYNCMAINNET_XVS_BRIDGE_ADMIN = "0x2471043F05Cc41A6051dd6714DC967C7BfC8F902";
 export const ARBITRUM_XVS_BRIDGE_ADMIN = "0xf5d81C6F7DAA3F97A6265C8441f92eFda22Ad784";
 
 const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
-const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
+const ZKSYNCMAINNET_CHAIN_ID = LzChainId.zksyncmainnet;
 const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
 
 export const ARBITRUM_ONE_BOUND_VALIDATOR = "0x2245FA2420925Cd3C2D889Ddc5bA1aefEF0E14CF";
 export const ETHEREUM_BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
-export const OPBNBMAINNET_BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
+export const ZKSYNCMAINNET_BOUND_VALIDATOR = "0x51519cdCDDD05E2ADCFA108f4a960755D9d6ea8b";
 export const ETHEREUM_sFrxETH_ORACLE = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADCD1";
 
-const { arbitrumone, ethereum, opbnbmainnet } = NETWORK_ADDRESSES;
+const { arbitrumone, ethereum, zksyncmainnet } = NETWORK_ADDRESSES;
 
 const vip418 = () => {
   const meta = {
@@ -64,10 +64,10 @@ const vip418 = () => {
         dstChainId: LzChainId.ethereum,
       },
       {
-        target: opbnbmainnet.XVS_VAULT_PROXY,
+        target: zksyncmainnet.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ARBITRUM_ONE_XVS_STORE,
@@ -88,10 +88,10 @@ const vip418 = () => {
         dstChainId: LzChainId.ethereum,
       },
       {
-        target: OPBNBMAINNET_XVS_BRIDGE_ADMIN,
+        target: ZKSYNCMAINNET_XVS_BRIDGE_ADMIN,
         signature: "setWhitelist(address,bool)",
-        params: [opbnbmainnet.NORMAL_TIMELOCK, true],
-        dstChainId: LzChainId.opbnbmainnet,
+        params: [zksyncmainnet.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ETHEREUM_XVS_STORE,
@@ -100,10 +100,10 @@ const vip418 = () => {
         dstChainId: LzChainId.ethereum,
       },
       {
-        target: OPBNBMAINNET_XVS_STORE,
+        target: ZKSYNCMAINNET_XVS_STORE,
         signature: "acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ARBITRUM_XVS_BRIDGE_ADMIN,
@@ -112,10 +112,10 @@ const vip418 = () => {
         dstChainId: ARBITRUM_CHAIN_ID,
       },
       {
-        target: OPBNBMAINNET_XVS_BRIDGE_ADMIN,
+        target: ZKSYNCMAINNET_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
+        dstChainId: ZKSYNCMAINNET_CHAIN_ID,
       },
       {
         target: ETHEREUM_XVS_BRIDGE_ADMIN,
@@ -148,22 +148,16 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: opbnbmainnet.BINANCE_ORACLE,
+        target: zksyncmainnet.RESILIENT_ORACLE,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
-        target: opbnbmainnet.RESILIENT_ORACLE,
+        target: ZKSYNCMAINNET_BOUND_VALIDATOR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
-      },
-      {
-        target: OPBNBMAINNET_BOUND_VALIDATOR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
 
       {
@@ -204,10 +198,10 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: opbnbmainnet.VTREASURY,
+        target: zksyncmainnet.VTREASURY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ethereum.VTREASURY,
@@ -296,25 +290,25 @@ const vip418 = () => {
         };
       }),
       {
-        target: OPBNBMAINNET_POOL_REGISTRY,
+        target: ZKSYNCMAINNET_POOL_REGISTRY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
-      ...OPBNBMAINNET_COMPTROLLERS.map(comptroller => {
+      ...ZKSYNCMAINNET_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbmainnet,
+          dstChainId: LzChainId.zksyncmainnet,
         };
       }),
-      ...OPBNBMAINNET_VTOKENS.map(comptroller => {
+      ...ZKSYNCMAINNET_VTOKENS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbmainnet,
+          dstChainId: LzChainId.zksyncmainnet,
         };
       }),
       ...ARBITRUMONE_NTGs.map(ntg => {
@@ -333,12 +327,12 @@ const vip418 = () => {
           dstChainId: LzChainId.ethereum,
         };
       }),
-      ...OPBNBMAINNET_NTGs.map(ntg => {
+      ...ZKSYNCMAINNET_NTGs.map(ntg => {
         return {
           target: ntg,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbmainnet,
+          dstChainId: LzChainId.zksyncmainnet,
         };
       }),
       {
@@ -354,10 +348,10 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: OPBNBMAINNET_PSR,
+        target: ZKSYNCMAINNET_PSR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbmainnet,
+        dstChainId: LzChainId.zksyncmainnet,
       },
     ],
     meta,

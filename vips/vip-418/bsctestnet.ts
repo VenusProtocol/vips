@@ -14,11 +14,11 @@ import { CONVERTER_NETWORK as ARBITRUM_SEPOLIA_CONVERTER_NETWORK } from "../../m
 import { NTGs as ARBITRUMSEPOLIA_NTGs } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { REWARD_DISTRIBUTORS as ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsepolia/vip-020";
-import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { NTGs as OPBNBTESTNET_NTGs } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import { COMPTROLLERS as ZKSYNCSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { VTOKENS as ZKSYNCSEPOLIA_VTOKENS } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { POOL_REGISTRY as ZKSYNCSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
 import { CONVERTER_NETWORK as SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-071";
 import { PLP as SEPOLIA_PLP, PRIME as SEPOLIA_PRIME } from "../../multisig/proposals/sepolia/vip-071";
@@ -31,32 +31,28 @@ export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
 export const SEPOLIA_CRITICAL_TIMELOCK = "0xA24A7A65b8968a749841988Bd7d05F6a94329fDe";
 export const ARBITRUM_SEPOLIA_ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
-export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+export const ZKSYNCSEPOLIA_ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 
 export const ARBITRUM_SEPOLIA_XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 export const SEPOLIA_XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
-export const OPBNBTESTNET_XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
+export const ZKSYNCSEPOLIA_XVS_STORE = "0xf0DaEFE5f5df4170426F88757EcdF45430332d88";
 
 export const SEPOLIA_XVS_BRIDGE_ADMIN = "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B";
-export const OPBNBTESTNET_XVS_BRIDGE_ADMIN = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
+export const ZKSYNCSEPOLIA_XVS_BRIDGE_ADMIN = "0x28cfE3f2D7D8944FAd162a058260ec922C19065E";
 export const ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN = "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8";
 
 const SEPOLIA_CHAIN_ID = LzChainId.sepolia;
-const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
+const ZKSYNCSEPOLIA_CHAIN_ID = LzChainId.zksyncsepolia;
 const ARBITRUM_SEPOLIA_CHAIN_ID = LzChainId.arbitrumsepolia;
 
 export const ARBITRUM_SEPOLIA_BOUND_VALIDATOR = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
 export const SEPOLIA_BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
-export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
+export const ZKSYNCSEPOLIA_BOUND_VALIDATOR = "0x0A4daBeF41C83Af7e30FfC33feC56ba769f3D24b";
 export const SEPOLIA_sFrxETH_ORACLE = "0x61EB836afA467677e6b403D504fe69D6940e7996";
-
-export const ARBITRUMSEPOLIA_ACM_AGGREGATOR = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
-export const OPBNBTESTNET_ACM_AGGREGATOR = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
-export const SEPOLIA_ACM_AGGREGATOR = "0x0653830c55035d678e1287b2d4550519fd263d0e";
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-const { arbitrumsepolia, sepolia, opbnbtestnet } = NETWORK_ADDRESSES;
+const { arbitrumsepolia, sepolia, zksyncsepolia } = NETWORK_ADDRESSES;
 
 const vip418 = () => {
   const meta = {
@@ -82,10 +78,10 @@ const vip418 = () => {
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: opbnbtestnet.XVS_VAULT_PROXY,
+        target: zksyncsepolia.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_XVS_STORE,
@@ -100,10 +96,10 @@ const vip418 = () => {
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: OPBNBTESTNET_XVS_STORE,
+        target: ZKSYNCSEPOLIA_XVS_STORE,
         signature: "acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -112,10 +108,10 @@ const vip418 = () => {
         dstChainId: ARBITRUM_SEPOLIA_CHAIN_ID,
       },
       {
-        target: OPBNBTESTNET_XVS_BRIDGE_ADMIN,
+        target: ZKSYNCSEPOLIA_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPBNBTESTNET_CHAIN_ID,
+        dstChainId: ZKSYNCSEPOLIA_CHAIN_ID,
       },
       {
         target: SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -148,22 +144,16 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
-        target: opbnbtestnet.BINANCE_ORACLE,
+        target: zksyncsepolia.RESILIENT_ORACLE,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
-        target: opbnbtestnet.RESILIENT_ORACLE,
+        target: ZKSYNCSEPOLIA_BOUND_VALIDATOR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
-      },
-      {
-        target: OPBNBTESTNET_BOUND_VALIDATOR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
 
       {
@@ -204,16 +194,16 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
-        target: opbnbtestnet.VTREASURY,
+        target: zksyncsepolia.VTREASURY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
-        target: OPBNBTESTNET_XVS_BRIDGE_ADMIN,
+        target: ZKSYNCSEPOLIA_XVS_BRIDGE_ADMIN,
         signature: "setWhitelist(address,bool)",
-        params: [opbnbtestnet.NORMAL_TIMELOCK, true],
-        dstChainId: LzChainId.opbnbtestnet,
+        params: [zksyncsepolia.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -309,25 +299,25 @@ const vip418 = () => {
       }),
 
       {
-        target: OPBNBTESTNET_POOL_REGISTRY,
+        target: ZKSYNCSEPOLIA_POOL_REGISTRY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
-      ...OPBNBTESTNET_COMPTROLLERS.map(comptroller => {
+      ...ZKSYNCSEPOLIA_COMPTROLLERS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbtestnet,
+          dstChainId: LzChainId.zksyncsepolia,
         };
       }),
-      ...OPBNBTESTNET_VTOKENS.map(comptroller => {
+      ...ZKSYNCSEPOLIA_VTOKENS.map(comptroller => {
         return {
           target: comptroller,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbtestnet,
+          dstChainId: LzChainId.zksyncsepolia,
         };
       }),
       ...SEPOLIA_NTGs.map(ntg => {
@@ -346,12 +336,12 @@ const vip418 = () => {
           dstChainId: LzChainId.arbitrumsepolia,
         };
       }),
-      ...OPBNBTESTNET_NTGs.map(ntg => {
+      ...ZKSYNCSEPOLIA_NTGs.map(ntg => {
         return {
           target: ntg,
           signature: "acceptOwnership()",
           params: [],
-          dstChainId: LzChainId.opbnbtestnet,
+          dstChainId: LzChainId.zksyncsepolia,
         };
       }),
       {
@@ -367,10 +357,10 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
-        target: OPBNBTESTNET_PSR,
+        target: ZKSYNCSEPOLIA_PSR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.opbnbtestnet,
+        dstChainId: LzChainId.zksyncsepolia,
       },
       ...ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
         return {
