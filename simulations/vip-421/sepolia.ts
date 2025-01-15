@@ -26,48 +26,94 @@ forking(7482880, async () => {
 
   describe("Incentives before VIP", () => {
     it("Incentives in USDT converter", async () => {
-      sepoliaUSDTPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDT_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[0], token);
-        expect(incentveAndAccess[0]).to.equal(0);
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaUSDTPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDT_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[0], token);
+          if (token === "0x772d68929655ce7234C8C94256526ddA66Ef641E") {
+            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
+          } else {
+            expect(incentiveAndAccess[0]).to.equal(0);
+          }
+          if (token === "0xB8eb706b85Ae7355c9FE4371a499F50f3484809c") {
+            expect(incentiveAndAccess[1]).to.equal(0);
+          } else {
+            expect(incentiveAndAccess[1]).to.equal(1);
+          }
+        }),
+      );
     });
 
     it("Incentives in USDC converter", async () => {
-      sepoliaUSDCPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDC_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[1], token);
-        expect(incentveAndAccess[0]).to.equal(0);
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaUSDCPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDC_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[1], token);
+          expect(incentiveAndAccess[0]).to.equal(0);
+          if (token === "0xB8eb706b85Ae7355c9FE4371a499F50f3484809c") {
+            expect(incentiveAndAccess[1]).to.equal(0);
+          } else {
+            expect(incentiveAndAccess[1]).to.equal(1);
+          }
+        }),
+      );
     });
 
     it("Incentives in WBTC converter", async () => {
-      sepoliaWBTCPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WBTC_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[2], token);
-        expect(incentveAndAccess[0]).to.equal(0);
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaWBTCPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WBTC_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[2], token);
+          if (token === "0x772d68929655ce7234C8C94256526ddA66Ef641E") {
+            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
+          } else {
+            expect(incentiveAndAccess[0]).to.equal(0);
+          }
+          if (token === "0xB8eb706b85Ae7355c9FE4371a499F50f3484809c") {
+            expect(incentiveAndAccess[1]).to.equal(0);
+          } else {
+            expect(incentiveAndAccess[1]).to.equal(1);
+          }
+        }),
+      );
     });
 
     it("Incentives in WETH converter", async () => {
-      sepoliaWETHPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WETH_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[3], token);
-        expect(incentveAndAccess[0]).to.equal(0);
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaWETHPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WETH_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[3], token);
+          if (token === "0x772d68929655ce7234C8C94256526ddA66Ef641E") {
+            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
+          } else {
+            expect(incentiveAndAccess[0]).to.equal(0);
+          }
+          if (token === "0xB8eb706b85Ae7355c9FE4371a499F50f3484809c") {
+            expect(incentiveAndAccess[1]).to.equal(0);
+          } else {
+            expect(incentiveAndAccess[1]).to.equal(1);
+          }
+        }),
+      );
     });
 
     it("Incentives in XVSVault converter", async () => {
-      sepoliaXVSVaultConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_XVS_VAULT_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[4], token);
-        expect(incentveAndAccess[0]).to.equal(0);
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaXVSVaultConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_XVS_VAULT_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[4], token);
+          if (token === "0x772d68929655ce7234C8C94256526ddA66Ef641E") {
+            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
+          } else {
+            expect(incentiveAndAccess[0]).to.equal(0);
+          }
+          if (token === "0xB8eb706b85Ae7355c9FE4371a499F50f3484809c") {
+            expect(incentiveAndAccess[1]).to.equal(0);
+          } else {
+            expect(incentiveAndAccess[1]).to.equal(1);
+          }
+        }),
+      );
     });
   });
 
@@ -79,48 +125,58 @@ forking(7482880, async () => {
 
   describe("Verify incentives post VIP", () => {
     it("Incentives in USDT converter", async () => {
-      sepoliaUSDTPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDT_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[0], token);
-        expect(incentveAndAccess[0]).to.equal(parseUnits("3", 14));
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaUSDTPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDT_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[0], token);
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("3", 14));
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }),
+      );
     });
 
     it("Incentives in USDC converter", async () => {
-      sepoliaUSDCPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDC_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[1], token);
-        expect(incentveAndAccess[0]).to.equal(parseUnits("3", 14));
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaUSDCPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_USDC_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[1], token);
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("3", 14));
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }),
+      );
     });
 
     it("Incentives in WBTC converter", async () => {
-      sepoliaWBTCPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WBTC_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[2], token);
-        expect(incentveAndAccess[0]).to.equal(parseUnits("3", 14));
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaWBTCPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WBTC_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[2], token);
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("3", 14));
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }),
+      );
     });
 
     it("Incentives in WETH converter", async () => {
-      sepoliaWETHPrimeConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WETH_PRIME_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[3], token);
-        expect(incentveAndAccess[0]).to.equal(parseUnits("3", 14));
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaWETHPrimeConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_WETH_PRIME_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[3], token);
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("3", 14));
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }),
+      );
     });
 
     it("Incentives in XVSVault converter", async () => {
-      sepoliaXVSVaultConverterTokenOuts.map(async token => {
-        converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_XVS_VAULT_CONVERTER);
-        const incentveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[4], token);
-        expect(incentveAndAccess[0]).to.equal(parseUnits("3", 14));
-        expect(incentveAndAccess[1]).to.equal(1);
-      });
+      await Promise.all(
+        sepoliaXVSVaultConverterTokenOuts.map(async token => {
+          converter = await ethers.getContractAt(CONVERTER_ABI, SEPOLIA_XVS_VAULT_CONVERTER);
+          const incentiveAndAccess = await converter.conversionConfigurations(sepoliaBaseAssets[4], token);
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("3", 14));
+          expect(incentiveAndAccess[1]).to.equal(1);
+        }),
+      );
     });
   });
 });

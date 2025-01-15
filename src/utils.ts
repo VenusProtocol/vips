@@ -162,7 +162,7 @@ const getAdapterParam = (noOfCommands: number): string => {
 };
 
 export const calculateGasForAdapterParam = (noOfCommands: number): number => {
-  const requiredGas = (500000 + gasUsedPerCommand * noOfCommands) * 2;
+  const requiredGas = (500000 + gasUsedPerCommand * noOfCommands) * 10;
   return requiredGas;
 };
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {

@@ -27,9 +27,9 @@ export const ARBITRUM_SEPOLIA_XVS_VAULT_CONVERTER = "0x99942a033454Cef6Ffb284388
 export const arbitrumSepoliaTokenAddresses = [ARBITRUM_SEPOLIA_ARB, ARBITRUM_SEPOLIA_WEETH, ARBITRUM_SEPOLIA_WSTETH];
 
 export const arbitrumSepoliaIncentiveAndAccessibilities = [
-  [0, 1],
-  [0, 1],
-  [0, 1],
+  [1e14, 1],
+  [1e14, 1],
+  [1e14, 1],
 ];
 
 export interface Command {
@@ -155,6 +155,13 @@ export const ethereumAssets = [
   "0xac3E018457B222d93114458476f3E3416Abbe38F", // sfrxETH
   "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110", // ezETH
   "0x917ceE801a67f933F2e6b33fC0cD1ED2d5909D88", // weETHs
+  "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642", // eBTC
+  "0xec53bF9167f50cDEB3Ae105f56099aaaB9061F83", // EIGEN
+  "0x8236a87084f8B84306f72007F36F2618A5634494", // LBTC
+  "0xD9A442856C234a39a81a089C06451EBAa4306a72", // pufETH
+  "0xE00bd3Df25fb187d6ABBB620b3dfd19839947b81", // PT-sUSDE
+  "0x8A47b431A7D947c6a3ED6E42d501803615a97EAa", // PT-USDe
+  "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497", // sUSDe
 ];
 
 export const incentiveAndAccessibilitiesEthereum = new Array(ethereumAssets.length - 1).fill([CONVERSION_INCENTIVE, 1]);
