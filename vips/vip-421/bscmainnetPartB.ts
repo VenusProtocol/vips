@@ -2,13 +2,11 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import {
-  ETHEREUM_USDC_PRIME_CONVERTER,
-  ETHEREUM_USDT_PRIME_CONVERTER,
-  ETHEREUM_WBTC_PRIME_CONVERTER,
+  ETHEREUM_WETH_PRIME_CONVERTER,
+  ETHEREUM_XVS_VAULT_CONVERTER,
   ethereumBaseAssets,
-  ethereumUSDCPrimeConverterTokenOuts,
-  ethereumUSDTPrimeConverterTokenOuts,
-  ethereumWBTCPrimeConverterTokenOuts,
+  ethereumWETHPrimeConverterTokenOuts,
+  ethereumXVSVaultConverterTokenOuts,
   incentiveAndAccessibilitiesEthereum,
 } from "./addresses";
 
@@ -25,21 +23,15 @@ const vip421 = () => {
   return makeProposal(
     [
       {
-        target: ETHEREUM_USDT_PRIME_CONVERTER,
+        target: ETHEREUM_WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[0], ethereumUSDTPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
+        params: [ethereumBaseAssets[3], ethereumWETHPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
       {
-        target: ETHEREUM_USDC_PRIME_CONVERTER,
+        target: ETHEREUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[1], ethereumUSDCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ETHEREUM_WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[2], ethereumWBTCPrimeConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
+        params: [ethereumBaseAssets[4], ethereumXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
         dstChainId: LzChainId.ethereum,
       },
     ],
