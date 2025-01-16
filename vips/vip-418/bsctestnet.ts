@@ -17,6 +17,10 @@ import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsep
 import { COMPTROLLERS as ZKSYNCSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { VTOKENS as ZKSYNCSEPOLIA_VTOKENS } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { POOL_REGISTRY as ZKSYNCSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import {
+  PLP as ZKSYNCSEPOLIA_PLP,
+  PRIME as ZKSYNCSEPOLIA_PRIME,
+} from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
@@ -150,7 +154,19 @@ const vip418 = () => {
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
+        target: zksyncsepolia.CHAINLINK_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
         target: ZKSYNCSEPOLIA_BOUND_VALIDATOR,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: zksyncsepolia.REDSTONE_ORACLE,
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.zksyncsepolia,
@@ -268,6 +284,18 @@ const vip418 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ZKSYNCSEPOLIA_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: ZKSYNCSEPOLIA_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: SEPOLIA_POOL_REGISTRY,
