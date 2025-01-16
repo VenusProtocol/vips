@@ -21,6 +21,7 @@ import { VTOKENS as ZKSYNCMAINNET_VTOKENS } from "../../multisig/proposals/zksyn
 import { POOL_REGISTRY as ZKSYNCMAINNET_POOL_REGISTRY } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import { NTGs as ZKSYNCMAINNET_NTGs } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import { PSR as ZKSYNCMAINNET_PSR } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { PLP as ZKSYNCMAINNET_PLP, PRIME as ZKSYNCMAINNET_PRIME } from "../../multisig/proposals/zksyncmainnet/vip-017";
 
 export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 export const ETHEREUM_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
@@ -130,6 +131,18 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
+        target: zksyncmainnet.REDSTONE_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: zksyncmainnet.CHAINLINK_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
         target: ARBITRUM_ONE_BOUND_VALIDATOR,
         signature: "acceptOwnership()",
         params: [],
@@ -198,12 +211,6 @@ const vip418 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: zksyncmainnet.VTREASURY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
         target: ethereum.VTREASURY,
         signature: "acceptOwnership()",
         params: [],
@@ -236,6 +243,18 @@ const vip418 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ZKSYNCMAINNET_PRIME,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ZKSYNCMAINNET_PLP,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ETHEREUM_PRIME,

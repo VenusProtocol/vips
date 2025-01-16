@@ -27,7 +27,6 @@ import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
-import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTOKEN_BEACON_ABI from "./abi/VTokenBeacon.json";
 import XVS_STORE_ABI from "./abi/XVSStore.json";

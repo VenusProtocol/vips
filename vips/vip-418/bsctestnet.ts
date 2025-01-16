@@ -14,15 +14,6 @@ import { CONVERTER_NETWORK as ARBITRUM_SEPOLIA_CONVERTER_NETWORK } from "../../m
 import { NTGs as ARBITRUMSEPOLIA_NTGs } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { REWARD_DISTRIBUTORS as ARBITRUMSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { PSR as ARBITRUMSEPOLIA_PSR } from "../../multisig/proposals/arbitrumsepolia/vip-020";
-import { COMPTROLLERS as ZKSYNCSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/zksyncsepolia/vip-017";
-import { VTOKENS as ZKSYNCSEPOLIA_VTOKENS } from "../../multisig/proposals/zksyncsepolia/vip-017";
-import { POOL_REGISTRY as ZKSYNCSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/zksyncsepolia/vip-017";
-import {
-  PLP as ZKSYNCSEPOLIA_PLP,
-  PRIME as ZKSYNCSEPOLIA_PRIME,
-} from "../../multisig/proposals/zksyncsepolia/vip-017";
-import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepolia/vip-017";
-import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { CONVERTERS as SEPOLIA_CONVERTERS } from "../../multisig/proposals/sepolia/vip-071";
 import { CONVERTER_NETWORK as SEPOLIA_CONVERTER_NETWORK } from "../../multisig/proposals/sepolia/vip-071";
 import { PLP as SEPOLIA_PLP, PRIME as SEPOLIA_PRIME } from "../../multisig/proposals/sepolia/vip-071";
@@ -30,6 +21,12 @@ import { POOL_REGISTRY as SEPOLIA_POOL_REGISTRY } from "../../multisig/proposals
 import { NTGs as SEPOLIA_NTGs } from "../../multisig/proposals/sepolia/vip-071";
 import { REWARD_DISTRIBUTORS as SEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/sepolia/vip-071";
 import { PSR as SEPOLIA_PSR } from "../../multisig/proposals/sepolia/vip-071";
+import { COMPTROLLERS as ZKSYNCSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { VTOKENS as ZKSYNCSEPOLIA_VTOKENS } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { POOL_REGISTRY as ZKSYNCSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { PLP as ZKSYNCSEPOLIA_PLP, PRIME as ZKSYNCSEPOLIA_PRIME } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
 
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";

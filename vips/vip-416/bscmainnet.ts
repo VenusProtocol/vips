@@ -2,17 +2,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+import { COMPTROLLERS as OPBNBMAINNET_COMPTROLLERS } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { VTOKENS as OPBNBMAINNET_VTOKENS } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { NTGs as OPBNBMAINNET_NTGs } from "../../multisig/proposals/opbnbmainnet/vip-024";
+import { PSR as OPBNBMAINNET_PSR } from "../../multisig/proposals/opbnbmainnet/vip-024";
 import { PLP as OPMAINNET_PLP, PRIME as OPMAINNET_PRIME } from "../../multisig/proposals/opmainnet/vip-007";
 import { COMPTROLLERS as OPMAINNET_COMPTROLLERS } from "../../multisig/proposals/opmainnet/vip-007";
 import { VTOKENS as OPMAINNET_VTOKENS } from "../../multisig/proposals/opmainnet/vip-007";
 import { POOL_REGISTRY as OPMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opmainnet/vip-007";
 import { NTGs as OPMAINNET_NTGs } from "../../multisig/proposals/opmainnet/vip-007";
 import { PSR as OPMAINNET_PSR } from "../../multisig/proposals/opmainnet/vip-007";
-import { COMPTROLLERS as OPBNBMAINNET_COMPTROLLERS } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { VTOKENS as OPBNBMAINNET_VTOKENS } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { POOL_REGISTRY as OPBNBMAINNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { NTGs as OPBNBMAINNET_NTGs } from "../../multisig/proposals/opbnbmainnet/vip-024";
-import { PSR as OPBNBMAINNET_PSR } from "../../multisig/proposals/opbnbmainnet/vip-024";
 
 export const OPMAINNET_XVS_STORE = "0xFE548630954129923f63113923eF5373E10589d3";
 export const OPBNBMAINNET_XVS_STORE = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F775";
@@ -129,7 +129,6 @@ const vip418 = () => {
         dstChainId: LzChainId.opbnbmainnet,
       },
 
-      
       {
         target: opmainnet.VTREASURY,
         signature: "acceptOwnership()",
@@ -142,7 +141,7 @@ const vip418 = () => {
         params: [],
         dstChainId: LzChainId.opbnbmainnet,
       },
-      
+
       {
         target: OPMAINNET_PRIME,
         signature: "acceptOwnership()",
@@ -155,7 +154,7 @@ const vip418 = () => {
         params: [],
         dstChainId: LzChainId.opmainnet,
       },
-     
+
       {
         target: OPMAINNET_POOL_REGISTRY,
         signature: "acceptOwnership()",
@@ -208,7 +207,7 @@ const vip418 = () => {
           dstChainId: LzChainId.opmainnet,
         };
       }),
-      
+
       ...OPBNBMAINNET_NTGs.map(ntg => {
         return {
           target: ntg,
@@ -217,7 +216,7 @@ const vip418 = () => {
           dstChainId: LzChainId.opbnbmainnet,
         };
       }),
-     
+
       {
         target: OPMAINNET_PSR,
         signature: "acceptOwnership()",

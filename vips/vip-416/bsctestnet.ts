@@ -2,20 +2,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import {
-  PLP as OPSEPOLIA_PLP,
-  PRIME as OPSEPOLIA_PRIME,
-} from "../../multisig/proposals/opsepolia/vip-008";
-import { COMPTROLLERS as OPSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/opsepolia/vip-008";
-import { VTOKENS as OPSEPOLIA_VTOKENS } from "../../multisig/proposals/opsepolia/vip-008";
-import { POOL_REGISTRY as OPSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/opsepolia/vip-008";
-import { NTGs as OPSEPOLIA_NTGs } from "../../multisig/proposals/opsepolia/vip-008";
-import { PSR as OPSEPOLIA_PSR } from "../../multisig/proposals/opsepolia/vip-008";
 import { COMPTROLLERS as OPBNBTESTNET_COMPTROLLERS } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { NTGs as OPBNBTESTNET_NTGs } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-024";
+import { PLP as OPSEPOLIA_PLP, PRIME as OPSEPOLIA_PRIME } from "../../multisig/proposals/opsepolia/vip-008";
+import { COMPTROLLERS as OPSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/opsepolia/vip-008";
+import { VTOKENS as OPSEPOLIA_VTOKENS } from "../../multisig/proposals/opsepolia/vip-008";
+import { POOL_REGISTRY as OPSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/opsepolia/vip-008";
+import { NTGs as OPSEPOLIA_NTGs } from "../../multisig/proposals/opsepolia/vip-008";
+import { PSR as OPSEPOLIA_PSR } from "../../multisig/proposals/opsepolia/vip-008";
 
 export const OPSEPOLIA_ACM = "0x1652E12C8ABE2f0D84466F0fc1fA4286491B3BC1";
 export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";

@@ -34,7 +34,6 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import TREASURY_ABI from "./abi/treasury.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 
@@ -60,7 +59,6 @@ forking(53755793, async () => {
   let resilientOracle: Contract;
   let chainLinkOracle: Contract;
   let boundValidator: Contract;
-  let treasury: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
