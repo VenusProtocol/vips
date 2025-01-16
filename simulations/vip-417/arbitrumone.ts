@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip014 from "../../multisig/proposals/arbitrumone/vip-019";
 import { REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip417 from "../../vips/vip-417/bscmainnet";
-import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
+import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -22,7 +22,7 @@ forking(291641176, async () => {
   describe("Post-VIP behavior", async () => {
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
       it(`correct owner for ${rewardDistributor}`, async () => {
-        const c = new ethers.Contract(rewardDistributor, REWARD_DISTRIBUTOR_ABI, provider);
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
         expect(await c.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
       });
     }
