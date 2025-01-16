@@ -8,6 +8,7 @@ import {
   ethereumWETHPrimeConverterTokenOuts,
   ethereumXVSVaultConverterTokenOuts,
   incentiveAndAccessibilitiesEthereum,
+  incentiveAndAccessibilitiesEthereumForXVS,
 } from "./addresses";
 
 const vip421 = () => {
@@ -31,7 +32,7 @@ const vip421 = () => {
       {
         target: ETHEREUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [ethereumBaseAssets[4], ethereumXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesEthereum],
+        params: [ethereumBaseAssets[4], ethereumXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesEthereumForXVS],
         dstChainId: LzChainId.ethereum,
       },
     ],

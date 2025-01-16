@@ -31,11 +31,7 @@ forking(21630221, async () => {
         ethereumUSDTPrimeConverterTokenOuts.map(async token => {
           converter = await ethers.getContractAt(CONVERTER_ABI, ETHEREUM_USDT_PRIME_CONVERTER);
           const incentiveAndAccess = await converter.conversionConfigurations(ethereumBaseAssets[0], token);
-          if (token === "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A") {
-            expect(incentiveAndAccess[0]).to.equal("0");
-          } else {
-            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
-          }
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
           expect(incentiveAndAccess[1]).to.equal(1);
         }),
       );
@@ -46,11 +42,7 @@ forking(21630221, async () => {
         ethereumUSDCPrimeConverterTokenOuts.map(async token => {
           converter = await ethers.getContractAt(CONVERTER_ABI, ETHEREUM_USDC_PRIME_CONVERTER);
           const incentiveAndAccess = await converter.conversionConfigurations(ethereumBaseAssets[1], token);
-          if (token === "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A") {
-            expect(incentiveAndAccess[0]).to.equal("0");
-          } else {
-            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
-          }
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
           expect(incentiveAndAccess[1]).to.equal(1);
         }),
       );
@@ -61,11 +53,7 @@ forking(21630221, async () => {
         ethereumWBTCPrimeConverterTokenOuts.map(async token => {
           converter = await ethers.getContractAt(CONVERTER_ABI, ETHEREUM_WBTC_PRIME_CONVERTER);
           const incentiveAndAccess = await converter.conversionConfigurations(ethereumBaseAssets[2], token);
-          if (token === "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A") {
-            expect(incentiveAndAccess[0]).to.equal("0");
-          } else {
-            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
-          }
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
           expect(incentiveAndAccess[1]).to.equal(1);
         }),
       );
@@ -76,11 +64,7 @@ forking(21630221, async () => {
         ethereumWETHPrimeConverterTokenOuts.map(async token => {
           converter = await ethers.getContractAt(CONVERTER_ABI, ETHEREUM_WETH_PRIME_CONVERTER);
           const incentiveAndAccess = await converter.conversionConfigurations(ethereumBaseAssets[3], token);
-          if (token === "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A") {
-            expect(incentiveAndAccess[0]).to.equal("0");
-          } else {
-            expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
-          }
+          expect(incentiveAndAccess[0]).to.equal(parseUnits("1", 14));
           expect(incentiveAndAccess[1]).to.equal(1);
         }),
       );
@@ -100,13 +84,13 @@ forking(21630221, async () => {
 
   testForkedNetworkVipCommands("vip421", await vip421PartA(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [72]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [69]);
     },
   });
 
   testForkedNetworkVipCommands("vip421", await vip421PartB(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [48]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [47]);
     },
   });
 

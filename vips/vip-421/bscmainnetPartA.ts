@@ -12,6 +12,7 @@ import {
   ETHEREUM_WBTC_PRIME_CONVERTER,
   arbitrumBaseAssets,
   arbitrumIncentiveAndAccessibilities,
+  arbitrumIncentiveAndAccessibilitiesForXVS,
   arbitrumUSDCPrimeConverterTokenOuts,
   arbitrumUSDTPrimeConverterTokenOuts,
   arbitrumWBTCPrimeConverterTokenOuts,
@@ -63,7 +64,7 @@ const vip421 = () => {
       {
         target: ARBITRUM_XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [arbitrumBaseAssets[4], arbitrumXVSVaultConverterTokenOuts, arbitrumIncentiveAndAccessibilities],
+        params: [arbitrumBaseAssets[4], arbitrumXVSVaultConverterTokenOuts, arbitrumIncentiveAndAccessibilitiesForXVS],
         dstChainId: LzChainId.arbitrumone,
       },
       {

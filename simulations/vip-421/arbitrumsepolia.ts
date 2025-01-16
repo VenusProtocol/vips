@@ -102,7 +102,7 @@ forking(114598133, async () => {
 
   testForkedNetworkVipCommands("vip421", await vip421(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [35]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [31]);
     },
   });
 
