@@ -119,7 +119,7 @@ const config: HardhatUserConfig = {
         [ChainId.bsctestnet]: assumeCancun,
         [ChainId.opbnbtestnet]: assumeCancun,
         [ChainId.opbnbmainnet]: assumeCancun,
-        [ChainId.arbitrumsepolia]: assumeCancun,
+        // [ChainId.arbitrumsepolia]: assumeCancun,
         // [ChainId.arbitrumone]: assumeCancun,
         [ChainId.opsepolia]: assumeCancun,
         [ChainId.opmainnet]: assumeCancun,
