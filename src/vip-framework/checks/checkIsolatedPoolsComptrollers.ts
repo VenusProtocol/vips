@@ -1,11 +1,11 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber, Contract, Signer } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, ethers } from "hardhat";
 import { ORACLE_BNB } from "src/networkAddresses";
 
-import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
+import { getForkedNetworkAddress, initMainnetUser, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
 import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
@@ -67,13 +67,8 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   let supplyUnderlying: Contract | undefined = undefined;
   let borrowUnderlying: Contract | undefined = undefined;
 
-  await impersonateAccount(poolSupplier);
-  await setBalance(poolSupplier, ethers.utils.parseEther("50"));
-  await impersonateAccount(NORMAL_TIMELOCK);
-  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
-
-  const signer: Signer = await ethers.getSigner(poolSupplier);
-  const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
+  const signer = await initMainnetUser(poolSupplier, ethers.utils.parseEther("50"));
+  const timelockSigner = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
   const comptroller: Contract = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
   const resilientOracle: Contract = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
