@@ -18,7 +18,8 @@ import {
   sepoliaWETHPrimeConverterTokenOuts,
   sepoliaXVSVaultConverterTokenOuts,
 } from "../../vips/vip-421/addresses";
-import vip421 from "../../vips/vip-421/bsctestnet";
+import vip421PartA from "../../vips/vip-421/bsctestnetPartA";
+import vip421PartB from "../../vips/vip-421/bsctestnetPartB";
 import CONVERTER_ABI from "./abi/Converter.json";
 
 const sepoliaAssetsWithIncentives = [
@@ -137,9 +138,15 @@ forking(7482880, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip421", await vip421(), {
+  testForkedNetworkVipCommands("vip421 part A", await vip421PartA(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [116]);
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [69]);
+    },
+  });
+
+  testForkedNetworkVipCommands("vip421 part B", await vip421PartB(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [47]);
     },
   });
 

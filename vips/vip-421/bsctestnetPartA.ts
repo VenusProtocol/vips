@@ -10,8 +10,6 @@ import {
   SEPOLIA_USDC_PRIME_CONVERTER,
   SEPOLIA_USDT_PRIME_CONVERTER,
   SEPOLIA_WBTC_PRIME_CONVERTER,
-  SEPOLIA_WETH_PRIME_CONVERTER,
-  SEPOLIA_XVS_VAULT_CONVERTER,
   arbitrumSepoliaBaseAssets,
   arbitrumSepoliaIncentiveAndAccessibilities,
   arbitrumSepoliaIncentiveAndAccessibilitiesForXVS,
@@ -21,19 +19,16 @@ import {
   arbitrumSepoliaWETHPrimeConverterTokenOuts,
   arbitrumSepoliaXVSVaultConverterTokenOuts,
   incentiveAndAccessibilitiesSepolia,
-  incentiveAndAccessibilitiesSepoliaForXVS,
   sepoliaBaseAssets,
   sepoliaUSDCPrimeConverterTokenOuts,
   sepoliaUSDTPrimeConverterTokenOuts,
   sepoliaWBTCPrimeConverterTokenOuts,
-  sepoliaWETHPrimeConverterTokenOuts,
-  sepoliaXVSVaultConverterTokenOuts,
 } from "./addresses";
 
 const vip421 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-421",
+    title: "VIP-421 Part A",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -109,18 +104,6 @@ const vip421 = () => {
         target: SEPOLIA_WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [sepoliaBaseAssets[2], sepoliaWBTCPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: SEPOLIA_WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[3], sepoliaWETHPrimeConverterTokenOuts, incentiveAndAccessibilitiesSepolia],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: SEPOLIA_XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [sepoliaBaseAssets[4], sepoliaXVSVaultConverterTokenOuts, incentiveAndAccessibilitiesSepoliaForXVS],
         dstChainId: LzChainId.sepolia,
       },
     ],
