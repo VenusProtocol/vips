@@ -4,125 +4,175 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  NORMAL_TIMELOCK,
-  RISK_STEWARD_RECEIVER,
-  MARKET_CAPS_RISK_STEWARD,
+  WILDCARD_ROLE,
   ACM,
   BNB_CORE_COMPTROLLER,
-  LIQUID_STAKING_BNB_COMPTROLLER,
-  DEFI_COMPTROLLER,
-  STABLECOIN_COMPTROLLER,
-  GAMEFI_COMPTROLLER,
-  BTC_COMPTROLLER,
-  TRON_COMPTROLLER,
-  LIQUID_STAKING_ETH_COMPTROLLER,
-  MEME_COMPTROLLER,
+  CRITICAL_TIMELOCK,
+  FAST_TRACK_TIMELOCK,
+  MARKET_CAPS_RISK_STEWARD,
+  NORMAL_TIMELOCK,
+  RISK_STEWARD_RECEIVER,
   vipXXX,
 } from "../../vips/vip-xxx/bsctestnet";
 import { abi as ACM_ABI } from "./abi/AccessControlManager.json";
 import { abi as RISK_STEWARD_RECEIVER_ABI } from "./abi/RiskStewardReceiver.json";
 
-forking(47580309, async () => {
+forking(47591824, async () => {
   const provider = ethers.provider;
   const accessControlManager = new ethers.Contract(ACM, ACM_ABI, provider);
 
   testVip("VIP-XXX", await vipXXX(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [ACM_ABI],
-        ["RoleGranted"],
-        [24],
-      );
+      await expectEvents(txResponse, [ACM_ABI], ["RoleGranted"], [18]);
     },
   });
 
-
   describe("Post-VIP behavior", async () => {
     it("check risk steward receiver permissions", async () => {
-      const allowedToSetRiskParameterConfig = await accessControlManager.hasPermission(NORMAL_TIMELOCK, RISK_STEWARD_RECEIVER, "setRiskParameterConfig(string,address,uint256)");
+      const allowedToSetRiskParameterConfig = await accessControlManager.hasPermission(
+        NORMAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "setRiskParameterConfig(string,address,uint256)",
+      );
 
       expect(allowedToSetRiskParameterConfig).to.equal(true);
 
-      const allowedToToggleConfigActive = await accessControlManager.hasPermission(NORMAL_TIMELOCK, RISK_STEWARD_RECEIVER, "toggleConfigActive(string)");
+      const normalTimeLockAllowedToToggleConfigActive = await accessControlManager.hasPermission(
+        NORMAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "toggleConfigActive(string)",
+      );
 
-      expect(allowedToToggleConfigActive).to.equal(true);
+      expect(normalTimeLockAllowedToToggleConfigActive).to.equal(true);
 
-      const allowedToPauseRiskStewardReceiver = await accessControlManager.hasPermission(NORMAL_TIMELOCK, RISK_STEWARD_RECEIVER, "pause()");
+      const criticalTimelockAllowedToToggleConfigActive = await accessControlManager.hasPermission(
+        CRITICAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "toggleConfigActive(string)",
+      );
 
-      expect(allowedToPauseRiskStewardReceiver).to.equal(true);
+      expect(criticalTimelockAllowedToToggleConfigActive).to.equal(true);
 
-      const allowedToUnpauseRiskStewardReceiver = await accessControlManager.hasPermission(NORMAL_TIMELOCK, RISK_STEWARD_RECEIVER, "unpause()");
+      const fastTrackTimelockAllowedToToggleConfigActive = await accessControlManager.hasPermission(
+        FAST_TRACK_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "toggleConfigActive(string)",
+      );
 
-      expect(allowedToUnpauseRiskStewardReceiver).to.equal(true);
+      expect(fastTrackTimelockAllowedToToggleConfigActive).to.equal(true);
+
+      const normalTimelockAllowedToPauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        NORMAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "pause()",
+      );
+
+      expect(normalTimelockAllowedToPauseRiskStewardReceiver).to.equal(true);
+
+      const fastTrackTimelockAllowedToPauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        FAST_TRACK_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "pause()",
+      );
+
+      expect(fastTrackTimelockAllowedToPauseRiskStewardReceiver).to.equal(true);
+
+      const criticalTimelockAllowedToPauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        CRITICAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "pause()",
+      );
+
+      expect(criticalTimelockAllowedToPauseRiskStewardReceiver).to.equal(true);
+
+      const normalTimelockAllowedToUnpauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        NORMAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "unpause()",
+      );
+
+      expect(normalTimelockAllowedToUnpauseRiskStewardReceiver).to.equal(true);
+
+      const criticalTimelockAllowedToUnpauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        CRITICAL_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "unpause()",
+      );
+
+      expect(criticalTimelockAllowedToUnpauseRiskStewardReceiver).to.equal(true);
+
+      const fastTrackTimelockAllowedToUnpauseRiskStewardReceiver = await accessControlManager.hasPermission(
+        FAST_TRACK_TIMELOCK,
+        RISK_STEWARD_RECEIVER,
+        "unpause()",
+      );
+
+      expect(fastTrackTimelockAllowedToUnpauseRiskStewardReceiver).to.equal(true);
     });
 
     it("check market caps risk steward permissions", async () => {
-      const allowedToProcessUpdate = await accessControlManager.hasPermission(RISK_STEWARD_RECEIVER, MARKET_CAPS_RISK_STEWARD, "processUpdate(RiskParameterUpdate)");
+      const allowedToProcessUpdate = await accessControlManager.hasPermission(
+        RISK_STEWARD_RECEIVER,
+        MARKET_CAPS_RISK_STEWARD,
+        "processUpdate(RiskParameterUpdate)",
+      );
 
       expect(allowedToProcessUpdate).to.equal(true);
 
-      const allowedToSetMaxIncreaseBps = await accessControlManager.hasPermission(NORMAL_TIMELOCK, MARKET_CAPS_RISK_STEWARD, "setMaxIncreaseBps(uint256)");
+      const normalTimelockAllowedToSetMaxIncreaseBps = await accessControlManager.hasPermission(
+        NORMAL_TIMELOCK,
+        MARKET_CAPS_RISK_STEWARD,
+        "setMaxIncreaseBps(uint256)",
+      );
 
-      expect(allowedToSetMaxIncreaseBps).to.equal(true);
+      expect(normalTimelockAllowedToSetMaxIncreaseBps).to.equal(true);
+
+      const criticalTimelockAllowedToSetMaxIncreaseBps = await accessControlManager.hasPermission(
+        CRITICAL_TIMELOCK,
+        MARKET_CAPS_RISK_STEWARD,
+        "setMaxIncreaseBps(uint256)",
+      );
+
+      expect(criticalTimelockAllowedToSetMaxIncreaseBps).to.equal(true);
+
+      const fastTrackTimelockAllowedToSetMaxIncreaseBps = await accessControlManager.hasPermission(
+        FAST_TRACK_TIMELOCK,
+        MARKET_CAPS_RISK_STEWARD,
+        "setMaxIncreaseBps(uint256)",
+      );
+
+      expect(fastTrackTimelockAllowedToSetMaxIncreaseBps).to.equal(true);
 
       // Core Pool
-      let allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, BNB_CORE_COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])");
+      let allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(
+        MARKET_CAPS_RISK_STEWARD,
+        BNB_CORE_COMPTROLLER,
+        "_setMarketSupplyCaps(address[],uint256[])",
+      );
 
       expect(allowedToSetMarketSupplyCaps).to.equal(true);
 
-      let allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, BNB_CORE_COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])");
+      let allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(
+        MARKET_CAPS_RISK_STEWARD,
+        BNB_CORE_COMPTROLLER,
+        "_setMarketBorrowCaps(address[],uint256[])",
+      );
 
       expect(allowedToSetMarketBorrowCaps).to.equal(true);
 
       // Isolated Pools
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, LIQUID_STAKING_BNB_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
+      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(
+        MARKET_CAPS_RISK_STEWARD,
+        WILDCARD_ROLE,
+        "setMarketSupplyCaps(address[],uint256[])",
+      );
       expect(allowedToSetMarketSupplyCaps).to.equal(true);
 
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, LIQUID_STAKING_BNB_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, DEFI_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, DEFI_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, STABLECOIN_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, STABLECOIN_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, GAMEFI_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, GAMEFI_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, BTC_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, BTC_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, TRON_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, TRON_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, LIQUID_STAKING_ETH_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, LIQUID_STAKING_ETH_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
-      expect(allowedToSetMarketBorrowCaps).to.equal(true);
-
-      allowedToSetMarketSupplyCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, MEME_COMPTROLLER, "setMarketSupplyCaps(address[],uint256[])");
-      expect(allowedToSetMarketSupplyCaps).to.equal(true);
-
-      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, MEME_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
+      allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(
+        MARKET_CAPS_RISK_STEWARD,
+        WILDCARD_ROLE,
+        "setMarketBorrowCaps(address[],uint256[])",
+      );
       expect(allowedToSetMarketBorrowCaps).to.equal(true);
     });
 
@@ -140,6 +190,6 @@ forking(47580309, async () => {
       expect(borrowConfig.riskSteward).to.equal(MARKET_CAPS_RISK_STEWARD);
       expect(borrowConfig.debounce).to.equal(TEN_MINUTES);
       expect(borrowConfig.active).to.equal(true);
-    })
+    });
   });
 });
