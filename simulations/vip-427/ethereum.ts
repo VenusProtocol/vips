@@ -17,9 +17,9 @@ import {
   ethereumWBTCPrimeConverterTokenOuts,
   ethereumWETHPrimeConverterTokenOuts,
   ethereumXVSVaultConverterTokenOuts,
-} from "../../vips/vip-421/addresses";
-import vip421PartA from "../../vips/vip-421/bscmainnetPartA";
-import vip421PartB from "../../vips/vip-421/bscmainnetPartB";
+} from "../../vips/vip-427/addresses";
+import vip427 from "../../vips/vip-427/bscmainnetPartA";
+import vip429 from "../../vips/vip-427/bscmainnetPartB";
 import CONVERTER_ABI from "./abi/Converter.json";
 
 forking(21630221, async () => {
@@ -82,13 +82,13 @@ forking(21630221, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip421", await vip421PartA(), {
+  testForkedNetworkVipCommands("vip427", await vip427(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [69]);
     },
   });
 
-  testForkedNetworkVipCommands("vip421", await vip421PartB(), {
+  testForkedNetworkVipCommands("vip429", await vip429(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [47]);
     },

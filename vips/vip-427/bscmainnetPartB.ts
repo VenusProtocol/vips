@@ -11,10 +11,10 @@ import {
   incentiveAndAccessibilitiesEthereumForXVS,
 } from "./addresses";
 
-const vip421 = () => {
+const vip429 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-421",
+    title: "VIP-429",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -38,7 +38,7 @@ const vip421 = () => {
     ],
 
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
-export default vip421;
+export default vip429;

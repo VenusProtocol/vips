@@ -22,8 +22,8 @@ import {
   arbitrumSepoliaWBTCPrimeConverterTokenOuts,
   arbitrumSepoliaWETHPrimeConverterTokenOuts,
   arbitrumSepoliaXVSVaultConverterTokenOuts,
-} from "../../vips/vip-421/addresses";
-import vip421PartA from "../../vips/vip-421/bsctestnetPartA";
+} from "../../vips/vip-427/addresses";
+import vip427PartA from "../../vips/vip-427/bsctestnetPartA";
 import CONVERTER_ABI from "./abi/Converter.json";
 import ERC20_ABI from "./abi/erc20.json";
 
@@ -100,7 +100,7 @@ forking(114598133, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip421", await vip421PartA(), {
+  testForkedNetworkVipCommands("vip427", await vip427PartA(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [31]);
     },

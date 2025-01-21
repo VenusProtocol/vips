@@ -25,10 +25,10 @@ import {
   sepoliaWBTCPrimeConverterTokenOuts,
 } from "./addresses";
 
-const vip421 = () => {
+const vip427 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-421 Part A",
+    title: "VIP-427 Part A",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -112,4 +112,4 @@ const vip421 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip421;
+export default vip427;
