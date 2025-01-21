@@ -56,11 +56,11 @@ export const newMarket = {
 
 export const FIXED_STABLECOIN_PRICE = parseUnits("1.1", 18);
 
-const vip427 = () => {
+const vip429 = () => {
   const meta = {
     version: "v2",
-    title: "BTC pool on BNB chain",
-    description: ``,
+    title: "wUSDM market ok ZKsync sepolia - Core pool",
+    description: `wUSDM market ok ZKsync sepolia - Core pool`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -104,7 +104,7 @@ const vip427 = () => {
       {
         target: newMarket.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["28800"],
+        params: ["86400"],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
@@ -159,4 +159,4 @@ const vip427 = () => {
   );
 };
 
-export default vip427;
+export default vip429;

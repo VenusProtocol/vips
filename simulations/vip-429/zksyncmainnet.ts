@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip427, { COMPTROLLER, WUSDM_ERC4626_ORACLE, newMarket, tokens } from "../../vips/vip-427/bsctestnet";
+import vip429, { COMPTROLLER, WUSDM_ERC4626_ORACLE, newMarket, tokens } from "../../vips/vip-429/bscmainnet";
 import ERC4626_ORACLE_ABI from "./abi/ERC4626Oracle.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -18,10 +18,12 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
+const ONE_YEAR = 3600 * 24 * 365;
+const WUSDM_HOLDER = "0x57a23d382cD9Ae7408A63ead305e09c23d6a36Be";
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["zksyncsepolia"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["zksyncmainnet"];
 
-forking(4514466, async () => {
+forking(54123200, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -31,13 +33,13 @@ forking(4514466, async () => {
     checkVToken(newMarket.vToken.address, newMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("zksync-wUSDM", await vip427());
+  testForkedNetworkVipCommands("zksync-wUSDM", await vip429({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct USDM price", async () => {
         const price = await oracle.getPrice(tokens["USDM"].address);
-        expect(price).to.be.eq(parseUnits("1.1", 18));
+        expect(price).to.be.eq(parseUnits("1.00003056", 18));
       });
 
       it("has the correct wUSDM oracle configuration", async () => {
@@ -49,7 +51,7 @@ forking(4514466, async () => {
 
       it("has the correct wUSDM price", async () => {
         const price = await oracle.getPrice(tokens["wUSDM"].address);
-        expect(price).to.be.eq(parseUnits("1.1", 18));
+        expect(price).to.be.eq(parseUnits("1.064366386871659138", 18));
       });
     });
 
@@ -106,6 +108,6 @@ forking(4514466, async () => {
       );
     });
 
-    checkIsolatedPoolsComptrollers();
+    checkIsolatedPoolsComptrollers({ [COMPTROLLER]: WUSDM_HOLDER });
   });
 });
