@@ -26,14 +26,15 @@ export const IL_COMPTROLLERS = [
   LIQUID_STAKING_ETH_COMPTROLLER,
   MEME_COMPTROLLER
 ]
-
+const TEN_MINUTES = 60 * 10;
 export const vipXXX = () => {
   const meta = {
     version: "v2",
     title: "VIP-XXX Configure Risk Steward Access Control",
     description: `If passed, this VIP will permission governance to set configurations on the RiskStewardReceiver, the RiskStewardReceiver to forward validated updates the the MarketCapsRiskSteward, and the MarketCapsRiskSteward to update market caps on comptrollers.
+This proposal will also set the risk parameter configs for updating the supplyCap and borrowCap configurations on the RiskStewardReceiver.
 
-The following actions will be performed:
+The following permissions will be granted:
 - Governance can call setRiskParameterConfig on the RiskStewardReceiver
 - Governance can call toggleConfigActive on the RiskStewardReceiver
 - Governance can call pause on the RiskStewardReceiver
@@ -43,7 +44,11 @@ The following actions will be performed:
 - MarketCapsRiskSteward can call _setMarketSupplyCaps on the BNB_CORE_COMPTROLLER
 - MarketCapsRiskSteward can call _setMarketBorrowCaps on the BNB_CORE_COMPTROLLER
 - MarketCapsRiskSteward can call setMarketSupplyCaps on IL comptrollers
-- MarketCapsRiskSteward can call setMarketBorrowCaps on ILcomptrollers
+- MarketCapsRiskSteward can call setMarketBorrowCaps on IL comptrollers
+
+Risk Paramater Configs:
+- SupplyCap: RiskSteward: ${MARKET_CAPS_RISK_STEWARD}, Debounce: ${TEN_MINUTES}, Active: true
+- BorrowCap: RiskSteward: ${MARKET_CAPS_RISK_STEWARD}, Debounce: ${TEN_MINUTES}, Active: true
 
 VIP simulation: [https://github.com/VenusProtocol/vips/pull/459](https://github.com/VenusProtocol/vips/pull/XXX)`,
     forDescription: "Execute this proposal",
@@ -103,6 +108,16 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/459](https://github.
         signature: "giveCallPermission(address,string,address)",
         params: [comptroller, "setMarketBorrowCaps(address[],uint256[])", MARKET_CAPS_RISK_STEWARD],
       })),
+      {
+        target: RISK_STEWARD_RECEIVER,
+        signature: "setRiskParameterConfig(string,address,uint256)",
+        params: ["supplyCap", MARKET_CAPS_RISK_STEWARD, TEN_MINUTES],
+      },
+      {
+        target: RISK_STEWARD_RECEIVER,
+        signature: "setRiskParameterConfig(string,address,uint256)",
+        params: ["borrowCap", MARKET_CAPS_RISK_STEWARD, TEN_MINUTES],
+      },
     ],
     meta,
     ProposalType.REGULAR,

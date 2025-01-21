@@ -20,6 +20,7 @@ import {
   vipXXX,
 } from "../../vips/vip-xxx/bsctestnet";
 import { abi as ACM_ABI } from "./abi/AccessControlManager.json";
+import { abi as RISK_STEWARD_RECEIVER_ABI } from "./abi/RiskStewardReceiver.json";
 
 forking(47580309, async () => {
   const provider = ethers.provider;
@@ -124,5 +125,21 @@ forking(47580309, async () => {
       allowedToSetMarketBorrowCaps = await accessControlManager.hasPermission(MARKET_CAPS_RISK_STEWARD, MEME_COMPTROLLER, "setMarketBorrowCaps(address[],uint256[])");
       expect(allowedToSetMarketBorrowCaps).to.equal(true);
     });
+
+    it("should set risk parameter config", async () => {
+      const riskStewardReceiver = new ethers.Contract(RISK_STEWARD_RECEIVER, RISK_STEWARD_RECEIVER_ABI, provider);
+
+      const supplyConfig = await riskStewardReceiver.getRiskParameterConfig("supplyCap");
+
+      const TEN_MINUTES = 60 * 10;
+      expect(supplyConfig.riskSteward).to.equal(MARKET_CAPS_RISK_STEWARD);
+      expect(supplyConfig.debounce).to.equal(TEN_MINUTES);
+      expect(supplyConfig.active).to.equal(true);
+
+      const borrowConfig = await riskStewardReceiver.getRiskParameterConfig("borrowCap");
+      expect(borrowConfig.riskSteward).to.equal(MARKET_CAPS_RISK_STEWARD);
+      expect(borrowConfig.debounce).to.equal(TEN_MINUTES);
+      expect(borrowConfig.active).to.equal(true);
+    })
   });
 });
