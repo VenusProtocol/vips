@@ -36,11 +36,59 @@ export const BSCMAINNET_WETH_PER_BLOCK_REWARD = parseUnits("21.38", 18).div(BSCM
 export const BSCMAINNET_USDC_PER_BLOCK_REWARD = parseUnits("216000", 18).div(BSCMAINNET_BLOCKS_PER_QUARTER).toString();
 export const BSCMAINNET_USDT_PER_BLOCK_REWARD = parseUnits("396000", 18).div(BSCMAINNET_BLOCKS_PER_QUARTER).toString();
 
-export const vip427 = () => {
+export const vip432 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-427",
-    description: ``,
+    title: "VIP-432 [Ethereum][BNB Chain] Prime Adjustment Proposal - Q1 2025",
+    description: `If passed, this VIP will perform the following actions following the Community proposals [Prime Adjustment Proposal - Q1 2025 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q1-2025-bnb-chain/4826) and [Prime Adjustment Proposal - Q1 2025 [ETH Mainnet]](https://community.venus.io/t/prime-adjustment-proposal-q1-2025-eth-mainnet/4825), and the associated [snapshot](https://snapshot.org/#/s:venus-xvs.eth/proposal/0x8859c5202c819fb000fe56bd16da0bbafafc30f28176b949e00c664473967cf3):
+
+- Modify the reward speeds for Prime markets on Ethereum and BNB Chain
+- Modify the income distribution to the Prime markets on Ethereum and BNB Chain
+
+In summary, the changes are the following:
+
+**BNB Chain**
+
+New income distribution proposal (scoped to the 20% of the protocol reserves, allocated to Prime):
+
+- USDT (Core): 55% (+5%)
+- USDC (Core): 30% (0%)
+- ETH (Core): 10% (‑5%)
+- BTCB (Core): 5% (0%)
+
+3-month reward distribution:
+
+- USDT (Core): 396,000 (+133,500)
+- USDC (Core): 216,000 (+58,500)
+- ETH (Core): 21.38 (‑8.86)
+- BTCB (Core): 0.38 (‑0.04)
+- Total rewards for 3 months: $720K.
+
+**Ethereum**
+
+New income distribution proposal (scoped to the 20% of the protocol reserves, allocated to Prime):
+
+- WBTC (Core): 3% (-2%)
+- WETH (Liquid Staked ETH): 85% (0%)
+- USDC (Core): 6% (+1%)
+- USDT (Core): 6% (+1%)
+
+3-month reward distribution:
+
+- WBTC (Core): 0.01 (-0.02)
+- WETH (Liquid Staked ETH): 11.36 (-4.42)
+- USDC (Core): 2,700 (+450)
+- USDT (Core): 2,700 (+450)
+- Total rewards for 3 months: $45,000
+
+#### References
+
+- Community proposals
+    - [Prime Adjustment Proposal - Q1 2025 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q1-2025-bnb-chain/4826)
+    - [Prime Adjustment Proposal - Q1 2025 [ETH Mainnet]](https://community.venus.io/t/prime-adjustment-proposal-q1-2025-eth-mainnet/4825)
+- [VIP-383 [Ethereum] Prime Adjustment Proposal - Q4 2024](https://app.venus.io/#/governance/proposal/383?chainId=56) (previous Prime adjustment)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/464)
+- [Tokenomics](https://docs-v4.venus.io/governance/tokenomics)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -102,8 +150,8 @@ export const vip427 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
-export default vip427;
+export default vip432;
