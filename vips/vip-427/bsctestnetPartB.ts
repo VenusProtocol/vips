@@ -11,10 +11,10 @@ import {
   sepoliaXVSVaultConverterTokenOuts,
 } from "./addresses";
 
-const vip429 = () => {
+const vip430 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-429 Part B",
+    title: "VIP-430 Part B",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -41,4 +41,4 @@ const vip429 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip429;
+export default vip430;

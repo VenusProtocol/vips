@@ -19,7 +19,7 @@ import {
   ethereumXVSVaultConverterTokenOuts,
 } from "../../vips/vip-427/addresses";
 import vip427 from "../../vips/vip-427/bscmainnetPartA";
-import vip429 from "../../vips/vip-427/bscmainnetPartB";
+import vip430 from "../../vips/vip-427/bscmainnetPartB";
 import CONVERTER_ABI from "./abi/Converter.json";
 
 forking(21630221, async () => {
@@ -88,7 +88,7 @@ forking(21630221, async () => {
     },
   });
 
-  testForkedNetworkVipCommands("vip429", await vip429(), {
+  testForkedNetworkVipCommands("vip430", await vip430(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [CONVERTER_ABI], ["ConversionConfigUpdated"], [47]);
     },
