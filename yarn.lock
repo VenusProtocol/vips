@@ -1209,9 +1209,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@matterlabs/hardhat-zksync-node@npm:^1.1.1":
-  version: 1.2.0
-  resolution: "@matterlabs/hardhat-zksync-node@npm:1.2.0"
+"@matterlabs/hardhat-zksync-node@npm:^1.2.0":
+  version: 1.2.1
+  resolution: "@matterlabs/hardhat-zksync-node@npm:1.2.1"
   dependencies:
     "@matterlabs/hardhat-zksync-solc": ^1.2.5
     axios: ^1.7.2
@@ -1220,13 +1220,14 @@ __metadata:
     debug: ^4.3.5
     fs-extra: ^11.2.0
     proxyquire: ^2.1.3
+    semver: ^7.6.2
     sinon: ^18.0.0
     sinon-chai: ^3.7.0
     source-map-support: ^0.5.21
     undici: ^6.18.2
   peerDependencies:
     hardhat: ^2.22.5
-  checksum: d38f6c67290bdb8e4949005616913099cd73678aaf97c2f7b59bc6c24f9a1932c560919b3b618b61a2ff470634211148282f35a43bdcb027952ba950bc77666a
+  checksum: a085bcb849511400b798e51b0d29c41125509fd78773214d82ca70ff8cff2baa9f211e0a8b89479196e6dcc640331156189e54b49d0af03e961c4689ad6988f7
   languageName: node
   linkType: hard
 
@@ -2839,7 +2840,7 @@ __metadata:
     "@ethersproject/bytes": ^5.7.0
     "@ethersproject/providers": ^5.7.2
     "@matterlabs/hardhat-zksync": ^0.2.0
-    "@matterlabs/hardhat-zksync-node": ^1.1.1
+    "@matterlabs/hardhat-zksync-node": ^1.2.0
     "@matterlabs/hardhat-zksync-solc": ^1.2.1
     "@morpho-labs/gnosis-tx-builder": ^1.3.1
     "@nomicfoundation/hardhat-chai-matchers": ^1.0.4
