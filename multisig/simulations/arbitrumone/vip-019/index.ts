@@ -172,7 +172,7 @@ forking(298392727, async () => {
       });
     }
 
-    it(`should have guardian as owner for converer beacon`, async () => {
+    it(`should have normal timelock as owner for converer beacon`, async () => {
       const c = new ethers.Contract(SINGLE_TOKEN_CONVERTER_BEACON, OWNERSHIP_ABI, provider);
       expect(await c.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
     });
