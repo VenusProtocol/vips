@@ -19,9 +19,6 @@ export const OPBNBMAINNET_XVS_STORE = "0xc3279442a5aCaCF0A2EcB015d1cDDBb3E0f3F77
 export const OPBNBMAINNET_XVS_BRIDGE_ADMIN = "0x52fcE05aDbf6103d71ed2BA8Be7A317282731831";
 export const OPMAINNET_XVS_BRIDGE_ADMIN = "0x3c307DF1Bf3198a2417d9CA86806B307D147Ddf7";
 
-const OPBNBMAINNET_CHAIN_ID = LzChainId.opbnbmainnet;
-const OPMAINNET_CHAIN_ID = LzChainId.opmainnet;
-
 export const OPMAINNET_BOUND_VALIDATOR = "0x37A04a1eF784448377a19F2b1b67cD40c09eA505";
 export const OPBNBMAINNET_BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf43dadCE";
 
@@ -78,13 +75,13 @@ const vip418 = () => {
         target: OPMAINNET_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPMAINNET_CHAIN_ID,
+        dstChainId: LzChainId.opmainnet,
       },
       {
         target: OPBNBMAINNET_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPBNBMAINNET_CHAIN_ID,
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: opmainnet.CHAINLINK_ORACLE,
