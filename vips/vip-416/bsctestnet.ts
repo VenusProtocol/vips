@@ -24,9 +24,6 @@ export const OPBNBTESTNET_XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A
 export const OPBNBTESTNET_XVS_BRIDGE_ADMIN = "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff";
 export const OPSEPOLIA_XVS_BRIDGE_ADMIN = "0x6bBcB95eCF9BEc9AE91d5Ad227783e3913145321";
 
-const OPBNBTESTNET_CHAIN_ID = LzChainId.opbnbtestnet;
-const OPSEPOLIA_CHAIN_ID = LzChainId.opsepolia;
-
 export const OPSEPOLIA_BOUND_VALIDATOR = "0x482469F1DA6Ec736cacF6361Ec41621f811A6800";
 export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753657A746";
 
@@ -81,13 +78,13 @@ const vip418 = () => {
         target: OPSEPOLIA_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPSEPOLIA_CHAIN_ID,
+        dstChainId: LzChainId.opsepolia,
       },
       {
         target: OPBNBTESTNET_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: OPBNBTESTNET_CHAIN_ID,
+        dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: opsepolia.CHAINLINK_ORACLE,

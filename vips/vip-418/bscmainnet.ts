@@ -31,10 +31,6 @@ export const ETHEREUM_XVS_BRIDGE_ADMIN = "0x9C6C95632A8FB3A74f2fB4B7FfC50B003c99
 export const ZKSYNCMAINNET_XVS_BRIDGE_ADMIN = "0x2471043F05Cc41A6051dd6714DC967C7BfC8F902";
 export const ARBITRUM_XVS_BRIDGE_ADMIN = "0xf5d81C6F7DAA3F97A6265C8441f92eFda22Ad784";
 
-const ETHEREUM_CHAIN_ID = LzChainId.ethereum;
-const ZKSYNCMAINNET_CHAIN_ID = LzChainId.zksyncmainnet;
-const ARBITRUM_CHAIN_ID = LzChainId.arbitrumone;
-
 export const ARBITRUM_ONE_BOUND_VALIDATOR = "0x2245FA2420925Cd3C2D889Ddc5bA1aefEF0E14CF";
 export const ETHEREUM_BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
 export const ZKSYNCMAINNET_BOUND_VALIDATOR = "0x51519cdCDDD05E2ADCFA108f4a960755D9d6ea8b";
@@ -119,19 +115,19 @@ const vip418 = () => {
         target: ARBITRUM_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: ARBITRUM_CHAIN_ID,
+        dstChainId: LzChainId.arbitrumone,
       },
       {
         target: ZKSYNCMAINNET_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: ZKSYNCMAINNET_CHAIN_ID,
+        dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: ETHEREUM_XVS_BRIDGE_ADMIN,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: ETHEREUM_CHAIN_ID,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: arbitrumone.CHAINLINK_ORACLE,
