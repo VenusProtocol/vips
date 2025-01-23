@@ -27,6 +27,7 @@ import { POOL_REGISTRY as ZKSYNCSEPOLIA_POOL_REGISTRY } from "../../multisig/pro
 import { PLP as ZKSYNCSEPOLIA_PLP, PRIME as ZKSYNCSEPOLIA_PRIME } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
+import { REWARD_DISTRIBUTORS as ZKSYNCSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/zksyncsepolia/vip-017";
 
 export const SEPOLIA_ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const SEPOLIA_FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
@@ -66,6 +67,14 @@ const vip418 = () => {
   };
   return makeProposal(
     [
+      ...ZKSYNCSEPOLIA_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
+        return {
+          target: rewardDistirbutor,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.zksyncsepolia,
+        };
+      }),
       {
         target: arbitrumsepolia.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",

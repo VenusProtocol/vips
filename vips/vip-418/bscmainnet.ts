@@ -22,6 +22,7 @@ import { POOL_REGISTRY as ZKSYNCMAINNET_POOL_REGISTRY } from "../../multisig/pro
 import { NTGs as ZKSYNCMAINNET_NTGs } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import { PSR as ZKSYNCMAINNET_PSR } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import { PLP as ZKSYNCMAINNET_PLP, PRIME as ZKSYNCMAINNET_PRIME } from "../../multisig/proposals/zksyncmainnet/vip-017";
+import { REWARD_DISTRIBUTORS as ZKSYNCMAINNET_REWARD_DISTRIBUTORS } from "../../multisig/proposals/zksyncmainnet/vip-017";
 
 export const ARBITRUM_ONE_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 export const ETHEREUM_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
@@ -52,6 +53,14 @@ const vip418 = () => {
   };
   return makeProposal(
     [
+      ...ZKSYNCMAINNET_REWARD_DISTRIBUTORS.map(rewardDistirbutor => {
+        return {
+          target: rewardDistirbutor,
+          signature: "acceptOwnership()",
+          params: [],
+          dstChainId: LzChainId.zksyncmainnet,
+        };
+      }),
       {
         target: arbitrumone.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",

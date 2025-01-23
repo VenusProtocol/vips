@@ -18,6 +18,7 @@ import vip017, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  REWARD_DISTRIBUTORS
 } from "../../../proposals/zksyncsepolia/vip-017";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
 
@@ -63,6 +64,13 @@ forking(4529969, async () => {
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
       treasury = await ethers.getContractAt(OWNERSHIP_ABI, NETWORK_ADDRESSES.zksyncsepolia.VTREASURY);
     });
+
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`should have no pending owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
 
     for (const ntg of NTGs) {
       it(`should have no pending owner for ${ntg}`, async () => {

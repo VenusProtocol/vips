@@ -18,6 +18,7 @@ import vip017, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
+  REWARD_DISTRIBUTORS
 } from "../../../proposals/zksyncmainnet/vip-017";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
 
@@ -61,6 +62,13 @@ forking(54359116, async () => {
       chainLinkOracle = new ethers.Contract(CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
     });
+
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`should have no pending owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
 
     for (const ntg of NTGs) {
       it(`should have no pending owner for ${ntg}`, async () => {

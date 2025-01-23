@@ -23,12 +23,21 @@ export const VTOKENS = [
   "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49",
   "0x92f4BD794303c0BD0791B350Be5531DB38414f47",
 ];
-
+export const REWARD_DISTRIBUTORS = [
+  "0x8EDd58DC2C8e38bfc17f07D6f5E8831d87a6962e"
+];
 
 export const NTGs = ["0xC2bc5881f2c1ee08a1f0fee65Fbf2BB4C4DD81e9"];
 
 const vip017 = () => {
   return makeProposal([
+    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
+      return {
+        target: rewardDistributor,
+        signature: "transferOwnership(address)",
+        params: [zksyncsepolia.NORMAL_TIMELOCK],
+      };
+    }),
     {
       target: DEFAULT_PROXY_ADMIN,
       signature: "transferOwnership(address)",

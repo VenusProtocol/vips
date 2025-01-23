@@ -12,6 +12,7 @@ import vip014, {
   PSR,
   VTOKENS,
   XVS_STORE,
+  REWARD_DISTRIBUTORS
 } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import vip418, { ZKSYNCMAINNET_BOUND_VALIDATOR, ZKSYNCMAINNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bscmainnet";
 import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
@@ -50,6 +51,13 @@ forking(54359116, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip418());
 
   describe("Post-VIP behaviour", async () => {
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`correct owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
+        expect(await c.owner()).to.equal(zksyncmainnet.NORMAL_TIMELOCK);
+      });
+    }
+
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
       expect(await xvsBridgeAdmin.owner()).to.be.equals(zksyncmainnet.NORMAL_TIMELOCK);
     });
