@@ -75,7 +75,7 @@ forking(117063164, async () => {
     });
 
     for (const converter of CONVERTERS) {
-      it(`should have no pending owner for ${converter}`, async () => {
+      it(`should have pending owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, OWNERSHIP_ABI, provider);
         expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
       });
@@ -164,7 +164,7 @@ forking(117063164, async () => {
     });
 
     for (const converter of CONVERTERS) {
-      it(`should have no pending owner for ${converter}`, async () => {
+      it(`should have pending owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, OWNERSHIP_ABI, provider);
         expect(await c.pendingOwner()).to.equal(arbitrumsepolia.NORMAL_TIMELOCK);
       });
