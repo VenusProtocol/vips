@@ -30,9 +30,7 @@ export const REWARD_DISTRIBUTORS = [
 export const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 export const COMPTROLLER_BEACON = "0xAE2C3F21896c02510aA187BdA0791cDA77083708";
 export const VTOKEN_BEACON = "0xfc08aADC7a1A93857f6296C3fb78aBA1d286533a";
-export const ETHEREUM_ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const POOL_REGISTRY = "0x61CAff113CCaf05FFc6540302c37adcf077C5179";
-export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 
 export const COMPTROLLERS = [
   "0x687a01ecF6d3907658f7A7c714749fAC32336D1B",
@@ -193,11 +191,6 @@ const vip073 = () => {
     },
     {
       target: SFrxETHOracle,
-      signature: "transferOwnership(address)",
-      params: [ethereum.NORMAL_TIMELOCK],
-    },
-    {
-      target: ethereum.VTREASURY,
       signature: "transferOwnership(address)",
       params: [ethereum.NORMAL_TIMELOCK],
     },

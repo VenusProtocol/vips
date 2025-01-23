@@ -2,7 +2,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
-export const DEFAULT_PROXY_ADMIN = "0xe98a3110929c6650c73031756288Ec518f65e846";
+export const DEFAULT_PROXY_ADMIN_1 = "0xe98a3110929c6650c73031756288Ec518f65e846";
+export const DEFAULT_PROXY_ADMIN_2 = "0x01435866babd91311b1355cf3af488cca36db68e";
 export const CONVERTERS = [
   "0xCCB08e5107b406E67Ad8356023dd489CEbc79B40",
   "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2",
@@ -27,7 +28,6 @@ export const REWARD_DISTRIBUTORS = [
 export const PSR = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 export const COMPTROLLER_BEACON = "0x6cE54143a88CC22500D49D744fb6535D66a8294F";
 export const VTOKEN_BEACON = "0x0463a7E5221EAE1990cEddB51A5821a68cdA6008";
-export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const POOL_REGISTRY = "0x758f5715d817e02857Ba40889251201A5aE3E186";
 
 export const COMPTROLLERS = [
@@ -76,13 +76,17 @@ export const XVS = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
 export const BOUND_VALIDATOR = "0x60c4Aa92eEb6884a76b309Dd8B3731ad514d6f9B";
 export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
-export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const NTGs = ["0xb8fD67f215117FADeF06447Af31590309750529D", "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407"];
 
 const vip071 = () => {
   return makeProposal([
     {
-      target: DEFAULT_PROXY_ADMIN,
+      target: DEFAULT_PROXY_ADMIN_1,
+      signature: "transferOwnership(address)",
+      params: [sepolia.NORMAL_TIMELOCK],
+    },
+    {
+      target: DEFAULT_PROXY_ADMIN_2,
       signature: "transferOwnership(address)",
       params: [sepolia.NORMAL_TIMELOCK],
     },

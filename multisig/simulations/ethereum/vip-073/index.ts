@@ -50,7 +50,6 @@ forking(21523966, async () => {
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;
   let boundValidator: Contract;
-  let treasury: Contract;
   let sfrxETHOracle: Contract;
 
   describe("Pre-VIP behavior", async () => {
@@ -70,7 +69,6 @@ forking(21523966, async () => {
       chainLinkOracle = new ethers.Contract(CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
       redstoneOracle = new ethers.Contract(REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
-      treasury = await ethers.getContractAt(OWNERSHIP_ABI, NETWORK_ADDRESSES.ethereum.VTREASURY);
       sfrxETHOracle = new ethers.Contract(SFrxETHOracle, OWNERSHIP_ABI, provider);
     });
 
@@ -241,10 +239,6 @@ forking(21523966, async () => {
       expect(await chainLinkOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
       expect(await redstoneOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
       expect(await boundValidator.pendingOwner()).to.equal(NORMAL_TIMELOCK);
-    });
-    it("Should set pendingOwner to Normal Timelock", async () => {
-      const pendingOwner = await treasury.pendingOwner();
-      expect(pendingOwner).equals(NETWORK_ADDRESSES.ethereum.NORMAL_TIMELOCK);
     });
 
     for (const converter of CONVERTERS) {

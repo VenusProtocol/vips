@@ -32,7 +32,6 @@ forking(21523966, async () => {
   let resilientOracle: Contract;
   let boundValidator: Contract;
   let sfraxETH: Contract;
-  let treasury: Contract;
   let prime: Contract;
   let plp: Contract;
 
@@ -47,7 +46,6 @@ forking(21523966, async () => {
     resilientOracle = new ethers.Contract(ethereum.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
     boundValidator = new ethers.Contract(ETHEREUM_BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
     sfraxETH = new ethers.Contract(ETHEREUM_sFrxETH_ORACLE, OWNERSHIP_ABI, provider);
-    treasury = await ethers.getContractAt(OWNERSHIP_ABI, ethereum.VTREASURY);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
 
@@ -81,9 +79,6 @@ forking(21523966, async () => {
       expect(await redstoneOracle.owner()).equals(ethereum.NORMAL_TIMELOCK);
       expect(await boundValidator.owner()).equals(ethereum.NORMAL_TIMELOCK);
       expect(await sfraxETH.owner()).equals(ethereum.NORMAL_TIMELOCK);
-    });
-    it("Normal Timelock should be the owner of the Vtreasury", async () => {
-      expect(await treasury.owner()).equals(ethereum.NORMAL_TIMELOCK);
     });
     it("should have the correct pending owner", async () => {
       expect(await xvsVaultProxy.admin()).to.equal(ethereum.NORMAL_TIMELOCK);

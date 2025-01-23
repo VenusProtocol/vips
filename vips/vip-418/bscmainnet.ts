@@ -210,12 +210,6 @@ const vip418 = () => {
         params: [],
         dstChainId: LzChainId.arbitrumone,
       },
-      {
-        target: ethereum.VTREASURY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.ethereum,
-      },
       ...ETHEREUM_CONVERTERS.map(converter => {
         return {
           target: converter,

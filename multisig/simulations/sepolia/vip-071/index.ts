@@ -10,7 +10,8 @@ import vip071, {
   COMPTROLLER_BEACON,
   CONVERTERS,
   CONVERTER_NETWORK,
-  DEFAULT_PROXY_ADMIN,
+  DEFAULT_PROXY_ADMIN_1,
+  DEFAULT_PROXY_ADMIN_2,
   NTGs,
   PLP,
   PRIME,
@@ -35,7 +36,8 @@ const NORMAL_TIMELOCK = sepolia.NORMAL_TIMELOCK;
 
 forking(7393932, async () => {
   const provider = ethers.provider;
-  let proxyAdmin: Contract;
+  let proxyAdmin1: Contract;
+  let proxyAdmin2: Contract;
   let prime: Contract;
   let plp: Contract;
   let psr: Contract;
@@ -54,7 +56,8 @@ forking(7393932, async () => {
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
-      proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, OWNERSHIP_ABI, provider);
+      proxyAdmin1 = new ethers.Contract(DEFAULT_PROXY_ADMIN_1, OWNERSHIP_ABI, provider);
+      proxyAdmin2 = new ethers.Contract(DEFAULT_PROXY_ADMIN_2, OWNERSHIP_ABI, provider);
       prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
       plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
       psr = new ethers.Contract(PSR, OWNERSHIP_ABI, provider);
@@ -80,7 +83,8 @@ forking(7393932, async () => {
     }
 
     it("owner of proxy admin is guardian", async () => {
-      expect(await proxyAdmin.owner()).to.equal(sepolia.GUARDIAN);
+      expect(await proxyAdmin1.owner()).to.equal(sepolia.GUARDIAN);
+      expect(await proxyAdmin2.owner()).to.equal(sepolia.GUARDIAN);
     });
     it("pending owner", async () => {
       expect(await prime.pendingOwner()).to.equal(ethers.constants.AddressZero);
@@ -173,7 +177,8 @@ forking(7393932, async () => {
     }
 
     it("owner of proxy admin is timelock", async () => {
-      expect(await proxyAdmin.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      expect(await proxyAdmin1.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+      expect(await proxyAdmin2.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
     });
 
     it("pending owner", async () => {
