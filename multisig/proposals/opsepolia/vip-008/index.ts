@@ -23,7 +23,7 @@ export const VTOKENS = [
   "0x6149eFAd7671f496C900B3BeC16Ba31Aed60BE4b",
   "0x4E610626BeF901EEE22D558b2ed19e6f7B87cf51",
 ];
-
+export const REWARD_DISTRIBUTORS = ["0x24139Dad3fe87Ee718ff9c2A8E0C4188578ba9aF"];
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 export const NTGs = ["0x521f59b2670bcc70961FB2edD4F62c3f3B1E7f6b"];
@@ -122,6 +122,13 @@ const vip008 = () => {
     ...NTGs.map(ntg => {
       return {
         target: ntg,
+        signature: "transferOwnership(address)",
+        params: [opsepolia.NORMAL_TIMELOCK],
+      };
+    }),
+    ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
+      return {
+        target: rewardDistributor,
         signature: "transferOwnership(address)",
         params: [opsepolia.NORMAL_TIMELOCK],
       };

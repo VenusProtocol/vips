@@ -13,6 +13,7 @@ import vip008, {
   PLP,
   PRIME,
   PSR,
+  REWARD_DISTRIBUTORS,
   VTOKENS,
   VTOKEN_BEACON,
   XVS,
@@ -63,6 +64,13 @@ forking(22912174, async () => {
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
       treasury = await ethers.getContractAt(OWNERSHIP_ABI, NETWORK_ADDRESSES.opsepolia.VTREASURY);
     });
+
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`should have no pending owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
+        expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+      });
+    }
 
     for (const ntg of NTGs) {
       it(`should have no pending owner for ${ntg}`, async () => {

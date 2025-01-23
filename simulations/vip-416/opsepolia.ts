@@ -4,7 +4,14 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip021, { COMPTROLLERS, NTGs, PSR, VTOKENS, XVS_STORE } from "../../multisig/proposals/opsepolia/vip-008";
+import vip021, {
+  COMPTROLLERS,
+  NTGs,
+  PSR,
+  REWARD_DISTRIBUTORS,
+  VTOKENS,
+  XVS_STORE,
+} from "../../multisig/proposals/opsepolia/vip-008";
 import vip416, { OPSEPOLIA_BOUND_VALIDATOR, OPSEPOLIA_XVS_BRIDGE_ADMIN } from "../../vips/vip-416/bsctestnet";
 import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 
@@ -33,6 +40,13 @@ forking(22912174, async () => {
   testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip416());
 
   describe("Post-VIP behaviour", async () => {
+    for (const rewardDistributor of REWARD_DISTRIBUTORS) {
+      it(`correct owner for ${rewardDistributor}`, async () => {
+        const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);
+        expect(await c.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
+      });
+    }
+
     it(`correct owner for psr`, async () => {
       const psr = new ethers.Contract(PSR, OWNERSHIP_ABI, provider);
       expect(await psr.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
