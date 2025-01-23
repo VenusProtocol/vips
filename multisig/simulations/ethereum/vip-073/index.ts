@@ -33,7 +33,7 @@ const CHAINLINK_ORACLE = ethereum.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = ethereum.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = ethereum.NORMAL_TIMELOCK;
 
-forking(21523966, async () => {
+forking(21686396, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

@@ -27,7 +27,7 @@ const RESILIENT_ORACLE = zksyncsepolia.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = zksyncsepolia.CHAINLINK_ORACLE;
 const NORMAL_TIMELOCK = zksyncsepolia.NORMAL_TIMELOCK;
 
-forking(4477124, async () => {
+forking(4529969, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

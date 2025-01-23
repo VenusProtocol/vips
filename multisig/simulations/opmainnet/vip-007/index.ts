@@ -28,7 +28,7 @@ const CHAINLINK_ORACLE = opmainnet.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = opmainnet.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = opmainnet.NORMAL_TIMELOCK;
 
-forking(130683237, async () => {
+forking(131013820, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

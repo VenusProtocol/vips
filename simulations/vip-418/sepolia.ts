@@ -24,7 +24,7 @@ import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(7393932, async () => {
+forking(7553307, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;

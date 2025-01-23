@@ -21,13 +21,12 @@ import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(291641176, async () => {
+forking(298392727, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;
   let resilientOracle: Contract;
   let boundValidator: Contract;
-  let treasury: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
   let prime: Contract;
@@ -40,7 +39,6 @@ forking(291641176, async () => {
     redstoneOracle = new ethers.Contract(arbitrumone.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
     resilientOracle = new ethers.Contract(arbitrumone.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
     boundValidator = new ethers.Contract(ARBITRUM_ONE_BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
-    treasury = await ethers.getContractAt(OWNERSHIP_ABI, arbitrumone.VTREASURY);
     xvsBridgeAdmin = await ethers.getContractAt(OWNERSHIP_ABI, ARBITRUM_XVS_BRIDGE_ADMIN);
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
@@ -69,9 +67,6 @@ forking(291641176, async () => {
       expect(await chainLinkOracle.owner()).equals(arbitrumone.NORMAL_TIMELOCK);
       expect(await redstoneOracle.owner()).equals(arbitrumone.NORMAL_TIMELOCK);
       expect(await boundValidator.owner()).equals(arbitrumone.NORMAL_TIMELOCK);
-    });
-    it("Normal Timelock should be the owner of the Vtreasury", async () => {
-      expect(await treasury.owner()).equals(arbitrumone.NORMAL_TIMELOCK);
     });
     it("should have the correct pending owner", async () => {
       expect(await xvsVaultProxy.admin()).to.equal(arbitrumone.NORMAL_TIMELOCK);

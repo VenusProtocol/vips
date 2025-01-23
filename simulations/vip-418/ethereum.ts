@@ -23,7 +23,7 @@ import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const { ethereum } = NETWORK_ADDRESSES;
 
-forking(21523966, async () => {
+forking(21686396, async () => {
   const provider = ethers.provider;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;

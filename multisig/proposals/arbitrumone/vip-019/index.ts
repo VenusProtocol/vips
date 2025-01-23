@@ -164,11 +164,6 @@ const vip019 = () => {
       signature: "transferOwnership(address)",
       params: [arbitrumone.NORMAL_TIMELOCK],
     },
-    {
-      target: arbitrumone.VTREASURY,
-      signature: "transferOwnership(address)",
-      params: [arbitrumone.NORMAL_TIMELOCK],
-    },
     ...NTGs.map(ntg => {
       return {
         target: ntg,

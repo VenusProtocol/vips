@@ -19,7 +19,7 @@ import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 const XVS_BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
-forking(53755793, async () => {
+forking(54359116, async () => {
   const provider = ethers.provider;
   let chainLinkOracle: Contract;
   let redstoneOracle: Contract;

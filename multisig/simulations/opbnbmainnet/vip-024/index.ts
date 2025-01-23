@@ -24,7 +24,7 @@ const { opbnbmainnet } = NETWORK_ADDRESSES;
 const RESILIENT_ORACLE = opbnbmainnet.RESILIENT_ORACLE;
 const NORMAL_TIMELOCK = opbnbmainnet.NORMAL_TIMELOCK;
 
-forking(43912806, async () => {
+forking(45875653, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let psr: Contract;

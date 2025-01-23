@@ -34,7 +34,7 @@ const CHAINLINK_ORACLE = sepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = sepolia.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = sepolia.NORMAL_TIMELOCK;
 
-forking(7393932, async () => {
+forking(7553307, async () => {
   const provider = ethers.provider;
   let proxyAdmin1: Contract;
   let proxyAdmin2: Contract;

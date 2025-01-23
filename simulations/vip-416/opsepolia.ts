@@ -11,7 +11,7 @@ import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
 const XVS_BRIDGE = "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1";
 const { opsepolia } = NETWORK_ADDRESSES;
 
-forking(22583622, async () => {
+forking(22912174, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let boundValidator: Contract;

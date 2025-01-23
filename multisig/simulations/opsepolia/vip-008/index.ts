@@ -27,7 +27,7 @@ const RESILIENT_ORACLE = opsepolia.RESILIENT_ORACLE;
 const CHAINLINK_ORACLE = opsepolia.CHAINLINK_ORACLE;
 const NORMAL_TIMELOCK = opsepolia.NORMAL_TIMELOCK;
 
-forking(22581612, async () => {
+forking(22912174, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;

@@ -35,7 +35,7 @@ const CHAINLINK_ORACLE = arbitrumsepolia.CHAINLINK_ORACLE;
 const REDSTONE_ORACLE = arbitrumsepolia.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = arbitrumsepolia.NORMAL_TIMELOCK;
 
-forking(115192126, async () => {
+forking(117063164, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;
