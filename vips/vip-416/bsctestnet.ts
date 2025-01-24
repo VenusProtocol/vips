@@ -15,9 +15,6 @@ import { NTGs as OPSEPOLIA_NTGs } from "../../multisig/proposals/opsepolia/vip-0
 import { PSR as OPSEPOLIA_PSR } from "../../multisig/proposals/opsepolia/vip-008";
 import { REWARD_DISTRIBUTORS as OPSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/opsepolia/vip-008";
 
-export const OPSEPOLIA_ACM = "0x1652E12C8ABE2f0D84466F0fc1fA4286491B3BC1";
-export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
-
 export const OPSEPOLIA_XVS_STORE = "0xE888FA54b32BfaD3cE0e3C7D566EFe809a6A0143";
 export const OPBNBTESTNET_XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
 
