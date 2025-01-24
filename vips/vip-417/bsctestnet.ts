@@ -7,7 +7,7 @@ import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip
 const vip417 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-332 accept ownership & give permissions to Normal Timelock",
+    title: "Accept ownership/admin of contracts on sepolia and arbitrum sepolia",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",

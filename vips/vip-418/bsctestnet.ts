@@ -51,7 +51,7 @@ const { arbitrumsepolia, sepolia, zksyncsepolia } = NETWORK_ADDRESSES;
 const vip418 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-332 accept ownership & give permissions to Normal Timelock",
+    title: "Accept ownership/admin of contracts on sepolia, zksync testnet and arbitrum sepolia",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",

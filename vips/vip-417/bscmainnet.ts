@@ -9,7 +9,7 @@ import { VTOKENS as ETHEREUM_VTOKENS } from "../../multisig/proposals/ethereum/v
 const vip417 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-417",
+    title: "Accept ownership/admin of contracts on ethereum and arbitrum one",
     description: `### Description`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
