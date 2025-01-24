@@ -9,6 +9,7 @@ import vip060, {
   CONVERTER_NETWORK,
   NTGs,
   PLP,
+  POOL_REGISTRY,
   PRIME,
   PSR,
   REWARD_DISTRIBUTORS,
@@ -33,6 +34,7 @@ forking(7553307, async () => {
   let sfraxETH: Contract;
   let prime: Contract;
   let plp: Contract;
+  let poolRegistry: Contract;
 
   const xvsVaultProxy = new ethers.Contract(sepolia.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
@@ -45,6 +47,7 @@ forking(7553307, async () => {
     sfraxETH = new ethers.Contract(SEPOLIA_sFrxETH_ORACLE, OWNERSHIP_ABI, provider);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
+    poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
     await pretendExecutingVip(await vip060());
   });
 
@@ -56,6 +59,10 @@ forking(7553307, async () => {
     before(async () => {
       xvsBridgeAdmin = await ethers.getContractAt(OWNERSHIP_ABI, SEPOLIA_XVS_BRIDGE_ADMIN);
       xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
+    });
+
+    it("correct owner for pool registry", async () => {
+      expect(await poolRegistry.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
     });
 
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {

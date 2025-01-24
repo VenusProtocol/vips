@@ -7,6 +7,9 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip021, {
   COMPTROLLERS,
   NTGs,
+  PLP,
+  POOL_REGISTRY,
+  PRIME,
   PSR,
   REWARD_DISTRIBUTORS,
   VTOKENS,
@@ -25,6 +28,10 @@ forking(22912174, async () => {
   let treasury: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
+  let poolRegistry: Contract;
+  let prime: Contract;
+  let plp: Contract;
+  let chainLinkOracle: Contract;
   const xvsVaultProxy = new ethers.Contract(opsepolia.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
 
@@ -34,12 +41,32 @@ forking(22912174, async () => {
     xvsBridgeAdmin = await ethers.getContractAt(OWNERSHIP_ABI, OPSEPOLIA_XVS_BRIDGE_ADMIN);
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
     treasury = await ethers.getContractAt(OWNERSHIP_ABI, opsepolia.VTREASURY);
+    poolRegistry = await ethers.getContractAt(OWNERSHIP_ABI, POOL_REGISTRY);
+    prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
+    plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
+    chainLinkOracle = new ethers.Contract(opsepolia.CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
     await pretendExecutingVip(await vip021());
   });
 
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip416());
 
   describe("Post-VIP behaviour", async () => {
+    it("correct owner for pool registry", async () => {
+      expect(await poolRegistry.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("correct owner for prime", async () => {
+      expect(await prime.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("correct owner for plp", async () => {
+      expect(await plp.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
+    });
+
+    it("correct owner for chainlink oracle", async () => {
+      expect(await chainLinkOracle.owner()).to.equal(opsepolia.NORMAL_TIMELOCK);
+    });
+
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
       it(`correct owner for ${rewardDistributor}`, async () => {
         const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);

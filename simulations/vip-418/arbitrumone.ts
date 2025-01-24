@@ -10,6 +10,7 @@ import vip014, {
   CONVERTER_NETWORK,
   NTGs,
   PLP,
+  POOL_REGISTRY,
   PRIME,
   PSR,
   VTOKENS,
@@ -31,6 +32,7 @@ forking(298392727, async () => {
   let xvsBridge: Contract;
   let prime: Contract;
   let plp: Contract;
+  let poolRegistry: Contract;
 
   const xvsVaultProxy = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
@@ -43,6 +45,7 @@ forking(298392727, async () => {
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
+    poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
 
     await pretendExecutingVip(await vip014());
   });
@@ -50,6 +53,10 @@ forking(298392727, async () => {
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
 
   describe("Post-VIP behaviour", async () => {
+    it("correct owner for pool registry", async () => {
+      expect(await poolRegistry.owner()).to.equal(arbitrumone.NORMAL_TIMELOCK);
+    });
+
     for (const converter of CONVERTERS) {
       it(`owner for ${converter}`, async () => {
         const c = new ethers.Contract(converter, OWNERSHIP_ABI, provider);

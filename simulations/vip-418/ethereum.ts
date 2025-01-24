@@ -9,6 +9,7 @@ import vip061, {
   CONVERTER_NETWORK,
   NTGs,
   PLP,
+  POOL_REGISTRY,
   PRIME,
   PSR,
   XVS_STORE,
@@ -34,6 +35,7 @@ forking(21686396, async () => {
   let sfraxETH: Contract;
   let prime: Contract;
   let plp: Contract;
+  let poolRegistry: Contract;
 
   const xvsVaultProxy = new ethers.Contract(ethereum.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
@@ -48,6 +50,7 @@ forking(21686396, async () => {
     sfraxETH = new ethers.Contract(ETHEREUM_sFrxETH_ORACLE, OWNERSHIP_ABI, provider);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
+    poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
 
     await pretendExecutingVip(await vip061());
   });
@@ -55,6 +58,10 @@ forking(21686396, async () => {
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
 
   describe("Post-VIP behaviour", async () => {
+    it("correct owner for pool registry", async () => {
+      expect(await poolRegistry.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+    });
+
     it(`correct owner for psr`, async () => {
       const psr = new ethers.Contract(PSR, OWNERSHIP_ABI, provider);
       expect(await psr.owner()).to.equal(ethereum.NORMAL_TIMELOCK);

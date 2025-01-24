@@ -23,7 +23,6 @@ export const VTOKENS = [
   "0x66d5AE25731Ce99D46770745385e662C8e0B4025",
 ];
 
-
 export const NTGs = ["0x5B1b7465cfDE450e267b562792b434277434413c"];
 
 const vip007 = () => {

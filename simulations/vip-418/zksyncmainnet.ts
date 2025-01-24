@@ -8,11 +8,12 @@ import vip014, {
   COMPTROLLERS,
   NTGs,
   PLP,
+  POOL_REGISTRY,
   PRIME,
   PSR,
+  REWARD_DISTRIBUTORS,
   VTOKENS,
   XVS_STORE,
-  REWARD_DISTRIBUTORS
 } from "../../multisig/proposals/zksyncmainnet/vip-017";
 import vip418, { ZKSYNCMAINNET_BOUND_VALIDATOR, ZKSYNCMAINNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bscmainnet";
 import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
@@ -31,6 +32,7 @@ forking(54359116, async () => {
   let xvsBridge: Contract;
   let prime: Contract;
   let plp: Contract;
+  let poolRegistry: Contract;
 
   const xvsVaultProxy = new ethers.Contract(zksyncmainnet.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
@@ -44,6 +46,7 @@ forking(54359116, async () => {
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
+    poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
 
     await pretendExecutingVip(await vip014());
   });
@@ -51,6 +54,10 @@ forking(54359116, async () => {
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
 
   describe("Post-VIP behaviour", async () => {
+    it("check owner of pool registry", async () => {
+      expect(await poolRegistry.owner()).to.equal(zksyncmainnet.NORMAL_TIMELOCK);
+    });
+
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
       it(`correct owner for ${rewardDistributor}`, async () => {
         const c = new ethers.Contract(rewardDistributor, OWNERSHIP_ABI, provider);

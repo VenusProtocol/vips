@@ -13,12 +13,12 @@ import vip017, {
   PLP,
   PRIME,
   PSR,
+  REWARD_DISTRIBUTORS,
   VTOKENS,
   VTOKEN_BEACON,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-  REWARD_DISTRIBUTORS
 } from "../../../proposals/zksyncsepolia/vip-017";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
 

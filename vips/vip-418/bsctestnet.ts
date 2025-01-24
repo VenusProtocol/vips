@@ -29,7 +29,6 @@ import { NTGs as ZKSYNCSEPOLIA_NTGs } from "../../multisig/proposals/zksyncsepol
 import { PSR as ZKSYNCSEPOLIA_PSR } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import { REWARD_DISTRIBUTORS as ZKSYNCSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/zksyncsepolia/vip-017";
 
-
 export const ARBITRUM_SEPOLIA_XVS_STORE = "0x4e909DA6693215dC630104715c035B159dDb67Dd";
 export const SEPOLIA_XVS_STORE = "0x03B868C7858F50900fecE4eBc851199e957b5d3D";
 export const ZKSYNCSEPOLIA_XVS_STORE = "0xf0DaEFE5f5df4170426F88757EcdF45430332d88";
