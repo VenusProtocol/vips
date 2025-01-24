@@ -17,7 +17,7 @@ forking(7553307, async () => {
     await pretendExecutingVip(await vip060());
   });
 
-  testForkedNetworkVipCommands("vip350", await vip417());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip417());
 
   describe("Post-VIP behavior", async () => {
     for (const comptrollerAddress of COMPTROLLERS) {

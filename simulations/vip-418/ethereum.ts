@@ -52,7 +52,7 @@ forking(21686396, async () => {
     await pretendExecutingVip(await vip061());
   });
 
-  testForkedNetworkVipCommands("vip418", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
 
   describe("Post-VIP behaviour", async () => {
     it(`correct owner for psr`, async () => {

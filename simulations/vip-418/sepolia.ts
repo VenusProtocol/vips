@@ -48,7 +48,7 @@ forking(7553307, async () => {
     await pretendExecutingVip(await vip060());
   });
 
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
 
   describe("Post-VIP behaviour", async () => {
     let xvsBridgeAdmin: Contract;

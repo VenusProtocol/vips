@@ -4,7 +4,7 @@ import vip417 from "../../vips/vip-417/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(46981374, async () => {
-  testVip("vip417 XVS vault permission proposal", await vip417(), {
+  testVip("Accept ownerships/admins", await vip417(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

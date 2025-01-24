@@ -37,7 +37,7 @@ forking(22912174, async () => {
     await pretendExecutingVip(await vip021());
   });
 
-  testForkedNetworkVipCommands("vip333 XVS Bridge permissions", await vip416());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip416());
 
   describe("Post-VIP behaviour", async () => {
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
