@@ -26,6 +26,10 @@ export const BaseAssets = [
 ];
 const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 
+export const REFUND_ADDRESS = "0xe1f7c5209938780625E354dc546E28397F6Ce174";
+export const REFUND_AMOUNT = parseUnits("10000", 18);
+export const REFUND_TOKEN = "0x7C11F78Ce78768518D743E81Fdfa2F860C6b9A77"
+
 type Token = {
   address: string;
   decimals: number;
@@ -228,6 +232,12 @@ const vip434 = (overrides: { chainlinkStalePeriod?: number }) => {
         params: [[
           market.vToken.address,
         ], [2], true],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryToken(address,uint256,address)",
+        params: [REFUND_TOKEN, REFUND_AMOUNT, REFUND_ADDRESS],
         dstChainId: LzChainId.arbitrumone,
       },
     ],

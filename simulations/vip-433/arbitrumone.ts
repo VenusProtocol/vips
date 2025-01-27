@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip433, { COMPTROLLER_CORE, market, token } from "../../vips/vip-433/bscmainnet";
+import vip433, { COMPTROLLER_CORE, market, token, REFUND_ADDRESS, REFUND_AMOUNT, REFUND_TOKEN } from "../../vips/vip-433/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -27,6 +27,9 @@ forking(299538054, async () => {
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const refundToken = new ethers.Contract(REFUND_TOKEN, ERC20_ABI, provider);
+
+  const balanceBefore = await refundToken.balanceOf(REFUND_ADDRESS);
 
   describe("vTokens deployment", () => {
     it(`should deploy market`, async () => {
@@ -97,6 +100,11 @@ forking(299538054, async () => {
         BLOCKS_PER_YEAR,
       );
     });
+
+    it(`should refund ${REFUND_AMOUNT} GM to the refund address`, async () => {
+      const balanceAfter = await refundToken.balanceOf(REFUND_ADDRESS);
+      expect(balanceAfter.sub(balanceBefore)).to.eq(REFUND_AMOUNT);
+    }); 
 
     checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: gmWETH_HOLDER });
   });
