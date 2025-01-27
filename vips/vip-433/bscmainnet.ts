@@ -28,19 +28,19 @@ const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 
 export const REFUND_ADDRESS = "0xe1f7c5209938780625E354dc546E28397F6Ce174";
 export const REFUND_AMOUNT = parseUnits("11000", 18);
-export const REFUND_TOKEN = "0x450bb6774Dd8a756274E0ab4107953259d2ac541"
+export const REFUND_TOKEN = "0x450bb6774Dd8a756274E0ab4107953259d2ac541";
 
 type Token = {
   address: string;
   decimals: number;
   symbol: string;
-}
+};
 
 export const token = {
   address: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
   decimals: 18,
   symbol: "GM",
-}
+};
 
 type Market = {
   vToken: {
@@ -73,37 +73,36 @@ type Market = {
   };
 };
 
-export const market: Market = 
-  {
-    vToken: {
-      address: "0x9bb8cEc9C0d46F53b4f2173BB2A0221F66c353cC",
-      name: "Venus gmWETH-USDC (Core)",
-      symbol: "vgmWETH-USDC_Core",
-      underlying: token,
-      decimals: 8,
-      exchangeRate: parseUnits("1", 28),
-      comptroller: COMPTROLLER_CORE,
-    },
-    riskParameters: {
-      collateralFactor: parseUnits("0.55", 18),
-      liquidationThreshold: parseUnits("0.6", 18),
-      supplyCap: parseUnits("2000000", 18),
-      borrowCap: parseUnits("0", 18),
-      reserveFactor: parseUnits("0.25", 18),
-      protocolSeizeShare: parseUnits("0.05", 18),
-    },
-    initialSupply: {
-      amount: parseUnits("6000", 18),
-      vTokenReceiver: "0xe1f7c5209938780625E354dc546E28397F6Ce174",
-    },
-    interestRateModel: {
-      address: "0x425dde630be832195619a06175ba45C827Dd3DCa",
-      base: "0",
-      multiplier: "0.03",
-      jump: "4.5",
-      kink: "0.9",
-    },
-  };
+export const market: Market = {
+  vToken: {
+    address: "0x9bb8cEc9C0d46F53b4f2173BB2A0221F66c353cC",
+    name: "Venus gmWETH-USDC (Core)",
+    symbol: "vgmWETH-USDC_Core",
+    underlying: token,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.55", 18),
+    liquidationThreshold: parseUnits("0.6", 18),
+    supplyCap: parseUnits("2000000", 18),
+    borrowCap: parseUnits("0", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("6000", 18),
+    vTokenReceiver: "0xe1f7c5209938780625E354dc546E28397F6Ce174",
+  },
+  interestRateModel: {
+    address: "0x425dde630be832195619a06175ba45C827Dd3DCa",
+    base: "0",
+    multiplier: "0.03",
+    jump: "4.5",
+    kink: "0.9",
+  },
+};
 
 const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
@@ -122,9 +121,7 @@ const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [
-            [token.address, gmWETH_CHAINLINK_FEED, chainlinkStalePeriod],
-        ],
+        params: [[token.address, gmWETH_CHAINLINK_FEED, chainlinkStalePeriod]],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -225,9 +222,7 @@ const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
       {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[
-          market.vToken.address,
-        ], [2], true],
+        params: [[market.vToken.address], [2], true],
         dstChainId: LzChainId.arbitrumone,
       },
       {

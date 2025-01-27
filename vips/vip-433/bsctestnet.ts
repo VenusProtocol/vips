@@ -5,8 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { POOL_REGISTRY, VTREASURY, NORMAL_TIMELOCK, CHAINLINK_ORACLE, RESILIENT_ORACLE } =
-  NETWORK_ADDRESSES["arbitrumsepolia"];
+const { POOL_REGISTRY, VTREASURY, CHAINLINK_ORACLE, RESILIENT_ORACLE } = NETWORK_ADDRESSES["arbitrumsepolia"];
 
 export const COMPTROLLER_CORE = "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208";
 
@@ -28,13 +27,13 @@ type Token = {
   address: string;
   decimals: number;
   symbol: string;
-}
+};
 
 export const token = {
   address: "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3",
   decimals: 18,
   symbol: "gmETH",
-}
+};
 
 type Market = {
   vToken: {
@@ -67,40 +66,38 @@ type Market = {
   };
 };
 
-export const market: Market = 
-  {
-    vToken: {
-      address: "0x4A80b19Cd8BbBd14c425fB17F8E06c6B60801d63",
-      name: "Venus gmWETH-USDC (Core)",
-      symbol: "vgmWETH-USDC_Core",
-      underlying: token,
-      decimals: 8,
-      exchangeRate: parseUnits("1", 28),
-      comptroller: COMPTROLLER_CORE,
-    },
-    riskParameters: {
-      collateralFactor: parseUnits("0.55", 18),
-      liquidationThreshold: parseUnits("0.6", 18),
-      supplyCap: parseUnits("2000000", 18),
-      borrowCap: parseUnits("0", 18),
-      reserveFactor: parseUnits("0.25", 18),
-      protocolSeizeShare: parseUnits("0.05", 18),
-    },
-    initialSupply: {
-      amount: parseUnits("6000", 18),
-      vTokenReceiver: VTREASURY,
-    },
-    interestRateModel: {
-      address: "0x4FA37fFA9f36Ec0e0e685C06a7bF169bb50409ce",
-      base: "0",
-      multiplier: "0.03",
-      jump: "4.5",
-      kink: "0.9",
-    },
-  };
+export const market: Market = {
+  vToken: {
+    address: "0x4A80b19Cd8BbBd14c425fB17F8E06c6B60801d63",
+    name: "Venus gmWETH-USDC (Core)",
+    symbol: "vgmWETH-USDC_Core",
+    underlying: token,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.55", 18),
+    liquidationThreshold: parseUnits("0.6", 18),
+    supplyCap: parseUnits("2000000", 18),
+    borrowCap: parseUnits("0", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("6000", 18),
+    vTokenReceiver: VTREASURY,
+  },
+  interestRateModel: {
+    address: "0x4FA37fFA9f36Ec0e0e685C06a7bF169bb50409ce",
+    base: "0",
+    multiplier: "0.03",
+    jump: "4.5",
+    kink: "0.9",
+  },
+};
 
-  export const FIXED_PRICE = parseUnits("1.75254694", 18);
-
+export const FIXED_PRICE = parseUnits("1.75254694", 18);
 
 const vip433 = () => {
   const meta = {
@@ -117,9 +114,7 @@ const vip433 = () => {
       {
         target: CHAINLINK_ORACLE,
         signature: "setDirectPrice(address,uint256)",
-        params: [
-          token.address, FIXED_PRICE
-        ],
+        params: [token.address, FIXED_PRICE],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -220,9 +215,7 @@ const vip433 = () => {
       {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[
-          market.vToken.address,
-        ], [2], true],
+        params: [[market.vToken.address], [2], true],
         dstChainId: LzChainId.arbitrumsepolia,
       },
     ],

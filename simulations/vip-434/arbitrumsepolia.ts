@@ -17,7 +17,6 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
-const ONE_YEAR = 3600 * 24 * 365;
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["arbitrumsepolia"];
 
@@ -50,14 +49,16 @@ forking(118404892, async () => {
       });
 
       it(`should register ${market.vToken.symbol} in PoolRegistry`, async () => {
-        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER_CORE, market.vToken.underlying.address);
+        const registeredVToken = await poolRegistry.getVTokenForAsset(
+          COMPTROLLER_CORE,
+          market.vToken.underlying.address,
+        );
         expect(registeredVToken).to.equal(market.vToken.address);
       });
     });
 
     describe("Risk parameters", () => {
-      checkRiskParameters(market.vToken.address, 
-        market.vToken, market.riskParameters);
+      checkRiskParameters(market.vToken.address, market.vToken, market.riskParameters);
     });
 
     describe("Ownership and initial supply", () => {

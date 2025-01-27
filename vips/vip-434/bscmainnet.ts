@@ -28,19 +28,19 @@ const CONVERSION_INCENTIVE = parseUnits("0.0001", 18);
 
 export const REFUND_ADDRESS = "0xe1f7c5209938780625E354dc546E28397F6Ce174";
 export const REFUND_AMOUNT = parseUnits("10000", 18);
-export const REFUND_TOKEN = "0x7C11F78Ce78768518D743E81Fdfa2F860C6b9A77"
+export const REFUND_TOKEN = "0x7C11F78Ce78768518D743E81Fdfa2F860C6b9A77";
 
 type Token = {
   address: string;
   decimals: number;
   symbol: string;
-}
+};
 
 export const token = {
   address: "0x47c031236e19d024b42f8AE6780E44A573170703",
   decimals: 18,
   symbol: "GM",
-}
+};
 
 type Market = {
   vToken: {
@@ -73,8 +73,7 @@ type Market = {
   };
 };
 
-export const market: Market = 
-{
+export const market: Market = {
   vToken: {
     address: "0x4f3a73f318C5EA67A86eaaCE24309F29f89900dF",
     name: "Venus gmBTC-USDC (Core)",
@@ -105,10 +104,6 @@ export const market: Market =
   },
 };
 
-
-
-
-
 const vip434 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
@@ -126,9 +121,7 @@ const vip434 = (overrides: { chainlinkStalePeriod?: number }) => {
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [
-            [token.address, gmBTC_CHAINLINK_FEED, chainlinkStalePeriod],
-        ],
+        params: [[token.address, gmBTC_CHAINLINK_FEED, chainlinkStalePeriod]],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -229,9 +222,7 @@ const vip434 = (overrides: { chainlinkStalePeriod?: number }) => {
       {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[
-          market.vToken.address,
-        ], [2], true],
+        params: [[market.vToken.address], [2], true],
         dstChainId: LzChainId.arbitrumone,
       },
       {

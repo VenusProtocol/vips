@@ -10,7 +10,14 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip433, { COMPTROLLER_CORE, market, token, REFUND_ADDRESS, REFUND_AMOUNT, REFUND_TOKEN } from "../../vips/vip-433/bscmainnet";
+import vip433, {
+  COMPTROLLER_CORE,
+  REFUND_ADDRESS,
+  REFUND_AMOUNT,
+  REFUND_TOKEN,
+  market,
+  token,
+} from "../../vips/vip-433/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -54,14 +61,16 @@ forking(299538054, async () => {
       });
 
       it(`should register ${market.vToken.symbol} in PoolRegistry`, async () => {
-        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER_CORE, market.vToken.underlying.address);
+        const registeredVToken = await poolRegistry.getVTokenForAsset(
+          COMPTROLLER_CORE,
+          market.vToken.underlying.address,
+        );
         expect(registeredVToken).to.equal(market.vToken.address);
       });
     });
 
     describe("Risk parameters", () => {
-      checkRiskParameters(market.vToken.address, 
-        market.vToken, market.riskParameters);
+      checkRiskParameters(market.vToken.address, market.vToken, market.riskParameters);
     });
 
     describe("Ownership and initial supply", () => {
@@ -104,7 +113,7 @@ forking(299538054, async () => {
     it(`should refund ${REFUND_AMOUNT} GM to the refund address`, async () => {
       const balanceAfter = await refundToken.balanceOf(REFUND_ADDRESS);
       expect(balanceAfter.sub(balanceBefore)).to.eq(REFUND_AMOUNT);
-    }); 
+    });
 
     checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: gmWETH_HOLDER });
   });
