@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
@@ -25,9 +26,8 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 const ONE_YEAR = 3600 * 24 * 365;
-const gmWETH_HOLDER = "0x7C8FeF8eA9b1fE46A7689bfb8149341C90431D38";
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["arbitrumone"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["arbitrumone"];
 
 forking(299538054, async () => {
   const provider = ethers.provider;
@@ -35,7 +35,6 @@ forking(299538054, async () => {
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   const refundToken = new ethers.Contract(REFUND_TOKEN, ERC20_ABI, provider);
-
   const balanceBefore = await refundToken.balanceOf(REFUND_ADDRESS);
 
   describe("vTokens deployment", () => {
@@ -47,6 +46,21 @@ forking(299538054, async () => {
   testForkedNetworkVipCommands("vip433", await vip433({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
+    before(async () => {
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0x5979D7b546E38E414F7E9822514be443A4800529",
+        "0xb523AE262D20A936BC152e6023996e46FDC2A95D",
+        NORMAL_TIMELOCK,
+      );
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe",
+        "0xE141425bc1594b8039De6390db1cDaf4397EA22b",
+        NORMAL_TIMELOCK,
+      );
+    });
+
     describe("Oracle configuration", async () => {
       it("has the correct gmWETH price", async () => {
         const price = await oracle.getPrice(token.address);
@@ -115,6 +129,6 @@ forking(299538054, async () => {
       expect(balanceAfter.sub(balanceBefore)).to.eq(REFUND_AMOUNT);
     });
 
-    checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: gmWETH_HOLDER });
+    checkIsolatedPoolsComptrollers();
   });
 });
