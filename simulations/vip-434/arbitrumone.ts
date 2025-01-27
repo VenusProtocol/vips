@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip433, { COMPTROLLER_CORE, market, token } from "../../vips/vip-433/bscmainnet";
+import vip434, { COMPTROLLER_CORE, market, token } from "../../vips/vip-434/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -18,7 +18,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 const ONE_YEAR = 3600 * 24 * 365;
-const gmWETH_HOLDER = "0x7C8FeF8eA9b1fE46A7689bfb8149341C90431D38";
+const gmBTC_HOLDER = "0x10Aa41Ed6463357B76F6C53e07473155b52838E0";
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["arbitrumone"];
 
@@ -34,13 +34,13 @@ forking(299538054, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip433", await vip433({ chainlinkStalePeriod: ONE_YEAR }));
+  testForkedNetworkVipCommands("vip434", await vip434({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
-      it("has the correct gmWETH price", async () => {
+      it("has the correct gmBTC price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("1.75254694", 18));
+        expect(price).to.be.eq(parseUnits("2.32639502", 18));
       });
     });
 
@@ -98,6 +98,6 @@ forking(299538054, async () => {
       );
     });
 
-    checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: gmWETH_HOLDER });
+    checkIsolatedPoolsComptrollers({ [COMPTROLLER_CORE]: gmBTC_HOLDER });
   });
 });

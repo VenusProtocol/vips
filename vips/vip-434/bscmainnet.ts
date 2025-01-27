@@ -10,7 +10,7 @@ const { POOL_REGISTRY, VTREASURY, NORMAL_TIMELOCK, CHAINLINK_ORACLE, RESILIENT_O
 
 export const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
 export const CHAINLINK_STALE_PERIOD = 26 * 60 * 60; // 26 hours
-export const gmWETH_CHAINLINK_FEED = "0xfB3264D1129824933a52374c2C1696F4470D041e";
+export const gmBTC_CHAINLINK_FEED = "0x395D5c5D552Df670dc4B2B1cef0c4EABfFba492f";
 
 export const USDT_PRIME_CONVERTER = "0x435Fac1B002d5D31f374E07c0177A1D709d5DC2D";
 export const USDC_PRIME_CONVERTER = "0x6553C9f9E131191d4fECb6F0E73bE13E229065C6";
@@ -33,7 +33,7 @@ type Token = {
 }
 
 export const token = {
-  address: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
+  address: "0x47c031236e19d024b42f8AE6780E44A573170703",
   decimals: 18,
   symbol: "GM",
 }
@@ -70,38 +70,42 @@ type Market = {
 };
 
 export const market: Market = 
-  {
-    vToken: {
-      address: "0x9bb8cEc9C0d46F53b4f2173BB2A0221F66c353cC",
-      name: "Venus gmWETH-USDC (Core)",
-      symbol: "vgmWETH-USDC_Core",
-      underlying: token,
-      decimals: 8,
-      exchangeRate: parseUnits("1", 28),
-      comptroller: COMPTROLLER_CORE,
-    },
-    riskParameters: {
-      collateralFactor: parseUnits("0.55", 18),
-      liquidationThreshold: parseUnits("0.6", 18),
-      supplyCap: parseUnits("2000000", 18),
-      borrowCap: parseUnits("0", 18),
-      reserveFactor: parseUnits("0.25", 18),
-      protocolSeizeShare: parseUnits("0.05", 18),
-    },
-    initialSupply: {
-      amount: parseUnits("6000", 18),
-      vTokenReceiver: "0xe1f7c5209938780625E354dc546E28397F6Ce174",
-    },
-    interestRateModel: {
-      address: "0x425dde630be832195619a06175ba45C827Dd3DCa",
-      base: "0",
-      multiplier: "0.03",
-      jump: "4.5",
-      kink: "0.9",
-    },
-  };
+{
+  vToken: {
+    address: "0x4f3a73f318C5EA67A86eaaCE24309F29f89900dF",
+    name: "Venus gmBTC-USDC (Core)",
+    symbol: "vgmBTC-USDC_Core",
+    underlying: token,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.55", 18),
+    liquidationThreshold: parseUnits("0.6", 18),
+    supplyCap: parseUnits("2650000", 18),
+    borrowCap: parseUnits("0", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("4800", 18),
+    vTokenReceiver: "0xe1f7c5209938780625E354dc546E28397F6Ce174",
+  },
+  interestRateModel: {
+    address: "0x390D1C248217615D79f74f2453D682906Bd2dD20",
+    base: "0",
+    multiplier: "0.15",
+    jump: "2.5",
+    kink: "0.45",
+  },
+};
 
-const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
+
+
+
+
+const vip434 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
     title: "VIP-433",
@@ -119,7 +123,7 @@ const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
         params: [
-            [token.address, gmWETH_CHAINLINK_FEED, chainlinkStalePeriod],
+            [token.address, gmBTC_CHAINLINK_FEED, chainlinkStalePeriod],
         ],
         dstChainId: LzChainId.arbitrumone,
       },
@@ -232,4 +236,4 @@ const vip433 = (overrides: { chainlinkStalePeriod?: number }) => {
   );
 };
 
-export default vip433;
+export default vip434;
