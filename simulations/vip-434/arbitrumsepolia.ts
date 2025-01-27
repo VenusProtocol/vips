@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip433, { COMPTROLLER_CORE, market, token } from "../../vips/vip-433/bsctestnet";
+import vip434, { COMPTROLLER_CORE, market, token } from "../../vips/vip-434/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -32,11 +32,11 @@ forking(118404892, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip433", await vip433());
+  testForkedNetworkVipCommands("vip434", await vip434());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
-      it("has the correct gmBTC price", async () => {
+      it("has the correct gmETH price", async () => {
         const price = await oracle.getPrice(token.address);
         expect(price).to.be.eq(parseUnits("1.75254694", 18));
       });

@@ -30,9 +30,9 @@ type Token = {
 };
 
 export const token = {
-  address: "0xbd3AAd064295dcA0f45fab4C6A5adFb0D23a19D2",
+  address: "0x0012875a7395a293Adfc9b5cDC2Cfa352C4cDcD3",
   decimals: 18,
-  symbol: "gmBTC",
+  symbol: "gmETH",
 };
 
 type Market = {
@@ -68,9 +68,9 @@ type Market = {
 
 export const market: Market = {
   vToken: {
-    address: "0x6089B1F477e13459C4d1D1f767c974e5A72a541F",
-    name: "Venus gmBTC-USDC (Core)",
-    symbol: "vgmBTC-USDC_Core",
+    address: "0x4A80b19Cd8BbBd14c425fB17F8E06c6B60801d63",
+    name: "Venus gmWETH-USDC (Core)",
+    symbol: "vgmWETH-USDC_Core",
     underlying: token,
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
@@ -79,30 +79,30 @@ export const market: Market = {
   riskParameters: {
     collateralFactor: parseUnits("0.55", 18),
     liquidationThreshold: parseUnits("0.6", 18),
-    supplyCap: parseUnits("2650000", 18),
+    supplyCap: parseUnits("2000000", 18),
     borrowCap: parseUnits("0", 18),
     reserveFactor: parseUnits("0.25", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("4800", 18),
+    amount: parseUnits("6000", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
-    address: "0xf5EA67C92EF40b948EF672DE5fb913237A880A9E",
+    address: "0x4FA37fFA9f36Ec0e0e685C06a7bF169bb50409ce",
     base: "0",
-    multiplier: "0.15",
-    jump: "2.5",
-    kink: "0.45",
+    multiplier: "0.03",
+    jump: "4.5",
+    kink: "0.9",
   },
 };
 
-export const FIXED_PRICE = parseUnits("2.32639502", 18);
+export const FIXED_PRICE = parseUnits("1.75254694", 18);
 
 const vip434 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-434",
+    title: "VIP-433",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",

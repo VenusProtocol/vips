@@ -35,7 +35,6 @@ forking(299538054, async () => {
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   const refundToken = new ethers.Contract(REFUND_TOKEN, ERC20_ABI, provider);
-
   const balanceBefore = await refundToken.balanceOf(REFUND_ADDRESS);
 
   describe("vTokens deployment", () => {
@@ -63,9 +62,9 @@ forking(299538054, async () => {
     });
 
     describe("Oracle configuration", async () => {
-      it("has the correct gmBTC price", async () => {
+      it("has the correct gmWETH price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("2.32639502", 18));
+        expect(price).to.be.eq(parseUnits("1.75254694", 18));
       });
     });
 

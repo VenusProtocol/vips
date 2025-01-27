@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
@@ -10,21 +11,32 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip433, { COMPTROLLER_CORE, market, token } from "../../vips/vip-433/bsctestnet";
+import vip436, {
+  COMPTROLLER_CORE,
+  REFUND_ADDRESS,
+  REFUND_AMOUNT,
+  REFUND_TOKEN,
+  market,
+  token,
+} from "../../vips/vip-436/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
+const ONE_YEAR = 3600 * 24 * 365;
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["arbitrumsepolia"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["arbitrumone"];
 
-forking(118404892, async () => {
+forking(299538054, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const refundToken = new ethers.Contract(REFUND_TOKEN, ERC20_ABI, provider);
+
+  const balanceBefore = await refundToken.balanceOf(REFUND_ADDRESS);
 
   describe("vTokens deployment", () => {
     it(`should deploy market`, async () => {
@@ -32,13 +44,28 @@ forking(118404892, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip433", await vip433());
+  testForkedNetworkVipCommands("vip436", await vip436({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
+    before(async () => {
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0x5979D7b546E38E414F7E9822514be443A4800529",
+        "0xb523AE262D20A936BC152e6023996e46FDC2A95D",
+        NORMAL_TIMELOCK,
+      );
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe",
+        "0xE141425bc1594b8039De6390db1cDaf4397EA22b",
+        NORMAL_TIMELOCK,
+      );
+    });
+
     describe("Oracle configuration", async () => {
-      it("has the correct gmETH price", async () => {
+      it("has the correct gmBTC price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("1.75254694", 18));
+        expect(price).to.be.eq(parseUnits("2.32639502", 18));
       });
     });
 
@@ -96,6 +123,11 @@ forking(118404892, async () => {
         market.interestRateModel,
         BLOCKS_PER_YEAR,
       );
+    });
+
+    it(`should refund ${REFUND_AMOUNT} GM to the refund address`, async () => {
+      const balanceAfter = await refundToken.balanceOf(REFUND_ADDRESS);
+      expect(balanceAfter.sub(balanceBefore)).to.eq(REFUND_AMOUNT);
     });
 
     checkIsolatedPoolsComptrollers();
