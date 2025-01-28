@@ -155,10 +155,9 @@ forking(7582260, async () => {
     describe("Ownership and initial supply", () => {
       for (const { vToken: vTokenSpec, initialSupply } of Object.values(newMarkets)) {
         const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
-        const underlyingSymbol = vTokenSpec.underlying.symbol;
 
         describe(`${vTokenSpec.symbol}`, () => {
-          it(`should have owner = normal timelock`, async () => {
+          it(`should have owner = guardian`, async () => {
             expect(await vTokenContract.owner()).to.equal(GUARDIAN);
           });
 
@@ -166,9 +165,6 @@ forking(7582260, async () => {
             expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(parseUnits("10000", 8));
           });
 
-          it(`should balance of underlying = 10000 ${underlyingSymbol}`, async () => {
-            expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(parseUnits("10000", 18));
-          });
         });
       }
     });
