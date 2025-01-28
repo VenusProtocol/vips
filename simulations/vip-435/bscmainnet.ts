@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setRedstonePrice } from "src/utils";
+import { expectEvents, setRedstonePrice } from "src/utils";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -12,12 +12,16 @@ import { forking, testVip } from "src/vip-framework/index";
 import vip435, {
   CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
+  THE_INCENTIVES,
   THE_REDSTONE_FEED,
+  VANGUARD_TREASURY,
   converterBaseAssets,
   marketSpec,
 } from "../../vips/vip-435/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 
@@ -26,12 +30,15 @@ const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 const { RESILIENT_ORACLE, REDSTONE_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
 forking(46136910, async () => {
+  let theVanguardTreasuryBalancePrev: BigNumber;
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const vToken = new ethers.Contract(marketSpec.vToken.address, VTOKEN_ABI, ethers.provider);
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
+  const the = new ethers.Contract(marketSpec.vToken.underlying.address, ERC20_ABI, ethers.provider);
 
   before(async () => {
     await setRedstonePrice(REDSTONE_ORACLE, marketSpec.vToken.underlying.address, THE_REDSTONE_FEED, NORMAL_TIMELOCK);
+    theVanguardTreasuryBalancePrev = await the.balanceOf(VANGUARD_TREASURY);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -45,7 +52,16 @@ forking(46136910, async () => {
     });
   });
 
-  testVip("THE market VIP", await vip435(), {});
+  testVip("THE market on BNB chain mainnet & gmBTC market on Arbitrum", await vip435({}), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
+      );
+    },
+  });
 
   describe("Post-VIP behavior", async () => {
     it("has the correct price", async () => {
@@ -95,6 +111,10 @@ forking(46136910, async () => {
           expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
         });
       }
+    });
+
+    it("incentives have been transferred to the Vanguard Treasury", async () => {
+      expect(await the.balanceOf(VANGUARD_TREASURY)).to.equal(theVanguardTreasuryBalancePrev.add(THE_INCENTIVES));
     });
   });
 });

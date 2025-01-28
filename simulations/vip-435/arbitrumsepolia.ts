@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip436, { COMPTROLLER_CORE, market, token } from "../../vips/vip-436/bsctestnet";
+import vip435Addendum, { COMPTROLLER_CORE, market, token } from "../../vips/vip-435/bsctestnet-addendum";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -32,7 +32,7 @@ forking(118404892, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip436", await vip436());
+  testForkedNetworkVipCommands("gmBTC market on Arbitrum Sepolia", await vip435Addendum());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

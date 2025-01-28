@@ -11,14 +11,15 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip436, {
+import {
   COMPTROLLER_CORE,
   REFUND_ADDRESS,
   REFUND_AMOUNT,
   REFUND_TOKEN,
   market,
   token,
-} from "../../vips/vip-436/bscmainnet";
+} from "../../vips/vip-435/arbitrumone-commands";
+import vip435 from "../../vips/vip-435/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -44,7 +45,7 @@ forking(299538054, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip436", await vip436({ chainlinkStalePeriod: ONE_YEAR }));
+  testForkedNetworkVipCommands("gmBTC market", await vip435({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     before(async () => {

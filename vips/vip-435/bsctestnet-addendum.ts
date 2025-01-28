@@ -99,10 +99,10 @@ export const market: Market = {
 
 export const FIXED_PRICE = parseUnits("2.32639502", 18);
 
-const vip436 = () => {
+const vip435Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-434",
+    title: "gmBTC market on Arbitrum Sepolia",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -224,4 +224,4 @@ const vip436 = () => {
   );
 };
 
-export default vip436;
+export default vip435Addendum;

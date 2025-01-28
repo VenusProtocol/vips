@@ -1,11 +1,11 @@
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip436 from "../../vips/vip-436/bsctestnet";
+import vip435Addendum from "../../vips/vip-435/bsctestnet-addendum";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(47754551, async () => {
-  testVip("VIP-436", await vip436(), {
+  testVip("gmBTC market on Arbitrum Sepolia", await vip435Addendum(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
