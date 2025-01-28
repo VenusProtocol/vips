@@ -55,8 +55,8 @@ type Market = {
 
 export const market: Market = {
   vToken: {
-    address: "0x5aFb0bDdB2cc7d79609AF4F4E1273d14c88c9cBC",
-    name: "Venus wsuperOETHb",
+    address: "0xF9d609ba31724E199ccaacaD3e3e7ED8462C20C5",
+    name: "Venus wsuperOETHb (Core)",
     symbol: "vwsuperOETHb_Core",
     underlying: token,
     decimals: 8,
@@ -83,8 +83,6 @@ export const market: Market = {
     kink: "0.45",
   },
 };
-
-export const FIXED_PRICE = parseUnits("1.75254694", 18);
 
 const vip433 = () => {
   const meta = {
