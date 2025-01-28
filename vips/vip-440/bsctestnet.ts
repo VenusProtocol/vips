@@ -125,7 +125,6 @@ const vip440 = () => {
         dstChainId: LzChainId.sepolia,
       },
 
-      // // VSUSDS market
       {
         target: vsUSDS,
         signature: "setReduceReservesBlockDelta(uint256)",
@@ -178,73 +177,77 @@ const vip440 = () => {
         params: [parseUnits("0.05", 18)],
         dstChainId: LzChainId.sepolia,
       },
-
       {
         target: COMPTROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[vsUSDS], [2], true],
         dstChainId: LzChainId.sepolia,
       },
+
       // set converters
       {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [USDS], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[0],
+          [USDS, sUSDS],
+          [
+            [CONVERSION_INCENTIVE, 1],
+            [CONVERSION_INCENTIVE, 1],
+          ],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [USDS], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[1],
+          [USDS, sUSDS],
+          [
+            [CONVERSION_INCENTIVE, 1],
+            [CONVERSION_INCENTIVE, 1],
+          ],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [USDS], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[2],
+          [USDS, sUSDS],
+          [
+            [CONVERSION_INCENTIVE, 1],
+            [CONVERSION_INCENTIVE, 1],
+          ],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [USDS], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[3],
+          [USDS, sUSDS],
+          [
+            [CONVERSION_INCENTIVE, 1],
+            [CONVERSION_INCENTIVE, 1],
+          ],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [USDS], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [sUSDS], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [sUSDS], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [sUSDS], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [sUSDS], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [sUSDS], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[4],
+          [USDS, sUSDS],
+          [
+            [CONVERSION_INCENTIVE, 1],
+            [CONVERSION_INCENTIVE, 1],
+          ],
+        ],
         dstChainId: LzChainId.sepolia,
       },
     ],
