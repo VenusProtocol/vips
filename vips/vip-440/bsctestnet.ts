@@ -165,7 +165,7 @@ const vip440 = () => {
 
       {
         target: COMPTROLLER,
-        signature: "setActionsPaused(address[],uint256[],bool)",
+        signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[vsUSDS], [2], true],
         dstChainId: LzChainId.sepolia,
       },
