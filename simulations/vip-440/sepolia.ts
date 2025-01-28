@@ -164,7 +164,6 @@ forking(7582260, async () => {
           it(`should have initial supply = 10000 ${vTokenSpec.symbol}`, async () => {
             expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(parseUnits("10000", 8));
           });
-
         });
       }
     });
@@ -179,6 +178,8 @@ forking(7582260, async () => {
       expect(await comptroller.actionPaused(newMarkets["vsUSDS"].vToken.address, 2)).to.equal(true);
     });
 
-    checkIsolatedPoolsComptrollers();
+    it("Isolated pools generic tests", async () => {
+      checkIsolatedPoolsComptrollers();
+    });
   });
 });

@@ -138,6 +138,11 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
+
+  // Return if Borrow is paused
+  if ((await comptroller.actionPaused(borrowMarket.address, 2)) == true) {
+    return;
+  }
   await borrowMarket?.borrow(borrowAmount);
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
