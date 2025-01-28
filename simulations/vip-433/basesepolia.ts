@@ -23,7 +23,7 @@ const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = N
 const WETH = "0x4200000000000000000000000000000000000006";
 const WETH_FEED = "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1";
 
-forking(21155281, async () => {
+forking(21158338, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -45,7 +45,7 @@ forking(21155281, async () => {
     describe("Oracle configuration", async () => {
       it(`has the correct ${token.symbol} price`, async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("3201.6", 18));
+        expect(price).to.be.eq(parseUnits("3177.92", 18));
       });
     });
 

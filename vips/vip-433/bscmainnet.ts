@@ -55,9 +55,9 @@ type Market = {
 
 export const market: Market = {
   vToken: {
-    address: "0x8Dcf936167fba65fA89719415D89Db33B8e46Ad3",
+    address: "0xbd1996209644E8FA6b473C3a1892Eb8D397ccbb6",
     name: "Venus wsuperOETHb",
-    symbol: "vwsuperOETHb",
+    symbol: "vwsuperOETHb_Core",
     underlying: token,
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
