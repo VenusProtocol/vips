@@ -9,10 +9,24 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip440, { COMPTROLLER, USDS, sUSDS, sUSDS_ERC4626_ORACLE, vUSDS, vsUSDS } from "../../vips/vip-440/bsctestnet";
+import vip440, {
+  COMPTROLLER,
+  CONVERSION_INCENTIVE,
+  USDC_PRIME_CONVERTER,
+  USDS,
+  USDT_PRIME_CONVERTER,
+  WBTC_PRIME_CONVERTER,
+  WETH_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
+  sUSDS,
+  sUSDS_ERC4626_ORACLE,
+  vUSDS,
+  vsUSDS,
+} from "../../vips/vip-440/bsctestnet";
 import ERC4626_ORACLE_ABI from "./abi/ERC4626Oracle.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -180,6 +194,29 @@ forking(7582260, async () => {
 
     it("Isolated pools generic tests", async () => {
       checkIsolatedPoolsComptrollers();
+    });
+
+    describe("Converters", () => {
+      const converterBaseAssets = {
+        [USDT_PRIME_CONVERTER]: "0x8d412FD0bc5d826615065B931171Eed10F5AF266",
+        [USDC_PRIME_CONVERTER]: "0x772d68929655ce7234C8C94256526ddA66Ef641E",
+        [WBTC_PRIME_CONVERTER]: "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b",
+        [WETH_PRIME_CONVERTER]: "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9",
+        [XVS_VAULT_CONVERTER]: "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E",
+      };
+
+      const assets = [USDS, sUSDS];
+
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+
+        for (const asset of assets) {
+          it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${asset}`, async () => {
+            const result = await converterContract.conversionConfigurations(baseAsset, asset);
+            expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+          });
+        }
+      }
     });
   });
 });
