@@ -141,7 +141,7 @@ Base sepolia
 #### References
 
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/471)
-- Deployment to Base Sepolia
+- [Deployment to Base Sepolia](https://sepolia.basescan.org/tx/0x94b4d6abc54f8dd2c999ce46be9e6822920f94fc44a9b0d95641fccc1afff7c0)
 - [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
