@@ -78,7 +78,7 @@ export const SFrxETHOracle = "0x61EB836afA467677e6b403D504fe69D6940e7996";
 
 export const NTGs = ["0xb8fD67f215117FADeF06447Af31590309750529D", "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407"];
 
-const vip071 = () => {
+const vip073 = () => {
   return makeProposal([
     {
       target: DEFAULT_PROXY_ADMIN_1,
@@ -213,4 +213,4 @@ const vip071 = () => {
   ]);
 };
 
-export default vip071;
+export default vip073;

@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip060, {
+import vip073, {
   CONVERTERS,
   CONVERTER_NETWORK,
   NTGs,
@@ -14,7 +14,7 @@ import vip060, {
   PSR,
   REWARD_DISTRIBUTORS,
   XVS_STORE,
-} from "../../multisig/proposals/sepolia/vip-071";
+} from "../../multisig/proposals/sepolia/vip-073";
 import vip418, {
   SEPOLIA_BOUND_VALIDATOR,
   SEPOLIA_XVS_BRIDGE_ADMIN,
@@ -48,7 +48,7 @@ forking(7553307, async () => {
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
     poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
-    await pretendExecutingVip(await vip060());
+    await pretendExecutingVip(await vip073());
   });
 
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());

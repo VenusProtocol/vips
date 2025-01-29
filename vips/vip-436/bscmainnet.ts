@@ -1,12 +1,12 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { REWARD_DISTRIBUTORS as ARBITRUMONE_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-019";
+import { REWARD_DISTRIBUTORS as ARBITRUMONE_REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-020";
 import { REWARD_DISTRIBUTORS as ETHEREUM_REWARD_DISTRIBUTORS } from "../../multisig/proposals/ethereum/vip-073";
 import { COMPTROLLERS as ETHEREUM_COMPTROLLERS } from "../../multisig/proposals/ethereum/vip-073";
 import { VTOKENS as ETHEREUM_VTOKENS } from "../../multisig/proposals/ethereum/vip-073";
 
-const vip417 = () => {
+const vip436 = () => {
   const meta = {
     version: "v2",
     title: "Accept ownership/admin of contracts on ethereum and arbitrum one",
@@ -55,4 +55,4 @@ const vip417 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip417;
+export default vip436;

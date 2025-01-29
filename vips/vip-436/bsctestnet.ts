@@ -1,10 +1,10 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/sepolia/vip-071";
-import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-071";
+import { COMPTROLLERS as SEPOLIA_COMPTROLLERS } from "../../multisig/proposals/sepolia/vip-073";
+import { VTOKENS as SEPOLIA_VTOKENS } from "../../multisig/proposals/sepolia/vip-073";
 
-const vip417 = () => {
+const vip436 = () => {
   const meta = {
     version: "v2",
     title: "Accept ownership/admin of contracts on sepolia and arbitrum sepolia",
@@ -36,4 +36,4 @@ const vip417 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip417;
+export default vip436;

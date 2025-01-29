@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip014, {
+import vip020, {
   COMPTROLLERS,
   NTGs,
   PLP,
@@ -14,7 +14,7 @@ import vip014, {
   REWARD_DISTRIBUTORS,
   VTOKENS,
   XVS_STORE,
-} from "../../multisig/proposals/zksyncmainnet/vip-017";
+} from "../../multisig/proposals/zksyncmainnet/vip-020";
 import vip418, { ZKSYNCMAINNET_BOUND_VALIDATOR, ZKSYNCMAINNET_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bscmainnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
@@ -48,7 +48,7 @@ forking(54359116, async () => {
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
     poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
 
-    await pretendExecutingVip(await vip014());
+    await pretendExecutingVip(await vip020());
   });
 
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());

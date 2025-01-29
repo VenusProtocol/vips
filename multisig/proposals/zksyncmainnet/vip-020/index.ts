@@ -27,7 +27,7 @@ export const REWARD_DISTRIBUTORS = ["0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894"
 
 export const NTGs = ["0xeEDE4e1BDaC489BD851970bE3952B729C4238A68"];
 
-const vip017 = () => {
+const vip020 = () => {
   return makeProposal([
     ...REWARD_DISTRIBUTORS.map(rewardDistributor => {
       return {
@@ -135,4 +135,4 @@ const vip017 = () => {
   ]);
 };
 
-export default vip017;
+export default vip020;

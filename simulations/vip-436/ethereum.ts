@@ -3,9 +3,9 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip061 from "../../multisig/proposals/ethereum/vip-073";
+import vip073 from "../../multisig/proposals/ethereum/vip-073";
 import { COMPTROLLERS, REWARD_DISTRIBUTORS, VTOKENS } from "../../multisig/proposals/ethereum/vip-073";
-import vip417 from "../../vips/vip-417/bscmainnet";
+import vip436 from "../../vips/vip-436/bscmainnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -14,10 +14,10 @@ forking(21686396, async () => {
   const provider = ethers.provider;
 
   before(async () => {
-    await pretendExecutingVip(await vip061());
+    await pretendExecutingVip(await vip073());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip417());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip436());
 
   describe("Post-VIP behavior", async () => {
     for (const rewardDistributor of REWARD_DISTRIBUTORS) {
