@@ -28,6 +28,7 @@ forking(21161397, async () => {
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const vTokenContract = new ethers.Contract(market.vToken.address, VTOKEN_ABI, provider);
 
   describe("vTokens deployment", () => {
     before(async () => {
@@ -66,11 +67,18 @@ forking(21161397, async () => {
 
     describe("Risk parameters", () => {
       checkRiskParameters(market.vToken.address, market.vToken, market.riskParameters);
+
+      it("should pause borrowing on wsuperOETHb", async () => {
+        expect(await comptroller.actionPaused(market.vToken.address, 2)).to.equal(true);
+      });
+
+      it(`should have a protocol seize share ${market.riskParameters.protocolSeizeShare}`, async () => {
+        expect(await vTokenContract.protocolSeizeShareMantissa()).to.equal(market.riskParameters.protocolSeizeShare);
+      });
     });
 
     describe("Ownership and initial supply", () => {
       const { vToken: vTokenSpec, initialSupply } = market;
-      const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
       const underlyingSymbol = token.symbol;
 
       describe(`${vTokenSpec.symbol}`, () => {
