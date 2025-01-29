@@ -84,10 +84,10 @@ export const market: Market = {
   },
 };
 
-const vip433 = () => {
+const vip437 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-433",
+    title: "VIP-437 [Base] New wsuperOETHb market in the Core pool",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -173,4 +173,4 @@ const vip433 = () => {
   );
 };
 
-export default vip433;
+export default vip437;
