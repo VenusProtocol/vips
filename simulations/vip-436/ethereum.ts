@@ -10,7 +10,7 @@ import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-forking(21686396, async () => {
+forking(21730719, async () => {
   const provider = ethers.provider;
 
   before(async () => {

@@ -10,7 +10,7 @@ import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(7553307, async () => {
+forking(7596074, async () => {
   const provider = ethers.provider;
 
   before(async () => {
