@@ -24,7 +24,7 @@ export const OPBNBMAINNET_BOUND_VALIDATOR = "0xd1f80C371C6E2Fa395A5574DB3E3b4dAf
 
 const { opmainnet, opbnbmainnet } = NETWORK_ADDRESSES;
 
-const vip418 = () => {
+const vip433 = () => {
   const meta = {
     version: "v2",
     title: "VIP-433 [Optimism][opBNB] Transfer contracts to Omnichain Governance",
@@ -303,4 +303,4 @@ We applied the following security procedures for this upgrade:
     ProposalType.REGULAR,
   );
 };
-export default vip418;
+export default vip433;

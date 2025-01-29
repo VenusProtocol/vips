@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip060 from "../../multisig/proposals/sepolia/vip-071";
 import { COMPTROLLERS, VTOKENS } from "../../multisig/proposals/sepolia/vip-071";
 import vip417 from "../../vips/vip-417/bsctestnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 

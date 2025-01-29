@@ -16,7 +16,7 @@ import vip014, {
   XVS_STORE,
 } from "../../multisig/proposals/zksyncsepolia/vip-017";
 import vip418, { ZKSYNCSEPOLIA_BOUND_VALIDATOR, ZKSYNCSEPOLIA_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bsctestnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0x760461ccB2508CAAa2ECe0c28af3a4707b853043";
 const { zksyncsepolia } = NETWORK_ADDRESSES;

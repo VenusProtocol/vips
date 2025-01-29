@@ -17,7 +17,7 @@ import vip014, {
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip418, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bscmainnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 const { arbitrumone } = NETWORK_ADDRESSES;

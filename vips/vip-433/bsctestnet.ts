@@ -7,13 +7,16 @@ import { VTOKENS as OPBNBTESTNET_VTOKENS } from "../../multisig/proposals/opbnbt
 import { POOL_REGISTRY as OPBNBTESTNET_POOL_REGISTRY } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { NTGs as OPBNBTESTNET_NTGs } from "../../multisig/proposals/opbnbtestnet/vip-024";
 import { PSR as OPBNBTESTNET_PSR } from "../../multisig/proposals/opbnbtestnet/vip-024";
-import { PLP as OPSEPOLIA_PLP, PRIME as OPSEPOLIA_PRIME } from "../../multisig/proposals/opsepolia/vip-008";
-import { COMPTROLLERS as OPSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/opsepolia/vip-008";
-import { VTOKENS as OPSEPOLIA_VTOKENS } from "../../multisig/proposals/opsepolia/vip-008";
-import { POOL_REGISTRY as OPSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/opsepolia/vip-008";
-import { NTGs as OPSEPOLIA_NTGs } from "../../multisig/proposals/opsepolia/vip-008";
-import { PSR as OPSEPOLIA_PSR } from "../../multisig/proposals/opsepolia/vip-008";
-import { REWARD_DISTRIBUTORS as OPSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/opsepolia/vip-008";
+import {
+  PLP as OPSEPOLIA_PLP,
+  PRIME as OPSEPOLIA_PRIME,
+} from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { COMPTROLLERS as OPSEPOLIA_COMPTROLLERS } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { VTOKENS as OPSEPOLIA_VTOKENS } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { POOL_REGISTRY as OPSEPOLIA_POOL_REGISTRY } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { NTGs as OPSEPOLIA_NTGs } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { PSR as OPSEPOLIA_PSR } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
+import { REWARD_DISTRIBUTORS as OPSEPOLIA_REWARD_DISTRIBUTORS } from "../../multisig/proposals/opsepolia/vip-007/index-007-mainnet";
 
 export const OPSEPOLIA_XVS_STORE = "0xE888FA54b32BfaD3cE0e3C7D566EFe809a6A0143";
 export const OPBNBTESTNET_XVS_STORE = "0x06473fB3f7bF11e2E8EfEcC95aC55ABEFCb2e0A0";
@@ -26,7 +29,7 @@ export const OPBNBTESTNET_BOUND_VALIDATOR = "0x049537Bb065e6253e9D8D08B45Bf6b753
 
 const { opsepolia, opbnbtestnet } = NETWORK_ADDRESSES;
 
-const vip418 = () => {
+const vip433 = () => {
   const meta = {
     version: "v2",
     title: "Accept ownership/admin of contracts on OP testnet and opBNB testnet",
@@ -231,4 +234,4 @@ const vip418 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip418;
+export default vip433;

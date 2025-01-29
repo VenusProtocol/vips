@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip061 from "../../multisig/proposals/ethereum/vip-073";
 import { COMPTROLLERS, REWARD_DISTRIBUTORS, VTOKENS } from "../../multisig/proposals/ethereum/vip-073";
 import vip417 from "../../vips/vip-417/bscmainnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 

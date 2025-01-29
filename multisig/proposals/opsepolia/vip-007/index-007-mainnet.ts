@@ -26,7 +26,7 @@ export const REWARD_DISTRIBUTORS = ["0x24139Dad3fe87Ee718ff9c2A8E0C4188578ba9aF"
 
 export const NTGs = ["0x521f59b2670bcc70961FB2edD4F62c3f3B1E7f6b"];
 
-const vip008 = () => {
+const vip007 = () => {
   return makeProposal([
     {
       target: DEFAULT_PROXY_ADMIN,
@@ -134,4 +134,4 @@ const vip008 = () => {
   ]);
 };
 
-export default vip008;
+export default vip007;

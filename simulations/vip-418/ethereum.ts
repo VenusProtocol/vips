@@ -19,7 +19,7 @@ import vip418, {
   ETHEREUM_XVS_BRIDGE_ADMIN,
   ETHEREUM_sFrxETH_ORACLE,
 } from "../../vips/vip-418/bscmainnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
 const { ethereum } = NETWORK_ADDRESSES;

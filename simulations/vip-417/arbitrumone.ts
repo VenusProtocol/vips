@@ -6,7 +6,7 @@ import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/
 import vip014 from "../../multisig/proposals/arbitrumone/vip-019";
 import { REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumone/vip-019";
 import vip417 from "../../vips/vip-417/bscmainnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 

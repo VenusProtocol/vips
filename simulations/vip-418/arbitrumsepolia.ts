@@ -20,7 +20,7 @@ import vip418, {
   ARBITRUM_SEPOLIA_BOUND_VALIDATOR,
   ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
 } from "../../vips/vip-418/bsctestnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
 const { arbitrumsepolia } = NETWORK_ADDRESSES;

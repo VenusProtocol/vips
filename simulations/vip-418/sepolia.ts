@@ -20,7 +20,7 @@ import vip418, {
   SEPOLIA_XVS_BRIDGE_ADMIN,
   SEPOLIA_sFrxETH_ORACLE,
 } from "../../vips/vip-418/bsctestnet";
-import OWNERSHIP_ABI from "../vip-416/abi/Ownership.json";
+import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
 const { sepolia } = NETWORK_ADDRESSES;

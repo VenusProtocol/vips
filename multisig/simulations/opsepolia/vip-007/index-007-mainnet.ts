@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip008, {
+import vip007, {
   BOUND_VALIDATOR,
   COMPTROLLERS,
   COMPTROLLER_BEACON,
@@ -19,7 +19,7 @@ import vip008, {
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-} from "../../../proposals/opsepolia/vip-008";
+} from "../../../proposals/opsepolia/vip-007/index-007-mainnet";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
 
 const { opsepolia } = NETWORK_ADDRESSES;
@@ -133,7 +133,7 @@ forking(22912174, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip008());
+      await pretendExecutingVip(await vip007());
     });
 
     for (const ntg of NTGs) {
