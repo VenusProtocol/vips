@@ -3,12 +3,13 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import { vip071 } from "../../multisig/proposals/sepolia/vip-071/index";
 import vip440, {
   COMPTROLLER,
   CONVERSION_INCENTIVE,
@@ -32,7 +33,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
-const { POOL_REGISTRY, GUARDIAN, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES["sepolia"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES["sepolia"];
 
 export const newMarkets = {
   vUSDS: {
@@ -112,6 +113,9 @@ forking(7582260, async () => {
   const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
 
   describe("vTokens deployment", () => {
+    before(async () => {
+      await pretendExecutingVip(await vip071());
+    });
     for (const market of Object.values(newMarkets)) {
       checkVToken(market.vToken.address, market.vToken);
     }
@@ -171,8 +175,8 @@ forking(7582260, async () => {
         const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
 
         describe(`${vTokenSpec.symbol}`, () => {
-          it(`should have owner = guardian`, async () => {
-            expect(await vTokenContract.owner()).to.equal(GUARDIAN);
+          it(`should have owner = normal timelock`, async () => {
+            expect(await vTokenContract.owner()).to.equal(NORMAL_TIMELOCK);
           });
 
           it(`should have initial supply = 10000 ${vTokenSpec.symbol}`, async () => {

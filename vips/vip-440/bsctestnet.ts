@@ -43,6 +43,18 @@ const vip440 = () => {
 
   return makeProposal(
     [
+      {
+        target: vUSDS,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: vsUSDS,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.sepolia,
+      },
       // Oracle config
       {
         target: CHAINLINK_ORACLE,
