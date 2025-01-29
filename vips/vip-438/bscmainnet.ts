@@ -38,7 +38,7 @@ export const ETHEREUM_sFrxETH_ORACLE = "0x5E06A5f48692E4Fff376fDfCA9E4C0183AAADC
 
 const { arbitrumone, ethereum, zksyncmainnet } = NETWORK_ADDRESSES;
 
-const vip418 = () => {
+const vip438 = () => {
   const meta = {
     version: "v2",
     title: "Accept ownership/admin of contracts on ethereum, zksync mainnet and arbitrum one",
@@ -370,4 +370,4 @@ const vip418 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip418;
+export default vip438;

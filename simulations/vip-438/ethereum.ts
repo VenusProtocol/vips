@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip061, {
+import vip073, {
   CONVERTERS,
   CONVERTER_NETWORK,
   NTGs,
@@ -14,11 +14,11 @@ import vip061, {
   PSR,
   XVS_STORE,
 } from "../../multisig/proposals/ethereum/vip-073";
-import vip418, {
+import vip438, {
   ETHEREUM_BOUND_VALIDATOR,
   ETHEREUM_XVS_BRIDGE_ADMIN,
   ETHEREUM_sFrxETH_ORACLE,
-} from "../../vips/vip-418/bscmainnet";
+} from "../../vips/vip-438/bscmainnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0x888E317606b4c590BBAD88653863e8B345702633";
@@ -52,10 +52,10 @@ forking(21686396, async () => {
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
     poolRegistry = new ethers.Contract(POOL_REGISTRY, OWNERSHIP_ABI, provider);
 
-    await pretendExecutingVip(await vip061());
+    await pretendExecutingVip(await vip073());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip438());
 
   describe("Post-VIP behaviour", async () => {
     it("correct owner for pool registry", async () => {

@@ -16,7 +16,7 @@ import vip020, {
   VTOKENS,
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumone/vip-020";
-import vip418, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-418/bscmainnet";
+import vip438, { ARBITRUM_ONE_BOUND_VALIDATOR, ARBITRUM_XVS_BRIDGE_ADMIN } from "../../vips/vip-438/bscmainnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
@@ -50,7 +50,7 @@ forking(298392727, async () => {
     await pretendExecutingVip(await vip020());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip438());
 
   describe("Post-VIP behaviour", async () => {
     it("correct owner for pool registry", async () => {

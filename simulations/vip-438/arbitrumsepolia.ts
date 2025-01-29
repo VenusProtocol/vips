@@ -16,10 +16,10 @@ import vip014, {
   XVS_STORE,
 } from "../../multisig/proposals/arbitrumsepolia/vip-020";
 import { PSR, REWARD_DISTRIBUTORS } from "../../multisig/proposals/arbitrumsepolia/vip-020";
-import vip418, {
+import vip438, {
   ARBITRUM_SEPOLIA_BOUND_VALIDATOR,
   ARBITRUM_SEPOLIA_XVS_BRIDGE_ADMIN,
-} from "../../vips/vip-418/bsctestnet";
+} from "../../vips/vip-438/bsctestnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4";
@@ -55,7 +55,7 @@ forking(117063164, async () => {
     await pretendExecutingVip(await vip014());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip438());
 
   describe("Post-VIP behaviour", async () => {
     it("correct owner for pool registry", async () => {

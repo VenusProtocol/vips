@@ -48,7 +48,7 @@ export const SEPOLIA_sFrxETH_ORACLE = "0x61EB836afA467677e6b403D504fe69D6940e799
 
 const { arbitrumsepolia, sepolia, zksyncsepolia } = NETWORK_ADDRESSES;
 
-const vip418 = () => {
+const vip438 = () => {
   const meta = {
     version: "v2",
     title: "Accept ownership/admin of contracts on sepolia, zksync testnet and arbitrum sepolia",
@@ -409,4 +409,4 @@ const vip418 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip418;
+export default vip438;

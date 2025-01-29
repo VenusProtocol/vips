@@ -15,11 +15,11 @@ import vip073, {
   REWARD_DISTRIBUTORS,
   XVS_STORE,
 } from "../../multisig/proposals/sepolia/vip-073";
-import vip418, {
+import vip438, {
   SEPOLIA_BOUND_VALIDATOR,
   SEPOLIA_XVS_BRIDGE_ADMIN,
   SEPOLIA_sFrxETH_ORACLE,
-} from "../../vips/vip-418/bsctestnet";
+} from "../../vips/vip-438/bsctestnet";
 import OWNERSHIP_ABI from "../vip-433/abi/Ownership.json";
 
 const XVS_BRIDGE = "0xc340b7d3406502F43dC11a988E4EC5bbE536E642";
@@ -51,7 +51,7 @@ forking(7553307, async () => {
     await pretendExecutingVip(await vip073());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip418());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip438());
 
   describe("Post-VIP behaviour", async () => {
     let xvsBridgeAdmin: Contract;
