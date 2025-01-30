@@ -137,7 +137,7 @@ forking(7582260, async () => {
         expect(await erc4626Oracle.RESILIENT_ORACLE()).to.equal(RESILIENT_ORACLE);
       });
 
-      it("has the correct wUSDM price", async () => {
+      it("has the correct sUSDS price", async () => {
         const price = await oracle.getPrice(sUSDS);
         expect(price).to.be.eq(parseUnits("1.1", 18));
       });
