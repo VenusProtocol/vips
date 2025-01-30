@@ -10,7 +10,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import { vip071 } from "../../multisig/proposals/sepolia/vip-071/index";
-import vip440, {
+import vip439, {
   COMPTROLLER,
   CONVERSION_INCENTIVE,
   USDC_PRIME_CONVERTER,
@@ -23,7 +23,7 @@ import vip440, {
   sUSDS_ERC4626_ORACLE,
   vUSDS,
   vsUSDS,
-} from "../../vips/vip-440/bsctestnet";
+} from "../../vips/vip-439/bsctestnet";
 import ERC4626_ORACLE_ABI from "./abi/ERC4626Oracle.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -121,7 +121,7 @@ forking(7582260, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("USDS & sUSDS markets", await vip440());
+  testForkedNetworkVipCommands("USDS & sUSDS markets", await vip439());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

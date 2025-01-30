@@ -9,21 +9,18 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip440, { USDS } from "../../vips/vip-440/bscmainnet";
-import vip441, {
+import vip439, {
   COMPTROLLER,
   CONVERSION_INCENTIVE,
   USDC_PRIME_CONVERTER,
+  USDS,
   USDT_PRIME_CONVERTER,
   VTOKEN_RECEIVER,
   WBTC_PRIME_CONVERTER,
   WETH_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
-  sUSDS,
-  sUSDS_ERC4626_ORACLE,
-  vsUSDS,
-} from "../../vips/vip-441/bscmainnet";
-import ERC4626_ORACLE_ABI from "./abi/ERC4626Oracle.json";
+  vUSDS,
+} from "../../vips/vip-439/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
@@ -37,13 +34,13 @@ const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["
 
 export const newMarkets = {
   vToken: {
-    address: vsUSDS,
-    name: "Venus sUSDS (Core)",
-    symbol: "vsUSDS_Core",
+    address: vUSDS,
+    name: "Venus USDS (Core)",
+    symbol: "vUSDS_Core",
     underlying: {
-      address: sUSDS,
+      address: USDS,
       decimals: 18,
-      symbol: "sUSDS",
+      symbol: "USDS",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
@@ -52,8 +49,8 @@ export const newMarkets = {
   riskParameters: {
     collateralFactor: parseUnits("0.73", 18),
     liquidationThreshold: parseUnits("0.75", 18),
-    supplyCap: parseUnits("30000000", 18),
-    borrowCap: parseUnits("0", 18),
+    supplyCap: parseUnits("65000000", 18),
+    borrowCap: parseUnits("7680000", 18),
     reserveFactor: parseUnits("0.1", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
   },
@@ -82,33 +79,25 @@ forking(21735465, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("USDS markets", await vip440(ONE_YEAR));
-  testForkedNetworkVipCommands("sUSDS markets", await vip441());
+  testForkedNetworkVipCommands("USDS & sUSDS markets", await vip439(ONE_YEAR));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
-      it("has the correct sUSDS oracle configuration", async () => {
-        const erc4626Oracle = new ethers.Contract(sUSDS_ERC4626_ORACLE, ERC4626_ORACLE_ABI, provider);
-        expect(await erc4626Oracle.CORRELATED_TOKEN()).to.equal(sUSDS);
-        expect(await erc4626Oracle.UNDERLYING_TOKEN()).to.equal(USDS);
-        expect(await erc4626Oracle.RESILIENT_ORACLE()).to.equal(RESILIENT_ORACLE);
-      });
-
-      it("has the correct sUSDS price", async () => {
-        const price = await oracle.getPrice(sUSDS);
-        expect(price).to.be.eq("1032946082184943261");
+      it("has the correct USDS price", async () => {
+        const price = await oracle.getPrice(USDS);
+        expect(price).to.be.eq("998897790000000000");
       });
     });
 
     describe("PoolRegistry state", () => {
-      it(`should add sUSDS market to the Comptroller`, async () => {
+      it(`should add USDS market to the Comptroller`, async () => {
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.contain(vsUSDS);
+        expect(poolVTokens).to.contain(vUSDS);
       });
 
-      it(`should register sUSDS in PoolRegistry`, async () => {
-        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER, sUSDS);
-        expect(registeredVToken).to.equal(vsUSDS);
+      it(`should register USDS in PoolRegistry`, async () => {
+        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER, USDS);
+        expect(registeredVToken).to.equal(vUSDS);
       });
     });
 
@@ -141,10 +130,6 @@ forking(21735465, async () => {
       );
     });
 
-    it("should pause brrowing on sUSDS", async () => {
-      expect(await comptroller.actionPaused(newMarkets.vToken.address, 2)).to.equal(true);
-    });
-
     it("Isolated pools generic tests", async () => {
       checkIsolatedPoolsComptrollers();
     });
@@ -161,8 +146,8 @@ forking(21735465, async () => {
       for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
         const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
 
-        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${sUSDS}`, async () => {
-          const result = await converterContract.conversionConfigurations(baseAsset, sUSDS);
+        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${USDS}`, async () => {
+          const result = await converterContract.conversionConfigurations(baseAsset, USDS);
           expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
         });
       }

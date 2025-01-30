@@ -31,7 +31,7 @@ export const WBTC_PRIME_CONVERTER = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE"
 export const WETH_PRIME_CONVERTER = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
 export const XVS_VAULT_CONVERTER = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
 
-const vip440 = () => {
+const vip439 = () => {
   const meta = {
     version: "v2",
     title: "Configure USDS & sUSDS markets on sepolia - Core pool",
@@ -268,4 +268,4 @@ const vip440 = () => {
   );
 };
 
-export default vip440;
+export default vip439;
