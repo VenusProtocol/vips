@@ -10,7 +10,6 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip439, {
-  COMPTROLLER,
   CONVERSION_INCENTIVE,
   USDC_PRIME_CONVERTER,
   USDS,
@@ -27,6 +26,7 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
+const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 const ONE_YEAR = 365 * 24 * 3600;
 
