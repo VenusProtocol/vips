@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip440, { COMPTROLLER_CORE, market, token } from "../../vips/vip-440/bsctestnet";
+import vip442, { COMPTROLLER_CORE, market, token } from "../../vips/vip-442/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -32,13 +32,13 @@ forking(7609144, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip440", await vip440());
+  testForkedNetworkVipCommands("vip442", await vip442());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("1", 42));
+        expect(price).to.be.eq(parseUnits("3239.6242", 18));
       });
     });
 
@@ -72,8 +72,8 @@ forking(7609144, async () => {
 
         const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
 
-        it(`should have initial supply of 1000000000000`, async () => {
-          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal("1000000000000");
+        it(`should have initial supply of 300000000`, async () => {
+          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal("300000000");
         });
 
         it(`should have balance of underlying = ${underlyingSupplyString} ${token.symbol}`, async () => {

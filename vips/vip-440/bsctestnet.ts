@@ -74,7 +74,7 @@ export const market: Market = {
     symbol: "vyvUSDT-1_Core",
     underlying: token,
     decimals: 8,
-    exchangeRate: parseUnits("1", 22),
+    exchangeRate: parseUnits("1", 16),
     comptroller: COMPTROLLER_CORE,
   },
   riskParameters: {
