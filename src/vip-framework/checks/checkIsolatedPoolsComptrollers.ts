@@ -89,7 +89,11 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
       }
     }
 
-    if (!borrowMarket && !(supplyMarket && supplyMarket.address === market)) {
+    if (
+      !borrowMarket &&
+      !(supplyMarket && supplyMarket.address === market) &&
+      !(await comptroller.actionPaused(market, 2))
+    ) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
     }
@@ -138,6 +142,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
+
   await borrowMarket?.borrow(borrowAmount);
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
@@ -147,16 +152,23 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
 
   const supplyUnderlyingBalance = await supplyUnderlying?.balanceOf(poolSupplier);
-  await supplyMarket?.redeemUnderlying(parseUnits("0.001", supplyUnderlyingDecimals));
+  await supplyMarket?.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
   expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
-  console.log(`${pool.name} > set storage`);
-  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
+  const comptrollerOwner = await comptroller.owner();
+  if (NORMAL_TIMELOCK != comptrollerOwner) {
+    console.log(
+      `Skipping the set storage test because the owner of the comptroller (${comptrollerOwner}) is not (${NORMAL_TIMELOCK})`,
+    );
+  } else {
+    console.log(`${pool.name} > set storage`);
+    await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
-  const originalOracle = await comptroller.oracle();
-  await comptroller.connect(timelockSigner).setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
-  expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
-  await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
+    const originalOracle = await comptroller.oracle();
+    await comptroller.connect(timelockSigner).setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+    expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+    await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
+  }
 };
 
 // NOTE: The default supplier for each pool will be VTreasury, if in case VTreasury has no
