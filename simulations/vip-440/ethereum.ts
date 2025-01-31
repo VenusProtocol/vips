@@ -11,10 +11,10 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip440, {
   BAL,
-  COMPTROLLER,
   CONVERSION_INCENTIVE,
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
+  VTOKEN_RECEIVER,
   WBTC_PRIME_CONVERTER,
   WETH_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
@@ -26,10 +26,11 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
+const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 const ONE_YEAR = 360 * 24 * 60 * 60;
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, VTREASURY } = NETWORK_ADDRESSES["ethereum"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
 export const newMarkets = {
   vBAL: {
@@ -56,7 +57,7 @@ export const newMarkets = {
     },
     initialSupply: {
       amount: parseUnits("4000", 18),
-      vTokenReceiver: VTREASURY,
+      vTokenReceiver: VTOKEN_RECEIVER,
     },
     interestRateModel: {
       address: "0x17F987e09896F19584799e3FFD10679b9C7C35f0",

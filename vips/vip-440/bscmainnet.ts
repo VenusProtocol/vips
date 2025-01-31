@@ -6,11 +6,11 @@ import { makeProposal } from "src/utils";
 
 const { POOL_REGISTRY, VTREASURY, CHAINLINK_ORACLE, RESILIENT_ORACLE, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["ethereum"];
 
-export const COMPTROLLER = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 export const BAL = "0xba100000625a3754423978a60c9317c58a424e3D";
 export const vBAL = "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8";
 const BAL_CHAINLINK_FEED = "0xdF2917806E30300537aEB49A7663062F4d1F2b5F";
 const STALE_PERIOD_26H = 26 * 60 * 60;
+export const VTOKEN_RECEIVER = "0x36cc7B13029B5DEe4034745FB4F24034f3F2ffc6";
 
 export const CONVERSION_INCENTIVE = 3e14;
 
@@ -22,7 +22,6 @@ export const BaseAssets = [
   "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSPrimeConverter BaseAsset
 ];
 
-export const CONVERTER_NETWORK = "0x232CC47AECCC55C2CAcE4372f5B268b27ef7cac8";
 export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
 export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
 export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0";
@@ -73,7 +72,7 @@ const vip440 = (chainlinkStalePeriod?: number) => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [BAL, parseUnits("10000", 18), NORMAL_TIMELOCK],
+        params: [BAL, parseUnits("4000", 18), NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -91,7 +90,7 @@ const vip440 = (chainlinkStalePeriod?: number) => {
             parseUnits("0.57", 18),
             parseUnits("0.59", 18),
             parseUnits("4000", 18),
-            VTREASURY,
+            VTOKEN_RECEIVER,
             parseUnits("1500000", 18),
             parseUnits("700000", 18),
           ],
