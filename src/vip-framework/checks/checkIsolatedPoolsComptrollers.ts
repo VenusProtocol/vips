@@ -12,10 +12,7 @@ import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
 import RESILIENT_ORACLE_ABI from "../abi/resilientOracle.json";
 import VTOKEN_ABI from "../abi/vToken.json";
 
-const NORMAL_TIMELOCK =
-  FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
-    ? getForkedNetworkAddress("NORMAL_TIMELOCK")
-    : getForkedNetworkAddress("GUARDIAN");
+const NORMAL_TIMELOCK = getForkedNetworkAddress("NORMAL_TIMELOCK")
 const DEFAULT_SUPPLIER = getForkedNetworkAddress("VTREASURY");
 const POOL_REGISTRY = getForkedNetworkAddress("POOL_REGISTRY");
 const RESILIENT_ORACLE = getForkedNetworkAddress("RESILIENT_ORACLE");
@@ -138,14 +135,20 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
-  await borrowMarket?.borrow(borrowAmount);
-  expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
-  borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
-  await borrowUnderlying?.approve(borrowMarket?.address, borrowAmount);
-  await borrowMarket?.repayBorrow(borrowAmount);
-  expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
+  const totalBorrows = await borrowMarket?.totalBorrows();
+  const borrowCap = await comptroller.borrowCaps(borrowMarket?.address);
 
+  if (!totalBorrows.add(borrowAmount).gt(borrowCap)) {
+    await borrowMarket?.borrow(borrowAmount);
+    expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
+
+    borrowUnderlyingBalance = await borrowUnderlying?.balanceOf(poolSupplier);
+    await borrowUnderlying?.approve(borrowMarket?.address, borrowAmount);
+    await borrowMarket?.repayBorrow(borrowAmount);
+    expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
+  }
+ 
   const supplyUnderlyingBalance = await supplyUnderlying?.balanceOf(poolSupplier);
   await supplyMarket?.redeemUnderlying(parseUnits("0.001", supplyUnderlyingDecimals));
   expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
