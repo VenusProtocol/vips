@@ -40,6 +40,13 @@ const vip440 = (chainlinkStalePeriod?: number) => {
 
   return makeProposal(
     [
+      // Refuel NT on BSC
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [parseUnits("5", 18), NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK],
+      },
+
       // Oracle config
       {
         target: CHAINLINK_ORACLE,
