@@ -28,11 +28,65 @@ export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0"
 export const WETH_PRIME_CONVERTER = "0xb8fD67f215117FADeF06447Af31590309750529D";
 export const XVS_VAULT_CONVERTER = "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407";
 
-const vip440 = (chainlinkStalePeriod?: number) => {
+const vip442 = (chainlinkStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "Configure BAL markets on ethereum - Core pool",
-    description: ``,
+    title: "VIP-442 [Ethereum] New BAL market in the Core pool",
+    description: `#### Summary
+
+If passed, this VIP will add a market for [BAL](https://etherscan.io/address/0xba100000625a3754423978a60c9317c58a424e3D) to the Core pool on Ethereum, following the Community proposal “[List Balancers BAL token on Venus Core Pool (Ethereum Mainnet)](https://community.venus.io/t/list-balancers-bal-token-on-venus-core-pool-ethereum-mainnet/4699)” and [the associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x6881440d0bfb8794fe2bede3556543ccaca33bebed195808bb1ab460003b993a).
+
+Moreover, it will fund the [Normal Timelock](https://bscscan.com/address/0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396) with 5 BNB from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9), used to send cross-chain messages by the Omnichain Governance.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/list-balancers-bal-token-on-venus-core-pool-ethereum-mainnet/4699/6), the risk parameters for the new market are:
+
+Underlying token: [BAL](https://etherscan.io/address/0xba100000625a3754423978a60c9317c58a424e3D)
+
+- Borrow cap: 700,000 BAL
+- Supply cap: 1,500,000 BAL
+- Collateral factor: 57%
+- Liquidation threshold: 59%
+- Reserve factor: 20%
+
+Bootstrap liquidity: 4,000 BAL provided by [the Balancer Community](https://etherscan.io/address/0x36cc7b13029b5dee4034745fb4f24034f3f2ffc6).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Ethereum](https://etherscan.io/address/0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94) is used for BAL, using under the hood the BAL/USD price provided by Chainlink ([feed](https://etherscan.io/address/0xdF2917806E30300537aEB49A7663062F4d1F2b5F)).
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Core pool on Ethereum, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to Sepolia, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+Mainnet
+
+- vBAL_Core: [0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8](https://etherscan.io/address/0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8)
+
+Testnet
+
+- vBAL_Core: [0xD4B82B7B7CdedB029e0E58AC1B6a04F6616BEd40](https://sepolia.etherscan.io/address/0xD4B82B7B7CdedB029e0E58AC1B6a04F6616BEd40)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/472)
+- [Deployment to Sepolia](https://sepolia.etherscan.io/tx/0xfe2b728357cae54a5df24dbf030be7155fba6c0c0414aacfd339d83aad0ea2be)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -154,4 +208,4 @@ const vip440 = (chainlinkStalePeriod?: number) => {
   );
 };
 
-export default vip440;
+export default vip442;
