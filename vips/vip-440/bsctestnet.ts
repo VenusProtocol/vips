@@ -5,7 +5,9 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { POOL_REGISTRY, VTREASURY, CHAINLINK_ORACLE, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
+import { tokens } from "../vip-439/bsctestnet";
+
+const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
 
 export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
@@ -22,7 +24,7 @@ export const BaseAssets = [
   "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSTokenConverter BaseAsset
 ];
 const CONVERSION_INCENTIVE = parseUnits("3", 14);
-const ORACLE = "0xE2CA0cBFd70caA7C682e52C9E0e86A51CA174CA4";
+const ORACLE = "0x08A486eD37dd741D18b7c45B14C8bCF22D2BF66a";
 
 type Token = {
   address: string;
@@ -31,9 +33,9 @@ type Token = {
 };
 
 export const token = {
-  address: "0x5cBA66C5415E56CC0Ace55148ffC63f61327478B",
-  decimals: 6,
-  symbol: "yvUSDT-1",
+  address: "0x99AD7ecf9b1C5aC2A11BB00D7D8a7C54fCd41517",
+  decimals: 18,
+  symbol: "yvWETH-1",
 };
 
 type Market = {
@@ -69,24 +71,24 @@ type Market = {
 
 export const market: Market = {
   vToken: {
-    address: "0x9Ec91759d4EBaDE3109cCAD1B7AE199a02312c10",
-    name: "Venus yvUSDT-1 (Core)",
-    symbol: "vyvUSDT-1_Core",
+    address: "0x271D914014Ac2CD8EB89a4e106Ac15a4e948eEE2",
+    name: "Venus yvWETH-1 (Core)",
+    symbol: "vyvWETH-1_Core",
     underlying: token,
     decimals: 8,
-    exchangeRate: parseUnits("1", 16),
+    exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
   },
   riskParameters: {
     collateralFactor: parseUnits("0.5", 18),
     liquidationThreshold: parseUnits("0.6", 18),
-    supplyCap: parseUnits("630000", 6),
-    borrowCap: parseUnits("0", 6),
+    supplyCap: parseUnits("56", 18),
+    borrowCap: parseUnits("0", 18),
     reserveFactor: parseUnits("0.1", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("10000", 6),
+    amount: parseUnits("3", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
@@ -114,15 +116,10 @@ const vip440 = () => {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
-          [
-            token.address,
-            [ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-          ],
+          [token.address, [ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
         ],
         dstChainId: LzChainId.sepolia,
       },
-
       {
         target: token.address,
         signature: "faucet(uint256)",
@@ -133,12 +130,6 @@ const vip440 = () => {
         target: market.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: market.vToken.address,
-        signature: "setReserveFactor(uint256)",
-        params: [market.riskParameters.reserveFactor],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -170,45 +161,59 @@ const vip440 = () => {
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: market.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [market.riskParameters.protocolSeizeShare],
+        target: COMPTROLLER_CORE,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[market.vToken.address], [2], true],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [market.vToken.underlying.address], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[0],
+          [...tokens.map(t => t.address), token.address],
+          [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [market.vToken.underlying.address], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[1],
+          [...tokens.map(t => t.address), token.address],
+          [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [market.vToken.underlying.address], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[2],
+          [...tokens.map(t => t.address), token.address],
+          [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [market.vToken.underlying.address], [[CONVERSION_INCENTIVE, 1]]],
+        params: [
+          BaseAssets[3],
+          [...tokens.map(t => t.address), token.address],
+          [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
+        ],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [market.vToken.underlying.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: COMPTROLLER_CORE,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[market.vToken.address], [2], true],
+        params: [
+          BaseAssets[4],
+          [...tokens.map(t => t.address), token.address],
+          [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
+        ],
         dstChainId: LzChainId.sepolia,
       },
     ],

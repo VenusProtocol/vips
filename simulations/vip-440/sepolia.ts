@@ -38,7 +38,7 @@ forking(7609144, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("1", 42));
+        expect(price).to.be.eq(parseUnits("3239.6242", 18));
       });
     });
 
@@ -72,8 +72,8 @@ forking(7609144, async () => {
 
         const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
 
-        it(`should have initial supply of 1000000000000`, async () => {
-          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal("1000000000000");
+        it(`should have initial supply of 300000000`, async () => {
+          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal("300000000");
         });
 
         it(`should have balance of underlying = ${underlyingSupplyString} ${token.symbol}`, async () => {
