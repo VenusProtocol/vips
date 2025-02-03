@@ -103,7 +103,7 @@ export const market: Market = {
 const vip440 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-433",
+    title: "Add yvWETH-1 to the Core pool",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -129,7 +129,7 @@ const vip440 = () => {
       {
         target: market.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["86400"],
+        params: ["7200"],
         dstChainId: LzChainId.sepolia,
       },
       {
