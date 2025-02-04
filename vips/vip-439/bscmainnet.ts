@@ -11,7 +11,7 @@ export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
 const yvUSDC_1_ORACLE = "0x64725823f70dcE89d17e4dDE9C5D53Fe47ce507c";
 const yvUSDT_1_ORACLE = "0x591a4124cE63C3d42e80B60E80DeD7F6e383b6F9";
-const yvUSDS_1_ORACLE = "0x6aC823911fA2939FD015281dF77A61B3bFaAa2EE";
+const yvUSDS_1_ORACLE = "0x9026cDC8c08652C6130182772aC197b0367A71C5";
 
 type Token = {
   address: string;
@@ -27,14 +27,14 @@ export const tokens: Token[] = [
     decimals: 6,
     symbol: "yvUSDC-1",
     oracle: yvUSDC_1_ORACLE,
-    price: parseUnits("1.000034330000", 42),
+    price: parseUnits("1.04886575582268136555792443", 42),
   },
   {
     address: "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa",
     decimals: 6,
     symbol: "yvUSDT-1",
     oracle: yvUSDT_1_ORACLE,
-    price: parseUnits("1", 42),
+    price: parseUnits("1.0272603053033119936994", 42),
   },
   {
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8",
