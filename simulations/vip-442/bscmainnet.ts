@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents } from "src/utils";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -26,16 +26,13 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
-const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
-const MAINNET_USDT_USER = "0xD3a22590f8243f8E83Ac230D1842C9Af0404C4A1";
 const SOL_PRICE = parseUnits("200.65", 18);
 const ONE_YEAR = 365 * 24 * 3600;
 
 forking(46332892, async () => {
   let theVanguardTreasuryBalancePrev: BigNumber;
-  let usdtHolder: any;
-
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const vToken = new ethers.Contract(marketSpec.vToken.address, VTOKEN_ABI, ethers.provider);
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
@@ -43,9 +40,6 @@ forking(46332892, async () => {
 
   before(async () => {
     theVanguardTreasuryBalancePrev = await usdt.balanceOf(VANGUARD_TREASURY);
-
-    usdtHolder = await initMainnetUser(MAINNET_USDT_USER, parseUnits("1", 18));
-    await usdt.connect(usdtHolder).transfer(VTREASURY, VANGUARD_REFUND_AMOUNT);
   });
 
   describe("Pre-VIP behavior", () => {
