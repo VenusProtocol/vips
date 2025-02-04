@@ -9,7 +9,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip442, {
+import vip444, {
   CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
   USDT,
@@ -17,7 +17,7 @@ import vip442, {
   VANGUARD_TREASURY,
   converterBaseAssets,
   marketSpec,
-} from "../../vips/vip-442/bscmainnet";
+} from "../../vips/vip-444/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
@@ -54,8 +54,8 @@ forking(46332892, async () => {
   });
 
   testVip(
-    "VIP-442",
-    await vip442({
+    "VIP-444",
+    await vip444({
       chainlinkStalePeriod: ONE_YEAR,
     }),
     {

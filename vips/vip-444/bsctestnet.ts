@@ -86,7 +86,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip442 = () => {
+export const vip444 = () => {
   const meta = {
     version: "v2",
     title: "VIP-438",
@@ -184,4 +184,4 @@ export const vip442 = () => {
   );
 };
 
-export default vip442;
+export default vip444;

@@ -89,10 +89,10 @@ const configureConverters = (fromAssets: string[]) => {
   });
 };
 
-export const vip442 = (overrides: { chainlinkStalePeriod?: number }) => {
+export const vip444 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
-    title: "VIP-442 [BNB Chain] Add support for Solana on Core Pool",
+    title: "VIP-444 [BNB Chain] Add support for Solana on Core Pool",
     description: `#### Summary
     
     If passed, this VIP will add a new market for the [Solana token](https://bscscan.com/address/0x570A5D26f7765Ecb712C0924E4De545B89fD43dF) on Venus Core Pool.
@@ -242,4 +242,4 @@ export const vip442 = (overrides: { chainlinkStalePeriod?: number }) => {
   );
 };
 
-export default vip442;
+export default vip444;
