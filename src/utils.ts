@@ -191,6 +191,7 @@ export const makeProposal = async (
   commands: Command[],
   meta?: ProposalMeta,
   type?: ProposalType,
+  remoteType?: ProposalType,
 ): Promise<Proposal> => {
   const proposal: Proposal = {
     signatures: [],
@@ -236,7 +237,7 @@ export const makeProposal = async (
           signatures: chainCommands.map(cmd => cmd.signature),
           params: chainCommands.map(cmd => cmd.params),
         }),
-        type as ProposalType,
+        remoteType ?? (type as ProposalType),
       );
       const remoteAdapterParam = getAdapterParam(chainCommands.map(cmd => cmd.target).length);
 
