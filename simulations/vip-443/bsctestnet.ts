@@ -8,12 +8,12 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip444, {
+import vip443, {
   CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
   converterBaseAssets,
   marketSpec,
-} from "../../vips/vip-444/bsctestnet";
+} from "../../vips/vip-443/bsctestnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -38,7 +38,7 @@ forking(47870864, async () => {
     });
   });
 
-  testVip("SOL market VIP", await vip444(), {});
+  testVip("SOL market VIP", await vip443(), {});
 
   describe("Post-VIP behavior", async () => {
     it("has the correct price", async () => {

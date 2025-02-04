@@ -89,58 +89,62 @@ const configureConverters = (fromAssets: string[]) => {
   });
 };
 
-export const vip444 = (overrides: { chainlinkStalePeriod?: number }) => {
+export const vip443 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
-    title: "VIP-444 [BNB Chain] Add support for Solana on Core Pool",
+    title: "VIP-443 [BNB Chain] New Solana (SOL) market in the Core pool",
     description: `#### Summary
-    
-    If passed, this VIP will add a new market for the [Solana token](https://bscscan.com/address/0x570A5D26f7765Ecb712C0924E4De545B89fD43dF) on Venus Core Pool.
-    
-    #### Description
-    
-    **Risk parameters**
-    
-    Following [Chaos Labs recommendations](https://community.venus.io/t/add-support-for-binance-pegged-sol-to-venus-core-pool-on-bnb-chain/4843/8), the risk parameters for the new markets are:
-    
-    - Underlying token: [Solana](https://bscscan.com/address/0x570A5D26f7765Ecb712C0924E4De545B89fD43dF)
-    - Borrow cap: 9,000 Solana
-    - Supply cap: 18,000 Solana
-    - Collateral factor: 72%
-    - Reserve factor: 20%
-    
-    Bootstrap liquidity: "____" Solana - provided by the [Solana project](https://solv.finance/).
-    
-    Interest rate curve for the new market:
-    
-    - kink: 50%
-    - base (yearly): 0.02
-    - multiplier (yearly): 0.2
-    - jump multiplier (yearly): 3.0
-    
-    Oracle configuration:
-    
-    - Main oracle: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
-    - Feed: [0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323](https://bscscan.com/address/0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323)
-    
-    #### Security and additional considerations
-    
-    No changes in the code are involved in this VIP. We applied the following security procedures for this upgrade:
-    
-    - **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the core pool with the right parameters and the expected bootstrap liquidity
-    - **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
-    
-    #### Deployed contracts
-    
-    - **Mainnet Solana market (vSOL)**: [0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC](https://bscscan.com/address/0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC)
-    - **Testnet Solana market (vSOL)**: [0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C](https://testnet.bscscan.com/address/0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C)
-    
-    #### References
-    
-    - [VIP simulation](https://github.com/VenusProtocol/vips/pull/474)
-    - [Testnet deployment](https://testnet.bscscan.com/tx/)
-    - Snapshot “[[BNB Chain] Add support for the Solana market on Venus Core Pool](https://snapshot.org/#/venus-xvs.eth/proposal/"")”
-    - [Documentation](https://docs-v4.venus.io/)`,
+
+If passed, this VIP will add a market for [SOL](https://bscscan.com/address/0x570A5D26f7765Ecb712C0924E4De545B89fD43dF) to the Core pool on BNB Chain, following the Community proposal “[Add support for binance pegged SOL to Venus core pool on BNB chain](https://community.venus.io/t/add-support-for-binance-pegged-sol-to-venus-core-pool-on-bnb-chain/4843)” and [the associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xf201cf1a278e7d27b6cb4709d444a5649abbc9bc9f07a4c194edeecd9c86e3d0).
+
+#### Description
+
+**Risk parameters for SOL**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/add-support-for-binance-pegged-sol-to-venus-core-pool-on-bnb-chain/4843/8), the risk parameters for the new market are:
+
+Underlying token: [SOL](https://bscscan.com/address/0x570A5D26f7765Ecb712C0924E4De545B89fD43dF)
+
+- Borrow cap: 9,000 SOL
+- Supply cap: 18,000 SOL
+- Collateral factor: 72%
+- Reserve factor: 20%
+
+Bootstrap liquidity: 21.2829576 SOL provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) (refunding 5,000 USDT to the Vanguard Treasury, [that provided the liquidity](https://bscscan.com/tx/0xf2b4c2866bdf9f2e8c64cc74d888c904f3bb928da8754f7097eb7e9f2fbda007))
+
+Interest rate curve for the new market:
+
+- kink: 50%
+- base (yearly): 2%
+- multiplier (yearly): 20%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration for SOL**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [BNB Chain](https://bscscan.com/address/0x6592b5DE802159F3E74B2486b091D11a8256ab8A) is used for SOL, using under the hood the Chainlink price ([feed](https://bscscan.com/address/0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323)).
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Core pool on BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+BNB Chain
+
+- vSOL: [0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC](https://bscscan.com/address/0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC)
+
+BNB Chain testnet
+
+- vSOL: [0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C](https://testnet.bscscan.com/address/0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/474)
+- [Deployment to BNB Chain testnet](https://testnet.bscscan.com/tx/0x443fe4a8e7e5ca3a43e7d1af607837d0dc32aecc2155e0eed3e7ac349236315d)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -242,4 +246,4 @@ export const vip444 = (overrides: { chainlinkStalePeriod?: number }) => {
   );
 };
 
-export default vip444;
+export default vip443;
