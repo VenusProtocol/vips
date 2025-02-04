@@ -152,7 +152,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.lt(borrowUnderlyingBalance);
 
   const supplyUnderlyingBalance = await supplyUnderlying?.balanceOf(poolSupplier);
-  await supplyMarket?.redeemUnderlying(parseUnits("0.001", supplyUnderlyingDecimals));
+  await supplyMarket?.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
   expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
   const comptrollerOwner = await comptroller.owner();
