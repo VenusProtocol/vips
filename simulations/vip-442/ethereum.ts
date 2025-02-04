@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip439, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-439/bsctestnet";
+import vip442, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-442/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -18,9 +18,9 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-forking(7609144, async () => {
+forking(21771897, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -34,7 +34,7 @@ forking(7609144, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip439", await vip439());
+  testForkedNetworkVipCommands("vip442", await vip442());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

@@ -5,26 +5,26 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { tokens } from "../vip-439/bsctestnet";
+import { tokens } from "../vip-442/bsctestnet";
 
-const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
+const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
 export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
-export const USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
-export const USDC_PRIME_CONVERTER = "0x511a559a699cBd665546a1F75908f7E9454Bfc67";
-export const WBTC_PRIME_CONVERTER = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE";
-export const WETH_PRIME_CONVERTER = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
-export const XVS_VAULT_CONVERTER = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
+export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
+export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
+export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0";
+export const WETH_PRIME_CONVERTER = "0xb8fD67f215117FADeF06447Af31590309750529D";
+export const XVS_VAULT_CONVERTER = "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407";
 export const BaseAssets = [
-  "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTTokenConverter BaseAsset
-  "0x772d68929655ce7234C8C94256526ddA66Ef641E", // USDC USDCTokenConverter BaseAsset
-  "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b", // WBTC WBTCTokenConverter BaseAsset
-  "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHTokenConverter BaseAsset
-  "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSTokenConverter BaseAsset
+  "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT USDTTokenConverter BaseAsset
+  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC USDCTokenConverter BaseAsset
+  "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC WBTCTokenConverter BaseAsset
+  "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH WETHTokenConverter BaseAsset
+  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
 ];
 const CONVERSION_INCENTIVE = parseUnits("3", 14);
-const ORACLE = "0x08A486eD37dd741D18b7c45B14C8bCF22D2BF66a";
+const ORACLE = "0x6aC823911fA2939FD015281dF77A61B3bFaAa2EE";
 
 type Token = {
   address: string;
@@ -33,7 +33,7 @@ type Token = {
 };
 
 export const token = {
-  address: "0x99AD7ecf9b1C5aC2A11BB00D7D8a7C54fCd41517",
+  address: "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0",
   decimals: 18,
   symbol: "yvWETH-1",
 };
@@ -71,7 +71,7 @@ type Market = {
 
 export const market: Market = {
   vToken: {
-    address: "0x271D914014Ac2CD8EB89a4e106Ac15a4e948eEE2",
+    address: "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0",
     name: "Venus yvWETH-1 (Core)",
     symbol: "vyvWETH-1_Core",
     underlying: token,
@@ -92,7 +92,7 @@ export const market: Market = {
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
-    address: "0xBd20E6922A5b1e20B5e611700f1Cab7c177C35De",
+    address: "0x322072b84434609ff64333A125516055B5B4435F",
     base: "0",
     multiplier: "0.15625",
     jump: "2.5",
@@ -100,7 +100,7 @@ export const market: Market = {
   },
 };
 
-const vip440 = () => {
+const vip443 = () => {
   const meta = {
     version: "v2",
     title: "Add yvWETH-1 to the Core pool",
@@ -118,25 +118,25 @@ const vip440 = () => {
         params: [
           [token.address, [ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: token.address,
         signature: "faucet(uint256)",
         params: [market.initialSupply.amount],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: market.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["7200"],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: market.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [POOL_REGISTRY, market.initialSupply.amount],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: POOL_REGISTRY,
@@ -152,19 +152,19 @@ const vip440 = () => {
             market.riskParameters.borrowCap,
           ],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: market.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [POOL_REGISTRY, 0],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[market.vToken.address], [2], true],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: USDT_PRIME_CONVERTER,
@@ -174,7 +174,7 @@ const vip440 = () => {
           [...tokens.map(t => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: USDC_PRIME_CONVERTER,
@@ -184,7 +184,7 @@ const vip440 = () => {
           [...tokens.map(t => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: WBTC_PRIME_CONVERTER,
@@ -194,7 +194,7 @@ const vip440 = () => {
           [...tokens.map(t => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: WETH_PRIME_CONVERTER,
@@ -204,7 +204,7 @@ const vip440 = () => {
           [...tokens.map(t => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: XVS_VAULT_CONVERTER,
@@ -214,7 +214,7 @@ const vip440 = () => {
           [...tokens.map(t => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
     ],
     meta,
@@ -222,4 +222,4 @@ const vip440 = () => {
   );
 };
 
-export default vip440;
+export default vip443;
