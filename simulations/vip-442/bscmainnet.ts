@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser, setRedstonePrice } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -12,8 +12,8 @@ import { forking, testVip } from "src/vip-framework/index";
 import vip442, {
   CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
-  SOL_CHAINLINK_FEED,
-  SOL_INCENTIVES,
+  USDT,
+  VANGUARD_REFUND_AMOUNT,
   VANGUARD_TREASURY,
   converterBaseAssets,
   marketSpec,
@@ -26,26 +26,26 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
-const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, CHAINLINK_ORACLE, VTREASURY } =
-  NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
-const MAINNET_USER = "0x4Ed6Cf63bd9C009d247ee51224Fc1c7041f517F1";
+const MAINNET_USDT_USER = "0xD3a22590f8243f8E83Ac230D1842C9Af0404C4A1";
 const SOL_PRICE = parseUnits("200.65", 18);
+const ONE_YEAR = 365 * 24 * 3600;
 
 forking(46332892, async () => {
   let theVanguardTreasuryBalancePrev: BigNumber;
-  let solHolder: any;
+  let usdtHolder: any;
+
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const vToken = new ethers.Contract(marketSpec.vToken.address, VTOKEN_ABI, ethers.provider);
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
-  const sol = new ethers.Contract(marketSpec.vToken.underlying.address, ERC20_ABI, ethers.provider);
+  const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
 
   before(async () => {
-    await setRedstonePrice(CHAINLINK_ORACLE, marketSpec.vToken.underlying.address, SOL_CHAINLINK_FEED, NORMAL_TIMELOCK);
-    theVanguardTreasuryBalancePrev = await sol.balanceOf(VANGUARD_TREASURY);
+    theVanguardTreasuryBalancePrev = await usdt.balanceOf(VANGUARD_TREASURY);
 
-    solHolder = await initMainnetUser(MAINNET_USER, parseUnits("1", 18));
-    await sol.connect(solHolder).transfer(VTREASURY, parseUnits("5000", 18));
+    usdtHolder = await initMainnetUser(MAINNET_USDT_USER, parseUnits("1", 18));
+    await usdt.connect(usdtHolder).transfer(VTREASURY, VANGUARD_REFUND_AMOUNT);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -59,7 +59,17 @@ forking(46332892, async () => {
     });
   });
 
-  testVip("VIP-442", await vip442());
+  testVip(
+    "VIP-442",
+    await vip442({
+      chainlinkStalePeriod: ONE_YEAR,
+    }),
+    {
+      callbackAfterExecution: async (txResponse: any) => {
+        await expectEvents(txResponse, [SINGLE_TOKEN_CONVERTER_ABI], ["ConversionConfigUpdated"], [6]);
+      },
+    },
+  );
 
   describe("Post-VIP behavior", async () => {
     it("has the correct price", async () => {
@@ -112,7 +122,9 @@ forking(46332892, async () => {
     });
 
     it("incentives have been transferred to the Vanguard Treasury", async () => {
-      expect(await sol.balanceOf(VANGUARD_TREASURY)).to.equal(theVanguardTreasuryBalancePrev.add(SOL_INCENTIVES));
+      expect(await usdt.balanceOf(VANGUARD_TREASURY)).to.equal(
+        theVanguardTreasuryBalancePrev.add(VANGUARD_REFUND_AMOUNT),
+      );
     });
   });
 });

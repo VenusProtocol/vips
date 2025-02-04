@@ -10,10 +10,10 @@ const { VTREASURY, RESILIENT_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, CHAINLI
 export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const SOL_CHAINLINK_FEED = "0x0E8a53DD9c13589df6382F13dA6B3Ec8F919B323";
-const SOL_MAX_STALE_PERIOD = 15 * 60; // 15 minutes
+const CHAINLINK_STALE_PERIOD = 15 * 60; // 15 minutes
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
@@ -25,7 +25,7 @@ const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
 const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 
-export const SOL_INCENTIVES = parseUnits("5000", 18);
+export const VANGUARD_REFUND_AMOUNT = parseUnits("5000", 18);
 
 export const CONVERSION_INCENTIVE = 1e14;
 export const converterBaseAssets = {
@@ -89,7 +89,7 @@ const configureConverters = (fromAssets: string[]) => {
   });
 };
 
-export const vip442 = () => {
+export const vip442 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
     title: "VIP-442 [BNB Chain] Add support for Solana on Core Pool",
@@ -145,13 +145,14 @@ export const vip442 = () => {
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
+  const chainlinkStalePeriod = overrides?.chainlinkStalePeriod || CHAINLINK_STALE_PERIOD;
 
   return makeProposal(
     [
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[marketSpec.vToken.underlying.address, SOL_CHAINLINK_FEED, SOL_MAX_STALE_PERIOD]],
+        params: [[marketSpec.vToken.underlying.address, SOL_CHAINLINK_FEED, chainlinkStalePeriod]],
       },
       {
         target: RESILIENT_ORACLE,
@@ -231,7 +232,7 @@ export const vip442 = () => {
       {
         target: VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpec.vToken.underlying.address, SOL_INCENTIVES, VANGUARD_TREASURY],
+        params: [USDT, VANGUARD_REFUND_AMOUNT, VANGUARD_TREASURY],
       },
 
       ...configureConverters([marketSpec.vToken.underlying.address]),
