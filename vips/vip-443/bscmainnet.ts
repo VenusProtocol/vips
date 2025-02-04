@@ -9,7 +9,7 @@ import { tokens } from "../vip-442/bsctestnet";
 
 const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
 export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
 export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
@@ -92,7 +92,7 @@ export const market: Market = {
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
-    address: "0x322072b84434609ff64333A125516055B5B4435F",
+    address: "0x322072b84434609ff64333A125516055B5B4405F",
     base: "0",
     multiplier: "0.15625",
     jump: "2.5",
@@ -118,12 +118,6 @@ const vip443 = () => {
         params: [
           [token.address, [ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false]],
         ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: token.address,
-        signature: "faucet(uint256)",
-        params: [market.initialSupply.amount],
         dstChainId: LzChainId.ethereum,
       },
       {
