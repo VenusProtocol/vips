@@ -20,7 +20,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
 
-forking(7609144, async () => {
+forking(7644253, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -38,7 +38,7 @@ forking(7609144, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("3239.6242", 18));
+        expect(price).to.be.eq(parseUnits("2749.91045519", 18));
       });
     });
 

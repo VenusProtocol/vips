@@ -9,9 +9,9 @@ const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepoli
 
 export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
 
-const yvUSDC_1_ORACLE = "0x4df3cd8F4Ad55A996A2401F0505A2c9C74473aAd";
-const yvUSDT_1_ORACLE = "0xE2CA0cBFd70caA7C682e52C9E0e86A51CA174CA4";
-const yvUSDS_1_ORACLE = "0x62838D1f2b84A2A3Af700A2C9C8Fb6C2bAdb38b2";
+const yvUSDC_1_ORACLE = "0xd680aA82d58D5cc5385A4a3ACdEbE93D84D65a00";
+const yvUSDT_1_ORACLE = "0x930F0fC7321eB35Ff93556C264EA076d3Aaf1692";
+const yvUSDS_1_ORACLE = "0x5a93e425e42470b9bB609862abf2A38E7041250E";
 
 type Token = {
   address: string;
@@ -27,14 +27,14 @@ export const tokens: Token[] = [
     decimals: 6,
     symbol: "yvUSDC-1",
     oracle: yvUSDC_1_ORACLE,
-    price: parseUnits("1.000034330000", 42),
+    price: parseUnits("0.99992897", 30),
   },
   {
     address: "0x5cBA66C5415E56CC0Ace55148ffC63f61327478B",
     decimals: 6,
     symbol: "yvUSDT-1",
     oracle: yvUSDT_1_ORACLE,
-    price: parseUnits("1", 42),
+    price: parseUnits("1", 30),
   },
   {
     address: "0xC6A0e98B8D9E9F1160E9cE1f2E0172F41FB06BC2",

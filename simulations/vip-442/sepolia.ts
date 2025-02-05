@@ -20,7 +20,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["sepolia"];
 
-forking(7609144, async () => {
+forking(7644253, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);

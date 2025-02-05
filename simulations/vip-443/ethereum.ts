@@ -24,7 +24,7 @@ const WETH = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-forking(21779026, async () => {
+forking(21779586, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -52,7 +52,7 @@ forking(21779026, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct price", async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("2816.066967185620936042", 18));
+        expect(price).to.be.eq(parseUnits("2818.077847437866017698", 18));
       });
     });
 
@@ -85,29 +85,29 @@ forking(21779026, async () => {
         });
 
         let multiplier;
-          let vTokenSupply;
+        let vTokenSupply;
 
-          // Initial exchange rate should account for decimal transformations such that
-          // the string representation is the same (i.e. 1 vToken == 1 underlying)
-          if (vTokenSpec.underlying.decimals > vTokenSpec.decimals) {
-            multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
-            vTokenSupply = initialSupply.amount.div(multiplier);
-          } else {
-            multiplier = 10 ** (vTokenSpec.decimals - vTokenSpec.underlying.decimals);
-            vTokenSupply = initialSupply.amount.mul(multiplier);
-          }
-          
-          const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
-          const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
+        // Initial exchange rate should account for decimal transformations such that
+        // the string representation is the same (i.e. 1 vToken == 1 underlying)
+        if (vTokenSpec.underlying.decimals > vTokenSpec.decimals) {
+          multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
+          vTokenSupply = initialSupply.amount.div(multiplier);
+        } else {
+          multiplier = 10 ** (vTokenSpec.decimals - vTokenSpec.underlying.decimals);
+          vTokenSupply = initialSupply.amount.mul(multiplier);
+        }
 
-          it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
-            expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
-          });
+        const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
+        const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
-          it(`should have balance of underlying = ${underlyingSupplyString} ${market.vToken.underlying.symbol}`, async () => {
-            const underlying = new ethers.Contract(vTokenSpec.underlying.address, ERC20_ABI, provider);
-            expect(await underlying.balanceOf(vTokenSpec.address)).to.equal(initialSupply.amount);
-          });
+        it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
+          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
+        });
+
+        it(`should have balance of underlying = ${underlyingSupplyString} ${market.vToken.underlying.symbol}`, async () => {
+          const underlying = new ethers.Contract(vTokenSpec.underlying.address, ERC20_ABI, provider);
+          expect(await underlying.balanceOf(vTokenSpec.address)).to.equal(initialSupply.amount);
+        });
       });
     });
 

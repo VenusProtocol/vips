@@ -24,7 +24,7 @@ export const BaseAssets = [
   "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
 ];
 const CONVERSION_INCENTIVE = parseUnits("3", 14);
-const ORACLE = "0x6aC823911fA2939FD015281dF77A61B3bFaAa2EE";
+const ORACLE = "0x641817dE6c0E4f763C393AaD182E6C946e1a2e2b";
 
 type Token = {
   address: string;

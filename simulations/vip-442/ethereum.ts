@@ -31,7 +31,7 @@ const ONE_YEAR = 365 * 24 * 3600;
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-forking(21779026, async () => {
+forking(21779586, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -119,7 +119,7 @@ forking(21779026, async () => {
             multiplier = 10 ** (vTokenSpec.decimals - vTokenSpec.underlying.decimals);
             vTokenSupply = initialSupply.amount.mul(multiplier);
           }
-          
+
           const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
           const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
