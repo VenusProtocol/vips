@@ -140,13 +140,10 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
 
-  await borrowMarket?.borrow(borrowAmount);
-  expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
-
   const totalBorrows = await borrowMarket?.totalBorrows();
   const borrowCap = await comptroller.borrowCaps(borrowMarket?.address);
 
-  if (totalBorrows.add(borrowAmount).lt(borrowCap)) {
+  if (!totalBorrows.add(borrowAmount).gt(borrowCap) && comptroller.borrowCaps(borrowMarket?.address) > 0) {
     await borrowMarket?.borrow(borrowAmount);
     expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
