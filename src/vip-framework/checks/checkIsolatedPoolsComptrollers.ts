@@ -1,11 +1,11 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber, Contract, Signer } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, ethers } from "hardhat";
 import { ORACLE_BNB } from "src/networkAddresses";
 
-import { getForkedNetworkAddress, setMaxStalePeriod } from "../../utils";
+import { getForkedNetworkAddress, initMainnetUser, setMaxStalePeriod } from "../../utils";
 import ERC20_ABI from "../abi/erc20.json";
 import COMPTROLLER_ABI from "../abi/il_comptroller.json";
 import POOL_REGISTRY_ABI from "../abi/poolRegistry.json";
@@ -50,9 +50,14 @@ const calculateBorrowableAmount = async (
   const supplyTokenUSDAmountScaled = suppliedAmount.mul(supplyTokenPrice).div(EXP_SCALE);
   const borrowableAmountUSD = supplyTokenUSDAmountScaled.mul(supplyMarketCF).div(EXP_SCALE);
   const borrowTokenPriceScaled = borrowTokenPrice.mul(parseUnits("1", borrowUnderlyingDecimals)).div(EXP_SCALE); // scaled to 18 decimals
-  const borrowTokenAmount = borrowableAmountUSD.div(borrowTokenPriceScaled);
+  const borrowTokenAmountScaled = borrowableAmountUSD.div(borrowTokenPriceScaled);
+  const borrowTokenAmount = parseUnits(borrowTokenAmountScaled.toString(), borrowUnderlyingDecimals);
+  await borrowMarket.accrueInterest();
+  const cash = await borrowMarket.getCash();
+  const reserves = await borrowMarket.totalReserves();
+  const availableCash = cash.sub(reserves).mul(9).div(10); // applying 0.9 factor to account for interests
 
-  return parseUnits(borrowTokenAmount.toString(), borrowUnderlyingDecimals);
+  return borrowTokenAmount.gt(availableCash) ? availableCash : borrowTokenAmount;
 };
 
 const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
@@ -62,13 +67,8 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   let supplyUnderlying: Contract | undefined = undefined;
   let borrowUnderlying: Contract | undefined = undefined;
 
-  await impersonateAccount(poolSupplier);
-  await setBalance(poolSupplier, ethers.utils.parseEther("50"));
-  await impersonateAccount(NORMAL_TIMELOCK);
-  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
-
-  const signer: Signer = await ethers.getSigner(poolSupplier);
-  const timelockSigner: Signer = await ethers.getSigner(NORMAL_TIMELOCK);
+  const signer = await initMainnetUser(poolSupplier, ethers.utils.parseEther("50"));
+  const timelockSigner = await initMainnetUser(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
   const comptroller: Contract = await ethers.getContractAt(COMPTROLLER_ABI, pool.comptroller, signer);
   const resilientOracle: Contract = await ethers.getContractAt(RESILIENT_ORACLE_ABI, RESILIENT_ORACLE);
@@ -89,7 +89,11 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
       }
     }
 
-    if (!borrowMarket && !(supplyMarket && supplyMarket.address === market)) {
+    if (
+      !borrowMarket &&
+      !(supplyMarket && supplyMarket.address === market) &&
+      !(await comptroller.actionPaused(market, 2))
+    ) {
       borrowMarket = await ethers.getContractAt(VTOKEN_ABI, market, signer);
       borrowUnderlying = await ethers.getContractAt(ERC20_ABI, await borrowMarket.underlying(), signer);
     }
@@ -138,6 +142,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     supplyAmountScaled,
   );
   borrowAmount = borrowAmount.isZero() ? BigNumber.from(1) : borrowAmount;
+
   await borrowMarket?.borrow(borrowAmount);
   expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
@@ -150,13 +155,20 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   await supplyMarket?.redeemUnderlying(parseUnits("0.01", supplyUnderlyingDecimals));
   expect(await supplyUnderlying?.balanceOf(poolSupplier)).to.gt(supplyUnderlyingBalance);
 
-  console.log(`${pool.name} > set storage`);
-  await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
+  const comptrollerOwner = await comptroller.owner();
+  if (NORMAL_TIMELOCK != comptrollerOwner) {
+    console.log(
+      `Skipping the set storage test because the owner of the comptroller (${comptrollerOwner}) is not (${NORMAL_TIMELOCK})`,
+    );
+  } else {
+    console.log(`${pool.name} > set storage`);
+    await setBalance(NORMAL_TIMELOCK, ethers.utils.parseEther("5"));
 
-  const originalOracle = await comptroller.oracle();
-  await comptroller.connect(timelockSigner).setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
-  expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
-  await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
+    const originalOracle = await comptroller.oracle();
+    await comptroller.connect(timelockSigner).setPriceOracle("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+    expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
+    await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
+  }
 };
 
 // NOTE: The default supplier for each pool will be VTreasury, if in case VTreasury has no

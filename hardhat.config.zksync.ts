@@ -7,6 +7,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
+import { ChainId } from "src/chains";
 
 import "./type-extensions";
 
@@ -50,7 +51,7 @@ task("test", "Update fork config")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
 
-    if (hre.network.name === "zkSyncTestNode") {
+    if (hre.network.name === "zksynctestnode") {
       if (!process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]) {
         throw new Error("ZKSYNC_ERA_LOCAL_TEST_NODE env variable is not set");
       }
@@ -71,7 +72,7 @@ task("test", "Update fork config")
           allowUnlimitedContractSize: false,
           loggingEnabled: false,
           forking:
-            hre.network.name === "zkSyncTestNode"
+            hre.network.name === "zksynctestnode"
               ? {
                   enabled: false,
                   url: process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"] as string,
@@ -93,6 +94,13 @@ task("test", "Update fork config")
 
     await runSuper(taskArguments);
   });
+
+// Pretend that Cancun hardfork was activated at block 0
+const assumeCancun = {
+  hardforkHistory: {
+    cancun: 0,
+  },
+};
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -132,6 +140,11 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       loggingEnabled: false,
       zksync: true,
+      chains: {
+        [ChainId.zksyncmainnet]: assumeCancun,
+        [ChainId.zksyncsepolia]: assumeCancun,
+        [ChainId.zkSyncTestNode]: assumeCancun,
+      },
     },
     zksyncsepolia: {
       url: process.env.ARCHIVE_NODE_zksyncsepolia || "https://sepolia.era.zksync.dev",
@@ -147,9 +160,9 @@ const config: HardhatUserConfig = {
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
       zksync: true,
     },
-    zkSyncTestNode: {
+    zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 260,
+      chainId: 300, // change it to 324 for zksyncmainnet
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,
