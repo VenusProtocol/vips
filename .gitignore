@@ -36,3 +36,4 @@ gnosisTXBuilder.json
 **/.DS_Store
 
 .cache
+.vscode/settings.json

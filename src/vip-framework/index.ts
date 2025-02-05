@@ -3,7 +3,7 @@ import { loadFixture, mine, mineUpTo, time } from "@nomicfoundation/hardhat-netw
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import cliProgress from "cli-progress";
-import { Contract, ContractInterface } from "ethers";
+import { BigNumber, Contract, ContractInterface } from "ethers";
 import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
@@ -16,7 +16,10 @@ import {
   getPayload,
   getSourceChainId,
   initMainnetUser,
+  mineBlocks,
+  mineOnZksync,
   setForkBlock,
+  validateTargetAddresses,
 } from "../utils";
 import ENDPOINT_ABI from "./abi/LzEndpoint.json";
 import OMNICHAIN_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
@@ -163,6 +166,10 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       const { targets, signatures, values, meta } = proposal;
       const proposalIdBefore = await governorProxy.callStatic.proposalCount();
       let tx;
+
+      // Validates target address
+      await validateTargetAddresses(targets, signatures);
+
       if (proposal.type === undefined || proposal.type === null) {
         tx = await governorProxy
           .connect(proposer)
@@ -208,7 +215,8 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
   let executor: Contract;
   let payload: string;
   let proposalId: number;
-  let targets: any[];
+  let targets: string[];
+  let signatures: string[];
   let proposalType: ProposalType;
   const provider = ethers.provider;
 
@@ -218,13 +226,15 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
       proposalId++;
-      [targets, , , , proposalType] = ethers.utils.defaultAbiCoder.decode(
+      [targets, , signatures, , proposalType] = ethers.utils.defaultAbiCoder.decode(
         ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
         payload,
       );
+      // Validates target address
     });
 
     it("should be queued succesfully", async () => {
+      await validateTargetAddresses(targets, signatures);
       const impersonatedLibrary = await initMainnetUser(
         NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].LZ_LIBRARY,
         ethers.utils.parseEther("100"),
@@ -234,6 +244,7 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         ENDPOINT_ABI,
         provider,
       );
+
       const srcAddress = ethers.utils.solidityPack(
         ["address", "address"],
         [OMNICHAIN_PROPOSAL_SENDER, OMNICHAIN_GOVERNANCE_EXECUTOR],
@@ -241,7 +252,16 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       const srcChainId = getSourceChainId(FORKED_NETWORK as REMOTE_NETWORKS);
       const inboundNonce = await endpoint.connect(impersonatedLibrary).getInboundNonce(srcChainId, srcAddress);
       const gasLimit = calculateGasForAdapterParam(targets.length);
-      const tx = await endpoint
+
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber; gasLimit: number } = { gasLimit: gasLimit };
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      await endpoint
         .connect(impersonatedLibrary)
         .receivePayload(
           srcChainId,
@@ -250,17 +270,33 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
           inboundNonce.add(1),
           gasLimit,
           ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [payload, proposalId]),
-          { gasLimit: gasLimit },
+          txnParams,
         );
-      await tx.wait();
+
       expect(await executor.queued(proposalId)).to.be.true;
     });
 
     it("should be executed successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + DELAY_BLOCKS[proposalType]);
+      if (FORKED_NETWORK == "zksyncsepolia" || FORKED_NETWORK == "zksyncmainnet") {
+        await mineOnZksync(DELAY_BLOCKS[proposalType]);
+        const [signer] = await ethers.getSigners();
+        await initMainnetUser(signer.address, ethers.utils.parseEther("2"));
+      } else {
+        await mine(DELAY_BLOCKS[proposalType]);
+      }
       const blockchainProposal = await executor.proposals(proposalId);
-      await time.increaseTo(blockchainProposal.eta.toNumber());
-      const tx = await executor.execute(proposalId);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [blockchainProposal.eta.toHexString()]);
+      await mineBlocks();
+
+      const feeData = await ethers.provider.getFeeData();
+      const txnParams: { maxFeePerGas?: BigNumber } = {};
+
+      if (feeData.maxFeePerGas) {
+        // Sometimes the gas estimation is wrong with some networks like zksync
+        txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
+      }
+
+      const tx = await executor.execute(proposalId, txnParams);
 
       if (options.callbackAfterExecution) {
         await options.callbackAfterExecution(tx);
