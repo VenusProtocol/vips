@@ -8,7 +8,6 @@ export type SUPPORTED_NETWORKS =
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "zksyncsepolia"
-  | "unichainsepolia"
   | "zksyncmainnet"
   | "opsepolia"
   | "opmainnet"
