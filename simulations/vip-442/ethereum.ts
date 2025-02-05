@@ -31,7 +31,7 @@ const ONE_YEAR = 365 * 24 * 3600;
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-forking(21771897, async () => {
+forking(21779026, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -107,10 +107,24 @@ forking(21771897, async () => {
             expect(await vTokenContract.owner()).to.equal(NORMAL_TIMELOCK);
           });
 
-          const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
+          let multiplier;
+          let vTokenSupply;
 
-          it(`should have initial supply of 1000000000000`, async () => {
-            expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal("1000000000000");
+          // Initial exchange rate should account for decimal transformations such that
+          // the string representation is the same (i.e. 1 vToken == 1 underlying)
+          if (vTokenSpec.underlying.decimals > vTokenSpec.decimals) {
+            multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
+            vTokenSupply = initialSupply.amount.div(multiplier);
+          } else {
+            multiplier = 10 ** (vTokenSpec.decimals - vTokenSpec.underlying.decimals);
+            vTokenSupply = initialSupply.amount.mul(multiplier);
+          }
+          
+          const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
+          const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
+
+          it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
+            expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
           });
 
           it(`should have balance of underlying = ${underlyingSupplyString} ${market.vToken.underlying.symbol}`, async () => {

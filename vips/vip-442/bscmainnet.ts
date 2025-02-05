@@ -27,21 +27,21 @@ export const tokens: Token[] = [
     decimals: 6,
     symbol: "yvUSDC-1",
     oracle: yvUSDC_1_ORACLE,
-    price: parseUnits("1.04967102602048006270368044", 42),
+    price: parseUnits("1.049977316295657309656843130000000000000000", 42),
   },
   {
     address: "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa",
     decimals: 6,
     symbol: "yvUSDT-1",
     oracle: yvUSDT_1_ORACLE,
-    price: parseUnits("1.02780489556754051804754", 42),
+    price: parseUnits("1.027280878861664816933301940000000000000000", 42),
   },
   {
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8",
     decimals: 18,
     symbol: "yvUSDS-1",
     oracle: yvUSDS_1_ORACLE,
-    price: parseUnits("1.028794035181029294", 18),
+    price: parseUnits("1.029165904957293506", 18),
   },
 ];
 
@@ -96,7 +96,7 @@ export const markets: Market[] = [
       protocolSeizeShare: parseUnits("0.05", 18),
     },
     initialSupply: {
-      amount: parseUnits("10000", 6),
+      amount: parseUnits("9533.021607", 6),
       vTokenReceiver: VTREASURY,
     },
     interestRateModel: {
@@ -126,7 +126,7 @@ export const markets: Market[] = [
       protocolSeizeShare: parseUnits("0.05", 18),
     },
     initialSupply: {
-      amount: parseUnits("10000", 6),
+      amount: parseUnits("8321.541317", 6),
       vTokenReceiver: VTREASURY,
     },
     interestRateModel: {
@@ -144,7 +144,7 @@ export const markets: Market[] = [
       symbol: "vyvUSDS-1_Core",
       underlying: tokens[2],
       decimals: 8,
-      exchangeRate: parseUnits("1", 28),
+      exchangeRate: parseUnits("1.0000000000002461286708091704", 28),
       comptroller: COMPTROLLER_CORE,
     },
     riskParameters: {
@@ -156,7 +156,7 @@ export const markets: Market[] = [
       protocolSeizeShare: parseUnits("0.05", 18),
     },
     initialSupply: {
-      amount: parseUnits("10000", 18),
+      amount: parseUnits("9723.178564012393153016", 18),
       vTokenReceiver: VTREASURY,
     },
     interestRateModel: {

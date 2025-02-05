@@ -76,7 +76,7 @@ export const market: Market = {
     symbol: "vyvWETH-1_Core",
     underlying: token,
     decimals: 8,
-    exchangeRate: parseUnits("1", 28),
+    exchangeRate: parseUnits("1.0000000008559240874742259986", 28),
     comptroller: COMPTROLLER_CORE,
   },
   riskParameters: {
@@ -88,7 +88,7 @@ export const market: Market = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("3", 18),
+    amount: parseUnits("3.920893913355987542", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
