@@ -143,7 +143,7 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   const totalBorrows = await borrowMarket?.totalBorrows();
   const borrowCap = await comptroller.borrowCaps(borrowMarket?.address);
 
-  if (!totalBorrows.add(borrowAmount).gt(borrowCap) && comptroller.borrowCaps(borrowMarket?.address) > 0) {
+  if (totalBorrows.add(borrowAmount).lt(borrowCap)) {
     await borrowMarket?.borrow(borrowAmount);
     expect(await borrowUnderlying?.balanceOf(poolSupplier)).to.gt(borrowUnderlyingBalance);
 
