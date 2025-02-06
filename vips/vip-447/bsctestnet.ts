@@ -100,7 +100,7 @@ export const market: Market = {
   },
 };
 
-const vip443 = () => {
+const vip447 = () => {
   const meta = {
     version: "v2",
     title: "Add yvWETH-1 to the Core pool",
@@ -222,4 +222,4 @@ const vip443 = () => {
   );
 };
 
-export default vip443;
+export default vip447;
