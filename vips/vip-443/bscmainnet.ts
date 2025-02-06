@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { tokens } from "../vip-442/bsctestnet";
+import { tokens } from "../vip-445/bsctestnet";
 
 const { POOL_REGISTRY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
@@ -165,7 +165,7 @@ const vip443 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           BaseAssets[0],
-          [...tokens.map(t => t.address), token.address],
+          [...tokens.map((t: Token) => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
         dstChainId: LzChainId.ethereum,
@@ -175,7 +175,7 @@ const vip443 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           BaseAssets[1],
-          [...tokens.map(t => t.address), token.address],
+          [...tokens.map((t: Token) => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
         dstChainId: LzChainId.ethereum,
@@ -185,7 +185,7 @@ const vip443 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           BaseAssets[2],
-          [...tokens.map(t => t.address), token.address],
+          [...tokens.map((t: Token) => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
         dstChainId: LzChainId.ethereum,
@@ -195,7 +195,7 @@ const vip443 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           BaseAssets[3],
-          [...tokens.map(t => t.address), token.address],
+          [...tokens.map((t: Token) => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
         dstChainId: LzChainId.ethereum,
@@ -205,7 +205,7 @@ const vip443 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [
           BaseAssets[4],
-          [...tokens.map(t => t.address), token.address],
+          [...tokens.map((t: Token) => t.address), token.address],
           [...tokens.map(() => [CONVERSION_INCENTIVE, 1]), [CONVERSION_INCENTIVE, 1]],
         ],
         dstChainId: LzChainId.ethereum,

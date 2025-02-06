@@ -84,8 +84,8 @@ forking(21779586, async () => {
           expect(await vTokenContract.owner()).to.equal(NORMAL_TIMELOCK);
         });
 
-        let multiplier;
-        let vTokenSupply;
+        let multiplier: any;
+        let vTokenSupply: any;
 
         // Initial exchange rate should account for decimal transformations such that
         // the string representation is the same (i.e. 1 vToken == 1 underlying)
