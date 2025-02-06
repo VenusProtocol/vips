@@ -12,7 +12,6 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip439 from "../../vips/vip-439/bscmainnet";
 import vip442, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-442/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -21,6 +20,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const USDT = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+const USDS = "0xdC035D45d973E3EC169d2276DDab16f1e407384F";
 const HOLDERS = {
   [markets[0].vToken.underlying.address]: "0xC113c4D519Af3E9EFB1adb80Dbd9e0f20591F48d",
   [markets[1].vToken.underlying.address]: "0xA55713A301F23B02DCBE36321164a78614e368dF",
@@ -31,7 +31,7 @@ const ONE_YEAR = 365 * 24 * 3600;
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
-forking(21779586, async () => {
+forking(21787505, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -40,8 +40,10 @@ forking(21779586, async () => {
   before(async () => {
     const usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
     const usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
+    const usds = new ethers.Contract(USDS, ERC20_ABI, provider);
     await setMaxStalePeriod(oracle, usdt);
     await setMaxStalePeriod(oracle, usdc);
+    await setMaxStalePeriod(oracle, usds);
 
     for (const market of markets) {
       await impersonateAccount(HOLDERS[market.vToken.underlying.address]);
@@ -61,7 +63,6 @@ forking(21779586, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip439", await vip439(ONE_YEAR));
   testForkedNetworkVipCommands("vip442", await vip442());
 
   describe("Post-VIP state", () => {

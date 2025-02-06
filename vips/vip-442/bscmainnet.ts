@@ -27,21 +27,21 @@ export const tokens: Token[] = [
     decimals: 6,
     symbol: "yvUSDC-1",
     oracle: yvUSDC_1_ORACLE,
-    price: parseUnits("1.04999495388567", 30),
+    price: parseUnits("1.04980005086922", 30),
   },
   {
     address: "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa",
     decimals: 6,
     symbol: "yvUSDT-1",
     oracle: yvUSDT_1_ORACLE,
-    price: parseUnits("1.02728047118582", 30),
+    price: parseUnits("1.027182503071620", 30),
   },
   {
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8",
     decimals: 18,
     symbol: "yvUSDS-1",
     oracle: yvUSDS_1_ORACLE,
-    price: parseUnits("1.029165904957293506", 18),
+    price: parseUnits("1.030409516280000868", 18),
   },
 ];
 
