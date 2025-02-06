@@ -12,7 +12,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip442, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-442/bscmainnet";
+import vip445, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-445/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -27,7 +27,6 @@ const HOLDERS = {
   [markets[2].vToken.underlying.address]: "0x602DA189F5aDa033E9aC7096Fc39C7F44a77e942",
 };
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
-const ONE_YEAR = 365 * 24 * 3600;
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
@@ -63,7 +62,7 @@ forking(21787505, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip442", await vip442());
+  testForkedNetworkVipCommands("vip445", await vip445());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

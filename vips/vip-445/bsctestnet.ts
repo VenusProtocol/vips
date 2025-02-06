@@ -169,7 +169,7 @@ export const markets: Market[] = [
   },
 ];
 
-const vip442 = () => {
+const vip445 = () => {
   const meta = {
     version: "v2",
     title: "Add yvUSDC-1, yvUSDT-1 and yvUSDS-1 to the Core pool",
@@ -244,4 +244,4 @@ const vip442 = () => {
   );
 };
 
-export default vip442;
+export default vip445;

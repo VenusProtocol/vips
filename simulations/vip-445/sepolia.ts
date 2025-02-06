@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip442, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-442/bsctestnet";
+import vip445, { COMPTROLLER_CORE, markets, tokens } from "../../vips/vip-445/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -34,7 +34,7 @@ forking(7644253, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip442", await vip442());
+  testForkedNetworkVipCommands("vip445", await vip445());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

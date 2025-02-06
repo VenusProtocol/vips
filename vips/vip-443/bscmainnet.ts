@@ -7,7 +7,7 @@ import { makeProposal } from "src/utils";
 
 import { tokens } from "../vip-442/bsctestnet";
 
-const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
+const { POOL_REGISTRY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["ethereum"];
 
 export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
