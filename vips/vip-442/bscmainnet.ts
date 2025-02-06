@@ -97,7 +97,7 @@ export const markets: Market[] = [
     },
     initialSupply: {
       amount: parseUnits("9533.021607", 6),
-      vTokenReceiver: VTREASURY,
+      vTokenReceiver: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7",
     },
     interestRateModel: {
       address: "0x322072b84434609ff64333A125516055B5B4405F",
@@ -127,7 +127,7 @@ export const markets: Market[] = [
     },
     initialSupply: {
       amount: parseUnits("8321.541317", 6),
-      vTokenReceiver: VTREASURY,
+      vTokenReceiver: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7",
     },
     interestRateModel: {
       address: "0x322072b84434609ff64333A125516055B5B4405F",
@@ -157,7 +157,7 @@ export const markets: Market[] = [
     },
     initialSupply: {
       amount: parseUnits("9723.178564012393153016", 18),
-      vTokenReceiver: VTREASURY,
+      vTokenReceiver: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7",
     },
     interestRateModel: {
       address: "0x322072b84434609ff64333A125516055B5B4405F",

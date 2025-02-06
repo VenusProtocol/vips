@@ -89,7 +89,7 @@ export const market: Market = {
   },
   initialSupply: {
     amount: parseUnits("3.920893913355987542", 18),
-    vTokenReceiver: VTREASURY,
+    vTokenReceiver: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7",
   },
   interestRateModel: {
     address: "0x322072b84434609ff64333A125516055B5B4405F",
