@@ -208,7 +208,7 @@ const vip002 = () => {
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setMinDstGas(uint16,uint16,uint256)",
-      params: [LzChainId.basesepolia, 0,  MIN_DEST_GAS],
+      params: [LzChainId.basesepolia, 0, MIN_DEST_GAS],
     },
     {
       target: XVS_BRIDGE_ADMIN_PROXY,

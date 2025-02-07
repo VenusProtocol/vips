@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
@@ -9,21 +9,21 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 
 import vip002, {
   ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
+  BASE_SEPOLIA_TRUSTED_REMOTE,
   BNB_TESTNET_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  MAX_DAILY_SEND_LIMIT,
+  MIN_DEST_GAS,
   OPBNB_TESTNET_TRUSTED_REMOTE,
   OP_SEPOLIA_TRUSTED_REMOTE,
   SEPOLIA_TRUSTED_REMOTE,
+  SINGLE_RECEIVE_LIMIT,
+  SINGLE_SEND_LIMIT,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
   ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
-  BASE_SEPOLIA_TRUSTED_REMOTE,
-  MAX_DAILY_RECEIVE_LIMIT,
-  MAX_DAILY_SEND_LIMIT,
-  MIN_DEST_GAS,
-  SINGLE_RECEIVE_LIMIT,
-  SINGLE_SEND_LIMIT
 } from "../../../proposals/unichainsepolia/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
@@ -33,11 +33,25 @@ const { unichainsepolia } = NETWORK_ADDRESSES;
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
 type NetworkTrustedRemoteMap = {
-  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia" | "basesepolia"]: string;
+  [key in
+    | "bsctestnet"
+    | "opbnbtestnet"
+    | "sepolia"
+    | "arbitrumsepolia"
+    | "zksyncsepolia"
+    | "opsepolia"
+    | "basesepolia"]: string;
 };
 
 type ChainIds = {
-  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia" | "basesepolia"]: number;
+  [key in
+    | "bsctestnet"
+    | "opbnbtestnet"
+    | "sepolia"
+    | "arbitrumsepolia"
+    | "zksyncsepolia"
+    | "opsepolia"
+    | "basesepolia"]: number;
 };
 
 const chainIds: ChainIds = {
@@ -47,7 +61,7 @@ const chainIds: ChainIds = {
   arbitrumsepolia: LzChainId.arbitrumsepolia,
   zksyncsepolia: LzChainId.zksyncsepolia,
   opsepolia: LzChainId.opsepolia,
-  basesepolia: LzChainId.basesepolia
+  basesepolia: LzChainId.basesepolia,
 };
 
 const networksTrustedRemote: NetworkTrustedRemoteMap = {
@@ -57,7 +71,7 @@ const networksTrustedRemote: NetworkTrustedRemoteMap = {
   arbitrumsepolia: ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
   zksyncsepolia: ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
   opsepolia: OP_SEPOLIA_TRUSTED_REMOTE,
-  basesepolia: BASE_SEPOLIA_TRUSTED_REMOTE
+  basesepolia: BASE_SEPOLIA_TRUSTED_REMOTE,
 };
 
 forking(4547246, async () => {

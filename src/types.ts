@@ -96,4 +96,5 @@ export enum LzChainId {
   opmainnet = 111,
   basesepolia = 10245,
   basemainnet = 184,
+  unichainsepolia = 10333,
 }
