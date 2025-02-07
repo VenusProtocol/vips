@@ -10,13 +10,13 @@ import vip445, {
 import { RemoteBridgeEntry } from "../../vips/vip-445/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(7656672, async () => {
+forking(23553087, async () => {
   await checkXVSBridge(
     LzChainId.unichainsepolia,
-    NETWORK_ADDRESSES.sepolia,
+    NETWORK_ADDRESSES.basesepolia,
     vip445,
     UNICHAIN_SEPOLIA_TRUSTED_REMOTE,
-    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.sepolia) as RemoteBridgeEntry,
+    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.basesepolia) as RemoteBridgeEntry,
     MIN_DST_GAS,
   );
 });

@@ -70,13 +70,13 @@ forking(48064651, async () => {
 
   describe("Post-VIP behavior", () => {
     it("Should match trusted remote address", async () => {
-      expect(await bridge.getTrustedRemoteAddress(LzChainId.basesepolia)).to.equal(
+      expect(await bridge.getTrustedRemoteAddress(LzChainId.unichainsepolia)).to.equal(
         UNICHAIN_SEPOLIA_TRUSTED_REMOTE.toLowerCase(),
       );
     });
 
     it("Should match minDestGas value", async () => {
-      expect(await bridge.minDstGasLookup(LzChainId.basesepolia, 0)).to.equal(MIN_DST_GAS);
+      expect(await bridge.minDstGasLookup(LzChainId.unichainsepolia, 0)).to.equal(MIN_DST_GAS);
     });
 
     describe("Limits", () => {
@@ -87,23 +87,25 @@ forking(48064651, async () => {
       });
 
       it("Should match single send transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.basesepolia)).to.equal(
+        expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.unichainsepolia)).to.equal(
           remoteBridgeEntry.maxSingleTransactionLimit,
         );
       });
 
       it("Should match single receive transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.basesepolia)).to.equal(
+        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.unichainsepolia)).to.equal(
           remoteBridgeEntry.maxSingleReceiveTransactionLimit,
         );
       });
 
       it("Should match max daily send limit", async () => {
-        expect(await bridge.chainIdToMaxDailyLimit(LzChainId.basesepolia)).to.equal(remoteBridgeEntry.maxDailyLimit);
+        expect(await bridge.chainIdToMaxDailyLimit(LzChainId.unichainsepolia)).to.equal(
+          remoteBridgeEntry.maxDailyLimit,
+        );
       });
 
       it("Should match max daily receive limit", async () => {
-        expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.basesepolia)).to.equal(
+        expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.unichainsepolia)).to.equal(
           remoteBridgeEntry.maxDailyReceiveLimit,
         );
       });
@@ -112,7 +114,13 @@ forking(48064651, async () => {
     it("Should emit an event on successfull bridging of XVS", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
-        await bridge.estimateSendFee(LzChainId.basesepolia, receiverAddressBytes32, amount, false, defaultAdapterParams)
+        await bridge.estimateSendFee(
+          LzChainId.unichainsepolia,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
       ).nativeFee;
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
@@ -122,7 +130,7 @@ forking(48064651, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.basesepolia,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -130,7 +138,7 @@ forking(48064651, async () => {
           ),
       )
         .to.be.emit(bridge, "SendToChain")
-        .withArgs(LzChainId.basesepolia, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(LzChainId.unichainsepolia, XVS_HOLDER, receiverAddressBytes32, amount);
       const bridgeBalAfter = await xvs.balanceOf(XVSProxyOFTSrc);
 
       expect(bridgeBalAfter.sub(bridgeBalPrev)).to.equal(amount);
@@ -141,14 +149,20 @@ forking(48064651, async () => {
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
       const nativeFee = (
-        await bridge.estimateSendFee(LzChainId.basesepolia, receiverAddressBytes32, amount, false, defaultAdapterParams)
+        await bridge.estimateSendFee(
+          LzChainId.unichainsepolia,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
       ).nativeFee;
       await expect(
         bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.basesepolia,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -161,7 +175,13 @@ forking(48064651, async () => {
       const amount = parseUnits("2500", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, ethers.constants.MaxUint256); // Let's approve enough XVS
       const nativeFee = (
-        await bridge.estimateSendFee(LzChainId.basesepolia, receiverAddressBytes32, amount, false, defaultAdapterParams)
+        await bridge.estimateSendFee(
+          LzChainId.unichainsepolia,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
       ).nativeFee;
 
       for (let i = 0; i < 8; i++) {
@@ -169,7 +189,7 @@ forking(48064651, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.basesepolia,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -181,7 +201,7 @@ forking(48064651, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.basesepolia,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
