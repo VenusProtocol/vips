@@ -10,8 +10,14 @@ declare module "hardhat/types/runtime" {
       | "ethereum"
       | "opbnbtestnet"
       | "opbnbmainnet"
+      | "arbitrumone"
       | "arbitrumsepolia"
       | "zksyncsepolia"
-      | "zksyncmainnet";
+      | "zksyncmainnet"
+      | "basesepolia"
+      | "basemainnet"
+      | "opsepolia"
+      | "opmainnet"
+      | "unichainsepolia";
   }
 }
