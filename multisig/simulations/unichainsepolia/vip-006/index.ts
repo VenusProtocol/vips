@@ -9,6 +9,7 @@ import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
 import vip000 from "../../../proposals/unichainsepolia/vip-000";
 import vip001 from "../../../proposals/unichainsepolia/vip-001";
+import vip002 from "../../../proposals/unichainsepolia/vip-002";
 import vip003 from "../../../proposals/unichainsepolia/vip-003";
 import vip006, {
   COMPTROLLER_CORE,
@@ -30,6 +31,7 @@ forking(4731488, async () => {
   before(async () => {
     await pretendExecutingVip(await vip000());
     await pretendExecutingVip(await vip001());
+    await pretendExecutingVip(await vip002());
     await pretendExecutingVip(await vip003());
     await pretendExecutingVip(await vip006());
   });

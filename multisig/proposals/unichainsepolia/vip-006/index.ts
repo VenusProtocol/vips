@@ -35,7 +35,11 @@ const vip006 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [PRIME_LIQUIDITY_PROVIDER, "setMaxTokensDistributionSpeed(address[],uint256[])", unichainsepolia.GUARDIAN],
+      params: [
+        PRIME_LIQUIDITY_PROVIDER,
+        "setMaxTokensDistributionSpeed(address[],uint256[])",
+        unichainsepolia.GUARDIAN,
+      ],
     },
     {
       target: ACM,
