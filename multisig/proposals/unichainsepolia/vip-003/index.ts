@@ -63,17 +63,30 @@ const vip003 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "addPool(string,address,uint256,uint256,uint256)", unichainsepolia.GUARDIAN],
+      params: [ZERO_ADDRESS, "setForcedLiquidation(address,bool)", unichainsepolia.GUARDIAN],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setPoolName(address,string)", unichainsepolia.GUARDIAN],
+      params: [
+        unichainsepolia.POOL_REGISTRY,
+        "addPool(string,address,uint256,uint256,uint256)",
+        unichainsepolia.GUARDIAN,
+      ],
     },
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "updatePoolMetadata(address,VenusPoolMetaData)", unichainsepolia.GUARDIAN],
+      params: [unichainsepolia.POOL_REGISTRY, "setPoolName(address,string)", unichainsepolia.GUARDIAN],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [
+        unichainsepolia.POOL_REGISTRY,
+        "updatePoolMetadata(address,VenusPoolMetaData)",
+        unichainsepolia.GUARDIAN,
+      ],
     },
     {
       target: ACM,

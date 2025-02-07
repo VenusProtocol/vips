@@ -8,7 +8,6 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip000 from "../../../proposals/unichainsepolia/vip-000";
 import vip003, {
   COMPTROLLER_CORE,
   USDC,
@@ -184,7 +183,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Core: "",
 };
 
-forking(4656182, async () => {
+forking(12067445, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
@@ -199,7 +198,6 @@ forking(4656182, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip000());
       await pretendExecutingVip(await vip003());
 
       for (const model of interestRateModels) {
