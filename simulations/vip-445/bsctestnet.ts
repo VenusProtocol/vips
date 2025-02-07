@@ -25,7 +25,7 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(48064651, async () => {
+forking(48077026, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -184,7 +184,7 @@ forking(48064651, async () => {
         )
       ).nativeFee;
 
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 7; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(

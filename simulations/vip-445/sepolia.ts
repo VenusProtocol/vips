@@ -10,7 +10,7 @@ import vip445, {
 import { RemoteBridgeEntry } from "../../vips/vip-445/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(7656672, async () => {
+forking(7660147, async () => {
   await checkXVSBridge(
     LzChainId.unichainsepolia,
     NETWORK_ADDRESSES.sepolia,

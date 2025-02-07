@@ -118,8 +118,8 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
 const vip407 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-500 Enable Base sepolia bridge",
-    description: `#### Summary Enable Base bridge`,
+    title: "VIP-500 Enable Unichain sepolia bridge",
+    description: `#### Summary Enable Unichain sepolia bridge`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
