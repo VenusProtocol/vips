@@ -31,7 +31,6 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opsepolia: 30000000,
   unichainsepolia: 30000000,
   opmainnet: 30000000,
-  unichainsepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
