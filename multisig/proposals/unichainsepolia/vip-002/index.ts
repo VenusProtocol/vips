@@ -16,7 +16,14 @@ export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e64
 export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
 export const ARBITRUM_SEPOLIA_TRUSTED_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 export const ZKSYNC_SEPOLIA_TRUSTED_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
+export const BASE_SEPOLIA_TRUSTED_REMOTE = "0xd5cd1fd17b724a391c1bce55eb9d88e3205eed60";
 export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
+
+export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
+export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
+export const MIN_DEST_GAS = "300000";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 
@@ -193,6 +200,37 @@ const vip002 = () => {
       signature: "setTrustedRemoteAddress(uint16,bytes)",
       params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
     },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.basesepolia, BASE_SEPOLIA_TRUSTED_REMOTE],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [LzChainId.basesepolia, 0,  MIN_DEST_GAS],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [LzChainId.basesepolia, MAX_DAILY_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [LzChainId.basesepolia, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [LzChainId.basesepolia, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [LzChainId.basesepolia, SINGLE_RECEIVE_LIMIT],
+    },
+
     {
       target: XVS_BRIDGE_ADMIN_PROXY,
       signature: "setWhitelist(address,bool)",

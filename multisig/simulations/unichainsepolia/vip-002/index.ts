@@ -18,6 +18,12 @@ import vip002, {
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
   ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
+  BASE_SEPOLIA_TRUSTED_REMOTE,
+  MAX_DAILY_RECEIVE_LIMIT,
+  MAX_DAILY_SEND_LIMIT,
+  MIN_DEST_GAS,
+  SINGLE_RECEIVE_LIMIT,
+  SINGLE_SEND_LIMIT
 } from "../../../proposals/unichainsepolia/vip-002";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
@@ -26,19 +32,12 @@ import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 const { unichainsepolia } = NETWORK_ADDRESSES;
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
-export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
-export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
-export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
-
-const MIN_DEST_GAS = "300000";
-
 type NetworkTrustedRemoteMap = {
-  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia"]: string;
+  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia" | "basesepolia"]: string;
 };
 
 type ChainIds = {
-  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia"]: number;
+  [key in "bsctestnet" | "opbnbtestnet" | "sepolia" | "arbitrumsepolia" | "zksyncsepolia" | "opsepolia" | "basesepolia"]: number;
 };
 
 const chainIds: ChainIds = {
@@ -48,6 +47,7 @@ const chainIds: ChainIds = {
   arbitrumsepolia: LzChainId.arbitrumsepolia,
   zksyncsepolia: LzChainId.zksyncsepolia,
   opsepolia: LzChainId.opsepolia,
+  basesepolia: LzChainId.basesepolia
 };
 
 const networksTrustedRemote: NetworkTrustedRemoteMap = {
@@ -57,6 +57,7 @@ const networksTrustedRemote: NetworkTrustedRemoteMap = {
   arbitrumsepolia: ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
   zksyncsepolia: ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
   opsepolia: OP_SEPOLIA_TRUSTED_REMOTE,
+  basesepolia: BASE_SEPOLIA_TRUSTED_REMOTE
 };
 
 forking(4547246, async () => {
