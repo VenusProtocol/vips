@@ -5,6 +5,8 @@ export type SUPPORTED_NETWORKS =
   | "bscmainnet"
   | "sepolia"
   | "ethereum"
+  | "arbitrumsepolia"
+  | "arbitrumone"
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "zksyncsepolia"
