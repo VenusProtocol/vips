@@ -30,7 +30,6 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 32000000,
   arbitrumone: 32000000,
   opsepolia: 60000000,
-  unichainsepolia: 30000000,
   opmainnet: 60000000,
   basesepolia: 60000000,
   basemainnet: 198000000,
