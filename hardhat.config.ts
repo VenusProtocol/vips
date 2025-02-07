@@ -30,10 +30,10 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   arbitrumsepolia: 32000000,
   arbitrumone: 32000000,
   opsepolia: 60000000,
-  unichainsepolia: 30000000,
   opmainnet: 60000000,
   basesepolia: 60000000,
   basemainnet: 198000000,
+  unichainsepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -126,6 +126,7 @@ const config: HardhatUserConfig = {
         [ChainId.opmainnet]: assumeCancun,
         [ChainId.basesepolia]: assumeCancun,
         [ChainId.basemainnet]: assumeCancun,
+        [ChainId.unichainsepolia]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -203,10 +204,9 @@ const config: HardhatUserConfig = {
     },
     unichainsepolia: {
       url: process.env.ARCHIVE_NODE_unichainsepolia || "https://sepolia.unichain.org",
-      chainId: 1301,
-      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainsepolia,
-
+      chainId: ChainId.unichainsepolia,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainsepolia,
     },
   },
   paths: {
