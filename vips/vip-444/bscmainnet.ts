@@ -7,19 +7,6 @@ import { makeProposal } from "src/utils";
 const { POOL_REGISTRY, VTREASURY, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["ethereum"];
 
 export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
-export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
-export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
-export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0";
-export const WETH_PRIME_CONVERTER = "0xb8fD67f215117FADeF06447Af31590309750529D";
-export const XVS_VAULT_CONVERTER = "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407";
-export const BaseAssets = [
-  "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT USDTTokenConverter BaseAsset
-  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC USDCTokenConverter BaseAsset
-  "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC WBTCTokenConverter BaseAsset
-  "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH WETHTokenConverter BaseAsset
-  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
-];
-const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
 type Token = {
   address: string;
@@ -83,7 +70,7 @@ export const market: Market = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("3", 18),
+    amount: parseUnits("2", 18),
     vTokenReceiver: "0x3e8734ec146c981e3ed1f6b582d447dde701d90c",
   },
   interestRateModel: {
@@ -157,36 +144,6 @@ const vip437 = () => {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[market.vToken.address], [2], true],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [token.address], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.ethereum,
       },
     ],

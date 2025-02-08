@@ -7,19 +7,6 @@ import { makeProposal } from "src/utils";
 const { POOL_REGISTRY, VTREASURY, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["sepolia"];
 
 export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
-export const USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
-export const USDC_PRIME_CONVERTER = "0x511a559a699cBd665546a1F75908f7E9454Bfc67";
-export const WBTC_PRIME_CONVERTER = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE";
-export const WETH_PRIME_CONVERTER = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
-export const XVS_VAULT_CONVERTER = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
-export const BaseAssets = [
-  "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTTokenConverter BaseAsset
-  "0x772d68929655ce7234C8C94256526ddA66Ef641E", // USDC USDCTokenConverter BaseAsset
-  "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b", // WBTC WBTCTokenConverter BaseAsset
-  "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHTokenConverter BaseAsset
-  "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSTokenConverter BaseAsset
-];
-const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
 type Token = {
   address: string;
@@ -83,7 +70,7 @@ export const market: Market = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("3", 18),
+    amount: parseUnits("2", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
@@ -98,7 +85,7 @@ export const market: Market = {
 const vip437 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-444",
+    title: "[Ethereum] New weETHs market in the Core pool",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -163,36 +150,6 @@ const vip437 = () => {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[market.vToken.address], [2], true],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [token.address], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [token.address], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.sepolia,
       },
     ],

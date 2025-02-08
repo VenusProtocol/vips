@@ -3,7 +3,7 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriod } from "src/utils";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
@@ -14,8 +14,23 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip444, { COMPTROLLER_CORE, market, token } from "../../vips/vip-444/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
+
+const USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
+const USDC_PRIME_CONVERTER = "0x511a559a699cBd665546a1F75908f7E9454Bfc67";
+const WBTC_PRIME_CONVERTER = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE";
+const WETH_PRIME_CONVERTER = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
+const XVS_VAULT_CONVERTER = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
+const converterBaseAssets = {
+  [USDT_PRIME_CONVERTER]: "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTTokenConverter BaseAsset
+  [USDC_PRIME_CONVERTER]: "0x772d68929655ce7234C8C94256526ddA66Ef641E", // USDC USDCTokenConverter BaseAsset
+  [WBTC_PRIME_CONVERTER]: "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b", // WBTC WBTCTokenConverter BaseAsset
+  [WETH_PRIME_CONVERTER]: "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHTokenConverter BaseAsset
+  [XVS_VAULT_CONVERTER]: "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSTokenConverter BaseAsset
+};
+const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 
@@ -45,7 +60,11 @@ forking(7651078, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip444", await vip444());
+  testForkedNetworkVipCommands("vip444", await vip444(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["MarketSupported"], [1]);
+    },
+  });
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
@@ -119,5 +138,16 @@ forking(7651078, async () => {
     });
 
     checkIsolatedPoolsComptrollers();
+
+    describe("Converters", () => {
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        const asset = market.vToken.underlying.address;
+        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset ${asset}`, async () => {
+          const result = await converterContract.conversionConfigurations(baseAsset, asset);
+          expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+        });
+      }
+    });
   });
 });
