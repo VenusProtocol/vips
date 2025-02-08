@@ -5,6 +5,8 @@ export type SUPPORTED_NETWORKS =
   | "bscmainnet"
   | "sepolia"
   | "ethereum"
+  | "arbitrumsepolia"
+  | "arbitrumone"
   | "opbnbtestnet"
   | "opbnbmainnet"
   | "zksyncsepolia"
@@ -94,4 +96,5 @@ export enum LzChainId {
   opmainnet = 111,
   basesepolia = 10245,
   basemainnet = 184,
+  unichainsepolia = 10333,
 }
