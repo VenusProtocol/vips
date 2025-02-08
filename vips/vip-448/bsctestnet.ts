@@ -82,7 +82,7 @@ export const market: Market = {
   },
 };
 
-const vip437 = () => {
+const vip448 = () => {
   const meta = {
     version: "v2",
     title: "[Ethereum] New weETHs market in the Core pool",
@@ -158,4 +158,4 @@ const vip437 = () => {
   );
 };
 
-export default vip437;
+export default vip448;

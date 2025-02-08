@@ -11,7 +11,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip444, { COMPTROLLER_CORE, market, token } from "../../vips/vip-444/bscmainnet";
+import vip448, { COMPTROLLER_CORE, market, token } from "../../vips/vip-448/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
@@ -60,7 +60,7 @@ forking(21801393, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip444", await vip444(), {
+  testForkedNetworkVipCommands("vip448", await vip448(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["MarketSupported"], [1]);
     },
