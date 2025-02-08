@@ -4,7 +4,7 @@ import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import { RemoteBridgeCommand, RemoteBridgeEntry } from "./types";
 
-export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60";
+export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
 
 export const MIN_DST_GAS = "300000";
 
