@@ -23,21 +23,27 @@ const assetConfigs: AssetConfig[] = [
   {
     name: "USDC",
     address: "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-    price: "",
-    feed: "",
+    price: "999954990000000000000000000000",
+    feed: "0xD15862FC3D5407A03B696548b6902D6464A69b8c",
     oracle: "redstone",
   },
-
   {
     name: "WETH",
     address: "0x4200000000000000000000000000000000000006",
-    price: "",
-    feed: "",
+    price: "2661700440190000000000",
+    feed: "0xe8D9FbC10e00ecc9f0694617075fDAF657a76FB2",
+    oracle: "redstone",
+  },
+  {
+    name: "XVS",
+    address: unichainmainnet.XVS,
+    price: "5590976720000000000",
+    feed: "0xb4fe9028A4D4D8B3d00e52341F2BB0798860532C",
     oracle: "redstone",
   },
 ];
 
-forking(8428680, async () => {
+forking(8452229, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
