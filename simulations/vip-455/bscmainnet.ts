@@ -1,7 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -10,15 +10,23 @@ import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip455, {
+  CORE_COMPTROLLER,
   MIN_DST_GAS,
   UNICHAIN_MAINNET_TRUSTED_REMOTE,
+  USDT,
+  USDT_AMOUNT_TO_DEX,
+  VANGUARD_TREASURY,
+  XVS_AMOUNT_TO_BRIDGE,
+  XVS_AMOUNT_TO_DEX,
   remoteBridgeEntries,
 } from "../../vips/vip-455/bscmainnet";
 import { RemoteBridgeEntry } from "../../vips/vip-455/types";
+import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
-import XVS_ABI from "./abi/XVS.json";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
+import ERC20_ABI from "./abi/erc20.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -30,20 +38,30 @@ forking(46534647, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
+  let usdt: Contract;
   let xvsHolderSigner: SignerWithAddress;
   let receiver: SignerWithAddress;
   let receiverAddressBytes32: string;
   let defaultAdapterParams: string;
   let resilientOracle: Contract;
+  let usdtBalanceOfVanguardTreasury: BigNumber;
+  let xvsBalanceOfVanguardTreasury: BigNumber;
+  let xvsBalanceOfComptroller: BigNumber;
 
-  beforeEach(async () => {
+  before(async () => {
     bridge = new ethers.Contract(XVSProxyOFTSrc, XVS_BRIDGE_SRC_ABI, provider);
-    xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
+    xvs = new ethers.Contract(bscmainnet.XVS, ERC20_ABI, provider);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+
+    usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
+
+    usdtBalanceOfVanguardTreasury = await usdt.balanceOf(VANGUARD_TREASURY);
+    xvsBalanceOfVanguardTreasury = await xvs.balanceOf(VANGUARD_TREASURY);
+    xvsBalanceOfComptroller = await xvs.balanceOf(CORE_COMPTROLLER);
   });
 
   testVip("vip-455", await vip455(), {
@@ -68,12 +86,31 @@ forking(46534647, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [6, 0],
       );
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
+      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["VenusGranted"], [2]);
     },
   });
 
   describe("Post-VIP behavior", () => {
     before(async () => {
       await setMaxStalePeriod(resilientOracle, xvs);
+    });
+
+    describe("transferred funds", () => {
+      it("check usdt balance of Vanguard Treasury", async () => {
+        const newBalance = await usdt.balanceOf(VANGUARD_TREASURY);
+        expect(newBalance).to.equals(usdtBalanceOfVanguardTreasury.add(USDT_AMOUNT_TO_DEX));
+      });
+
+      it("check xvs balance of Vanguard Treasury", async () => {
+        const newBalance = await xvs.balanceOf(VANGUARD_TREASURY);
+        expect(newBalance).to.equals(xvsBalanceOfVanguardTreasury.add(XVS_AMOUNT_TO_DEX));
+      });
+
+      it("should transfer XVS from the Comptroller", async () => {
+        const newBalance = await xvs.balanceOf(CORE_COMPTROLLER);
+        expect(newBalance).to.equal(xvsBalanceOfComptroller.sub(XVS_AMOUNT_TO_BRIDGE.add(XVS_AMOUNT_TO_DEX)));
+      });
     });
 
     it("Should match trusted remote address", async () => {
