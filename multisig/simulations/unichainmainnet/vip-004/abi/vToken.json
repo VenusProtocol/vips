@@ -1,6 +1,22 @@
 [
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "timeBased_",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blocksPerYear_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "maxBorrowRateMantissa_",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -21,19 +37,13 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "BorrowComptrollerRejection",
+    "inputs": [],
+    "name": "BorrowFreshnessCheck",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "BorrowFreshnessCheck",
+    "name": "DelegateNotApproved",
     "type": "error"
   },
   {
@@ -47,14 +57,13 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "LiquidateAccrueBorrowInterestFailed",
+    "inputs": [],
+    "name": "InvalidBlocksPerYear",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTimeBasedConfiguration",
     "type": "error"
   },
   {
@@ -84,17 +93,6 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "LiquidateComptrollerRejection",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "LiquidateFreshnessCheck",
     "type": "error"
@@ -105,41 +103,8 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "LiquidateRepayBorrowFreshFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "LiquidateSeizeComptrollerRejection",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "LiquidateSeizeLiquidatorIsBorrower",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "MintComptrollerRejection",
     "type": "error"
   },
   {
@@ -153,17 +118,6 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "RedeemComptrollerRejection",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "RedeemFreshnessCheck",
     "type": "error"
@@ -171,11 +125,6 @@
   {
     "inputs": [],
     "name": "RedeemTransferOutNotPossible",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReduceReservesAdminCheck",
     "type": "error"
   },
   {
@@ -194,44 +143,13 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "RepayBorrowComptrollerRejection",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "RepayBorrowFreshnessCheck",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "SetComptrollerOwnerCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
     "name": "SetInterestRateModelFreshCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetInterestRateModelOwnerCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetProtocolSeizeShareUnauthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetReserveFactorAdminCheck",
     "type": "error"
   },
   {
@@ -245,29 +163,34 @@
     "type": "error"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "TransferComptrollerRejection",
-    "type": "error"
-  },
-  {
     "inputs": [],
     "name": "TransferNotAllowed",
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "TransferNotEnough",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "calledContract",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "methodSignature",
+        "type": "string"
+      }
+    ],
+    "name": "Unauthorized",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "TransferTooMuch",
+    "name": "ZeroAddressNotAllowed",
     "type": "error"
   },
   {
@@ -411,13 +334,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "payer",
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "borrower",
         "type": "address"
@@ -517,14 +440,14 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "contract AccessControlManager",
+        "indexed": false,
+        "internalType": "address",
         "name": "oldAccessControlManager",
         "type": "address"
       },
       {
-        "indexed": true,
-        "internalType": "contract AccessControlManager",
+        "indexed": false,
+        "internalType": "address",
         "name": "newAccessControlManager",
         "type": "address"
       }
@@ -593,6 +516,44 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldProtocolShareReserve",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newProtocolShareReserve",
+        "type": "address"
+      }
+    ],
+    "name": "NewProtocolShareReserve",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "oldReduceReservesBlockOrTimestampDelta",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newReduceReservesBlockOrTimestampDelta",
+        "type": "uint256"
+      }
+    ],
+    "name": "NewReduceReservesBlockDelta",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "oldReserveFactorMantissa",
@@ -606,6 +567,25 @@
       }
     ],
     "name": "NewReserveFactor",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "oldShortfall",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newShortfall",
+        "type": "address"
+      }
+    ],
+    "name": "NewShortfallContract",
     "type": "event"
   },
   {
@@ -644,6 +624,31 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProtocolSeize",
     "type": "event"
   },
   {
@@ -745,7 +750,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "admin",
+        "name": "protocolShareReserve",
         "type": "address"
       },
       {
@@ -761,14 +766,14 @@
         "type": "uint256"
       }
     ],
-    "name": "ReservesReduced",
+    "name": "SpreadReservesReduced",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "token",
         "type": "address"
@@ -827,7 +832,7 @@
     "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "contract AccessControlManager",
+        "internalType": "contract IAccessControlManagerV8",
         "name": "",
         "type": "address"
       }
@@ -987,6 +992,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "blocksOrSecondsPerYear",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1041,6 +1059,30 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "borrower",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "borrowAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "borrowBehalf",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -1214,6 +1256,19 @@
   },
   {
     "inputs": [],
+    "name": "getBlockNumberOrTimestamp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getCash",
     "outputs": [
       {
@@ -1315,7 +1370,7 @@
         "type": "address"
       },
       {
-        "internalType": "contract AccessControlManager",
+        "internalType": "address",
         "name": "accessControlManager_",
         "type": "address"
       },
@@ -1328,11 +1383,6 @@
           },
           {
             "internalType": "address payable",
-            "name": "riskFund",
-            "type": "address"
-          },
-          {
-            "internalType": "address payable",
             "name": "protocolShareReserve",
             "type": "address"
           }
@@ -1340,6 +1390,11 @@
         "internalType": "struct VTokenInterface.RiskManagementInit",
         "name": "riskManagement",
         "type": "tuple"
+      },
+      {
+        "internalType": "uint256",
+        "name": "reserveFactorMantissa_",
+        "type": "uint256"
       }
     ],
     "name": "initialize",
@@ -1362,7 +1417,7 @@
   },
   {
     "inputs": [],
-    "name": "isVToken",
+    "name": "isTimeBased",
     "outputs": [
       {
         "internalType": "bool",
@@ -1371,6 +1426,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isVToken",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1498,6 +1566,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "protocolShareReserve",
+    "outputs": [
+      {
+        "internalType": "address payable",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1506,6 +1587,30 @@
       }
     ],
     "name": "redeem",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "redeemer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "redeemTokens",
+        "type": "uint256"
+      }
+    ],
+    "name": "redeemBehalf",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1538,6 +1643,30 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "redeemer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "redeemAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "redeemUnderlyingBehalf",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "reduceAmount",
         "type": "uint256"
@@ -1546,6 +1675,32 @@
     "name": "reduceReserves",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "reduceReservesBlockDelta",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "reduceReservesBlockNumber",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1637,12 +1792,12 @@
   {
     "inputs": [
       {
-        "internalType": "contract AccessControlManager",
-        "name": "newAccessControlManager",
+        "internalType": "address",
+        "name": "accessControlManager_",
         "type": "address"
       }
     ],
-    "name": "setAccessControlAddress",
+    "name": "setAccessControlManager",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1676,12 +1831,51 @@
   {
     "inputs": [
       {
+        "internalType": "address payable",
+        "name": "protocolShareReserve_",
+        "type": "address"
+      }
+    ],
+    "name": "setProtocolShareReserve",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newReduceReservesBlockOrTimestampDelta",
+        "type": "uint256"
+      }
+    ],
+    "name": "setReduceReservesBlockDelta",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "newReserveFactorMantissa",
         "type": "uint256"
       }
     ],
     "name": "setReserveFactor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "shortfall_",
+        "type": "address"
+      }
+    ],
+    "name": "setShortfallContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

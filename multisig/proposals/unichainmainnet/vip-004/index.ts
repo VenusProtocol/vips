@@ -110,7 +110,16 @@ const vip004 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [ZERO_ADDRESS, "setLastRewardingBlock(address[],uint32[],uint32[])", unichainmainnet.GUARDIAN],
+      params: [ZERO_ADDRESS, "unlistMarket(address)", unichainmainnet.GUARDIAN],
+    },
+    {
+      target: ACM,
+      signature: "giveCallPermission(address,string,address)",
+      params: [
+        ZERO_ADDRESS,
+        "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
+        unichainmainnet.GUARDIAN,
+      ],
     },
     {
       target: ACM,
