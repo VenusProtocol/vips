@@ -1,4 +1,3 @@
-import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
@@ -8,6 +7,7 @@ export const ACM = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
 
 const REDSTONE_ETH_FEED = "";
 const REDSTONE_USDC_FEED = "";
+const REDSTONE_XVS_FEED = "";
 const WETH = "0x4200000000000000000000000000000000000006";
 const USDC = "0x078D782b760474a361dDA0AF3839290b0EF57AD6";
 
@@ -114,8 +114,8 @@ const vip001 = () => {
     },
     {
       target: unichainmainnet.REDSTONE_ORACLE,
-      signature: "setDirectPrice(address,uint256)",
-      params: [unichainmainnet.XVS, parseUnits("7", 18)],
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[unichainmainnet.XVS, REDSTONE_XVS_FEED, STALE_PERIOD]],
     },
     {
       target: unichainmainnet.RESILIENT_ORACLE,
