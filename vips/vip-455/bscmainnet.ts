@@ -1,12 +1,28 @@
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { LzChainId, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 import { RemoteBridgeCommand, RemoteBridgeEntry } from "./types";
 
+const { bscmainnet, unichainmainnet } = NETWORK_ADDRESSES;
+
 export const UNICHAIN_MAINNET_TRUSTED_REMOTE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 
 export const MIN_DST_GAS = "300000";
+
+export const XVS_BRIDGE_BNB_CHAIN = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
+export const CORE_COMPTROLLER = bscmainnet.UNITROLLER;
+export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+
+export const XVS_AMOUNT_TO_BRIDGE = parseUnits("19500", 18);
+export const XVS_AMOUNT_TO_DEX = parseUnits("5000", 18);
+export const USDT_AMOUNT_TO_DEX = parseUnits("27000", 18);
+
+export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
+const BRIDGE_FEES = parseUnits("0.5", 18);
 
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {
@@ -125,7 +141,40 @@ const vip455 = () => {
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
-  return makeProposal(remoteBridgeEntries.flatMap(getRemoteBridgeCommands), meta, ProposalType.REGULAR);
+  return makeProposal(
+    [
+      ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, USDT_AMOUNT_TO_DEX, VANGUARD_TREASURY],
+      },
+      {
+        target: CORE_COMPTROLLER,
+        signature: "_grantXVS(address,uint256)",
+        params: [VANGUARD_TREASURY, XVS_AMOUNT_TO_DEX],
+      },
+      {
+        target: CORE_COMPTROLLER,
+        signature: "_grantXVS(address,uint256)",
+        params: [bscmainnet.NORMAL_TIMELOCK, XVS_AMOUNT_TO_BRIDGE],
+      },
+      {
+        target: XVS_BRIDGE_BNB_CHAIN,
+        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
+        params: [
+          bscmainnet.NORMAL_TIMELOCK,
+          LzChainId.unichainmainnet,
+          ethers.utils.defaultAbiCoder.encode(["address"], [unichainmainnet.VTREASURY]),
+          XVS_AMOUNT_TO_BRIDGE,
+          [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
+        ],
+        value: BRIDGE_FEES.toString(),
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
 };
 
 export default vip455;
