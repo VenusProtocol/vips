@@ -19,7 +19,37 @@ export const ZKSYNC_MAINNET_TRUSTED_REMOTE = "0x16a62b534e09a7534cd5847cfe5bf6a4
 export const OP_MAINNET_TRUSTED_REMOTE = "0xbbe46baec851355c3fc4856914c47eb6cea0b8b4";
 export const BASE_MAINNET_TRUSTED_REMOTE = "0x3dd92fb51a5d381ae78e023dfb5dd1d45d2426cd";
 
+export const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
+export const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
+export const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
+export const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
+
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
+
+const configureLimits = (lzChainId: LzChainId) => {
+  return [
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [lzChainId, MAX_DAILY_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [lzChainId, SINGLE_SEND_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [lzChainId, MAX_DAILY_RECEIVE_LIMIT],
+    },
+    {
+      target: XVS_BRIDGE_ADMIN_PROXY,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [lzChainId, SINGLE_RECEIVE_LIMIT],
+    },
+  ];
+};
 
 const vip003 = () => {
   return makeProposal([
@@ -214,6 +244,15 @@ const vip003 = () => {
       signature: "setMintCap(address,uint256)",
       params: [XVS_BRIDGE_DEST, XVS_MINT_LIMIT],
     },
+    ...[
+      LzChainId.bscmainnet,
+      LzChainId.opbnbmainnet,
+      LzChainId.ethereum,
+      LzChainId.arbitrumone,
+      LzChainId.zksyncmainnet,
+      LzChainId.opmainnet,
+      LzChainId.basemainnet,
+    ].flatMap(lzChainId => configureLimits(lzChainId)),
   ]);
 };
 

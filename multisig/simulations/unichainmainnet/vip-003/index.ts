@@ -69,10 +69,10 @@ const networksTrustedRemote: NetworkTrustedRemoteMap = {
   basemainnet: BASE_MAINNET_TRUSTED_REMOTE,
 };
 
-const MAX_DAILY_SEND_LIMIT = parseUnits("0", 18);
-const MAX_DAILY_RECEIVE_LIMIT = parseUnits("0", 18);
-const SINGLE_SEND_LIMIT = parseUnits("0", 18);
-const SINGLE_RECEIVE_LIMIT = parseUnits("0", 18);
+const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
+const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
+const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
+const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 const MIN_DEST_GAS = "300000";
 
 forking(8428680, async () => {
