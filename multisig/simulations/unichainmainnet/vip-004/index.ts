@@ -88,19 +88,19 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
   // Core Pool
 
   vWETH_Core: {
-    borrowCap: "900",
-    supplyCap: "1000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.8",
-    reserveFactor: "0.2",
+    borrowCap: "300",
+    supplyCap: "350",
+    collateralFactor: "0.70",
+    liquidationThreshold: "0.75",
+    reserveFactor: "0.1",
     initialSupply: "3",
     vTokenReceiver: unichainmainnet.VTREASURY,
   },
   vUSDC_Core: {
-    borrowCap: "3600000",
-    supplyCap: "4000000",
-    collateralFactor: "0.75",
-    liquidationThreshold: "0.78",
+    borrowCap: "850000",
+    supplyCap: "1000000",
+    collateralFactor: "0.70",
+    liquidationThreshold: "0.75",
     reserveFactor: "0.1",
     initialSupply: "5000",
     vTokenReceiver: unichainmainnet.VTREASURY,
@@ -120,15 +120,15 @@ const interestRateModels: InterestRateModelSpec[] = [
     vTokens: ["vWETH_Core"],
     kink: "0.8",
     base: "0",
-    multiplier: "0.035",
-    jump: "2.5",
+    multiplier: "0.03",
+    jump: "3",
   },
   {
     vTokens: ["vUSDC_Core"],
     kink: "0.8",
     base: "0",
-    multiplier: "0.2",
-    jump: "2.5",
+    multiplier: "0.125",
+    jump: "3",
   },
 ];
 
@@ -137,7 +137,7 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Core: "",
 };
 
-forking(8452229, async () => {
+forking(8536413, async () => {
   let poolRegistry: Contract;
 
   before(async () => {

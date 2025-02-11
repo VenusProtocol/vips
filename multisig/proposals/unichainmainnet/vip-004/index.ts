@@ -10,8 +10,8 @@ export const COMPTROLLER_CORE = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
 export const WETH = "0x4200000000000000000000000000000000000006";
 export const USDC = "0x078D782b760474a361dDA0AF3839290b0EF57AD6";
 
-export const VWETH_CORE = "0x3aD14786b8A7234B976D7E9CD87aBB9DF64960AD";
-export const VUSDC_CORE = "0xfdA249430F7DB5Cb3ef1B4033C5c363e27512019";
+export const VWETH_CORE = "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374";
+export const VUSDC_CORE = "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95";
 
 export const WETH_INITIAL_SUPPLY = parseUnits("3", 18);
 export const USDC_INITIAL_SUPPLY = parseUnits("5000", 6);
@@ -204,12 +204,12 @@ const vip004 = () => {
       params: [
         [
           VWETH_CORE,
-          parseUnits("0.75", 18), // CF
-          parseUnits("0.80", 18), // LT
+          parseUnits("0.70", 18), // CF
+          parseUnits("0.75", 18), // LT
           WETH_INITIAL_SUPPLY, // initial supply
           unichainmainnet.VTREASURY,
-          parseUnits("1000", 18), // supply cap
-          parseUnits("900", 18), // borrow cap
+          parseUnits("350", 18), // supply cap
+          parseUnits("300", 18), // borrow cap
         ],
       ],
     },
@@ -239,12 +239,12 @@ const vip004 = () => {
       params: [
         [
           VUSDC_CORE,
-          parseUnits("0.75", 18), // CF
-          parseUnits("0.78", 18), // LT
+          parseUnits("0.70", 18), // CF
+          parseUnits("0.75", 18), // LT
           USDC_INITIAL_SUPPLY, // initial supply
           unichainmainnet.VTREASURY,
-          parseUnits("4000000", 6), // supply cap
-          parseUnits("3600000", 6), // borrow cap
+          parseUnits("1000000", 6), // supply cap
+          parseUnits("850000", 6), // borrow cap
         ],
       ],
     },
