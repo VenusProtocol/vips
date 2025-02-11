@@ -4,7 +4,6 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -93,7 +92,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.70",
     liquidationThreshold: "0.75",
     reserveFactor: "0.1",
-    initialSupply: "3",
+    initialSupply: "0.99",
     vTokenReceiver: unichainmainnet.VTREASURY,
   },
   vUSDC_Core: {
@@ -102,7 +101,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     collateralFactor: "0.70",
     liquidationThreshold: "0.75",
     reserveFactor: "0.1",
-    initialSupply: "5000",
+    initialSupply: "1000",
     vTokenReceiver: unichainmainnet.VTREASURY,
   },
 };
@@ -137,26 +136,11 @@ const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
   vUSDC_Core: "",
 };
 
-forking(8536413, async () => {
+forking(8540765, async () => {
   let poolRegistry: Contract;
 
   before(async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, POOL_REGISTRY);
-
-    // Will be removed once treasury has funds
-    const wethHolder = await initMainnetUser(
-      "0x07aE8551Be970cB1cCa11Dd7a11F47Ae82e70E67",
-      ethers.utils.parseEther("2"),
-    );
-    const usdcHolder = await initMainnetUser(
-      "0x5752e57DcfA070e3822d69498185B706c293C792",
-      ethers.utils.parseEther("2"),
-    );
-    const weth = await ethers.getContractAt(ERC20_ABI, WETH);
-    const usdc = await ethers.getContractAt(ERC20_ABI, USDC);
-
-    await weth.connect(wethHolder).transfer(unichainmainnet.VTREASURY, parseUnits("4", 18));
-    await usdc.connect(usdcHolder).transfer(unichainmainnet.VTREASURY, parseUnits("5000", 6));
   });
 
   describe("Contracts setup", () => {
