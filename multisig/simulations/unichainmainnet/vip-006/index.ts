@@ -13,12 +13,12 @@ import vip002 from "../../../proposals/unichainmainnet/vip-002";
 import vip003 from "../../../proposals/unichainmainnet/vip-003";
 import vip004 from "../../../proposals/unichainmainnet/vip-004";
 import vip006, { COMPTROLLER_CORE, PRIME, PRIME_LIQUIDITY_PROVIDER } from "../../../proposals/unichainmainnet/vip-006";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 const XVS_BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
