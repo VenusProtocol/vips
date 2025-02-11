@@ -13,10 +13,10 @@ import PSR_ABI from "./abi/protocolShareReserve.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
-const VWETH = "0x3aD14786b8A7234B976D7E9CD87aBB9DF64960AD";
+const VWETH = "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374";
 const WETH = "0x4200000000000000000000000000000000000006";
 
-forking(8428680, async () => {
+forking(8548228, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
