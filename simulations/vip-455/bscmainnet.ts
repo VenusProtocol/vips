@@ -11,8 +11,13 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip455, {
   CORE_COMPTROLLER,
+  ETH,
+  ETH_AMOUNT_TO_LIQUIDITY_PROVIDER,
+  LIQUIDITY_PROVIDER,
   MIN_DST_GAS,
   UNICHAIN_MAINNET_TRUSTED_REMOTE,
+  USDC,
+  USDC_AMOUNT_TO_VANGUARD_TREASURY,
   USDT,
   USDT_AMOUNT_TO_DEX,
   VANGUARD_TREASURY,
@@ -34,17 +39,21 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 const XVSProxyOFTSrc = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 const XVS_HOLDER = "0x4F2F8448F857994CE83ef14cf4EBb7DF0bb14667";
 
-forking(46534647, async () => {
+forking(46566370, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
   let usdt: Contract;
+  let usdc: Contract;
+  let eth: Contract;
   let xvsHolderSigner: SignerWithAddress;
   let receiver: SignerWithAddress;
   let receiverAddressBytes32: string;
   let defaultAdapterParams: string;
   let resilientOracle: Contract;
   let usdtBalanceOfVanguardTreasury: BigNumber;
+  let usdcBalanceOfVanguardTreasury: BigNumber;
+  let ethBalanceOfLiquidityProvider: BigNumber;
   let xvsBalanceOfVanguardTreasury: BigNumber;
   let xvsBalanceOfComptroller: BigNumber;
 
@@ -58,8 +67,12 @@ forking(46534647, async () => {
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
     usdt = new ethers.Contract(USDT, ERC20_ABI, provider);
+    usdc = new ethers.Contract(USDC, ERC20_ABI, provider);
+    eth = new ethers.Contract(ETH, ERC20_ABI, provider);
 
     usdtBalanceOfVanguardTreasury = await usdt.balanceOf(VANGUARD_TREASURY);
+    usdcBalanceOfVanguardTreasury = await usdc.balanceOf(VANGUARD_TREASURY);
+    ethBalanceOfLiquidityProvider = await eth.balanceOf(LIQUIDITY_PROVIDER);
     xvsBalanceOfVanguardTreasury = await xvs.balanceOf(VANGUARD_TREASURY);
     xvsBalanceOfComptroller = await xvs.balanceOf(CORE_COMPTROLLER);
   });
@@ -86,7 +99,7 @@ forking(46534647, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [6, 0],
       );
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [3]);
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["VenusGranted"], [2]);
     },
   });
@@ -100,6 +113,16 @@ forking(46534647, async () => {
       it("check usdt balance of Vanguard Treasury", async () => {
         const newBalance = await usdt.balanceOf(VANGUARD_TREASURY);
         expect(newBalance).to.equals(usdtBalanceOfVanguardTreasury.add(USDT_AMOUNT_TO_DEX));
+      });
+
+      it("check usdc balance of Vanguard Treasury", async () => {
+        const newBalance = await usdc.balanceOf(VANGUARD_TREASURY);
+        expect(newBalance).to.equals(usdcBalanceOfVanguardTreasury.add(USDC_AMOUNT_TO_VANGUARD_TREASURY));
+      });
+
+      it("check eth balance of Liquidity Provider", async () => {
+        const newBalance = await eth.balanceOf(LIQUIDITY_PROVIDER);
+        expect(newBalance).to.equals(ethBalanceOfLiquidityProvider.add(ETH_AMOUNT_TO_LIQUIDITY_PROVIDER));
       });
 
       it("check xvs balance of Vanguard Treasury", async () => {

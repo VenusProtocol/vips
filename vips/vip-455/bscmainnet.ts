@@ -15,11 +15,17 @@ export const MIN_DST_GAS = "300000";
 export const XVS_BRIDGE_BNB_CHAIN = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const CORE_COMPTROLLER = bscmainnet.UNITROLLER;
 export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
+export const LIQUIDITY_PROVIDER = "0xe4E14BdC7dAD60F1d60ec8153D04322Ff2f9B100";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
 export const XVS_AMOUNT_TO_BRIDGE = parseUnits("19500", 18);
 export const XVS_AMOUNT_TO_DEX = parseUnits("5000", 18);
 export const USDT_AMOUNT_TO_DEX = parseUnits("27000", 18);
+
+export const ETH_AMOUNT_TO_LIQUIDITY_PROVIDER = parseUnits("1", 18);
+export const USDC_AMOUNT_TO_VANGUARD_TREASURY = parseUnits("5000", 18);
 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 const BRIDGE_FEES = parseUnits("0.5", 18);
@@ -144,6 +150,16 @@ const vip455 = () => {
   return makeProposal(
     [
       ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDC, USDC_AMOUNT_TO_VANGUARD_TREASURY, VANGUARD_TREASURY],
+      },
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [ETH, ETH_AMOUNT_TO_LIQUIDITY_PROVIDER, LIQUIDITY_PROVIDER],
+      },
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
