@@ -15,4 +15,5 @@ export enum ChainId {
   basesepolia = 84532,
   basemainnet = 8453,
   unichainsepolia = 1301,
+  unichainmainnet = 130,
 }
