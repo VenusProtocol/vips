@@ -12,7 +12,8 @@ export type SUPPORTED_NETWORKS =
   | "opsepolia"
   | "opmainnet"
   | "basesepolia"
-  | "basemainnet";
+  | "basemainnet"
+  | "unichainsepolia";
 
 export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 
@@ -23,6 +24,7 @@ export const REMOTE_TESTNET_NETWORKS = [
   "zksyncsepolia",
   "opsepolia",
   "basesepolia",
+  "unichainsepolia",
 ];
 export const REMOTE_MAINNET_NETWORKS = [
   "ethereum",
@@ -94,4 +96,5 @@ export enum LzChainId {
   opmainnet = 111,
   basesepolia = 10245,
   basemainnet = 184,
+  unichainsepolia = 10333,
 }
