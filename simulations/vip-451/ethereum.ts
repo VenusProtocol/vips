@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip449, { RECIPIENT, TRANSFERS } from "../../vips/vip-449/bscmainnet";
+import vip451, { RECIPIENT, TRANSFERS } from "../../vips/vip-451/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 
 forking(21828630, async () => {
@@ -16,7 +16,7 @@ forking(21828630, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip449", await vip449());
+  testForkedNetworkVipCommands("vip451", await vip451());
 
   describe("Post-VIP state", () => {
     for (const transfer of TRANSFERS) {
