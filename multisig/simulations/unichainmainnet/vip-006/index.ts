@@ -7,13 +7,7 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip000 from "../../../proposals/unichainmainnet/vip-000";
-import vip001 from "../../../proposals/unichainmainnet/vip-001";
-import vip002 from "../../../proposals/unichainmainnet/vip-002";
-import vip003 from "../../../proposals/unichainmainnet/vip-003";
-import vip004 from "../../../proposals/unichainmainnet/vip-004";
 import vip006, { COMPTROLLER_CORE, PRIME, PRIME_LIQUIDITY_PROVIDER } from "../../../proposals/unichainmainnet/vip-006";
-import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -24,30 +18,8 @@ const { unichainmainnet } = NETWORK_ADDRESSES;
 const XVS_BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 const XVS_STORE = "0xeE012BeFEa825a21b6346EF0f78249740ca2569b";
 
-const WETH = "0x4200000000000000000000000000000000000006";
-const USDC = "0x078D782b760474a361dDA0AF3839290b0EF57AD6";
-
-forking(8452229, async () => {
+forking(8620110, async () => {
   before(async () => {
-    // Will be removed once treasury has funds
-    const wethHolder = await initMainnetUser(
-      "0x07aE8551Be970cB1cCa11Dd7a11F47Ae82e70E67",
-      ethers.utils.parseEther("2"),
-    );
-    const usdcHolder = await initMainnetUser(
-      "0x5752e57DcfA070e3822d69498185B706c293C792",
-      ethers.utils.parseEther("2"),
-    );
-    const weth = await ethers.getContractAt(ERC20_ABI, WETH);
-    const usdc = await ethers.getContractAt(ERC20_ABI, USDC);
-
-    await weth.connect(wethHolder).transfer(unichainmainnet.VTREASURY, parseUnits("4", 18));
-    await usdc.connect(usdcHolder).transfer(unichainmainnet.VTREASURY, parseUnits("5000", 6));
-    await pretendExecutingVip(await vip000());
-    await pretendExecutingVip(await vip001());
-    await pretendExecutingVip(await vip002());
-    await pretendExecutingVip(await vip003());
-    await pretendExecutingVip(await vip004());
     await pretendExecutingVip(await vip006());
   });
   describe("Post-VIP behavior", async () => {
