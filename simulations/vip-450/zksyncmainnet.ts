@@ -3,11 +3,11 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip449, {
+import vip450, {
   ZKSYNC_CORE_COMPTROLLER,
   ZKSYNC_vUSDC_CORE,
   ZKSYNC_vUSDC_CORE_SUPPLY_CAP,
-} from "../../vips/vip-449/bscmainnet";
+} from "../../vips/vip-450/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(55778674, async () => {
@@ -21,7 +21,7 @@ forking(55778674, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip449", await vip449());
+  testForkedNetworkVipCommands("vip450", await vip450());
 
   describe("Post-VIP behaviour", async () => {
     it("correct supply cap for vUSDC", async () => {
