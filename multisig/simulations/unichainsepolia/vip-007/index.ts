@@ -10,7 +10,6 @@ import {
   checkRewardsDistributorPool,
 } from "src/vip-framework/checks/rewardsDistributor";
 
-import vip001 from "../../../proposals/unichainsepolia/vip-001";
 import vip007, {
   COMPTROLLER_CORE,
   REWARD_DISTRIBUTOR_CORE_0,
@@ -31,7 +30,7 @@ const { unichainsepolia } = NETWORK_ADDRESSES;
 
 const TREASURY_AMOUNT = parseUnits("7200", 18);
 
-forking(12068136, async () => {
+forking(12605295, async () => {
   const provider = ethers.provider;
   let xvsVault: Contract;
   let xvs: Contract;
@@ -44,7 +43,7 @@ forking(12068136, async () => {
     });
 
     it("vTreasury should hold atleast 7200 XVS", async () => {
-      expect(await xvs.balanceOf(unichainsepolia.VTREASURY)).to.be.gt(TREASURY_AMOUNT);
+      expect(await xvs.balanceOf(unichainsepolia.VTREASURY)).to.be.gte(TREASURY_AMOUNT);
     });
   });
 
@@ -53,7 +52,6 @@ forking(12068136, async () => {
       xvsVault = new ethers.Contract(XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
       xvs = new ethers.Contract(XVS, XVS_ABI, provider);
       treasuryBalanceBefore = await xvs.balanceOf(unichainsepolia.VTREASURY);
-      await pretendExecutingVip(await vip001());
       await pretendExecutingVip(await vip007());
     });
 
