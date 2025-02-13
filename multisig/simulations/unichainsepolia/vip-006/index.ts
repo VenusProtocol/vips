@@ -7,8 +7,6 @@ import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip000 from "../../../proposals/unichainsepolia/vip-000";
-import vip001 from "../../../proposals/unichainsepolia/vip-001";
 import vip003 from "../../../proposals/unichainsepolia/vip-003";
 import vip006, {
   COMPTROLLER_CORE,
@@ -26,13 +24,7 @@ const { unichainsepolia } = NETWORK_ADDRESSES;
 const XVS_BRIDGE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
 const XVS_STORE = "0xeE012BeFEa825a21b6346EF0f78249740ca2569b";
 
-forking(4731488, async () => {
-  before(async () => {
-    await pretendExecutingVip(await vip000());
-    await pretendExecutingVip(await vip001());
-    await pretendExecutingVip(await vip003());
-    await pretendExecutingVip(await vip006());
-  });
+forking(12089140, async () => {
   describe("Post-VIP behavior", async () => {
     let prime: Contract;
     let primeLiquidityProvider: Contract;
@@ -42,6 +34,9 @@ forking(4731488, async () => {
     const amount = parseUnits("1000", 18);
 
     before(async () => {
+      await pretendExecutingVip(await vip003());
+      await pretendExecutingVip(await vip006());
+
       comptrollerCore = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
       xvs = await ethers.getContractAt(XVS_ABI, unichainsepolia.XVS);
       xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, unichainsepolia.XVS_VAULT_PROXY);
