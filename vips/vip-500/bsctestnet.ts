@@ -115,7 +115,7 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
   ];
 }
 
-const vip407 = () => {
+const vip500 = () => {
   const meta = {
     version: "v2",
     title: "VIP-500 Enable Unichain sepolia bridge",
@@ -128,4 +128,4 @@ const vip407 = () => {
   return makeProposal(remoteBridgeEntries.flatMap(getRemoteBridgeCommands), meta, ProposalType.REGULAR);
 };
 
-export default vip407;
+export default vip500;

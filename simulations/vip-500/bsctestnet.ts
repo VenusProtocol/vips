@@ -9,12 +9,12 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip445, {
+import vip500, {
   MIN_DST_GAS,
   UNICHAIN_SEPOLIA_TRUSTED_REMOTE,
   remoteBridgeEntries,
-} from "../../vips/vip-445/bsctestnet";
-import { RemoteBridgeEntry } from "../../vips/vip-445/types";
+} from "../../vips/vip-500/bsctestnet";
+import { RemoteBridgeEntry } from "../../vips/vip-500/types";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
@@ -43,7 +43,7 @@ forking(48077026, async () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip-445 testnet", await vip445(), {
+  testVip("vip-500 testnet", await vip500(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
