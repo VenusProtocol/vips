@@ -9,7 +9,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip455, {
+import vip452, {
   CORE_COMPTROLLER,
   MIN_DST_GAS,
   UNICHAIN_MAINNET_TRUSTED_REMOTE,
@@ -19,8 +19,8 @@ import vip455, {
   XVS_AMOUNT_TO_BRIDGE,
   XVS_AMOUNT_TO_DEX,
   remoteBridgeEntries,
-} from "../../vips/vip-455/bscmainnet";
-import { RemoteBridgeEntry } from "../../vips/vip-455/types";
+} from "../../vips/vip-452/bscmainnet";
+import { RemoteBridgeEntry } from "../../vips/vip-452/types";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -64,7 +64,7 @@ forking(46623789, async () => {
     xvsBalanceOfComptroller = await xvs.balanceOf(CORE_COMPTROLLER);
   });
 
-  testVip("vip-455", await vip455(), {
+  testVip("vip-452", await vip452(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

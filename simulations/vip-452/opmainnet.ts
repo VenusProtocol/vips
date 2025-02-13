@@ -4,29 +4,30 @@ import { LzChainId } from "src/types";
 import { setRedstonePrice } from "src/utils";
 import { forking } from "src/vip-framework";
 
-import vip455, {
+import vip452, {
   MIN_DST_GAS,
   UNICHAIN_MAINNET_TRUSTED_REMOTE,
   remoteBridgeEntries,
-} from "../../vips/vip-455/bscmainnet";
-import { RemoteBridgeEntry } from "../../vips/vip-455/types";
+} from "../../vips/vip-452/bscmainnet";
+import { RemoteBridgeEntry } from "../../vips/vip-452/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-const { ethereum } = NETWORK_ADDRESSES;
+const { opmainnet } = NETWORK_ADDRESSES;
 
-forking(21838787, async () => {
+forking(131933486, async () => {
   await setRedstonePrice(
-    ethereum.REDSTONE_ORACLE,
-    ethereum.XVS,
+    opmainnet.REDSTONE_ORACLE,
+    opmainnet.XVS,
     ethers.constants.AddressZero,
-    ethereum.NORMAL_TIMELOCK,
+    opmainnet.NORMAL_TIMELOCK,
   );
+
   await checkXVSBridge(
     LzChainId.unichainmainnet,
-    ethereum,
-    vip455,
+    opmainnet,
+    vip452,
     UNICHAIN_MAINNET_TRUSTED_REMOTE,
-    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.ethereum) as RemoteBridgeEntry,
+    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.opmainnet) as RemoteBridgeEntry,
     MIN_DST_GAS,
   );
 });
