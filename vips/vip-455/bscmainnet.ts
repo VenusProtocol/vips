@@ -160,6 +160,11 @@ const vip455 = () => {
         params: [bscmainnet.NORMAL_TIMELOCK, XVS_AMOUNT_TO_BRIDGE],
       },
       {
+        target: bscmainnet.XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_BNB_CHAIN, XVS_AMOUNT_TO_BRIDGE],
+      },
+      {
         target: XVS_BRIDGE_BNB_CHAIN,
         signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
         params: [

@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { setRedstonePrice } from "src/utils";
@@ -11,23 +12,19 @@ import vip455, {
 import { RemoteBridgeEntry } from "../../vips/vip-455/types";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(131793985, async () => {
-  before(async () => {
-    const ONE_YEAR = 31536000;
-    const XVS_REDSTONE_FEED = "0x414F8f961969A8131AbE53294600c6C515E68f81";
-    await setRedstonePrice(
-      NETWORK_ADDRESSES.opmainnet.REDSTONE_ORACLE,
-      NETWORK_ADDRESSES.opmainnet.XVS,
-      XVS_REDSTONE_FEED,
-      NETWORK_ADDRESSES.opmainnet.NORMAL_TIMELOCK,
-      ONE_YEAR,
-      { tokenDecimals: 18 },
-    );
-  });
+const { opmainnet } = NETWORK_ADDRESSES;
+
+forking(131933486, async () => {
+  await setRedstonePrice(
+    opmainnet.REDSTONE_ORACLE,
+    opmainnet.XVS,
+    ethers.constants.AddressZero,
+    opmainnet.NORMAL_TIMELOCK,
+  );
 
   await checkXVSBridge(
     LzChainId.unichainmainnet,
-    NETWORK_ADDRESSES.opmainnet,
+    opmainnet,
     vip455,
     UNICHAIN_MAINNET_TRUSTED_REMOTE,
     remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.opmainnet) as RemoteBridgeEntry,
