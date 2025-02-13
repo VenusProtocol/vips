@@ -7,7 +7,7 @@ import { LzChainId } from "src/types";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip002, {
+import vip003, {
   ARBITRUM_SEPOLIA_TRUSTED_REMOTE,
   BASE_SEPOLIA_TRUSTED_REMOTE,
   BNB_TESTNET_TRUSTED_REMOTE,
@@ -24,7 +24,7 @@ import vip002, {
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
   ZKSYNC_SEPOLIA_TRUSTED_REMOTE,
-} from "../../../proposals/unichainsepolia/vip-002";
+} from "../../../proposals/unichainsepolia/vip-003";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
@@ -107,7 +107,7 @@ forking(4547246, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip002());
+      await pretendExecutingVip(await vip003());
     });
 
     it("Should set bridge owner to multisig", async () => {

@@ -27,7 +27,7 @@ export const MIN_DEST_GAS = "300000";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 
-const vip002 = () => {
+const vip003 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -249,4 +249,4 @@ const vip002 = () => {
   ]);
 };
 
-export default vip002;
+export default vip003;
