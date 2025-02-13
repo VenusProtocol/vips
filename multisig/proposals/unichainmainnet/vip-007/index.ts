@@ -25,7 +25,7 @@ export const vip007 = () => {
       signature: "giveCallPermission(address,string,address)",
       params: [
         ethers.constants.AddressZero,
-        "setLastRewardingBlockTimestamps(address[],uint32[],uint32[])",
+        "setLastRewardingBlockTimestamps(address[],uint256[],uint256[])",
         unichainmainnet.GUARDIAN,
       ],
     },

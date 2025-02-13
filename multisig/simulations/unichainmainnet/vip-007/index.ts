@@ -11,11 +11,6 @@ import {
 } from "src/vip-framework/checks/rewardsDistributor";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip000 from "../../../proposals/unichainmainnet/vip-000";
-import vip001 from "../../../proposals/unichainmainnet/vip-001";
-import vip002 from "../../../proposals/unichainmainnet/vip-002";
-import vip003 from "../../../proposals/unichainmainnet/vip-003";
-import vip004 from "../../../proposals/unichainmainnet/vip-004";
 import {
   COMPTROLLER_CORE,
   REWARD_DISTRIBUTOR_CORE_0,
@@ -35,7 +30,7 @@ const { unichainmainnet } = NETWORK_ADDRESSES;
 const XVS_PROXY_OFT_DEST = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 const TREASURY_AMOUNT = parseUnits("19500", 18);
 
-forking(8540765, async () => {
+forking(8711530, async () => {
   let xvs: Contract;
   let xvsVault: Contract;
   describe("Post VIP checks", async () => {
@@ -45,12 +40,6 @@ forking(8540765, async () => {
       xvsVault = new ethers.Contract(unichainmainnet.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
 
       const impersonateBridge = await initMainnetUser(XVS_PROXY_OFT_DEST, ethers.utils.parseEther("2"));
-      await pretendExecutingVip(await vip000());
-      await pretendExecutingVip(await vip001());
-      await pretendExecutingVip(await vip002());
-
-      await pretendExecutingVip(await vip003());
-      await pretendExecutingVip(await vip004());
 
       await xvs.connect(impersonateBridge).mint(unichainmainnet.VTREASURY, TREASURY_AMOUNT);
 
