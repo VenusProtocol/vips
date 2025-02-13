@@ -8,7 +8,7 @@ import { forking, pretendExecutingVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip003, {
+import vip004, {
   COMPTROLLER_CORE,
   USDC,
   USDT,
@@ -18,7 +18,7 @@ import vip003, {
   VcbBTC_CORE,
   WETH,
   cbBTC,
-} from "../../../proposals/unichainsepolia/vip-003";
+} from "../../../proposals/unichainsepolia/vip-004";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -198,7 +198,7 @@ forking(12067445, async () => {
 
   describe("Post-Execution state", () => {
     before(async () => {
-      await pretendExecutingVip(await vip003());
+      await pretendExecutingVip(await vip004());
 
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {

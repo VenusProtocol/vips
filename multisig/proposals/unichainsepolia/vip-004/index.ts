@@ -23,7 +23,7 @@ export const USDT_INITIAL_SUPPLY = parseUnits("5000", 6);
 export const USDC_INITIAL_SUPPLY = parseUnits("5000", 6);
 
 // IL configuration
-const vip003 = () => {
+const vip004 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -318,4 +318,4 @@ const vip003 = () => {
   ]);
 };
 
-export default vip003;
+export default vip004;
