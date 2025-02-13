@@ -243,6 +243,11 @@ We applied the following security procedures for this upgrade:
         ],
         value: BRIDGE_FEES.toString(),
       },
+      {
+        target: bscmainnet.XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_BNB_CHAIN, 0],
+      },
     ],
     meta,
     ProposalType.REGULAR,
