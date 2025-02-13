@@ -7,7 +7,7 @@ export const ACM = "0x854C064EA6b503A97980F481FA3B7279012fdeDd";
 export const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0x148C41b07A5c1f289CFB57C2F40d5EEF8ab30DB1";
 
-const vip004 = () => {
+const vip005 = () => {
   return makeProposal([
     {
       target: PSR,
@@ -47,4 +47,4 @@ const vip004 = () => {
   ]);
 };
 
-export default vip004;
+export default vip005;

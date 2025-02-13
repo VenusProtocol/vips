@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip004, { ACM, NATIVE_TOKEN_GATEWAY_CORE_POOL, PSR } from "../../../proposals/unichainsepolia/vip-004";
+import vip005, { ACM, NATIVE_TOKEN_GATEWAY_CORE_POOL, PSR } from "../../../proposals/unichainsepolia/vip-005";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
@@ -28,7 +28,7 @@ forking(4724011, async () => {
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     psrSigner = await initMainnetUser(PSR, ethers.utils.parseEther("1"));
-    await pretendExecutingVip(await vip004());
+    await pretendExecutingVip(await vip005());
   });
 
   describe("Post tx checks", () => {
