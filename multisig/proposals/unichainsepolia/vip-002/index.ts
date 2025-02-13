@@ -6,7 +6,7 @@ const { unichainsepolia } = NETWORK_ADDRESSES;
 export const XVS_STORE = "0xeE012BeFEa825a21b6346EF0f78249740ca2569b";
 export const ACM = "0x854C064EA6b503A97980F481FA3B7279012fdeDd";
 
-const vip003 = () => {
+const vip002 = () => {
   return makeProposal([
     {
       target: unichainsepolia.XVS_VAULT_PROXY,
@@ -80,4 +80,4 @@ const vip003 = () => {
   ]);
 };
 
-export default vip003;
+export default vip002;
