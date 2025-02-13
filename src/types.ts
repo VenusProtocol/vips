@@ -13,7 +13,8 @@ export type SUPPORTED_NETWORKS =
   | "opmainnet"
   | "basesepolia"
   | "basemainnet"
-  | "unichainsepolia";
+  | "unichainsepolia"
+  | "unichainmainnet";
 
 export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 
