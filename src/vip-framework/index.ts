@@ -225,12 +225,14 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
       executor = await ethers.getContractAt(OMNICHAIN_EXECUTOR_ABI, OMNICHAIN_GOVERNANCE_EXECUTOR);
       payload = getPayload(proposal);
       proposalId = await executor.lastProposalReceived();
-      proposalId++;
+
+      // there could be proposals recevied before the last proposal, with a greater id (i.e. if the last proposal was a retry)
+      while ((await executor.proposals(++proposalId)).id.gt(0));
+
       [targets, , signatures, , proposalType] = ethers.utils.defaultAbiCoder.decode(
         ["address[]", "uint256[]", "string[]", "bytes[]", "uint8"],
         payload,
       );
-      // Validates target address
     });
 
     it("should be queued succesfully", async () => {
