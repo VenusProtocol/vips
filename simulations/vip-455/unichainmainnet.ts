@@ -6,23 +6,23 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip008 from "../../multisig/proposals/unichainsepolia/vip-008";
+import vip008 from "../../multisig/proposals/unichainmainnet/vip-008";
 import vip455, {
   ACM,
   ACM_AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-455/bsctestnet";
+} from "../../vips/vip-455/bscmainnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
-const { unichainsepolia } = NETWORK_ADDRESSES;
-const FAST_TRACK_TIMELOCK = "0x668cDb1A414006D0a26e9e13881D4Cd30B8b2a4A";
-const CRITICAL_TIMELOCK = "0x86C093266e824FA4345484a7B9109e9567923DA6";
+const { unichainmainnet } = NETWORK_ADDRESSES;
+const FAST_TRACK_TIMELOCK = "0x5F4ec2524A670139b760f95D0986Ef6b9d162989";
+const CRITICAL_TIMELOCK = "0x91A58273EA9B2Cae1f72d431a7cB145aB9A3d1F3";
 
-forking(12517026, async () => {
+forking(8697951, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -30,7 +30,7 @@ forking(12517026, async () => {
 
   before(async () => {
     executor = new ethers.Contract(
-      unichainsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      unichainmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR,
       OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
       provider,
     );
@@ -40,9 +40,9 @@ forking(12517026, async () => {
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role on base sepolia", async () => {
+    it("Normal Timelock has default admin role on unichainmainnet", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
-      const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, unichainsepolia.NORMAL_TIMELOCK);
+      const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, unichainmainnet.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
     });
   });
@@ -68,15 +68,15 @@ forking(12517026, async () => {
     });
     it("check configuration", async () => {
       // Check Timelock configurations
-      expect(await executor.proposalTimelocks(0)).equals(unichainsepolia.NORMAL_TIMELOCK);
+      expect(await executor.proposalTimelocks(0)).equals(unichainmainnet.NORMAL_TIMELOCK);
       expect(await executor.proposalTimelocks(1)).equals(FAST_TRACK_TIMELOCK);
       expect(await executor.proposalTimelocks(2)).equals(CRITICAL_TIMELOCK);
 
       // Check trusted remote
-      expect(await executor.trustedRemoteLookup(LzChainId.bsctestnet)).equals(
+      expect(await executor.trustedRemoteLookup(LzChainId.bscmainnet)).equals(
         ethers.utils.solidityPack(
           ["address", "address"],
-          [getOmnichainProposalSenderAddress(), unichainsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR],
+          [getOmnichainProposalSenderAddress(), unichainmainnet.OMNICHAIN_GOVERNANCE_EXECUTOR],
         ),
       );
 
@@ -112,7 +112,7 @@ forking(12517026, async () => {
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
     });
-    it("Default admin role must be revoked from ACMAggregator contract on base sepolia", async () => {
+    it("Default admin role must be revoked from ACMAggregator contract on unichain mainnet", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
     });
     it("Guardian and all timelocks are allowed to call retryMessage ", async () => {
@@ -121,8 +121,8 @@ forking(12517026, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.true;
-      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainmainnet.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainmainnet.NORMAL_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.true;
     });
@@ -133,8 +133,8 @@ forking(12517026, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.true;
-      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.false;
+      expect(await acm.hasRole(roleHash, unichainmainnet.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainmainnet.NORMAL_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
     });
@@ -144,8 +144,8 @@ forking(12517026, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.false;
-      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainmainnet.GUARDIAN)).to.be.false;
+      expect(await acm.hasRole(roleHash, unichainmainnet.NORMAL_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
     });

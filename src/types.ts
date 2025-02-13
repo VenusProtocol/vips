@@ -33,6 +33,7 @@ export const REMOTE_MAINNET_NETWORKS = [
   "zksyncmainnet",
   "opmainnet",
   "basemainnet",
+  "unichainmainnet",
 ];
 
 export interface ProposalMeta {
@@ -97,4 +98,5 @@ export enum LzChainId {
   basesepolia = 10245,
   basemainnet = 184,
   unichainsepolia = 10333,
+  unichainmainnet = 320,
 }
