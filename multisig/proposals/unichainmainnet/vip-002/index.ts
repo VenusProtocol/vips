@@ -1,15 +1,15 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
-const { unichainsepolia } = NETWORK_ADDRESSES;
+const { unichainmainnet } = NETWORK_ADDRESSES;
 
-export const XVS_STORE = "0xeE012BeFEa825a21b6346EF0f78249740ca2569b";
-export const ACM = "0x854C064EA6b503A97980F481FA3B7279012fdeDd";
+export const XVS_STORE = "0x0ee4b35c2cEAb19856Bf35505F81608d12B2a7Bb";
+export const ACM = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
 
-const vip003 = () => {
+const vip002 = () => {
   return makeProposal([
     {
-      target: unichainsepolia.XVS_VAULT_PROXY,
+      target: unichainmainnet.XVS_VAULT_PROXY,
       signature: "_acceptAdmin()",
       params: [],
     },
@@ -23,38 +23,38 @@ const vip003 = () => {
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [unichainsepolia.XVS_VAULT_PROXY, "pause()", unichainsepolia.GUARDIAN],
+      params: [unichainmainnet.XVS_VAULT_PROXY, "pause()", unichainmainnet.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [unichainsepolia.XVS_VAULT_PROXY, "resume()", unichainsepolia.GUARDIAN],
+      params: [unichainmainnet.XVS_VAULT_PROXY, "resume()", unichainmainnet.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
-        unichainsepolia.XVS_VAULT_PROXY,
+        unichainmainnet.XVS_VAULT_PROXY,
         "add(address,uint256,address,uint256,uint256)",
-        unichainsepolia.GUARDIAN,
+        unichainmainnet.GUARDIAN,
       ],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
-      params: [unichainsepolia.XVS_VAULT_PROXY, "set(address,uint256,uint256)", unichainsepolia.GUARDIAN],
+      params: [unichainmainnet.XVS_VAULT_PROXY, "set(address,uint256,uint256)", unichainmainnet.GUARDIAN],
     },
 
     {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
-        unichainsepolia.XVS_VAULT_PROXY,
+        unichainmainnet.XVS_VAULT_PROXY,
         "setRewardAmountPerBlockOrSecond(address,uint256)",
-        unichainsepolia.GUARDIAN,
+        unichainmainnet.GUARDIAN,
       ],
     },
 
@@ -62,22 +62,22 @@ const vip003 = () => {
       target: ACM,
       signature: "giveCallPermission(address,string,address)",
       params: [
-        unichainsepolia.XVS_VAULT_PROXY,
+        unichainmainnet.XVS_VAULT_PROXY,
         "setWithdrawalLockingPeriod(address,uint256,uint256)",
-        unichainsepolia.GUARDIAN,
+        unichainmainnet.GUARDIAN,
       ],
     },
     {
-      target: unichainsepolia.XVS_VAULT_PROXY,
+      target: unichainmainnet.XVS_VAULT_PROXY,
       signature: "add(address,uint256,address,uint256,uint256)",
-      params: [unichainsepolia.XVS, 100, unichainsepolia.XVS, "0", 300],
+      params: [unichainmainnet.XVS, 100, unichainmainnet.XVS, "0", 604800],
     },
     {
-      target: unichainsepolia.XVS_VAULT_PROXY,
+      target: unichainmainnet.XVS_VAULT_PROXY,
       signature: "pause()",
       params: [],
     },
   ]);
 };
 
-export default vip003;
+export default vip002;
