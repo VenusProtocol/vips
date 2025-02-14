@@ -1,30 +1,32 @@
+import { TransactionResponse } from "@ethersproject/providers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { Proposal } from "src/types";
-import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
-import { testForkedNetworkVipCommands } from "src/vip-framework";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId } from "src/types";
+import { expectEvents, initMainnetUser } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
-import { RemoteBridgeEntry } from "../../vips/vip-407/types";
+import vip452, {
+  MIN_DST_GAS,
+  UNICHAIN_SEPOLIA_TRUSTED_REMOTE,
+  remoteBridgeEntries,
+} from "../../vips/vip-452/bsctestnet";
+import { RemoteBridgeEntry } from "../../vips/vip-452/types";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/XVSBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
-const XVS_HOLDER = "0x000000000000000000000000000000000000dEaD";
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-export async function checkXVSBridge(
-  remoteLzChainId: number | undefined,
-  networkAddresses: { [key: string]: any },
-  vip: () => Promise<Proposal>,
-  trustedRemote: string,
-  bridgeConfiguration: RemoteBridgeEntry,
-  minDstGas: string,
-) {
+const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
+const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+
+forking(48077026, async () => {
   const provider = ethers.provider;
-  let resilientOracle: Contract;
   let bridge: Contract;
   let xvs: Contract;
   let xvsHolderSigner: SignerWithAddress;
@@ -33,22 +35,16 @@ export async function checkXVSBridge(
   let defaultAdapterParams: string;
 
   beforeEach(async () => {
-    bridge = new ethers.Contract(bridgeConfiguration.proxyOFT, XVS_BRIDGE_SRC_ABI, provider);
+    bridge = new ethers.Contract(XVSProxyOFTSrc, XVS_BRIDGE_SRC_ABI, provider);
+    xvs = new ethers.Contract(bsctestnet.XVS, XVS_ABI, provider);
     xvsHolderSigner = await initMainnetUser(XVS_HOLDER, ethers.utils.parseEther("2"));
     [receiver] = await ethers.getSigners();
     receiverAddressBytes32 = ethers.utils.defaultAbiCoder.encode(["address"], [receiver.address]);
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-    resilientOracle = new ethers.Contract(networkAddresses.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-
-    // Let's fund the XVS_HOLDER wallet with some XVS tokens
-    const impersonatedBridge = await initMainnetUser(bridge.address, parseUnits("1", 18));
-
-    xvs = new ethers.Contract(networkAddresses.XVS, XVS_ABI, impersonatedBridge);
-    await xvs.mint(XVS_HOLDER, parseUnits("10000", 18));
   });
 
-  testForkedNetworkVipCommands("VIP", await vip(), {
-    callbackAfterExecution: async txResponse => {
+  testVip("vip-452 testnet", await vip452(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
         [XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_SRC_ABI],
@@ -63,42 +59,54 @@ export async function checkXVSBridge(
         ],
         [1, 1, 1, 1, 1, 1, 0],
       );
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [6, 0],
+      );
     },
   });
 
   describe("Post-VIP behavior", () => {
-    before(async () => {
-      await setMaxStalePeriod(resilientOracle, xvs);
-    });
-
     it("Should match trusted remote address", async () => {
-      expect(await bridge.getTrustedRemoteAddress(remoteLzChainId)).to.equal(trustedRemote.toLowerCase());
+      expect(await bridge.getTrustedRemoteAddress(LzChainId.unichainsepolia)).to.equal(
+        UNICHAIN_SEPOLIA_TRUSTED_REMOTE.toLowerCase(),
+      );
     });
 
     it("Should match minDestGas value", async () => {
-      expect(await bridge.minDstGasLookup(remoteLzChainId, 0)).to.equal(minDstGas);
+      expect(await bridge.minDstGasLookup(LzChainId.unichainsepolia, 0)).to.equal(MIN_DST_GAS);
     });
 
     describe("Limits", () => {
+      let remoteBridgeEntry: RemoteBridgeEntry;
+
+      before(() => {
+        remoteBridgeEntry = remoteBridgeEntries.find(entry => !entry.dstChainId) as RemoteBridgeEntry;
+      });
+
       it("Should match single send transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleTransactionLimit(remoteLzChainId)).to.equal(
-          bridgeConfiguration.maxSingleTransactionLimit,
+        expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.unichainsepolia)).to.equal(
+          remoteBridgeEntry.maxSingleTransactionLimit,
         );
       });
 
       it("Should match single receive transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(remoteLzChainId)).to.equal(
-          bridgeConfiguration.maxSingleReceiveTransactionLimit,
+        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.unichainsepolia)).to.equal(
+          remoteBridgeEntry.maxSingleReceiveTransactionLimit,
         );
       });
 
       it("Should match max daily send limit", async () => {
-        expect(await bridge.chainIdToMaxDailyLimit(remoteLzChainId)).to.equal(bridgeConfiguration.maxDailyLimit);
+        expect(await bridge.chainIdToMaxDailyLimit(LzChainId.unichainsepolia)).to.equal(
+          remoteBridgeEntry.maxDailyLimit,
+        );
       });
 
       it("Should match max daily receive limit", async () => {
-        expect(await bridge.chainIdToMaxDailyReceiveLimit(remoteLzChainId)).to.equal(
-          bridgeConfiguration.maxDailyReceiveLimit,
+        expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.unichainsepolia)).to.equal(
+          remoteBridgeEntry.maxDailyReceiveLimit,
         );
       });
     });
@@ -106,24 +114,34 @@ export async function checkXVSBridge(
     it("Should emit an event on successfull bridging of XVS", async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
-        await bridge.estimateSendFee(remoteLzChainId, receiverAddressBytes32, amount, false, defaultAdapterParams)
+        await bridge.estimateSendFee(
+          LzChainId.unichainsepolia,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
       ).nativeFee;
 
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
+      const bridgeBalPrev = await xvs.balanceOf(XVSProxyOFTSrc);
       await expect(
         bridge
           .connect(xvsHolderSigner)
           .sendFrom(
-            XVS_HOLDER,
-            remoteLzChainId,
+            xvsHolderSigner.address,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
-            [XVS_HOLDER, ethers.constants.AddressZero, defaultAdapterParams],
+            [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
             { value: nativeFee },
           ),
       )
         .to.be.emit(bridge, "SendToChain")
-        .withArgs(remoteLzChainId, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(LzChainId.unichainsepolia, XVS_HOLDER, receiverAddressBytes32, amount);
+      const bridgeBalAfter = await xvs.balanceOf(XVSProxyOFTSrc);
+
+      expect(bridgeBalAfter.sub(bridgeBalPrev)).to.equal(amount);
     });
 
     it("Reverts if single transaction limit exceed", async function () {
@@ -131,49 +149,50 @@ export async function checkXVSBridge(
       await xvs.connect(xvsHolderSigner).approve(bridge.address, amount);
 
       const nativeFee = (
-        await bridge.estimateSendFee(remoteLzChainId, receiverAddressBytes32, amount, false, defaultAdapterParams)
+        await bridge.estimateSendFee(
+          LzChainId.unichainsepolia,
+          receiverAddressBytes32,
+          amount,
+          false,
+          defaultAdapterParams,
+        )
       ).nativeFee;
       await expect(
         bridge
           .connect(xvsHolderSigner)
           .sendFrom(
-            XVS_HOLDER,
-            remoteLzChainId,
+            xvsHolderSigner.address,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
             amount,
-            [XVS_HOLDER, ethers.constants.AddressZero, defaultAdapterParams],
+            [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
             { value: nativeFee },
           ),
       ).to.be.revertedWith("Single Transaction Limit Exceed");
     });
 
     it("Reverts if max daily transaction limit exceed", async function () {
-      const xvsPrice = await resilientOracle.getPrice(networkAddresses.XVS);
-      const singleTransactionLimit = await bridge.chainIdToMaxSingleTransactionLimit(remoteLzChainId);
-      const dailyTransactionLimit = await bridge.chainIdToMaxDailyLimit(remoteLzChainId);
-      const safeTransactionAmount = parseUnits(singleTransactionLimit.div(xvsPrice).sub(1).toString(), 18);
-      const safeTransactionOcurrencies = dailyTransactionLimit.div(singleTransactionLimit);
-
+      const amount = parseUnits("2500", 18);
       await xvs.connect(xvsHolderSigner).approve(bridge.address, ethers.constants.MaxUint256); // Let's approve enough XVS
       const nativeFee = (
         await bridge.estimateSendFee(
-          remoteLzChainId,
+          LzChainId.unichainsepolia,
           receiverAddressBytes32,
-          safeTransactionAmount,
+          amount,
           false,
           defaultAdapterParams,
         )
       ).nativeFee;
 
-      for (let i = 0; i < safeTransactionOcurrencies; i++) {
+      for (let i = 0; i < 7; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
-            XVS_HOLDER,
-            remoteLzChainId,
+            xvsHolderSigner.address,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
-            safeTransactionAmount,
-            [XVS_HOLDER, ethers.constants.AddressZero, defaultAdapterParams],
+            amount,
+            [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
             { value: nativeFee },
           );
       }
@@ -181,14 +200,14 @@ export async function checkXVSBridge(
         bridge
           .connect(xvsHolderSigner)
           .sendFrom(
-            XVS_HOLDER,
-            remoteLzChainId,
+            xvsHolderSigner.address,
+            LzChainId.unichainsepolia,
             receiverAddressBytes32,
-            safeTransactionAmount,
-            [XVS_HOLDER, ethers.constants.AddressZero, defaultAdapterParams],
+            amount,
+            [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
             { value: nativeFee },
           ),
       ).to.be.revertedWith("Daily Transaction Limit Exceed");
     });
   });
-}
+});

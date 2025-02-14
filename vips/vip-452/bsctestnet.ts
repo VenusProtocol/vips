@@ -115,10 +115,10 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
   ];
 }
 
-const vip500 = () => {
+const vip452 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-500 Enable Unichain sepolia bridge",
+    title: "VIP-452 Enable Unichain sepolia bridge",
     description: `#### Summary Enable Unichain sepolia bridge`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -128,4 +128,4 @@ const vip500 = () => {
   return makeProposal(remoteBridgeEntries.flatMap(getRemoteBridgeCommands), meta, ProposalType.REGULAR);
 };
 
-export default vip500;
+export default vip452;
