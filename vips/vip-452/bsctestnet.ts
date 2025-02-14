@@ -6,10 +6,10 @@ const { berachainbartio } = NETWORK_ADDRESSES;
 
 export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
 export const MAX_DAILY_LIMIT = 100;
-export const OMNICHAIN_EXECUTOR_OWNER = "0xd934a7c03D6fA022321565f2042EC37bD26Baf3c";
+export const OMNICHAIN_EXECUTOR_OWNER = "0x94ba324b639F2C4617834dFcF45EA23188a17124";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR = "0x65cfF2E3833dC0fFcEE09102C29DD43e2ED75DF9";
-export const ACM = "0x92A6BCD9987Eb8689152C5A89BCC5c03305139E3";
+export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
+export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
 
 const vip452 = () => {
   const meta = {
@@ -43,19 +43,19 @@ const vip452 = () => {
         target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.berachainbartio,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [0],
-        dstChainId: LzChainId.basesepolia,
+        params: [1],
+        dstChainId: LzChainId.berachainbartio,
       },
       {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.basesepolia,
+        dstChainId: LzChainId.berachainbartio,
       },
     ],
     meta,

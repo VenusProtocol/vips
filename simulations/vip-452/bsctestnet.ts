@@ -10,7 +10,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 const { berachainbartio } = NETWORK_ADDRESSES;
-forking(10570744, async () => {
+forking(48276592, async () => {
   const provider = ethers.provider;
   const omnichainProposalSender = new ethers.Contract(
     OMNICHAIN_PROPOSAL_SENDER,
@@ -33,7 +33,7 @@ forking(10570744, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["SetMaxDailyLimit", "SetTrustedRemoteAddress", "ExecuteRemoteProposal", "StorePayload"],
-        [1, 1, 1, 0],
+        [1, 1, 2, 0],
       );
     },
   });
