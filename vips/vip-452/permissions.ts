@@ -1,7 +1,4 @@
-import { ethers } from "hardhat";
-import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
 import ACM_COMMANDS_AGGREATOR_ABI from "@venusprotocol/governance-contracts/artifacts/contracts/Utils/ACMCommandsAggregator.sol/ACMCommandsAggregator.json";
-
 import {
   AccountType,
   getBoundValidatorPermissions,
@@ -10,6 +7,9 @@ import {
   getRedstoneOraclePermissions,
   getResilientOraclePermissions,
 } from "@venusprotocol/governance-contracts/dist/helpers/permissions";
+import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
+import { ethers } from "hardhat";
+import hre from "hardhat";
 
 interface Permissions {
   [key: string]: string[][];
@@ -34,7 +34,7 @@ const grantPermissions: Permissions = {
 
 const acmCommandsAggreator: any = {
   berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
-}
+};
 
 const addresses: any = {
   berachainbartio: {
@@ -44,7 +44,7 @@ const addresses: any = {
     Guardian: BERACHAINBARTIO_GUARDIAN,
     OmnichainExecutorOwner: BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER,
   },
-}
+};
 
 function splitPermissions(
   array: ACMCommandsAggregator.PermissionStruct[],
@@ -122,13 +122,9 @@ const generateGrantPermissions = (
   }));
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Running script with deployer:", deployer.address);
-
-  const hre = require("hardhat");
   const acmCommandsAggregator = await ethers.getContractAt(
     ACM_COMMANDS_AGGREATOR_ABI.abi,
-    acmCommandsAggreator[hre.network.name]
+    acmCommandsAggreator[hre.network.name],
   );
   const networkGrantPermissions = grantPermissions[hre.network.name];
 
@@ -138,7 +134,7 @@ async function main() {
     }
   }
 
-  const _grantPermissions: ACMCommandsAggregator.PermissionStruct[] = networkGrantPermissions.map((permission) => ({
+  const _grantPermissions: ACMCommandsAggregator.PermissionStruct[] = networkGrantPermissions.map(permission => ({
     contractAddress: permission[0],
     functionSig: permission[1],
     account: permission[2],
@@ -192,7 +188,7 @@ async function main() {
 
 main()
   .then(() => process.exit(0))
-  .catch((error) => {
+  .catch(error => {
     console.error(error);
     process.exit(1);
   });

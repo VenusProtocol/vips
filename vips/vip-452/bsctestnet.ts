@@ -10,6 +10,8 @@ export const OMNICHAIN_EXECUTOR_OWNER = "0x94ba324b639F2C4617834dFcF45EA23188a17
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
 export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
+export const TREASURY = "0xF2f878a9cF9a43409F673CfA17B4F1E9D8169211";
+export const BOUND_VALIDATOR = "0x24C815d92f5F084E3679ceD7c51c2033784AaC06";
 
 const vip452 = () => {
   const meta = {
@@ -55,6 +57,36 @@ const vip452 = () => {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: TREASURY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: berachainbartio.RESILIENT_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: berachainbartio.CHAINLINK_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: berachainbartio.REDSTONE_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: BOUND_VALIDATOR,
+        signature: "acceptOwnership()",
+        params: [],
         dstChainId: LzChainId.berachainbartio,
       },
     ],

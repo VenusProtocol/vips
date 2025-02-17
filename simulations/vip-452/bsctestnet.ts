@@ -40,7 +40,9 @@ forking(48276592, async () => {
 
   describe("Post-VIP behavior", () => {
     it("Daily limit should be 100 of berachainbartio", async () => {
-      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.berachainbartio)).to.equals(MAX_DAILY_LIMIT);
+      expect(await omnichainProposalSender.chainIdToMaxDailyLimit(LzChainId.berachainbartio)).to.equals(
+        MAX_DAILY_LIMIT,
+      );
     });
 
     it("Trusted remote should be set of berachainbartio", async () => {

@@ -4,18 +4,21 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
-import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip452, {
   ACM,
   ACM_AGGREGATOR,
+  BOUND_VALIDATOR,
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
+  TREASURY,
 } from "../../vips/vip-452/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
+import OWNERSHIP_ABI from "./abi/Ownership.json";
 
 const { berachainbartio } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x723b7CB226d86bd89638ec77936463453a46C656";
@@ -26,6 +29,11 @@ forking(10581255, async () => {
   let lastProposalReceived: BigNumber;
   let executor: Contract;
   let executorOwner: Contract;
+  let treasury: Contract;
+  let resilientOracle: Contract;
+  let chainlinkOracle: Contract;
+  let redstoneOracle: Contract;
+  let boundValidator: Contract;
 
   before(async () => {
     executor = new ethers.Contract(
@@ -35,6 +43,12 @@ forking(10581255, async () => {
     );
     executorOwner = new ethers.Contract(OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
+
+    treasury = await ethers.getContractAt(OWNERSHIP_ABI, TREASURY);
+    resilientOracle = new ethers.Contract(berachainbartio.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
+    chainlinkOracle = new ethers.Contract(berachainbartio.CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
+    redstoneOracle = new ethers.Contract(berachainbartio.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
+    boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -42,6 +56,13 @@ forking(10581255, async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
       const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, berachainbartio.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
+    });
+
+    it("correct pending owner for oracles", async () => {
+      expect(await resilientOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await chainlinkOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await redstoneOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await boundValidator.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
     });
   });
 
@@ -78,7 +99,7 @@ forking(10581255, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(4);
+      expect(await executor.last24HourCommandsReceived()).equals(9);
 
       // Check function registry
       const functionSignatures: string[] = [
@@ -144,6 +165,14 @@ forking(10581255, async () => {
       expect(await acm.hasRole(roleHash, berachainbartio.NORMAL_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
+    });
+
+    it("correct owner for oracles", async () => {
+      expect(await treasury.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await resilientOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await chainlinkOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await redstoneOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(await boundValidator.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
     });
   });
 });
