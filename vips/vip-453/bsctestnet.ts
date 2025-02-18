@@ -13,13 +13,12 @@ export const XVS_BRIDGE_ADMIN_PROXY = "0xdE489177E607F1C6D9d27325FA38152fA462F7c
 export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
 export const XVS_BRIDGE_DEST = "0x95676A9Ec0d7c11f207Bc180350Bd53bfed31a59";
 
-
-export const OPBNB_TRUSTED_REMOTE = "0x100D331C1B5Dcd41eACB1eCeD0e83DCEbf3498B2";
-export const ETHEREUM_TRUSTED_REMOTE = "0x888E317606b4c590BBAD88653863e8B345702633";
-export const BNB_MAINNET_TRUSTED_REMOTE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
-export const ARBITRUM_REMOTE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
-export const ZYSYNC_REMOTE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
-export const OP_TRUSTED_REMOTE = "0xbBe46bAec851355c3FC4856914c47eB6Cea0B8B4";
+export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e331a70ea3";
+export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
+export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086e5fd0";
+export const ARBITRUM_SEPOLIA_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
+export const ZYSYNC_SEPOLIA_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
+export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 export const MIN_DST_GAS = "300000";
@@ -174,37 +173,37 @@ const vip452 = () => {
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.bscmainnet, BNB_MAINNET_TRUSTED_REMOTE],
+        params: [LzChainId.bsctestnet, BNB_TESTNET_TRUSTED_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.opbnbmainnet, OPBNB_TRUSTED_REMOTE],
+        params: [LzChainId.opbnbtestnet, OPBNB_TESTNET_TRUSTED_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.ethereum, ETHEREUM_TRUSTED_REMOTE],
+        params: [LzChainId.sepolia, SEPOLIA_TRUSTED_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.arbitrumone, ARBITRUM_REMOTE],
+        params: [LzChainId.arbitrumsepolia, ARBITRUM_SEPOLIA_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.zksyncmainnet, ZYSYNC_REMOTE],
+        params: [LzChainId.zksyncsepolia, ZYSYNC_SEPOLIA_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.opmainnet, OP_TRUSTED_REMOTE],
+        params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {
@@ -216,7 +215,7 @@ const vip452 = () => {
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setWhitelist(address,bool)",
-        params: [berachainbartio.GUARDIAN, true],
+        params: [berachainbartio.NORMAL_TIMELOCK, true],
         dstChainId: LzChainId.berachainbartio,
       },
       {
