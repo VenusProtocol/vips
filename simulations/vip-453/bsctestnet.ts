@@ -6,7 +6,7 @@ import vip453 from "../../vips/vip-453/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(48276592, async () => {
-  testVip("vip452 give permissions to timelock", await vip452())
+  testVip("vip452 give permissions to timelock", await vip452());
   testVip("VIP-453", await vip453(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(

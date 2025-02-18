@@ -1,28 +1,27 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip452, {
-} from "../../vips/vip-452/bsctestnet";
+import vip452 from "../../vips/vip-452/bsctestnet";
 import vip453, {
   ARBITRUM_SEPOLIA_REMOTE,
-  SEPOLIA_TRUSTED_REMOTE,
+  BNB_TESTNET_TRUSTED_REMOTE,
   OPBNB_TESTNET_TRUSTED_REMOTE,
   OP_SEPOLIA_TRUSTED_REMOTE,
-  ZYSYNC_SEPOLIA_REMOTE,
-  BNB_TESTNET_TRUSTED_REMOTE,
+  SEPOLIA_TRUSTED_REMOTE,
   XVS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
+  ZYSYNC_SEPOLIA_REMOTE,
 } from "../../vips/vip-453/bsctestnet";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
-import { parseUnits } from "ethers/lib/utils";
 
 const { berachainbartio } = NETWORK_ADDRESSES;
 const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
@@ -33,7 +32,6 @@ const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 const MIN_DEST_GAS = "300000";
 
 forking(10720442, async () => {
-  const provider = ethers.provider;
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;

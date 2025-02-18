@@ -14,13 +14,10 @@ interface Permissions {
 
 const BERACHAINBARTIO_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const XVS_BRIDGE_ADMIN = "0xdE489177E607F1C6D9d27325FA38152fA462F7cC";
-const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208"
+const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [
-    ...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN),
-    ...getXVSPermissions(XVS),
-  ],
+  berachainbartio: [...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN), ...getXVSPermissions(XVS)],
 };
 
 const acmCommandsAggreator: any = {

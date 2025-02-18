@@ -40,7 +40,6 @@ export type RemoteBridgeCommand = {
   dstChainId: LzChainId | undefined;
 };
 
-
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {
     bridgeAdmin: "0xB164Cb262328Ca44a806bA9e3d4094931E658513",
@@ -169,7 +168,12 @@ const vip452 = () => {
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
         dstChainId: LzChainId.berachainbartio,
       },
-      { target: XVS_BRIDGE_ADMIN_PROXY, signature: "acceptOwnership()", params: [], dstChainId: LzChainId.berachainbartio, },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
@@ -224,7 +228,7 @@ const vip452 = () => {
         params: [XVS_BRIDGE_DEST, XVS_MINT_LIMIT],
         dstChainId: LzChainId.berachainbartio,
       },
-      ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands)
+      ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
     ],
     meta,
     ProposalType.REGULAR,
