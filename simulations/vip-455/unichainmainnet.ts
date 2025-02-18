@@ -19,10 +19,10 @@ import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json"
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
-const FAST_TRACK_TIMELOCK = "0x5F4ec2524A670139b760f95D0986Ef6b9d162989";
-const CRITICAL_TIMELOCK = "0x91A58273EA9B2Cae1f72d431a7cB145aB9A3d1F3";
+const FAST_TRACK_TIMELOCK = "0x4121995b87f9EE8bA0a89e87470255e2E0fe48c7";
+const CRITICAL_TIMELOCK = "0x1b05eCb489842786776a9A10e91AAb56e2CFe15e";
 
-forking(8697951, async () => {
+forking(9147076, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
