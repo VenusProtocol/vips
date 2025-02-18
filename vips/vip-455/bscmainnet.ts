@@ -5,7 +5,7 @@ import { makeProposal } from "src/utils";
 const { unichainmainnet } = NETWORK_ADDRESSES;
 export const OMNICHAIN_PROPOSAL_SENDER = "0x36a69dE601381be7b0DcAc5D5dD058825505F8f6";
 
-export const OMNICHAIN_EXECUTOR_OWNER = "0x65df5ba2Fa1F7A5bBDee1789bFd29b593108D15F";
+export const OMNICHAIN_EXECUTOR_OWNER = "0x6E78a0d96257F8F2615d72F3ee48cb6fb2c970bd";
 export const ACM = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM_AGGREGATOR = "0x904D11b00bdB2740d16176cc00DE139d0d626115";
@@ -47,19 +47,19 @@ const vip455 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [0],
+        params: [2],
         dstChainId: LzChainId.unichainmainnet,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [1],
+        params: [3],
         dstChainId: LzChainId.unichainmainnet,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeRevokePermissions(uint256)",
-        params: [0],
+        params: [1],
         dstChainId: LzChainId.unichainmainnet,
       },
       {
