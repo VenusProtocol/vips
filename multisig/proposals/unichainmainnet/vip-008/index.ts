@@ -17,7 +17,7 @@ export const VUSDC_CORE = "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95";
 export const VWETH_CORE = "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374";
 const ACM = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
 
-export const vip007 = () => {
+export const vip008 = () => {
   return makeProposal([
     // ACM Permissions
     {
@@ -73,4 +73,4 @@ export const vip007 = () => {
   ]);
 };
 
-export default vip007;
+export default vip008;

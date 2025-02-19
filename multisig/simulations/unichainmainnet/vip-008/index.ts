@@ -19,8 +19,8 @@ import {
   XVS,
   XVS_REWARD_AMOUNT,
   XVS_STORE,
-  vip007,
-} from "../../../proposals/unichainmainnet/vip-007";
+  vip008,
+} from "../../../proposals/unichainmainnet/vip-008";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_VAULT_ABI from "./abi/xvsvault.json";
 
@@ -35,7 +35,7 @@ forking(9227729, async () => {
 
       xvsVault = new ethers.Contract(unichainmainnet.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
 
-      await pretendExecutingVip(await vip007());
+      await pretendExecutingVip(await vip008());
     });
 
     it("rewards distributor should have expected number of xvs tokens", async () => {
