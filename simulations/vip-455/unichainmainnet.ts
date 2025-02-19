@@ -6,7 +6,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip008 from "../../multisig/proposals/unichainmainnet/vip-008";
+import vip009 from "../../multisig/proposals/unichainmainnet/vip-009";
 import vip455, {
   ACM,
   ACM_AGGREGATOR,
@@ -36,7 +36,7 @@ forking(9147076, async () => {
     );
     executorOwner = new ethers.Contract(OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vip008());
+    await pretendExecutingVip(await vip009());
   });
 
   describe("Pre-VIP behaviour", async () => {
