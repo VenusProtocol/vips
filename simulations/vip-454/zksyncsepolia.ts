@@ -50,8 +50,9 @@ forking(4761402, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct wstETH price", async () => {
         const price = await oracle.getPrice(newMarket.vToken.underlying.address);
-        expect(price).to.be.eq(parseUnits("2950.704790000000000000", 18));
+        expect(price).to.be.eq(parseUnits("2978.555065838000000000", 18));
       });
+
       it(`Oracle underlying Price`, async () => {
         const price = await oracle.getUnderlyingPrice(newMarket.vToken.address);
         console.log(price.toString());

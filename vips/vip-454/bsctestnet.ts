@@ -37,7 +37,7 @@ export const newMarket = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("10000", 18),
+    amount: parseUnits("2.5", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
@@ -50,8 +50,6 @@ export const newMarket = {
 };
 
 export const FIXED_STABLECOIN_PRICE = parseUnits("1.1", 18);
-const STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours (pricefeeds with heartbeat of 24 hr)
-const ETH_USD_FEED = "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF";
 
 const vip454 = () => {
   const meta = {
@@ -84,26 +82,9 @@ const vip454 = () => {
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
-        target: CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[token["wstETH"].address, ETH_USD_FEED, STALE_PERIOD_26H]],
-      },
-      {
         target: newMarket.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: newMarket.vToken.address,
-        signature: "setReserveFactor(uint256)",
-        params: [newMarket.riskParameters.reserveFactor],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: newMarket.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [newMarket.riskParameters.protocolSeizeShare],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
