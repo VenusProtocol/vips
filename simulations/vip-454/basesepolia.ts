@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
@@ -11,7 +10,8 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, { COMPTROLLER_CORE, market, token } from "../../vips/vip-454/bsctestnet1";
+import vip454, { COMPTROLLER_CORE, market, token, wstETH_ONE_JUMP_ORACLE } from "../../vips/vip-454/bsctestnet1";
+import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -19,8 +19,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["basesepolia"];
-const ETH_USD_FEED = "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1";
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["basesepolia"];
 
 forking(22005820, async () => {
   const provider = ethers.provider;
@@ -30,27 +29,24 @@ forking(22005820, async () => {
   const vTokenContract = new ethers.Contract(market.vToken.address, VTOKEN_ABI, provider);
 
   describe("vTokens deployment", () => {
-    before(async () => {
-      await setMaxStalePeriodInChainlinkOracle(
-        CHAINLINK_ORACLE,
-        market.vToken.underlying.address,
-        ETH_USD_FEED,
-        NORMAL_TIMELOCK,
-      );
-    });
-
     it(`should deploy market`, async () => {
       await checkVToken(market.vToken.address, market.vToken);
     });
   });
 
-  testForkedNetworkVipCommands("vip454", await vip454());
+  testForkedNetworkVipCommands("wstEth_Core - BASE", await vip454());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it(`has the correct ${token.symbol} price`, async () => {
         const price = await oracle.getPrice(token.address);
         expect(price).to.be.eq(parseUnits("2954.688", 18));
+      });
+
+      it("has the correct wstETH oracle configuration", async () => {
+        const JUMP_RATE_ORACLE = new ethers.Contract(wstETH_ONE_JUMP_ORACLE, JUMPRATEMODEL_ABI, provider);
+        expect(await JUMP_RATE_ORACLE.CORRELATED_TOKEN()).to.equal(market.vToken.underlying.address);
+        expect(await JUMP_RATE_ORACLE.RESILIENT_ORACLE()).to.equal(RESILIENT_ORACLE);
       });
     });
 

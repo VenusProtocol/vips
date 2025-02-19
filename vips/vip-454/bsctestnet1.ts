@@ -122,18 +122,6 @@ const vip454 = () => {
         dstChainId: LzChainId.basesepolia,
       },
       {
-        target: market.vToken.address,
-        signature: "setReserveFactor(uint256)",
-        params: [market.riskParameters.reserveFactor],
-        dstChainId: LzChainId.basesepolia,
-      },
-      {
-        target: market.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [market.riskParameters.protocolSeizeShare],
-        dstChainId: LzChainId.basesepolia,
-      },
-      {
         target: token.address,
         signature: "faucet(uint256)",
         params: [market.initialSupply.amount],

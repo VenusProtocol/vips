@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
@@ -18,7 +17,7 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["zksyncsepolia"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["zksyncsepolia"];
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is time based deployment
 
@@ -27,35 +26,20 @@ forking(4761402, async () => {
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
-  const ETH_USD_FEED = "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF";
 
   describe("vTokens deployment", () => {
-    before(async () => {
-      await setMaxStalePeriodInChainlinkOracle(
-        CHAINLINK_ORACLE,
-        newMarket.vToken.underlying.address,
-        ETH_USD_FEED,
-        NORMAL_TIMELOCK,
-      );
-    });
-
     it(`should deploy market`, async () => {
       await checkVToken(newMarket.vToken.address, newMarket.vToken);
     });
   });
 
-  testForkedNetworkVipCommands("wstEth_Core", await vip454());
+  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct wstETH price", async () => {
         const price = await oracle.getPrice(newMarket.vToken.underlying.address);
         expect(price).to.be.eq(parseUnits("2978.555065838000000000", 18));
-      });
-
-      it(`Oracle underlying Price`, async () => {
-        const price = await oracle.getUnderlyingPrice(newMarket.vToken.address);
-        console.log(price.toString());
       });
     });
 
