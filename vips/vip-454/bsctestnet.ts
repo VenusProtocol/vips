@@ -119,21 +119,21 @@ const vip454 = () => {
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
-              target: POOL_REGISTRY,
-              signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-              params: [
-                [
-                  newMarket.vToken.address,
-                  newMarket.riskParameters.collateralFactor,
-                  newMarket.riskParameters.liquidationThreshold,
-                  newMarket.initialSupply.amount,
-                  newMarket.initialSupply.vTokenReceiver,
-                  newMarket.riskParameters.supplyCap,
-                  newMarket.riskParameters.borrowCap,
-                ],
-              ],
-              dstChainId: LzChainId.zksyncsepolia,
-            },
+        target: POOL_REGISTRY,
+        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+        params: [
+          [
+            newMarket.vToken.address,
+            newMarket.riskParameters.collateralFactor,
+            newMarket.riskParameters.liquidationThreshold,
+            newMarket.initialSupply.amount,
+            newMarket.initialSupply.vTokenReceiver,
+            newMarket.riskParameters.supplyCap,
+            newMarket.riskParameters.borrowCap,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
       {
         target: newMarket.vToken.underlying.address,
         signature: "approve(address,uint256)",

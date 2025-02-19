@@ -20,7 +20,6 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["basesepolia"];
-const WETH = "0x4200000000000000000000000000000000000006";
 const ETH_USD_FEED = "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1";
 
 forking(22005820, async () => {
@@ -32,14 +31,19 @@ forking(22005820, async () => {
 
   describe("vTokens deployment", () => {
     before(async () => {
-      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, market.vToken.underlying.address, ETH_USD_FEED, NORMAL_TIMELOCK);
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        market.vToken.underlying.address,
+        ETH_USD_FEED,
+        NORMAL_TIMELOCK,
+      );
     });
 
     it(`should deploy market`, async () => {
       await checkVToken(market.vToken.address, market.vToken);
     });
   });
-  
+
   testForkedNetworkVipCommands("vip454", await vip454());
 
   describe("Post-VIP state", () => {
