@@ -5,27 +5,23 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip455, {
-  BNB_GAMEFI_COMPTROLLER,
-  BNB_vFLOKI_CORE,
-  BNB_vFLOKI_CORE_BORROW_CAP,
-} from "../../vips/vip-455/bscmainnet";
+import vip453, { BNB_CHAIN_vFLOKI, FLOKI_BORROW_CAP, GAMEFI_COMPTROLLER } from "../../vips/vip-453/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-forking(46792130, async () => {
+forking(46738309, async () => {
   const provider = ethers.provider;
 
-  const comptroller = new ethers.Contract(BNB_GAMEFI_COMPTROLLER, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(GAMEFI_COMPTROLLER, COMPTROLLER_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
     it("check borrow caps", async () => {
-      const borrowCap = await comptroller.borrowCaps(BNB_vFLOKI_CORE);
-      expect(borrowCap).to.equal(parseUnits("16000000000", 9));
+      const borrowCap = await comptroller.borrowCaps(BNB_CHAIN_vFLOKI);
+      expect(borrowCap).to.equal(parseUnits("8000000000", 9));
     });
   });
 
-  testVip("VIP-455", await vip455(), {
+  testVip("VIP-453", await vip453(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -40,8 +36,8 @@ forking(46792130, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("check borrow caps", async () => {
-      const borrowCap = await comptroller.borrowCaps(BNB_vFLOKI_CORE);
-      expect(borrowCap).to.equal(BNB_vFLOKI_CORE_BORROW_CAP);
+      const borrowCap = await comptroller.borrowCaps(BNB_CHAIN_vFLOKI);
+      expect(borrowCap).to.equal(FLOKI_BORROW_CAP);
     });
   });
 });

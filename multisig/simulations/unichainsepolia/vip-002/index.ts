@@ -8,7 +8,7 @@ import { initMainnetUser } from "src/utils";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip001, { ACM, XVS_STORE } from "../../../proposals/unichainsepolia/vip-001";
+import vip002, { ACM, XVS_STORE } from "../../../proposals/unichainsepolia/vip-002";
 import ACM_ABI from "./abi/acm.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_STORE_ABI from "./abi/xvsstore.json";
@@ -25,7 +25,7 @@ forking(4541503, async () => {
   before(async () => {
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, unichainsepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
-    await pretendExecutingVip(await vip001());
+    await pretendExecutingVip(await vip002());
   });
 
   describe("Post tx checks", () => {
