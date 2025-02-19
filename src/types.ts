@@ -14,7 +14,9 @@ export type SUPPORTED_NETWORKS =
   | "opsepolia"
   | "opmainnet"
   | "basesepolia"
-  | "basemainnet";
+  | "basemainnet"
+  | "unichainsepolia"
+  | "unichainmainnet";
 
 export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
 
@@ -25,6 +27,7 @@ export const REMOTE_TESTNET_NETWORKS = [
   "zksyncsepolia",
   "opsepolia",
   "basesepolia",
+  "unichainsepolia",
 ];
 export const REMOTE_MAINNET_NETWORKS = [
   "ethereum",
@@ -33,6 +36,7 @@ export const REMOTE_MAINNET_NETWORKS = [
   "zksyncmainnet",
   "opmainnet",
   "basemainnet",
+  "unichainmainnet",
 ];
 
 export interface ProposalMeta {
