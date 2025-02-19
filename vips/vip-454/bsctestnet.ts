@@ -52,10 +52,11 @@ export const newMarket = {
 export const FIXED_STABLECOIN_PRICE = parseUnits("1.1", 18);
 const STALE_PERIOD_26H = 26 * 60 * 60; // 26 hours (pricefeeds with heartbeat of 24 hr)
 const ETH_USD_FEED = "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF";
-const vip453 = () => {
+
+const vip454 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-453 [Zksync] New wstETH market in the Core pool",
+    title: "VIP-454 [Zksync] New wstETH market in the Core pool",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -145,4 +146,4 @@ const vip453 = () => {
   );
 };
 
-export default vip453;
+export default vip454;

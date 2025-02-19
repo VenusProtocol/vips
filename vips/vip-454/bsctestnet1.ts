@@ -85,10 +85,10 @@ export const market: Market = {
 };
 
 const FIXED_STABLECOIN_PRICE = parseUnits("1.1", 18);
-const vip453 = () => {
+const vip454 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-453 [Base] New vwstETH_Core market in the Core pool",
+    title: "VIP-454 [Base] New vwstETH_Core market in the Core pool",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -173,4 +173,4 @@ const vip453 = () => {
   );
 };
 
-export default vip453;
+export default vip454;

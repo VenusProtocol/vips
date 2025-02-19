@@ -9,10 +9,10 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import vip453, {
+import vip454, {
   COMPTROLLER_CORE,
   newMarket, token, wstETH_ONE_JUMP_ORACLE,
-} from "../../vips/vip-453/bsctestnet";
+} from "../../vips/vip-454/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -40,7 +40,7 @@ forking(4761402, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("wstEth_Core", await vip453());
+  testForkedNetworkVipCommands("wstEth_Core", await vip454());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
