@@ -11,10 +11,10 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 export const ACM_AGGREGATOR = "0xb0067C9CD83B00DE781e9b456Bf0Fec86D687Bb2";
 export const MAX_DAILY_LIMIT = 100;
 
-const vip455 = () => {
+const vip456 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-455 Enable Multichain Governance on unichain sepolia",
+    title: "VIP-456 Enable Multichain Governance on unichain sepolia",
     description: `### Summary`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -73,4 +73,4 @@ const vip455 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip455;
+export default vip456;

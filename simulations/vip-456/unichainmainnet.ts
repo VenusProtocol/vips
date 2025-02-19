@@ -6,13 +6,13 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip008 from "../../multisig/proposals/unichainmainnet/vip-008";
-import vip455, {
+import vip009 from "../../multisig/proposals/unichainmainnet/vip-009";
+import vip456, {
   ACM,
   ACM_AGGREGATOR,
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
-} from "../../vips/vip-455/bscmainnet";
+} from "../../vips/vip-456/bscmainnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
@@ -36,7 +36,7 @@ forking(9147076, async () => {
     );
     executorOwner = new ethers.Contract(OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vip008());
+    await pretendExecutingVip(await vip009());
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -47,7 +47,7 @@ forking(9147076, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip455 configures bridge", await vip455(), {
+  testForkedNetworkVipCommands("vip456 configures bridge", await vip456(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [223]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);

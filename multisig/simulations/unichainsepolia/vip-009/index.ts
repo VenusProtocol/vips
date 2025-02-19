@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip } from "src/vip-framework/index";
 
-import vip008, { ACM } from "../../../proposals/unichainsepolia/vip-008";
+import vip009, { ACM } from "../../../proposals/unichainsepolia/vip-009";
 import ACM_ABI from "./abi/AccessControlManager.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
@@ -27,7 +27,7 @@ forking(12516535, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await pretendExecutingVip(await vip008());
+      await pretendExecutingVip(await vip009());
     });
 
     it("Normal Timelock has default admin role", async () => {
