@@ -1,4 +1,7 @@
 import ACM_COMMANDS_AGGREATOR_ABI from "@venusprotocol/governance-contracts/artifacts/contracts/Utils/ACMCommandsAggregator.sol/ACMCommandsAggregator.json";
+import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
+import { ethers } from "hardhat";
+import hre from "hardhat";
 import {
   AccountType,
   getBoundValidatorPermissions,
@@ -6,10 +9,7 @@ import {
   getOmniChainExecutorOwnerPermissions,
   getRedstoneOraclePermissions,
   getResilientOraclePermissions,
-} from "@venusprotocol/governance-contracts/dist/helpers/permissions";
-import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
-import { ethers } from "hardhat";
-import hre from "hardhat";
+} from "src/permissions";
 
 interface Permissions {
   [key: string]: string[][];
@@ -28,7 +28,7 @@ const grantPermissions: Permissions = {
     ...getChainlinkOraclePermissions(BERACHAINBARTIO_CHAINLINK_ORACLE),
     ...getRedstoneOraclePermissions(BERACHAINBARTIO_REDSTONE_ORACLE),
     ...getBoundValidatorPermissions(BERACHAINBARTIO_BOUND_VALIDATOR),
-    ...getOmniChainExecutorOwnerPermissions(BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER, BERACHAINBARTIO_GUARDIAN),
+    ...getOmniChainExecutorOwnerPermissions(BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER),
   ],
 };
 
@@ -36,13 +36,12 @@ const acmCommandsAggreator: any = {
   berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
 };
 
-const addresses: any = {
+const accounts: any = {
   berachainbartio: {
     NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
     FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
     CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
     Guardian: BERACHAINBARTIO_GUARDIAN,
-    OmnichainExecutorOwner: BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER,
   },
 };
 
@@ -60,67 +59,6 @@ function splitPermissions(
   return result;
 }
 
-const functionSignatures = {
-  normal: [
-    "setSendVersion(uint16)",
-    "setReceiveVersion(uint16)",
-    "setMaxDailyReceiveLimit(uint256)",
-    "pause()",
-    "setPrecrime(address)",
-    "setMinDstGas(uint16,uint16,uint256)",
-    "setPayloadSizeLimit(uint16,uint256)",
-    "setConfig(uint16,uint16,uint256,bytes)",
-    "addTimelocks(address[])",
-    "setTrustedRemoteAddress(uint16,bytes)",
-    "setTimelockPendingAdmin(address,uint8)",
-    "retryMessage(uint16,bytes,uint64,bytes)",
-    "setGuardian(address)",
-    "setSrcChainId(uint16)",
-    "transferBridgeOwnership(address)",
-  ],
-  fasttrack: [
-    "setReceiveVersion(uint16)",
-    "setMaxDailyReceiveLimit(uint256)",
-    "pause()",
-    "setConfig(uint16,uint16,uint256,bytes)",
-    "addTimelocks(address[])",
-    "retryMessage(uint16,bytes,uint64,bytes)",
-  ],
-  critical: [
-    "setReceiveVersion(uint16)",
-    "setMaxDailyReceiveLimit(uint256)",
-    "pause()",
-    "setConfig(uint16,uint16,uint256,bytes)",
-    "addTimelocks(address[])",
-    "retryMessage(uint16,bytes,uint64,bytes)",
-  ],
-  guardian: [
-    "setReceiveVersion(uint16)",
-    "forceResumeReceive(uint16,bytes)",
-    "setMaxDailyReceiveLimit(uint256)",
-    "pause()",
-    "unpause()",
-    "setConfig(uint16,uint16,uint256,bytes)",
-    "addTimelocks(address[])",
-    "setTrustedRemoteAddress(uint16,bytes)",
-    "setTimelockPendingAdmin(address,uint8)",
-    "retryMessage(uint16,bytes,uint64,bytes)",
-    "setSrcChainId(uint16)",
-    "transferBridgeOwnership(address)",
-  ],
-};
-
-const generateGrantPermissions = (
-  OMNICHAIN_EXECUTOR_OWNER: string,
-  functionSigs: string[],
-  account: string,
-): ACMCommandsAggregator.PermissionStruct[] =>
-  functionSigs.map(functionSig => ({
-    contractAddress: OMNICHAIN_EXECUTOR_OWNER,
-    functionSig: functionSig,
-    account: account,
-  }));
-
 async function main() {
   const acmCommandsAggregator = await ethers.getContractAt(
     ACM_COMMANDS_AGGREATOR_ABI.abi,
@@ -130,7 +68,7 @@ async function main() {
 
   for (const permission of networkGrantPermissions) {
     if (Object.values(AccountType).includes(permission[2] as AccountType)) {
-      permission[2] = addresses[hre.network.name][permission[2]];
+      permission[2] = accounts[hre.network.name][permission[2]];
     }
   }
 
@@ -140,40 +78,10 @@ async function main() {
     account: permission[2],
   }));
 
-  const normalGrantPermissions = generateGrantPermissions(
-    addresses[hre.network.name].OmnichainExecutorOwner,
-    functionSignatures.normal,
-    addresses[hre.network.name].NormalTimelock,
-  );
-  const fasttrackGrantPermissions = generateGrantPermissions(
-    addresses[hre.network.name].OmnichainExecutorOwner,
-    functionSignatures.fasttrack,
-    addresses[hre.network.name].FastTrackTimelock,
-  );
-  const criticalGrantPermissions = generateGrantPermissions(
-    addresses[hre.network.name].OmnichainExecutorOwner,
-    functionSignatures.critical,
-    addresses[hre.network.name].CriticalTimelock,
-  );
-  const guardianGrantPermissions = generateGrantPermissions(
-    addresses[hre.network.name].OmnichainExecutorOwner,
-    functionSignatures.guardian,
-    addresses[hre.network.name].Guardian,
-  );
+  console.log("Adding Grant Permissions: ", _grantPermissions);
+  return;
 
-  const omnichainGrantPermissions: ACMCommandsAggregator.PermissionStruct[] = [
-    ...normalGrantPermissions,
-    ...fasttrackGrantPermissions,
-    ...criticalGrantPermissions,
-    ...guardianGrantPermissions,
-  ];
-
-  const allGrantPermissions: ACMCommandsAggregator.PermissionStruct[] = [
-    ..._grantPermissions,
-    ...omnichainGrantPermissions,
-  ];
-
-  const grantChunks = splitPermissions(allGrantPermissions);
+  const grantChunks = splitPermissions(_grantPermissions);
   const grantIndexes: string[] = [];
 
   for (const chunk of grantChunks) {
