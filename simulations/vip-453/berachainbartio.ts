@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
+import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip452 from "../../vips/vip-452/bsctestnet";
@@ -30,6 +31,8 @@ const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
 const SINGLE_RECEIVE_LIMIT = parseUnits("20400", 18);
 
 const MIN_DEST_GAS = "300000";
+
+const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
 forking(10720442, async () => {
   let xvs: Contract;
@@ -214,6 +217,20 @@ forking(10720442, async () => {
 
       limit = await xvsBridge.minDstGasLookup(LzChainId.opsepolia, 0);
       expect(limit).equals(MIN_DEST_GAS);
+    });
+  });
+
+  describe("Post-Execution extra checks", () => {
+    it(`should fail if someone else tries to mint XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).mint(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
+    });
+
+    it(`should fail if someone else tries to burn XVS`, async () => {
+      const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
+
+      await expect(xvs.connect(regularUser).burn(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
     });
   });
 });

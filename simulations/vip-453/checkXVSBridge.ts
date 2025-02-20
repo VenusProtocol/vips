@@ -7,12 +7,11 @@ import { Proposal } from "src/types";
 import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip452 from "../../vips/vip-452/bsctestnet";
 import { RemoteBridgeEntry } from "../../vips/vip-453/bsctestnet";
-import XVS_ABI from "./abi/xvs.json";
-import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_SRC_ABI from "./abi/XVSProxyOFTSrc.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
+import XVS_ABI from "./abi/xvs.json";
+import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 
 const XVS_HOLDER = "0x000000000000000000000000000000000000dEaD";
 
