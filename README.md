@@ -6,6 +6,8 @@
 
 - Solc - v0.8.13 (https://github.com/ethereum/solidity/releases/tag/v0.8.13)
 
+- anvil-zksync - v0.3.0 (https://github.com/matter-labs/anvil-zksync)
+
 ### Installing
 
 ```
