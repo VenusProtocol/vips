@@ -1,3 +1,5 @@
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
@@ -6,6 +8,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
 import vip452 from "../../vips/vip-452/bsctestnet";
 import vip453, {
@@ -18,8 +21,11 @@ import vip453, {
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_BRIDGE_DEST,
   XVS_MINT_LIMIT,
+  XVS_STORE,
   ZYSYNC_SEPOLIA_REMOTE,
 } from "../../vips/vip-453/bsctestnet";
+import XVS_STORE_ABI from "./abi/XVSStore.json";
+import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
@@ -34,15 +40,20 @@ const MIN_DEST_GAS = "300000";
 
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(10720442, async () => {
+forking(10791347, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
+  let xvsVault: Contract;
+  let xvsStore: Contract;
+  let xvsMinter: SignerWithAddress;
 
   before(async () => {
     xvs = await ethers.getContractAt(XVS_ABI, XVS);
     xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE_DEST);
+    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, berachainbartio.XVS_VAULT_PROXY);
+    xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -231,6 +242,43 @@ forking(10720442, async () => {
       const regularUser = await initMainnetUser(REGULAR_USER, parseEther("1"));
 
       await expect(xvs.connect(regularUser).burn(REGULAR_USER, 1)).to.be.revertedWithCustomError(xvs, "Unauthorized");
+    });
+  });
+
+  describe("XVS Vault checks", async () => {
+    before(async () => {
+      const xvs: Contract = await ethers.getContractAt(XVS_ABI, berachainbartio.XVS);
+      xvsMinter = await initMainnetUser(XVS_BRIDGE_DEST, ethers.utils.parseEther("1"));
+      const admin = await initMainnetUser(berachainbartio.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      const xvsHolder = await initMainnetUser(berachainbartio.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
+      await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(berachainbartio.XVS, "61805555555555555");
+      await xvsVault.connect(admin).resume();
+      await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"));
+
+      await xvs.connect(xvsHolder).transfer(XVS_STORE, ethers.utils.parseEther("1"));
+      await mine(604800);
+    });
+
+    checkXVSVault();
+
+    it("Should set xvs vault owner to NTL", async () => {
+      const owner = await xvsVault.admin();
+      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+    });
+
+    it("Should set xvs store owner to NTL", async () => {
+      const owner = await xvsStore.admin();
+      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+    });
+
+    it("Should set correct xvs store address", async () => {
+      const xvsStore = await xvsVault.xvsStore();
+      expect(xvsStore).equals(XVS_STORE);
+    });
+
+    it("Should set correct reward token address", async () => {
+      const isActive = await xvsStore.rewardTokens(berachainbartio.XVS);
+      expect(isActive).equals(true);
     });
   });
 });

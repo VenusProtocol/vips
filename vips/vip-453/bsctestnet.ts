@@ -12,6 +12,7 @@ export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
 export const XVS_BRIDGE_ADMIN_PROXY = "0xdE489177E607F1C6D9d27325FA38152fA462F7cC";
 export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
 export const XVS_BRIDGE_DEST = "0x95676A9Ec0d7c11f207Bc180350Bd53bfed31a59";
+export const XVS_STORE = "0xED54Eaa582f07886c15A22eF81582f68dBd987C1";
 
 export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e331a70ea3";
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
@@ -152,6 +153,18 @@ const vip452 = () => {
     [
       {
         target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS, "mint(address,uint256)", XVS_BRIDGE_DEST],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [XVS, "burn(address,uint256)", XVS_BRIDGE_DEST],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
         dstChainId: LzChainId.berachainbartio,
@@ -159,7 +172,7 @@ const vip452 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [2],
+        params: [5],
         dstChainId: LzChainId.berachainbartio,
       },
       {
@@ -229,6 +242,30 @@ const vip452 = () => {
         dstChainId: LzChainId.berachainbartio,
       },
       ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
+      {
+        target: berachainbartio.XVS_VAULT_PROXY,
+        signature: "_acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: XVS_STORE,
+        signature: "acceptAdmin()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: berachainbartio.XVS_VAULT_PROXY,
+        signature: "add(address,uint256,address,uint256,uint256)",
+        params: [XVS, 100, XVS, "0", 300],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: berachainbartio.XVS_VAULT_PROXY,
+        signature: "pause()",
+        params: [],
+        dstChainId: LzChainId.berachainbartio,
+      },
     ],
     meta,
     ProposalType.REGULAR,

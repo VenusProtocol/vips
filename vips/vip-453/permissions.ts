@@ -1,12 +1,8 @@
 import ACM_COMMANDS_AGGREATOR_ABI from "@venusprotocol/governance-contracts/artifacts/contracts/Utils/ACMCommandsAggregator.sol/ACMCommandsAggregator.json";
-import {
-  AccountType,
-  getXVSBridgeAdminPermissions,
-  getXVSPermissions,
-} from "@venusprotocol/governance-contracts/dist/helpers/permissions";
 import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
 import { ethers } from "hardhat";
 import hre from "hardhat";
+import { AccountType, getXVSBridgeAdminPermissions, getXVSPermissions, getXVSVaultPermissions } from "src/permissions";
 
 interface Permissions {
   [key: string]: string[][];
@@ -15,16 +11,21 @@ interface Permissions {
 const BERACHAINBARTIO_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 const XVS_BRIDGE_ADMIN = "0xdE489177E607F1C6D9d27325FA38152fA462F7cC";
 const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
+const XVS_VAULT = "0x622E4e8104F7ebc94Aa81Db2613A751c39e6688b";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN), ...getXVSPermissions(XVS)],
+  berachainbartio: [
+    ...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN),
+    ...getXVSPermissions(XVS),
+    ...getXVSVaultPermissions(XVS_VAULT),
+  ],
 };
 
 const acmCommandsAggreator: any = {
   berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
 };
 
-const addresses: any = {
+const accounts: any = {
   berachainbartio: {
     NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
     FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
@@ -56,7 +57,7 @@ async function main() {
 
   for (const permission of networkGrantPermissions) {
     if (Object.values(AccountType).includes(permission[2] as AccountType)) {
-      permission[2] = addresses[hre.network.name][permission[2]];
+      permission[2] = accounts[hre.network.name][permission[2]];
     }
   }
 
