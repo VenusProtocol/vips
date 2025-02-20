@@ -36,13 +36,12 @@ const acmCommandsAggreator: any = {
   berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
 };
 
-const addresses: any = {
+const accounts: any = {
   berachainbartio: {
     NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
     FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
     CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
     Guardian: BERACHAINBARTIO_GUARDIAN,
-    OmnichainExecutorOwner: BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER,
   },
 };
 
@@ -69,7 +68,7 @@ async function main() {
 
   for (const permission of networkGrantPermissions) {
     if (Object.values(AccountType).includes(permission[2] as AccountType)) {
-      permission[2] = addresses[hre.network.name][permission[2]];
+      permission[2] = accounts[hre.network.name][permission[2]];
     }
   }
 
@@ -78,6 +77,9 @@ async function main() {
     functionSig: permission[1],
     account: permission[2],
   }));
+
+  console.log("Adding Grant Permissions: ", _grantPermissions);
+  return;
 
   const grantChunks = splitPermissions(_grantPermissions);
   const grantIndexes: string[] = [];
