@@ -13,6 +13,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip454, {
   CHAINLINK_WETH_FEED,
   COMPTROLLER_CORE,
+  convertAmountToVTokens,
   newMarket,
   token,
   wstETH_ONE_JUMP_ORACLE,
@@ -104,6 +105,14 @@ forking(4761402, async () => {
       const vTokenSupply = initialSupply.amount.div(multiplier);
       const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
       const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
+
+      it(`Verify minted tokens after transfering some amount of vToken to zero address`, async () => {
+        const vTokensMinted = convertAmountToVTokens(newMarket.initialSupply.amount, newMarket.vToken.exchangeRate);
+        expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
+        expect(await vTokenContract.balanceOf(newMarket.initialSupply.vTokenReceiver)).to.equal(
+          vTokensMinted.sub(initialSupply.vTokensToBurn),
+        );
+      });
 
       it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
         expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(

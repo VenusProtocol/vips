@@ -1,4 +1,4 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
@@ -12,11 +12,11 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip453, { COMPTROLLER_CORE, market, token } from "../../vips/vip-454/bscmainnetBase";
-import RESILIENT_ORACLE_ABI from "../vip-454/abi/ResilientOracle.json";
-import COMPTROLLER_ABI from "../vip-454/abi/comptroller.json";
-import POOL_REGISTRY_ABI from "../vip-454/abi/poolRegistry.json";
-import VTOKEN_ABI from "../vip-454/abi/vToken.json";
+import vip453, { COMPTROLLER_CORE, convertAmountToVTokens, market, token } from "../../vips/vip-454/bscmainnetBase";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
+import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
+import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 
@@ -33,15 +33,9 @@ forking(26583875, async () => {
 
   describe("vTokens deployment", () => {
     before(async () => {
-      const { initialSupply } = market;
       await impersonateAccount(USER);
-      await impersonateAccount(initialSupply.vTokenReceiver);
-      await setBalance(initialSupply.vTokenReceiver, parseUnits("1000", 18));
       const signer = await ethers.getSigner(USER);
-      const vReceiver = await ethers.getSigner(initialSupply.vTokenReceiver);
-
       await setMaxStalePeriod(oracle, await ethers.getContractAt(ERC20_ABI, WETH, signer));
-      await vTokenContract.connect(vReceiver).approve(NORMAL_TIMELOCK, initialSupply.vTokensToBurn);
     });
 
     it(`should deploy market`, async () => {
@@ -105,18 +99,14 @@ forking(26583875, async () => {
 
         // Initial exchange rate should account for decimal transformations such that
         // the string representation is the same (i.e. 1 vToken == 1 underlying)
-        const multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
-        const vTokenSupply = initialSupply.amount.div(multiplier);
         const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
-        const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
-        it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
-          const vTokensRemaining = vTokenSupply.sub(market.initialSupply.vTokensToBurn);
-          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokensRemaining);
-        });
-
-        it(`should check balance for normal timelock for VToken after vip`, async () => {
-          expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal("0");
+        it(`Verify minted tokens after transfering some amount of vToken to zero address`, async () => {
+          const vTokensMinted = convertAmountToVTokens(market.initialSupply.amount, market.vToken.exchangeRate);
+          expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
+          expect(await vTokenContract.balanceOf(market.initialSupply.vTokenReceiver)).to.equal(
+            vTokensMinted.sub(initialSupply.vTokensToBurn),
+          );
         });
 
         it(`should have balance of underlying = ${underlyingSupplyString} ${underlyingSymbol}`, async () => {

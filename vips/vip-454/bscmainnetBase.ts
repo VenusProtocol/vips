@@ -153,7 +153,7 @@ const vip453 = () => {
             market.riskParameters.collateralFactor,
             market.riskParameters.liquidationThreshold,
             market.initialSupply.amount,
-            market.initialSupply.vTokenReceiver,
+            NORMAL_TIMELOCK,
             market.riskParameters.supplyCap,
             market.riskParameters.borrowCap,
           ],
@@ -168,10 +168,20 @@ const vip453 = () => {
       },
       {
         target: market.vToken.address,
-        signature: "transferFrom(address,address,uint256)",
-        params: [market.initialSupply.vTokenReceiver, ethers.constants.AddressZero, market.initialSupply.vTokensToBurn],
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, market.initialSupply.vTokensToBurn],
         dstChainId: LzChainId.basemainnet,
       },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(market.initialSupply.amount, market.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(market.initialSupply.vTokensToBurn);
+        return {
+          target: market.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [market.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.basemainnet,
+        };
+      })(),
     ],
     meta,
     ProposalType.REGULAR,
