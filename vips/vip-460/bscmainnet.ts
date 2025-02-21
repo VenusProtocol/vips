@@ -32,7 +32,7 @@ const vip460 = () => {
   };
   return makeProposal(
     [
-      // This commands will be removed once vip-456 will be executedd
+      // This commands will be removed once vip-456 will be executed
       // --------------------------
       {
         target: ACM,

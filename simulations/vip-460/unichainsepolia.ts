@@ -22,7 +22,7 @@ import OWNERSHIP_ABI from "./abi/Ownership.json";
 const XVS_BRIDGE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
-forking(13182108, async () => {
+forking(13289674, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let boundValidator: Contract;

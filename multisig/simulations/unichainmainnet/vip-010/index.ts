@@ -29,7 +29,7 @@ const RESILIENT_ORACLE = unichainmainnet.RESILIENT_ORACLE;
 const REDSTONE_ORACLE = unichainmainnet.REDSTONE_ORACLE;
 const NORMAL_TIMELOCK = unichainmainnet.NORMAL_TIMELOCK;
 
-forking(9213234, async () => {
+forking(9393677, async () => {
   const provider = ethers.provider;
   let proxyAdmin: Contract;
   let prime: Contract;
