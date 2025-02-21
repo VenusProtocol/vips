@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import { BigNumber, providers } from "ethers";
+import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
-import { ethers, network } from "hardhat";
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
@@ -25,7 +25,6 @@ import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const WSTETH_HOLDER = "0x2d23fefFED69EBA4cd6eD47f7006bbd6284DFBeA";
-const USER = "0x2d23fefFED69EBA4cd6eD47f7006bbd6284DFBeA";
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["zksyncmainnet"];
 
@@ -36,29 +35,8 @@ forking(4761402, async () => {
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
   const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
-  const vToken = new ethers.Contract(newMarket.vToken.address, VTOKEN_ABI, provider);
 
   before(async () => {
-    const { initialSupply } = newMarket;
-    await network.provider.request({
-      method: "anvil_impersonateAccount",
-      params: [USER],
-    });
-
-    await network.provider.request({
-      method: "anvil_impersonateAccount",
-      params: [newMarket.initialSupply.vTokenReceiver],
-    });
-
-    await network.provider.request({
-      method: "anvil_setBalance",
-      params: [newMarket.initialSupply.vTokenReceiver, "0x3635C9ADC5DEA00000"],
-    });
-
-    const provider = new providers.JsonRpcProvider("http://0.0.0.0:8011");
-
-    const vReceiver = await provider.getSigner(initialSupply.vTokenReceiver);
-    await vToken.connect(vReceiver).approve(NORMAL_TIMELOCK, initialSupply.vTokensToBurn);
     await setMaxStalePeriodInChainlinkOracle(
       CHAINLINK_ORACLE,
       token["WETH"].address,
