@@ -10,7 +10,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, { COMPTROLLER_CORE, market, token, wstETH_ONE_JUMP_ORACLE } from "../../vips/vip-454/bsctestnet1";
+import vip454, { COMPTROLLER_CORE, market, token, wstETH_ONE_JUMP_ORACLE } from "../../vips/vip-454/bsctestnetBase";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
