@@ -101,12 +101,15 @@ forking(13205017, async () => {
           expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
         });
 
-        it(`should set supply cap to 2000`, async () => {
+        it(`should set supply cap to 20000`, async () => {
           expect(await comptroller.supplyCaps(VUNI_CORE)).to.equal(parseUnits("20000", 18));
         });
 
         it(`should set borrow cap to 0`, async () => {
           expect(await comptroller.borrowCaps(VUNI_CORE)).to.equal(0);
+        });
+        it("Borrow action should be paused", async () => {
+          expect(await comptroller.actionPaused(VUNI_CORE, 2)).to.be.true;
         });
       });
     });
