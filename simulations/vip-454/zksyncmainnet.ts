@@ -59,7 +59,7 @@ forking(4761402, async () => {
     describe("Oracle configuration", async () => {
       it("has the correct wstETH price", async () => {
         const price = await oracle.getPrice(zksyncMarket.vToken.underlying.address);
-        expect(price).to.be.eq(parseUnits("3273.154450063484488638", 18));
+        expect(price).to.be.eq(parseUnits("1.427459814154928703", 18));
       });
 
       it("has the correct wstETH oracle configuration", async () => {
