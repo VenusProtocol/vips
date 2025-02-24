@@ -146,10 +146,10 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const vip453 = () => {
+const vip454 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-453 [Base] New wstETH Market in the Core pool of Base and ZKSYNC",
+    title: "VIP-454 [Base] New wstETH Market in the Core pool of Base and ZKSYNC",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -326,4 +326,4 @@ const vip453 = () => {
   );
 };
 
-export default vip453;
+export default vip454;
