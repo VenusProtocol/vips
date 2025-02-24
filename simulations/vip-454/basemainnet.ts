@@ -98,7 +98,6 @@ forking(26583875, async () => {
 
     describe("Ownership and initial supply", () => {
       const { vToken: vTokenSpec, initialSupply } = baseMarket;
-      const underlyingSymbol = token_BASE.symbol;
 
       describe(`${vTokenSpec.symbol}`, () => {
         it(`should have owner = normal timelock`, async () => {
@@ -107,19 +106,33 @@ forking(26583875, async () => {
 
         // Initial exchange rate should account for decimal transformations such that
         // the string representation is the same (i.e. 1 vToken == 1 underlying)
-        const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
+        const vTokenSupply = convertAmountToVTokens(initialSupply.amount, vTokenSpec.exchangeRate);
+        const vTokenSupplyForReceiver = vTokenSupply.sub(initialSupply.vTokensToBurn);
+        const format = (amount: BigNumber, spec: { decimals: number; symbol: string }) =>
+          `${formatUnits(amount, spec.decimals)} ${spec.symbol}`;
 
-        it(`Verify minted tokens after transfering some amount of vToken to zero address`, async () => {
-          const vTokensMinted = convertAmountToVTokens(baseMarket.initialSupply.amount, baseMarket.vToken.exchangeRate);
-          expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
-          expect(await vTokenContract.balanceOf(baseMarket.initialSupply.vTokenReceiver)).to.equal(
-            vTokensMinted.sub(initialSupply.vTokensToBurn),
-          );
-        });
-
-        it(`should have balance of underlying = ${underlyingSupplyString} ${underlyingSymbol}`, async () => {
+        it(`should have balance of underlying = ${format(initialSupply.amount, vTokenSpec.underlying)}`, async () => {
           const underlying = new ethers.Contract(vTokenSpec.underlying.address, ERC20_ABI, provider);
           expect(await underlying.balanceOf(vTokenSpec.address)).to.equal(initialSupply.amount);
+        });
+
+        it(`should have total supply of ${format(vTokenSupply, vTokenSpec)}`, async () => {
+          expect(await vTokenContract.totalSupply()).to.equal(vTokenSupply);
+        });
+
+        it(`should send ${format(vTokenSupplyForReceiver, vTokenSpec)} to receiver`, async () => {
+          const receiverBalance = await vTokenContract.balanceOf(initialSupply.vTokenReceiver);
+          expect(receiverBalance).to.equal(vTokenSupplyForReceiver);
+        });
+
+        it(`should burn ${format(initialSupply.vTokensToBurn, vTokenSpec)}`, async () => {
+          const burnt = await vTokenContract.balanceOf(ethers.constants.AddressZero);
+          expect(burnt).to.equal(initialSupply.vTokensToBurn);
+        });
+
+        it(`should leave no ${vTokenSpec.symbol} in the timelock`, async () => {
+          const timelockBalance = await vTokenContract.balanceOf(NORMAL_TIMELOCK);
+          expect(timelockBalance).to.equal(0);
         });
       });
     });
