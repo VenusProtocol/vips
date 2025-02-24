@@ -10,7 +10,7 @@ const NETWORK_ADDRESSES_ZKSYNC = NETWORK_ADDRESSES["zksyncmainnet"];
 
 export const COMPTROLLER_CORE_BASE = "0x0C7973F9598AA62f9e03B94E92C967fD5437426C";
 export const COMPTROLLER_CORE_ZKSYNC = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
-export const CHAINLINK_STALE_PERIOD = 60 * 60 * 24 * 365; // 1 Year
+export const CHAINLINK_STALE_PERIOD = 60 * 60 * 24; // 24 Hours
 export const CHAINLINK_WSTETH_FEED_BASE = "0xB88BAc61a4Ca37C43a3725912B1f472c9A5bc061";
 export const CHAINLINK_WSTETH_FEED_ZKSYNC = "0x24a0C9404101A8d7497676BE12F10aEa356bAC28";
 export const WETH_ADDRESS_BASE = "0x4200000000000000000000000000000000000006";
@@ -146,7 +146,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const vip454 = () => {
+const vip454 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
     title: "VIP-454 [Base] New wstETH Market in the Core pool of Base and ZKSYNC",
@@ -155,14 +155,14 @@ const vip454 = () => {
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
-
+  const chainlinkStalePeriod = overrides?.chainlinkStalePeriod || CHAINLINK_STALE_PERIOD;
   return makeProposal(
     [
       // BASE PROPOSAL
       {
         target: NETWORK_ADDRESSES_BASE["CHAINLINK_ORACLE"],
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[baseMarket.vToken.underlying.address, CHAINLINK_WSTETH_FEED_BASE, CHAINLINK_STALE_PERIOD]],
+        params: [[baseMarket.vToken.underlying.address, CHAINLINK_WSTETH_FEED_BASE, chainlinkStalePeriod]],
         dstChainId: LzChainId.basemainnet,
       },
       {
@@ -241,7 +241,7 @@ const vip454 = () => {
       {
         target: NETWORK_ADDRESSES_ZKSYNC["CHAINLINK_ORACLE"],
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[token_ZKSYNC["wstETH"].address, CHAINLINK_WSTETH_FEED_ZKSYNC, CHAINLINK_STALE_PERIOD]],
+        params: [[token_ZKSYNC["wstETH"].address, CHAINLINK_WSTETH_FEED_ZKSYNC, chainlinkStalePeriod]],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {

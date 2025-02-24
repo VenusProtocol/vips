@@ -28,6 +28,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["basemainnet"];
 const WETH = "0x4200000000000000000000000000000000000006";
 const USER = "0x87c9B02A10eC2CB4dcB3b2e573e26169CF3cd9Bf";
+const ONE_YEAR = 3600 * 24 * 365;
 
 forking(26583875, async () => {
   const provider = ethers.provider;
@@ -52,7 +53,7 @@ forking(26583875, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("wstEth_Core - BASE", await vip454());
+  testForkedNetworkVipCommands("wstEth_Core - BASE", await vip454({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

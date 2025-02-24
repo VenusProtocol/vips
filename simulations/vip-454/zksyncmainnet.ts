@@ -30,6 +30,7 @@ const WSTETH_HOLDER = "0x2d23fefFED69EBA4cd6eD47f7006bbd6284DFBeA";
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["zksyncmainnet"];
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is time based deployment
+const ONE_YEAR = 3600 * 24 * 365;
 
 forking(4761402, async () => {
   const provider = ethers.provider;
@@ -52,7 +53,7 @@ forking(4761402, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454());
+  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
