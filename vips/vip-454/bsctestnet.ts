@@ -75,7 +75,7 @@ export const baseMarket: Market = {
   riskParameters: {
     collateralFactor: parseUnits("0.785", 18),
     liquidationThreshold: parseUnits("0.81", 18),
-    supplyCap: parseUnits("26000", 18),
+    supplyCap: parseUnits("2600", 18),
     borrowCap: parseUnits("260", 18),
     reserveFactor: parseUnits("0.25", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
