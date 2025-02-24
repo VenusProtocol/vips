@@ -14,9 +14,9 @@ import vip454, {
   CHAINLINK_WSTETH_FEED_ZKSYNC,
   COMPTROLLER_CORE_ZKSYNC,
   convertAmountToVTokens,
-  zksyncMarket,
   token_ZKSYNC,
   wstETH_ONE_JUMP_ORACLE_ZKSYNC,
+  zksyncMarket,
 } from "../../vips/vip-454/bscmainnet";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -107,7 +107,10 @@ forking(4761402, async () => {
       const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
       it(`Verify minted tokens after transfering some amount of vToken to zero address`, async () => {
-        const vTokensMinted = convertAmountToVTokens(zksyncMarket.initialSupply.amount, zksyncMarket.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          zksyncMarket.initialSupply.amount,
+          zksyncMarket.vToken.exchangeRate,
+        );
         expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
         expect(await vTokenContract.balanceOf(zksyncMarket.initialSupply.vTokenReceiver)).to.equal(
           vTokensMinted.sub(initialSupply.vTokensToBurn),

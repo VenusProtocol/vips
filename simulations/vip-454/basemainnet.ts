@@ -12,7 +12,12 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, { COMPTROLLER_CORE_BASE, convertAmountToVTokens, baseMarket, token_BASE } from "../../vips/vip-454/bscmainnet";
+import vip454, {
+  COMPTROLLER_CORE_BASE,
+  baseMarket,
+  convertAmountToVTokens,
+  token_BASE,
+} from "../../vips/vip-454/bscmainnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
@@ -84,7 +89,9 @@ forking(26583875, async () => {
       });
 
       it(`should have a protocol seize share ${baseMarket.riskParameters.protocolSeizeShare}`, async () => {
-        expect(await vTokenContract.protocolSeizeShareMantissa()).to.equal(baseMarket.riskParameters.protocolSeizeShare);
+        expect(await vTokenContract.protocolSeizeShareMantissa()).to.equal(
+          baseMarket.riskParameters.protocolSeizeShare,
+        );
       });
     });
 

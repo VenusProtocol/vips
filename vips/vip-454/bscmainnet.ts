@@ -186,7 +186,11 @@ const vip453 = () => {
       {
         target: NETWORK_ADDRESSES_BASE["VTREASURY"],
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [baseMarket.vToken.underlying.address, baseMarket.initialSupply.amount, NETWORK_ADDRESSES_BASE["NORMAL_TIMELOCK"]],
+        params: [
+          baseMarket.vToken.underlying.address,
+          baseMarket.initialSupply.amount,
+          NETWORK_ADDRESSES_BASE["NORMAL_TIMELOCK"],
+        ],
         dstChainId: LzChainId.basemainnet,
       },
       {
@@ -262,7 +266,11 @@ const vip453 = () => {
       {
         target: NETWORK_ADDRESSES_ZKSYNC["VTREASURY"],
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [token_ZKSYNC["wstETH"].address, zksyncMarket.initialSupply.amount, NETWORK_ADDRESSES_ZKSYNC["NORMAL_TIMELOCK"]],
+        params: [
+          token_ZKSYNC["wstETH"].address,
+          zksyncMarket.initialSupply.amount,
+          NETWORK_ADDRESSES_ZKSYNC["NORMAL_TIMELOCK"],
+        ],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -300,7 +308,10 @@ const vip453 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(zksyncMarket.initialSupply.amount, zksyncMarket.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          zksyncMarket.initialSupply.amount,
+          zksyncMarket.vToken.exchangeRate,
+        );
         const vTokensRemaining = vTokensMinted.sub(zksyncMarket.initialSupply.vTokensToBurn);
         return {
           target: zksyncMarket.vToken.address,
