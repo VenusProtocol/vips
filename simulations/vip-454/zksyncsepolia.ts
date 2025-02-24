@@ -9,7 +9,11 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, { COMPTROLLER_CORE, newMarket, wstETH_ONE_JUMP_ORACLE } from "../../vips/vip-454/bsctestnetZksync";
+import vip454, {
+  COMPTROLLER_CORE_ZKSYNC,
+  wstETH_ONE_JUMP_ORACLE_ZKSYNC,
+  zksyncMarket,
+} from "../../vips/vip-454/bsctestnet";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -25,11 +29,11 @@ forking(4761402, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
-  const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(COMPTROLLER_CORE_ZKSYNC, COMPTROLLER_ABI, provider);
 
   describe("vTokens deployment", () => {
     it(`should deploy market`, async () => {
-      await checkVToken(newMarket.vToken.address, newMarket.vToken);
+      await checkVToken(zksyncMarket.vToken.address, zksyncMarket.vToken);
     });
   });
 
@@ -38,40 +42,40 @@ forking(4761402, async () => {
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct wstETH price", async () => {
-        const price = await oracle.getPrice(newMarket.vToken.underlying.address);
+        const price = await oracle.getPrice(zksyncMarket.vToken.underlying.address);
         expect(price).to.be.eq(parseUnits("2978.555065838000000000", 18));
       });
     });
 
     it("has the correct wstETH oracle configuration", async () => {
-      const JUMP_RATE_ORACLE = new ethers.Contract(wstETH_ONE_JUMP_ORACLE, JUMPRATEMODEL_ABI, provider);
-      expect(await JUMP_RATE_ORACLE.CORRELATED_TOKEN()).to.equal(newMarket.vToken.underlying.address);
+      const JUMP_RATE_ORACLE = new ethers.Contract(wstETH_ONE_JUMP_ORACLE_ZKSYNC, JUMPRATEMODEL_ABI, provider);
+      expect(await JUMP_RATE_ORACLE.CORRELATED_TOKEN()).to.equal(zksyncMarket.vToken.underlying.address);
       expect(await JUMP_RATE_ORACLE.RESILIENT_ORACLE()).to.equal(RESILIENT_ORACLE);
     });
   });
 
   describe("PoolRegistry state", () => {
-    it(`should add ${newMarket.vToken.symbol} to the Comptroller`, async () => {
+    it(`should add ${zksyncMarket.vToken.symbol} to the Comptroller`, async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.contain(newMarket.vToken.address);
+      expect(poolVTokens).to.contain(zksyncMarket.vToken.address);
     });
 
-    it(`should register ${newMarket.vToken.symbol} in PoolRegistry`, async () => {
+    it(`should register ${zksyncMarket.vToken.symbol} in PoolRegistry`, async () => {
       const registeredVToken = await poolRegistry.getVTokenForAsset(
-        COMPTROLLER_CORE,
-        newMarket.vToken.underlying.address,
+        COMPTROLLER_CORE_ZKSYNC,
+        zksyncMarket.vToken.underlying.address,
       );
 
-      expect(registeredVToken).to.equal(newMarket.vToken.address);
+      expect(registeredVToken).to.equal(zksyncMarket.vToken.address);
     });
   });
 
   describe("Risk parameters", () => {
-    checkRiskParameters(newMarket.vToken.address, newMarket.vToken, newMarket.riskParameters);
+    checkRiskParameters(zksyncMarket.vToken.address, zksyncMarket.vToken, zksyncMarket.riskParameters);
   });
 
   describe("Ownership and initial supply", () => {
-    const { vToken: vTokenSpec, initialSupply } = newMarket;
+    const { vToken: vTokenSpec, initialSupply } = zksyncMarket;
     const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
     const underlyingSymbol = vTokenSpec.underlying.symbol;
 
@@ -100,9 +104,9 @@ forking(4761402, async () => {
 
   describe("Interest rates", () => {
     checkInterestRate(
-      newMarket.interestRateModel.address,
-      newMarket.vToken.symbol,
-      newMarket.interestRateModel,
+      zksyncMarket.interestRateModel.address,
+      zksyncMarket.vToken.symbol,
+      zksyncMarket.interestRateModel,
       BLOCKS_PER_YEAR,
     );
   });
