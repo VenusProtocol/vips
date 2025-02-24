@@ -5,6 +5,7 @@ export enum AccountType {
   FAST_TRACK_TIMELOCK = "FastTrackTimelock",
   CRITICAL_TIMELOCK = "CriticalTimelock",
   GUARDIAN = "Guardian",
+  POOL_REGISTRY = "PoolRegistry",
 }
 
 const timelocks = [AccountType.NORMAL_TIMELOCK]
@@ -160,15 +161,25 @@ export const getConverterNetworkPermissions = (converterNetwork: string): string
 
 export const getComptrollerPermissions = (): string[][] => {
   return [
-    ...accounts.map(account => [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", account]),
-    ...accounts.map(account => [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", account]),
-    ...accounts.map(account => [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", account]),
+    ...accounts
+      .concat(AccountType.POOL_REGISTRY)
+      .map(account => [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", account]),
+    ...accounts
+      .concat(AccountType.POOL_REGISTRY)
+      .map(account => [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", account]),
+    ...accounts
+      .concat(AccountType.POOL_REGISTRY)
+      .map(account => [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", account]),
     ...accounts.map(account => [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", account]),
     ...timelocks.map(account => [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", account]),
     ...timelocks.map(account => [ethers.constants.AddressZero, "unlistMarket(address)", account]),
     [ethers.constants.AddressZero, "setCloseFactor(uint256)", AccountType.NORMAL_TIMELOCK],
     [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", AccountType.NORMAL_TIMELOCK],
     [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", AccountType.NORMAL_TIMELOCK],
+    [ethers.constants.AddressZero, "setCloseFactor(uint256)", AccountType.POOL_REGISTRY],
+    [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", AccountType.POOL_REGISTRY],
+    [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", AccountType.POOL_REGISTRY],
+    [ethers.constants.AddressZero, "supportMarket(address)", AccountType.POOL_REGISTRY],
   ];
 };
 
