@@ -11,13 +11,13 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip454, {
-  CHAINLINK_WETH_FEED,
-  COMPTROLLER_CORE,
+  CHAINLINK_WSTETH_FEED_ZKSYNC,
+  COMPTROLLER_CORE_ZKSYNC,
   convertAmountToVTokens,
-  newMarket,
-  token,
-  wstETH_ONE_JUMP_ORACLE,
-} from "../../vips/vip-454/bscmainnetZksync";
+  zksyncMarket,
+  token_ZKSYNC,
+  wstETH_ONE_JUMP_ORACLE_ZKSYNC,
+} from "../../vips/vip-454/bscmainnet";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -35,20 +35,20 @@ forking(4761402, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
-  const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(COMPTROLLER_CORE_ZKSYNC, COMPTROLLER_ABI, provider);
 
   before(async () => {
     await setMaxStalePeriodInChainlinkOracle(
       CHAINLINK_ORACLE,
-      token["WETH"].address,
-      CHAINLINK_WETH_FEED,
+      token_ZKSYNC["WETH"].address,
+      CHAINLINK_WSTETH_FEED_ZKSYNC,
       NORMAL_TIMELOCK,
     );
   });
 
   describe("vTokens deployment", () => {
     it(`should deploy market`, async () => {
-      await checkVToken(newMarket.vToken.address, newMarket.vToken);
+      await checkVToken(zksyncMarket.vToken.address, zksyncMarket.vToken);
     });
   });
 
@@ -57,40 +57,40 @@ forking(4761402, async () => {
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct wstETH price", async () => {
-        const price = await oracle.getPrice(newMarket.vToken.underlying.address);
+        const price = await oracle.getPrice(zksyncMarket.vToken.underlying.address);
         expect(price).to.be.eq(parseUnits("3273.154450063484488638", 18));
       });
 
       it("has the correct wstETH oracle configuration", async () => {
-        const JUMP_RATE_ORACLE = new ethers.Contract(wstETH_ONE_JUMP_ORACLE, JUMPRATEMODEL_ABI, provider);
-        expect(await JUMP_RATE_ORACLE.CORRELATED_TOKEN()).to.equal(newMarket.vToken.underlying.address);
+        const JUMP_RATE_ORACLE = new ethers.Contract(wstETH_ONE_JUMP_ORACLE_ZKSYNC, JUMPRATEMODEL_ABI, provider);
+        expect(await JUMP_RATE_ORACLE.CORRELATED_TOKEN()).to.equal(zksyncMarket.vToken.underlying.address);
         expect(await JUMP_RATE_ORACLE.RESILIENT_ORACLE()).to.equal(RESILIENT_ORACLE);
       });
     });
   });
 
   describe("PoolRegistry state", () => {
-    it(`should add ${newMarket.vToken.symbol} to the Comptroller`, async () => {
+    it(`should add ${zksyncMarket.vToken.symbol} to the Comptroller`, async () => {
       const poolVTokens = await comptroller.getAllMarkets();
-      expect(poolVTokens).to.contain(newMarket.vToken.address);
+      expect(poolVTokens).to.contain(zksyncMarket.vToken.address);
     });
 
-    it(`should register ${newMarket.vToken.symbol} in PoolRegistry`, async () => {
+    it(`should register ${zksyncMarket.vToken.symbol} in PoolRegistry`, async () => {
       const registeredVToken = await poolRegistry.getVTokenForAsset(
-        COMPTROLLER_CORE,
-        newMarket.vToken.underlying.address,
+        COMPTROLLER_CORE_ZKSYNC,
+        zksyncMarket.vToken.underlying.address,
       );
 
-      expect(registeredVToken).to.equal(newMarket.vToken.address);
+      expect(registeredVToken).to.equal(zksyncMarket.vToken.address);
     });
   });
 
   describe("Risk parameters", () => {
-    checkRiskParameters(newMarket.vToken.address, newMarket.vToken, newMarket.riskParameters);
+    checkRiskParameters(zksyncMarket.vToken.address, zksyncMarket.vToken, zksyncMarket.riskParameters);
   });
 
   describe("Ownership and initial supply", () => {
-    const { vToken: vTokenSpec, initialSupply } = newMarket;
+    const { vToken: vTokenSpec, initialSupply } = zksyncMarket;
     const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
     const underlyingSymbol = vTokenSpec.underlying.symbol;
 
@@ -107,16 +107,16 @@ forking(4761402, async () => {
       const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
 
       it(`Verify minted tokens after transfering some amount of vToken to zero address`, async () => {
-        const vTokensMinted = convertAmountToVTokens(newMarket.initialSupply.amount, newMarket.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(zksyncMarket.initialSupply.amount, zksyncMarket.vToken.exchangeRate);
         expect(await vTokenContract.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
-        expect(await vTokenContract.balanceOf(newMarket.initialSupply.vTokenReceiver)).to.equal(
+        expect(await vTokenContract.balanceOf(zksyncMarket.initialSupply.vTokenReceiver)).to.equal(
           vTokensMinted.sub(initialSupply.vTokensToBurn),
         );
       });
 
       it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
         expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(
-          vTokenSupply.sub(newMarket.initialSupply.vTokensToBurn),
+          vTokenSupply.sub(zksyncMarket.initialSupply.vTokensToBurn),
         );
       });
 
@@ -129,16 +129,16 @@ forking(4761402, async () => {
 
   describe("Interest rates", () => {
     checkInterestRate(
-      newMarket.interestRateModel.address,
-      newMarket.vToken.symbol,
-      newMarket.interestRateModel,
+      zksyncMarket.interestRateModel.address,
+      zksyncMarket.vToken.symbol,
+      zksyncMarket.interestRateModel,
       BLOCKS_PER_YEAR,
     );
   });
 
   describe("generic tests", async () => {
     checkIsolatedPoolsComptrollers({
-      [COMPTROLLER_CORE]: WSTETH_HOLDER,
+      [COMPTROLLER_CORE_ZKSYNC]: WSTETH_HOLDER,
     });
   });
 });

@@ -1,6 +1,6 @@
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip454Base from "../../vips/vip-454/bscmainnetBase";
+import vip454Base from "../../vips/vip-454/bscmainnet";
 import vip454Zksync from "../../vips/vip-454/bscmainnetZksync";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
