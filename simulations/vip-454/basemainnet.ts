@@ -85,7 +85,7 @@ forking(26583875, async () => {
     describe("Risk parameters", () => {
       checkRiskParameters(baseMarket.vToken.address, baseMarket.vToken, baseMarket.riskParameters);
 
-      it("should pause borrowing on wsuperOETHb", async () => {
+      it("should not pause borrowing on wstETH", async () => {
         expect(await comptroller.actionPaused(baseMarket.vToken.address, 2)).to.equal(false);
       });
 
