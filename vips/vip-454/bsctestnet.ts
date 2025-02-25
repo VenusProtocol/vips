@@ -102,60 +102,6 @@ const vip453 = () => {
         dstChainId: LzChainId.berachainbartio,
       },
 
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [berachainbartio.XVS, parseUnits("7", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WETH, parseUnits("3000", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WBERA, parseUnits("6", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [MOCK_USDCe, parseUnits("1", 30)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.RESILIENT_ORACLE,
-        signature: "setTokenConfigs((address,address[3],bool[3])[])",
-        params: [
-          [
-            [
-              berachainbartio.XVS,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WETH,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WBERA,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              MOCK_USDCe,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-          ],
-        ],
-        dstChainId: LzChainId.berachainbartio,
-      },
-
       // Add USDC.e market
       {
         target: MOCK_USDCe,
