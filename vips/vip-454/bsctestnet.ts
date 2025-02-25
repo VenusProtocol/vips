@@ -1,5 +1,4 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -99,60 +98,6 @@ const vip453 = () => {
         target: berachainbartio.POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
         params: ["Core", COMPTROLLER_CORE, parseUnits("0.5", 18), parseUnits("1.1", 18), parseUnits("100", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [berachainbartio.XVS, parseUnits("7", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WETH, parseUnits("3000", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WBERA, parseUnits("6", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [MOCK_USDCe, parseUnits("1", 30)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.RESILIENT_ORACLE,
-        signature: "setTokenConfigs((address,address[3],bool[3])[])",
-        params: [
-          [
-            [
-              berachainbartio.XVS,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WETH,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WBERA,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              MOCK_USDCe,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-          ],
-        ],
         dstChainId: LzChainId.berachainbartio,
       },
 

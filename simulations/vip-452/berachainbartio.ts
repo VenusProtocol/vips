@@ -24,7 +24,7 @@ const { berachainbartio } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x723b7CB226d86bd89638ec77936463453a46C656";
 const CRITICAL_TIMELOCK = "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD";
 
-forking(10790214, async () => {
+forking(10959687, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -99,7 +99,7 @@ forking(10790214, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(9);
+      expect(await executor.last24HourCommandsReceived()).equals(14);
 
       // Check function registry
       const functionSignatures: string[] = [
