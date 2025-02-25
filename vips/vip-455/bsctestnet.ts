@@ -1,5 +1,3 @@
-import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -74,6 +72,7 @@ const vip453 = () => {
         target: berachainbartio.XVS_VAULT_PROXY,
         signature: "setPrimeToken(address,address,uint256)",
         params: [PRIME, berachainbartio.XVS, PRIME_POOL_ID],
+        dstChainId: LzChainId.berachainbartio,
       },
       {
         target: PRIME,

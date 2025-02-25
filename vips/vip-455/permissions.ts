@@ -2,11 +2,7 @@ import ACM_COMMANDS_AGGREATOR_ABI from "@venusprotocol/governance-contracts/arti
 import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
 import { ethers } from "hardhat";
 import hre from "hardhat";
-import {
-  AccountType,
-  getPrimeLiquidityProviderPermissions,
-  getPrimePermissions,
-} from "src/permissions";
+import { AccountType, getPrimeLiquidityProviderPermissions, getPrimePermissions } from "src/permissions";
 
 interface Permissions {
   [key: string]: string[][];
@@ -17,10 +13,7 @@ const PRIME = "0x3AAEd911374A60856a205cEf545F5Af49969aAa7";
 const PLP = "0x4039Ba7b3837FA9C2Ae95e59573f5CBfB4691c40";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [
-    ...getPrimePermissions(PRIME),
-    ...getPrimeLiquidityProviderPermissions(PLP)
-  ],
+  berachainbartio: [...getPrimePermissions(PRIME), ...getPrimeLiquidityProviderPermissions(PLP)],
 };
 
 const acmCommandsAggreator: any = {
