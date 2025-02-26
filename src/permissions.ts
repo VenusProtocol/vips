@@ -32,8 +32,8 @@ export const getChainlinkOraclePermissions = (chainlinkOracle: string): string[]
 
 export const getRedstoneOraclePermissions = (redstoneOracle: string): string[][] => {
   return [
-    ...timelocks.map(account => [redstoneOracle, "setTokenConfig(TokenConfig)", account]),
-    ...timelocks.map(account => [redstoneOracle, "setDirectPrice(address,uint256)", account]),
+    ...accounts.map(account => [redstoneOracle, "setTokenConfig(TokenConfig)", account]),
+    ...accounts.map(account => [redstoneOracle, "setDirectPrice(address,uint256)", account]),
   ];
 };
 
