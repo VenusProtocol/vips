@@ -4,77 +4,55 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip452, {
+import vip009 from "../../multisig/proposals/unichainsepolia/vip-009";
+import vip456, {
   ACM,
   ACM_AGGREGATOR,
-  BOUND_VALIDATOR,
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
-  TREASURY,
-  MOCK_USDCe,
-  WETH,
-  WBERA,
-  XVS
-} from "../../vips/vip-452/bsctestnet";
+} from "../../vips/vip-456/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
-import OWNERSHIP_ABI from "./abi/Ownership.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
-const FAST_TRACK_TIMELOCK = "0x723b7CB226d86bd89638ec77936463453a46C656";
-const CRITICAL_TIMELOCK = "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD";
+const { unichainsepolia } = NETWORK_ADDRESSES;
+const FAST_TRACK_TIMELOCK = "0x668cDb1A414006D0a26e9e13881D4Cd30B8b2a4A";
+const CRITICAL_TIMELOCK = "0x86C093266e824FA4345484a7B9109e9567923DA6";
 
-forking(10987237, async () => {
+forking(12517026, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
   let executorOwner: Contract;
-  let treasury: Contract;
-  let resilientOracle: Contract;
-  let chainlinkOracle: Contract;
-  let redstoneOracle: Contract;
-  let boundValidator: Contract;
 
   before(async () => {
     executor = new ethers.Contract(
-      berachainbartio.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      unichainsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR,
       OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
       provider,
     );
     executorOwner = new ethers.Contract(OMNICHAIN_EXECUTOR_OWNER, OMNICHAIN_EXECUTOR_OWNER_ABI, provider);
     lastProposalReceived = await executor.lastProposalReceived();
-
-    treasury = await ethers.getContractAt(OWNERSHIP_ABI, TREASURY);
-    resilientOracle = new ethers.Contract(berachainbartio.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-    chainlinkOracle = new ethers.Contract(berachainbartio.CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
-    redstoneOracle = new ethers.Contract(berachainbartio.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
-    boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
+    await pretendExecutingVip(await vip009());
   });
 
   describe("Pre-VIP behaviour", async () => {
-    it("Normal Timelock has default admin role", async () => {
+    it("Normal Timelock has default admin role on unichain sepolia", async () => {
       const acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
-      const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, berachainbartio.NORMAL_TIMELOCK);
+      const hasRole = await acm.hasRole(DEFAULT_ADMIN_ROLE, unichainsepolia.NORMAL_TIMELOCK);
       expect(hasRole).equals(true);
-    });
-
-    it("correct pending owner for oracles", async () => {
-      expect(await resilientOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await chainlinkOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await redstoneOracle.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await boundValidator.pendingOwner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
     });
   });
 
-  testForkedNetworkVipCommands("vip452 configures bridge", await vip452(), {
+  testForkedNetworkVipCommands("vip456 configures bridge", await vip456(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [67]);
-      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [223]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [2]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [50]);
+      await expectEvents(txResponse, [ACMAggregator_ABI], ["RevokePermissionsExecuted"], [1]);
     },
   });
 
@@ -90,7 +68,7 @@ forking(10987237, async () => {
     });
     it("check configuration", async () => {
       // Check Timelock configurations
-      expect(await executor.proposalTimelocks(0)).equals(berachainbartio.NORMAL_TIMELOCK);
+      expect(await executor.proposalTimelocks(0)).equals(unichainsepolia.NORMAL_TIMELOCK);
       expect(await executor.proposalTimelocks(1)).equals(FAST_TRACK_TIMELOCK);
       expect(await executor.proposalTimelocks(2)).equals(CRITICAL_TIMELOCK);
 
@@ -98,13 +76,13 @@ forking(10987237, async () => {
       expect(await executor.trustedRemoteLookup(LzChainId.bsctestnet)).equals(
         ethers.utils.solidityPack(
           ["address", "address"],
-          [getOmnichainProposalSenderAddress(), berachainbartio.OMNICHAIN_GOVERNANCE_EXECUTOR],
+          [getOmnichainProposalSenderAddress(), unichainsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR],
         ),
       );
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(14);
+      expect(await executor.last24HourCommandsReceived()).equals(6);
 
       // Check function registry
       const functionSignatures: string[] = [
@@ -134,7 +112,7 @@ forking(10987237, async () => {
         expect(await executorOwner.functionRegistry(selector)).equals(signature);
       }
     });
-    it("Default admin role must be revoked from ACMAggregator contract", async () => {
+    it("Default admin role must be revoked from ACMAggregator contract on unichain sepolia", async () => {
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
     });
     it("Guardian and all timelocks are allowed to call retryMessage ", async () => {
@@ -143,8 +121,8 @@ forking(10987237, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "retryMessage(uint16,bytes,uint64,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, berachainbartio.GUARDIAN)).to.be.true;
-      expect(await acm.hasRole(roleHash, berachainbartio.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.true;
     });
@@ -155,8 +133,8 @@ forking(10987237, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "forceResumeReceive(uint16,bytes)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, berachainbartio.GUARDIAN)).to.be.true;
-      expect(await acm.hasRole(roleHash, berachainbartio.NORMAL_TIMELOCK)).to.be.false;
+      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
     });
@@ -166,29 +144,10 @@ forking(10987237, async () => {
         [OMNICHAIN_EXECUTOR_OWNER, "setSendVersion(uint16)"],
       );
       const roleHash = ethers.utils.keccak256(role);
-      expect(await acm.hasRole(roleHash, berachainbartio.GUARDIAN)).to.be.false;
-      expect(await acm.hasRole(roleHash, berachainbartio.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(roleHash, unichainsepolia.GUARDIAN)).to.be.false;
+      expect(await acm.hasRole(roleHash, unichainsepolia.NORMAL_TIMELOCK)).to.be.true;
       expect(await acm.hasRole(roleHash, FAST_TRACK_TIMELOCK)).to.be.false;
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
-    });
-
-    it("correct owner for treasury and oracles", async () => {
-      expect(await treasury.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await resilientOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await chainlinkOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await redstoneOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-      expect(await boundValidator.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
-    });
-
-    it("check price of tokens", async () => {
-      const wethPrice = await resilientOracle.getPrice(WETH);
-      const xvsPrice = await resilientOracle.getPrice(XVS);
-      const wberaPrice = await resilientOracle.getPrice(WBERA);
-      const usdcePrice = await resilientOracle.getPrice(MOCK_USDCe);
-      expect(wethPrice).to.equal(ethers.utils.parseUnits("3000", 18));
-      expect(xvsPrice).to.equal(ethers.utils.parseUnits("7", 18));
-      expect(wberaPrice).to.equal(ethers.utils.parseUnits("6", 18));
-      expect(usdcePrice).to.equal(ethers.utils.parseUnits("1", 30));
     });
   });
 });

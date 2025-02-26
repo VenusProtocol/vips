@@ -1,158 +1,131 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { LzChainId, ProposalType } from "src/types";
-import { makeProposal } from "src/utils";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+import { LzChainId, ProposalType } from "../../src/types";
+import { makeProposal } from "../../src/utils";
+import { RemoteBridgeCommand, RemoteBridgeEntry } from "./types";
 
-export const OMNICHAIN_PROPOSAL_SENDER = "0xCfD34AEB46b1CB4779c945854d405E91D27A1899";
-export const MAX_DAILY_LIMIT = 100;
-export const OMNICHAIN_EXECUTOR_OWNER = "0x94ba324b639F2C4617834dFcF45EA23188a17124";
-export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
-export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
-export const TREASURY = "0xF2f878a9cF9a43409F673CfA17B4F1E9D8169211";
-export const BOUND_VALIDATOR = "0x24C815d92f5F084E3679ceD7c51c2033784AaC06";
-export const MOCK_USDCe = "0x0A912ebEc8D4a35568C1BFE368AD68A548597906";
-export const WETH = "0x5A4bcFa0cf7f029bb5A62Cd52a24F7B2d0C18d2A";
-export const WBERA = "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8";
-export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
+export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
+
+export const MIN_DST_GAS = "300000";
+
+export const remoteBridgeEntries: RemoteBridgeEntry[] = [
+  {
+    bridgeAdmin: "0xB164Cb262328Ca44a806bA9e3d4094931E658513",
+    proxyOFT: "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0",
+    dstChainId: undefined,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0xd3c6bdeeadB2359F726aD4cF42EAa8B7102DAd9B",
+    proxyOFT: "0xc340b7d3406502F43dC11a988E4EC5bbE536E642",
+    dstChainId: LzChainId.sepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff",
+    proxyOFT: "0xA03205bC635A772E533E7BE36b5701E331a70ea3",
+    dstChainId: LzChainId.opbnbtestnet,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0xc94578caCC89a29B044a0a1D54d20d48A645E5C8",
+    proxyOFT: "0xFdC5cEC63FD167DA46cF006585b30D03B104eFD4",
+    dstChainId: LzChainId.arbitrumsepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0x28cfE3f2D7D8944FAd162a058260ec922C19065E",
+    proxyOFT: "0x760461ccB2508CAAa2ECe0c28af3a4707b853043",
+    dstChainId: LzChainId.zksyncsepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0x6bBcB95eCF9BEc9AE91d5Ad227783e3913145321",
+    proxyOFT: "0x79a36dc9a43D05Db4747c59c02F48ed500e47dF1",
+    dstChainId: LzChainId.opsepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD",
+    proxyOFT: "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60",
+    dstChainId: LzChainId.basesepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+];
+
+function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBridgeCommand[] {
+  return [
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setTrustedRemoteAddress(uint16,bytes)",
+      params: [LzChainId.unichainsepolia, UNICHAIN_SEPOLIA_TRUSTED_REMOTE],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setMinDstGas(uint16,uint16,uint256)",
+      params: [LzChainId.unichainsepolia, 0, MIN_DST_GAS],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setMaxDailyLimit(uint16,uint256)",
+      params: [LzChainId.unichainsepolia, remoteBridgeEntry.maxDailyLimit],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setMaxSingleTransactionLimit(uint16,uint256)",
+      params: [LzChainId.unichainsepolia, remoteBridgeEntry.maxSingleTransactionLimit],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setMaxDailyReceiveLimit(uint16,uint256)",
+      params: [LzChainId.unichainsepolia, remoteBridgeEntry.maxDailyReceiveLimit],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+    {
+      target: remoteBridgeEntry.bridgeAdmin,
+      signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
+      params: [LzChainId.unichainsepolia, remoteBridgeEntry.maxSingleReceiveTransactionLimit],
+      dstChainId: remoteBridgeEntry.dstChainId,
+    },
+  ];
+}
 
 const vip452 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-452",
-    description: ``,
+    title: "VIP-452 Enable Unichain sepolia bridge",
+    description: `#### Summary Enable Unichain sepolia bridge`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
-  return makeProposal(
-    [
-      {
-        target: OMNICHAIN_PROPOSAL_SENDER,
-        signature: "setMaxDailyLimit(uint16,uint256)",
-        params: [LzChainId.berachainbartio, MAX_DAILY_LIMIT],
-      },
-      {
-        target: OMNICHAIN_PROPOSAL_SENDER,
-        signature: "setTrustedRemoteAddress(uint16,bytes)",
-        params: [LzChainId.berachainbartio, berachainbartio.OMNICHAIN_GOVERNANCE_EXECUTOR],
-      },
-      {
-        target: OMNICHAIN_EXECUTOR_OWNER,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: ACM,
-        signature: "grantRole(bytes32,address)",
-        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: ACM_AGGREGATOR,
-        signature: "executeGrantPermissions(uint256)",
-        params: [9],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: ACM,
-        signature: "revokeRole(bytes32,address)",
-        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: TREASURY,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.RESILIENT_ORACLE,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.CHAINLINK_ORACLE,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: BOUND_VALIDATOR,
-        signature: "acceptOwnership()",
-        params: [],
-        dstChainId: LzChainId.berachainbartio,
-      },
-
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [berachainbartio.XVS, parseUnits("7", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WETH, parseUnits("3000", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [WBERA, parseUnits("6", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [MOCK_USDCe, parseUnits("1", 18)],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: berachainbartio.RESILIENT_ORACLE,
-        signature: "setTokenConfigs((address,address[3],bool[3])[])",
-        params: [
-          [
-            [
-              berachainbartio.XVS,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WETH,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              WBERA,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-            [
-              MOCK_USDCe,
-              [berachainbartio.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-            ],
-          ],
-        ],
-        dstChainId: LzChainId.berachainbartio,
-      },
-    ],
-    meta,
-    ProposalType.REGULAR,
-  );
+  return makeProposal(remoteBridgeEntries.flatMap(getRemoteBridgeCommands), meta, ProposalType.REGULAR);
 };
 
 export default vip452;
