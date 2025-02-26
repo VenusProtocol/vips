@@ -140,10 +140,10 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
   ];
 }
 
-const vip453 = () => {
+const vip458 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-453",
+    title: "VIP-458",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -261,4 +261,4 @@ const vip453 = () => {
   );
 };
 
-export default vip453;
+export default vip458;

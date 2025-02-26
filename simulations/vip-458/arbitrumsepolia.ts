@@ -2,21 +2,21 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 import { forking } from "src/vip-framework";
 
-import vip453, {
+import vip458, {
   MIN_DST_GAS,
   RemoteBridgeEntry,
   XVS_BRIDGE_DEST,
   remoteBridgeEntries,
-} from "../../vips/vip-453/bsctestnet";
+} from "../../vips/vip-458/bsctestnet";
 import { checkXVSBridge } from "./checkXVSBridge";
 
-forking(7746698, async () => {
+forking(125538445, async () => {
   await checkXVSBridge(
     LzChainId.berachainbartio,
-    NETWORK_ADDRESSES.sepolia,
-    vip453,
+    NETWORK_ADDRESSES.arbitrumsepolia,
+    vip458,
     XVS_BRIDGE_DEST,
-    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.sepolia) as RemoteBridgeEntry,
+    remoteBridgeEntries.find(entry => entry.dstChainId === LzChainId.arbitrumsepolia) as RemoteBridgeEntry,
     MIN_DST_GAS,
   );
 });

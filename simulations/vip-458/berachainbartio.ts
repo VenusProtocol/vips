@@ -11,7 +11,7 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
 import vip452 from "../../vips/vip-452/bsctestnet";
-import vip453, {
+import vip458, {
   ARBITRUM_SEPOLIA_REMOTE,
   BNB_TESTNET_TRUSTED_REMOTE,
   OPBNB_TESTNET_TRUSTED_REMOTE,
@@ -23,7 +23,7 @@ import vip453, {
   XVS_MINT_LIMIT,
   XVS_STORE,
   ZYSYNC_SEPOLIA_REMOTE,
-} from "../../vips/vip-453/bsctestnet";
+} from "../../vips/vip-458/bsctestnet";
 import XVS_STORE_ABI from "./abi/XVSStore.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import XVS_ABI from "./abi/xvs.json";
@@ -87,7 +87,7 @@ forking(10791347, async () => {
   });
 
   testForkedNetworkVipCommands("vip452 configures bridge", await vip452());
-  testForkedNetworkVipCommands("vip453 configures bridge", await vip453());
+  testForkedNetworkVipCommands("vip458 configures bridge", await vip458());
 
   describe("Post-VIP behaviour", async () => {
     it("Should set bridge owner to multisig", async () => {
