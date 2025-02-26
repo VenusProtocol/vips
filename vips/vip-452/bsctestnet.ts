@@ -56,7 +56,7 @@ const vip452 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [3],
+        params: [9],
         dstChainId: LzChainId.berachainbartio,
       },
       {

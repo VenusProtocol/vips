@@ -222,7 +222,10 @@ const config: HardhatUserConfig = {
     berachainbartio: {
       url: process.env.ARCHIVE_NODE_berachainbartio || "https://bartio.rpc.berachain.com",
       chainId: 80084,
-      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      // accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      accounts: {
+        mnemonic: process.env.MNEMONIC || "",
+      },
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.berachainbartio,
     },
   },
