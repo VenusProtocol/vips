@@ -13,18 +13,23 @@ import vip452, {
   DEFAULT_ADMIN_ROLE,
   OMNICHAIN_EXECUTOR_OWNER,
   TREASURY,
+  MOCK_USDCe,
+  WETH,
+  WBERA,
+  XVS
 } from "../../vips/vip-452/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor_ABI.json";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { berachainbartio } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x723b7CB226d86bd89638ec77936463453a46C656";
 const CRITICAL_TIMELOCK = "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD";
 
-forking(10959687, async () => {
+forking(10987237, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -45,7 +50,7 @@ forking(10959687, async () => {
     lastProposalReceived = await executor.lastProposalReceived();
 
     treasury = await ethers.getContractAt(OWNERSHIP_ABI, TREASURY);
-    resilientOracle = new ethers.Contract(berachainbartio.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
+    resilientOracle = new ethers.Contract(berachainbartio.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
     chainlinkOracle = new ethers.Contract(berachainbartio.CHAINLINK_ORACLE, OWNERSHIP_ABI, provider);
     redstoneOracle = new ethers.Contract(berachainbartio.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
@@ -68,7 +73,7 @@ forking(10959687, async () => {
 
   testForkedNetworkVipCommands("vip452 configures bridge", await vip452(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [68]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [67]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);
     },
   });
@@ -167,12 +172,23 @@ forking(10959687, async () => {
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
     });
 
-    it("correct owner for oracles", async () => {
+    it("correct owner for treasury and oracles", async () => {
       expect(await treasury.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await resilientOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await chainlinkOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await redstoneOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await boundValidator.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+    });
+
+    it("check price of tokens", async () => {
+      const wethPrice = await resilientOracle.getPrice(WETH);
+      const xvsPrice = await resilientOracle.getPrice(XVS);
+      const wberaPrice = await resilientOracle.getPrice(WBERA);
+      const usdcePrice = await resilientOracle.getPrice(MOCK_USDCe);
+      expect(wethPrice).to.equal(ethers.utils.parseUnits("3000", 18));
+      expect(xvsPrice).to.equal(ethers.utils.parseUnits("7", 18));
+      expect(wberaPrice).to.equal(ethers.utils.parseUnits("6", 18));
+      expect(usdcePrice).to.equal(ethers.utils.parseUnits("1", 30));
     });
   });
 });

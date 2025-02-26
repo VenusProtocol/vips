@@ -78,9 +78,6 @@ async function main() {
     account: permission[2],
   }));
 
-  console.log("Adding Grant Permissions: ", _grantPermissions);
-  return;
-
   const grantChunks = splitPermissions(_grantPermissions);
   const grantIndexes: string[] = [];
 

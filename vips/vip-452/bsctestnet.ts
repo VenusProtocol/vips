@@ -56,7 +56,7 @@ const vip452 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [3],
+        params: [9],
         dstChainId: LzChainId.berachainbartio,
       },
       {
@@ -117,7 +117,7 @@ const vip452 = () => {
       {
         target: berachainbartio.REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
-        params: [MOCK_USDCe, parseUnits("1", 30)],
+        params: [MOCK_USDCe, parseUnits("1", 18)],
         dstChainId: LzChainId.berachainbartio,
       },
       {
