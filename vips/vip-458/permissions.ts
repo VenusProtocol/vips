@@ -45,20 +45,6 @@ const accounts: any = {
   },
 };
 
-function splitPermissions(
-  array: ACMCommandsAggregator.PermissionStruct[],
-  chunkSize: number = 200,
-): ACMCommandsAggregator.PermissionStruct[][] {
-  const result: ACMCommandsAggregator.PermissionStruct[][] = [];
-
-  for (let i = 0; i < array.length; i += chunkSize) {
-    const chunk = array.slice(i, i + chunkSize);
-    result.push(chunk);
-  }
-
-  return result;
-}
-
 async function main() {
   const acmCommandsAggregator = await ethers.getContractAt(
     ACM_COMMANDS_AGGREATOR_ABI.abi,
@@ -78,17 +64,11 @@ async function main() {
     account: permission[2],
   }));
 
-  const grantChunks = splitPermissions(_grantPermissions);
-  const grantIndexes: string[] = [];
+  const tx = await acmCommandsAggregator.addGrantPermissions(_grantPermissions);
+  const receipt = await tx.wait();
+  const events = receipt.events?.filter((event: any) => event.event === "GrantPermissionsAdded");
 
-  for (const chunk of grantChunks) {
-    const tx = await acmCommandsAggregator.addGrantPermissions(chunk);
-    const receipt = await tx.wait();
-    const events = receipt.events?.filter((event: any) => event.event === "GrantPermissionsAdded");
-    grantIndexes.push(events?.[0].args?.index.toString());
-  }
-
-  console.log("Grant Permissions added with indexes: ", grantIndexes.toString());
+  console.log("Grant Permissions added with indexes: ", events?.[0].args?.index.toString());
 }
 
 main()

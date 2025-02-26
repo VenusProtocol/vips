@@ -8,7 +8,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip452 from "../../vips/vip-452/bsctestnet";
+import vip458 from "../../vips/vip-458/bsctestnet";
 import vip459, {
   MIN_DST_GAS,
   RemoteBridgeEntry,
@@ -25,7 +25,7 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(48276592, async () => {
+forking(48618958, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -43,14 +43,14 @@ forking(48276592, async () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip452 give permissions to timelock", await vip452());
+  testVip("vip458 give permissions to timelock", await vip458());
   testVip("VIP-459", await vip459(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
-        [6, 0],
+        [8, 0],
       );
 
       await expectEvents(

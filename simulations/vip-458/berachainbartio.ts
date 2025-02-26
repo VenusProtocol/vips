@@ -11,12 +11,12 @@ import vip458, {
   ACM_AGGREGATOR,
   BOUND_VALIDATOR,
   DEFAULT_ADMIN_ROLE,
+  MOCK_USDCe,
   OMNICHAIN_EXECUTOR_OWNER,
   TREASURY,
-  MOCK_USDCe,
-  WETH,
   WBERA,
-  XVS
+  WETH,
+  XVS,
 } from "../../vips/vip-458/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";

@@ -20,7 +20,8 @@ export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086
 export const ARBITRUM_SEPOLIA_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 export const ZYSYNC_SEPOLIA_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
 export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
-export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
+export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xcaf833318a6663bb23aa7f218e597c2f7970b4d2";
+export const BASE_SEPOLIA_TRUSTED_REMOTE = "0xd5cd1fd17b724a391c1bce55eb9d88e3205eed60";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 export const MIN_DST_GAS = "300000";
@@ -97,6 +98,24 @@ export const remoteBridgeEntries: RemoteBridgeEntry[] = [
     maxDailyReceiveLimit: parseUnits("102000", 18),
     maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
   },
+  {
+    bridgeAdmin: "0xc570c62bbECCd0a63408de95d9418ad7b89Ff63F",
+    proxyOFT: "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2",
+    dstChainId: LzChainId.unichainsepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
+  {
+    bridgeAdmin: "0xE431E82d8fFfd81E7c082BeC7Fe2C306f5c988aD",
+    proxyOFT: "0xD5Cd1fD17B724a391C1bce55Eb9d88E3205eED60",
+    dstChainId: LzChainId.basesepolia,
+    maxDailyLimit: parseUnits("100000", 18),
+    maxSingleTransactionLimit: parseUnits("20000", 18),
+    maxDailyReceiveLimit: parseUnits("102000", 18),
+    maxSingleReceiveTransactionLimit: parseUnits("20400", 18),
+  },
 ];
 
 function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBridgeCommand[] {
@@ -161,7 +180,7 @@ const vip459 = () => {
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [5],
+        params: [10],
         dstChainId: LzChainId.berachainbartio,
       },
       {
@@ -210,6 +229,18 @@ const vip459 = () => {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setTrustedRemoteAddress(uint16,bytes)",
+        params: [LzChainId.unichainsepolia, UNICHAIN_SEPOLIA_TRUSTED_REMOTE],
+        dstChainId: LzChainId.berachainbartio,
+      },
+      {
+        target: XVS_BRIDGE_ADMIN_PROXY,
+        signature: "setTrustedRemoteAddress(uint16,bytes)",
+        params: [LzChainId.basesepolia, BASE_SEPOLIA_TRUSTED_REMOTE],
         dstChainId: LzChainId.berachainbartio,
       },
       {

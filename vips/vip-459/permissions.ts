@@ -27,28 +27,12 @@ const acmCommandsAggreator: any = {
 };
 
 const accounts: any = {
-  berachainbartio: {
-    NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
-    FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
-    CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
-    Guardian: BERACHAINBARTIO_GUARDIAN,
-    XVSBridgeDest: XVS_BRIDGE_DEST
-  },
+  NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
+  FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
+  CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
+  Guardian: BERACHAINBARTIO_GUARDIAN,
+  XVSBridgeDest: XVS_BRIDGE_DEST,
 };
-
-function splitPermissions(
-  array: ACMCommandsAggregator.PermissionStruct[],
-  chunkSize: number = 200,
-): ACMCommandsAggregator.PermissionStruct[][] {
-  const result: ACMCommandsAggregator.PermissionStruct[][] = [];
-
-  for (let i = 0; i < array.length; i += chunkSize) {
-    const chunk = array.slice(i, i + chunkSize);
-    result.push(chunk);
-  }
-
-  return result;
-}
 
 async function main() {
   const acmCommandsAggregator = await ethers.getContractAt(
@@ -59,7 +43,7 @@ async function main() {
 
   for (const permission of networkGrantPermissions) {
     if (Object.values(AccountType).includes(permission[2] as AccountType)) {
-      permission[2] = accounts[hre.network.name][permission[2]];
+      permission[2] = accounts[permission[2]];
     }
   }
 
@@ -69,17 +53,11 @@ async function main() {
     account: permission[2],
   }));
 
-  const grantChunks = splitPermissions(_grantPermissions);
-  const grantIndexes: string[] = [];
+  const tx = await acmCommandsAggregator.addGrantPermissions(_grantPermissions);
+  const receipt = await tx.wait();
+  const events = receipt.events?.filter((event: any) => event.event === "GrantPermissionsAdded");
 
-  for (const chunk of grantChunks) {
-    const tx = await acmCommandsAggregator.addGrantPermissions(chunk);
-    const receipt = await tx.wait();
-    const events = receipt.events?.filter((event: any) => event.event === "GrantPermissionsAdded");
-    grantIndexes.push(events?.[0].args?.index.toString());
-  }
-
-  console.log("Grant Permissions added with indexes: ", grantIndexes.toString());
+  console.log("Grant Permissions added with indexes: ", events?.[0].args?.index.toString());
 }
 
 main()

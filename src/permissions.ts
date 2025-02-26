@@ -204,7 +204,7 @@ export const getRewardDistributorPermissionsBlockbased = (): string[][] => {
 
 export const getIRMPermissions = (): string[][] => {
   return [
-    [ethers.constants.AddressZero, "updateJumpRateModel(uint256,uint256,uint256,uint256)", AccountType.NORMAL_TIMELOCK]
+    [ethers.constants.AddressZero, "updateJumpRateModel(uint256,uint256,uint256,uint256)", AccountType.NORMAL_TIMELOCK],
   ];
 };
 
