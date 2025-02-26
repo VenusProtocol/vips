@@ -117,7 +117,7 @@ const vip452 = () => {
       {
         target: berachainbartio.REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
-        params: [MOCK_USDCe, parseUnits("1", 30)],
+        params: [MOCK_USDCe, parseUnits("1", 18)],
         dstChainId: LzChainId.berachainbartio,
       },
       {
