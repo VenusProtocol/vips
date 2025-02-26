@@ -167,7 +167,7 @@ forking(10959687, async () => {
       expect(await acm.hasRole(roleHash, CRITICAL_TIMELOCK)).to.be.false;
     });
 
-    it("correct owner for oracles", async () => {
+    it("correct owner for treasury and oracles", async () => {
       expect(await treasury.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await resilientOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
       expect(await chainlinkOracle.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
