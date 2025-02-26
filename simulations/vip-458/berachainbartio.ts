@@ -6,7 +6,7 @@ import { LzChainId } from "src/types";
 import { expectEvents, getOmnichainProposalSenderAddress } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip452, {
+import vip458, {
   ACM,
   ACM_AGGREGATOR,
   BOUND_VALIDATOR,
@@ -17,7 +17,7 @@ import vip452, {
   WETH,
   WBERA,
   XVS
-} from "../../vips/vip-452/bsctestnet";
+} from "../../vips/vip-458/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
 import OMNICHAIN_EXECUTOR_OWNER_ABI from "./abi/OmnichainExecutorOwner_ABI.json";
@@ -71,7 +71,7 @@ forking(10987237, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip452 configures bridge", await vip452(), {
+  testForkedNetworkVipCommands("vip458 configures bridge", await vip458(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [67]);
       await expectEvents(txResponse, [ACMAggregator_ABI], ["GrantPermissionsExecuted"], [1]);

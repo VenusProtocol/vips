@@ -19,10 +19,10 @@ export const WETH = "0x5A4bcFa0cf7f029bb5A62Cd52a24F7B2d0C18d2A";
 export const WBERA = "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8";
 export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
 
-const vip452 = () => {
+const vip458 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-452",
+    title: "VIP-458",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -155,4 +155,4 @@ const vip452 = () => {
   );
 };
 
-export default vip452;
+export default vip458;
