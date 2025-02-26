@@ -48,9 +48,7 @@ forking(56518970, async () => {
   });
 
   describe("vTokens deployment", () => {
-    it(`should deploy market`, async () => {
-      await checkVToken(zksyncMarket.vToken.address, zksyncMarket.vToken);
-    });
+    checkVToken(zksyncMarket.vToken.address, zksyncMarket.vToken);
   });
 
   testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454({ chainlinkStalePeriod: ONE_YEAR }));
@@ -139,7 +137,7 @@ forking(56518970, async () => {
     );
   });
 
-  describe("generic tests", async () => {
+  describe("generic tests", () => {
     checkIsolatedPoolsComptrollers({
       [COMPTROLLER_CORE_ZKSYNC]: WSTETH_HOLDER,
     });
