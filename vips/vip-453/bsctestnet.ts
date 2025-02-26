@@ -20,6 +20,7 @@ export const BNB_TESTNET_TRUSTED_REMOTE = "0x0e132cd94fd70298b747d2b4d977db8d086
 export const ARBITRUM_SEPOLIA_REMOTE = "0xfdc5cec63fd167da46cf006585b30d03b104efd4";
 export const ZYSYNC_SEPOLIA_REMOTE = "0x760461ccb2508caaa2ece0c28af3a4707b853043";
 export const OP_SEPOLIA_TRUSTED_REMOTE = "0x79a36dc9a43d05db4747c59c02f48ed500e47df1";
+export const UNICHAIN_SEPOLIA_TRUSTED_REMOTE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
 
 export const XVS_MINT_LIMIT = parseUnits("500000", 18);
 export const MIN_DST_GAS = "300000";
@@ -139,10 +140,10 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
   ];
 }
 
-const vip452 = () => {
+const vip453 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-452",
+    title: "VIP-453",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -151,18 +152,6 @@ const vip452 = () => {
 
   return makeProposal(
     [
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVS, "mint(address,uint256)", XVS_BRIDGE_DEST],
-        dstChainId: LzChainId.berachainbartio,
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [XVS, "burn(address,uint256)", XVS_BRIDGE_DEST],
-        dstChainId: LzChainId.berachainbartio,
-      },
       {
         target: ACM,
         signature: "grantRole(bytes32,address)",
@@ -272,4 +261,4 @@ const vip452 = () => {
   );
 };
 
-export default vip452;
+export default vip453;
