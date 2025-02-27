@@ -262,7 +262,6 @@ export const testForkedNetworkVipCommands = (description: string, proposal: Prop
         // Sometimes the gas estimation is wrong with some networks like zksync
         txnParams.maxFeePerGas = feeData.maxFeePerGas.mul(15).div(10);
       }
-
       await endpoint
         .connect(impersonatedLibrary)
         .receivePayload(
