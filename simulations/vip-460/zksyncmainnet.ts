@@ -12,10 +12,10 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip460, {
-  COMPTROLLER,
+  ZKETH_COMPTROLLER_CORE,
   ZKETH_ORACLE,
   convertAmountToVTokens,
-  newMarket,
+  newMarkets,
   tokens,
 } from "../../vips/vip-460/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -34,7 +34,7 @@ forking(56240200, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
-  const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(ZKETH_COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
 
   before(async () => {
     await setMaxStalePeriodInChainlinkOracle(
@@ -46,7 +46,7 @@ forking(56240200, async () => {
   });
 
   describe("vTokens deployment", () => {
-    checkVToken(newMarket.vToken.address, newMarket.vToken);
+    checkVToken(newMarkets["zkETH"].vToken.address, newMarkets["zkETH"].vToken);
   });
 
   testForkedNetworkVipCommands("zksync-zkETH", await vip460());
@@ -72,27 +72,34 @@ forking(56240200, async () => {
     });
 
     describe("PoolRegistry state", () => {
-      it(`should add ${newMarket.vToken.symbol} to the Comptroller`, async () => {
+      it(`should add ${newMarkets["zkETH"].vToken.symbol} to the Comptroller`, async () => {
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.contain(newMarket.vToken.address);
+        expect(poolVTokens).to.contain(newMarkets["zkETH"].vToken.address);
       });
 
-      it(`should register ${newMarket.vToken.symbol} in PoolRegistry`, async () => {
-        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER, newMarket.vToken.underlying.address);
-        expect(registeredVToken).to.equal(newMarket.vToken.address);
+      it(`should register ${newMarkets["zkETH"].vToken.symbol} in PoolRegistry`, async () => {
+        const registeredVToken = await poolRegistry.getVTokenForAsset(
+          ZKETH_COMPTROLLER_CORE,
+          newMarkets["zkETH"].vToken.underlying.address,
+        );
+        expect(registeredVToken).to.equal(newMarkets["zkETH"].vToken.address);
       });
     });
 
     describe("Risk parameters", () => {
-      checkRiskParameters(newMarket.vToken.address, newMarket.vToken, newMarket.riskParameters);
+      checkRiskParameters(
+        newMarkets["zkETH"].vToken.address,
+        newMarkets["zkETH"].vToken,
+        newMarkets["zkETH"].riskParameters,
+      );
 
       it("should pause brrowing on zkETH", async () => {
-        expect(await comptroller.actionPaused(newMarket.vToken.address, 2)).to.equal(true);
+        expect(await comptroller.actionPaused(newMarkets["zkETH"].vToken.address, 2)).to.equal(true);
       });
     });
 
     describe("Ownership and initial supply", () => {
-      const { vToken: vTokenSpec, initialSupply } = newMarket;
+      const { vToken: vTokenSpec, initialSupply } = newMarkets["zkETH"];
       const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
 
       describe(`${vTokenSpec.symbol}`, () => {
@@ -133,9 +140,9 @@ forking(56240200, async () => {
 
     describe("Interest rates", () => {
       checkInterestRate(
-        newMarket.interestRateModel.address,
-        newMarket.vToken.symbol,
-        newMarket.interestRateModel,
+        newMarkets["zkETH"].interestRateModel.address,
+        newMarkets["zkETH"].vToken.symbol,
+        newMarkets["zkETH"].interestRateModel,
         BLOCKS_PER_YEAR,
       );
     });
