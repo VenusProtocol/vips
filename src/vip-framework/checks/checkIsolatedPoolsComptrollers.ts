@@ -122,13 +122,10 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   const balance = await supplyUnderlying?.balanceOf(poolSupplier);
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
-  const supplyCap = await comptroller.supplyCaps(supplyMarket?.address);
-  const nextTotalSupply = (await supplyMarket.totalSupply()) + supplyAmountScaled;
 
-  // Adding 1% extra to account for exchange rate fluctuations
-  if (nextTotalSupply * 0.01 > supplyCap) {
-    await comptroller.connect(timelockSigner).setMarketSupplyCaps([supplyMarket?.address], [nextTotalSupply]);
-  }
+  // NOTE: THIS IS CAUSING STATE CHANGE
+  await comptroller.connect(timelockSigner).setMarketSupplyCaps([supplyMarket?.address], [Number.MAX_SAFE_INTEGER - 1]);
+
   await supplyUnderlying?.approve(supplyMarket?.address, supplyAmountScaled);
   await supplyMarket?.mint(supplyAmountScaled);
   expect(await supplyMarket?.balanceOf(poolSupplier)).to.be.gt(originalSupplyMarketBalance);
