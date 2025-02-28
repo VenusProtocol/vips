@@ -1,11 +1,12 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
-import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
+import { SafeTransactionOptionalProps } from "@safe-global/protocol-kit";
+import { MetaTransactionData, OperationType, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 import { Proposal, SUPPORTED_NETWORKS } from "src/types";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 
-const DEFAULT_OPERATION = 0; // Call
+const DEFAULT_OPERATION = OperationType.CALL; // Call
 
 export const loadMultisigTx = async (multisigVipPath: string) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -38,12 +39,14 @@ export const createGnosisTx = async (
   ethAdapter: EthersAdapter,
   safeSdk: Safe,
   multisigVipPath: string,
+  onlyCalls: boolean = false,
+  options: SafeTransactionOptionalProps,
 ): Promise<SafeTransaction> => {
   const proposal = await loadMultisigTx(multisigVipPath);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 
-  return await safeSdk.createTransaction({ safeTransactionData });
+  return await safeSdk.createTransaction({ safeTransactionData, onlyCalls, options });
 };
 
 export const getContractNetworks = (chainId: number): ContractNetworksConfig => {
@@ -132,6 +135,11 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         signMessageLibAddress: "0xDB94695bB4E974adfCD116351aF427937AD3a4b5",
         createCallAddress: "0x474761AC5c317d93B76d8dc5388A9F38B5412E2C",
         simulateTxAccessorAddress: "0xf95b731E477c3d16c3C68E7c9c766CBf6E190D49",
+      },
+    },
+    unichainmainnet: {
+      [chainId]: {
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
       },
     },
     // Add more testnet networks as needed
