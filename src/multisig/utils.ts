@@ -39,8 +39,8 @@ export const createGnosisTx = async (
   ethAdapter: EthersAdapter,
   safeSdk: Safe,
   multisigVipPath: string,
-  onlyCalls: boolean = false,
-  options: SafeTransactionOptionalProps,
+  onlyCalls?: boolean,
+  options?: SafeTransactionOptionalProps,
 ): Promise<SafeTransaction> => {
   const proposal = await loadMultisigTx(multisigVipPath);
 
@@ -139,7 +139,14 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
     },
     unichainmainnet: {
       [chainId]: {
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
         multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+      },
+    },
+    zksyncmainnet: {
+      [chainId]: {
+        multiSendAddress: "0x0dFcccB95225ffB03c6FBB2559B530C2B7C8A912",
+        multiSendCallOnlyAddress: "0xf220d3b4dfb23c4ade8c88e526c1353abacbc38f",
       },
     },
     // Add more testnet networks as needed

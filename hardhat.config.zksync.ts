@@ -37,6 +37,16 @@ task("createProposal", "Create proposal objects for various destinations").setAc
   await createProposal();
 });
 
+task("safeTxData", "Get a Safe TX hash and data for execution of a multisig VIP")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .addOptionalParam("nonce", "Nonce of the multisig TX to be considered")
+  .setAction(async function (taskArguments) {
+    const { proposalPath, nonce } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const calculateSafeTxData = require("./scripts/calculateSafeTxData.ts").default;
+    await calculateSafeTxData(proposalPath, nonce);
+  });
+
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments) {
