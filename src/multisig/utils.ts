@@ -137,7 +137,19 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xf95b731E477c3d16c3C68E7c9c766CBf6E190D49",
       },
     },
-    unichainmainnet: {
+    ethereum: {
+      [chainId]: {
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+      },
+    },
+    opbnbmainnet: {
+      [chainId]: {
+        multiSendAddress: "0xdeb0467ccfada493902c8d279a2f41f26b813ac9",
+        multiSendCallOnlyAddress: "0xc33224e130c702808e12299ecabc16148a5b3d0b",
+      },
+    },
+    arbitrumone: {
       [chainId]: {
         multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
         multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
@@ -149,7 +161,25 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         multiSendCallOnlyAddress: "0xf220d3b4dfb23c4ade8c88e526c1353abacbc38f",
       },
     },
-    // Add more testnet networks as needed
+    opmainnet: {
+      [chainId]: {
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+      },
+    },
+    basemainnet: {
+      [chainId]: {
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+      },
+    },
+    unichainmainnet: {
+      [chainId]: {
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+      },
+    },
+    // Add more networks as needed
   };
 
   if (network.name in networks) {
