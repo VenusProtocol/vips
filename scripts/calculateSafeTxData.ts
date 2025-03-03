@@ -6,42 +6,42 @@ import { SUPPORTED_NETWORKS } from "src/types";
 
 const SAFE_ABI = [
   {
-    "inputs": [
-      { "internalType": "address", "name": "", "type": "address" },
-      { "internalType": "bytes32", "name": "", "type": "bytes32" }
+    inputs: [
+      { internalType: "address", name: "", type: "address" },
+      { internalType: "bytes32", name: "", type: "bytes32" },
     ],
-    "name": "approvedHashes",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
+    name: "approvedHashes",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
   },
   {
-    "inputs": [
-      { "internalType": "address", "name": "to", "type": "address" },
-      { "internalType": "uint256", "name": "value", "type": "uint256" },
-      { "internalType": "bytes", "name": "data", "type": "bytes" },
-      { "internalType": "uint8", "name": "operation", "type": "uint8" },
-      { "internalType": "uint256", "name": "safeTxGas", "type": "uint256" },
-      { "internalType": "uint256", "name": "baseGas", "type": "uint256" },
-      { "internalType": "uint256", "name": "gasPrice", "type": "uint256" },
-      { "internalType": "address", "name": "gasToken", "type": "address" },
-      { "internalType": "address", "name": "refundReceiver", "type": "address" },
-      { "internalType": "bytes", "name": "signatures", "type": "bytes" }
+    inputs: [
+      { internalType: "address", name: "to", type: "address" },
+      { internalType: "uint256", name: "value", type: "uint256" },
+      { internalType: "bytes", name: "data", type: "bytes" },
+      { internalType: "uint8", name: "operation", type: "uint8" },
+      { internalType: "uint256", name: "safeTxGas", type: "uint256" },
+      { internalType: "uint256", name: "baseGas", type: "uint256" },
+      { internalType: "uint256", name: "gasPrice", type: "uint256" },
+      { internalType: "address", name: "gasToken", type: "address" },
+      { internalType: "address", name: "refundReceiver", type: "address" },
+      { internalType: "bytes", name: "signatures", type: "bytes" },
     ],
-    "name": "execTransaction",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "payable",
-    "type": "function"
-  }
+    name: "execTransaction",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 const buildDummySignature = (owner: string) => {
   // Remove "0x" and pad left to 64 hex digits.
-  let r = owner.toLowerCase().replace(/^0x/, '');
-  r = r.padStart(64, '0');
+  let r = owner.toLowerCase().replace(/^0x/, "");
+  r = r.padStart(64, "0");
   const s = "0".repeat(64); // 32 bytes of zeros
-  const v = "01";           // 1 byte for v
-  return r + s + v;         // Concatenate without 0x prefix
+  const v = "01"; // 1 byte for v
+  return r + s + v; // Concatenate without 0x prefix
 };
 
 const getApprovedOwners = async (safeAddress: string, owners: string[], safeTxHash: string) => {
@@ -82,7 +82,7 @@ const calculateSafeTxData = async (multisigVipPath: string, nonce: number | unde
   const owners = await safeSdk.getOwners();
   const approvedOwners = (await getApprovedOwners(safeAddress, owners, safeTxHash)).sort();
 
-  console.log("## Status")
+  console.log("## Status");
   console.log({ threshold, owners, approvedOwners });
 
   if (approvedOwners.length >= threshold) {
@@ -99,16 +99,16 @@ const calculateSafeTxData = async (multisigVipPath: string, nonce: number | unde
       safeTransaction.data.gasPrice,
       safeTransaction.data.gasToken,
       safeTransaction.data.refundReceiver,
-      signatures
+      signatures,
     ]);
 
-    console.log("## executeTransaction submiting the call data")
+    console.log("## executeTransaction submiting the call data");
     console.log({ safeAddress, execTxCalldata });
 
-    console.log("## executeTransaction providing individual fields")
+    console.log("## executeTransaction providing individual fields");
     console.log({
       ...safeTransaction.data,
-      signatures
+      signatures,
     });
   }
 };
