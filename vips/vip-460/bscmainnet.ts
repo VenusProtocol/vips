@@ -13,6 +13,8 @@ const STALE_PERIOD_26H = 26 * 60 * 60; // heartbeat of 24H
 export const ZKETH_COMPTROLLER_CORE = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
 export const ZKETH_ORACLE = "0x540aA1683E5E5592E0444499bDA41f6DF8de2Dd8";
 export const UNI_COMPTROLLER_CORE = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
+export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
 export const tokens = {
   WETH: {
@@ -307,6 +309,13 @@ const vip460 = () => {
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[newMarkets["UNI"].vToken.address], [2], true],
         dstChainId: LzChainId.unichainmainnet,
+      },
+
+      // Refund 5000 USDT to Vanguard Treasury
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, parseUnits("5000", 18), VANGUARD_TREASURY],
       },
     ],
     meta,
