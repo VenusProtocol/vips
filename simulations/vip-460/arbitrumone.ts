@@ -3,7 +3,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip465, {
+import vip460, {
   ARBITRUM_CORE_COMPTROLLER,
   ARBITRUM_vgmBTC_CF,
   ARBITRUM_vgmBTC_CORE,
@@ -11,7 +11,7 @@ import vip465, {
   ARBITRUM_vgmWETH_CF,
   ARBITRUM_vgmWETH_CORE,
   ARBITRUM_vgmWETH_LT,
-} from "../../vips/vip-465/bscmainnet";
+} from "../../vips/vip-460/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(312485973, async () => {
@@ -34,7 +34,7 @@ forking(312485973, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip465", await vip465());
+  testForkedNetworkVipCommands("vip460", await vip460());
 
   describe("Post-VIP behaviour", async () => {
     it("correct CF, LT for gmBTC and gmWETH market", async () => {

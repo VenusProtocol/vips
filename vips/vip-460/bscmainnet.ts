@@ -20,11 +20,28 @@ export const ARBITRUM_vgmBTC_CORE = "0x4f3a73f318C5EA67A86eaaCE24309F29f89900dF"
 export const ARBITRUM_vgmBTC_CF = parseUnits("0.70", 18);
 export const ARBITRUM_vgmBTC_LT = parseUnits("0.75", 18);
 
-export const vip465 = () => {
+export const vip460 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-465 chaos lab recommendation",
-    description: ``,
+    title:
+      "VIP-460 [Arbitrum][Unichain][BNB Chain] Risk Parameters Adjustments (gmBTC/USDC, gmWETH/USDC, WETH, USDC, SolvBTC)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in these Venus community forum publications:
+
+[Chaos Labs - Risk Parameter Updates - 03/05/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-03-05-25/4977)
+
+- [BNB Chain / SolvBTC (Core pool)](https://app.venus.io/#/core-pool/market/0xf841cb62c19fCd4fF5CD0AaB5939f3140BaaC3Ea?chainId=56): increase supply cap from 480 SolvBTC to 1,780 SolvBTC
+- [Unichain / WETH (Core pool)](https://app.venus.io/#/core-pool/market/0xc219BC179C7cDb37eACB03f993f9fDc2495e3374?chainId=130): increase supply cap, from 700 WETH to 1,000 WETH
+- [Unichain / USDC (Core pool)](https://app.venus.io/#/core-pool/market/0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95?chainId=130): increase supply cap, from 1M USDC to 1.5M USDC
+
+[Chaos Labs - gmBTC and gmETH Risk Parameter Adjustment - 03/05/25](https://community.venus.io/t/chaos-labs-gmbtc-and-gmeth-risk-parameter-adjustment-03-05-25/4978)
+
+- Arbitrum one / [gmBTC/USDC](https://app.venus.io/#/core-pool/market/0x4f3a73f318C5EA67A86eaaCE24309F29f89900dF?chainId=42161) and [gmWETH/USDC](https://app.venus.io/#/core-pool/market/0x9bb8cEc9C0d46F53b4f2173BB2A0221F66c353cC?chainId=42161):
+    - Increase collateral factor, from 55% to 70%
+    - Increase liquidation threshold, from 60% to 75%
+
+Complete analysis and details of these recommendations are available in the above publications.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/518](https://github.com/VenusProtocol/vips/pull/518)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -70,4 +87,4 @@ export const vip465 = () => {
   );
 };
 
-export default vip465;
+export default vip460;

@@ -3,13 +3,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip465, {
+import vip460, {
   UNICHAIN_CORE_COMPTROLLER,
   UNICHAIN_vUSDC_CORE,
   UNICHAIN_vUSDC_CORE_SUPPLY_CAP,
   UNICHAIN_vWETH_CORE,
   UNICHAIN_vWETH_CORE_SUPPLY_CAP,
-} from "../../vips/vip-465/bscmainnet";
+} from "../../vips/vip-460/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(10424905, async () => {
@@ -24,7 +24,7 @@ forking(10424905, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip465", await vip465());
+  testForkedNetworkVipCommands("vip460", await vip460());
 
   describe("Post-VIP behaviour", async () => {
     it("correct supply cap for usdc and weth market", async () => {
