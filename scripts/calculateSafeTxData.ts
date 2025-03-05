@@ -64,7 +64,7 @@ const calculateSafeTxData = async (multisigVipPath: string, nonce: number | unde
     ethers,
     signerOrProvider: safeOwner,
   });
-  const safeAddress = getSafeAddress(network.name as Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">);
+  const safeAddress = getSafeAddress(network.name as SUPPORTED_NETWORKS);
   const chainId = await ethAdapter.getChainId();
   const contractNetworks: ContractNetworksConfig = getContractNetworks(chainId);
 

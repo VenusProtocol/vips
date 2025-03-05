@@ -60,7 +60,7 @@ const processTxBuilder = async () => {
 };
 
 export const processGnosisTxBuilder = async () => {
-  const safeAddress = getSafeAddress(network.name as Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">);
+  const safeAddress = getSafeAddress(network.name as SUPPORTED_NETWORKS);
 
   const multisigVipPath = readline.question(
     "Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ",

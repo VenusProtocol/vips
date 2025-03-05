@@ -14,7 +14,7 @@ export const loadMultisigTx = async (multisigVipPath: string) => {
   return vip();
 };
 
-export const getSafeAddress = (networkName: Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">): string => {
+export const getSafeAddress = (networkName: SUPPORTED_NETWORKS): string => {
   return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 
