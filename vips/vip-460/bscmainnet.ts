@@ -226,6 +226,12 @@ const vip460 = () => {
       },
 
       {
+        target: unichainmainnet.VTREASURY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
         target: newMarkets["UNI"].vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
@@ -263,7 +269,7 @@ const vip460 = () => {
             0, // CF
             0, // LT
             newMarkets["UNI"].initialSupply.amount, // initial supply
-            unichainmainnet.GUARDIAN,
+            unichainmainnet.NORMAL_TIMELOCK,
             parseUnits("20000", 18), // supply cap
             parseUnits("0", 18), // borrow cap
           ],

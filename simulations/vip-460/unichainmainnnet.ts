@@ -3,38 +3,42 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip010 from "../../multisig/proposals/unichainmainnet/vip-010";
 import vip460, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-460/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import TREASURY_ABI from "./abi/treasury.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
-const GUARDIAN = unichainmainnet.GUARDIAN;
 const PSR = "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-forking(9893241, async () => {
+forking(10406586, async () => {
   let comptroller: Contract;
 
   describe("Contracts setup", () => {
     checkVToken(newMarkets["UNI"].vToken.address, newMarkets["UNI"].vToken);
   });
 
+  await pretendExecutingVip(await vip010());
   testForkedNetworkVipCommands("UNI market", await vip460());
 
   describe("Post-Execution state", () => {
     let interestRateModelAddresses: string;
     let vToken: Contract;
+    let treasury: Contract;
 
     before(async () => {
       vToken = await ethers.getContractAt(VTOKEN_ABI, newMarkets["UNI"].vToken.address);
       interestRateModelAddresses = await vToken.interestRateModel();
+      treasury = await ethers.getContractAt(TREASURY_ABI, unichainmainnet.VTREASURY);
     });
 
     describe("PoolRegistry state", () => {
@@ -46,8 +50,8 @@ forking(9893241, async () => {
     });
 
     describe("Ownership", () => {
-      it(`should transfer ownership of ${newMarkets["UNI"].vToken.address} to GUARDIAN`, async () => {
-        expect(await vToken.owner()).to.equal(GUARDIAN);
+      it(`should transfer ownership of Treasury to NT`, async () => {
+        expect(await treasury.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
       });
     });
 
