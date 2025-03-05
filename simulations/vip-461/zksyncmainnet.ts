@@ -10,14 +10,14 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, {
+import vip461, {
   CHAINLINK_WSTETH_FEED_ZKSYNC,
   COMPTROLLER_CORE_ZKSYNC,
   convertAmountToVTokens,
   token_ZKSYNC,
   wstETH_ONE_JUMP_ORACLE_ZKSYNC,
   zksyncMarket,
-} from "../../vips/vip-454/bscmainnet";
+} from "../../vips/vip-461/bscmainnet";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -51,7 +51,7 @@ forking(56518970, async () => {
     checkVToken(zksyncMarket.vToken.address, zksyncMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454({ chainlinkStalePeriod: ONE_YEAR }));
+  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip461({ chainlinkStalePeriod: ONE_YEAR }));
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

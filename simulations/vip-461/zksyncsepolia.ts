@@ -9,11 +9,11 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip454, {
+import vip461, {
   COMPTROLLER_CORE_ZKSYNC,
   wstETH_ONE_JUMP_ORACLE_ZKSYNC,
   zksyncMarket,
-} from "../../vips/vip-454/bsctestnet";
+} from "../../vips/vip-461/bsctestnet";
 import JUMPRATEMODEL_ABI from "./abi/JumpRateModel.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -37,7 +37,7 @@ forking(4761402, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip454());
+  testForkedNetworkVipCommands("wstEth_Core - ZKSYNC", await vip461());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

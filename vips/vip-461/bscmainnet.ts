@@ -149,8 +149,94 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vip454 = (overrides: { chainlinkStalePeriod?: number }) => {
   const meta = {
     version: "v2",
-    title: "VIP-454 [Base] New wstETH Market in the Core pool of Base and ZKSYNC",
-    description: ``,
+    title: "VIP-461 [Base][ZKsync] New wstETH markets in the Core pool",
+    description: `#### Summary
+
+If passed, this VIP will add the wstETH market to the Core pool on [Base](https://basescan.org/address/0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452) and [ZKsync Era](https://explorer.zksync.io/address/0x703b52f2b28febcb60e1372858af5b18849fe867), following the Community proposals:
+
+- [wstETH as collateral on Venus Protocol BASE Core Pool](https://community.venus.io/t/wsteth-as-collateral-on-venus-protocol-base-core-pool/4746) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x3f39a2b42358f0715ce06bf3ddc837c3312db437827ba74d0985f72fb63735a8))
+- [List Lido wstETH on ZKSync Core Pool](https://community.venus.io/t/list-lido-wsteth-on-zksync-core-pool/4842) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x2f82e79a40cdea9a0aa561c1f07e8fd48d528a27cccf8d976e897fe33807e51f))
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/wsteth-as-collateral-on-venus-protocol-base-core-pool/4746/12), the risk parameters for the new market on Base are:
+
+Underlying token: [wstETH](https://basescan.org/address/0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452)
+
+- Borrow cap: 260 wstETH
+- Supply cap: 2,600 wstETH
+- Collateral factor: 78.5%
+- Liquidation threshold: 81%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 2.5 wstETH, provided by the [Lido project](https://basescan.org/address/0x5a9d695c518e95cd6ea101f2f25fc2ae18486a61)
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/wsteth-as-collateral-on-venus-protocol-base-core-pool/4746/12), the risk parameters for the new market on ZKsync Era are:
+
+Underlying token: [wstETH](https://explorer.zksync.io/address/0x703b52f2b28febcb60e1372858af5b18849fe867)
+
+- Borrow cap: 35 wstETH
+- Supply cap: 350 wstETH
+- Collateral factor: 71%
+- Liquidation threshold: 76%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 2.5 wstETH, provided by the [Lido project](https://explorer.zksync.io/address/0x65B05f4fCa066316383b0FE196C76C873a4dFD02)
+
+Interest rate curves for the new markets are:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Base](https://basescan.org/address/0xcBBf58bD5bAdE357b634419B70b215D5E9d6FbeD) is used for wstETH on Base, and the ResilientOracle deployed to [ZKsync Era](https://explorer.zksync.io/address/0xDe564a4C887d5ad315a19a96DC81991c98b12182) is used for wstETH on ZKsync Era, with the following configuration. The OneJumpOracle is used to get the USD price of wstETH in both cases, first getting the conversion rate wstETH/stETH using the feeds from Chainlink, and then getting the USD price using the Chainlink price feed for ETH/USD.
+
+- MAIN oracle for wstETH on Base
+    - Contract: [OneJumpOracle](https://basescan.org/address/0x007e6Bd6993892b39210a7116506D6eA417B7565)
+    - CORRELATED_TOKEN: [wstETH](https://basescan.org/address/0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452)
+    - UNDERLYING_TOKEN: [WETH](https://basescan.org/address/0x4200000000000000000000000000000000000006) (assuming 1 stETH is equal to 1 ETH)
+    - INTERMEDIATE_ORACLE: [ChainlinkOracle](https://basescan.org/address/0x6F2eA73597955DB37d7C06e1319F0dC7C7455dEb), using its price feed [wstETH/stETH](https://basescan.org/address/0xB88BAc61a4Ca37C43a3725912B1f472c9A5bc061)
+- MAIN oracle for wstETH on ZKsync Era
+    - Contract: [OneJumpOracle](https://explorer.zksync.io/address/0xd2b4352A3C1C452D9D4D11B4F19e28476128798f)
+    - CORRELATED_TOKEN: [wstETH](https://explorer.zksync.io/address/0x703b52f2b28febcb60e1372858af5b18849fe867)
+    - UNDERLYING_TOKEN: [WETH](https://explorer.zksync.io/address/0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91) (assuming 1 stETH is equal to 1 ETH)
+    - INTERMEDIATE_ORACLE: [ChainlinkOracle](https://explorer.zksync.io/address/0x4FC29E1d3fFFbDfbf822F09d20A5BE97e59F66E5), using its price feed [wstETH/stETH](https://explorer.zksync.io/address/0x24a0C9404101A8d7497676BE12F10aEa356bAC28)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this VIP:
+
+- **Audit**: Certik, Peckshield, Hacken and Code4rena have audited the market code.
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on Base and ZKsync Era, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to Base Sepolia and ZKsync Sepolia, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/oracle/blob/93a79c97e867f61652fc063abb5df323acc9bed4/audits/116_WeETHAccountantOracle_certik_20240823.pdf) (2024/08/23)
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+#### Deployed contracts
+
+- Base
+    - Mainnet vwstETH_Core: [0x133d3BCD77158D125B75A17Cb517fFD4B4BE64C5](https://basescan.org/address/0x133d3BCD77158D125B75A17Cb517fFD4B4BE64C5)
+    - Sepolia vwstETH_Core: [0x40A30E1B01e0CF3eE3F22f769b0E437160550eEa](https://sepolia.basescan.org/address/0x40A30E1B01e0CF3eE3F22f769b0E437160550eEa)
+- ZKsync
+    - Era vwstETH_Core: [0x03CAd66259f7F34EE075f8B62D133563D249eDa4](https://explorer.zksync.io/address/0x03CAd66259f7F34EE075f8B62D133563D249eDa4)
+    - Sepolia vwstETH_Core: [0x853ed4e6ab3a6747d71Bb79eDbc0A64FF87D31BF](https://sepolia.explorer.zksync.io/address/0x853ed4e6ab3a6747d71Bb79eDbc0A64FF87D31BF)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/506)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
