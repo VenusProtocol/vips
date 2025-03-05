@@ -120,11 +120,6 @@ export const vip010 = () => {
       signature: "transferOwnership(address)",
       params: [unichainmainnet.NORMAL_TIMELOCK],
     },
-    {
-      target: unichainmainnet.VTREASURY,
-      signature: "transferOwnership(address)",
-      params: [unichainmainnet.NORMAL_TIMELOCK],
-    },
   ]);
 };
 

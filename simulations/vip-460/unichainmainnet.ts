@@ -28,7 +28,6 @@ forking(9393677, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let boundValidator: Contract;
-  let treasury: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
   let poolRegistry: Contract;
@@ -44,7 +43,6 @@ forking(9393677, async () => {
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
     xvsBridgeAdmin = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE_ADMIN_PROXY);
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
-    treasury = await ethers.getContractAt(OWNERSHIP_ABI, unichainmainnet.VTREASURY);
     poolRegistry = await ethers.getContractAt(OWNERSHIP_ABI, POOL_REGISTRY);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
@@ -91,9 +89,6 @@ forking(9393677, async () => {
       expect(await boundValidator.owner()).equals(unichainmainnet.NORMAL_TIMELOCK);
     });
 
-    it("Normal Timelock should be the owner of the Vtreasury", async () => {
-      expect(await treasury.owner()).equals(unichainmainnet.NORMAL_TIMELOCK);
-    });
     it("should have the correct pending owner", async () => {
       expect(await xvsVaultProxy.admin()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
       expect(await xvsStore.admin()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
