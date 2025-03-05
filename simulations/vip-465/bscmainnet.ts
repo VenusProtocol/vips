@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
@@ -13,7 +14,14 @@ import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(47197189, async () => {
-  const provider = ethers.provider;
+  const comptroller = new ethers.Contract(BNB_CORE_COMPTROLLER, COMPTROLLER_ABI, ethers.provider);
+
+  describe("Pre-VIP risk parameters", () => {
+    it("should have supply cap of 480", async () => {
+      const supplyCap = await comptroller.supplyCaps(BNB_vSolv_BTC_CORE);
+      expect(supplyCap).equals(parseUnits("480", 18));
+    });
+  });
 
   testVip("VIP-458", await vip465(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
@@ -23,11 +31,12 @@ forking(47197189, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [2, 0],
       );
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1, 0]);
     },
   });
+
   describe("Risk parameters", () => {
     it("should have supply cap of 1720", async () => {
-      const comptroller = new ethers.Contract(BNB_CORE_COMPTROLLER, COMPTROLLER_ABI, provider);
       const supplyCap = await comptroller.supplyCaps(BNB_vSolv_BTC_CORE);
       expect(supplyCap).equals(BNB_vSolv_BTC_CORE_SUPPLY_CAP);
     });
