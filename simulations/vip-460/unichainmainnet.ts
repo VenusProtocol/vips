@@ -3,6 +3,7 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setRedstonePrice } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -17,11 +18,32 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
 const PSR = "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242";
+const USDC = "0x078d782b760474a361dda0af3839290b0ef57ad6";
+const WETH = "0x4200000000000000000000000000000000000006";
+const ONE_YEAR = 31536000;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
 forking(10406586, async () => {
   let comptroller: Contract;
+
+  before(async () => {
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      USDC,
+      ethers.constants.AddressZero,
+      unichainmainnet.NORMAL_TIMELOCK,
+      ONE_YEAR,
+      { tokenDecimals: 6 },
+    );
+
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      WETH,
+      ethers.constants.AddressZero,
+      unichainmainnet.NORMAL_TIMELOCK,
+    );
+  });
 
   describe("Contracts setup", () => {
     checkVToken(newMarkets["UNI"].vToken.address, newMarkets["UNI"].vToken);
@@ -126,7 +148,9 @@ forking(10406586, async () => {
       );
     });
     it("check isolated pools", async () => {
-      checkIsolatedPoolsComptrollers();
+      checkIsolatedPoolsComptrollers({
+        [UNI_COMPTROLLER_CORE]: "0xB5A2a236581dbd6BCECD8A25EeBFF140595f138C", // USDC holder
+      });
     });
   });
 });

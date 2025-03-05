@@ -123,8 +123,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
   const supplyAmountScaled = initialSupplyAmount.gt(balance) ? balance : initialSupplyAmount;
   const originalSupplyMarketBalance = await supplyMarket?.balanceOf(poolSupplier);
 
-  // NOTE: THIS IS CAUSING STATE CHANGE
-  await comptroller.connect(timelockSigner).setMarketSupplyCaps([supplyMarket?.address], [Number.MAX_SAFE_INTEGER - 1]);
+  // NOTE: this is causing a state change that we'll restore before the end of this function
+  const originalSupplyCap = await comptroller.supplyCaps(supplyMarket?.address);
+  await comptroller.connect(timelockSigner).setMarketSupplyCaps([supplyMarket?.address], [ethers.constants.MaxUint256]);
 
   await supplyUnderlying?.approve(supplyMarket?.address, supplyAmountScaled);
   await supplyMarket?.mint(supplyAmountScaled);
@@ -175,6 +176,9 @@ const runPoolTests = async (pool: PoolMetadata, poolSupplier: string) => {
     expect(await comptroller.oracle()).to.be.equal("0x50F618A2EAb0fB55e87682BbFd89e38acb2735cD");
     await comptroller.connect(timelockSigner).setPriceOracle(originalOracle);
   }
+
+  // Restoring the original supply cap
+  await comptroller.connect(timelockSigner).setMarketSupplyCaps([supplyMarket?.address], [originalSupplyCap]);
 };
 
 // NOTE: The default supplier for each pool will be VTreasury, if in case VTreasury has no
