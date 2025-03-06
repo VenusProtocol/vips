@@ -20,7 +20,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const vip465 = () => {
+const vip463 = () => {
   const meta = {
     version: "v2",
     title: "[Unichain sepolia] New UNI market in the Core pool",
@@ -129,4 +129,4 @@ const vip465 = () => {
   );
 };
 
-export default vip465;
+export default vip463;

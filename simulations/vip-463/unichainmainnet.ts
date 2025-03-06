@@ -4,12 +4,12 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setRedstonePrice } from "src/utils";
-import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip460, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-460/bscmainnet";
+import vip463, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-463/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -48,7 +48,7 @@ forking(9893241, async () => {
     checkVToken(newMarkets["UNI"].vToken.address, newMarkets["UNI"].vToken);
   });
 
-  testForkedNetworkVipCommands("UNI market", await vip460());
+  testForkedNetworkVipCommands("UNI market", await vip463());
 
   describe("Post-Execution state", () => {
     let interestRateModelAddresses: string;

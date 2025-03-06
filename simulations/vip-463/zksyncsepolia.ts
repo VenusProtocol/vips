@@ -11,13 +11,13 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip460, {
-  ZKETH_COMPTROLLER_CORE,
+import vip463, {
+  COMPTROLLER,
   ZKETH_ORACLE,
   convertAmountToVTokens,
-  newMarkets,
+  newMarket,
   tokens,
-} from "../../vips/vip-460/bscmainnet";
+} from "../../vips/vip-463/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ZKETH_ORACLE_ABI from "./abi/ZkETHOracle.json";
@@ -26,15 +26,15 @@ import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000");
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, CHAINLINK_ORACLE, RESILIENT_ORACLE } = NETWORK_ADDRESSES["zksyncmainnet"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, CHAINLINK_ORACLE, RESILIENT_ORACLE } = NETWORK_ADDRESSES["zksyncsepolia"];
 
-const WETH_CHAINLINK_FEED = "0x6D41d1dc818112880b40e26BD6FD347E41008eDA";
+const WETH_CHAINLINK_FEED = "0xfEefF7c3fB57d18C5C6Cdd71e45D2D0b4F9377bF";
 
-forking(56240200, async () => {
+forking(4761800, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
-  const comptroller = new ethers.Contract(ZKETH_COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
+  const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
 
   before(async () => {
     await setMaxStalePeriodInChainlinkOracle(
@@ -46,16 +46,16 @@ forking(56240200, async () => {
   });
 
   describe("vTokens deployment", () => {
-    checkVToken(newMarkets["zkETH"].vToken.address, newMarkets["zkETH"].vToken);
+    checkVToken(newMarket.vToken.address, newMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("zksync-zkETH", await vip460());
+  testForkedNetworkVipCommands("zksync-zkETH", await vip463());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct WETH price", async () => {
         const price = await oracle.getPrice(tokens["WETH"].address);
-        expect(price).to.be.eq(parseUnits("2715.45552182", 18));
+        expect(price).to.be.eq(parseUnits("2710.4469786", 18));
       });
 
       it("has the correct zkETH oracle configuration", async () => {
@@ -67,39 +67,32 @@ forking(56240200, async () => {
 
       it("has the correct zkETH price", async () => {
         const price = await oracle.getPrice(tokens["zkETH"].address);
-        expect(price).to.be.eq(parseUnits("2729.315379820657852299", 18));
+        expect(price).to.be.eq(parseUnits("2723.999213493", 18));
       });
     });
 
     describe("PoolRegistry state", () => {
-      it(`should add ${newMarkets["zkETH"].vToken.symbol} to the Comptroller`, async () => {
+      it(`should add ${newMarket.vToken.symbol} to the Comptroller`, async () => {
         const poolVTokens = await comptroller.getAllMarkets();
-        expect(poolVTokens).to.contain(newMarkets["zkETH"].vToken.address);
+        expect(poolVTokens).to.contain(newMarket.vToken.address);
       });
 
-      it(`should register ${newMarkets["zkETH"].vToken.symbol} in PoolRegistry`, async () => {
-        const registeredVToken = await poolRegistry.getVTokenForAsset(
-          ZKETH_COMPTROLLER_CORE,
-          newMarkets["zkETH"].vToken.underlying.address,
-        );
-        expect(registeredVToken).to.equal(newMarkets["zkETH"].vToken.address);
+      it(`should register ${newMarket.vToken.symbol} in PoolRegistry`, async () => {
+        const registeredVToken = await poolRegistry.getVTokenForAsset(COMPTROLLER, newMarket.vToken.underlying.address);
+        expect(registeredVToken).to.equal(newMarket.vToken.address);
       });
     });
 
     describe("Risk parameters", () => {
-      checkRiskParameters(
-        newMarkets["zkETH"].vToken.address,
-        newMarkets["zkETH"].vToken,
-        newMarkets["zkETH"].riskParameters,
-      );
+      checkRiskParameters(newMarket.vToken.address, newMarket.vToken, newMarket.riskParameters);
 
       it("should pause brrowing on zkETH", async () => {
-        expect(await comptroller.actionPaused(newMarkets["zkETH"].vToken.address, 2)).to.equal(true);
+        expect(await comptroller.actionPaused(newMarket.vToken.address, 2)).to.equal(true);
       });
     });
 
     describe("Ownership and initial supply", () => {
-      const { vToken: vTokenSpec, initialSupply } = newMarkets["zkETH"];
+      const { vToken: vTokenSpec, initialSupply } = newMarket;
       const vTokenContract = new ethers.Contract(vTokenSpec.address, VTOKEN_ABI, provider);
 
       describe(`${vTokenSpec.symbol}`, () => {
@@ -140,9 +133,9 @@ forking(56240200, async () => {
 
     describe("Interest rates", () => {
       checkInterestRate(
-        newMarkets["zkETH"].interestRateModel.address,
-        newMarkets["zkETH"].vToken.symbol,
-        newMarkets["zkETH"].interestRateModel,
+        newMarket.interestRateModel.address,
+        newMarket.vToken.symbol,
+        newMarket.interestRateModel,
         BLOCKS_PER_YEAR,
       );
     });

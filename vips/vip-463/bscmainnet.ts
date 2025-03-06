@@ -104,7 +104,7 @@ export const newMarkets = {
   },
 };
 
-const vip460 = () => {
+const vip463 = () => {
   const meta = {
     version: "v2",
     title: "[ZKsync][Unichain] New zkETH and UNI market in the Core pool",
@@ -265,7 +265,7 @@ const vip460 = () => {
             0, // CF
             0, // LT
             newMarkets["UNI"].initialSupply.amount, // initial supply
-            unichainmainnet.GUARDIAN,
+            unichainmainnet.NORMAL_TIMELOCK,
             parseUnits("20000", 18), // supply cap
             parseUnits("0", 18), // borrow cap
           ],
@@ -317,4 +317,4 @@ const vip460 = () => {
   );
 };
 
-export default vip460;
+export default vip463;

@@ -60,7 +60,7 @@ export const newMarket = {
   },
 };
 
-const vip460 = () => {
+const vip463 = () => {
   const meta = {
     version: "v2",
     title: "[ZKsync sepolia] New zkETH market in the Core pool",
@@ -162,4 +162,4 @@ const vip460 = () => {
   );
 };
 
-export default vip460;
+export default vip463;
