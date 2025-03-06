@@ -4,8 +4,6 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip008 from "../../multisig/proposals/unichainmainnet/vip-008";
-import vip009 from "../../multisig/proposals/unichainmainnet/vip-009";
 import vip010, {
   BOUND_VALIDATOR,
   COMPTROLLER,
@@ -24,7 +22,7 @@ import OWNERSHIP_ABI from "./abi/Ownership.json";
 const XVS_BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
-forking(9393677, async () => {
+forking(10509535, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let boundValidator: Contract;
@@ -49,8 +47,6 @@ forking(9393677, async () => {
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
     redstoneOracle = new ethers.Contract(unichainmainnet.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
-    await pretendExecutingVip(await vip008());
-    await pretendExecutingVip(await vip009());
 
     await pretendExecutingVip(await vip010());
   });

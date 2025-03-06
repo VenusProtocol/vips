@@ -4,7 +4,7 @@ import vip456 from "../../vips/vip-456/bscmainnet";
 import vip460 from "../../vips/vip-460/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(46816786, async () => {
+forking(47225425, async () => {
   testVip("Multichain governance", await vip456());
   testVip("Accept ownerships/admins", await vip460(), {
     callbackAfterExecution: async txResponse => {
