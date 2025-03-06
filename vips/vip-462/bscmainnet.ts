@@ -32,21 +32,6 @@ const vip462 = () => {
   };
   return makeProposal(
     [
-      // This commands will be removed once vip-456 will be executed
-      // --------------------------
-      {
-        target: ACM,
-        signature: "grantRole(bytes32,address)",
-        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: ACM_AGGREGATOR,
-        signature: "executeGrantPermissions(uint256)",
-        params: [2],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      // --------------------------
       {
         target: unichainmainnet.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
