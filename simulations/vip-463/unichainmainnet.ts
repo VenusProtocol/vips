@@ -4,18 +4,19 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setRedstonePrice } from "src/utils";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip010 from "../../multisig/proposals/unichainmainnet/vip-010";
+import vip462 from "../../vips/vip-462/bscmainnet";
 import vip463, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-463/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
-const GUARDIAN = unichainmainnet.GUARDIAN;
 const PSR = "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242";
 const USDC = "0x078d782b760474a361dda0af3839290b0ef57ad6";
 const WETH = "0x4200000000000000000000000000000000000006";
@@ -23,7 +24,7 @@ const ONE_YEAR = 31536000;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-forking(9893241, async () => {
+forking(10509535, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -42,12 +43,15 @@ forking(9893241, async () => {
       ethers.constants.AddressZero,
       unichainmainnet.NORMAL_TIMELOCK,
     );
+
+    await pretendExecutingVip(await vip010());
   });
 
   describe("Contracts setup", () => {
     checkVToken(newMarkets["UNI"].vToken.address, newMarkets["UNI"].vToken);
   });
 
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip462());
   testForkedNetworkVipCommands("UNI market", await vip463());
 
   describe("Post-Execution state", () => {
@@ -68,8 +72,8 @@ forking(9893241, async () => {
     });
 
     describe("Ownership", () => {
-      it(`should transfer ownership of ${newMarkets["UNI"].vToken.address} to GUARDIAN`, async () => {
-        expect(await vToken.owner()).to.equal(GUARDIAN);
+      it(`should transfer ownership of ${newMarkets["UNI"].vToken.address} to Normal Timelock`, async () => {
+        expect(await vToken.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
       });
     });
 
