@@ -94,6 +94,13 @@ const vip460 = () => {
       },
 
       {
+        target: unichainmainnet.VTREASURY,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+
+      {
         target: PRIME,
         signature: "acceptOwnership()",
         params: [],

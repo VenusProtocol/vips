@@ -45,6 +45,7 @@ forking(9393677, async () => {
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
   let boundValidator: Contract;
+  let treasury: Contract;
 
   describe("Pre-VIP behavior", async () => {
     before(async () => {
@@ -62,6 +63,7 @@ forking(9393677, async () => {
       resilientOracle = new ethers.Contract(RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
       redstoneOracle = new ethers.Contract(REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
       boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
+      treasury = new ethers.Contract(unichainmainnet.VTREASURY, OWNERSHIP_ABI, provider);
 
       await pretendExecutingVip(await vip008());
     });
@@ -91,6 +93,10 @@ forking(9393677, async () => {
     it(`should have no pending owner for ${COMPTROLLER}`, async () => {
       const c = new ethers.Contract(COMPTROLLER, OWNERSHIP_ABI, provider);
       expect(await c.pendingOwner()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it(`should have no pending owner for ${unichainmainnet.VTREASURY}`, async () => {
+      expect(await treasury.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
     for (const vTokenAddress of VTOKENS) {
@@ -143,6 +149,10 @@ forking(9393677, async () => {
     it("pending owner", async () => {
       expect(await prime.pendingOwner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
       expect(await plp.pendingOwner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+    });
+
+    it(`should have Normal Timelock as pending owner for ${unichainmainnet.VTREASURY}`, async () => {
+      expect(await treasury.pendingOwner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
     });
 
     it(`should have Normal Timelock as pending owner for ${REWARD_DISTRIBUTOR}`, async () => {
