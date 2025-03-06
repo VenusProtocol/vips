@@ -21,10 +21,10 @@ export const ACM_AGGREGATOR = "0x904D11b00bdB2740d16176cc00DE139d0d626115";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 export const ACM = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
 
-const vip460 = () => {
+const vip462 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-460: Transfer ownership to NT on unichain",
+    title: "VIP-462: Transfer ownership to NT on unichain",
     description: `#### Summary`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -157,4 +157,4 @@ const vip460 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip460;
+export default vip462;

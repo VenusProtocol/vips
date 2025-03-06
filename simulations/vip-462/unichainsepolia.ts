@@ -15,14 +15,14 @@ import vip010, {
   VTOKENS,
   XVS_BRIDGE_ADMIN_PROXY,
   XVS_STORE,
-} from "../../multisig/proposals/unichainmainnet/vip-010";
-import vip460 from "../../vips/vip-460/bscmainnet";
+} from "../../multisig/proposals/unichainsepolia/vip-010";
+import vip462 from "../../vips/vip-462/bsctestnet";
 import OWNERSHIP_ABI from "./abi/Ownership.json";
 
-const XVS_BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
-const { unichainmainnet } = NETWORK_ADDRESSES;
+const XVS_BRIDGE = "0xCAF833318a6663bb23aa7f218e597c2F7970b4D2";
+const { unichainsepolia } = NETWORK_ADDRESSES;
 
-forking(10509535, async () => {
+forking(13289674, async () => {
   const provider = ethers.provider;
   let resilientOracle: Contract;
   let boundValidator: Contract;
@@ -34,81 +34,81 @@ forking(10509535, async () => {
   let plp: Contract;
   let redstoneOracle: Contract;
 
-  const xvsVaultProxy = new ethers.Contract(unichainmainnet.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
+  const xvsVaultProxy = new ethers.Contract(unichainsepolia.XVS_VAULT_PROXY, OWNERSHIP_ABI, provider);
   const xvsStore = new ethers.Contract(XVS_STORE, OWNERSHIP_ABI, provider);
 
   before(async () => {
-    resilientOracle = new ethers.Contract(unichainmainnet.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
+    resilientOracle = new ethers.Contract(unichainsepolia.RESILIENT_ORACLE, OWNERSHIP_ABI, provider);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, OWNERSHIP_ABI, provider);
     xvsBridgeAdmin = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE_ADMIN_PROXY);
     xvsBridge = await ethers.getContractAt(OWNERSHIP_ABI, XVS_BRIDGE);
-    treasury = await ethers.getContractAt(OWNERSHIP_ABI, unichainmainnet.VTREASURY);
+    treasury = await ethers.getContractAt(OWNERSHIP_ABI, unichainsepolia.VTREASURY);
     poolRegistry = await ethers.getContractAt(OWNERSHIP_ABI, POOL_REGISTRY);
     prime = new ethers.Contract(PRIME, OWNERSHIP_ABI, provider);
     plp = new ethers.Contract(PLP, OWNERSHIP_ABI, provider);
-    redstoneOracle = new ethers.Contract(unichainmainnet.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
+    redstoneOracle = new ethers.Contract(unichainsepolia.REDSTONE_ORACLE, OWNERSHIP_ABI, provider);
 
     await pretendExecutingVip(await vip010());
   });
 
-  testForkedNetworkVipCommands("Accept ownerships/admins", await vip460());
+  testForkedNetworkVipCommands("Accept ownerships/admins", await vip462());
 
   describe("Post-VIP behaviour", async () => {
     it("correct owner for pool registry", async () => {
-      expect(await poolRegistry.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await poolRegistry.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("correct owner for prime", async () => {
-      expect(await prime.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await prime.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("correct owner for plp", async () => {
-      expect(await plp.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await plp.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("correct owner for redstone oracle", async () => {
-      expect(await redstoneOracle.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await redstoneOracle.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it(`correct owner for psr`, async () => {
       const psr = new ethers.Contract(PSR, OWNERSHIP_ABI, provider);
-      expect(await psr.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await psr.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("XVSBridgeAdmin ownership transferred to Normal Timelock", async () => {
-      expect(await xvsBridgeAdmin.owner()).to.be.equals(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await xvsBridgeAdmin.owner()).to.be.equals(unichainsepolia.NORMAL_TIMELOCK);
     });
     it("Normal Timelock should be whitelisted", async () => {
-      expect(await xvsBridge.whitelist(unichainmainnet.NORMAL_TIMELOCK)).to.be.true;
+      expect(await xvsBridge.whitelist(unichainsepolia.NORMAL_TIMELOCK)).to.be.true;
     });
 
     it("oracles should have correct owner", async () => {
-      expect(await resilientOracle.owner()).equals(unichainmainnet.NORMAL_TIMELOCK);
-      expect(await boundValidator.owner()).equals(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await resilientOracle.owner()).equals(unichainsepolia.NORMAL_TIMELOCK);
+      expect(await boundValidator.owner()).equals(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("Normal Timelock should be the owner of the Vtreasury", async () => {
-      expect(await treasury.owner()).equals(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await treasury.owner()).equals(unichainsepolia.NORMAL_TIMELOCK);
     });
     it("should have the correct pending owner", async () => {
-      expect(await xvsVaultProxy.admin()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
-      expect(await xvsStore.admin()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await xvsVaultProxy.admin()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
+      expect(await xvsStore.admin()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
     it(`correct owner for ${COMPTROLLER}`, async () => {
       const c = new ethers.Contract(COMPTROLLER, OWNERSHIP_ABI, provider);
-      expect(await c.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await c.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     for (const vTokenAddress of VTOKENS) {
       it(`correct owner for ${vTokenAddress}`, async () => {
         const v = new ethers.Contract(vTokenAddress, OWNERSHIP_ABI, provider);
-        expect(await v.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+        expect(await v.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
       });
     }
 
     it(`correct owner for ${NTG}`, async () => {
       const ntg = new ethers.Contract(NTG, OWNERSHIP_ABI, provider);
-      expect(await ntg.owner()).to.equal(unichainmainnet.NORMAL_TIMELOCK);
+      expect(await ntg.owner()).to.equal(unichainsepolia.NORMAL_TIMELOCK);
     });
   });
 });

@@ -18,10 +18,10 @@ import {
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
-const vip460 = () => {
+const vip462 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-460: Transfer ownership to NT on unichain sepolia",
+    title: "VIP-462: Transfer ownership to NT on unichain sepolia",
     description: `#### Summary`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -139,4 +139,4 @@ const vip460 = () => {
     ProposalType.REGULAR,
   );
 };
-export default vip460;
+export default vip462;
