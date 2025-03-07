@@ -11,13 +11,13 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip463, {
+import vip464, {
   COMPTROLLER,
   ZKETH_ORACLE,
   convertAmountToVTokens,
   newMarket,
   tokens,
-} from "../../vips/vip-463/bsctestnet";
+} from "../../vips/vip-464/bsctestnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ZKETH_ORACLE_ABI from "./abi/ZkETHOracle.json";
@@ -49,7 +49,7 @@ forking(4761800, async () => {
     checkVToken(newMarket.vToken.address, newMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("zksync-zkETH", await vip463());
+  testForkedNetworkVipCommands("zksync-zkETH", await vip464());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {

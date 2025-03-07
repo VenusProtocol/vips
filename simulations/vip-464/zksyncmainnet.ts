@@ -11,13 +11,13 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip463, {
+import vip464, {
   ZKETH_COMPTROLLER_CORE,
   ZKETH_ORACLE,
   convertAmountToVTokens,
   newMarkets,
   tokens,
-} from "../../vips/vip-463/bscmainnet";
+} from "../../vips/vip-464/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ZKETH_ORACLE_ABI from "./abi/ZkETHOracle.json";
@@ -30,7 +30,7 @@ const { POOL_REGISTRY, NORMAL_TIMELOCK, CHAINLINK_ORACLE, RESILIENT_ORACLE } = N
 
 const WETH_CHAINLINK_FEED = "0x6D41d1dc818112880b40e26BD6FD347E41008eDA";
 
-forking(56240200, async () => {
+forking(57243944, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -49,13 +49,13 @@ forking(56240200, async () => {
     checkVToken(newMarkets["zkETH"].vToken.address, newMarkets["zkETH"].vToken);
   });
 
-  testForkedNetworkVipCommands("zksync-zkETH", await vip463());
+  testForkedNetworkVipCommands("zksync-zkETH", await vip464());
 
   describe("Post-VIP state", () => {
     describe("Oracle configuration", async () => {
       it("has the correct WETH price", async () => {
         const price = await oracle.getPrice(tokens["WETH"].address);
-        expect(price).to.be.eq(parseUnits("2715.45552182", 18));
+        expect(price).to.be.eq(parseUnits("2194.5024", 18));
       });
 
       it("has the correct zkETH oracle configuration", async () => {
@@ -67,7 +67,7 @@ forking(56240200, async () => {
 
       it("has the correct zkETH price", async () => {
         const price = await oracle.getPrice(tokens["zkETH"].address);
-        expect(price).to.be.eq(parseUnits("2729.315379820657852299", 18));
+        expect(price).to.be.eq(parseUnits("2208.763725755763322437", 18));
       });
     });
 

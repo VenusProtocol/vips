@@ -11,7 +11,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip010 from "../../multisig/proposals/unichainmainnet/vip-010";
 import vip462 from "../../vips/vip-462/bscmainnet";
-import vip463, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-463/bscmainnet";
+import vip464, { UNI_COMPTROLLER_CORE, newMarkets } from "../../vips/vip-464/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -24,7 +24,7 @@ const ONE_YEAR = 31536000;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-forking(10509535, async () => {
+forking(10613980, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -52,7 +52,7 @@ forking(10509535, async () => {
   });
 
   testForkedNetworkVipCommands("Accept ownerships/admins", await vip462());
-  testForkedNetworkVipCommands("UNI market", await vip463());
+  testForkedNetworkVipCommands("UNI market", await vip464());
 
   describe("Post-Execution state", () => {
     let interestRateModelAddresses: string;

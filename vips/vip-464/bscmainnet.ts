@@ -104,11 +104,104 @@ export const newMarkets = {
   },
 };
 
-const vip463 = () => {
+const vip464 = () => {
   const meta = {
     version: "v2",
-    title: "[ZKsync][Unichain] New zkETH and UNI market in the Core pool",
-    description: ``,
+    title: "VIP-464 [ZKsync][Unichain] New zkETH and UNI markets in the Core pools",
+    description: `#### Summary
+
+If passed, this VIP will add the following markets:
+
+- [zkETH](https://explorer.zksync.io/address/0xb72207E1FB50f341415999732A20B6D25d8127aa) to the Core pool on ZKsync Era, following the Community proposal “[Proposal: List Dinero’s zkETH on Venus zkSync](https://community.venus.io/t/proposal-list-dineros-zketh-on-venus-zksync/4830)” and [the associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb431710c5777c5a2b8eeba8e4e1d03e0ae2732918fc0005fbd6203d7dabd975f).
+- [UNI](https://uniscan.xyz/token/0x8f187aa05619a017077f5308904739877ce9ea21) to the Core pool on Unichain, following the Community proposal “[Proposal: List UNI on Unichain](https://community.venus.io/t/proposal-list-uni-on-unichain/4951)” and [the associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x18b3c52ba003d4e9c91011ad35df69f9adab6283c5084433392aaba8b01cfe44)
+
+Moreover, it will transfer 5,000 [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) from the [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) to the [Vanguard Treasury](https://bscscan.com/address/0xf645a387180F5F74b968305dF81d54EB328d21ca), to refund [the provided bootstrap liquidity](https://uniscan.xyz/tx/0x3ee89b3b17f85da9d8bcf5c8bae3686c53665f7b0d56aca6bd4d51a504a3fd02) for the UNI market.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-list-dineros-zketh-on-venus-zksync/4830/7), the risk parameters for the new zkETH market are:
+
+Underlying token: [zkETH](https://explorer.zksync.io/address/0xb72207E1FB50f341415999732A20B6D25d8127aa)
+
+- Borrow cap: 0 zkETH
+- Supply cap: 650 zkETH
+- Collateral factor: 70%
+- Liquidation threshold: 75%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 3.734 zkETH, provided by the [Dinero.xyz project](https://explorer.zksync.io/address/0x3d97E13A1D2bb4C9cE9EA9d424D83d3638F052ad)
+
+The interest rate curve for the new market is not relevant because the asset is not borrowable, but these parameters will be set anyway:
+
+- kink: 80%
+- base (yearly): 0%
+- multiplier (yearly): 8.75%
+- jump multiplier (yearly): 80%
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-list-uni-on-unichain/4951/3), the risk parameters for the new UNI market are:
+
+Underlying token: [UNI](https://uniscan.xyz/token/0x8f187aa05619a017077f5308904739877ce9ea21)
+
+- Borrow cap: 0 UNI
+- Supply cap: 20,000 UNI
+- Collateral factor: 0%
+- Liquidation threshold: 0%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 5,29.46 UNI, provided by the market supporter [Venus Treasury](https://uniscan.xyz/address/0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B)
+
+The interest rate curve for the new market is not relevant because the asset is not borrowable, but these parameters will be set anyway:
+
+- kink: 30%
+- base (yearly): 0%
+- multiplier (yearly): 15%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [ZKsync Era](https://explorer.zksync.io/address/0xDe564a4C887d5ad315a19a96DC81991c98b12182) is used for zkETH, using under the hood the [new ZkETHOracle](https://github.com/VenusProtocol/oracle/pull/269) for the MAIN oracle.
+
+- CORRELATED_TOKEN: [zkETH](https://explorer.zksync.io/address/0xb72207E1FB50f341415999732A20B6D25d8127aa)
+- UNDERLYING_TOKEN: [WETH](https://explorer.zksync.io/address/0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91) (assuming 1 rzkETH is equal to 1 ETH)
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Unichain](https://uniscan.xyz/address/0x86D04d6FE928D888076851122dc6739551818f7E) is used for UNI, using under the hood the [RedStone price feed](https://unichain.blockscout.com/address/0xf1454949C6dEdfb500ae63Aa6c784Aa1Dde08A6c) for the MAIN oracle.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this VIP:
+
+- **Audit:** Certik, Peckshield, Hacken and Code4rena have audited the market code. Certik has audited the ZkETHOracle
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on ZKsync Era and Unichain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to ZKsync Sepolia and Unichain Sepolia, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report of ZkETHOracle (2025/February/25)](https://github.com/VenusProtocol/oracle/blob/420a6d3a42d1d2dd8c12f0eb917bf2f1d9359c77/audits/124_oracles_certik_20250225.pdf)
+- [Certik audit report](https://github.com/VenusProtocol/oracle/blob/93a79c97e867f61652fc063abb5df323acc9bed4/audits/116_WeETHAccountantOracle_certik_20240823.pdf) (2024/August/23)
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+**Deployed contracts**
+
+- ZKsync Era:
+    - Mainnet vzkETH_Core: [0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2](https://uniscan.xyz/address/0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2)
+    - Sepolia vzkETH_Core: [0xaE43aAd383b93FCeE5d3e0dD2d40b6e94639c642](https://sepolia.uniscan.xyz/address/0xaE43aAd383b93FCeE5d3e0dD2d40b6e94639c642)
+- Unichain:
+    - Mainnet vUNI_Core: [0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2](https://uniscan.xyz/address/0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2)
+    - Sepolia vUNI_Core: [0xaE43aAd383b93FCeE5d3e0dD2d40b6e94639c642](https://sepolia.uniscan.xyz/address/0xaE43aAd383b93FCeE5d3e0dD2d40b6e94639c642)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/510)
+- [ZkETHOracle source code](https://github.com/VenusProtocol/oracle/pull/269)
+- [Deployment of zkETH to ZKsync Sepolia](https://sepolia.explorer.zksync.io/tx/0xefd8e081808f5ff4e7174871300d936d2e60f372d7e270912f016b609c488a81)
+- [Deployment of UNI to Unichain sepolia](https://sepolia.uniscan.xyz/tx/0x0665700f1e833058e4384b30ee5212ba30914ffc29a60571bd59830e6907968e)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -317,4 +410,4 @@ const vip463 = () => {
   );
 };
 
-export default vip463;
+export default vip464;

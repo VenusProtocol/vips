@@ -6,14 +6,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip463, { USDT, VANGUARD_TREASURY } from "../../vips/vip-463/bscmainnet";
+import vip464, { USDT, VANGUARD_TREASURY } from "../../vips/vip-464/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import ERC20_ABI from "./abi/erc20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const AMOUNT = parseUnits("5000", 18);
 
-forking(47198112, async () => {
+forking(47260170, async () => {
   let usdtBalanceOfVanguardTreasury: BigNumber;
   let usdtTreasuryBalanceBefore: BigNumber;
   let usdt: Contract;
@@ -26,7 +26,7 @@ forking(47198112, async () => {
     usdtTreasuryBalanceBefore = await usdt.balanceOf(bscmainnet.VTREASURY);
   });
 
-  testVip("VIP-463", await vip463(), {
+  testVip("VIP-464", await vip464(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

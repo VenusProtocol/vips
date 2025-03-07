@@ -8,7 +8,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip463, { COMPTROLLER_CORE, UNI, VUNI_CORE } from "../../vips/vip-463/bsctestnet-uni";
+import vip464, { COMPTROLLER_CORE, UNI, VUNI_CORE } from "../../vips/vip-464/bsctestnet-uni";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -33,7 +33,7 @@ forking(13205017, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("add UNI market", await vip463());
+  testForkedNetworkVipCommands("add UNI market", await vip464());
   describe("Post-Execution state", () => {
     let interestRateModelAddresses: string;
     let vToken: Contract;
