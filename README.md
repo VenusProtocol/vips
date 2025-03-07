@@ -72,6 +72,16 @@ Proceed by executing the following command:
 npx hardhat multisig <path to multisig vip relative to multisig/proposal> --network <network>
 ```
 
+### Calculate the Safe TX hash and call data to execute a Multisig
+
+Script to calculate the Safe TX hash associated with a multisig VIP, and the call data to execute it by the GUARDIAN wallet (defined in `src/multisig/utils.ts`). By default, the script will consider the next nonce of the Guardian wallet of the network. A custom nonce can be defined with the argument `nonce`.
+
+It requires the address of the `MultiSend` and `MultiSendCallOnly` contracts, defined in `src/multisig/utils.ts` too.
+
+```
+npx hardhat safeTxData <path to multisig vip relative to multisig/proposal> [--nonce n] --network <network>
+```
+
 ### Export Gnosis Safe tx JSON
 
 Script to export a VIP in the form of a gnosis safe tx JSON format.

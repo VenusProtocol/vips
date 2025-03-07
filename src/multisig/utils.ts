@@ -1,11 +1,12 @@
 import Safe, { ContractNetworksConfig, EthersAdapter } from "@safe-global/protocol-kit";
-import { MetaTransactionData, SafeTransaction } from "@safe-global/safe-core-sdk-types";
+import { SafeTransactionOptionalProps } from "@safe-global/protocol-kit";
+import { MetaTransactionData, OperationType, SafeTransaction } from "@safe-global/safe-core-sdk-types";
 import { ethers, network } from "hardhat";
 import { Proposal, SUPPORTED_NETWORKS } from "src/types";
 
 import { NETWORK_ADDRESSES } from "../networkAddresses";
 
-const DEFAULT_OPERATION = 0; // Call
+const DEFAULT_OPERATION = OperationType.Call; // Call
 
 export const loadMultisigTx = async (multisigVipPath: string) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -13,7 +14,7 @@ export const loadMultisigTx = async (multisigVipPath: string) => {
   return vip();
 };
 
-export const getSafeAddress = (networkName: Exclude<SUPPORTED_NETWORKS, "bsctestnet" | "bscmainnet">): string => {
+export const getSafeAddress = (networkName: SUPPORTED_NETWORKS): string => {
   return NETWORK_ADDRESSES[networkName].GUARDIAN;
 };
 
@@ -38,12 +39,14 @@ export const createGnosisTx = async (
   ethAdapter: EthersAdapter,
   safeSdk: Safe,
   multisigVipPath: string,
+  onlyCalls?: boolean,
+  options?: SafeTransactionOptionalProps,
 ): Promise<SafeTransaction> => {
   const proposal = await loadMultisigTx(multisigVipPath);
 
   const safeTransactionData = await buildMultiSigTx(proposal);
 
-  return await safeSdk.createTransaction({ safeTransactionData });
+  return await safeSdk.createTransaction({ safeTransactionData, onlyCalls, options });
 };
 
 export const getContractNetworks = (chainId: number): ContractNetworksConfig => {
@@ -134,7 +137,99 @@ export const getContractNetworks = (chainId: number): ContractNetworksConfig => 
         simulateTxAccessorAddress: "0xf95b731E477c3d16c3C68E7c9c766CBf6E190D49",
       },
     },
-    // Add more testnet networks as needed
+    ethereum: {
+      // v1.3.0
+      [chainId]: {
+        safeMasterCopyAddress: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+        safeProxyFactoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
+        multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
+        multiSendCallOnlyAddress: "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D",
+        fallbackHandlerAddress: "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4",
+        signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
+        createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
+        simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
+      },
+    },
+    opbnbmainnet: {
+      // v1.3.0
+      [chainId]: {
+        safeMasterCopyAddress: "0xe2cf742b554f466d5e7a37c371fd47c786d2fbc0",
+        safeProxyFactoryAddress: "0x9fea7f7c69f14aa1a7d62cc9d468feb2f9371cb3",
+        multiSendAddress: "0xdeb0467ccfada493902c8d279a2f41f26b813ac9",
+        multiSendCallOnlyAddress: "0xc33224e130c702808e12299ecabc16148a5b3d0b",
+        fallbackHandlerAddress: "0x40b30946045a876ffd68caf008f94eeaad50f855",
+        signMessageLibAddress: "0x6ace153bf757b4999c7d6f0f3dfb1043dc67d61a",
+        createCallAddress: "0x392e2f66c3bbf0046c861e0065fb7c7917b18078",
+        simulateTxAccessorAddress: "0x3fa429e8feb5ea46cea2f435b1c0f60890c02483",
+      },
+    },
+    arbitrumone: {
+      // v1.3.0
+      [chainId]: {
+        safeMasterCopyAddress: "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+        safeProxyFactoryAddress: "0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2",
+        multiSendAddress: "0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761",
+        multiSendCallOnlyAddress: "0x40A2aCCbd92BCA938b02010E17A5b8929b49130D",
+        fallbackHandlerAddress: "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4",
+        signMessageLibAddress: "0xA65387F16B013cf2Af4605Ad8aA5ec25a2cbA3a2",
+        createCallAddress: "0x7cbB62EaA69F79e6873cD1ecB2392971036cFAa4",
+        simulateTxAccessorAddress: "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da",
+      },
+    },
+    zksyncmainnet: {
+      // v1.3.0
+      [chainId]: {
+        safeMasterCopyAddress: "0x1727c2c531cf966f902E5927b98490fDFb3b2b70",
+        safeProxyFactoryAddress: "0xDAec33641865E4651fB43181C6DB6f7232Ee91c2",
+        multiSendAddress: "0x0dFcccB95225ffB03c6FBB2559B530C2B7C8A912",
+        multiSendCallOnlyAddress: "0xf220d3b4dfb23c4ade8c88e526c1353abacbc38f",
+        fallbackHandlerAddress: "0x2f870a80647BbC554F3a0EBD093f11B4d2a7492A",
+        signMessageLibAddress: "0x357147caf9C0cCa67DfA0CF5369318d8193c8407",
+        createCallAddress: "0xcB8e5E438c5c2b45FbE17B02Ca9aF91509a8ad56",
+        simulateTxAccessorAddress: "0x4191E2e12E8BC5002424CE0c51f9947b02675a44",
+      },
+    },
+    opmainnet: {
+      // v1.3.0
+      [chainId]: {
+        safeMasterCopyAddress: "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA",
+        safeProxyFactoryAddress: "0xC22834581EbC8527d974F8a1c97E1bEA4EF910BC",
+        multiSendAddress: "0x998739BFdAAdde7C933B942a68053933098f9EDa",
+        multiSendCallOnlyAddress: "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+        fallbackHandlerAddress: "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
+        signMessageLibAddress: "0x98FFBBF51bb33A056B08ddf711f289936AafF717",
+        createCallAddress: "0xB19D6FFc2182150F8Eb585b79D4ABcd7C5640A9d",
+        simulateTxAccessorAddress: "0x727a77a074D1E6c4530e814F89E618a3298FC044",
+      },
+    },
+    basemainnet: {
+      // v1.4.1
+      [chainId]: {
+        safeMasterCopyAddress: "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+        safeProxyFactoryAddress: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+        fallbackHandlerAddress: "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+        signMessageLibAddress: "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+        createCallAddress: "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+        simulateTxAccessorAddress: "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+      },
+    },
+    unichainmainnet: {
+      // v1.4.1
+      [chainId]: {
+        safeMasterCopyAddress: "0x29fcB43b46531BcA003ddC8FCB67FFE91900C762",
+        safeProxyFactoryAddress: "0x4e1DCf7AD4e460CfD30791CCC4F9c8a4f820ec67",
+        multiSendAddress: "0x38869bf66a61cF6bDB996A6aE40D5853Fd43B526",
+        multiSendCallOnlyAddress: "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
+        fallbackHandlerAddress: "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+        signMessageLibAddress: "0xd53cd0aB83D845Ac265BE939c57F53AD838012c9",
+        createCallAddress: "0x9b35Af71d77eaf8d7e40252370304687390A1A52",
+        simulateTxAccessorAddress: "0x3d4BA2E0884aa488718476ca2FB8Efc291A46199",
+      },
+    },
+    // Add more networks as needed, taking into account the version of the Safe wallet
+    // Safe addresses on mainnets: https://docs.safe.global/advanced/smart-account-supported-networks
   };
 
   if (network.name in networks) {
