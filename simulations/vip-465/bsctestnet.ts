@@ -28,7 +28,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["bsctestnet"];
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
 
-forking(49018130, async () => {
+forking(49051765, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -47,7 +47,7 @@ forking(49018130, async () => {
     describe("Oracle configuration", async () => {
       it(`has the correct ${token.symbol} price`, async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("2234.756423853548610779", 18));
+        expect(price).to.be.eq(parseUnits("2315.504013308118083583", 18));
       });
     });
 

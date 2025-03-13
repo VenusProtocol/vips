@@ -9,7 +9,7 @@ const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["bsctes
 
 export const COMPTROLLER_LIQUID_STAKED_BNB_POOL = "0x596B11acAACF03217287939f88d63b51d3771704";
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
-export const PT_CLISBNB_PENDLE_ORACLE = "0x791E59Ac0495F69C983c17330C2F6154682E3c70";
+export const PT_CLISBNB_PENDLE_ORACLE = "0xeF663663e802Ff4510aDE14975820FFB5d2EE9E8";
 
 export const vankrBNB_LiquidStakedBNB = "0x57a664Dd7f1dE19545fEE9c86C949e3BF43d6D47";
 export const vBNBx_LiquidStakedBNB = "0x644A149853E5507AdF3e682218b8AC86cdD62951";
@@ -79,7 +79,7 @@ export const market: Market = {
     protocolSeizeShare: parseUnits("0.0125", 18),
   },
   initialSupply: {
-    amount: parseUnits("10", 18),
+    amount: parseUnits("10.178770086973303982", 18),
     vTokenReceiver: VTREASURY,
   },
   interestRateModel: {
@@ -106,7 +106,7 @@ const vip465 = () => {
       {
         target: MOCK_PENDLE_PT_ORACLE,
         signature: "setPtToSyRate(address,uint32,uint256)",
-        params: ["0x0000000000000000000000000000000000000002", 900, "956271978187548724"],
+        params: ["0x0000000000000000000000000000000000000002", 1800, "956271978187548724"],
       },
       {
         target: RESILIENT_ORACLE,
@@ -154,6 +154,11 @@ const vip465 = () => {
           ],
         ],
       },
+      // {
+      //   target: market.vToken.address,
+      //   signature: "transfer(address,uint256)",
+      //   params: [ethers.constants.AddressZero, parseUnits("0.016", 8)], // around $10
+      // },
       {
         target: market.vToken.underlying.address,
         signature: "approve(address,uint256)",
