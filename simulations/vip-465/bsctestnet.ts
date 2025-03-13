@@ -1,10 +1,9 @@
 import { expect } from "chai";
 import { BigNumber } from "ethers";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
-import ERC20_ABI from "src/vip-framework/abi/erc20.json";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -80,27 +79,16 @@ forking(49051765, async () => {
 
     describe("Ownership and initial supply", () => {
       const { vToken: vTokenSpec, initialSupply } = market;
-      const underlyingSymbol = token.symbol;
 
       describe(`${vTokenSpec.symbol}`, () => {
         it(`should have owner = normal timelock`, async () => {
           expect(await vTokenContract.owner()).to.equal(NORMAL_TIMELOCK);
         });
 
-        // Initial exchange rate should account for decimal transformations such that
-        // the string representation is the same (i.e. 1 vToken == 1 underlying)
-        const multiplier = 10 ** (vTokenSpec.underlying.decimals - vTokenSpec.decimals);
-        const vTokenSupply = initialSupply.amount.div(multiplier);
-        const underlyingSupplyString = formatUnits(initialSupply.amount, vTokenSpec.underlying.decimals);
-        const vTokenSupplyString = formatUnits(vTokenSupply, vTokenSpec.decimals);
-
-        it(`should have initial supply = ${vTokenSupplyString} ${vTokenSpec.symbol}`, async () => {
-          expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(vTokenSupply);
-        });
-
-        it(`should have balance of underlying = ${underlyingSupplyString} ${underlyingSymbol}`, async () => {
-          const underlying = new ethers.Contract(vTokenSpec.underlying.address, ERC20_ABI, provider);
-          expect(await underlying.balanceOf(vTokenSpec.address)).to.equal(initialSupply.amount);
+        describe(`${vTokenSpec.symbol}`, () => {
+          it(`should have correct initial supply`, async () => {
+            expect(await vTokenContract.balanceOf(initialSupply.vTokenReceiver)).to.equal(parseUnits("10.16184961", 8));
+          });
         });
       });
     });

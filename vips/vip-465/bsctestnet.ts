@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE } = NETWORK_ADDRESSES["bsctestnet"];
+const { POOL_REGISTRY, VTREASURY, RESILIENT_ORACLE, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["bsctestnet"];
 
 export const COMPTROLLER_LIQUID_STAKED_BNB_POOL = "0x596B11acAACF03217287939f88d63b51d3771704";
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
@@ -16,6 +16,11 @@ export const vBNBx_LiquidStakedBNB = "0x644A149853E5507AdF3e682218b8AC86cdD62951
 export const vslisBNB_LiquidStakedBNB = "0xeffE7874C345aE877c1D893cd5160DDD359b24dA";
 export const vstkBNB_LiquidStakedBNB = "0x75aa42c832a8911B77219DbeBABBB40040d16987";
 export const vWBNB_LiquidStakedBNB = "0x231dED0Dfc99634e52EE1a1329586bc970d773b3";
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
 
 type Token = {
   address: string;
@@ -67,7 +72,7 @@ export const market: Market = {
     symbol: "vPT-clisBNB-24APR2025_LiquidStakedBNB",
     underlying: token,
     decimals: 8,
-    exchangeRate: parseUnits("1", 28),
+    exchangeRate: parseUnits("1.0000000006850831610492571416", 28),
     comptroller: COMPTROLLER_LIQUID_STAKED_BNB_POOL,
   },
   riskParameters: {
@@ -148,17 +153,26 @@ const vip465 = () => {
             market.riskParameters.collateralFactor,
             market.riskParameters.liquidationThreshold,
             market.initialSupply.amount,
-            market.initialSupply.vTokenReceiver,
+            NORMAL_TIMELOCK,
             market.riskParameters.supplyCap,
             market.riskParameters.borrowCap,
           ],
         ],
       },
-      // {
-      //   target: market.vToken.address,
-      //   signature: "transfer(address,uint256)",
-      //   params: [ethers.constants.AddressZero, parseUnits("0.016", 8)], // around $10
-      // },
+      {
+        target: market.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, parseUnits("0.01692047", 8)], // around $10
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(market.initialSupply.amount, parseUnits("1", 28));
+        const vTokensRemaining = vTokensMinted.sub(parseUnits("0.01692047", 8));
+        return {
+          target: market.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [VTREASURY, vTokensRemaining],
+        };
+      })(),
       {
         target: market.vToken.underlying.address,
         signature: "approve(address,uint256)",
