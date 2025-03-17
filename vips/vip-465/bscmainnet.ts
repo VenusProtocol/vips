@@ -32,7 +32,7 @@ export const BaseAssets = [
   "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS XVSTokenConverter BaseAsset
 ];
 
-const CONVERSION_INCENTIVE = parseUnits("1", 14);
+export const CONVERSION_INCENTIVE = parseUnits("1", 14);
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);

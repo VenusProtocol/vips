@@ -11,7 +11,15 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip465, {
+  BTCB_PRIME_CONVERTER,
+  BaseAssets,
   COMPTROLLER_LIQUID_STAKED_BNB_POOL,
+  CONVERSION_INCENTIVE,
+  ETH_PRIME_CONVERTER,
+  RISK_FUND_CONVERTER,
+  USDC_PRIME_CONVERTER,
+  USDT_PRIME_CONVERTER,
+  XVS_VAULT_CONVERTER,
   market,
   token,
   vBNBx_LiquidStakedBNB,
@@ -22,6 +30,7 @@ import vip465, {
 } from "../../vips/vip-465/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -136,6 +145,68 @@ forking(47454449, async () => {
       vtoken = new ethers.Contract(vslisBNB_LiquidStakedBNB, VTOKEN_ABI, provider);
       protocolSeizeShare = await vtoken.protocolSeizeShareMantissa();
       expect(protocolSeizeShare).to.equal(parseUnits("0.0125", 18));
+    });
+
+    describe("Converters", () => {
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter RISK_FUND_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(RISK_FUND_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        const asset = token.address;
+        const baseAsset = BaseAssets[0];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
+
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter USDT_PRIME_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(
+          USDT_PRIME_CONVERTER,
+          SINGLE_TOKEN_CONVERTER_ABI,
+          ethers.provider,
+        );
+        const asset = token.address;
+        const baseAsset = BaseAssets[1];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
+
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter USDC_PRIME_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(
+          USDC_PRIME_CONVERTER,
+          SINGLE_TOKEN_CONVERTER_ABI,
+          ethers.provider,
+        );
+        const asset = token.address;
+        const baseAsset = BaseAssets[2];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
+
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter BTCB_PRIME_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(
+          BTCB_PRIME_CONVERTER,
+          SINGLE_TOKEN_CONVERTER_ABI,
+          ethers.provider,
+        );
+        const asset = token.address;
+        const baseAsset = BaseAssets[3];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
+
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ETH_PRIME_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(ETH_PRIME_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        const asset = token.address;
+        const baseAsset = BaseAssets[4];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
+
+      it(`should set ${CONVERSION_INCENTIVE} as incentive in converter XVS_VAULT_CONVERTER`, async () => {
+        const converterContract = new ethers.Contract(XVS_VAULT_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+        const asset = token.address;
+        const baseAsset = BaseAssets[5];
+        const result = await converterContract.conversionConfigurations(baseAsset, asset);
+        expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+      });
     });
   });
 });
