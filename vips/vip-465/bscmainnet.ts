@@ -16,6 +16,24 @@ export const vslisBNB_LiquidStakedBNB = "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB8
 export const vstkBNB_LiquidStakedBNB = "0xcc5D9e502574cda17215E70bC0B4546663785227";
 export const vWBNB_LiquidStakedBNB = "0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2";
 
+export const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+export const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+export const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+export const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+export const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
+
+export const BaseAssets = [
+  "0x55d398326f99059fF775485246999027B3197955", // USDT RiskFundConverter BaseAsset
+  "0x55d398326f99059fF775485246999027B3197955", // USDT USDTTokenConverter BaseAsset
+  "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d", // USDC USDCTokenConverter BaseAsset
+  "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB BTCBTokenConverter BaseAsset
+  "0x2170Ed0880ac9A755fd29B2688956BD959F933F8", // ETH ETHTokenConverter BaseAsset
+  "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63", // XVS XVSTokenConverter BaseAsset
+];
+
+const CONVERSION_INCENTIVE = parseUnits("1", 14);
+
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
   return amount.mul(EXP_SCALE).div(exchangeRate);
@@ -211,6 +229,36 @@ const vip465 = () => {
         target: COMPTROLLER_LIQUID_STAKED_BNB_POOL,
         signature: "setLiquidationIncentive(uint256)",
         params: ["1025000000000000000"],
+      },
+      {
+        target: RISK_FUND_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[0], [token.address], [[CONVERSION_INCENTIVE, 1]]],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[1], [token.address], [[CONVERSION_INCENTIVE, 1]]],
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[2], [token.address], [[CONVERSION_INCENTIVE, 1]]],
+      },
+      {
+        target: BTCB_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[3], [token.address], [[CONVERSION_INCENTIVE, 1]]],
+      },
+      {
+        target: ETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[4], [token.address], [[CONVERSION_INCENTIVE, 1]]],
+      },
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[5], [token.address], [[CONVERSION_INCENTIVE, 1]]],
       },
     ],
     meta,
