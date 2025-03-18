@@ -114,11 +114,11 @@ export const market: Market = {
   },
 };
 
-const vip465 = () => {
+const vip468 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-465",
-    description: ``,
+    title: "VIP-468 [BNB Chain] New PT-clisBNB-24APR2025 markets in the Liquid Staked BNB pool",
+    description: `VIP-468 [BNB Chain] New PT-clisBNB-24APR2025 markets in the Liquid Staked BNB pool`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -272,4 +272,4 @@ const vip465 = () => {
   );
 };
 
-export default vip465;
+export default vip468;

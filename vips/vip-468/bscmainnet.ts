@@ -113,11 +113,77 @@ export const market: Market = {
   },
 };
 
-const vip465 = () => {
+const vip468 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-465",
-    description: ``,
+    title: "VIP-468 [BNB Chain] New PT-clisBNB-24APR2025 market in the Liquid Staked BNB pool",
+    description: `#### Summary
+
+If passed, this VIP will add the [PT-clisBNB-24APR2025](https://bscscan.com/address/0xe8f1c9804770e11ab73395be54686ad656601e9e) market to the [Liquid Staked BNB pool on BNB Chain](https://bscscan.com/address/0xd933909A4a2b7A4638903028f44D1d38ce27c352), following the Community proposal “[Proposal: Creating LISTA pool for BNB, slisBNB, asBNB, pt-slisBNB on Venus BNB chain](https://community.venus.io/t/proposal-creating-lista-pool-for-bnb-slisbnb-asbnb-pt-slisbnb-on-venus-bnb-chain/4879/1)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xf173dd65d223a71108221a43e28bcff8f4ce15496a85741e767c3c8cec3e7c20))
+
+Moreover, it will also set to 2.5% the liquidation penalty on every market of the Liquid Staked BNB pool on BNB Chain.
+
+#### Description
+
+**Risk parameters**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-creating-lista-pool-for-bnb-slisbnb-asbnb-pt-slisbnb-on-venus-bnb-chain/4879/9), the risk parameters for the new market are:
+
+Underlying token: [PT-clisBNB-24APR2025](https://bscscan.com/address/0xe8f1c9804770e11ab73395be54686ad656601e9e)
+
+- Borrow cap: 0 PT-clisBNB-24APR2025
+- Supply cap: 2,000 PT-clisBNB-24APR2025
+- Collateral factor: 80%
+- Liquidation threshold: 85%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 10.17 PT-clisBNB-24APR2025, provided by [Lista DAO](https://bscscan.com/address/0x078357b0e6dca79450850d25cd48a1b5daf08f48)
+
+The interest rate curve for the new market is not relevant because the asset is not borrowable, but these parameters will be set anyway:
+
+- kink: 80%
+- base (yearly): 0%
+- multiplier (yearly): 3.5%
+- jump multiplier (yearly): 80%
+
+**Oracles configuration**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [BNB Chain](https://bscscan.com/address/0x6592b5DE802159F3E74B2486b091D11a8256ab8A) is used for PT-clisBNB-24APR2025, with the following configuration
+
+- PT-clisBNB-24APR2025
+    - Main oracle: [PendleOracle](https://bscscan.com/address/0xE11965a3513F537d91D73d9976FBe8c0969Bb252), that will internally use the ratio PT-clisBNB-24APR2025/slisBNB ([oracle](https://bscscan.com/address/0x9a9fa8338dd5e5b2188006f1cd2ef26d921650c2), [market](https://bscscan.com/address/0x1d9d27f0b89181cf1593ac2b36a37b444eb66bee), [underlying token](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B), twap duration: 1,800 seconds)
+- slisBNB
+    - Main oracle: [SlisBNBOracle](https://bscscan.com/address/0xfE54895445eD2575Bf5386B90FFB098cBC5CA29A), that will internally use the ratio slisBNB/BNB provided by [StakeManager contract](https://bscscan.com/address/0x1adB950d8bB3dA4bE104211D5AB038628e477fE6)
+- BNB
+    - Main oracle: [RedStoneOracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a) ([feed](https://bscscan.com/address/0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e))
+    - Pivot and fallback oracles: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F) ([feed](https://bscscan.com/address/0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE))
+
+#### Security and additional considerations
+
+We applied the following security procedures for this VIP:
+
+- **Audit**: Certik, Peckshield, Hacken and Code4rena have audited the market code.
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Liquid Staked BNB pool on BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to BNB testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/oracle/blob/93a79c97e867f61652fc063abb5df323acc9bed4/audits/116_WeETHAccountantOracle_certik_20240823.pdf) (2024/08/23)
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+#### Deployed contracts
+
+- Mainnet VToken_vPT-clisBNB-24APR2025_LiquidStakedBNB: [0xA537ACf381b12Bbb91C58398b66D1D220f1C77c8](https://bscscan.com/address/0xA537ACf381b12Bbb91C58398b66D1D220f1C77c8)
+- Sepolia VToken_vPT-clisBNB-24APR2025_LiquidStakedBNB: [0x7C4890D673985CE22A4D38761473f190e434c956](https://testnet.bscscan.com/address/0x7C4890D673985CE22A4D38761473f190e434c956)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/522)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -266,4 +332,4 @@ const vip465 = () => {
   );
 };
 
-export default vip465;
+export default vip468;

@@ -3,13 +3,14 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip465, {
+import vip468, {
   BTCB_PRIME_CONVERTER,
   BaseAssets,
   COMPTROLLER_LIQUID_STAKED_BNB_POOL,
@@ -26,17 +27,19 @@ import vip465, {
   vankrBNB_LiquidStakedBNB,
   vslisBNB_LiquidStakedBNB,
   vstkBNB_LiquidStakedBNB,
-} from "../../vips/vip-465/bsctestnet";
+} from "../../vips/vip-468/bscmainnet";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE } = NETWORK_ADDRESSES["bsctestnet"];
+const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["bscmainnet"];
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
+const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
+const BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
 
-forking(49051765, async () => {
+forking(47454449, async () => {
   const provider = ethers.provider;
   const oracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const poolRegistry = new ethers.Contract(POOL_REGISTRY, POOL_REGISTRY_ABI, provider);
@@ -44,18 +47,22 @@ forking(49051765, async () => {
   const vTokenContract = new ethers.Contract(market.vToken.address, VTOKEN_ABI, provider);
 
   describe("vTokens deployment", () => {
+    before(async () => {
+      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, NATIVE_TOKEN_ADDR, BNB_FEED, NORMAL_TIMELOCK);
+    });
+
     it(`should deploy market`, async () => {
       await checkVToken(market.vToken.address, market.vToken);
     });
   });
 
-  testVip("vip465", await vip465());
+  testVip("vip468", await vip468());
 
   describe("Post-VIP behavior", () => {
     describe("Oracle configuration", async () => {
       it(`has the correct ${token.symbol} price`, async () => {
         const price = await oracle.getPrice(token.address);
-        expect(price).to.be.eq(parseUnits("2315.504013308118083583", 18));
+        expect(price).to.be.eq(parseUnits("570.184573007623824813", 18));
       });
     });
 
