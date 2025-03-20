@@ -3,6 +3,7 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
@@ -27,7 +28,6 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 
 const { POOL_REGISTRY, NORMAL_TIMELOCK, RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES["bscmainnet"];
 const BLOCKS_PER_YEAR = BigNumber.from("10512000");
