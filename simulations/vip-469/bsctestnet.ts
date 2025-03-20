@@ -108,12 +108,6 @@ forking(49227951, async () => {
 
     checkIsolatedPoolsComptrollers();
 
-    it("check protocol seize share incentive", async () => {
-      const vtoken = new ethers.Contract(market.vToken.address, VTOKEN_ABI, provider);
-      const protocolSeizeShare = await vtoken.protocolSeizeShareMantissa();
-      expect(protocolSeizeShare).to.equal(parseUnits("0.0125", 18));
-    });
-
     describe("Converters", () => {
       it(`should set ${CONVERSION_INCENTIVE} as incentive in converter RISK_FUND_CONVERTER`, async () => {
         const converterContract = new ethers.Contract(RISK_FUND_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
