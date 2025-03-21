@@ -20,10 +20,10 @@ import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-//when the command "setVenusVAIVaultRate(uint256 venusVAIVaultRate_)" in vip-469,
-//it sets the amount of XVS distributed per block to VAI Vault. At the same time,
-//internally it executes "releaseToVault()" which transfer XVS from comptroller to VAI Vault
-//these XVS are extracted apart from TOTAL_XVS
+// when the command "setVenusVAIVaultRate(uint256 venusVAIVaultRate_)" in vip-469,
+// it sets the amount of XVS distributed per block to VAI Vault. At the same time,
+// internally it executes "releaseToVault()" which transfer XVS from comptroller to VAI Vault
+// these XVS are extracted apart from TOTAL_XVS
 const xvsFetchedInVaiVault = ethers.BigNumber.from("284139046296296293064");
 const oldRewardTokenAmountsPerBlockOrSecond = ethers.BigNumber.from("50000000000000000");
 const oldVenusVAIVaultRat = ethers.BigNumber.from("3255787037037037");
