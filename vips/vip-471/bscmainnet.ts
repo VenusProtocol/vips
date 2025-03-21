@@ -304,7 +304,7 @@ export const ETHEREUM_TOTAL_AMOUNT = parseUnits("22725", 18);
 export const ARBITRUM_ONE_TOTAL_AMOUNT = parseUnits("5907", 18);
 export const ZKSYNCMAINNET_TOTAL_AMOUNT = parseUnits("7353", 18);
 
-export const vip469 = () => {
+export const vip471 = () => {
   const meta = {
     version: "v2",
     title: "VIP-469 Emissions Adjustments and Bridge XVS Tokens Across ZKSync, Arbitrum one, Ethereum and BNB Chains",
@@ -422,4 +422,4 @@ export const vip469 = () => {
   );
 };
 
-export default vip469;
+export default vip471;

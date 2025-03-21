@@ -8,14 +8,14 @@ import { LzChainId } from "src/types";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip469, {
+import vip471, {
   ETHEREUM_TARGETS,
   ETHEREUM_TOTAL_AMOUNT,
   ETHEREUM_XVS,
   ETHEREUM_XVS_VAULT,
   ETHEREUM_XVS_VAULT_REWARD,
   emissions,
-} from "../../vips/vip-469/bscmainnet";
+} from "../../vips/vip-471/bscmainnet";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -41,7 +41,7 @@ forking(22094800, async () => {
     previousTreasuryBalance = await xvs.balanceOf(ethereum.VTREASURY);
   });
 
-  testForkedNetworkVipCommands("VIP 469", await vip469(), {
+  testForkedNetworkVipCommands("VIP 471", await vip471(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip469, {
+import vip471, {
   BSC_COMPTROLLER,
   BSC_VAI_VAULT_RATE,
   BSC_XVS,
@@ -13,7 +13,7 @@ import vip469, {
   BSC_XVS_VAULT,
   BSC_XVS_VAULT_RATE,
   TOTAL_XVS,
-} from "../../vips/vip-469/bscmainnet";
+} from "../../vips/vip-471/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -61,7 +61,7 @@ forking(47621639, async () => {
     });
   });
 
-  testVip("vip-469", await vip469(), {
+  testVip("vip-471", await vip471(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
