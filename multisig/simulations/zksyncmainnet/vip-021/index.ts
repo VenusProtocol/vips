@@ -14,7 +14,7 @@ forking(58148637, async () => {
       await pretendExecutingVip(await vip021());
     });
 
-    it("Default admin role must be revoked from ACMAggregator contract", async () => {
+    it("Default admin role must be revoked", async () => {
       const acm = new ethers.Contract(ACM, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
       expect(await acm.hasRole(DEFAULT_ADMIN_ROLE, zksyncmainnet.GUARDIAN)).to.be.false;
     });
