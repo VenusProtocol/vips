@@ -5,7 +5,7 @@ export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const { ethereum } = NETWORK_ADDRESSES;
 
-const vip056 = () => {
+const vip074 = () => {
   return makeProposal([
     {
       target: ACM,
@@ -15,4 +15,4 @@ const vip056 = () => {
   ]);
 };
 
-export default vip056;
+export default vip074;

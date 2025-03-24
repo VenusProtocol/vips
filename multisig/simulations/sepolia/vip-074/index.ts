@@ -1,11 +1,11 @@
 import { forking, pretendExecutingVip } from "src/vip-framework";
 
-import vip019 from "../../../proposals/opbnbtestnet/vip-019";
+import vip074 from "../../../proposals/sepolia/vip-074";
 
-forking(36325286, async () => {
+forking(6466682, async () => {
   describe("Post-VIP behavior", async () => {
     it("execute vip", async () => {
-      await pretendExecutingVip(await vip019());
+      await pretendExecutingVip(await vip074());
     });
   });
 });

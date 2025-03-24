@@ -1,18 +1,18 @@
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { makeProposal } from "src/utils";
 
-export const ACM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
+export const ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-const { arbitrumone } = NETWORK_ADDRESSES;
+const { opbnbmainnet } = NETWORK_ADDRESSES;
 
-const vip011 = () => {
+const vip025 = () => {
   return makeProposal([
     {
       target: ACM,
       signature: "renounceRole(bytes32,address)",
-      params: [DEFAULT_ADMIN_ROLE, arbitrumone.GUARDIAN],
+      params: [DEFAULT_ADMIN_ROLE, opbnbmainnet.GUARDIAN],
     },
   ]);
 };
 
-export default vip011;
+export default vip025;
