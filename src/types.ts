@@ -5,21 +5,40 @@ export type SUPPORTED_NETWORKS =
   | "bscmainnet"
   | "sepolia"
   | "ethereum"
-  | "opbnbtestnet"
-  | "opbnbmainnet"
-  | "xlayertestnet"
-  | "zksyncsepolia";
-
-export type REMOTE_NETWORKS =
-  | "sepolia"
-  | "ethereum"
-  | "opbnbtestnet"
-  | "opbnbmainnet"
   | "arbitrumsepolia"
-  | "arbitrumone";
+  | "arbitrumone"
+  | "opbnbtestnet"
+  | "opbnbmainnet"
+  | "zksyncsepolia"
+  | "zksyncmainnet"
+  | "opsepolia"
+  | "opmainnet"
+  | "basesepolia"
+  | "basemainnet"
+  | "unichainsepolia"
+  | "unichainmainnet";
 
-export const REMOTE_TESTNET_NETWORKS = ["sepolia", "opbnbtestnet", "arbitrumsepolia"];
-export const REMOTE_MAINNET_NETWORKS = ["ethereum", "opbnbmainnet", "arbitrumone"];
+export type REMOTE_NETWORKS = Exclude<SUPPORTED_NETWORKS, "bscmainnet" | "bsctestnet">;
+
+export const REMOTE_TESTNET_NETWORKS = [
+  "sepolia",
+  "opbnbtestnet",
+  "arbitrumsepolia",
+  "zksyncsepolia",
+  "opsepolia",
+  "basesepolia",
+  "unichainsepolia",
+];
+export const REMOTE_MAINNET_NETWORKS = [
+  "ethereum",
+  "opbnbmainnet",
+  "arbitrumone",
+  "zksyncmainnet",
+  "opmainnet",
+  "basemainnet",
+  "unichainmainnet",
+];
+
 export interface ProposalMeta {
   version: string;
   title: string;
@@ -40,6 +59,10 @@ export interface Proposal {
   values: BigNumberish[];
   signatures: string[];
   params: any[][];
+  // 1 means no change, 2 means double the gas fee. Will always be whole numbers.
+  gasFeeMultiplicationFactor?: number[];
+  // 1 means no change, 2 means double the gas fee. Will always be whole numbers.
+  gasLimitMultiplicationFactor?: number[];
   meta?: ProposalMeta;
   type?: ProposalType;
 }
@@ -50,6 +73,10 @@ export interface Command {
   params: any[];
   value?: string;
   dstChainId?: LzChainId;
+  // only matters for simulations. For some network forks, the gas fee estimation is not accurate. Should be a whole number.
+  gasFeeMultiplicationFactor?: number;
+  // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
+  gasLimitMultiplicationFactor?: number;
 }
 
 export interface TokenConfig {
@@ -67,4 +94,12 @@ export enum LzChainId {
   opbnbtestnet = 10202,
   arbitrumsepolia = 10231,
   arbitrumone = 110,
+  zksyncsepolia = 10248,
+  zksyncmainnet = 165,
+  opsepolia = 10232,
+  opmainnet = 111,
+  basesepolia = 10245,
+  basemainnet = 184,
+  unichainsepolia = 10333,
+  unichainmainnet = 320,
 }

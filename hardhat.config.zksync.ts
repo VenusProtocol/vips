@@ -7,6 +7,7 @@ import "@nomicfoundation/hardhat-chai-matchers";
 import "@nomiclabs/hardhat-ethers";
 import * as dotenv from "dotenv";
 import { HardhatUserConfig, task } from "hardhat/config";
+import { ChainId } from "src/chains";
 
 import "./type-extensions";
 
@@ -23,7 +24,28 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const BLOCK_GAS_LIMIT_PER_NETWORK = {
   zksyncsepolia: 30000000,
+  zksyncmainnet: 30000000,
 };
+
+task("createProposal", "Create proposal objects for various destinations").setAction(async function (
+  taskArguments,
+  hre,
+) {
+  hre.FORKED_NETWORK = (hre.network.name as "zksyncsepolia") || "zksyncmainnet";
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const createProposal = require("./scripts/createProposal").processGnosisTxBuilder;
+  await createProposal();
+});
+
+task("safeTxData", "Get a Safe TX hash and data for execution of a multisig VIP")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .addOptionalParam("nonce", "Nonce of the multisig TX to be considered")
+  .setAction(async function (taskArguments) {
+    const { proposalPath, nonce } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const calculateSafeTxData = require("./scripts/calculateSafeTxData.ts").default;
+    await calculateSafeTxData(proposalPath, nonce);
+  });
 
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
@@ -38,14 +60,37 @@ task("test", "Update fork config")
   .addOptionalParam("fork", "Network to fork")
   .setAction(async function (taskArguments, hre, runSuper) {
     const { fork } = taskArguments;
+
+    if (hre.network.name === "zksynctestnode") {
+      if (!process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]) {
+        throw new Error("ZKSYNC_ERA_LOCAL_TEST_NODE env variable is not set");
+      }
+
+      try {
+        const provider = new hre.ethers.providers.JsonRpcProvider(process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"]);
+        await provider.send("eth_chainId", []);
+        console.log("Local zksync era test node is running");
+      } catch (e) {
+        throw new Error(
+          `Local zksync era test node is not running. Please run it with "yarn run local-test-node:${fork} --fork-block-number \`<fork block number of the vip>\`"`,
+        );
+      }
+    }
+
     const hardhatConfig = fork
       ? {
           allowUnlimitedContractSize: false,
           loggingEnabled: false,
-          forking: {
-            enabled: true,
-            url: process.env[`ARCHIVE_NODE_${fork}`] as string,
-          },
+          forking:
+            hre.network.name === "zksynctestnode"
+              ? {
+                  enabled: false,
+                  url: process.env["ZKSYNC_ERA_LOCAL_TEST_NODE"] as string,
+                }
+              : {
+                  enabled: true,
+                  url: process.env[`ARCHIVE_NODE_${fork}`] as string,
+                },
           gas: "auto" as const,
           blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
         }
@@ -54,10 +99,18 @@ task("test", "Update fork config")
           loggingEnabled: false,
         };
     hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
+
     hre.FORKED_NETWORK = fork;
 
     await runSuper(taskArguments);
   });
+
+// Pretend that Cancun hardfork was activated at block 0
+const assumeCancun = {
+  hardforkHistory: {
+    cancun: 0,
+  },
+};
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -97,12 +150,32 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: true,
       loggingEnabled: false,
       zksync: true,
+      chains: {
+        [ChainId.zksyncmainnet]: assumeCancun,
+        [ChainId.zksyncsepolia]: assumeCancun,
+        [ChainId.zkSyncTestNode]: assumeCancun,
+      },
     },
     zksyncsepolia: {
       url: process.env.ARCHIVE_NODE_zksyncsepolia || "https://sepolia.era.zksync.dev",
       chainId: 300,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
+      zksync: true,
+    },
+    zksyncmainnet: {
+      url: process.env.ARCHIVE_NODE_zksyncmainnet || "https://mainnet.era.zksync.io",
+      chainId: 324,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncmainnet,
+      zksync: true,
+    },
+    zksynctestnode: {
+      url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
+      chainId: 300, // change it to 324 for zksyncmainnet
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
+      timeout: 2000000000,
       zksync: true,
     },
   },

@@ -1,12 +1,15 @@
 import { JsonFragment, defaultAbiCoder } from "@ethersproject/abi";
-import { TransactionResponse } from "@ethersproject/providers";
+import { JsonRpcProvider, TransactionResponse } from "@ethersproject/providers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { NumberLike } from "@nomicfoundation/hardhat-network-helpers/dist/src/types";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract, utils } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { FORKED_NETWORK, config, ethers, network } from "hardhat";
+import { EthereumProvider } from "hardhat/types";
 
-import { NETWORK_ADDRESSES } from "./networkAddresses";
+import { NETWORK_ADDRESSES, ORACLE_BNB } from "./networkAddresses";
 import {
   Command,
   LzChainId,
@@ -46,6 +49,11 @@ export const getPayload = (proposal: Proposal) => {
 
 const gasUsedPerCommand = 300000;
 export async function setForkBlock(_blockNumber: number) {
+  if (network.name === "zksynctestnode") {
+    console.log("zksynctestnode network does not support forking, skipping fork");
+    return;
+  }
+
   const blockNumber = config.networks.hardhat.zksync ? _blockNumber.toString(16) : _blockNumber;
   await network.provider.request({
     method: "hardhat_reset",
@@ -65,6 +73,8 @@ export const getSourceChainId = (network: REMOTE_NETWORKS) => {
     return LzChainId.bscmainnet;
   } else if (REMOTE_TESTNET_NETWORKS.includes(network as string)) {
     return LzChainId.bsctestnet;
+  } else {
+    throw new Error("Network is not registered. Please register it.");
   }
 };
 
@@ -86,11 +96,21 @@ export function getCalldatas({ signatures, params }: { signatures: string[]; par
   });
 }
 export const initMainnetUser = async (user: string, balance: NumberLike) => {
-  await network.provider.send("hardhat_impersonateAccount", [user]);
-  const balanceHex = toRpcQuantity(balance);
-  await network.provider.send("hardhat_setBalance", [user, balanceHex]);
+  let provider: EthereumProvider | JsonRpcProvider = network.provider;
+  let signer = await ethers.getSigner(user);
 
-  return ethers.getSigner(user);
+  // zksync test node provider does not support default impersonation
+  if (network.name === "zksynctestnode" && config.networks.hardhat.forking?.url) {
+    provider = new ethers.providers.JsonRpcProvider({ url: config.networks.hardhat.forking.url, timeout: 1200000 });
+
+    signer = provider.getSigner(user) as unknown as SignerWithAddress;
+  }
+
+  await provider.send("hardhat_impersonateAccount", [user]);
+  const balanceHex = toRpcQuantity(balance);
+  await provider.send("hardhat_setBalance", [user, balanceHex]);
+
+  return signer;
 };
 
 const toRpcQuantity = (x: NumberLike): string => {
@@ -126,6 +146,14 @@ export async function mineBlocks(blocks: NumberLike = 1, options: { interval?: N
     params: [blocksHex, intervalHex],
   });
 }
+export const mineOnZksync = async (blocks: number) => {
+  const blockTimestamp = (await ethers.provider.getBlock("latest")).timestamp;
+  // Actual timestamp on which block will get mine (assuming 1 sec/block)
+  const timestampOfBlocks = blocks * 1;
+  const targetTimestamp = blockTimestamp + timestampOfBlocks;
+  await ethers.provider.send("evm_setNextBlockTimestamp", [targetTimestamp.toString(16)]);
+  await mineBlocks();
+};
 
 const getAdapterParam = (noOfCommands: number): string => {
   const requiredGas = calculateGasForAdapterParam(noOfCommands);
@@ -137,6 +165,7 @@ export const calculateGasForAdapterParam = (noOfCommands: number): number => {
   const requiredGas = (500000 + gasUsedPerCommand * noOfCommands) * 1.5;
   return requiredGas;
 };
+
 const getEstimateFeesForBridge = async (dstChainId: number, payload: string, adapterParams: string) => {
   const provider = ethers.provider;
   const OmnichainProposalSender = new ethers.Contract(
@@ -163,7 +192,17 @@ export const makeProposal = async (
   meta?: ProposalMeta,
   type?: ProposalType,
 ): Promise<Proposal> => {
-  const proposal: Proposal = { signatures: [], targets: [], params: [], values: [], meta, type };
+  const proposal: Proposal = {
+    signatures: [],
+    targets: [],
+    params: [],
+    values: [],
+    gasFeeMultiplicationFactor: [],
+    gasLimitMultiplicationFactor: [],
+    meta,
+    type,
+  };
+
   const map = new Map<number, Command[]>();
   const _commands = [];
   for (const command of commands) {
@@ -181,6 +220,10 @@ export const makeProposal = async (
     proposal.values.push(..._commands.map(cmd => cmd.value ?? "0"));
     proposal.signatures.push(..._commands.map(cmd => cmd.signature));
     proposal.params.push(..._commands.map(cmd => cmd.params));
+    proposal.gasFeeMultiplicationFactor?.push(
+      ..._commands.map(cmd => (cmd.gasFeeMultiplicationFactor ?? network.zksync ? 2 : 1)),
+    );
+    proposal.gasLimitMultiplicationFactor?.push(..._commands.map(cmd => cmd.gasLimitMultiplicationFactor ?? 1));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);
@@ -207,6 +250,16 @@ export const makeProposal = async (
     }
   }
   return proposal;
+};
+
+export const validateTargetAddresses = async (contractAddresses: string[], signatures: string[]) => {
+  for (let i = 0; i < contractAddresses.length; i++) {
+    // If there is no contract currently deployed, the result is "0x"
+    const bytecode = await ethers.provider.getCode(contractAddresses[i]);
+    if (bytecode.length === 2 && signatures[i].length !== 0) {
+      throw new Error(`Invalid address ${contractAddresses[i]}`);
+    }
+  }
 };
 
 export const setMaxStalePeriodInOracle = async (
@@ -240,12 +293,14 @@ export const setMaxStalePeriodInBinanceOracle = async (
   await tx.wait();
 };
 
+const ONE_YEAR = 31536000;
+
 export const setMaxStalePeriodInChainlinkOracle = async (
   chainlinkOracleAddress: string,
   asset: string,
   feed: string,
   admin: string,
-  maxStalePeriodInSeconds: number = 31536000 /* 1 year */,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
 ) => {
   const provider = ethers.provider;
 
@@ -265,6 +320,46 @@ export const setMaxStalePeriodInChainlinkOracle = async (
     feed,
     maxStalePeriod: maxStalePeriodInSeconds,
   });
+};
+
+export const setRedstonePrice = async (
+  redstoneOracleAddress: string,
+  asset: string,
+  feed: string,
+  admin: string,
+  maxStalePeriodInSeconds: number = ONE_YEAR,
+  { tokenDecimals }: { tokenDecimals?: number } = {},
+) => {
+  const rsOracle = new ethers.Contract(redstoneOracleAddress, CHAINLINK_ORACLE_ABI, ethers.provider);
+  const oracleAdmin = await initMainnetUser(admin, ethers.utils.parseEther("1.0"));
+
+  if (feed === ethers.constants.AddressZero) {
+    feed = (await rsOracle.tokenConfigs(asset)).feed;
+
+    if (feed === ethers.constants.AddressZero) {
+      return;
+    }
+  }
+
+  await rsOracle.connect(oracleAdmin).setTokenConfig({
+    asset,
+    feed,
+    maxStalePeriod: maxStalePeriodInSeconds,
+  });
+  const price = await rsOracle.getPrice(asset);
+
+  // Since our oracle adjusts the configured price for token decimals internally,
+  // we need to do the reverse operation here so that the result of the getPrice()
+  // call before setting the direct value is equal to the result of the same call
+  // after we set the price
+  const decimalDelta = 18 - (tokenDecimals ?? 18);
+  const adjustedPrice = price.div(parseUnits("1", decimalDelta));
+  await rsOracle.connect(oracleAdmin).setDirectPrice(asset, adjustedPrice);
+  const priceAfter = await rsOracle.getPrice(asset);
+
+  if (!price.eq(priceAfter)) {
+    throw new Error("Price is not correctly configured, try setting token decimals");
+  }
 };
 
 export const getForkedNetworkAddress = (contractName: string) => {
@@ -303,7 +398,20 @@ export const setMaxStalePeriod = async (
   }
 
   const normalTimelock =
-    FORKED_NETWORK == "bscmainnet" || FORKED_NETWORK == "bsctestnet"
+    FORKED_NETWORK == "bscmainnet" ||
+    FORKED_NETWORK == "bsctestnet" ||
+    FORKED_NETWORK == "arbitrumone" ||
+    FORKED_NETWORK == "arbitrumsepolia" ||
+    FORKED_NETWORK == "ethereum" ||
+    FORKED_NETWORK == "sepolia" ||
+    FORKED_NETWORK == "opbnbmainnet" ||
+    FORKED_NETWORK == "opbnbtestnet" ||
+    FORKED_NETWORK == "opmainnet" ||
+    FORKED_NETWORK == "opsepolia" ||
+    FORKED_NETWORK == "zksyncmainnet" ||
+    FORKED_NETWORK == "zksyncsepolia" ||
+    FORKED_NETWORK == "basemainnet" ||
+    FORKED_NETWORK == "basesepolia"
       ? getForkedNetworkAddress("NORMAL_TIMELOCK")
       : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);
@@ -320,9 +428,25 @@ export const setMaxStalePeriod = async (
         normalTimelock,
         maxStalePeriodInSeconds,
       );
+
+      if (underlyingAsset.address === ORACLE_BNB) {
+        await setMaxStalePeriodInChainlinkOracle(
+          tokenConfig.oracles[1],
+          underlyingAsset.address,
+          ethers.constants.AddressZero,
+          normalTimelock,
+          maxStalePeriodInSeconds,
+        );
+      }
     }
   }
   await mine(100);
+};
+
+export const setMaxStalePeriodForAllAssets = async (resilientOracle: Contract, assets: Contract[]): Promise<void> => {
+  for (const asset of assets) {
+    await setMaxStalePeriod(resilientOracle, asset);
+  }
 };
 
 export const expectEvents = async (
@@ -335,7 +459,7 @@ export const expectEvents = async (
   const getNamedEvents = (abi: string | JsonFragment[]) => {
     const iface = new ethers.utils.Interface(abi);
     // @ts-expect-error @TODO type is wrong
-    return receipt.events
+    return (receipt.events || receipt.logs)
       .map((it: { topics: string[]; data: string }) => {
         try {
           return iface.parseLog(it).name;
