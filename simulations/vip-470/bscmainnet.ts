@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip467, {
+import vip470, {
   BNB_CORE_COMPTROLLER,
   BNB_GAMEFI_COMPTROLLER,
   BNB_RACA_GAMEFI,
@@ -17,7 +17,7 @@ import vip467, {
   BNB_UNI_CORE_SUPPLY_CAP,
   BNB_USDT_CORE,
   BNB_USDT_CORE_SUPPLY_CAP,
-} from "../../vips/vip-500/bscmainnet";
+} from "../../vips/vip-470/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
 import IL_COMPTROLLER_ABI from "./abi/ilComptroller.json";
@@ -53,7 +53,7 @@ forking(47749140, async () => {
     });
   });
 
-  testVip("VIP-500", await vip467(), {
+  testVip("VIP-470", await vip470(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
