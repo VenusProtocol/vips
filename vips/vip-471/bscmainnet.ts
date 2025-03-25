@@ -307,8 +307,86 @@ export const ZKSYNCMAINNET_TOTAL_AMOUNT = parseUnits("7353", 18);
 export const vip471 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-469 Emissions Adjustments and Bridge XVS Tokens Across ZKSync, Arbitrum one, Ethereum and BNB Chains",
-    description: "",
+    title: "VIP-471 Emissions Adjustments Across All Chains",
+    description: `#### Summary
+
+Following the community proposal [XVS Emissions Adjustment Across All Chains](https://community.venus.io/t/xvs-emissions-adjustment-across-all-chains/4995), and the [associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x4cbf432ba32d9e74480d2b78ab945ae2a1f8340a9f6d8ccd5a93bb4add7b6bb3), if passed, this VIP will perform the following actions:
+
+Reduce XVS emissions:
+
+- on BNB Chain, Ethereum, Arbitrum one and ZKSync Era markets
+- in the XVS Vaults of the mentioned networks
+- in the VAI Vault on BNB Chain
+
+Bridge XVS from the [Core pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to:
+
+- the [XVS Store](https://etherscan.io/address/0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B) and some RewardsDistributor contracts on Ethereum (22,725 XVS)
+- the [XVS Store](https://arbiscan.io/address/0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e) and some RewardsDistributor contracts on Arbitrum one (5,907 XVS)
+- the [XVS Store](https://explorer.zksync.io/address/0x84266F552756cBed893b1FFA85248cD99501e3ce) and some RewardsDistributor contracts on ZKsync Era (7,353 XVS)
+
+The sum of the current emissions is 1,286.4 XVS/day, and after the change the daily emission of XVS in these networks will be 796.6 XVS/day (a 38% reduction).
+
+#### Details
+
+Specifically, the changes in the monthly XVS emissions are:
+
+BNB Chain.
+
+- Core pool
+    - XVS. From 900 XVS/month to 675 XVS/month (100% for suppliers, and 0% for borrowers)
+- XVS Vault: Base Rewards 13,230 XVS/month to 9,261 XVS/month. So, the new XVS rewards in the XVS vault will be 39,241 XVS/month
+- VAI Vault: from 2,813 XVS/month to 1,961 XVS/month
+
+Ethereum.
+
+- Core pool
+    - WETH. From 475 XVS/month to 119 XVS/month (100% for suppliers, and 0% for borrowers)
+    - WBTC. From 949 XVS/month to 475 XVS/month (100% for suppliers, and 0% for borrowers)
+    - USDT. From 1,709 XVS/month to 427 XVS/month (0% for suppliers, and 100% for borrowers)
+    - USDC. From 1,709 XVS/month to 427 XVS/month (0% for suppliers, and 100% for borrowers)
+- Liquid Staked ETH pool
+    - From 3,713 XVS/month to 2,599 XVS/month (100% for suppliers, and 0% for borrowers)
+- XVS Vault: from 5,040 XVS/month to 3,528 XVS/month
+
+ZKSync Era.
+
+- Core pool
+    - ZKSync. From 630 XVS/month to 441 XVS/month (100% for suppliers, and 0% for borrowers)
+    - ETH. From 600 XVS/month to 300 XVS/month (100% for suppliers, and 0% for borrowers)
+    - BTC. From 600 XVS/month to 300 XVS/month (100% for suppliers, and 0% for borrowers)
+    - USDT. From 450 XVS/month to 225 XVS/month (0% for suppliers, and 100% for borrowers)
+    - USDC.e. From 900 XVS/month to 450 XVS/month (0% for suppliers, and 100% for borrowers)
+- XVS Vault: from 1,050 XVS/month to 735 XVS/month
+
+Arbitrum one.
+
+- Core pool
+    - ARB. From 239 XVS/month to 60 XVS/month (100% for suppliers, and 0% for borrowers)
+    - WETH. From 239 XVS/month to 60 XVS/month (100% for suppliers, and 0% for borrowers)
+    - WBTC. From 319 XVS/month to 160 XVS/month (100% for suppliers, and 0% for borrowers)
+    - USDT. From 479 XVS/month to 120 XVS/month (0% for suppliers, and 100% for borrowers)
+    - USDC. From 479 XVS/month to 120 XVS/month (0% for suppliers, and 100% for borrowers)
+- Liquid Staked ETH pool
+    - WETH. From 1,020 XVS/month to 714 XVS/month (100% for suppliers, and 0% for borrowers)
+- XVS Vault: from 1,050 XVS/month to 735 XVS/month
+
+Moreover, this proposal seeks to fund the reward distributors for an additional three months to maintain XVS emissions and continue monitoring market performance. The required amounts for each chain and location are as follows:
+
+- Ethereum Mainnet: 22,725 XVS
+    - [XVS Store](https://etherscan.io/address/0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B): 10,584 XVS
+    - [RewardsDistributor_Core_2](https://etherscan.io/address/0x886767B62C7ACD601672607373048FFD96Cf27B2): 4,344 XVS
+    - [RewardsDistributor_Liquid Staked ETH_3](https://etherscan.io/address/0x1e25CF968f12850003Db17E0Dba32108509C4359): 7,797 XVS
+- Arbitrum one: 5,907 XVS
+    - [XVS Store](https://arbiscan.io/address/0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e): 2,205 XVS
+    - [RewardsDistributor_Core_0](https://arbiscan.io/address/0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a): 1,560 XVS
+    - [RewardsDistributor_Liquid Staked ETH_0](https://arbiscan.io/address/0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D): 2,142 XVS
+- ZKsync Era: 7,353 XVS
+    - [XVS Store](https://explorer.zksync.io/address/0x84266F552756cBed893b1FFA85248cD99501e3ce): 2,205 XVS
+    - [RewardsDistributor_Core_0](https://explorer.zksync.io/address/0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894): 5,148 XVS
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/525)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",

@@ -20,7 +20,7 @@ import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-// when the command "setVenusVAIVaultRate(uint256 venusVAIVaultRate_)" in vip-469,
+// when the command "setVenusVAIVaultRate(uint256 venusVAIVaultRate_)" in vip-471,
 // it sets the amount of XVS distributed per block to VAI Vault. At the same time,
 // internally it executes "releaseToVault()" which transfer XVS from comptroller to VAI Vault
 // these XVS are extracted apart from TOTAL_XVS
@@ -83,8 +83,8 @@ forking(47621639, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("should transfer XVS from the Comptroller", async () => {
-      const comptrollerXVSBalanceAFter = await xvs.balanceOf(BSC_COMPTROLLER);
-      expect(comptrollerXVSBalanceAFter).to.equal(
+      const comptrollerXVSBalanceAfter = await xvs.balanceOf(BSC_COMPTROLLER);
+      expect(comptrollerXVSBalanceAfter).to.equal(
         comptrollerPreviousXVSBalance.sub(TOTAL_XVS).sub(xvsFetchedInVaiVault),
       );
     });
