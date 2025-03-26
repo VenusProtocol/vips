@@ -8,10 +8,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip471, {
-  PROTOCOL_SHARE_RESERVE,
-  marketSpec,
-} from "../../vips/vip-471/bsctestnet";
+import vip471, { PROTOCOL_SHARE_RESERVE, marketSpec } from "../../vips/vip-471/bsctestnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -36,7 +33,7 @@ forking(49424214, async () => {
     });
   });
 
-  testVip("SOL market VIP", await vip471(), {});
+  testVip("lisUSD market VIP", await vip471(), {});
 
   describe("Post-VIP behavior", async () => {
     it("should have 29 markets in the core pool", async () => {
