@@ -16,8 +16,8 @@ import {
   BSCMAINNET_USDC_PER_BLOCK_REWARD,
   BSCMAINNET_USDT,
   BSCMAINNET_USDT_PER_BLOCK_REWARD,
-  vip470,
-} from "../../vips/vip-470/bscmainnet";
+  vip472,
+} from "../../vips/vip-472/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
@@ -50,7 +50,7 @@ forking(47735000, async () => {
     });
   });
 
-  testVip("VIP-470", await vip470(), {
+  testVip("VIP-472", await vip472(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

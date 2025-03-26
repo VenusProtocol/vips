@@ -26,11 +26,37 @@ export const BSCMAINNET_ETH_PER_BLOCK_REWARD = parseUnits("35.11", 18).div(BSCMA
 export const BSCMAINNET_USDC_PER_BLOCK_REWARD = parseUnits("198000", 18).div(BSCMAINNET_BLOCKS_PER_QUARTER).toString();
 export const BSCMAINNET_USDT_PER_BLOCK_REWARD = parseUnits("363000", 18).div(BSCMAINNET_BLOCKS_PER_QUARTER).toString();
 
-export const vip470 = () => {
+export const vip472 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-470 [Ethereum][BNB Chain] Prime Adjustment Proposal - Q1 2025",
-    description: ``,
+    title: "VIP-472 [Ethereum][BNB Chain] Prime Adjustment Proposal - Q2 2025",
+    description: `If passed, this VIP will perform the following actions following the Community proposals [Prime Adjustment Proposal - Q2 2025 [ETH Mainnet]](https://community.venus.io/t/prime-adjustment-proposal-q2-2025-eth-mainnet/4997) and [Prime Adjustment Proposal - Q2 2025 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q2-2025-bnb-chain/4996), and the associated snapshots ([here](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xd0bba63cc1f5a2a6191ce054a80764b2f30aa406f2721d765a6b253c1dff9cab) and [here](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x3e4c0f597c498e44ba14396d8ff8bf7bfdceba16f8668d10e2cfb33921820bbe)):
+
+- Modify the reward speeds for Prime markets on Ethereum and BNB Chain
+
+In summary, the changes in the 3-month reward distributions are the following:
+
+**BNB Chain**
+
+- USDT (Core): 363,000 (-33,000)
+- USDC (Core): 198,000 (-18,000)
+- ETH (Core): 35.11 (+13.73)
+- BTCB (Core): 0.40 (+0.02)
+- Total rewards for 3 months: $660,000
+
+**Ethereum**
+
+- WBTC (Core): 0.0055 (-0.0045)
+- WETH (Liquid Staked ETH): 6.78 (-4.58)
+- USDC (Core): 900 (-1,800)
+- USDT (Core): 900 (-1,800)
+- Total rewards for 3 months: $15,000
+
+#### References
+
+- [VIP-432 [Ethereum][BNB Chain] Prime Adjustment Proposal - Q1 2025](https://app.venus.io/#/governance/proposal/432?chainId=1) (previous Prime adjustment)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/526)
+- [Tokenomics](https://docs-v4.venus.io/governance/tokenomics)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -71,4 +97,4 @@ export const vip470 = () => {
   );
 };
 
-export default vip470;
+export default vip472;

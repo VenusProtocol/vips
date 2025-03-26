@@ -16,8 +16,8 @@ import {
   ETHEREUM_WBTC_PER_BLOCK_REWARD,
   ETHEREUM_WETH,
   ETHEREUM_WETH_PER_BLOCK_REWARD,
-  vip470,
-} from "../../vips/vip-470/bscmainnet";
+  vip472,
+} from "../../vips/vip-472/bscmainnet";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 
 forking(22114400, async () => {
@@ -49,7 +49,7 @@ forking(22114400, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-470", await vip470(), {
+  testForkedNetworkVipCommands("VIP-472", await vip472(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PLP_ABI], ["TokenDistributionSpeedUpdated"], [4]);
     },
