@@ -19,6 +19,7 @@ declare module "hardhat/types/runtime" {
       | "opsepolia"
       | "opmainnet"
       | "unichainsepolia"
-      | "unichainmainnet";
+      | "unichainmainnet"
+      | "berachainbartio";
   }
 }
