@@ -1,14 +1,16 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { VTREASURY, ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES["bsctestnet"];
+const { VTREASURY, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["bsctestnet"];
 
 export const COMPTROLLER_CORE = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const BURN_AMOUNT = parseUnits("10", 8);
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -115,8 +117,22 @@ const vip471 = () => {
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
-        params: [marketSpec.initialSupply.vTokenReceiver, marketSpec.initialSupply.amount],
+        params: [NORMAL_TIMELOCK, marketSpec.initialSupply.amount],
       },
+      {
+        target: marketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, BURN_AMOUNT],
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(marketSpec.initialSupply.amount, parseUnits("1", 28));
+        const vTokensRemaining = vTokensMinted.sub(BURN_AMOUNT);
+        return {
+          target: marketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+        };
+      })(),
       {
         target: marketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",

@@ -1,14 +1,21 @@
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
 
-const { VTREASURY, ACCESS_CONTROL_MANAGER } = NETWORK_ADDRESSES.bscmainnet;
+const { VTREASURY, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
 
 export const COMPTROLLER_CORE = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const BURN_AMOUNT = parseUnits("10", 8);
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
 
 export const marketSpec = {
   vToken: {
@@ -18,7 +25,7 @@ export const marketSpec = {
     underlying: {
       address: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
       decimals: 18,
-      symbol: "SOL",
+      symbol: "lisUSD",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
@@ -111,8 +118,22 @@ export const vip471 = () => {
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
-        params: [marketSpec.initialSupply.vTokenReceiver, marketSpec.initialSupply.amount],
+        params: [NORMAL_TIMELOCK, marketSpec.initialSupply.amount],
       },
+      {
+        target: marketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, BURN_AMOUNT],
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(marketSpec.initialSupply.amount, parseUnits("1", 28));
+        const vTokensRemaining = vTokensMinted.sub(BURN_AMOUNT);
+        return {
+          target: marketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+        };
+      })(),
       {
         target: marketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",

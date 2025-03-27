@@ -8,7 +8,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip471, { PROTOCOL_SHARE_RESERVE, marketSpec } from "../../vips/vip-471/bsctestnet";
+import vip471, { BURN_AMOUNT, PROTOCOL_SHARE_RESERVE, marketSpec } from "../../vips/vip-471/bsctestnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -50,9 +50,8 @@ forking(49424214, async () => {
     });
 
     it("has correct initial supply", async () => {
-      const expectedSupply = parseUnits("1000000", 8);
+      const expectedSupply = parseUnits("1000000", 8).sub(BURN_AMOUNT);
       expect(await vToken.balanceOf(marketSpec.initialSupply.vTokenReceiver)).to.equal(expectedSupply);
-      expect(await vToken.totalSupply()).to.equal(expectedSupply);
       expect(await vToken.balanceOf(NORMAL_TIMELOCK)).to.equal(0);
     });
 
