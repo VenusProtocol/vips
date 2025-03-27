@@ -25,11 +25,12 @@ export const marketSpec = {
     underlying: {
       address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
       decimals: 18,
-      symbol: "lisUSD",
+      symbol: "HAY",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
+    isLegacyPool: true,
   },
   interestRateModel: {
     address: "0x4348FC0CBD4ab6E46311ef90ba706169e50fC804",
@@ -43,7 +44,7 @@ export const marketSpec = {
     vTokenReceiver: VTREASURY,
   },
   riskParameters: {
-    collateralFactor: parseUnits("0.5", 18),
+    collateralFactor: parseUnits("0.55", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("12000000", 18),
     borrowCap: parseUnits("10000000", 18),

@@ -4,6 +4,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -68,13 +69,25 @@ forking(47809465, async () => {
       expect(await vToken.protocolShareReserve()).equals(PROTOCOL_SHARE_RESERVE);
     });
 
-    checkRiskParameters(marketSpec.vToken.address, marketSpec.vToken, marketSpec.riskParameters);
-    checkVToken(marketSpec.vToken.address, marketSpec.vToken);
-    checkInterestRate(
-      marketSpec.interestRateModel.address,
-      marketSpec.vToken.symbol,
-      marketSpec.interestRateModel,
-      BLOCKS_PER_YEAR,
-    );
+    it("checks risk parameters", async () => {
+      await checkRiskParameters(marketSpec.vToken.address, marketSpec.vToken, marketSpec.riskParameters);
+    });
+
+    it("checks vToken", async () => {
+      await checkVToken(marketSpec.vToken.address, marketSpec.vToken);
+    });
+
+    it("checks interest rate", async () => {
+      await checkInterestRate(
+        marketSpec.interestRateModel.address,
+        marketSpec.vToken.symbol,
+        marketSpec.interestRateModel,
+        BLOCKS_PER_YEAR,
+      );
+    });
+
+    it("checks core pool comptroller", async () => {
+      await checkCorePoolComptroller();
+    });
   });
 });

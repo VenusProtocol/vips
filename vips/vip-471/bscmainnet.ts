@@ -30,6 +30,7 @@ export const marketSpec = {
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
     comptroller: COMPTROLLER_CORE,
+    isLegacyPool: true,
   },
   interestRateModel: {
     address: "0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805",
@@ -43,7 +44,7 @@ export const marketSpec = {
     vTokenReceiver: "0x1d60bBBEF79Fb9540D271Dbb01925380323A8f66",
   },
   riskParameters: {
-    collateralFactor: parseUnits("0.5", 18),
+    collateralFactor: parseUnits("0.55", 18),
     reserveFactor: parseUnits("0.1", 18),
     supplyCap: parseUnits("12000000", 18),
     borrowCap: parseUnits("10000000", 18),
