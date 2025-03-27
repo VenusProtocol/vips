@@ -5,10 +5,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { VTREASURY, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+const { VTREASURY, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES["bsctestnet"];
 
-export const COMPTROLLER_CORE = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const COMPTROLLER_CORE = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const BURN_AMOUNT = parseUnits("10", 8);
 
@@ -19,13 +19,13 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 
 export const marketSpec = {
   vToken: {
-    address: "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
+    address: "0x9447b1D4Bd192f25416B6aCc3B7f06be2f7D6309",
     name: "Venus lisUSD",
     symbol: "vlisUSD",
     underlying: {
-      address: "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5",
+      address: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
       decimals: 18,
-      symbol: "lisUSD",
+      symbol: "HAY",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
@@ -33,7 +33,7 @@ export const marketSpec = {
     isLegacyPool: true,
   },
   interestRateModel: {
-    address: "0x62A8919C4C413fd4F9aef7348540Bc4B1b5CC805",
+    address: "0x4348FC0CBD4ab6E46311ef90ba706169e50fC804",
     base: "0",
     multiplier: "0.1",
     jump: "2.5",
@@ -41,7 +41,7 @@ export const marketSpec = {
   },
   initialSupply: {
     amount: parseUnits("1000000", 18),
-    vTokenReceiver: "0x1d60bBBEF79Fb9540D271Dbb01925380323A8f66",
+    vTokenReceiver: VTREASURY,
   },
   riskParameters: {
     collateralFactor: parseUnits("0.55", 18),
@@ -51,11 +51,11 @@ export const marketSpec = {
   },
 };
 
-export const vip471 = () => {
+const vip473 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-471",
-    description: ``,
+    title: "lisUSD",
+    description: `lisUSD`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -104,12 +104,11 @@ export const vip471 = () => {
         signature: "_setReserveFactor(uint256)",
         params: [marketSpec.riskParameters.reserveFactor],
       },
-
       // Mint initial supply
       {
-        target: VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpec.vToken.underlying.address, marketSpec.initialSupply.amount, NORMAL_TIMELOCK],
+        target: marketSpec.vToken.underlying.address,
+        signature: "faucet(uint256)",
+        params: [marketSpec.initialSupply.amount],
       },
       {
         target: marketSpec.vToken.underlying.address,
@@ -146,4 +145,4 @@ export const vip471 = () => {
   );
 };
 
-export default vip471;
+export default vip473;

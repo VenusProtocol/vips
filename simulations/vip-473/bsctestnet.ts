@@ -3,52 +3,43 @@ import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
-import vip471, { BURN_AMOUNT, PROTOCOL_SHARE_RESERVE, marketSpec } from "../../vips/vip-471/bscmainnet";
+import vip473, { BURN_AMOUNT, PROTOCOL_SHARE_RESERVE, marketSpec } from "../../vips/vip-473/bsctestnet";
 import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
-const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, BINANCE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
-forking(47809465, async () => {
+forking(49424214, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const vToken = new ethers.Contract(marketSpec.vToken.address, VTOKEN_ABI, ethers.provider);
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
 
-  before(async () => {
-    await setMaxStalePeriodInBinanceOracle(BINANCE_ORACLE, "lisUSD");
-  });
-
   describe("Pre-VIP behavior", () => {
     it("has the correct price", async () => {
-      expect(await resilientOracle.getPrice(marketSpec.vToken.underlying.address)).to.equal(
-        parseUnits("0.99854774", 18),
-      );
-      expect(await resilientOracle.getUnderlyingPrice(marketSpec.vToken.address)).to.equal(
-        parseUnits("0.99854774", 18),
-      );
+      expect(await resilientOracle.getPrice(marketSpec.vToken.underlying.address)).to.equal(parseUnits("1", 18));
+      expect(await resilientOracle.getUnderlyingPrice(marketSpec.vToken.address)).to.equal(parseUnits("1", 18));
     });
-    it("should have 35 markets in the core pool", async () => {
+    it("should have 28 markets in the core pool", async () => {
       const markets = await comptroller.getAllMarkets();
-      expect(markets).to.have.lengthOf(35);
+      expect(markets).to.have.lengthOf(28);
     });
   });
 
-  testVip("lisUSD market VIP", await vip471(), {});
+  testVip("lisUSD market VIP", await vip473(), {});
 
   describe("Post-VIP behavior", async () => {
-    it("should have 36 markets in the core pool", async () => {
+    it("should have 29 markets in the core pool", async () => {
       const markets = await comptroller.getAllMarkets();
-      expect(markets).to.have.lengthOf(36);
+      expect(markets).to.have.lengthOf(29);
     });
 
     it("has correct owner", async () => {
