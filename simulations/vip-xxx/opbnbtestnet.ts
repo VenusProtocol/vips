@@ -19,7 +19,7 @@ import VENUS_RISK_STEWARD_RECEIVER_ABI from "./abi/VenusRiskStewardReceiver.json
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(54487051, async () => {
+forking(56951686, async () => {
   const provider = ethers.provider;
   let executor: Contract;
   let lastProposalReceived: BigNumber;
