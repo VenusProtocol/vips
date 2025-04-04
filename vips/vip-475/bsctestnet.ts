@@ -14,11 +14,11 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 const { arbitrumsepolia, basesepolia, opbnbtestnet, opsepolia, sepolia, unichainsepolia, zksyncsepolia } =
   NETWORK_ADDRESSES;
 
-export const vip470 = () => {
+export const vip475 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-470",
-    description: ``,
+    title: "VIP-475 Omnichain Governance - Remove permissions from Guardian wallet",
+    description: `Omnichain Governance - Remove permissions from Guardian wallet`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -74,4 +74,4 @@ export const vip470 = () => {
   );
 };
 
-export default vip470;
+export default vip475;

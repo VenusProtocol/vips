@@ -14,11 +14,25 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 const { arbitrumone, basemainnet, opbnbmainnet, opmainnet, ethereum, unichainmainnet, zksyncmainnet } =
   NETWORK_ADDRESSES;
 
-export const vip470 = () => {
+export const vip475 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-470",
-    description: ``,
+    title: "VIP-475 Omnichain Governance - Remove permissions from Guardian wallet",
+    description: `If passed, this VIP will remove the DEFAULT_ADMIN role from the Guardian wallets on [Ethereum](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), [opBNB](https://opbnbscan.com/address/0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207), [Arbitrum one](https://arbiscan.io/address/0x14e0e151b33f9802b3e75b621c1457afc44dcaa0), [Base](https://basescan.org/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C), [Optimism](https://optimistic.etherscan.io/address/0x2e94dd14E81999CdBF5deDE31938beD7308354b3), [ZKsync Era](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa) and [Unichain](https://uniscan.xyz/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C). This role allowed the Guardian wallets to configure permissions for every Venus contract. That was useful during the multichain deployment of the protocol, but it’s not needed anymore. After the execution of this VIP, only Governance (with a Normal VIP) will be able to configure the Venus permissions on the listed networks.
+
+BNB Chain is not affected because in that network the Guardian doesn’t have the mentioned role, and only Governance can configure the permissions.
+
+**Security and additional considerations**
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the role is properly removed.
+- **Deployment on testnet**: the same commands have been executed on testnets
+
+#### References
+
+- [VIP simulation, and links to the testnet transactions](https://github.com/VenusProtocol/vips/pull/364)
+- [Documentation](https://docs-v4.venus.io/technical-reference/reference-technical-articles/omnichain-governance)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -74,4 +88,4 @@ export const vip470 = () => {
   );
 };
 
-export default vip470;
+export default vip475;

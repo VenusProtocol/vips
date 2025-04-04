@@ -2,11 +2,11 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip470 from "../../vips/vip-470/bsctestnet";
+import vip475 from "../../vips/vip-475/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
-forking(49471679, async () => {
-  testVip("VIP-470", await vip470(), {
+forking(47366517, async () => {
+  testVip("VIP-475", await vip475(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
