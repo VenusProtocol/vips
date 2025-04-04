@@ -16,4 +16,5 @@ export enum ChainId {
   basemainnet = 8453,
   unichainsepolia = 1301,
   unichainmainnet = 130,
+  berachainbartio = 80084,
 }
