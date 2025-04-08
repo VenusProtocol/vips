@@ -71,12 +71,12 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_BSC_TESTNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_BSC_TESTNET, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_BSC_TESTNET, 600],
       },
       {
         target: RISK_STEWARD_RECEIVER_BSC_TESTNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BSC_TESTNET, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BSC_TESTNET, 600],
       },
       {
         target: ACCESS_CONTROL_MANAGER_BSC_TESTNET,
@@ -113,13 +113,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_SEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_SEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_SEPOLIA, 600],
         dstChainId: LzChainId.sepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_SEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_SEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_SEPOLIA, 600],
         dstChainId: LzChainId.sepolia,
       },
       {
@@ -148,13 +148,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_OPBNBTESTNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_OPBNBTESTNET, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_OPBNBTESTNET, 600],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
         target: RISK_STEWARD_RECEIVER_OPBNBTESTNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_OPBNBTESTNET, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_OPBNBTESTNET, 600],
         dstChainId: LzChainId.opbnbtestnet,
       },
       {
@@ -183,13 +183,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_ARBITRUMSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA, 600],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_ARBITRUMSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA, 600],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -226,13 +226,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_OPSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_OPSEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_OPSEPOLIA, 600],
         dstChainId: LzChainId.opsepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_OPSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_OPSEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_OPSEPOLIA, 600],
         dstChainId: LzChainId.opsepolia,
       },
       {
@@ -261,13 +261,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_BASESEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_BASESEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_BASESEPOLIA, 600],
         dstChainId: LzChainId.basesepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_BASESEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BASESEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BASESEPOLIA, 600],
         dstChainId: LzChainId.basesepolia,
       },
       {
@@ -296,13 +296,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_UNICHAINSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA, 600],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_UNICHAINSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA, 600],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
@@ -339,13 +339,13 @@ Configure Remote Risk Stewards
       {
         target: RISK_STEWARD_RECEIVER_ZKSYNCSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_ZKSYNCSEPOLIA, 86401],
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_ZKSYNCSEPOLIA, 600],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
         target: RISK_STEWARD_RECEIVER_ZKSYNCSEPOLIA,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_ZKSYNCSEPOLIA, 86401],
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_ZKSYNCSEPOLIA, 600],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
