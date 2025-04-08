@@ -7,9 +7,9 @@ import { forking, testVip } from "src/vip-framework";
 
 import vipxxx, {
   ACCESS_CONTROL_MANAGER_BSC_TESTNET,
-  MARKET_CAP_RISK_STEWARD_BSC_TESTNET,
+  ANY_TARGET_CONTRACT,
   BSC_TESTNET_CORE_COMPTROLLER,
-  ANY_TARGET_CONTRACT
+  MARKET_CAP_RISK_STEWARD_BSC_TESTNET,
 } from "../../vips/vip-xxx/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
