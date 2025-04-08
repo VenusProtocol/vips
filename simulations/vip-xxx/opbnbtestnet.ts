@@ -11,7 +11,7 @@ import vipxxx, {
   ACCESS_CONTROL_MANAGER_OPBNBTESTNET,
   ANY_TARGET_CONTRACT,
   MARKET_CAP_RISK_STEWARD_OPBNBTESTNET,
-} from "../../vips/vip-xxx/bsctestnet-crosschain";
+} from "../../vips/vip-xxx/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
