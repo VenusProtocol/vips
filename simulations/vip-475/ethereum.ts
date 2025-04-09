@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { ETH_DISTRIBUTION_SPEED, ETH_RELEASE_AMOUNT, vip475 } from "../../vips/vip-475/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
+import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_TREASURY from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 
@@ -18,7 +18,7 @@ forking(22217734, async () => {
   let xvsBalanceBefore: BigNumber;
 
   before(async () => {
-    xvs = new ethers.Contract(ethereum.XVS, ERC20_ABI, ethers.provider);
+    xvs = new ethers.Contract(ethereum.XVS, XVS_ABI, ethers.provider);
     xvsBalanceBefore = await xvs.balanceOf(XVS_STORE);
   });
 

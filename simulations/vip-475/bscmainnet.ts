@@ -5,9 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip475, { BSC_DISTRIBUTION_SPEED, BSC_RELEASE_AMOUNT } from "../../vips/vip-475/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
+import vip475, {
+  BSC_DISTRIBUTION_SPEED,
+  BSC_RELEASE_AMOUNT,
+  BSC_XVS_STORE_AMOUNT,
+} from "../../vips/vip-475/bscmainnet";
+import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_TREASURY from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 
@@ -19,7 +24,7 @@ forking(48151669, async () => {
   let xvsBalanceBefore: BigNumber;
 
   before(async () => {
-    xvs = new ethers.Contract(bscmainnet.XVS, ERC20_ABI, ethers.provider);
+    xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, ethers.provider);
     xvsBalanceBefore = await xvs.balanceOf(XVS_STORE);
   });
 
@@ -33,13 +38,14 @@ forking(48151669, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [3, 0],
       );
+      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["VenusGranted"], [2]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
     it("check balances", async () => {
       const xvsBalanceAfter = await xvs.balanceOf(XVS_STORE);
-      expect(xvsBalanceAfter.sub(xvsBalanceBefore)).to.equal(BSC_RELEASE_AMOUNT);
+      expect(xvsBalanceAfter.sub(xvsBalanceBefore)).to.equal(BSC_RELEASE_AMOUNT.add(BSC_XVS_STORE_AMOUNT));
     });
 
     it("check distribution speed", async () => {
