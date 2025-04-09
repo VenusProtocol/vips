@@ -1,6 +1,6 @@
 import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -24,7 +24,6 @@ const BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 
 forking(323905381, async () => {
   const xvs = new ethers.Contract(arbitrumone.XVS, XVS_ABI, ethers.provider);
-  const vTreasury = new ethers.Contract(arbitrumone.VTREASURY, VTREASURY_ABI, ethers.provider);
   let xvsBalanceBefore: BigNumber;
 
   before(async () => {
