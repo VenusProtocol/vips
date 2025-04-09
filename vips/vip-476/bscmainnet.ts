@@ -14,15 +14,28 @@ export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000
 const { arbitrumone, basemainnet, opbnbmainnet, opmainnet, ethereum, unichainmainnet, zksyncmainnet } =
   NETWORK_ADDRESSES;
 
-export const vip475 = () => {
+export const vip476 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-475 Omnichain Governance - Remove permissions from Guardian wallet",
-    description: `If passed, this VIP will remove the DEFAULT_ADMIN role from the Guardian wallets on [Ethereum](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), [opBNB](https://opbnbscan.com/address/0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207), [Arbitrum one](https://arbiscan.io/address/0x14e0e151b33f9802b3e75b621c1457afc44dcaa0), [Base](https://basescan.org/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C), [Optimism](https://optimistic.etherscan.io/address/0x2e94dd14E81999CdBF5deDE31938beD7308354b3), [ZKsync Era](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa) and [Unichain](https://uniscan.xyz/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C). This role allowed the Guardian wallets to configure permissions for every Venus contract. That was useful during the multichain deployment of the protocol, but it’s not needed anymore. After the execution of this VIP, only Governance (with a Normal VIP) will be able to configure the Venus permissions on the listed networks.
+    title: "VIP-476 Omnichain Governance - Update Guardian Permissions",
+    description: `#### Summary
 
-BNB Chain is not affected because in that network the Guardian doesn’t have the mentioned role, and only Governance can configure the permissions.
+If passed, following the Community proposal “[Venus Upgrade - Omnichain Money Markets](https://community.venus.io/t/venus-upgrade-omnichain-money-markets/3027/9)” and [the associated snapshot](https://snapshot.org/#/venus-xvs.eth/proposal/0x62440d98cb7513d4873662203b7a27f9441880afa73105c55a733005de7ac9a1), this VIP would remove the DEFAULT_ADMIN role from the Guardian wallets on [Ethereum](https://etherscan.io/address/0x285960C5B22fD66A736C7136967A3eB15e93CC67), [opBNB](https://opbnbscan.com/address/0xC46796a21a3A9FAB6546aF3434F2eBfFd0604207), [Arbitrum one](https://arbiscan.io/address/0x14e0e151b33f9802b3e75b621c1457afc44dcaa0), [Base](https://basescan.org/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C), [Optimism](https://optimistic.etherscan.io/address/0x2e94dd14E81999CdBF5deDE31938beD7308354b3), [ZKsync Era](https://explorer.zksync.io/address/0x751Aa759cfBB6CE71A43b48e40e1cCcFC66Ba4aa) and [Unichain](https://uniscan.xyz/address/0x1803Cf1D3495b43cC628aa1d8638A981F8CD341C).
 
-**Security and additional considerations**
+#### Description
+
+This role allowed the Guardian wallets to configure permissions for every Venus contract. That was needed during the multichain deployment of the protocol, when Omnichain Governance wasn’t totally available, and the Guardians were used for every privileged action, including the configuration of permissions. This is not needed anymore, because now Normal VIP’s can configure permissions on every network.
+
+Several VIP’s have already been executed during these months to transit to an Omnichain Governance 100% managed by Governance:
+
+- Contracts were transferred to Governance on every chain (see [VIP-409](https://app.venus.io/#/governance/proposal/409?chainId=56), [VIP-433](https://app.venus.io/#/governance/proposal/433?chainId=56), [VIP-436](https://app.venus.io/#/governance/proposal/436?chainId=56), [VIP-438](https://app.venus.io/#/governance/proposal/438?chainId=56), [VIP-462](https://app.venus.io/#/governance/proposal/462?chainId=56))
+- Timelock contracts were authorized to perform privileged actions, and every unnecessary permission was removed from the Guardians (see [VIP-391](https://app.venus.io/#/governance/proposal/391?chainId=56), [VIP-399](https://app.venus.io/#/governance/proposal/399?chainId=56), [VIP-403](https://app.venus.io/#/governance/proposal/403?chainId=56), [VIP-408](https://app.venus.io/#/governance/proposal/408?chainId=56), [VIP-456](https://app.venus.io/#/governance/proposal/456?chainId=56)).
+
+After the execution of this VIP, only Governance (with a Normal VIP) will be able to configure the Venus permissions on every network.
+
+BNB Chain is not affected by this VIP because in that network the Guardian doesn’t have the mentioned role, and only Governance can configure the permissions.
+
+#### Security and additional considerations
 
 We applied the following security procedures for this upgrade:
 
@@ -88,4 +101,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip475;
+export default vip476;

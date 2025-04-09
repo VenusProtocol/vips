@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip475, { DEFAULT_ADMIN_ROLE, UNICHAIN_SEPOLIA_ACM } from "../../vips/vip-475/bsctestnet";
+import vip476, { DEFAULT_ADMIN_ROLE, UNICHAIN_SEPOLIA_ACM } from "../../vips/vip-476/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
@@ -17,7 +17,7 @@ forking(15985553, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip475", await vip475());
+  testForkedNetworkVipCommands("vip476", await vip476());
 
   describe("Post-VIP behaviour", async () => {
     it("Default admin role must be revoked", async () => {
