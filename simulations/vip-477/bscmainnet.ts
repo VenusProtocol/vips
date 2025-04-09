@@ -5,11 +5,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip475, {
+import vip477, {
   BSC_DISTRIBUTION_SPEED,
   BSC_RELEASE_AMOUNT,
   BSC_XVS_STORE_AMOUNT,
-} from "../../vips/vip-475/bscmainnet";
+} from "../../vips/vip-477/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -28,7 +28,7 @@ forking(48151669, async () => {
     xvsBalanceBefore = await xvs.balanceOf(XVS_STORE);
   });
 
-  testVip("VIP-475", await vip475(), {
+  testVip("VIP-477", await vip477(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY], ["FundsTransferredToXVSStore"], [1]);
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);

@@ -11,8 +11,8 @@ import {
   ARB_DISTRIBUTION_SPEED,
   ARB_RELEASE_AMOUNT,
   ARB_XVS_STORE_AMOUNT,
-  vip475,
-} from "../../vips/vip-475/bscmainnet";
+  vip477,
+} from "../../vips/vip-477/bscmainnet";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_TREASURY from "./abi/XVSVaultTreasury.json";
@@ -35,7 +35,7 @@ forking(323905381, async () => {
     xvsBalanceBefore = await xvs.balanceOf(XVS_STORE);
   });
 
-  testForkedNetworkVipCommands("VIP-475", await vip475(), {
+  testForkedNetworkVipCommands("VIP-477", await vip477(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY], ["FundsTransferredToXVSStore"], [1]);
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);

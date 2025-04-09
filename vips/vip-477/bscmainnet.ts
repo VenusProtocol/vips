@@ -27,10 +27,10 @@ const BRIDGE_FEES = parseUnits("0.5", 18);
 
 const { zksyncmainnet, ethereum, arbitrumone, bscmainnet } = NETWORK_ADDRESSES;
 
-export const vip475 = () => {
+export const vip477 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-475",
+    title: "VIP-477",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -121,4 +121,4 @@ export const vip475 = () => {
   );
 };
 
-export default vip475;
+export default vip477;

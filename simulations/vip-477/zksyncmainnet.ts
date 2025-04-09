@@ -4,13 +4,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { ZKSYNC_DISTRIBUTION_SPEED, vip475 } from "../../vips/vip-475/bscmainnet";
+import { ZKSYNC_DISTRIBUTION_SPEED, vip477 } from "../../vips/vip-477/bscmainnet";
 import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
 forking(58794907, async () => {
-  testForkedNetworkVipCommands("VIP-475", await vip475(), {
+  testForkedNetworkVipCommands("VIP-477", await vip477(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },
