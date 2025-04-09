@@ -9,7 +9,6 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import vip476, { BASE_VWETH, BASE_WETH, ETH_AMOUNT_RECEIVED, VTREASURY_BASE } from "../../vips/vip-476/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
-import VTREASURY_ABI from "./abi/vTreasury.json";
 
 // "mintBehalf(address,uint256)" internally executes comptroller.preMintHook(address(this), minter, mintAmount)
 // and distribute reward tokens through "rewardsDistributor.distributeSupplierRewardToken(vToken, minter)"
@@ -28,12 +27,10 @@ forking(28615549, async () => {
   let wethHolderSigner: SignerWithAddress;
   let wethBalanceForVWeth: BigNumber;
   let vWethBalanceForTreasury: BigNumber;
-  let treasury: Contract;
 
   before(async () => {
     weth = new ethers.Contract(BASE_WETH, ERC20_ABI, ethers.provider);
     vWeth = new ethers.Contract(BASE_VWETH, VTOKEN_ABI, ethers.provider);
-    treasury = new ethers.Contract(VTREASURY_BASE, VTREASURY_ABI, ethers.provider);
     wethBalanceForVWeth = await weth.balanceOf(BASE_VWETH);
     vWethBalanceForTreasury = await vWeth.balanceOf(VTREASURY_BASE);
     wethHolderSigner = await initMainnetUser(wethHolder_address, ethers.utils.parseEther("1"));
