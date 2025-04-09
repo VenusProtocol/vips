@@ -1,5 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
-import { LzChainId, ProposalType } from "src/types";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const BSCTESTNET_XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
@@ -25,9 +26,10 @@ export const BSCTESTNET_VAI_UNITROLLER = "0xf70C3C6b749BbAb89C081737334E74C9aFD4
 export const BSCTESTNET_NEW_VAI_IMPLEMENTATION = "0x52558EED5d8f4c86cC2d5EC5DF155521db8d0D48";
 export const BSCTESTNET_NEW_PLP_IMPLEMENTATION = "0xD2eBa310E843fC6dc242187501bDf7c0F6b46681";
 export const BSCTESTNET_NEW_PRIME_IMPLEMENTATION = "0x73Ac7280b8f3EAF7F621c48ae2398733eD9fBC81";
-export const BSCTESTNET_NEW_XVS_VAULT_IMPLEMENTATION = "0xcD99F57e3E6cbb6a5cAED2A2F52072f1aa31F170";
+export const BSCTESTNET_NEW_XVS_VAULT_IMPLEMENTATION = "0x471A33538D8A73fc7148F8B72A2A8BE6Ab9E3723";
 export const BSCTESTNET_VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0x78Da3E30a896Afd5E04cBC98fE37b8f027098638";
+export const BSCTESTNET_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 export const vip475 = () => {
   const meta = {
@@ -44,6 +46,17 @@ export const vip475 = () => {
     [
       {
         target: BSCTESTNET_XVS_VAULT_PROXY,
+        signature: "setAccessControl(address)",
+        params: [BSCTESTNET_ACM],
+      },
+      {
+        target: BSCTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [BSCTESTNET_XVS_VAULT_PROXY, "setBlocksPerYear(uint256)", NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
+      },
+
+      {
+        target: BSCTESTNET_XVS_VAULT_PROXY,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [BSCTESTNET_XVS, BSCTESTNET_XVS_PER_BLOCK_REWARD],
       },
@@ -51,11 +64,6 @@ export const vip475 = () => {
         target: BSCTESTNET_COMPTROLLER,
         signature: "_setVenusVAIVaultRate(uint256)",
         params: [BSC_VAI_VAULT_RATE_PER_BLOCK],
-      },
-      {
-        target: BSCTESTNET_COMPTROLLER,
-        signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [[BSCTESTNET_XVS_MARKET], [0], [0]],
       },
       {
         target: BSCTESTNET_PLP_PROXY,
@@ -105,6 +113,7 @@ export const vip475 = () => {
         signature: "_become(address)",
         params: [BSCTESTNET_VAI_UNITROLLER],
       },
+
       // set new block rate in xvs vault
       {
         target: BSCTESTNET_XVS_VAULT_PROXY,

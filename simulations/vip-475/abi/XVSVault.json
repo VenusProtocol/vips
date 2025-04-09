@@ -56,6 +56,15 @@
   {
     "anonymous": false,
     "inputs": [
+      { "indexed": true, "internalType": "bool", "name": "timebased", "type": "bool" },
+      { "indexed": true, "internalType": "uint256", "name": "blocksOrSecondsPerYear", "type": "uint256" }
+    ],
+    "name": "InitializeTimeManager",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
       { "indexed": false, "internalType": "address", "name": "oldAccessControlManager", "type": "address" },
       { "indexed": false, "internalType": "address", "name": "newAccessControlManager", "type": "address" }
     ],
@@ -118,6 +127,15 @@
       { "indexed": false, "internalType": "uint256", "name": "newReward", "type": "uint256" }
     ],
     "name": "RewardAmountUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "uint256", "name": "prevBlocksPeryear", "type": "uint256" },
+      { "indexed": true, "internalType": "uint256", "name": "newBlocksPerYear", "type": "uint256" }
+    ],
+    "name": "SetBlocksPerYear",
     "type": "event"
   },
   {
@@ -669,6 +687,15 @@
     "constant": false,
     "inputs": [{ "internalType": "address", "name": "newAccessControlAddress", "type": "address" }],
     "name": "setAccessControl",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [{ "internalType": "uint256", "name": "blocksPerYear_", "type": "uint256" }],
+    "name": "setBlocksPerYear",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

@@ -7,6 +7,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
+  BSCTESTNET_ACM,
   BSCTESTNET_BTCB,
   BSCTESTNET_BTCB_PER_BLOCK_REWARD,
   BSCTESTNET_COMPTROLLER,
@@ -33,7 +34,6 @@ import {
   BSC_VAI_VAULT_RATE_PER_BLOCK,
   vip475,
 } from "../../vips/vip-475/bsctestnet";
-import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -47,7 +47,7 @@ import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 const skipVtokens = ["0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1", "0xeffE7874C345aE877c1D893cd5160DDD359b24dA"];
 
-forking(49684361, async () => {
+forking(49864260, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
@@ -261,6 +261,11 @@ forking(49684361, async () => {
               expect(await vtoken.blocksOrSecondsPerYear()).equals(21024000);
             }
           }
+        });
+      });
+      describe("Configured ACM", () => {
+        it("ACM should be configured in XVS vault", async () => {
+          expect(await xvsVault.accessControlManager()).equals(BSCTESTNET_ACM);
         });
       });
     });
