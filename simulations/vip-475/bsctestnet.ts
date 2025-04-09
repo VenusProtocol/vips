@@ -26,14 +26,15 @@ import {
   BSCTESTNET_USDT,
   BSCTESTNET_USDT_PER_BLOCK_REWARD,
   BSCTESTNET_VAI_UNITROLLER,
+  BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK,
   BSCTESTNET_VTOKEN_BEACON,
   BSCTESTNET_XVS,
   BSCTESTNET_XVS_MARKET,
   BSCTESTNET_XVS_PER_BLOCK_REWARD,
   BSCTESTNET_XVS_VAULT_PROXY,
-  BSC_VAI_VAULT_RATE_PER_BLOCK,
   vip475,
 } from "../../vips/vip-475/bsctestnet";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -79,8 +80,8 @@ forking(49864260, async () => {
         expect(await xvsVault.rewardTokenAmountsPerBlock(BSCTESTNET_XVS)).to.equal(OLD_BSCTESTNET_XVS_PER_BLOCK_REWARD);
       });
       it("has the old VAI vault rate", async () => {
-        const OLD_BSC_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.192", 18).toString();
-        expect(await comptroller.venusVAIVaultRate()).to.equals(OLD_BSC_VAI_VAULT_RATE_PER_BLOCK);
+        const OLD_BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.192", 18).toString();
+        expect(await comptroller.venusVAIVaultRate()).to.equals(OLD_BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK);
       });
 
       it("has the old XVS market speed", async () => {
@@ -170,9 +171,9 @@ forking(49864260, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
-        [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI],
-        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated"],
-        [1, 4],
+        [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated", "ExecuteRemoteProposal"],
+        [1, 4, 1],
       );
     },
   });
@@ -183,7 +184,7 @@ forking(49864260, async () => {
         expect(await xvsVault.rewardTokenAmountsPerBlock(BSCTESTNET_XVS)).to.equal(BSCTESTNET_XVS_PER_BLOCK_REWARD);
       });
       it("has the new VAI vault rate", async () => {
-        expect(await comptroller.venusVAIVaultRate()).to.equals(BSC_VAI_VAULT_RATE_PER_BLOCK);
+        expect(await comptroller.venusVAIVaultRate()).to.equals(BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK);
       });
 
       it("has the new XVS market speed", async () => {

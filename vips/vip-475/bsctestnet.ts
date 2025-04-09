@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ProposalType } from "src/types";
+import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const BSCTESTNET_XVS_VAULT_PROXY = "0x9aB56bAD2D7631B2A857ccf36d998232A8b82280";
@@ -17,7 +17,7 @@ export const BSCTESTNET_BTCB_PER_BLOCK_REWARD = parseUnits("0.000001261574074074
 export const BSCTESTNET_ETH_PER_BLOCK_REWARD = parseUnits("0.000024438657407407", 18).div(2);
 export const BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("0.036881", 6).div(2);
 export const BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("0.087191", 6).div(2);
-export const BSC_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.192", 18).div(2);
+export const BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.192", 18).div(2);
 
 export const BSCTESTNET_DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 export const BSCTESTNET_PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
@@ -30,6 +30,15 @@ export const BSCTESTNET_NEW_XVS_VAULT_IMPLEMENTATION = "0x471A33538D8A73fc7148F8
 export const BSCTESTNET_VTOKEN_BEACON = "0xBF85A90673E61956f8c79b9150BAB7893b791bDd";
 export const BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0x78Da3E30a896Afd5E04cBC98fE37b8f027098638";
 export const BSCTESTNET_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+const BSCTESTNET_NEW_BLOCK_RATE = 21024000;
+
+export const OPBNBTESTNET_VTOKEN_BEACON = "0xcc633492097078Ae590C0d11924e82A23f3Ab3E2";
+export const OPBNBTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0x25E034878C9873D780f2D82D22A25481aA8c74F6";
+export const OPBNBTESTNET_NEW_XVS_VAULT_IMPLEMENTATION = "0x6E09f32F94B2d5056431710BA3eEF75aed40C3b1";
+export const OPBNBTESTNET_XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
+export const OPBNBTESTNET_XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
+export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+const OPBNBTESTNET_NEW_BLOCK_RATE = 63072000;
 
 export const vip475 = () => {
   const meta = {
@@ -63,7 +72,7 @@ export const vip475 = () => {
       {
         target: BSCTESTNET_COMPTROLLER,
         signature: "_setVenusVAIVaultRate(uint256)",
-        params: [BSC_VAI_VAULT_RATE_PER_BLOCK],
+        params: [BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK],
       },
       {
         target: BSCTESTNET_PLP_PROXY,
@@ -118,7 +127,43 @@ export const vip475 = () => {
       {
         target: BSCTESTNET_XVS_VAULT_PROXY,
         signature: "setBlocksPerYear(uint256)",
-        params: [21024000],
+        params: [BSCTESTNET_NEW_BLOCK_RATE],
+      },
+
+      {
+        target: OPBNBTESTNET_VTOKEN_BEACON,
+        signature: "upgradeTo(address)",
+        params: [OPBNBTESTNET_NEW_VTOKEN_IMPLEMENTATION],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_XVS_VAULT_PROXY,
+        signature: "_setPendingImplementation(address)",
+        params: [OPBNBTESTNET_NEW_XVS_VAULT_IMPLEMENTATION],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_NEW_XVS_VAULT_IMPLEMENTATION,
+        signature: "_become(address)",
+        params: [OPBNBTESTNET_XVS_VAULT_PROXY],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          OPBNBTESTNET_XVS_VAULT_PROXY,
+          "setBlocksPerYear(uint256)",
+          NETWORK_ADDRESSES.opbnbtestnet.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      // set new block rate in xvs vault
+      {
+        target: OPBNBTESTNET_XVS_VAULT_PROXY,
+        signature: "setBlocksPerYear(uint256)",
+        params: [OPBNBTESTNET_NEW_BLOCK_RATE],
+        dstChainId: LzChainId.opbnbtestnet,
       },
     ],
     meta,
