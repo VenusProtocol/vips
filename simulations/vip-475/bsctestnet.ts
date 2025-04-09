@@ -57,7 +57,6 @@ forking(49864260, async () => {
   let vaicontroller: Contract;
   let vaiunitroller: Contract;
   let vtokenBeacon: Contract;
-  let vtoken: Contract;
   let poolRegistry: Contract;
 
   before(async () => {
@@ -70,7 +69,6 @@ forking(49864260, async () => {
     vaicontroller = await ethers.getContractAt(VAI_CONTROLLER_ABI, BSCTESTNET_VAI_UNITROLLER);
     vaiunitroller = await ethers.getContractAt(PROXY_ABI, BSCTESTNET_VAI_UNITROLLER);
     vtokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VTOKEN_BEACON);
-    vtoken = await ethers.getContractAt(VTOKEN_ABI, BSCTESTNET_VTOKEN_BEACON);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY);
   });
 
@@ -151,11 +149,11 @@ forking(49864260, async () => {
         });
         it("All Vtokens should have old block rate in IL", async () => {
           const registeredPools = await poolRegistry.getAllPools();
-          for (let pool of registeredPools) {
+          for (const pool of registeredPools) {
             const comptrollerAddress = pool.comptroller;
             const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, comptrollerAddress);
             const poolVTokens = await comptroller.getAllMarkets();
-            for (let vtokenAddress of poolVTokens) {
+            for (const vtokenAddress of poolVTokens) {
               const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
               if (skipVtokens.includes(vtokenAddress)) {
                 continue;
@@ -249,11 +247,11 @@ forking(49864260, async () => {
         });
         it("All Vtokens should have new block rate in IL", async () => {
           const registeredPools = await poolRegistry.getAllPools();
-          for (let pool of registeredPools) {
+          for (const pool of registeredPools) {
             const comptrollerAddress = pool.comptroller;
             const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, comptrollerAddress);
             const poolVTokens = await comptroller.getAllMarkets();
-            for (let vtokenAddress of poolVTokens) {
+            for (const vtokenAddress of poolVTokens) {
               const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
               if (skipVtokens.includes(vtokenAddress)) {
                 continue;
