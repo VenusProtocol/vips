@@ -12,8 +12,8 @@ export const ETH_RELEASE_AMOUNT = parseUnits("5932", 18);
 export const ARB_RELEASE_AMOUNT = parseUnits("470", 18);
 
 export const BSC_DISTRIBUTION_SPEED = "57256944444444445";
-export const ETH_DISTRIBUTION_SPEED = "2902777777777777";
-export const ARB_DISTRIBUTION_SPEED = "240355555555556";
+export const ETH_DISTRIBUTION_SPEED = "29027777777777778";
+export const ARB_DISTRIBUTION_SPEED = "243055555555556";
 export const ZKSYNC_DISTRIBUTION_SPEED = "393518518518519";
 
 const { zksyncmainnet, ethereum, arbitrumone, bscmainnet } = NETWORK_ADDRESSES;

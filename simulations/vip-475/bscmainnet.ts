@@ -7,6 +7,7 @@ import { expectEvents } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
 import vip475, { BSC_DISTRIBUTION_SPEED, BSC_RELEASE_AMOUNT } from "../../vips/vip-475/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_VAULT_TREASURY from "./abi/XVSVaultTreasury.json";
 import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 
@@ -26,6 +27,12 @@ forking(48151669, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_TREASURY], ["FundsTransferredToXVSStore"], [1]);
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [3, 0],
+      );
     },
   });
 
