@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
@@ -30,7 +31,6 @@ import {
   BSCTESTNET_XVS_PER_BLOCK_REWARD,
   BSCTESTNET_XVS_VAULT_PROXY,
   BSC_VAI_VAULT_RATE_PER_BLOCK,
-  BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
   vip475,
 } from "../../vips/vip-475/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
@@ -40,9 +40,12 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/defaultProxyAdmin.json";
 import PROXY_ABI from "./abi/manualProxy.json";
-import TIME_MANAGER_ABI from "./abi/timeManager.json";
+import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
+
+const skipVtokens = ["0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1", "0xeffE7874C345aE877c1D893cd5160DDD359b24dA"];
 
 forking(49684361, async () => {
   let plp: Contract;
@@ -55,6 +58,7 @@ forking(49684361, async () => {
   let vaiunitroller: Contract;
   let vtokenBeacon: Contract;
   let vtoken: Contract;
+  let poolRegistry: Contract;
 
   before(async () => {
     plp = await ethers.getContractAt(PLP_ABI, BSCTESTNET_PLP_PROXY);
@@ -66,7 +70,8 @@ forking(49684361, async () => {
     vaicontroller = await ethers.getContractAt(VAI_CONTROLLER_ABI, BSCTESTNET_VAI_UNITROLLER);
     vaiunitroller = await ethers.getContractAt(PROXY_ABI, BSCTESTNET_VAI_UNITROLLER);
     vtokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VTOKEN_BEACON);
-    vtoken = await ethers.getContractAt(TIME_MANAGER_ABI, BSCTESTNET_VTOKEN_BEACON);
+    vtoken = await ethers.getContractAt(VTOKEN_ABI, BSCTESTNET_VTOKEN_BEACON);
+    poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -81,10 +86,7 @@ forking(49684361, async () => {
       });
 
       it("has the old XVS market speed", async () => {
-        const OLD_BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK = parseUnits("0", 18).toString();
-        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(
-          OLD_BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
-        );
+        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(0);
       });
 
       it("has the old BTCB distribution speed", async () => {
@@ -98,12 +100,12 @@ forking(49684361, async () => {
       });
 
       it("has the old USDC distribution speed", async () => {
-        const OLD_BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("36881", 0);
+        const OLD_BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("0.036881", 6);
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_USDC)).to.equal(OLD_BSCTESTNET_USDC_PER_BLOCK_REWARD);
       });
 
       it("has the old USDT distribution speed", async () => {
-        const OLD_BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("87191", 0);
+        const OLD_BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("0.087191", 6);
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_USDT)).to.equal(OLD_BSCTESTNET_USDT_PER_BLOCK_REWARD);
       });
     });
@@ -134,7 +136,7 @@ forking(49684361, async () => {
           expect(await vaicontroller.getBlocksPerYear()).equals(10512000);
         });
       });
-      describe("XVS Vault", async () => {
+      describe("XVS Vault", () => {
         it("XVSVAULT should not point to new impl", async () => {
           expect(await xvsVaultProxy.implementation()).not.equals(BSCTESTNET_NEW_XVS_VAULT_IMPLEMENTATION);
         });
@@ -142,12 +144,26 @@ forking(49684361, async () => {
           expect(await xvsVault.blocksOrSecondsPerYear()).equals(10512000);
         });
       });
+
       describe("VToken", () => {
         it("VToken beacon should not point to new impl", async () => {
           expect(await vtokenBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
         });
-
-        // Need to check block rate for all markets
+        it("All Vtokens should have old block rate in IL", async () => {
+          const registeredPools = await poolRegistry.getAllPools();
+          for (let pool of registeredPools) {
+            const comptrollerAddress = pool.comptroller;
+            const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, comptrollerAddress);
+            const poolVTokens = await comptroller.getAllMarkets();
+            for (let vtokenAddress of poolVTokens) {
+              const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
+              if (skipVtokens.includes(vtokenAddress)) {
+                continue;
+              }
+              expect(await vtoken.blocksOrSecondsPerYear()).equals(10512000);
+            }
+          }
+        });
       });
     });
   });
@@ -157,8 +173,8 @@ forking(49684361, async () => {
       await expectEvents(
         txResponse,
         [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI],
-        ["RewardAmountUpdated", "NewVenusVAIVaultRate", "VenusSupplySpeedUpdated", "TokenDistributionSpeedUpdated"],
-        [1, 1, 1, 4],
+        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated"],
+        [1, 4],
       );
     },
   });
@@ -168,14 +184,12 @@ forking(49684361, async () => {
       it("has the new XVS distribution speed", async () => {
         expect(await xvsVault.rewardTokenAmountsPerBlock(BSCTESTNET_XVS)).to.equal(BSCTESTNET_XVS_PER_BLOCK_REWARD);
       });
-      it("has the old VAI vault rate", async () => {
+      it("has the new VAI vault rate", async () => {
         expect(await comptroller.venusVAIVaultRate()).to.equals(BSC_VAI_VAULT_RATE_PER_BLOCK);
       });
 
-      it("has the old XVS market speed", async () => {
-        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(
-          BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
-        );
+      it("has the new XVS market speed", async () => {
+        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(0);
       });
       it("has the new BTCB distribution speed", async () => {
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_BTCB)).to.equal(BSCTESTNET_BTCB_PER_BLOCK_REWARD);
@@ -186,9 +200,7 @@ forking(49684361, async () => {
       });
 
       it("has the new USDC distribution speed", async () => {
-        expect(parseUnits(await plp.tokenDistributionSpeeds(BSCTESTNET_USDC), 18)).to.equal(
-          BSCTESTNET_USDC_PER_BLOCK_REWARD,
-        );
+        expect(await plp.tokenDistributionSpeeds(BSCTESTNET_USDC)).to.equal(BSCTESTNET_USDC_PER_BLOCK_REWARD);
       });
 
       it("has the new USDT distribution speed", async () => {
@@ -230,12 +242,26 @@ forking(49684361, async () => {
           expect(await xvsVault.blocksOrSecondsPerYear()).equals(21024000);
         });
       });
+
       describe("VToken", () => {
         it("VToken beacon should point to new impl", async () => {
           expect(await vtokenBeacon.implementation()).equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
         });
-
-        // Need to check block rate for all markets
+        it("All Vtokens should have new block rate in IL", async () => {
+          const registeredPools = await poolRegistry.getAllPools();
+          for (let pool of registeredPools) {
+            const comptrollerAddress = pool.comptroller;
+            const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, comptrollerAddress);
+            const poolVTokens = await comptroller.getAllMarkets();
+            for (let vtokenAddress of poolVTokens) {
+              const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
+              if (skipVtokens.includes(vtokenAddress)) {
+                continue;
+              }
+              expect(await vtoken.blocksOrSecondsPerYear()).equals(21024000);
+            }
+          }
+        });
       });
     });
   });

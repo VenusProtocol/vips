@@ -14,10 +14,9 @@ export const BSCTESTNET_USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 export const BSCTESTNET_XVS_PER_BLOCK_REWARD = parseUnits("0.01", 18).div(2);
 export const BSCTESTNET_BTCB_PER_BLOCK_REWARD = parseUnits("0.000001261574074074", 18).div(2);
 export const BSCTESTNET_ETH_PER_BLOCK_REWARD = parseUnits("0.000024438657407407", 18).div(2);
-export const BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("36881", 0).div(2);
-export const BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("87191", 0).div(2);
+export const BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("0.036881", 6).div(2);
+export const BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("0.087191", 6).div(2);
 export const BSC_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.192", 18).div(2);
-export const BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK = parseUnits("0", 18).div(2);
 
 export const BSCTESTNET_DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 export const BSCTESTNET_PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
@@ -56,7 +55,7 @@ export const vip475 = () => {
       {
         target: BSCTESTNET_COMPTROLLER,
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [[BSCTESTNET_XVS_MARKET], [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK], [0]],
+        params: [[BSCTESTNET_XVS_MARKET], [0], [0]],
       },
       {
         target: BSCTESTNET_PLP_PROXY,
