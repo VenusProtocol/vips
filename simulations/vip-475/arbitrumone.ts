@@ -1,22 +1,16 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import {
-  ARB_DISTRIBUTION_SPEED,
-  ARB_RELEASE_AMOUNT,
-  ARB_XVS_VAULT_TREASURY,
-  vip475,
-} from "../../vips/vip-475/bscmainnet";
+import { ARB_DISTRIBUTION_SPEED, ARB_RELEASE_AMOUNT, vip475 } from "../../vips/vip-475/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 import XVS_VAULT_TREASURY from "./abi/XVSVaultTreasury.json";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import XVS_VAULT_ABI from "./abi/XVVaultProxy.json";
 
-const {arbitrumone}  = NETWORK_ADDRESSES; 
+const { arbitrumone } = NETWORK_ADDRESSES;
 const XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
 
 forking(323905381, async () => {
@@ -45,6 +39,6 @@ forking(323905381, async () => {
       const vault = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
       const distributionSpeed = await vault.rewardTokenAmountsPerBlockOrSecond(arbitrumone.XVS);
       expect(distributionSpeed).to.equal(ARB_DISTRIBUTION_SPEED);
-    })
+    });
   });
 });
