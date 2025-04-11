@@ -27,6 +27,7 @@ import {
   BSCTESTNET_USDT_PER_BLOCK_REWARD,
   BSCTESTNET_VAI_UNITROLLER,
   BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK,
+  BSCTESTNET_VSLIS_BEACON,
   BSCTESTNET_VTOKEN_BEACON,
   BSCTESTNET_XVS,
   BSCTESTNET_XVS_MARKET,
@@ -59,6 +60,7 @@ forking(49864260, async () => {
   let vaiunitroller: Contract;
   let vtokenBeacon: Contract;
   let poolRegistry: Contract;
+  let vslisBeacon: Contract;
 
   before(async () => {
     plp = await ethers.getContractAt(PLP_ABI, BSCTESTNET_PLP_PROXY);
@@ -70,6 +72,7 @@ forking(49864260, async () => {
     vaicontroller = await ethers.getContractAt(VAI_CONTROLLER_ABI, BSCTESTNET_VAI_UNITROLLER);
     vaiunitroller = await ethers.getContractAt(PROXY_ABI, BSCTESTNET_VAI_UNITROLLER);
     vtokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VTOKEN_BEACON);
+    vslisBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VSLIS_BEACON);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY);
   });
 
@@ -147,6 +150,7 @@ forking(49864260, async () => {
       describe("VToken", () => {
         it("VToken beacon should not point to new impl", async () => {
           expect(await vtokenBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
+          expect(await vslisBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
         });
         it("All Vtokens should have old block rate in IL", async () => {
           const registeredPools = await poolRegistry.getAllPools();
@@ -254,7 +258,8 @@ forking(49864260, async () => {
             const poolVTokens = await comptroller.getAllMarkets();
             for (const vtokenAddress of poolVTokens) {
               const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
-              if (skipVtokens.includes(vtokenAddress)) {
+              // VPLANET cannot be upgraded because it is linked to a different beacon contract and has a different owner.
+              if (vtokenAddress == "0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1") {
                 continue;
               }
               expect(await vtoken.blocksOrSecondsPerYear()).equals(21024000);
