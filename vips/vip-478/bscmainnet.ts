@@ -17,8 +17,15 @@ export const Actions = {
 export const vip478 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-478",
-    description: `description`,
+    title: "VIP-478 Risk Parameters Adjustments (FDUSD, TUSD)",
+    description: `This VIP will perform the following Risk Parameter actions as per [Chaos Labs’ latest recommendations](https://community.venus.io/t/fdusd-depeg-response/5019/4):
+
+- [FDUSD (Core pool)](https://app.venus.io/#/core-pool/market/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba?chainId=56): Resume MINT, BORROW and ENTER_MARKET
+- [TUSD (Core pool) / BNB Chain](https://app.venus.io/#/core-pool/market/0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E?chainId=56), and [TUSD (Core pool) / Ethereum](https://app.venus.io/#/core-pool/market/0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b?chainId=1): Resume MINT, BORROW and ENTER_MARKET
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/535](https://github.com/VenusProtocol/vips/pull/535)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
