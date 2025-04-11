@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip477, { BASE_VWETH, BASE_WETH, ETH_AMOUNT_RECEIVED, VTREASURY_BASE } from "../../vips/vip-477/bscmainnet";
+import vip479, { BASE_VWETH, BASE_WETH, ETH_AMOUNT_RECEIVED, VTREASURY_BASE } from "../../vips/vip-479/bscmainnet";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -39,8 +39,8 @@ forking(28615549, async () => {
   });
 
   testForkedNetworkVipCommands(
-    "VIP-477 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base",
-    await vip477(),
+    "VIP-479 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base",
+    await vip479(),
   );
 
   describe("Post-VIP behaviour", async () => {

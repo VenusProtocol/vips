@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip477, { BSCMAINNET_ETH, ETH_AMOUNT_SEND } from "../../vips/vip-477/bscmainnet";
+import vip479, { BSCMAINNET_ETH, ETH_AMOUNT_SEND } from "../../vips/vip-479/bscmainnet";
 import DLNSOURCE_ABI from "./abi/dlnSource.json";
 import ERC20_ABI from "./abi/erc20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/omnichainProposalSender.json";
@@ -22,7 +22,7 @@ forking(48142130, async () => {
     beforeTransfer = await eth.balanceOf(VTREASURY);
   });
 
-  testVip("VIP-477 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base", await vip477(), {
+  testVip("VIP-479 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base", await vip479(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
