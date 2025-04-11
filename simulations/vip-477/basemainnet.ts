@@ -6,8 +6,8 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip476, { BASE_VWETH, BASE_WETH, ETH_AMOUNT_RECEIVED, VTREASURY_BASE } from "../../vips/vip-476/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
+import vip477, { BASE_VWETH, BASE_WETH, ETH_AMOUNT_RECEIVED, VTREASURY_BASE } from "../../vips/vip-477/bscmainnet";
+import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 // "mintBehalf(address,uint256)" internally executes comptroller.preMintHook(address(this), minter, mintAmount)
@@ -17,7 +17,7 @@ import VTOKEN_ABI from "./abi/vToken.json";
 // from the last checkpointed slot(block or second) up to the current slot(block or second)
 // and writes new checkpoint to storage and reduce spread reserves to protocol share reserve
 // i.e _doTransferOut(protocolSeizeShare, amount)
-const rewardVTokensAccrued = ethers.BigNumber.from("101443046573365"); // till block 28615549
+const rewardVTokensAccrued = ethers.BigNumber.from("995969293046573365"); // till block 28615549
 const VWETH_AMOUNT_RECEIVED = ethers.BigNumber.from("9968973998"); // till block 28615549
 const wethHolder_address = "0xb2cc224c1c9feE385f8ad6a55b4d94E92359DC59";
 
@@ -39,8 +39,8 @@ forking(28615549, async () => {
   });
 
   testForkedNetworkVipCommands(
-    "VIP-476 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base",
-    await vip476(),
+    "VIP-477 Bridge 101 ETH from the Treasury on BNB Chain to the Treasury on Base",
+    await vip477(),
   );
 
   describe("Post-VIP behaviour", async () => {

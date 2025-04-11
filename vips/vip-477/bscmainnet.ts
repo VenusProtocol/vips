@@ -25,10 +25,10 @@ export const BASE_VWETH = "0xEB8A79bD44cF4500943bf94a2b4434c95C008599";
 export const BASE_WETH = "0x4200000000000000000000000000000000000006";
 export const VTREASURY_BASE = "0xbefD8d06f403222dd5E8e37D2ba93320A97939D1";
 
-export const vip476 = () => {
+export const vip477 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-476",
+    title: "VIP-477",
     description:
       "Bootstrapping WETH market on Base with Protocol-OwnedLiquidity(POL), Deposit 100 WETH into the WETH market on Base, using Venus Treasury funds",
     forDescription: "Execute this proposal",
@@ -101,4 +101,4 @@ export const vip476 = () => {
   );
 };
 
-export default vip476;
+export default vip477;
