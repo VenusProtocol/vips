@@ -40,7 +40,7 @@ export const SUSDE_CHAINLINK_FEED = "0x1a269eA1b209DA2c12bDCDab22635C9e6C5028B2"
 export const SUSDE_CHAINLINK_MAX_STALE_PERIOD = 26 * 60 * 60; // 26 hours
 
 // Converters
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
@@ -52,6 +52,12 @@ const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
 const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 export const CONVERSION_INCENTIVE = 1e14;
+
+// Refunds
+export const VANGUARD_VANTAGE_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
+export const PT_SUSDE_PROVIDER = "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D";
+export const VANGUARD_VANTAGE_AMOUNT_USDT = parseUnits("10000", 18);
+export const PT_SUSDE_PROVIDER_AMOUNT_USDT = parseUnits("100", 18);
 
 export const converterBaseAssets = {
   [RISK_FUND_CONVERTER]: USDT,
@@ -106,7 +112,7 @@ export const marketSpecs = {
     initialSupply: {
       amount: parseUnits("10424.583228294074586275", 18),
       vTokensToBurn: parseUnits("100", 8), // Approximately $100
-      vTokenReceiver: "0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D",
+      vTokenReceiver: PT_SUSDE_PROVIDER,
     },
     riskParameters: {
       collateralFactor: parseUnits("0.7", 18),
@@ -121,7 +127,7 @@ export const marketSpecs = {
       name: "Venus sUSDe",
       symbol: "vsUSDe",
       underlying: tokens.sUSDe,
-      exchangeRate: parseUnits("1", 28),
+      exchangeRate: parseUnits("1.0000000000012074977831117236", 28),
       ...commonSpec,
     },
     interestRateModel: {
@@ -132,9 +138,9 @@ export const marketSpecs = {
       kink: "0.8",
     },
     initialSupply: {
-      amount: parseUnits("4300", 18),
+      amount: parseUnits("4293.918338835184896875", 18),
       vTokensToBurn: parseUnits("100", 8), // Approximately $100
-      vTokenReceiver: VTREASURY, // TODO: confirm this
+      vTokenReceiver: VTREASURY,
     },
     riskParameters: {
       collateralFactor: parseUnits("0.75", 18),
@@ -149,7 +155,7 @@ export const marketSpecs = {
       name: "Venus USDe",
       symbol: "vUSDe",
       underlying: tokens.USDe,
-      exchangeRate: parseUnits("1", 28),
+      exchangeRate: parseUnits("1.0000000000007469910987686835", 28),
       ...commonSpec,
     },
     interestRateModel: {
@@ -160,9 +166,9 @@ export const marketSpecs = {
       kink: "0.8",
     },
     initialSupply: {
-      amount: parseUnits("5000", 18),
+      amount: parseUnits("5003.493736623737565284", 18),
       vTokensToBurn: parseUnits("100", 8), // Approximately $100
-      vTokenReceiver: VTREASURY, // TODO: confirm this
+      vTokenReceiver: VTREASURY,
     },
     riskParameters: {
       collateralFactor: parseUnits("0.75", 18),
@@ -423,6 +429,17 @@ export const vip480 = (overrides: { maxStalePeriod?: number; mockPendleOracleCon
       },
 
       ...configureConverters(Object.values(tokens).map(({ address }) => address)),
+
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, VANGUARD_VANTAGE_AMOUNT_USDT, VANGUARD_VANTAGE_TREASURY],
+      },
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, PT_SUSDE_PROVIDER_AMOUNT_USDT, PT_SUSDE_PROVIDER],
+      },
     ],
     meta,
     ProposalType.REGULAR,

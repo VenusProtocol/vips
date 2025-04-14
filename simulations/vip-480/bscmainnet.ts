@@ -1,4 +1,3 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
@@ -9,10 +8,16 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import { forking, testVip } from "src/vip-framework/index";
 
+import { expectEvents } from "../../src/utils";
 import vip480, {
   CONVERSION_INCENTIVE,
   PROTOCOL_SHARE_RESERVE,
   PT_SUSDE_FIXED_PRICE,
+  PT_SUSDE_PROVIDER,
+  PT_SUSDE_PROVIDER_AMOUNT_USDT,
+  USDT,
+  VANGUARD_VANTAGE_AMOUNT_USDT,
+  VANGUARD_VANTAGE_TREASURY,
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
@@ -23,6 +28,7 @@ import COMPTROLLER_ABI from "./abi/LegacyPoolComptroller.json";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const ONE_YEAR = 365 * 24 * 3600;
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
@@ -30,30 +36,20 @@ const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, UNITROLLER, VTREASURY } =
   NETWORK_ADDRESSES.bscmainnet;
 
-const HOLDERS = {
-  [tokens.USDe.address]: "0xdc35157217A3AeFF3dcaF2e86327254FBF9f4601",
-  [tokens.sUSDe.address]: "0xF2810F8ec028576354C4388d8B347aC1921c63A2",
-};
-
 const format = (amount: BigNumber, spec: { decimals: number; symbol: string }) =>
   `${formatUnits(amount, spec.decimals)} ${spec.symbol}`;
 
 // Check the whole VIP commands, fixing the price for the PT token because it will considered staled by the PT oracle
-forking(48326667, async () => {
+forking(48356309, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, ethers.provider);
+  const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+  let prevUSDTBalanceOfVanguard: BigNumber;
+  let prevUSDTBalanceOfPTProvider: BigNumber;
 
   before(async () => {
-    // TODO: remove this after having the bootstrap liquidity in the VTreasury
-    for (const tokenConfig of [tokens.USDe, tokens.sUSDe]) {
-      const initialSupply = Object.values(marketSpecs).find(it => it.vToken.underlying.symbol === tokenConfig.symbol)
-        ?.initialSupply.amount;
-      const holder = HOLDERS[tokenConfig.address];
-      await impersonateAccount(holder);
-      await setBalance(holder, parseUnits("1000000", 18));
-      const underlying = new ethers.Contract(tokenConfig.address, ERC20_ABI, ethers.provider);
-      await underlying.connect(await ethers.getSigner(holder)).transfer(VTREASURY, initialSupply);
-    }
+    prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
+    prevUSDTBalanceOfPTProvider = await usdt.balanceOf(PT_SUSDE_PROVIDER);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -75,18 +71,22 @@ forking(48326667, async () => {
       maxStalePeriod: ONE_YEAR,
       mockPendleOracleConfiguration: true,
     }),
-    {},
+    {
+      callbackAfterExecution: async txResponse => {
+        await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [5]); // 3 for the bootstrap liquidity + 2 for refunds
+      },
+    },
   );
 
   describe("Post-VIP behavior", async () => {
     it("check price USDe", async () => {
-      const expectedPrice = parseUnits("0.99901203", 18); // Chainlink price, because the RedStone's one will be staled
+      const expectedPrice = parseUnits("0.99901896", 18); // Chainlink price, because the RedStone's one will be staled
       expect(await resilientOracle.getPrice(tokens.USDe.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.USDe.vToken.address)).to.equal(expectedPrice);
     });
 
     it("check price sUSDe", async () => {
-      const expectedPrice = parseUnits("1.166127443652120433", 18); // Chainlink price, because the RedStone's one will be staled
+      const expectedPrice = parseUnits("1.166287675726780034", 18); // Chainlink price, because the RedStone's one will be staled
       expect(await resilientOracle.getPrice(tokens.sUSDe.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.sUSDe.vToken.address)).to.equal(expectedPrice);
     });
@@ -175,6 +175,17 @@ forking(48326667, async () => {
           });
         });
       }
+    });
+
+    describe("Refunds", () => {
+      it("Vanguard", async () => {
+        const currentUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
+        expect(currentUSDTBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VANTAGE_AMOUNT_USDT);
+      });
+      it("PT-sUSDE provider", async () => {
+        const currentUSDTBalanceOfPTProvider = await usdt.balanceOf(PT_SUSDE_PROVIDER);
+        expect(currentUSDTBalanceOfPTProvider.sub(prevUSDTBalanceOfPTProvider)).to.equal(PT_SUSDE_PROVIDER_AMOUNT_USDT);
+      });
     });
   });
 });
