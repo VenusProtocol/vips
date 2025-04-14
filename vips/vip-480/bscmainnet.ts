@@ -22,7 +22,7 @@ const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const SUSDE_ONEJUMP_REDSTONE_ORACLE = "0xA1dF2F18C74dB5Bed3A7752547F6Cc3094a1A2d5";
 export const SUSDE_ONEJUMP_CHAINLINK_ORACLE = "0xBBe2Dc15A533DEF04D7e84Ad8aF89d62a0E5662f";
 export const PT_SUSDE_PENDLE_ORACLE = "0x176ca46D7DcB4e001b8ee5F12d0fcd6D279214f4";
-const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
+export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
 const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 export const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
@@ -238,6 +238,82 @@ const getPendleOracleCommand = (mockPendleOracleConfiguration: boolean) => {
   }
 };
 
+const getOracleCommands = (overrides: { maxStalePeriod?: number; mockPendleOracleConfiguration?: boolean }) => {
+  return [
+    // Configure Oracle for USDe
+    {
+      target: REDSTONE_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [[tokens.USDe.address, USDE_REDSTONE_FEED, overrides?.maxStalePeriod || USDE_REDSTONE_MAX_STALE_PERIOD]],
+    },
+    {
+      target: CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [
+        [tokens.USDe.address, USDE_CHAINLINK_FEED, overrides?.maxStalePeriod || USDE_CHAINLINK_MAX_STALE_PERIOD],
+      ],
+    },
+    {
+      target: BOUND_VALIDATOR,
+      signature: "setValidateConfig((address,uint256,uint256))",
+      params: [[tokens.USDe.address, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
+    },
+    {
+      target: RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [[tokens.USDe.address, [REDSTONE_ORACLE, CHAINLINK_ORACLE, CHAINLINK_ORACLE], [true, true, true]]],
+    },
+
+    // Configure Oracle for sUSDe
+    {
+      target: REDSTONE_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [
+        [tokens.sUSDe.address, SUSDE_REDSTONE_FEED, overrides?.maxStalePeriod || SUSDE_REDSTONE_MAX_STALE_PERIOD],
+      ],
+    },
+    {
+      target: CHAINLINK_ORACLE,
+      signature: "setTokenConfig((address,address,uint256))",
+      params: [
+        [tokens.sUSDe.address, SUSDE_CHAINLINK_FEED, overrides?.maxStalePeriod || SUSDE_CHAINLINK_MAX_STALE_PERIOD],
+      ],
+    },
+    {
+      target: BOUND_VALIDATOR,
+      signature: "setValidateConfig((address,uint256,uint256))",
+      params: [[tokens.sUSDe.address, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
+    },
+    {
+      target: RESILIENT_ORACLE,
+      signature: "setTokenConfig((address,address[3],bool[3]))",
+      params: [
+        [
+          tokens.sUSDe.address,
+          [SUSDE_ONEJUMP_REDSTONE_ORACLE, SUSDE_ONEJUMP_CHAINLINK_ORACLE, SUSDE_ONEJUMP_CHAINLINK_ORACLE],
+          [true, true, true],
+        ],
+      ],
+    },
+
+    // Configure Oracle for PT-sUSDe-26JUN2026
+    ...getPendleOracleCommand(!!overrides?.mockPendleOracleConfiguration),
+  ];
+};
+
+export const vip480OnlyOracles = (overrides: { maxStalePeriod?: number; mockPendleOracleConfiguration?: boolean }) => {
+  const meta = {
+    version: "v2",
+    title: "VIP-480 Ethena oracles",
+    description: `VIP-480 Ethena oracles`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+  };
+
+  return makeProposal(getOracleCommands(overrides), meta, ProposalType.CRITICAL);
+};
+
 export const vip480 = (overrides: { maxStalePeriod?: number; mockPendleOracleConfiguration?: boolean }) => {
   const meta = {
     version: "v2",
@@ -250,66 +326,7 @@ export const vip480 = (overrides: { maxStalePeriod?: number; mockPendleOracleCon
 
   return makeProposal(
     [
-      // Configure Oracle for USDe
-      {
-        target: REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [
-          [tokens.USDe.address, USDE_REDSTONE_FEED, overrides?.maxStalePeriod || USDE_REDSTONE_MAX_STALE_PERIOD],
-        ],
-      },
-      {
-        target: CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [
-          [tokens.USDe.address, USDE_CHAINLINK_FEED, overrides?.maxStalePeriod || USDE_CHAINLINK_MAX_STALE_PERIOD],
-        ],
-      },
-      {
-        target: BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[tokens.USDe.address, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
-      },
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [[tokens.USDe.address, [REDSTONE_ORACLE, CHAINLINK_ORACLE, CHAINLINK_ORACLE], [true, true, true]]],
-      },
-
-      // Configure Oracle for sUSDe
-      {
-        target: REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [
-          [tokens.sUSDe.address, SUSDE_REDSTONE_FEED, overrides?.maxStalePeriod || SUSDE_REDSTONE_MAX_STALE_PERIOD],
-        ],
-      },
-      {
-        target: CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [
-          [tokens.sUSDe.address, SUSDE_CHAINLINK_FEED, overrides?.maxStalePeriod || SUSDE_CHAINLINK_MAX_STALE_PERIOD],
-        ],
-      },
-      {
-        target: BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[tokens.sUSDe.address, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
-      },
-      {
-        target: RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            tokens.sUSDe.address,
-            [SUSDE_ONEJUMP_REDSTONE_ORACLE, SUSDE_ONEJUMP_CHAINLINK_ORACLE, SUSDE_ONEJUMP_CHAINLINK_ORACLE],
-            [true, true, true],
-          ],
-        ],
-      },
-
-      // Configure Oracle for PT-sUSDe-26JUN2026
-      ...getPendleOracleCommand(!!overrides?.mockPendleOracleConfiguration),
+      ...getOracleCommands(overrides),
 
       // Add Markets
       ...Object.values(marketSpecs).flatMap(({ vToken, initialSupply, riskParameters }) => [

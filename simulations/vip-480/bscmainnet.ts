@@ -38,6 +38,7 @@ const HOLDERS = {
 const format = (amount: BigNumber, spec: { decimals: number; symbol: string }) =>
   `${formatUnits(amount, spec.decimals)} ${spec.symbol}`;
 
+// Check the whole VIP commands, fixing the price for the PT token because it will considered staled by the PT oracle
 forking(48326667, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   const comptroller = new ethers.Contract(UNITROLLER, COMPTROLLER_ABI, ethers.provider);
@@ -79,13 +80,13 @@ forking(48326667, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("check price USDe", async () => {
-      const expectedPrice = parseUnits("0.99901203", 18);
+      const expectedPrice = parseUnits("0.99901203", 18); // Chainlink price, because the RedStone's one will be staled
       expect(await resilientOracle.getPrice(tokens.USDe.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.USDe.vToken.address)).to.equal(expectedPrice);
     });
 
     it("check price sUSDe", async () => {
-      const expectedPrice = parseUnits("1.166127443652120433", 18);
+      const expectedPrice = parseUnits("1.166127443652120433", 18); // Chainlink price, because the RedStone's one will be staled
       expect(await resilientOracle.getPrice(tokens.sUSDe.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.sUSDe.vToken.address)).to.equal(expectedPrice);
     });
