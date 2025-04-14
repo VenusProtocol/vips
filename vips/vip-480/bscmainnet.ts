@@ -323,8 +323,116 @@ export const vip480OnlyOracles = (overrides: { maxStalePeriod?: number; mockPend
 export const vip480 = (overrides: { maxStalePeriod?: number; mockPendleOracleConfiguration?: boolean }) => {
   const meta = {
     version: "v2",
-    title: "VIP-480 Ethena markets in the Core pool",
-    description: `VIP-480 Ethena markets in the Core pool`,
+    title: "VIP-480 [BNB Chain] New sUSDe, USDe and PT-sUSDE-26JUN2025 markets in the Core pool",
+    description: `#### Summary
+
+If passed, this VIP will add three new markets to the Core pool on BNB Chain, for the following underlying assets:
+
+- [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
+- [sUSDe](https://bscscan.com/address/0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2)
+- [PT-sUSDE-26JUN2025](https://bscscan.com/address/0xdd809435ba6c9d6903730f923038801781ca66ce)
+
+Community posts associated with these markets:
+
+- [Proposal: Listing PT-sUSDe (26 June) on Venus BNB Core Pool](https://community.venus.io/t/proposal-listing-pt-susde-26-june-on-venus-bnb-core-pool/5026)
+- [Proposal: Listing sUSDe and USDe on Venus BNB Core Pool](https://community.venus.io/t/proposal-listing-susde-and-usde-on-venus-bnb-core-pool/5018)
+
+#### Description
+
+**Risk parameters of the new markets**
+
+Underlying token: [PT-sUSDE-26JUN2025](https://bscscan.com/address/0xdd809435ba6c9d6903730f923038801781ca66ce)
+
+- Borrow cap: 0
+- Supply cap: 2,000,000
+- Collateral factor: 0.7
+- Reserve factor: 0
+- Bootstrap liquidity: 10,424.58 PT-sUSDE-26JUN2025 - provided by the market supporter [0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D](https://bscscan.com/address/0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D)
+- Interest rates (not relevant, because the asset is not borrowable, but configured anyway):
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.1
+    - jump multiplier (yearly): 2.5
+
+Underlying token: [sUSDe](https://bscscan.com/address/0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2)
+
+- Borrow cap: 0
+- Supply cap: 2,000,000
+- Collateral factor: 0.75
+- Reserve factor: 0
+- Bootstrap liquidity: 4,293.91 sUSDe - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9)
+- Interest rates (not relevant, because the asset is not borrowable, but configured anyway):
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.1
+    - jump multiplier (yearly): 2.5
+
+Underlying token: [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
+
+- Borrow cap: 1,600,000
+- Supply cap: 2,000,000
+- Collateral factor: 0.75
+- Reserve factor: 0.25
+- Bootstrap liquidity: 5,003.49 USDe - provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9)
+- Interest rates (not relevant, because the asset is not borrowable, but configured anyway):
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.075
+    - jump multiplier (yearly): 0.5
+
+**Oracle configuration**
+
+- PT-sUSDE-26JUN2025
+    - Main oracle: [PendleOracle](https://bscscan.com/address/0x176ca46D7DcB4e001b8ee5F12d0fcd6D279214f4), that will internally use the ratio PT-USDe-26JUN2025/sUSDe/USDe ([oracle](https://bscscan.com/address/0x9a9Fa8338dd5E5B2188006f1Cd2Ef26d921650C2), [market](https://bscscan.com/address/0x8557D39d4BAB2b045ac5c2B7ea66d12139da9Af4), [underlying token](https://bscscan.com/address/0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2), twap duration: 1,800 seconds)
+- sUSDe
+    - Main oracle: [OneJumpOracle](https://bscscan.com/address/0xa1df2f18c74db5bed3a7752547f6cc3094a1a2d5)
+        - Correlated token: [sUSDe](https://bscscan.com/address/0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2)
+        - Underlying token: [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
+        - Intermediate oracle: [RedStoneOracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a), using its price feed [sUSDe/USDe](https://bscscan.com/address/0x5ED849a45B4608952161f45483F4B95BCEa7f8f0)
+    - Pivot and fallback oracles: [OneJumpOracle](https://bscscan.com/address/0xBBe2Dc15A533DEF04D7e84Ad8aF89d62a0E5662f)
+        - Correlated token: [sUSDe](https://bscscan.com/address/0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2)
+        - Underlying token: [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
+        - Intermediate oracle: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F), using its price feed [sUSDe/USDe](https://bscscan.com/address/0x1a269eA1b209DA2c12bDCDab22635C9e6C5028B2)
+- USDe
+    - Main oracle: [RedStoneOracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a) ([feed](https://bscscan.com/address/0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb))
+    - Pivot and fallback oracles: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F) ([feed](https://bscscan.com/address/0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC))
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Contracts on mainnet
+
+- VToken_vPT-USDE-26JUN2025: [0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866](https://bscscan.com/address/0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866)
+- VToken_vsUSDe: [0x699658323d58eE25c69F1a29d476946ab011bD18](https://bscscan.com/address/0x699658323d58eE25c69F1a29d476946ab011bD18)
+- VToken_vUSDe: [0x74ca6930108F775CC667894EEa33843e691680d7](https://bscscan.com/address/0x74ca6930108F775CC667894EEa33843e691680d7)
+
+#### Contracts on testnet
+
+- VToken_vPT-USDE-26JUN2025: [0x90535B06ddB00453a5e5f2bC094d498F1cc86032](https://testnet.bscscan.com/address/0x90535B06ddB00453a5e5f2bC094d498F1cc86032)
+- VToken_vsUSDe: [0x8c8A1a0b6e1cb8058037F7bF24de6b79Aca5B7B0](https://testnet.bscscan.com/address/0x8c8A1a0b6e1cb8058037F7bF24de6b79Aca5B7B0)
+- VToken_vUSDe: [0x86f8DfB7CA84455174EE9C3edd94867b51Da46BD](https://testnet.bscscan.com/address/0x86f8DfB7CA84455174EE9C3edd94867b51Da46BD)
+
+#### Refunds
+
+- [Vanguard Treasury](https://bscscan.com/address/0xf645a387180F5F74b968305dF81d54EB328d21ca) will be refunded in this VIP with 10,000 USDT, because it provided the bootstrap liquidity for USDe and sUSDe to the Venus Treasury (the minted VTokens will be held by the Treasury):
+    - 5,003.49 USDe [here](https://bscscan.com/tx/0xfb6e338a60723add772e7958be09d0644f3bcfd5f6c370d1dc4d5be48137ce53)
+    - 4,293.91 sUSDe [here](https://bscscan.com/tx/0xd825ff3f5f2d45111f63d2257fc074dbc3c7eeceb0d6cea84eb5c38a723cc643)
+- [0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D](https://bscscan.com/address/0x63f6D9E7d3953106bCaf98832BD9C88A54AfCc9D) will be refunded in this VIP with 100 USDT, because it provided the bootstrap liquidity for PT-sUSDE-26JUN2025 ([here](https://bscscan.com/tx/0x74508b81e7e5c9fe23c2d2ae4ffefee51879806e92ab33aec17cc0ea9a905ba4)), and it will receive the minted VTokens, except $100 that will be burnt for security reasons.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/537)
+- [Source code of the PendleOracle](https://github.com/VenusProtocol/oracle/blob/main/contracts/oracles/PendleOracle.sol)
+- [Execution of the proposal enabling the markets on testnet](https://testnet.bscscan.com/tx/0x7ba30a7db615032d4317b280b4a8512bf37cfc6f1314b0e1edb24e6b5439b3b6)
+- [Chaos Labs recommendations about PT-sUSDE-26JUN2025](https://community.venus.io/t/proposal-listing-pt-susde-26-june-on-venus-bnb-core-pool/5026/7)
+- [Chaos Labs recommendations about sUSDe and USDe](https://community.venus.io/t/proposal-listing-susde-and-usde-on-venus-bnb-core-pool/5018/6)
+- Snapshot “[Proposal: Listing PT-sUSDe (26 June) on Venus BNB Core Pool](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xab21fef6201727fc4059943e7ebe8a958b83a57edd8425f89056c0b5320274c5)”
+- Snapshot “[Proposal: Listing sUSDe and USDe on Venus BNB Core Pool](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb7f66266542ed23ec10b5fbaea65eb56ec9a030b86290f53734560f3de554375)”
+- [Documentation](https://docs.venus.io/whats-new/isolated-pools)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

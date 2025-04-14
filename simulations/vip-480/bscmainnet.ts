@@ -33,8 +33,7 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 const ONE_YEAR = 365 * 24 * 3600;
 const BLOCKS_PER_YEAR = BigNumber.from(10512000);
 
-const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, UNITROLLER, VTREASURY } =
-  NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, ACCESS_CONTROL_MANAGER, NORMAL_TIMELOCK, UNITROLLER } = NETWORK_ADDRESSES.bscmainnet;
 
 const format = (amount: BigNumber, spec: { decimals: number; symbol: string }) =>
   `${formatUnits(amount, spec.decimals)} ${spec.symbol}`;
