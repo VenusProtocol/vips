@@ -9,8 +9,8 @@ import {
   OPBNBTESTNET_NEW_XVS_VAULT_IMPLEMENTATION,
   OPBNBTESTNET_VTOKEN_BEACON,
   OPBNBTESTNET_XVS_VAULT_PROXY,
-  vip475,
-} from "../../vips/vip-475/bsctestnet";
+  vip481,
+} from "../../vips/vip-481/bsctestnet";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PROXY_ABI from "./abi/manualProxy.json";
@@ -62,7 +62,7 @@ forking(57999649, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-475", await vip475(), {});
+  testForkedNetworkVipCommands("VIP-475", await vip481(), {});
 
   describe("Post-VIP behavior", async () => {
     describe("Should point to new impl and have updated block rate", () => {

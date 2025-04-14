@@ -10,7 +10,7 @@ export const OPBNBMAINNET_XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 const OPBNBMAINNET_NEW_BLOCK_RATE = 63072000;
 
-export const vip475 = () => {
+export const vip481 = () => {
   const meta = {
     version: "v2",
     title:
@@ -64,4 +64,4 @@ export const vip475 = () => {
   );
 };
 
-export default vip475;
+export default vip481;

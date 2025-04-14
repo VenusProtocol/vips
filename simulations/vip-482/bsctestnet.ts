@@ -33,9 +33,8 @@ import {
   BSCTESTNET_XVS_MARKET,
   BSCTESTNET_XVS_PER_BLOCK_REWARD,
   BSCTESTNET_XVS_VAULT_PROXY,
-  vip475,
-} from "../../vips/vip-475/bsctestnet";
-import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+  vip482,
+} from "../../vips/vip-482/bsctestnet";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -171,12 +170,12 @@ forking(49864260, async () => {
     });
   });
 
-  testVip("VIP-475", await vip475(), {
+  testVip("VIP-475", await vip482(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
-        [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI, OMNICHAIN_PROPOSAL_SENDER_ABI],
-        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated", "ExecuteRemoteProposal"],
+        [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI],
+        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated"],
         [1, 4, 1],
       );
     },
