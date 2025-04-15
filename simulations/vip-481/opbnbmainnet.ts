@@ -1,3 +1,4 @@
+import { mine, time } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -10,11 +11,14 @@ import {
   OPBNBMAINNET_XVS_VAULT_PROXY,
   vip481,
 } from "../../vips/vip-481/bscmainnet";
+import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import PROXY_ABI from "./abi/manualProxy.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
-import { getAllVTokens } from "./common";
+import { RateCurvePoints, VTokenContractAndSymbol, getAllVTokens, getRateCurve } from "./common";
+
+const OPBNBMAINNET_CHECKPOINT = 1745204401;
 
 forking(52932185, async () => {
   const xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, OPBNBMAINNET_XVS_VAULT_PROXY);
@@ -22,6 +26,14 @@ forking(52932185, async () => {
   const vTokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, OPBNBMAINNET_VTOKEN_BEACON);
   const poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.opbnbmainnet.POOL_REGISTRY);
   const allVTokens = await getAllVTokens(poolRegistry);
+
+  const oldRates: Record<string, RateCurvePoints> = Object.fromEntries(
+    await Promise.all(
+      allVTokens.map(async (vToken: VTokenContractAndSymbol) => {
+        return [vToken.symbol, await getRateCurve(vToken.contract)];
+      }),
+    ),
+  );
 
   describe("Pre-VIP behaviour", () => {
     describe("Old Implementations & old block rate", () => {
@@ -72,6 +84,87 @@ forking(52932185, async () => {
           });
         }
       });
+    });
+
+    describe("Interest rates before checkpoint", () => {
+      for (const vToken of allVTokens) {
+        const oldRateCurve = oldRates[vToken.symbol];
+        let newRateCurve: RateCurvePoints;
+
+        before(async () => {
+          newRateCurve = await getRateCurve(vToken.contract);
+        });
+
+        describe(`${vToken.symbol} rate curve`, () => {
+          it("has the same utilization points", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              expect(oldRateCurve[idx].utilizationRate).to.equal(newRateCurve[idx].utilizationRate);
+            }
+          });
+
+          it("has new supply rate = old supply rate at all utilizations", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              expect(newRateCurve[idx].supplyRate).to.equal(oldRateCurve[idx].supplyRate);
+            }
+          });
+
+          it("has new borrow rate = old borrow rate at all utilizations", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              expect(newRateCurve[idx].borrowRate).to.equal(oldRateCurve[idx].borrowRate);
+            }
+          });
+
+          it("set to 31536000 blocks per year", async () => {
+            const rateModelAddress = await vToken.contract.interestRateModel();
+            const rateModel = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
+            const blocksPerYear = await Promise.any([rateModel.blocksPerYear(), rateModel.blocksOrSecondsPerYear()]);
+            expect(blocksPerYear).to.equal(31536000);
+          });
+        });
+      }
+    });
+
+    describe("Interest rates after checkpoint", () => {
+      before(async () => {
+        await time.increaseTo(OPBNBMAINNET_CHECKPOINT);
+        await mine();
+      });
+      for (const vToken of allVTokens) {
+        const oldRateCurve = oldRates[vToken.symbol];
+        let newRateCurve: RateCurvePoints;
+
+        before(async () => {
+          newRateCurve = await getRateCurve(vToken.contract);
+        });
+
+        describe(`${vToken.symbol} rate curve`, () => {
+          it("has the same utilization points", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              expect(oldRateCurve[idx].utilizationRate).to.equal(newRateCurve[idx].utilizationRate);
+            }
+          });
+
+          it("has new supply rate ≈ old supply rate / 2 at all utilizations", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              const expectedSupplyRate = oldRateCurve[idx].supplyRate.div(2);
+              expect(newRateCurve[idx].supplyRate).to.be.closeTo(expectedSupplyRate, 5);
+            }
+          });
+
+          it("has new borrow rate ≈ old borrow rate / 2 at all utilizations", async () => {
+            for (const [idx] of oldRateCurve.entries()) {
+              const expectedBorrowRate = oldRateCurve[idx].borrowRate.div(2);
+              expect(newRateCurve[idx].borrowRate).to.be.closeTo(expectedBorrowRate, 5);
+            }
+          });
+
+          it("set to 63072000 blocks per year", async () => {
+            const rateModelAddress = await vToken.contract.interestRateModel();
+            const rateModel = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
+            expect(await rateModel.blocksOrSecondsPerYear()).to.equal(63072000);
+          });
+        });
+      }
     });
   });
 });
