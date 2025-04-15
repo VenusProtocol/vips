@@ -10,6 +10,7 @@ import vipxxx, {
   ANY_TARGET_CONTRACT,
   BSC_TESTNET_CORE_COMPTROLLER,
   MARKET_CAP_RISK_STEWARD_BSC_TESTNET,
+  NORMAL_TIMELOCK_BSC_TESTNET
 } from "../../vips/vip-xxx/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
@@ -27,13 +28,18 @@ forking(48650752, async () => {
     provider,
   );
 
+  before(async () => {
+    await setBalance(NORMAL_TIMELOCK_BSC_TESTNET, parseUnits("1000000", 18));
+    await setBalance("0xCfD34AEB46b1CB4779c945854d405E91D27A1899", parseUnits("1000000", 18));
+  });
+
   testVip("vipxxx Configuring Risk Stewards", await vipxxx(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, VENUS_RISK_STEWARD_RECEIVER_ABI],
         ["PermissionGranted", "RiskParameterConfigSet"],
-        [5, 2],
+        [18, 2],
       );
     },
   });
