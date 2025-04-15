@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -8,6 +9,7 @@ export const OPBNBTESTNET_NEW_XVS_VAULT_IMPLEMENTATION = "0x6E09f32F94B2d5056431
 export const OPBNBTESTNET_XVS_VAULT_PROXY = "0xB14A0e72C5C202139F78963C9e89252c1ad16f01";
 export const OPBNBTESTNET_XVS = "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9";
 export const OPBNBTESTNET_ACM = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
+export const OPBNBTESTNET_RATE_MODEL_SETTER = "0x9Ed9e848cE1467a6959c0f28538C46252852180A";
 const OPBNBTESTNET_NEW_BLOCK_RATE = 63072000;
 
 export const vip481 = () => {
@@ -56,6 +58,25 @@ export const vip481 = () => {
         target: OPBNBTESTNET_XVS_VAULT_PROXY,
         signature: "setBlocksPerYear(uint256)",
         params: [OPBNBTESTNET_NEW_BLOCK_RATE],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      // update interest rate models
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBTESTNET_RATE_MODEL_SETTER],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_RATE_MODEL_SETTER,
+        signature: "run()",
+        params: [],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: OPBNBTESTNET_ACM,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBTESTNET_RATE_MODEL_SETTER],
         dstChainId: LzChainId.opbnbtestnet,
       },
     ],
