@@ -18,7 +18,7 @@ import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-forking(52895873, async () => {
+forking(52932185, async () => {
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
   let vtokenBeacon: Contract;
