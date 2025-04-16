@@ -177,9 +177,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
       } else {
         tx = await governorProxy
           .connect(proposer)
-          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type, {
-            gasLimit: 45_000_000,
-          });
+          .propose(targets, values, signatures, getCalldatas(proposal), JSON.stringify(meta), proposal.type);
       }
       await tx.wait();
       proposalId = await governorProxy.callStatic.proposalCount();

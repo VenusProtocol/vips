@@ -10,8 +10,8 @@ import vipxxx, {
   ANY_TARGET_CONTRACT,
   BSC_TESTNET_CORE_COMPTROLLER,
   MARKET_CAP_RISK_STEWARD_BSC_TESTNET,
-  NORMAL_TIMELOCK_BSC_TESTNET
-} from "../../vips/vip-xxx/bsctestnet";
+  NORMAL_TIMELOCK_BSC_TESTNET,
+} from "../../vips/vip-xxx/bsctestnet1";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";

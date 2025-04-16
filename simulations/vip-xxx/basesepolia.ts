@@ -7,11 +7,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
+import { ANY_TARGET_CONTRACT } from "../../vips/vip-xxx/bsctestnet1";
 import vipxxx, {
   ACCESS_CONTROL_MANAGER_BASESEPOLIA,
-  ANY_TARGET_CONTRACT,
   MARKET_CAP_RISK_STEWARD_BASESEPOLIA,
-} from "../../vips/vip-xxx/bsctestnet";
+} from "../../vips/vip-xxx/bsctestnet2";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";

@@ -11,7 +11,7 @@ import vipxxx, {
   ACCESS_CONTROL_MANAGER_ARBITRUMSEPOLIA,
   ANY_TARGET_CONTRACT,
   MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA,
-} from "../../vips/vip-xxx/bsctestnet";
+} from "../../vips/vip-xxx/bsctestnet1";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
