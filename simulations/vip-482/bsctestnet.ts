@@ -58,7 +58,7 @@ import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 const skipVtokens = ["0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1", "0xeffE7874C345aE877c1D893cd5160DDD359b24dA"];
 
-forking(50306601, async () => {
+forking(50324095, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
