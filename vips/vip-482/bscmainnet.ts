@@ -17,7 +17,7 @@ const MAX_STALE_PERIOD = 100;
 
 const { RESILIENT_ORACLE, UNITROLLER, REDSTONE_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
-const vip479 = (maxStalePeriod?: number) => {
+const vip482 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-482 Risk Parameters Adjustments (SolvBTC, THE)",
@@ -90,4 +90,4 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/539](https://github.
   );
 };
 
-export default vip479;
+export default vip482;
