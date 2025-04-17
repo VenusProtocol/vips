@@ -32,6 +32,40 @@ export const BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0x78Da3E30a896Afd5E04cBC98f
 export const BSCTESTNET_ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 const BSCTESTNET_NEW_BLOCK_RATE = 21024000;
 export const BSCTESTNET_VSLIS_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
+export const BSCTESTNET_VPLANET_BEACON = "0x6f48cf8e94562b5c37be1d0b6c50c845118cc498";
+export const BSCTESTNET_GOVERNANCE_BRAVO = "0x5573422A1a59385C247ec3a66B93B7C08eC2f8f2";
+export const BSCTESTNET_BRAVO_NEW_IMPL = "0x1789237eF2Db11D7fA8F91ff7FbdCAB40581C3F6";
+export const BSCTESTNET_GUARDIAN = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
+
+// Doubling the previous value, to be reviewed
+export const MIN_VOTING_PERIOD = 50 * 2;
+export const MAX_VOTING_PERIOD = 200 * 2;
+export const MIN_VOTING_DELAY = 1 * 2;
+export const MAX_VOTING_DELAY = 201600 * 2;
+
+export const NT_VOTING_PERIOD = 150 * 2;
+export const NT_VOTING_DELAY = 150 * 2;
+export const NT_PROPOSAL_THRESHOLD = parseUnits("150000", 18);
+
+export const FT_VOTING_PERIOD = 100 * 2;
+export const FT_VOTING_DELAY = 100 * 2;
+export const FT_PROPOSAL_THRESHOLD = parseUnits("200000", 18);
+
+export const CT_VOTING_PERIOD = 50 * 2;
+export const CT_VOTING_DELAY = 50 * 2;
+export const CT_PROPOSAL_THRESHOLD = parseUnits("250000", 18);
+
+export const PROPOSAL_TIMELOCKS = [
+  "0xce10739590001705F7FF231611ba4A48B2820327", // NT
+  "0x3CFf21b7AF8390fE68799D58727d3b4C25a83cb6", // FT
+  "0x23B893a7C45a5Eb8c8C062b9F32d0D2e43eD286D", // CT
+];
+
+export const PROPOSAL_CONFIGS = [
+  [NT_VOTING_PERIOD, NT_VOTING_DELAY, NT_PROPOSAL_THRESHOLD],
+  [FT_VOTING_PERIOD, FT_VOTING_DELAY, FT_PROPOSAL_THRESHOLD],
+  [CT_VOTING_PERIOD, CT_VOTING_DELAY, CT_PROPOSAL_THRESHOLD],
+];
 
 export const vip482 = () => {
   const meta = {
@@ -95,12 +129,18 @@ export const vip482 = () => {
         signature: "upgradeTo(address)",
         params: [BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION],
       },
-      // VSLIS is pointing to different Beacon
+      // VSLIS & VPLANET is pointing to different Beacon
       {
         target: BSCTESTNET_VSLIS_BEACON,
         signature: "upgradeTo(address)",
         params: [BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION],
       },
+      {
+        target: BSCTESTNET_VPLANET_BEACON,
+        signature: "upgradeTo(address)",
+        params: [BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION],
+      },
+
       {
         target: BSCTESTNET_XVS_VAULT_PROXY,
         signature: "_setPendingImplementation(address)",
@@ -127,6 +167,34 @@ export const vip482 = () => {
         target: BSCTESTNET_XVS_VAULT_PROXY,
         signature: "setBlocksPerYear(uint256)",
         params: [BSCTESTNET_NEW_BLOCK_RATE],
+      },
+
+      // Accept admin of Bravo
+      {
+        target: BSCTESTNET_GOVERNANCE_BRAVO,
+        signature: "_acceptAdmin()",
+        params: [],
+      },
+
+      // Update Bravo impl
+      {
+        target: BSCTESTNET_GOVERNANCE_BRAVO,
+        signature: "_setImplementation(address)",
+        params: [BSCTESTNET_BRAVO_NEW_IMPL],
+      },
+
+      // Update validation params in Bravo
+
+      {
+        target: BSCTESTNET_GOVERNANCE_BRAVO,
+        signature: "setValidationParams((uint256,uint256,uint256,uint256))",
+        params: [[MIN_VOTING_PERIOD, MAX_VOTING_PERIOD, MIN_VOTING_DELAY, MAX_VOTING_DELAY]],
+      },
+
+      {
+        target: BSCTESTNET_GOVERNANCE_BRAVO,
+        signature: "setProposalConfigs((uint256,uint256,uint256)[])",
+        params: [PROPOSAL_CONFIGS],
       },
     ],
     meta,

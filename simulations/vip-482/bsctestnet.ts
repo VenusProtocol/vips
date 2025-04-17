@@ -8,12 +8,14 @@ import { forking, testVip } from "src/vip-framework";
 
 import {
   BSCTESTNET_ACM,
+  BSCTESTNET_BRAVO_NEW_IMPL,
   BSCTESTNET_BTCB,
   BSCTESTNET_BTCB_PER_BLOCK_REWARD,
   BSCTESTNET_COMPTROLLER,
   BSCTESTNET_DEFAULT_PROXY_ADMIN,
   BSCTESTNET_ETH,
   BSCTESTNET_ETH_PER_BLOCK_REWARD,
+  BSCTESTNET_GOVERNANCE_BRAVO,
   BSCTESTNET_NEW_PLP_IMPLEMENTATION,
   BSCTESTNET_NEW_PRIME_IMPLEMENTATION,
   BSCTESTNET_NEW_VAI_IMPLEMENTATION,
@@ -27,12 +29,18 @@ import {
   BSCTESTNET_USDT_PER_BLOCK_REWARD,
   BSCTESTNET_VAI_UNITROLLER,
   BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK,
+  BSCTESTNET_VPLANET_BEACON,
   BSCTESTNET_VSLIS_BEACON,
   BSCTESTNET_VTOKEN_BEACON,
   BSCTESTNET_XVS,
   BSCTESTNET_XVS_MARKET,
   BSCTESTNET_XVS_PER_BLOCK_REWARD,
   BSCTESTNET_XVS_VAULT_PROXY,
+  MAX_VOTING_DELAY,
+  MAX_VOTING_PERIOD,
+  MIN_VOTING_DELAY,
+  MIN_VOTING_PERIOD,
+  PROPOSAL_CONFIGS,
   vip482,
 } from "../../vips/vip-482/bsctestnet";
 import PRIME_ABI from "./abi/Prime.json";
@@ -40,6 +48,8 @@ import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/defaultProxyAdmin.json";
+import DELEGATOR_ABI from "./abi/governorBravoDelegator.json";
+import DELEGATE_ABI from "./abi/governorBravodelegate.json";
 import PROXY_ABI from "./abi/manualProxy.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
@@ -48,7 +58,7 @@ import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 const skipVtokens = ["0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1", "0xeffE7874C345aE877c1D893cd5160DDD359b24dA"];
 
-forking(49864260, async () => {
+forking(50306601, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
@@ -60,6 +70,9 @@ forking(49864260, async () => {
   let vtokenBeacon: Contract;
   let poolRegistry: Contract;
   let vslisBeacon: Contract;
+  let vplanetBeacon: Contract;
+  let delegator: Contract;
+  let delegate: Contract;
 
   before(async () => {
     plp = await ethers.getContractAt(PLP_ABI, BSCTESTNET_PLP_PROXY);
@@ -72,7 +85,10 @@ forking(49864260, async () => {
     vaiunitroller = await ethers.getContractAt(PROXY_ABI, BSCTESTNET_VAI_UNITROLLER);
     vtokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VTOKEN_BEACON);
     vslisBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VSLIS_BEACON);
+    vplanetBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VPLANET_BEACON);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY);
+    delegate = await ethers.getContractAt(DELEGATE_ABI, BSCTESTNET_GOVERNANCE_BRAVO);
+    delegator = await ethers.getContractAt(DELEGATOR_ABI, BSCTESTNET_GOVERNANCE_BRAVO);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -150,6 +166,7 @@ forking(49864260, async () => {
         it("VToken beacon should not point to new impl", async () => {
           expect(await vtokenBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
           expect(await vslisBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
+          expect(await vplanetBeacon.implementation()).not.equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
         });
         it("All Vtokens should have old block rate in IL", async () => {
           const registeredPools = await poolRegistry.getAllPools();
@@ -165,6 +182,11 @@ forking(49864260, async () => {
               expect(await vtoken.blocksOrSecondsPerYear()).equals(10512000);
             }
           }
+        });
+      });
+      describe("Governance Bravo", () => {
+        it("delegator shopuld not point to new impl", async () => {
+          expect(await delegator.implementation()).not.equals(BSCTESTNET_BRAVO_NEW_IMPL);
         });
       });
     });
@@ -248,6 +270,8 @@ forking(49864260, async () => {
       describe("VToken", () => {
         it("VToken beacon should point to new impl", async () => {
           expect(await vtokenBeacon.implementation()).equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
+          expect(await vslisBeacon.implementation()).equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
+          expect(await vplanetBeacon.implementation()).equals(BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION);
         });
         it("All Vtokens should have new block rate in IL", async () => {
           const registeredPools = await poolRegistry.getAllPools();
@@ -257,12 +281,31 @@ forking(49864260, async () => {
             const poolVTokens = await comptroller.getAllMarkets();
             for (const vtokenAddress of poolVTokens) {
               const vtoken = await ethers.getContractAt(VTOKEN_ABI, vtokenAddress);
-              // VPLANET cannot be upgraded because it is linked to a different beacon contract and has a different owner.
-              if (vtokenAddress == "0xe237aA131E7B004aC88CB808Fa56AF3dc4C408f1") {
-                continue;
-              }
               expect(await vtoken.blocksOrSecondsPerYear()).equals(21024000);
             }
+          }
+        });
+      });
+      describe("Governance Bravo", () => {
+        it("Admin must be NT", async () => {
+          expect(await delegate.admin()).equals(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
+        });
+        it("delegator shopuld point to new impl", async () => {
+          expect(await delegator.implementation()).equals(BSCTESTNET_BRAVO_NEW_IMPL);
+        });
+        it("should have updated validation params", async () => {
+          const validationParams = await delegate.validationParams();
+          expect(validationParams.minVotingPeriod).equals(MIN_VOTING_PERIOD);
+          expect(validationParams.maxVotingPeriod).equals(MAX_VOTING_PERIOD);
+          expect(validationParams.minVotingDelay).equals(MIN_VOTING_DELAY);
+          expect(validationParams.maxVotingDelay).equals(MAX_VOTING_DELAY);
+        });
+        it("should have updated proposal configs", async () => {
+          for (let i = 0; i < PROPOSAL_CONFIGS.length; i++) {
+            const config = await delegate.proposalConfigs(i);
+            expect(config.votingPeriod).to.equal(PROPOSAL_CONFIGS[i][0]);
+            expect(config.votingDelay).to.equal(PROPOSAL_CONFIGS[i][1]);
+            expect(config.proposalThreshold).to.equal(PROPOSAL_CONFIGS[i][2]);
           }
         });
       });
