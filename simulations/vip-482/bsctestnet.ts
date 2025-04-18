@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -33,13 +33,13 @@ import {
   BSCTESTNET_VSLIS_BEACON,
   BSCTESTNET_VTOKEN_BEACON,
   BSCTESTNET_XVS,
-  BSCTESTNET_XVS_MARKET,
   BSCTESTNET_XVS_PER_BLOCK_REWARD,
   BSCTESTNET_XVS_VAULT_PROXY,
   MAX_VOTING_DELAY,
   MAX_VOTING_PERIOD,
   MIN_VOTING_DELAY,
   MIN_VOTING_PERIOD,
+  PREVIOUS_XVS_EMISSIONS,
   PROPOSAL_CONFIGS,
   vip482,
 } from "../../vips/vip-482/bsctestnet";
@@ -102,10 +102,6 @@ forking(50324095, async () => {
         expect(await comptroller.venusVAIVaultRate()).to.equals(OLD_BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK);
       });
 
-      it("has the old XVS market speed", async () => {
-        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(0);
-      });
-
       it("has the old BTCB distribution speed", async () => {
         const OLD_BSCTESTNET_BTCB_PER_BLOCK_REWARD = parseUnits("0.000001261574074074", 18);
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_BTCB)).to.equal(OLD_BSCTESTNET_BTCB_PER_BLOCK_REWARD);
@@ -125,6 +121,19 @@ forking(50324095, async () => {
         const OLD_BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("0.087191", 6);
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_USDT)).to.equal(OLD_BSCTESTNET_USDT_PER_BLOCK_REWARD);
       });
+    });
+    describe("Old XVS emissions", () => {
+      for (const oldSpeed of PREVIOUS_XVS_EMISSIONS) {
+        it(`previous supply-side XVS emissions per block for ${oldSpeed.symbol}`, async () => {
+          const supplySpeed = await comptroller.venusSupplySpeeds(oldSpeed.market);
+          expect(supplySpeed).to.equal(oldSpeed.supplySideSpeed);
+        });
+
+        it(`previous borrow-side XVS emissions per block for ${oldSpeed.symbol}`, async () => {
+          const borrowSpeed = await comptroller.venusBorrowSpeeds(oldSpeed.market);
+          expect(borrowSpeed).to.equal(oldSpeed.borrowSideSpeed);
+        });
+      }
     });
     describe("Old Implementations & old block rate", () => {
       describe("Prime & PLP", () => {
@@ -197,8 +206,8 @@ forking(50324095, async () => {
       await expectEvents(
         txResponse,
         [XVS_VAULT_ABI, COMPTROLLER_ABI, PLP_ABI],
-        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated"],
-        [1, 4, 1],
+        ["NewVenusVAIVaultRate", "TokenDistributionSpeedUpdated", "VenusSupplySpeedUpdated", "VenusBorrowSpeedUpdated"],
+        [1, 4, 18, 18],
       );
     },
   });
@@ -212,9 +221,6 @@ forking(50324095, async () => {
         expect(await comptroller.venusVAIVaultRate()).to.equals(BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK);
       });
 
-      it("has the new XVS market speed", async () => {
-        expect(await comptroller.venusSupplySpeeds(BSCTESTNET_XVS_MARKET)).to.equals(0);
-      });
       it("has the new BTCB distribution speed", async () => {
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_BTCB)).to.equal(BSCTESTNET_BTCB_PER_BLOCK_REWARD);
       });
@@ -230,6 +236,19 @@ forking(50324095, async () => {
       it("has the new USDT distribution speed", async () => {
         expect(await plp.tokenDistributionSpeeds(BSCTESTNET_USDT)).to.equal(BSCTESTNET_USDT_PER_BLOCK_REWARD);
       });
+    });
+    describe("New XVS emissions", () => {
+      for (const oldSpeed of PREVIOUS_XVS_EMISSIONS) {
+        it(`halve supply-side XVS emissions per block for ${oldSpeed.symbol}`, async () => {
+          const supplySpeed = await comptroller.venusSupplySpeeds(oldSpeed.market);
+          expect(supplySpeed).to.equal(BigNumber.from(oldSpeed.supplySideSpeed).div(2));
+        });
+
+        it(`halve borrow-side XVS emissions per block for ${oldSpeed.symbol}`, async () => {
+          const borrowSpeed = await comptroller.venusBorrowSpeeds(oldSpeed.market);
+          expect(borrowSpeed).to.equal(BigNumber.from(oldSpeed.borrowSideSpeed).div(2));
+        });
+      }
     });
     describe("Should point to new impl and have updated block rate", () => {
       describe("Prime & PLP", () => {

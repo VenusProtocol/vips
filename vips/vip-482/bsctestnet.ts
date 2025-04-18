@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
@@ -67,12 +68,130 @@ export const PROPOSAL_CONFIGS = [
   [CT_VOTING_PERIOD, CT_VOTING_DELAY, CT_PROPOSAL_THRESHOLD],
 ];
 
+export interface SpeedRecord {
+  market: string;
+  symbol: string;
+  supplySideSpeed: string;
+  borrowSideSpeed: string;
+}
+
+export const PREVIOUS_XVS_EMISSIONS: SpeedRecord[] = [
+  {
+    market: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
+    symbol: "vWBETH",
+    supplySideSpeed: "596440972222220",
+    borrowSideSpeed: "596440972222220",
+  },
+  {
+    market: "0x369Fea97f6fB7510755DCA389088d9E2e2819278",
+    symbol: "vTRXOLD",
+    supplySideSpeed: "868055555555556",
+    borrowSideSpeed: "868055555555556",
+  },
+  {
+    market: "0x6AF3Fdb3282c5bb6926269Db10837fa8Aec67C04",
+    symbol: "vTRX",
+    supplySideSpeed: "868055555555555",
+    borrowSideSpeed: "868055555555555",
+  },
+  {
+    market: "0xF06e662a00796c122AaAE935EC4F0Be3F74f5636",
+    symbol: "vFDUSD",
+    supplySideSpeed: "173611111111111",
+    borrowSideSpeed: "173611111111111",
+  },
+  {
+    market: "0xEFAACF73CE2D38ED40991f29E72B12C74bd4cf23",
+    symbol: "vTUSD",
+    supplySideSpeed: "217013888888889",
+    borrowSideSpeed: "217013888888889",
+  },
+  {
+    market: "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c",
+    symbol: "vBNB",
+    supplySideSpeed: "52083333000000000",
+    borrowSideSpeed: "52083333000000000",
+  },
+  {
+    market: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
+    symbol: "vUSDT",
+    supplySideSpeed: "17361111000000000",
+    borrowSideSpeed: "17361111000000000",
+  },
+  {
+    market: "0x171B468b52d7027F12cEF90cd065d6776a25E24e",
+    symbol: "vUNI",
+    supplySideSpeed: "81250000000000",
+    borrowSideSpeed: "81250000000000",
+  },
+  {
+    market: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
+    symbol: "vETH",
+    supplySideSpeed: "8680556000000000",
+    borrowSideSpeed: "8680556000000000",
+  },
+  {
+    market: "0xAfc13BC065ABeE838540823431055D2ea52eBA52",
+    symbol: "vLTC",
+    supplySideSpeed: "8680556000000000",
+    borrowSideSpeed: "8680556000000000",
+  },
+  {
+    market: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
+    symbol: "vBTCB",
+    supplySideSpeed: "52083333000000000",
+    borrowSideSpeed: "52083333000000000",
+  },
+  {
+    market: "0x488aB2826a154da01CC4CC16A8C83d4720D3cA2C",
+    symbol: "vXRP",
+    supplySideSpeed: "8680556000000000",
+    borrowSideSpeed: "8680556000000000",
+  },
+  {
+    market: "0x74469281310195A04840Daf6EdF576F559a3dE80",
+    symbol: "vSXP",
+    supplySideSpeed: "868055555555555",
+    borrowSideSpeed: "868055555555555",
+  },
+  {
+    market: "0x37C28DE42bA3d22217995D146FC684B2326Ede64",
+    symbol: "vADA",
+    supplySideSpeed: "3038194444444440",
+    borrowSideSpeed: "3038194444444440",
+  },
+  {
+    market: "0xeDaC03D29ff74b5fDc0CC936F6288312e1459BC6",
+    symbol: "vCAKE",
+    supplySideSpeed: "3038194444444440",
+    borrowSideSpeed: "3038194444444440",
+  },
+  {
+    market: "0x714db6c38A17883964B68a07d56cE331501d9eb6",
+    symbol: "vAAVE",
+    supplySideSpeed: "434027777777778",
+    borrowSideSpeed: "434027777777778",
+  },
+  {
+    market: "0xF912d3001CAf6DC4ADD366A62Cc9115B4303c9A9",
+    symbol: "vDOGE",
+    supplySideSpeed: "1590451388888890",
+    borrowSideSpeed: "1590451388888890",
+  },
+  {
+    market: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
+    symbol: "vUSDC",
+    supplySideSpeed: "17361111000000000",
+    borrowSideSpeed: "17361111000000000",
+  },
+];
+
 export const vip482 = () => {
   const meta = {
     version: "v2",
     title:
       "Reduce the distribution speeds and upgrade implementations considering the update of the blockrate on BNB Chain",
-    description: ``,
+    description: `Reduce the distribution speeds and upgrade implementations considering the update of the blockrate on BNB Chain`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -195,6 +314,17 @@ export const vip482 = () => {
         target: BSCTESTNET_GOVERNANCE_BRAVO,
         signature: "setProposalConfigs((uint256,uint256,uint256)[])",
         params: [PROPOSAL_CONFIGS],
+      },
+
+      // Update XVS market emissions
+      {
+        target: BSCTESTNET_COMPTROLLER,
+        signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
+        params: [
+          PREVIOUS_XVS_EMISSIONS.map(s => s.market),
+          PREVIOUS_XVS_EMISSIONS.map(s => BigNumber.from(s.supplySideSpeed).div(2).toString()),
+          PREVIOUS_XVS_EMISSIONS.map(s => BigNumber.from(s.borrowSideSpeed).div(2).toString()),
+        ],
       },
     ],
     meta,
