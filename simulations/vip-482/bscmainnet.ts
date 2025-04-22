@@ -52,7 +52,7 @@ import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-forking(48551731, async () => {
+forking(48574625, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
