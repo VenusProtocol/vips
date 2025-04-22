@@ -71,7 +71,7 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip482 = () => {
+export const vip490 = () => {
   const meta = {
     version: "v2",
     title:
@@ -189,4 +189,4 @@ export const vip482 = () => {
   );
 };
 
-export default vip482;
+export default vip490;
