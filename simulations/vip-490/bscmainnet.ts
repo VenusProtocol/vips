@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -54,7 +54,7 @@ import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-forking(48574625, async () => {
+forking(48611358, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let xvsVaultProxy: Contract;
@@ -81,11 +81,6 @@ forking(48574625, async () => {
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bscmainnet.POOL_REGISTRY);
     delegate = await ethers.getContractAt(DELEGATE_ABI, BSCMAINNET_GOVERNANCE_BRAVO);
     delegator = await ethers.getContractAt(DELEGATOR_ABI, BSCMAINNET_GOVERNANCE_BRAVO);
-
-    // To be removed
-    const ADMIN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
-    const impersonatedAdmin = await initMainnetUser(ADMIN, ethers.utils.parseEther("2"));
-    await delegate.connect(impersonatedAdmin)._setPendingAdmin(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -179,7 +174,7 @@ forking(48574625, async () => {
         });
       });
       describe("Governance Bravo", () => {
-        it("delegator shopuld not point to new impl", async () => {
+        it("delegator should not point to new impl", async () => {
           expect(await delegator.implementation()).not.equals(BSCMAINNET_BRAVO_NEW_IMPLEMENTATION);
         });
       });
@@ -285,7 +280,7 @@ forking(48574625, async () => {
         it("Admin must be NT", async () => {
           expect(await delegate.admin()).equals(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
         });
-        it("delegator shopuld point to new impl", async () => {
+        it("delegator should point to new impl", async () => {
           expect(await delegator.implementation()).equals(BSCMAINNET_BRAVO_NEW_IMPLEMENTATION);
         });
         it("should have updated validation params", async () => {
