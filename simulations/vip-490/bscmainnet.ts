@@ -30,8 +30,10 @@ import {
   BSCMAINNET_VAI_VAULT_RATE_PER_BLOCK,
   BSCMAINNET_VTOKEN_BEACON,
   BSCMAINNET_XVS,
+  BSCMAINNET_XVS_MARKET,
   BSCMAINNET_XVS_PER_BLOCK_REWARD,
   BSCMAINNET_XVS_VAULT_PROXY,
+  BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
   MAX_VOTING_DELAY,
   MAX_VOTING_PERIOD,
   MIN_VOTING_DELAY,
@@ -115,6 +117,12 @@ forking(48574625, async () => {
       it("has the old USDT distribution speed", async () => {
         const OLD_BSCMAINNET_USDT_PER_BLOCK_REWARD = parseUnits("0.138127853881278538", 18);
         expect(await plp.tokenDistributionSpeeds(BSCMAINNET_USDT)).to.equal(OLD_BSCMAINNET_USDT_PER_BLOCK_REWARD);
+      });
+      it("has the old XVS market speed", async () => {
+        const OLD_BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK = parseUnits("0.00078125", 18).toString();
+        expect(await comptroller.venusSupplySpeeds(BSCMAINNET_XVS_MARKET)).to.equals(
+          OLD_BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
+        );
       });
     });
     describe("Old Implementations & old block rate", () => {
@@ -212,6 +220,12 @@ forking(48574625, async () => {
 
       it("has the new USDT distribution speed", async () => {
         expect(await plp.tokenDistributionSpeeds(BSCMAINNET_USDT)).to.equal(BSCMAINNET_USDT_PER_BLOCK_REWARD);
+      });
+
+      it("has the new XVS market speed", async () => {
+        expect(await comptroller.venusSupplySpeeds(BSCMAINNET_XVS_MARKET)).to.equals(
+          BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
+        );
       });
     });
     describe("Should point to new impl and have updated block rate", () => {

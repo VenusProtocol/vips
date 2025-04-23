@@ -18,6 +18,7 @@ export const BSCMAINNET_ETH_PER_BLOCK_REWARD = parseUnits("0.000013359969558599"
 export const BSCMAINNET_USDC_PER_BLOCK_REWARD = parseUnits("0.075342465753424657", 18).div(2);
 export const BSCMAINNET_USDT_PER_BLOCK_REWARD = parseUnits("0.138127853881278538", 18).div(2);
 export const BSCMAINNET_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.002278935185185185", 18).div(2);
+export const BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK = parseUnits("0.00078125", 18).div(2);
 
 export const BSCMAINNET_DEFAULT_PROXY_ADMIN = "0x6beb6D2695B67FEb73ad4f172E8E2975497187e4";
 export const BSCMAINNET_PRIME_PROXY = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
@@ -37,19 +38,19 @@ const BSCMAINNET_NEW_BLOCK_RATE = 21024000;
 // Doubling the previous value, to be reviewed
 export const MIN_VOTING_PERIOD = 3600 * 2;
 export const MAX_VOTING_PERIOD = 403200 * 2;
-export const MIN_VOTING_DELAY = 1 * 2;
+export const MIN_VOTING_DELAY = 1;
 export const MAX_VOTING_DELAY = 201600 * 2;
 
 export const NT_VOTING_PERIOD = 28800 * 2;
-export const NT_VOTING_DELAY = 1 * 2;
+export const NT_VOTING_DELAY = 1;
 export const NT_PROPOSAL_THRESHOLD = parseUnits("300000", 18);
 
 export const FT_VOTING_PERIOD = 28800 * 2;
-export const FT_VOTING_DELAY = 1 * 2;
+export const FT_VOTING_DELAY = 1;
 export const FT_PROPOSAL_THRESHOLD = parseUnits("300000", 18);
 
 export const CT_VOTING_PERIOD = 7200 * 2;
-export const CT_VOTING_DELAY = 1 * 2;
+export const CT_VOTING_DELAY = 1;
 export const CT_PROPOSAL_THRESHOLD = parseUnits("300000", 18);
 
 export const PROPOSAL_TIMELOCKS = [
@@ -111,6 +112,15 @@ export const vip490 = () => {
             BSCMAINNET_USDC_PER_BLOCK_REWARD,
             BSCMAINNET_USDT_PER_BLOCK_REWARD,
           ],
+        ],
+      },
+      {
+        target: BSCMAINNET_COMPTROLLER,
+        signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
+        params: [
+          [BSCMAINNET_XVS_MARKET],
+          [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK],
+          [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK],
         ],
       },
       {
