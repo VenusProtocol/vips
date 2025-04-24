@@ -5,13 +5,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework/index";
 
 import { expectEvents } from "../../src/utils";
-import vip486, {
+import vip487, {
   FAIRYPROOF_AMOUNT,
   FAIRYPROOF_RECEIVER,
   PESSIMISTIC_AMOUNT,
   PESSIMISTIC_RECEIVER,
   USDT,
-} from "../../vips/vip-486/bscmainnet";
+} from "../../vips/vip-487/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
@@ -29,9 +29,9 @@ forking(48602303, async () => {
     prevUSDTBalanceOfFairyproof = await usdt.balanceOf(FAIRYPROOF_RECEIVER);
   });
 
-  testVip("VIP-486", await vip486(), {
+  testVip("VIP-487", await vip487(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [3]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [2]);
     },
   });
 
