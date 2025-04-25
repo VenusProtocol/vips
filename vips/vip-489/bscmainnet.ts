@@ -174,11 +174,7 @@ BNB Chain testnet
       {
         target: BSCMAINNET_COMPTROLLER,
         signature: "_setVenusSpeeds(address[],uint256[],uint256[])",
-        params: [
-          [BSCMAINNET_XVS_MARKET],
-          [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK],
-          [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK],
-        ],
+        params: [[BSCMAINNET_XVS_MARKET], [BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK], [0]],
       },
       {
         target: BSCMAINNET_DEFAULT_PROXY_ADMIN,

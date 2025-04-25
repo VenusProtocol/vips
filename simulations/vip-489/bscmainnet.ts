@@ -119,6 +119,9 @@ forking(48611358, async () => {
           OLD_BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
         );
       });
+      it("has the old XVS borrow speed", async () => {
+        expect(await comptroller.venusBorrowSpeeds(BSCMAINNET_XVS_MARKET)).to.equals(0);
+      });
     });
     describe("Old Implementations & old block rate", () => {
       describe("Prime & PLP", () => {
@@ -221,6 +224,9 @@ forking(48611358, async () => {
         expect(await comptroller.venusSupplySpeeds(BSCMAINNET_XVS_MARKET)).to.equals(
           BSC_XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
         );
+      });
+      it("has the XVS borrow speed of 0", async () => {
+        expect(await comptroller.venusBorrowSpeeds(BSCMAINNET_XVS_MARKET)).to.equals(0);
       });
     });
     describe("Should point to new impl and have updated block rate", () => {
