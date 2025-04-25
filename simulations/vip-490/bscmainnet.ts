@@ -8,6 +8,7 @@ import { forking, testVip } from "src/vip-framework";
 
 import {
   BNB_EXPLOITER,
+  NINETY_PERCENT_VTOKENS,
   POLICY_FACET,
   RISK_FUND_CONVERTER,
   TEMP_POLICY_FACET,
@@ -30,6 +31,7 @@ forking(48663751, async () => {
   let wbnb: Contract;
   let unitroller: Contract;
   let rfConverter: Contract;
+  let prevZROAddBalance: BigNumber;
 
   before(async () => {
     vBNB = await ethers.getContractAt(VBNB_ABI, VBNB);
@@ -38,6 +40,7 @@ forking(48663751, async () => {
     rfConverter = await ethers.getContractAt(RISK_FUND_CONVERTER_ABI, RISK_FUND_CONVERTER);
 
     prevRFBalance = await wbnb.balanceOf(RISK_FUND);
+    prevZROAddBalance = await ethers.provider.getBalance(ethers.constants.AddressZero);
   });
 
   describe("Pre-VIP state", async () => {
@@ -76,6 +79,10 @@ forking(48663751, async () => {
       expect(await rfConverter.poolsAssetsDirectTransfer(NETWORK_ADDRESSES.bscmainnet.UNITROLLER, WBNB)).to.equals(
         false,
       );
+    });
+    it("should burn expected BNB tokens", async () => {
+      const newZROAddalance = await ethers.provider.getBalance(ethers.constants.AddressZero);
+      expect(newZROAddalance).to.equal(prevZROAddBalance.add(NINETY_PERCENT_VTOKENS));
     });
   });
 });

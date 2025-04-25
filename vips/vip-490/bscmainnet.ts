@@ -4,7 +4,6 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -99,7 +98,7 @@ export const vip490 = () => {
       {
         target: TOKEN_REDEEMER,
         signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
-        params: [VBNB, bscmainnet.NORMAL_TIMELOCK, TEN_PERCENT_UNDERLYING, NORMAL_TIMELOCK],
+        params: [VBNB, bscmainnet.NORMAL_TIMELOCK, TEN_PERCENT_UNDERLYING, TOKEN_REDEEMER],
       },
 
       {
