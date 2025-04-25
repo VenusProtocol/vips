@@ -15,33 +15,33 @@ interface Permissions {
   [key: string]: string[][];
 }
 
-const BERACHAINBARTIO_RESILIENT_ORACLE = "0x279Bd38D27247BFb28064cab434f71816BD4aF4B";
-const BERACHAINBARTIO_CHAINLINK_ORACLE = "0x54568071437BcF7D7F1C004D0561B3aCa89E2132";
-const BERACHAINBARTIO_REDSTONE_ORACLE = "0x2E9aC3e161359d572E1F0cBe177fc5E84651D962";
-const BERACHAINBARTIO_BOUND_VALIDATOR = "0x24C815d92f5F084E3679ceD7c51c2033784AaC06";
-const BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER = "0x94ba324b639F2C4617834dFcF45EA23188a17124";
-const BERACHAINBARTIO_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
+const BERACHAINBEPOLIA_RESILIENT_ORACLE = "0x150B667d42FB80409f162aB84065f0c8E9B3A7a0";
+const BERACHAINBEPOLIA_CHAINLINK_ORACLE = "0xF7451caCcb32E6E3695e4B4bcF42152D57B73aD5";
+const BERACHAINBEPOLIA_REDSTONE_ORACLE = "0xedc00668FC314fcc85a574c8DBa0BB205810F247";
+const BERACHAINBEPOLIA_BOUND_VALIDATOR = "0xd3A635930300ea87548A1C3428Ac5DDfE3FFE66E";
+const BERACHAINBEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x61ed025c4EB50604F367316B8E18dB7eb7283D49";
+const BERACHAINBEPOLIA_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [
-    ...getResilientOraclePermissions(BERACHAINBARTIO_RESILIENT_ORACLE),
-    ...getChainlinkOraclePermissions(BERACHAINBARTIO_CHAINLINK_ORACLE),
-    ...getRedstoneOraclePermissions(BERACHAINBARTIO_REDSTONE_ORACLE),
-    ...getBoundValidatorPermissions(BERACHAINBARTIO_BOUND_VALIDATOR),
-    ...getOmniChainExecutorOwnerPermissions(BERACHAINBARTIO_OMNICHAIN_EXECUTOR_OWNER),
+  berachainbepolia: [
+    ...getResilientOraclePermissions(BERACHAINBEPOLIA_RESILIENT_ORACLE),
+    ...getChainlinkOraclePermissions(BERACHAINBEPOLIA_CHAINLINK_ORACLE),
+    ...getRedstoneOraclePermissions(BERACHAINBEPOLIA_REDSTONE_ORACLE),
+    ...getBoundValidatorPermissions(BERACHAINBEPOLIA_BOUND_VALIDATOR),
+    ...getOmniChainExecutorOwnerPermissions(BERACHAINBEPOLIA_OMNICHAIN_EXECUTOR_OWNER),
   ],
 };
 
 const acmCommandsAggreator: any = {
-  berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
+  berachainbepolia: "0x1EAA596ad8101bb321a5999e509A61747893078B",
 };
 
 const accounts: any = {
-  berachainbartio: {
-    NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
-    FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
-    CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
-    Guardian: BERACHAINBARTIO_GUARDIAN,
+  berachainbepolia: {
+    NormalTimelock: "0xAb3DBA18664B96AD54459D06Ca8BD18C9146d5CE",
+    FastTrackTimelock: "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE",
+    CriticalTimelock: "0x2aae1073B2219729Ff8e5952887905A8da498062",
+    Guardian: BERACHAINBEPOLIA_GUARDIAN,
   },
 };
 
@@ -64,6 +64,7 @@ async function main() {
     ACM_COMMANDS_AGGREATOR_ABI.abi,
     acmCommandsAggreator[hre.network.name],
   );
+
   const networkGrantPermissions = grantPermissions[hre.network.name];
 
   for (const permission of networkGrantPermissions) {
