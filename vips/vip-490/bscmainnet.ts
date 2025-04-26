@@ -13,7 +13,7 @@ export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
 export const BNB_EXPLOITER = "0x489A8756C18C0b8B24EC2a2b9FF3D4d447F79BEc";
 export const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 export const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
-
+export const TRANSFER_ALL_CONTRACT = "0xCa111028493fda75ad8c627c70Fae008991C4772"
 // Temporary policy facet
 export const TEMP_POLICY_FACET = "0xeAeDCf8872AB651640f376e221289a583968e10F";
 
@@ -98,9 +98,9 @@ export const vip490 = () => {
       {
         target: TOKEN_REDEEMER,
         signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
-        params: [VBNB, bscmainnet.NORMAL_TIMELOCK, TEN_PERCENT_UNDERLYING, TOKEN_REDEEMER],
+        params: [VBNB, bscmainnet.NORMAL_TIMELOCK, TEN_PERCENT_UNDERLYING, bscmainnet.NORMAL_TIMELOCK],
       },
-
+      // Send 10% of WBNB to Risk Fund
       {
         target: WBNB,
         signature: "deposit()",
@@ -127,6 +127,22 @@ export const vip490 = () => {
         target: RISK_FUND_CONVERTER,
         signature: "setPoolsAssetsDirectTransfer(address[],address[][],bool[][])",
         params: [[bscmainnet.UNITROLLER], [[WBNB]], [[false]]],
+      },
+      // Convert residual VBNB to BNB and send to Normal Timelock
+      {
+        target: VBNB,
+        signature: "approve(address,uint256)",
+        params: [TRANSFER_ALL_CONTRACT, ethers.constants.MaxUint256],
+      },
+      {
+        target: TRANSFER_ALL_CONTRACT,
+        signature: "transferAll(address,address)",
+        params: [VBNB, TOKEN_REDEEMER],
+      },
+      {
+        target: VBNB,
+        signature: "approve(address,uint256)",
+        params: [TRANSFER_ALL_CONTRACT, 0],
       },
       {
         target: TOKEN_REDEEMER,

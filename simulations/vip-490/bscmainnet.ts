@@ -3,17 +3,17 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, getEventArgs } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
   BNB_EXPLOITER,
-  NINETY_PERCENT_VTOKENS,
   POLICY_FACET,
   RISK_FUND_CONVERTER,
   TEMP_POLICY_FACET,
   TEN_PERCENT_UNDERLYING,
   TOKEN_REDEEMER,
+  TRANSFER_ALL_CONTRACT,
   VBNB,
   WBNB,
   vip490,
@@ -32,6 +32,7 @@ forking(48663751, async () => {
   let unitroller: Contract;
   let rfConverter: Contract;
   let prevZROAddBalance: BigNumber;
+  let burnedBNBAmount: BigNumber;
 
   before(async () => {
     vBNB = await ethers.getContractAt(VBNB_ABI, VBNB);
@@ -52,6 +53,8 @@ forking(48663751, async () => {
   testVip("VIP-490", await vip490(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["DiamondCut"], [2]);
+      const events = await getEventArgs(txResponse, VBNB_ABI, "Redeem");
+      burnedBNBAmount = events[0].redeemAmount;
     },
   });
 
@@ -75,14 +78,25 @@ forking(48663751, async () => {
       expect(await vBNB.balanceOf(TOKEN_REDEEMER)).to.equal(0);
     });
 
+    it("Timelock should have no left vBNB", async () => {
+      expect(await vBNB.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK)).to.equal(0);
+    });
+
     it("poolsAssetsDirectTransfer should have initial value i.e. false", async () => {
       expect(await rfConverter.poolsAssetsDirectTransfer(NETWORK_ADDRESSES.bscmainnet.UNITROLLER, WBNB)).to.equals(
         false,
       );
     });
+
+    it("vBNB approval is 0 for transfer all contract", async () => {
+      expect(await vBNB.allowance(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, TRANSFER_ALL_CONTRACT)).to.equals(
+        0,
+      );
+    });
+
     it("should burn expected BNB tokens", async () => {
       const newZROAddalance = await ethers.provider.getBalance(ethers.constants.AddressZero);
-      expect(newZROAddalance).to.equal(prevZROAddBalance.add(NINETY_PERCENT_VTOKENS));
+      expect(newZROAddalance).to.equal(prevZROAddBalance.add(burnedBNBAmount));
     });
   });
 });
