@@ -14,10 +14,10 @@ export const ACM_AGGREGATOR = "0x1EAA596ad8101bb321a5999e509A61747893078B";
 export const ACM = "0x243313C1cC198FF80756ed2ef14D9dcd94Ee762b";
 export const TREASURY = "0xd0D3FBBE22d9a43d3Aa605590976ac5843597228";
 export const BOUND_VALIDATOR = "0xd3A635930300ea87548A1C3428Ac5DDfE3FFE66E";
-// export const MOCK_USDCe = "0x0A912ebEc8D4a35568C1BFE368AD68A548597906";
-// export const WETH = "0x5A4bcFa0cf7f029bb5A62Cd52a24F7B2d0C18d2A";
-// export const WBERA = "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8";
-// export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
+export const MOCK_USDCe = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
+export const WETH = "0x434BB500fA491Daa03375D2B9762dD6080064e2D";
+export const WBERA = "0x6969696969696969696969696969696969696969";
+export const XVS = "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0";
 
 const vip458 = () => {
   const meta = {
@@ -96,59 +96,59 @@ const vip458 = () => {
         dstChainId: LzChainId.berachainbepolia,
       },
 
-      // {
-      //   target: berachainbepolia.REDSTONE_ORACLE,
-      //   signature: "setDirectPrice(address,uint256)",
-      //   params: [berachainbepolia.XVS, parseUnits("7", 18)],
-      //   dstChainId: LzChainId.berachainbepolia,
-      // },
-      // {
-      //   target: berachainbepolia.REDSTONE_ORACLE,
-      //   signature: "setDirectPrice(address,uint256)",
-      //   params: [WETH, parseUnits("3000", 18)],
-      //   dstChainId: LzChainId.berachainbepolia,
-      // },
-      // {
-      //   target: berachainbepolia.REDSTONE_ORACLE,
-      //   signature: "setDirectPrice(address,uint256)",
-      //   params: [WBERA, parseUnits("6", 18)],
-      //   dstChainId: LzChainId.berachainbepolia,
-      // },
-      // {
-      //   target: berachainbepolia.REDSTONE_ORACLE,
-      //   signature: "setDirectPrice(address,uint256)",
-      //   params: [MOCK_USDCe, parseUnits("1", 18)],
-      //   dstChainId: LzChainId.berachainbepolia,
-      // },
-      // {
-      //   target: berachainbepolia.RESILIENT_ORACLE,
-      //   signature: "setTokenConfigs((address,address[3],bool[3])[])",
-      //   params: [
-      //     [
-      //       [
-      //         berachainbepolia.XVS,
-      //         [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      //         [true, false, false],
-      //       ],
-      //       [
-      //         WETH,
-      //         [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      //         [true, false, false],
-      //       ],
-      //       [
-      //         WBERA,
-      //         [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      //         [true, false, false],
-      //       ],
-      //       [
-      //         MOCK_USDCe,
-      //         [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      //         [true, false, false],
-      //       ],
-      //     ],
-      //   ],
-      //   dstChainId: LzChainId.berachainbepolia,
-      // },
+      {
+        target: berachainbepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [berachainbepolia.XVS, parseUnits("7", 18)],
+        dstChainId: LzChainId.berachainbepolia,
+      },
+      {
+        target: berachainbepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [WETH, parseUnits("3000", 18)],
+        dstChainId: LzChainId.berachainbepolia,
+      },
+      {
+        target: berachainbepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [WBERA, parseUnits("6", 18)],
+        dstChainId: LzChainId.berachainbepolia,
+      },
+      {
+        target: berachainbepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [MOCK_USDCe, parseUnits("1", 18)],
+        dstChainId: LzChainId.berachainbepolia,
+      },
+      {
+        target: berachainbepolia.RESILIENT_ORACLE,
+        signature: "setTokenConfigs((address,address[3],bool[3])[])",
+        params: [
+          [
+            [
+              berachainbepolia.XVS,
+              [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+            ],
+            [
+              WETH,
+              [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+            ],
+            [
+              WBERA,
+              [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+            ],
+            [
+              MOCK_USDCe,
+              [berachainbepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+            ],
+          ],
+        ],
+        dstChainId: LzChainId.berachainbepolia,
+      },
     ],
     meta,
     ProposalType.REGULAR,

@@ -11,12 +11,12 @@ import vip458, {
   ACM_AGGREGATOR,
   BOUND_VALIDATOR,
   DEFAULT_ADMIN_ROLE,
-  // MOCK_USDCe,
+  MOCK_USDCe,
   OMNICHAIN_EXECUTOR_OWNER,
   TREASURY,
-  // WBERA,
-  // WETH,
-  // XVS,
+  WBERA,
+  WETH,
+  XVS,
 } from "../../vips/vip-458/bsctestnet";
 import ACMAggregator_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager_ABI.json";
@@ -29,7 +29,7 @@ const { berachainbepolia } = NETWORK_ADDRESSES;
 const FAST_TRACK_TIMELOCK = "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE";
 const CRITICAL_TIMELOCK = "0x2aae1073B2219729Ff8e5952887905A8da498062";
 
-forking(2924720, async () => {
+forking(3061990, async () => {
   const provider = ethers.provider;
   let lastProposalReceived: BigNumber;
   let executor: Contract;
@@ -104,7 +104,7 @@ forking(2924720, async () => {
 
       // Check receiving limit
       expect(await executor.maxDailyReceiveLimit()).equals(100);
-      expect(await executor.last24HourCommandsReceived()).equals(9);
+      expect(await executor.last24HourCommandsReceived()).equals(14);
 
       // Check function registry
       const functionSignatures: string[] = [
@@ -180,15 +180,15 @@ forking(2924720, async () => {
       expect(await boundValidator.owner()).to.equal(berachainbepolia.NORMAL_TIMELOCK);
     });
 
-    // it("check price of tokens", async () => {
-    //   const wethPrice = await resilientOracle.getPrice(WETH);
-    //   const xvsPrice = await resilientOracle.getPrice(XVS);
-    //   const wberaPrice = await resilientOracle.getPrice(WBERA);
-    //   const usdcePrice = await resilientOracle.getPrice(MOCK_USDCe);
-    //   expect(wethPrice).to.equal(ethers.utils.parseUnits("3000", 18));
-    //   expect(xvsPrice).to.equal(ethers.utils.parseUnits("7", 18));
-    //   expect(wberaPrice).to.equal(ethers.utils.parseUnits("6", 18));
-    //   expect(usdcePrice).to.equal(ethers.utils.parseUnits("1", 30));
-    // });
+    it("check price of tokens", async () => {
+      const wethPrice = await resilientOracle.getPrice(WETH);
+      const xvsPrice = await resilientOracle.getPrice(XVS);
+      const wberaPrice = await resilientOracle.getPrice(WBERA);
+      const usdcePrice = await resilientOracle.getPrice(MOCK_USDCe);
+      expect(wethPrice).to.equal(ethers.utils.parseUnits("3000", 18));
+      expect(xvsPrice).to.equal(ethers.utils.parseUnits("7", 18));
+      expect(wberaPrice).to.equal(ethers.utils.parseUnits("6", 18));
+      expect(usdcePrice).to.equal(ethers.utils.parseUnits("1", 30));
+    });
   });
 });
