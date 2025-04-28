@@ -89,9 +89,7 @@ forking(48663751, async () => {
     });
 
     it("vBNB approval is 0 for transfer all contract", async () => {
-      expect(await vBNB.allowance(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, TRANSFER_ALL_CONTRACT)).to.equals(
-        0,
-      );
+      expect(await vBNB.allowance(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, TRANSFER_ALL_CONTRACT)).to.equals(0);
     });
 
     it("should burn expected BNB tokens", async () => {

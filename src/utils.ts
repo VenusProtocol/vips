@@ -546,17 +546,9 @@ export const getEventArgs = async (
     );
 
   // Check each event's parameters
-  return matchingEvents.map(
-    (
-      event: {
-        topics: string[];
-        data: string;
-        args: [];
-      },
-    ) => {
-      return event.args;
-    },
-  );
+  return matchingEvents.map((event: { topics: string[]; data: string; args: [] }) => {
+    return event.args;
+  });
 };
 
 export const proposalSchema = {
