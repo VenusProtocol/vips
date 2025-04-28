@@ -522,6 +522,35 @@ export const expectEventWithParams = async (
   );
 };
 
+export const getEventArgs = async (
+  txResponse: TransactionResponse,
+  abi: string | JsonFragment[],
+  expectedEvent: string,
+) => {
+  const receipt = await txResponse.wait();
+  const iface = new ethers.utils.Interface(abi);
+
+  // Extract the events that match the expected event name
+  // @ts-expect-error @TODO type is wrong
+  const matchingEvents = receipt.events
+    .map((event: { topics: string[]; data: string }) => {
+      try {
+        return iface.parseLog(event);
+      } catch (error) {
+        return null; // Ignore events that do not match the ABI
+      }
+    })
+    .filter(
+      (parsedEvent: { topics: string[]; data: string; name: string }) =>
+        parsedEvent && parsedEvent.name === expectedEvent,
+    );
+
+  // Check each event's parameters
+  return matchingEvents.map((event: { topics: string[]; data: string; args: [] }) => {
+    return event.args;
+  });
+};
+
 export const proposalSchema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "object",
