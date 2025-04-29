@@ -7,6 +7,9 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip490, {
   CORE_COMPTROLLER,
+  DEFI_COMPTROLLER_ADDRESS,
+  DEFI_VALPACA,
+  DEFI_VALPACA_SUPPLY_CAP,
   VSUSDE,
   VSUSDE_SUPPLY_CAP,
   VUSDC,
@@ -14,9 +17,11 @@ import vip490, {
   VUSDC_SUPPLY_CAP,
 } from "../../vips/vip-490/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
+import IL_COMPTROLLER_ABI from "./abi/ilComptroller.json";
 
 forking(48764090, async () => {
   const coreComptroller = new ethers.Contract(CORE_COMPTROLLER, CORE_COMPTROLLER_ABI, ethers.provider);
+  const deFiComptroller = new ethers.Contract(DEFI_COMPTROLLER_ADDRESS, IL_COMPTROLLER_ABI, ethers.provider);
 
   describe("Pre-VIP risk parameters", () => {
     it("USDC should have supply cap of 258M", async () => {
@@ -33,11 +38,16 @@ forking(48764090, async () => {
       const supplyCap = await coreComptroller.supplyCaps(VSUSDE);
       expect(supplyCap).equals(parseUnits("2000000", 18));
     });
+
+    it(`ALPACA should have supply cap of 1.5M`, async () => {
+      const supplyCap = await deFiComptroller.supplyCaps(DEFI_VALPACA);
+      expect(supplyCap).equals(parseUnits("1500000", 18));
+    });
   });
 
   testVip("VIP-490", await vip490(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [2, 1]);
+      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [3, 1]);
     },
   });
 
@@ -55,6 +65,11 @@ forking(48764090, async () => {
     it(`sUSDe should have supply cap of ${VSUSDE_SUPPLY_CAP}`, async () => {
       const supplyCap = await coreComptroller.supplyCaps(VSUSDE);
       expect(supplyCap).equals(VSUSDE_SUPPLY_CAP);
+    });
+
+    it(`ALPACA should have supply cap of ${DEFI_VALPACA_SUPPLY_CAP}`, async () => {
+      const supplyCap = await deFiComptroller.supplyCaps(DEFI_VALPACA);
+      expect(supplyCap).equals(DEFI_VALPACA_SUPPLY_CAP);
     });
   });
 });
