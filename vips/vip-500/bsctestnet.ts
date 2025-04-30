@@ -7,8 +7,8 @@ import { makeProposal } from "src/utils";
 const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
   NETWORK_ADDRESSES.bsctestnet;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const USD1 = "0x70d57B23347dB44AED9AB61A9c589A7877a53B4D";
-export const VUSD1 = "0x18F85F4517201528921c6452fA8bC5276a07ca3C";
+export const USD1 = "0x7792af341a10ccc4B1CDd7B317F0460a37346a0A";
+export const VUSD1 = "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
 export const marketSpec = {
@@ -127,6 +127,7 @@ export const vip500 = () => {
         signature: "approve(address,uint256)",
         params: [marketSpec.vToken.address, marketSpec.initialSupply.amount],
       },
+      
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",

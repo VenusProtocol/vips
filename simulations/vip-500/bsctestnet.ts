@@ -30,7 +30,7 @@ const Actions = {
   ENTER_MARKET: 7,
 };
 
-forking(50999945, async () => {
+forking(51050448, async () => {
   let comptroller: Contract;
   let usd1: Contract;
   let vusd1: Contract;
@@ -44,7 +44,19 @@ forking(50999945, async () => {
     oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
   });
 
-  testVip("VIP-500-testnet Add USD1 Market", await vip500(), {
+  describe("Pre-VIP behavior", async () => {
+    it("check usd1 market not listed ", async () => {
+      const market = await comptroller.markets(VUSD1);
+      expect(market.isListed).to.equal(false);
+    });
+
+    it("enter market not paused", async () => {
+        const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
+        expect(borrowPaused).to.equal(false);
+    });
+   });
+
+  testVip("VIP-500-testnet: Add USD1 Market", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -63,12 +75,12 @@ forking(50999945, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("adds a new USD1 market and set collateral factor to 75%", async () => {
+    it("adds a new usd1 market and set collateral factor to 0%", async () => {
       const market = await comptroller.markets(VUSD1);
       expect(market.isListed).to.equal(true);
       expect(market.collateralFactorMantissa).to.equal(marketSpec.riskParameters.collateralFactor);
     });
-    it("reserves factor equals 20%", async () => {
+    it("reserves factor equals 25%", async () => {
       const reserveFactor = await vusd1.reserveFactorMantissa();
       expect(reserveFactor).to.equal(marketSpec.riskParameters.reserveFactor);
     });
