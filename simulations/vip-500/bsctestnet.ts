@@ -51,10 +51,10 @@ forking(51050448, async () => {
     });
 
     it("enter market not paused", async () => {
-        const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
-        expect(borrowPaused).to.equal(false);
+      const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
+      expect(borrowPaused).to.equal(false);
     });
-   });
+  });
 
   testVip("VIP-500-testnet: Add USD1 Market", await vip500(), {
     callbackAfterExecution: async txResponse => {

@@ -127,7 +127,7 @@ export const vip500 = () => {
         signature: "approve(address,uint256)",
         params: [marketSpec.vToken.address, marketSpec.initialSupply.amount],
       },
-      
+
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
