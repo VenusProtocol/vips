@@ -193,7 +193,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be queued successfully", async () => {
-      await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 2);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
       await tx.wait();
     });

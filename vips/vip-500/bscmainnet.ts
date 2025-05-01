@@ -50,7 +50,7 @@ export const marketSpec = {
 export const vip500 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-3195 [BNB Chain] Add support for USD1 on Venus Core Pool",
+    title: "VIP-500 [BNB Chain] Add support for USD1 on Venus Core Pool",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -65,7 +65,6 @@ export const vip500 = () => {
         signature: "setTokenConfig((address,address,uint256))",
         params: [[marketSpec.vToken.underlying.address, USDE_REDSTONE_FEED, MAX_STALE_PERIOD]],
       },
-
       {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
@@ -83,19 +82,16 @@ export const vip500 = () => {
         signature: "_supportMarket(address)",
         params: [marketSpec.vToken.address],
       },
-
       {
         target: marketSpec.vToken.comptroller,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
         params: [[marketSpec.vToken.address], [marketSpec.riskParameters.supplyCap]],
       },
-
       {
         target: marketSpec.vToken.comptroller,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
         params: [[marketSpec.vToken.address], [marketSpec.riskParameters.borrowCap]],
       },
-
       {
         target: marketSpec.vToken.address,
         signature: "setAccessControlManager(address)",
@@ -106,7 +102,6 @@ export const vip500 = () => {
         signature: "setProtocolShareReserve(address)",
         params: [PROTOCOL_SHARE_RESERVE],
       },
-
       {
         target: marketSpec.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",

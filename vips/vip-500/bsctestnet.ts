@@ -48,7 +48,7 @@ export const marketSpec = {
 export const vip500 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-3195 [BNB Chain] Add support for USD1 on Venus Core Pool",
+    title: "VIP-500 [BNB Chain] Add support for USD1 on Venus Core Pool",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -63,7 +63,6 @@ export const vip500 = () => {
         signature: "setDirectPrice(address,uint256)",
         params: [marketSpec.vToken.underlying.address, parseUnits("1", 18)],
       },
-
       {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
@@ -75,26 +74,22 @@ export const vip500 = () => {
           ],
         ],
       },
-
       // Add Market
       {
         target: marketSpec.vToken.comptroller,
         signature: "_supportMarket(address)",
         params: [marketSpec.vToken.address],
       },
-
       {
         target: marketSpec.vToken.comptroller,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
         params: [[marketSpec.vToken.address], [marketSpec.riskParameters.supplyCap]],
       },
-
       {
         target: marketSpec.vToken.comptroller,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
         params: [[marketSpec.vToken.address], [marketSpec.riskParameters.borrowCap]],
       },
-
       {
         target: marketSpec.vToken.address,
         signature: "setAccessControlManager(address)",
@@ -105,7 +100,6 @@ export const vip500 = () => {
         signature: "setProtocolShareReserve(address)",
         params: [PROTOCOL_SHARE_RESERVE],
       },
-
       {
         target: marketSpec.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
@@ -121,25 +115,21 @@ export const vip500 = () => {
         signature: "faucet(uint256)",
         params: [marketSpec.initialSupply.amount],
       },
-
       {
         target: marketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [marketSpec.vToken.address, marketSpec.initialSupply.amount],
       },
-
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
         params: [marketSpec.initialSupply.vTokenReceiver, marketSpec.initialSupply.amount],
       },
-
       {
         target: marketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [marketSpec.vToken.address, 0],
       },
-
       {
         target: marketSpec.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",

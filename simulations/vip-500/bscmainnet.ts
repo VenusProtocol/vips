@@ -83,43 +83,54 @@ forking(48883989, async () => {
       expect(market.isListed).to.equal(true);
       expect(market.collateralFactorMantissa).to.equal(marketSpec.riskParameters.collateralFactor);
     });
+
     it("reserves factor equals 25%", async () => {
       const reserveFactor = await vusd1.reserveFactorMantissa();
       expect(reserveFactor).to.equal(marketSpec.riskParameters.reserveFactor);
     });
+
     it("sets protocol share reserve", async () => {
       expect(await vusd1.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
     });
+
     it("sets Reduce Reserves Block Delta to 28800", async () => {
       expect(await vusd1.reduceReservesBlockDelta()).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
     });
+
     it("sets the supply cap", async () => {
       const newCap = await comptroller.supplyCaps(VUSD1);
       expect(newCap).to.equal(marketSpec.riskParameters.supplyCap);
     });
+
     it("sets the borrow cap", async () => {
       const newCap = await comptroller.borrowCaps(VUSD1);
       expect(newCap).to.equal(marketSpec.riskParameters.borrowCap);
     });
+
     it("does not leave usd1 balance on the address of the timelock", async () => {
       const timelockBalance = await usd1.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
+
     it("does not leave vusd1 balance on the address of the timelock", async () => {
       const timelockBalance = await vusd1.balanceOf(NORMAL_TIMELOCK);
       expect(timelockBalance).to.equal(0);
     });
+
     it("moves INITIAL_VTOKENS vusd1 to VENUS_TREASURY", async () => {
       const vTokenReceiverBalance = await vusd1.balanceOf(marketSpec.initialSupply.vTokenReceiver);
       expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
     });
+
     it("sets the admin to normal timelock", async () => {
       expect(await vusd1.admin()).to.equal(NORMAL_TIMELOCK);
     });
+
     it("get correct price from oracle ", async () => {
       const price = await oracle.getPrice(USD1);
       expect(price).to.equal(parseUnits("1.0002741", 18));
     });
+    
     it("enter market paused", async () => {
       const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
       expect(borrowPaused).to.equal(true);
