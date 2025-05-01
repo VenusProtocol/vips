@@ -130,7 +130,7 @@ forking(48883989, async () => {
       const price = await oracle.getPrice(USD1);
       expect(price).to.equal(parseUnits("1.0002741", 18));
     });
-    
+
     it("enter market paused", async () => {
       const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
       expect(borrowPaused).to.equal(true);
