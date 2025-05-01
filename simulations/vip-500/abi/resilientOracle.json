@@ -10,6 +10,11 @@
         "internalType": "address",
         "name": "vaiAddress",
         "type": "address"
+      },
+      {
+        "internalType": "contract BoundValidatorInterface",
+        "name": "_boundValidator",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -251,7 +256,7 @@
     "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "contract IAccessControlManager",
+        "internalType": "contract IAccessControlManagerV8",
         "name": "",
         "type": "address"
       }
@@ -299,7 +304,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "vToken",
+        "name": "asset",
         "type": "address"
       },
       {
@@ -328,7 +333,26 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "vToken",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "getPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
         "type": "address"
       }
     ],
@@ -381,11 +405,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "contract BoundValidatorInterface",
-        "name": "_boundValidator",
-        "type": "address"
-      },
       {
         "internalType": "address",
         "name": "accessControlManager_",
@@ -562,6 +581,19 @@
   {
     "inputs": [],
     "name": "unpause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      }
+    ],
+    "name": "updateAssetPrice",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
