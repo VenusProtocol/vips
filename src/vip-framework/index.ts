@@ -30,7 +30,8 @@ const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
 
-const VOTING_PERIOD = 28800;
+// Double voting period w.r.t new block rate on BSC chain
+const VOTING_PERIOD = 28800 * 2;
 
 export const {
   DEFAULT_PROPOSER_ADDRESS,
