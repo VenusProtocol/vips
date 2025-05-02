@@ -1,4 +1,3 @@
-import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -27,19 +26,19 @@ export const vip491 = () => {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE, RESILIENT_ORACLE_IMPLEMENTATION],
-        dstChainId: LzChainId.opbnbmainnet
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [BINANCE_ORACLE, BINANCE_ORACLE_IMPLEMENTATION],
-        dstChainId: LzChainId.opbnbmainnet
+        dstChainId: LzChainId.opbnbmainnet,
       },
       {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR, BOUND_VALIDATOR_IMPLEMENTATION],
-        dstChainId: LzChainId.opbnbmainnet
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,
