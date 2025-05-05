@@ -83,7 +83,7 @@ export const marketSpec = {
   },
   initialSupply: {
     amount: parseUnits("4988.032727667459257279", 18),
-    vTokensToBurn: parseUnits("100", 8), // Approximately $10
+    vTokensToBurn: parseUnits("100", 8),
     vTokenReceiver: VTREASURY,
   },
   riskParameters: {
