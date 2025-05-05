@@ -6,10 +6,10 @@ export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 export const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const vip427 = () => {
+export const vip500 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-427",
+    title: "VIP-500",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -61,4 +61,4 @@ export const vip427 = () => {
   );
 };
 
-export default vip427;
+export default vip500;

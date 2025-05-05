@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { BNB, BTCB, vip427 } from "../../vips/vip-427/bscmainnet";
+import { BNB, BTCB, vip500 } from "../../vips/vip-500/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -38,7 +38,7 @@ forking(45959640, async () => {
     });
   });
 
-  testVip("VIP-424", await vip427(), {
+  testVip("VIP-500", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
 
