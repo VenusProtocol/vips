@@ -28,6 +28,10 @@ const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 export const CONVERSION_INCENTIVE = 1e14;
 
+// Refunds
+export const VANGUARD_VANTAGE_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
+export const VANGUARD_VANTAGE_AMOUNT_USDT = parseUnits("5000", 18);
+
 export const converterBaseAssets = {
   [RISK_FUND_CONVERTER]: USDT,
   [USDT_PRIME_CONVERTER]: USDT,
@@ -200,6 +204,11 @@ export const vip500 = () => {
         params: [[marketSpec.vToken.address], [7], true],
       },
       ...configureConverters([marketSpec.vToken.underlying.address]),
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, VANGUARD_VANTAGE_AMOUNT_USDT, VANGUARD_VANTAGE_TREASURY],
+      },
     ],
     meta,
     ProposalType.REGULAR,

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
@@ -15,13 +15,17 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   USD1,
   USDE_REDSTONE_FEED,
+  USDT,
+  VANGUARD_VANTAGE_AMOUNT_USDT,
+  VANGUARD_VANTAGE_TREASURY,
   VUSD1,
   marketSpec,
   vip500,
 } from "../../vips/vip-500/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
 import VUSD1_ABI from "./abi/VBep20_ABI.json";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import USD1_ABI from "./abi/mockToken.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const RATE_MODEL = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
@@ -32,17 +36,15 @@ const Actions = {
 };
 
 forking(49078474, async () => {
-  let comptroller: Contract;
-  let usd1: Contract;
-  let vusd1: Contract;
-  let oracle: Contract;
-  const provider = ethers.provider;
+  const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
+  const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+  const usd1 = new ethers.Contract(USD1, ERC20_ABI, ethers.provider);
+  const vusd1 = new ethers.Contract(VUSD1, VUSD1_ABI, ethers.provider);
+  const oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, ethers.provider);
+  let prevUSDTBalanceOfVanguard: BigNumber;
 
   before(async () => {
-    comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
-    usd1 = new ethers.Contract(USD1, USD1_ABI, provider);
-    vusd1 = new ethers.Contract(VUSD1, VUSD1_ABI, provider);
-    oracle = new ethers.Contract(await comptroller.oracle(), PRICE_ORACLE_ABI, provider);
+    prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
     // the feed for USD1 is not available yet, so we're using USDE_REDSTONE_FEED in the meantime
     await setRedstonePrice(REDSTONE_ORACLE, USD1, USDE_REDSTONE_FEED, NORMAL_TIMELOCK);
   });
@@ -74,6 +76,7 @@ forking(49078474, async () => {
         ],
         [1, 1, 1, 1, 1, 1],
       );
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [2]); // bootstrap liquidity + refund
     },
   });
 
@@ -139,6 +142,11 @@ forking(49078474, async () => {
     it("enter market paused", async () => {
       const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
       expect(borrowPaused).to.equal(true);
+    });
+
+    it("Refund to Vanguard", async () => {
+      const currentUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
+      expect(currentUSDTBalanceOfVanguard.sub(prevUSDTBalanceOfVanguard)).to.equal(VANGUARD_VANTAGE_AMOUNT_USDT);
     });
 
     await checkInterestRate(RATE_MODEL, "USD1", { base: "0", kink: "0.8", multiplier: "0.1", jump: "2.5" });
