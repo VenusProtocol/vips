@@ -33,6 +33,8 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   opmainnet: 60000000,
   basesepolia: 60000000,
   basemainnet: 198000000,
+  unichainsepolia: 30000000,
+  unichainmainnet: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -63,6 +65,16 @@ task("createProposal", "Create proposal objects for various destinations").setAc
   const createProposal = require("./scripts/createProposal").default;
   await createProposal();
 });
+
+task("safeTxData", "Get a Safe TX hash and data for execution of a multisig VIP")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .addOptionalParam("nonce", "Nonce of the multisig TX to be considered")
+  .setAction(async function (taskArguments) {
+    const { proposalPath, nonce } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const calculateSafeTxData = require("./scripts/calculateSafeTxData.ts").default;
+    await calculateSafeTxData(proposalPath, nonce);
+  });
 
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
@@ -119,12 +131,14 @@ const config: HardhatUserConfig = {
         [ChainId.bsctestnet]: assumeCancun,
         [ChainId.opbnbtestnet]: assumeCancun,
         [ChainId.opbnbmainnet]: assumeCancun,
-        [ChainId.arbitrumsepolia]: assumeCancun,
+        // [ChainId.arbitrumsepolia]: assumeCancun,
         // [ChainId.arbitrumone]: assumeCancun,
         [ChainId.opsepolia]: assumeCancun,
         [ChainId.opmainnet]: assumeCancun,
         [ChainId.basesepolia]: assumeCancun,
         [ChainId.basemainnet]: assumeCancun,
+        [ChainId.unichainsepolia]: assumeCancun,
+        [ChainId.unichainmainnet]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -199,6 +213,18 @@ const config: HardhatUserConfig = {
       chainId: ChainId.basemainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.basemainnet,
+    },
+    unichainsepolia: {
+      url: process.env.ARCHIVE_NODE_unichainsepolia || "https://sepolia.unichain.org",
+      chainId: ChainId.unichainsepolia,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainsepolia,
+    },
+    unichainmainnet: {
+      url: process.env.ARCHIVE_NODE_unichainmainnet || "https://mainnet.unichain.org",
+      chainId: ChainId.unichainmainnet,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainmainnet,
     },
   },
   paths: {
