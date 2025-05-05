@@ -12,7 +12,7 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 365 * 24 * 60 * 60;
 
-forking(55419109, async () => {
+forking(55898298, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(opbnbmainnet.NORMAL_TIMELOCK);
@@ -25,31 +25,31 @@ forking(55419109, async () => {
   describe("Pre-VIP behaviour", async () => {
     it("check BTCB price", async () => {
       expect(await resilientOracle.getPrice("0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2")).to.equal(
-        parseUnits("96881.65370663", 18),
+        parseUnits("94741.36816372", 18),
       );
     });
 
     it("check ETH price", async () => {
       expect(await resilientOracle.getPrice("0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea")).to.equal(
-        parseUnits("1831.74800583", 18),
+        parseUnits("1819.8880323", 18),
       );
     });
 
     it("check FDUSD price", async () => {
       expect(await resilientOracle.getPrice("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb")).to.equal(
-        parseUnits("0.99875661", 18),
+        parseUnits("0.99840961", 18),
       );
     });
 
     it("check USDT price", async () => {
       expect(await resilientOracle.getPrice("0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3")).to.equal(
-        parseUnits("1.00059333", 18),
+        parseUnits("1.000635", 18),
       );
     });
 
     it("check WBNB price", async () => {
       expect(await resilientOracle.getPrice("0x4200000000000000000000000000000000000006")).to.equal(
-        parseUnits("597.50660256", 18),
+        parseUnits("591.38084285", 18),
       );
     });
   });
@@ -60,35 +60,35 @@ forking(55419109, async () => {
     it("check BTCB price", async () => {
       await binanceOracle.setMaxStalePeriod("BTC", ONE_YEAR);
       expect(await resilientOracle.getPrice("0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2")).to.equal(
-        parseUnits("96881.65370663", 18),
+        parseUnits("94741.36816372", 18),
       );
     });
 
     it("check ETH price", async () => {
       await binanceOracle.setMaxStalePeriod("ETH", ONE_YEAR);
       expect(await resilientOracle.getPrice("0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea")).to.equal(
-        parseUnits("1831.74800583", 18),
+        parseUnits("1819.8880323", 18),
       );
     });
 
     it("check FDUSD price", async () => {
       await binanceOracle.setMaxStalePeriod("FDUSD", ONE_YEAR);
       expect(await resilientOracle.getPrice("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb")).to.equal(
-        parseUnits("0.99875661", 18),
+        parseUnits("0.99840961", 18),
       );
     });
 
     it("check USDT price", async () => {
       await binanceOracle.setMaxStalePeriod("USDT", ONE_YEAR);
       expect(await resilientOracle.getPrice("0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3")).to.equal(
-        parseUnits("1.00059333", 18),
+        parseUnits("1.000635", 18),
       );
     });
 
     it("check WBNB price", async () => {
       await binanceOracle.setMaxStalePeriod("BNB", ONE_YEAR);
       expect(await resilientOracle.getPrice("0x4200000000000000000000000000000000000006")).to.equal(
-        parseUnits("597.50660256", 18),
+        parseUnits("591.38084285", 18),
       );
     });
   });
