@@ -1,3 +1,4 @@
+import { BigNumber, BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -12,6 +13,29 @@ export const VUSD1 = "0x0C1DA220D301155b87318B90692Da8dc43B67340";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const USDE_REDSTONE_FEED = "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb";
 export const MAX_STALE_PERIOD = 25200; // 7 hours max stale period
+
+// Converters
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
+export const CONVERSION_INCENTIVE = 1e14;
+
+export const converterBaseAssets = {
+  [RISK_FUND_CONVERTER]: USDT,
+  [USDT_PRIME_CONVERTER]: USDT,
+  [USDC_PRIME_CONVERTER]: USDC,
+  [BTCB_PRIME_CONVERTER]: BTCB,
+  [ETH_PRIME_CONVERTER]: ETH,
+  [XVS_VAULT_CONVERTER]: XVS,
+};
 
 export const marketSpec = {
   vToken: {
@@ -37,6 +61,7 @@ export const marketSpec = {
   },
   initialSupply: {
     amount: parseUnits("4988.032727667459257279", 18),
+    vTokensToBurn: parseUnits("100", 8), // Approximately $10
     vTokenReceiver: VTREASURY,
   },
   riskParameters: {
@@ -45,6 +70,29 @@ export const marketSpec = {
     collateralFactor: parseUnits("0", 18),
     reserveFactor: parseUnits("0.25", 18),
   },
+};
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
+
+const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
+  enum ConversionAccessibility {
+    NONE = 0,
+    ALL = 1,
+    ONLY_FOR_CONVERTERS = 2,
+    ONLY_FOR_USERS = 3,
+  }
+
+  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
+    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
+    return {
+      target: converter,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [baseAsset, fromAssets, conversionConfigs],
+    };
+  });
 };
 
 export const vip500 = () => {
@@ -125,7 +173,7 @@ export const vip500 = () => {
       {
         target: marketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
-        params: [marketSpec.initialSupply.vTokenReceiver, marketSpec.initialSupply.amount],
+        params: [NORMAL_TIMELOCK, marketSpec.initialSupply.amount],
       },
       {
         target: marketSpec.vToken.underlying.address,
@@ -133,10 +181,25 @@ export const vip500 = () => {
         params: [marketSpec.vToken.address, 0],
       },
       {
+        target: marketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, marketSpec.initialSupply.vTokensToBurn],
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(marketSpec.initialSupply.amount, marketSpec.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(marketSpec.initialSupply.vTokensToBurn);
+        return {
+          target: marketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+        };
+      })(),
+      {
         target: marketSpec.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",
         params: [[marketSpec.vToken.address], [7], true],
       },
+      ...configureConverters([marketSpec.vToken.underlying.address]),
     ],
     meta,
     ProposalType.REGULAR,

@@ -30,7 +30,7 @@ const Actions = {
   ENTER_MARKET: 7,
 };
 
-forking(51050448, async () => {
+forking(51296001, async () => {
   let comptroller: Contract;
   let usd1: Contract;
   let vusd1: Contract;
@@ -116,7 +116,7 @@ forking(51050448, async () => {
 
     it("moves INITIAL_VTOKENS vusd1 to VENUS_TREASURY", async () => {
       const vTokenReceiverBalance = await vusd1.balanceOf(marketSpec.initialSupply.vTokenReceiver);
-      expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS);
+      expect(vTokenReceiverBalance).to.equal(INITIAL_VTOKENS.sub(marketSpec.initialSupply.vTokensToBurn));
     });
 
     it("sets the admin to normal timelock", async () => {
@@ -126,6 +126,11 @@ forking(51050448, async () => {
     it("get correct price from oracle ", async () => {
       const price = await oracle.getUnderlyingPrice(VUSD1);
       expect(price).to.equal(parseUnits("1", 18));
+    });
+
+    it("should burn $100 vusd1", async () => {
+      const burnt = await vusd1.balanceOf(ethers.constants.AddressZero);
+      expect(burnt).to.equal(marketSpec.initialSupply.vTokensToBurn);
     });
 
     it("enter market paused", async () => {
