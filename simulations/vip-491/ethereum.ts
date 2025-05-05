@@ -9,13 +9,13 @@ import {
   Comptroller_LiquidStakedETH,
   PT_weETH_26DEC2024_LiquidStakedETH,
   Pendle_Router,
+  Timelock_Ethereum,
   VToken_vPT_USDe_27MAR2025_Ethena,
   VToken_vPT_sUSDE_27MAR2025_Ethena,
   VToken_vPT_weETH_26DEC2024_LiquidStakedETH,
+  VTreasury_Ethereum,
   vip491,
   weETH_Address,
-  VTreasury_Ethereum,
-  Timelock_Ethereum
 } from "../../vips/vip-491/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
