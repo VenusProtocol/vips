@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -10,6 +11,10 @@ export const RESILIENT_ORACLE_IMPLEMENTATION_BASE_SEPOLIA = "0xe8c39006906a9015a
 export const CHAINLINK_ORACLE_IMPLEMENTATION_BASE_SEPOLIA = "0x238F42Bc8E204583877d670891dF1f67a861ef0a";
 export const REDSTONE_ORACLE_IMPLEMENTATION_BASE_SEPOLIA = "0x91eEfAb71a8BD1E4f2889D51806407cD55DBF2fC";
 export const BOUND_VALIDATOR_IMPLEMENTATION_BASE_SEPOLIA = "0xae3C407A1C30Ac7A55A97B6A55927f6a2580bD4f";
+export const wSuperOETHb_ORACLE = "0x6F6e9Fd240372435eb16dBE36362ECdF84AB0399";
+export const wSuperOETHb = "0x02B1136d9E223333E0083aeAB76bC441f230a033";
+export const wstETHOracle = "0xB242450Ab1CBdd93409ee22c333F6f70aaA6Be08";
+export const wstETH = "0xAd69AA3811fE0EE7dBd4e25C4bae40e6422c76C8";
 
 export const RESILIENT_ORACLE_OP_SEPOLIA = "0x6c01ECa2B5C97F135406a3A5531445A7d977D28e";
 export const CHAINLINK_ORACLE_OP_SEPOLIA = "0x493C3f543AEa37EefF17D823f27Cb1feAB9f3143";
@@ -61,6 +66,18 @@ export const vip492 = () => {
         target: DEFAULT_PROXY_ADMIN_BASE_SEPOLIA,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_BASE_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_BASE_SEPOLIA],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_BASE_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [[wSuperOETHb, [wSuperOETHb_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false], false]],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_BASE_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [[wstETH, [wstETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false], false]],
         dstChainId: LzChainId.basesepolia,
       },
       {
