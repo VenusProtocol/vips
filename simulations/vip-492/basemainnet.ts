@@ -7,7 +7,6 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { CHAINLINK_ORACLE_ORACLE_BASE, REDSTONE_ORACLE_ORACLE_BASE, RESILIENT_ORACLE_BASE, wSuperOETHb_ORACLE, wstETHOracle } from "../../vips/vip-492/bscmainnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import ERC4626Oracle_ABI from "./abi/ERC4626Oracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 
@@ -21,7 +20,6 @@ forking(29870085, async () => {
   const signer = await ethers.getSigner(basemainnet.NORMAL_TIMELOCK);
 
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_BASE, RESILIENT_ORACLE_ABI, provider);
-  const redstoneOracle = new ethers.Contract(wstETHOracle, ERC4626Oracle_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
     it("check USDC price", async () => {
@@ -89,7 +87,7 @@ forking(29870085, async () => {
     it("check wstETH price", async () => {
       const token = new ethers.Contract("0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452", ERC20_ABI, provider);
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE_ORACLE_BASE, token.address, "0xB88BAc61a4Ca37C43a3725912B1f472c9A5bc061", basemainnet.NORMAL_TIMELOCK)
-      expect(await redstoneOracle.getPrice(token.address)).to.equal(
+      expect(await resilientOracle.getPrice(token.address)).to.equal(
         parseUnits("2147.343457226248364033", 18),
       );
     });
