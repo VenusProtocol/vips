@@ -198,11 +198,6 @@ export const vip500 = () => {
           params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
         };
       })(),
-      {
-        target: marketSpec.vToken.comptroller,
-        signature: "_setActionsPaused(address[],uint8[],bool)",
-        params: [[marketSpec.vToken.address], [7], true],
-      },
       ...configureConverters([marketSpec.vToken.underlying.address]),
       {
         target: VTREASURY,

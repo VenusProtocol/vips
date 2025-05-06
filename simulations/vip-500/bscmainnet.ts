@@ -31,10 +31,6 @@ import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 const RATE_MODEL = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
 const INITIAL_VTOKENS = parseUnits("4988.03272766", 8);
 
-const Actions = {
-  ENTER_MARKET: 7,
-};
-
 forking(49078474, async () => {
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
@@ -53,11 +49,6 @@ forking(49078474, async () => {
     it("check usd1 market not listed ", async () => {
       const market = await comptroller.markets(VUSD1);
       expect(market.isListed).to.equal(false);
-    });
-
-    it("check enter market action not paused", async () => {
-      const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
-      expect(borrowPaused).to.equal(false);
     });
   });
 
@@ -137,11 +128,6 @@ forking(49078474, async () => {
     it("get correct price from oracle ", async () => {
       const price = await oracle.getPrice(USD1);
       expect(price).to.equal(parseUnits("1.00066074", 18));
-    });
-
-    it("enter market paused", async () => {
-      const borrowPaused = await comptroller.actionPaused(VUSD1, Actions.ENTER_MARKET);
-      expect(borrowPaused).to.equal(true);
     });
 
     it("Refund to Vanguard", async () => {
