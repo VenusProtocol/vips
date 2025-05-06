@@ -10,7 +10,7 @@ import {
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { BNB, vip500 } from "../../vips/vip-500/bscmainnet";
+import { BNB, vip492 } from "../../vips/vip-492/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -39,7 +39,7 @@ forking(49136338, async () => {
     });
   });
 
-  testVip("VIP-500", await vip500(), {
+  testVip("VIP-492", await vip492(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
 
