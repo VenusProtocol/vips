@@ -1,12 +1,6 @@
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
-import { ACM, Assets, CONVERTER_NETWORK, XVS_VAULT_TREASURY, converters } from "./testnetAddresses";
-
-const { arbitrumone } = NETWORK_ADDRESSES;
-
-const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = arbitrumone;
-const timelocks = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
+import { ACM, Assets, CONVERTER_NETWORK, converters } from "./testnetAddresses";
 
 type IncentiveAndAccessibility = [number, number];
 
@@ -14,12 +8,14 @@ interface AcceptOwnership {
   target: string;
   signature: string;
   params: [];
+  dstChainId: number;
 }
 
 interface CallPermission {
   target: string;
   signature: string;
   params: [string, string, string];
+  dstChainId: number;
 }
 
 export const grant = (target: string, signature: string, caller: string): CallPermission => {
@@ -27,6 +23,7 @@ export const grant = (target: string, signature: string, caller: string): CallPe
     target: ACM,
     signature: "giveCallPermission(address,string,address)",
     params: [target, signature, caller],
+    dstChainId: LzChainId.unichainsepolia,
   };
 
   return config;
@@ -42,6 +39,7 @@ function generateAcceptOwnershipCommands(ConvertersArray: string[]): AcceptOwner
       target: converter,
       signature: "acceptOwnership()",
       params: [],
+      dstChainId: LzChainId.unichainsepolia,
     };
 
     acceptOwnershipCommandsArray.push(config);
@@ -55,6 +53,7 @@ const generateSetConverterNetworkCommands = () => {
     target: converter,
     signature: "setConverterNetwork(address)",
     params: [CONVERTER_NETWORK],
+    dstChainId: LzChainId.unichainsepolia,
   }));
 };
 
@@ -63,30 +62,9 @@ const generateAddConverterNetworkCommands = () => {
     target: CONVERTER_NETWORK,
     signature: "addTokenConverter(address)",
     params: [converter],
-    dstChainId: LzChainId.arbitrumone,
+    dstChainId: LzChainId.unichainsepolia,
   }));
 };
-
-function generateCallPermissionCommandsOnConverters(convertersArray: string[]): CallPermission[] {
-  return convertersArray.flatMap(converter => [
-    ...timelocks.flatMap(timelock => [
-      grant(converter, "setConversionConfig(address,address,ConversionConfig)", timelock),
-      grant(converter, "pauseConversion()", timelock),
-      grant(converter, "resumeConversion()", timelock),
-      grant(converter, "setMinAmountToConvert(uint256)", timelock),
-    ]),
-    grant(converter, "pauseConversion()", GUARDIAN),
-    grant(converter, "resumeConversion()", GUARDIAN),
-  ]);
-}
-
-function generateCallPermissionCommandsOnMisc(): CallPermission[] {
-  return timelocks.flatMap(timelock => [
-    grant(CONVERTER_NETWORK, "addTokenConverter(address)", timelock),
-    grant(CONVERTER_NETWORK, "removeTokenConverter(address)", timelock),
-    grant(XVS_VAULT_TREASURY, "fundXVSVault(uint256)", timelock),
-  ]);
-}
 
 export const incentiveAndAccessibilities = new Array(Assets.length - 1).fill(incentiveAndAccessibility);
 
@@ -95,8 +73,3 @@ export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateA
 export const setConverterNetworkCommands = generateSetConverterNetworkCommands();
 
 export const addConverterNetworkCommands = generateAddConverterNetworkCommands();
-
-export const callPermissionCommands: CallPermission[] = [
-  ...generateCallPermissionCommandsOnConverters(converters),
-  ...generateCallPermissionCommandsOnMisc(),
-];

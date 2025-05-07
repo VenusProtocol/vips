@@ -3,8 +3,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { acceptOwnershipCommandsAllConverters, callPermissionCommands, setConverterNetworkCommands } from "./commands";
-import { CONVERTER_NETWORK, XVS_VAULT_TREASURY } from "./testnetAddresses";
+import { acceptOwnershipCommandsAllConverters, setConverterNetworkCommands } from "./commands";
+import { ACM, CONVERTER_NETWORK, XVS_VAULT_TREASURY } from "./testnetAddresses";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
@@ -16,6 +16,8 @@ export const WETH = "0x4200000000000000000000000000000000000006";
 export const USDC = "0xf16d4774893eB578130a645d5c69E9c4d183F3A5";
 export const vWETH = "0x3dEAcBe87e4B6333140a46aBFD12215f4130B132";
 export const vUSDC = "0x0CA7edfcCF5dbf8AFdeAFB2D918409d439E3320A";
+export const ACM_AGGREGATOR = "0xb0067C9CD83B00DE781e9b456Bf0Fec86D687Bb2";
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 const PRIME_POOL_ID = 0;
 
@@ -89,7 +91,25 @@ export const vip501 = () => {
         params: [],
         dstChainId: LzChainId.unichainsepolia,
       },
-      ...callPermissionCommands,
+      {
+        target: ACM,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [3],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: ACM,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+
       ...setConverterNetworkCommands,
     ],
     meta,
