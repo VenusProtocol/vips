@@ -5,8 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { CHAINLINK_ORACLE_ORACLE_BASE_SEPOLIA, REDSTONE_ORACLE_ORACLE_BASE_SEPOLIA, RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-492/bsctestnet";
-import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
+import vip491, { RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-492/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
@@ -16,11 +15,8 @@ forking(25337385, async () => {
 
   await impersonateAccount(basesepolia.NORMAL_TIMELOCK);
   await setBalance(basesepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
-  const signer = await ethers.getSigner(basesepolia.NORMAL_TIMELOCK);
 
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_BASE_SEPOLIA, RESILIENT_ORACLE_ABI, provider);
-  const chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE_ORACLE_BASE_SEPOLIA, BINANCE_ORACLE_ABI, signer);
-  const redstoneOracle = new ethers.Contract(REDSTONE_ORACLE_ORACLE_BASE_SEPOLIA, RESILIENT_ORACLE_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
     it("check USDC price", async () => {

@@ -71,13 +71,27 @@ export const vip492 = () => {
       {
         target: RESILIENT_ORACLE_BASE_SEPOLIA,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[wSuperOETHb, [wSuperOETHb_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false], false]],
+        params: [
+          [
+            wSuperOETHb,
+            [wSuperOETHb_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
         dstChainId: LzChainId.basesepolia,
       },
       {
         target: RESILIENT_ORACLE_BASE_SEPOLIA,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[wstETH, [wstETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero], [true, false, false], false]],
+        params: [
+          [
+            wstETH,
+            [wstETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
         dstChainId: LzChainId.basesepolia,
       },
       {

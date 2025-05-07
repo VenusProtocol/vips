@@ -5,8 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { REDSTONE_ORACLE_UNICHAIN_SEPOLIA, RESILIENT_ORACLE_UNICHAIN_SEPOLIA } from "../../vips/vip-492/bsctestnet";
-import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
+import vip491, { RESILIENT_ORACLE_UNICHAIN_SEPOLIA } from "../../vips/vip-492/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
@@ -16,10 +15,7 @@ forking(19591682, async () => {
 
   await impersonateAccount(unichainsepolia.NORMAL_TIMELOCK);
   await setBalance(unichainsepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
-  const signer = await ethers.getSigner(unichainsepolia.NORMAL_TIMELOCK);
-
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_UNICHAIN_SEPOLIA, RESILIENT_ORACLE_ABI, provider);
-  const redstoneOracle = new ethers.Contract(REDSTONE_ORACLE_UNICHAIN_SEPOLIA, BINANCE_ORACLE_ABI, signer);
 
   describe("Pre-VIP behaviour", async () => {
     it("check cbBTC price", async () => {
