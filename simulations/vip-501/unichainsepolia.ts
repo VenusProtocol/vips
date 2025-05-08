@@ -35,7 +35,7 @@ import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import XVS_VAULT_TREASURY_ABI from "./abi/XVSVaultTreasury.json";
 import XVS_ABI from "./abi/xvs.json";
-import XVS_VAULT_ABI from "./abi/xvsvault.json";
+import XVS_VAULT_ABI from "./abi/xvsVault.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
@@ -101,6 +101,9 @@ forking(19755415, async () => {
 
     it("prime markets", async () => {
       expect((await prime.getAllMarkets()).length).to.equal(2);
+    });
+    it("prime is configured in xvs vault", async () => {
+      expect(await xvsVault.primeToken()).equals(PRIME);
     });
 
     it("prime address", async () => {

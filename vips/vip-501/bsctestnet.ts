@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
@@ -6,7 +7,7 @@ import { makeProposal } from "src/utils";
 import { acceptOwnershipCommandsAllConverters, setConverterNetworkCommands } from "./commands";
 import { ACM, CONVERTER_NETWORK, XVS_VAULT_TREASURY } from "./testnetAddresses";
 
-const { unichainsepolia } = NETWORK_ADDRESSES;
+const { unichainsepolia, bsctestnet } = NETWORK_ADDRESSES;
 
 export const PRIME_LIQUIDITY_PROVIDER = "0xDA4dcFBdC06A9947100a757Ee0eeDe88debaD586";
 export const PRIME = "0x59b95BF96D6D5FA1adf1Bfd20848A9b25814317A";
@@ -18,6 +19,10 @@ export const vWETH = "0x3dEAcBe87e4B6333140a46aBFD12215f4130B132";
 export const vUSDC = "0x0CA7edfcCF5dbf8AFdeAFB2D918409d439E3320A";
 export const ACM_AGGREGATOR = "0xb0067C9CD83B00DE781e9b456Bf0Fec86D687Bb2";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+const multisig = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+export const BSC_USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+export const BSC_ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 
 const PRIME_POOL_ID = 0;
 
@@ -33,6 +38,18 @@ export const vip501 = () => {
 
   return makeProposal(
     [
+      // Amount to be confirmed
+      {
+        target: bsctestnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [BSC_USDC, parseUnits("10000", 18), multisig],
+      },
+
+      {
+        target: bsctestnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [BSC_ETH, parseUnits("10000", 18), multisig],
+      },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "initializeTokens(address[])",
@@ -109,7 +126,6 @@ export const vip501 = () => {
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
         dstChainId: LzChainId.unichainsepolia,
       },
-
       ...setConverterNetworkCommands,
     ],
     meta,
@@ -118,3 +134,11 @@ export const vip501 = () => {
 };
 
 export default vip501;
+
+// BNB commands
+/**
+ * 1. Mint USDC and weth to treasury (will do in simulations)
+ * Withdraw from treasury to multisig
+ * bridge off chain
+ * unichain treasury to plp in next vip
+ */
