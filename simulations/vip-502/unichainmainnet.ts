@@ -29,9 +29,6 @@ const Actions = {
 };
 
 forking(15922000, async () => {
-  let interestRateModelAddresses: string;
-  let vToken: Contract;
-
   before(async () => {
     await setRedstonePrice(unichainmainnet.REDSTONE_ORACLE, UNI, UNI_REDSTONE_FEED, unichainmainnet.NORMAL_TIMELOCK);
   });
@@ -50,10 +47,12 @@ forking(15922000, async () => {
   testForkedNetworkVipCommands("update UNI market", await vip502());
 
   describe("Post-Execution state", () => {
+    let interestRateModelAddresses: string;
+    let vToken: Contract;
+
     before(async () => {
       vToken = await ethers.getContractAt(VTOKEN_ABI, VUNI_CORE);
       interestRateModelAddresses = await vToken.interestRateModel();
-      comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
     });
 
     describe("Risk parameters", () => {
