@@ -108,7 +108,9 @@ forking(15922000, async () => {
       );
     });
     it("check isolated pools", async () => {
-      checkIsolatedPoolsComptrollers();
+      checkIsolatedPoolsComptrollers({
+        [COMPTROLLER_CORE]: "0x9D5132Dd45CdaCd1De3a7b7f1f13da7F025fF726", // USDC holder
+      });
     });
   });
 });
