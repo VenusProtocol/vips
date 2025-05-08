@@ -2,9 +2,11 @@ import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+export const COMPTROLLER_LST = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
 export const COMPTROLLER_CORE = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
 export const UNI = "0x8f187aA05619a017077f5308904739877ce9eA21";
 export const VUNI_CORE = "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2";
+export const VasBNB_LST = "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288";
 export const RESERVE_FACTOR = parseUnits("0.25", 18);
 export const COLLATERAL_FACTOR = parseUnits("0.50", 18);
 export const LIQUIDATION_THRESHOLD = parseUnits("0.55", 18);
@@ -44,20 +46,8 @@ const vip502 = () => {
       },
       {
         target: VUNI_CORE,
-        signature: "setReserveFactor(uint256)",
-        params: [RESERVE_FACTOR],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: VUNI_CORE,
         signature: "setInterestRateModel(address)",
         params: [newInterestRateModel],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: COMPTROLLER_CORE,
-        signature: "setLiquidationIncentive(uint256)",
-        params: [LIQUIDATION_INCENTIVE],
         dstChainId: LzChainId.unichainmainnet,
       },
       {
@@ -66,9 +56,16 @@ const vip502 = () => {
         params: [[VUNI_CORE], [2], false],
         dstChainId: LzChainId.unichainmainnet,
       },
+
+      // asBNB update
+      {
+        target: COMPTROLLER_LST,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [[VasBNB_LST], [parseUnits("10000", 18)]],
+      },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 

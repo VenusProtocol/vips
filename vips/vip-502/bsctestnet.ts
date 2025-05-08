@@ -44,20 +44,8 @@ const vip502 = () => {
       },
       {
         target: VUNI_CORE,
-        signature: "setReserveFactor(uint256)",
-        params: [RESERVE_FACTOR],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-      {
-        target: VUNI_CORE,
         signature: "setInterestRateModel(address)",
         params: [newInterestRateModel],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-      {
-        target: COMPTROLLER_CORE,
-        signature: "setLiquidationIncentive(uint256)",
-        params: [LIQUIDATION_INCENTIVE],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
@@ -68,7 +56,7 @@ const vip502 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
