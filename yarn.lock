@@ -2718,6 +2718,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@venusprotocol/governance-contracts@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "@venusprotocol/governance-contracts@npm:2.9.0"
+  dependencies:
+    "@venusprotocol/solidity-utilities": 2.0.0
+    hardhat-deploy-ethers: ^0.3.0-beta.13
+    module-alias: ^2.2.2
+  checksum: 502f42064917867790f82b2026186457a973fe0a995b479bc25abe3b187674734eca65544e3ba060e5829ebc77b380b9e4e2bea7edbdba65ad94bf1ed30b01a2
+  languageName: node
+  linkType: hard
+
 "@venusprotocol/isolated-pools@npm:^2.5.0":
   version: 2.8.0
   resolution: "@venusprotocol/isolated-pools@npm:2.8.0"
@@ -2776,6 +2787,13 @@ __metadata:
   version: 1.3.0
   resolution: "@venusprotocol/solidity-utilities@npm:1.3.0"
   checksum: d1109365a5e01959c47b25fb129373db93792e60bf1bc0ed324b63c2a64f6e4a7878ebf016cfade94bc41a2c1245d3e861fdc6b8c5844ac210ed1d73e7307e72
+  languageName: node
+  linkType: hard
+
+"@venusprotocol/solidity-utilities@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@venusprotocol/solidity-utilities@npm:2.0.0"
+  checksum: 87a2ce2fd1d702bc04c4e98d675b904176c7f2489476e8da586d1782b48faae92aa4f2ba894737773d189ba72a6b274f1464cf2e0308e62758303d0adde749e6
   languageName: node
   linkType: hard
 
@@ -2864,7 +2882,7 @@ __metadata:
     "@types/sinon": ^17.0.3
     "@typescript-eslint/eslint-plugin": ^5.44.0
     "@typescript-eslint/parser": ^5.44.0
-    "@venusprotocol/governance-contracts": ^1.4.0
+    "@venusprotocol/governance-contracts": ^2.9.0
     "@venusprotocol/isolated-pools": ^2.5.0
     "@venusprotocol/oracle": ^1.10.0
     "@venusprotocol/token-bridge": ^1.1.0
@@ -2882,6 +2900,7 @@ __metadata:
     ethers: ^5.7.2
     fs-extra: ^10.1.0
     hardhat: ^2.22.15
+    hardhat-dependency-compiler: ^1.2.1
     hardhat-gas-reporter: ^1.0.9
     husky: ^8.0.2
     lint-staged: ^13.0.4
@@ -6401,6 +6420,15 @@ __metadata:
   peerDependencies:
     hardhat: ^2.0.0
   checksum: 870e7cad5d96ad7288b64da0faec7962a9a18e1eaaa02ed474e4f9285cd4b1a0fc6f66326e6a7476f7063fdf99aee57f227084519b1fb3723700a2d65fc65cfa
+  languageName: node
+  linkType: hard
+
+"hardhat-dependency-compiler@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "hardhat-dependency-compiler@npm:1.2.1"
+  peerDependencies:
+    hardhat: ^2.0.0
+  checksum: cc18ca535d861ff06d906ce639669a366879e37f15cb6d83f6a516e183d3fa6d9964a551195fe7bc106dcb2fab2c96eb0360a55cf69fd2b759c6fd01c6dc3d8b
   languageName: node
   linkType: hard
 
