@@ -57,15 +57,6 @@ export const vip501 = () => {
         dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: PRIME_LIQUIDITY_PROVIDER,
-        signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [
-          [WETH, USDC],
-          [0, 0],
-        ],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-      {
         target: unichainsepolia.XVS_VAULT_PROXY,
         signature: "setPrimeToken(address,address,uint256)",
         params: [PRIME, unichainsepolia.XVS, PRIME_POOL_ID],
