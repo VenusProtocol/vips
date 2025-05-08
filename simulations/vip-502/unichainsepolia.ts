@@ -7,18 +7,23 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip502, { COMPTROLLER_CORE, UNI, VUNI_CORE, COLLATERAL_FACTOR, LIQUIDATION_THRESHOLD} from "../../vips/vip-502/bsctestnet";
+import vip502, {
+  COLLATERAL_FACTOR,
+  COMPTROLLER_CORE,
+  LIQUIDATION_THRESHOLD,
+  UNI,
+  VUNI_CORE,
+} from "../../vips/vip-502/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
 const Actions = {
-    BORROW: 2,
+  BORROW: 2,
 };
 
 forking(19816317, async () => {
-
   describe("Contracts setup", () => {
     checkVToken(VUNI_CORE, {
       name: "Venus UNI (Core)",
@@ -74,8 +79,8 @@ forking(19816317, async () => {
         });
 
         it("enter market not paused", async () => {
-            const borrowPaused = await comptroller.actionPaused(VUNI_CORE, Actions.BORROW);
-            expect(borrowPaused).to.equal(false);
+          const borrowPaused = await comptroller.actionPaused(VUNI_CORE, Actions.BORROW);
+          expect(borrowPaused).to.equal(false);
         });
       });
     });
