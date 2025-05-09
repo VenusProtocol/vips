@@ -6,10 +6,10 @@ export const { UNITROLLER } = NETWORK_ADDRESSES.bsctestnet;
 
 export const VUSD1 = "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf";
 
-export const vip500Addendum = () => {
+export const vip493Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-500 [BNB Chain] Unpause enter market action for USD1 on Venus Core Pool",
+    title: "VIP-493 [BNB Chain] Unpause enter market action for USD1 on Venus Core Pool",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -29,4 +29,4 @@ export const vip500Addendum = () => {
   );
 };
 
-export default vip500Addendum;
+export default vip493Addendum;

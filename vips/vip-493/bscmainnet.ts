@@ -111,11 +111,70 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip500 = (maxStalePeriod?: number) => {
+export const vip493 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-500 [BNB Chain] Add support for USD1 on Venus Core Pool",
-    description: "",
+    title: "VIP-493 [BNB Chain] New USD1 market",
+    description: `#### Summary
+
+If passed, this VIP will add a market for [USD1](https://bscscan.com/address/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d) to the Core pool on BNB Chain, following the Community proposal “[[IDEA] Add Support USD1 on Venus](https://community.venus.io/t/idea-add-support-usd1-on-venus/5039)” and [the associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x62532df111b2b5f50353f8441ff0040e41fbaa903ea454a3f1fbd6faa389e705).
+
+#### Risk parameters for USD1
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/idea-add-support-usd1-on-venus/5039/13), the risk parameters for the new market are:
+
+Underlying token: [USD1](https://bscscan.com/address/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d)
+
+- Borrow cap: 14,400,000 USD1
+- Supply cap: 16,000,000 USD1
+- Collateral factor: 0%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 4,988 USD1 provided by the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) (Vanguard Treasury should be refunded with 5,000 USDT, because they provided the bootstrap liquidity [here](https://bscscan.com/tx/0x10ed7ba6f76cb89884bb1f5a9cfc53455e83a60b656c00d236e767207fe2cf9c))
+
+Interest rate curve for the new market:
+
+- kink: 80%
+- base (yearly): 0%
+- multiplier (yearly): 10%
+- jump multiplier (yearly): 250%
+
+#### Oracles configuration for USD1
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [BNB Chain](https://bscscan.com/address/0x6592b5DE802159F3E74B2486b091D11a8256ab8A) is used for USD1, using the following configuration:
+
+- Main oracle: [RedStoneOracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a)
+    - Feed: [0x6A1c87d11dDe3D1d52c24f8EC59B91019f14170D](https://bscscan.com/address/0x6A1c87d11dDe3D1d52c24f8EC59B91019f14170D)
+    - Max stale period: 7 hours
+- Pivot and fallback oracle: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+    - Feed: [0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0](https://bscscan.com/address/0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0)
+    - Max staled period: 26 hours
+- Bound validator:
+    - Upper bound: 1.01
+    - Lower bound: 0.99
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new market is properly added to the Core pool on BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+BNB Chain
+
+- vUSD1: [0x0C1DA220D301155b87318B90692Da8dc43B67340](https://bscscan.com/address/0x0C1DA220D301155b87318B90692Da8dc43B67340)
+
+BNB Chain testnet
+
+- vUSD1: [0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf](https://testnet.bscscan.com/address/0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/548)
+- [Deployment of USD1 to BNB Chain testnet](https://testnet.bscscan.com/tx/0x3b0f5d5600eb427dc09cbc9f976dde549e131225cc5f74127aae08d65b35f3e3)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -236,4 +295,4 @@ export const vip500 = (maxStalePeriod?: number) => {
   );
 };
 
-export default vip500;
+export default vip493;

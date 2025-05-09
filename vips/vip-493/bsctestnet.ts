@@ -94,10 +94,10 @@ export const marketSpec = {
   },
 };
 
-export const vip500 = () => {
+export const vip493 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-500 [BNB Chain] Add support for USD1 on Venus Core Pool",
+    title: "VIP-493 [BNB Chain] Add support for USD1 on Venus Core Pool",
     description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -206,4 +206,4 @@ export const vip500 = () => {
   );
 };
 
-export default vip500;
+export default vip493;

@@ -20,8 +20,8 @@ import {
   VANGUARD_VANTAGE_TREASURY,
   VUSD1,
   marketSpec,
-  vip500,
-} from "../../vips/vip-500/bscmainnet";
+  vip493,
+} from "../../vips/vip-493/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VUSD1_ABI from "./abi/VBep20_ABI.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -53,7 +53,7 @@ forking(49362932, async () => {
     });
   });
 
-  testVip("VIP-500 Add USD1 Market", await vip500(ONE_YEAR), {
+  testVip("VIP-493 Add USD1 Market", await vip493(ONE_YEAR), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

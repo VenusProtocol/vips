@@ -13,8 +13,8 @@ import {
   USD1,
   VUSD1,
   marketSpec,
-  vip500,
-} from "../../vips/vip-500/bsctestnet";
+  vip493,
+} from "../../vips/vip-493/bsctestnet";
 import VUSD1_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import USD1_ABI from "./abi/mockToken.json";
@@ -56,7 +56,7 @@ forking(51296001, async () => {
     });
   });
 
-  testVip("VIP-500-testnet: Add USD1 Market", await vip500(), {
+  testVip("VIP-493-testnet: Add USD1 Market", await vip493(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

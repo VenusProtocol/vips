@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 
-import { UNITROLLER, VUSD1, vip500Addendum } from "../../vips/vip-500/bsctestnet-addendum";
+import { UNITROLLER, VUSD1, vip493Addendum } from "../../vips/vip-493/bsctestnet-addendum";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const Actions = {
@@ -25,7 +25,7 @@ forking(51415815, async () => {
     });
   });
 
-  testVip("VIP-500-testnet-Addendum: Add USD1 Market", await vip500Addendum(), {});
+  testVip("VIP-493-testnet-Addendum: Add USD1 Market", await vip493Addendum(), {});
 
   describe("Post-VIP behavior", async () => {
     it("enter market not paused", async () => {
