@@ -8,10 +8,9 @@ export const VUNI_CORE = "0xaE43aAd383b93FCeE5d3e0dD2d40b6e94639c642";
 export const RESERVE_FACTOR = parseUnits("0.25", 18);
 export const COLLATERAL_FACTOR = parseUnits("0.50", 18);
 export const LIQUIDATION_THRESHOLD = parseUnits("0.55", 18);
-export const LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 export const newInterestRateModel = "0x5C7D8858a25778d992eE803Ce79F1eff60c1d9D1";
 
-const vip502 = () => {
+const vip494 = () => {
   const meta = {
     version: "v2",
     title: "Update the risk parameters of the UNI market in Core pool",
@@ -60,4 +59,4 @@ const vip502 = () => {
   );
 };
 
-export default vip502;
+export default vip494;
