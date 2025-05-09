@@ -14,7 +14,7 @@ import {
   REDSTONE_ORACLE,
   REDUCE_RESERVES_BLOCK_DELTA,
   USD1,
-  USDE_REDSTONE_FEED,
+  USD1_REDSTONE_FEED,
   USDT,
   VANGUARD_VANTAGE_AMOUNT_USDT,
   VANGUARD_VANTAGE_TREASURY,
@@ -33,7 +33,7 @@ const ONE_YEAR = 365 * 24 * 3600;
 const RATE_MODEL = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
 const INITIAL_VTOKENS = parseUnits("4988.03272766", 8);
 
-forking(49361606, async () => {
+forking(49362932, async () => {
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
   const usd1 = new ethers.Contract(USD1, ERC20_ABI, ethers.provider);
@@ -43,8 +43,7 @@ forking(49361606, async () => {
 
   before(async () => {
     prevUSDTBalanceOfVanguard = await usdt.balanceOf(VANGUARD_VANTAGE_TREASURY);
-    // the feed for USD1 is not available yet, so we're using USDE_REDSTONE_FEED in the meantime
-    await setRedstonePrice(REDSTONE_ORACLE, USD1, USDE_REDSTONE_FEED, NORMAL_TIMELOCK);
+    await setRedstonePrice(REDSTONE_ORACLE, USD1, USD1_REDSTONE_FEED, NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -129,7 +128,7 @@ forking(49361606, async () => {
 
     it("get correct price from oracle ", async () => {
       const price = await oracle.getPrice(USD1);
-      expect(price).to.equal(parseUnits("1.00049432", 18));
+      expect(price).to.equal(parseUnits("1.00132727", 18));
     });
 
     it("Refund to Vanguard", async () => {

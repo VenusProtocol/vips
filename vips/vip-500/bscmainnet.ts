@@ -19,7 +19,7 @@ export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c44
 export const USD1 = "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d";
 export const VUSD1 = "0x0C1DA220D301155b87318B90692Da8dc43B67340";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
-export const USDE_REDSTONE_FEED = "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb";
+export const USD1_REDSTONE_FEED = "0x6A1c87d11dDe3D1d52c24f8EC59B91019f14170D";
 export const USD1_CHAINLINK_FEED = "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0";
 export const REDSTONE_MAX_STALE_PERIOD = 25200; // 7 hours max stale period
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26 hours max stale period
@@ -128,7 +128,7 @@ export const vip500 = (maxStalePeriod?: number) => {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
         params: [
-          [marketSpec.vToken.underlying.address, USDE_REDSTONE_FEED, maxStalePeriod || REDSTONE_MAX_STALE_PERIOD],
+          [marketSpec.vToken.underlying.address, USD1_REDSTONE_FEED, maxStalePeriod || REDSTONE_MAX_STALE_PERIOD],
         ],
       },
       {
