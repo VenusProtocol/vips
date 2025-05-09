@@ -3,12 +3,12 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { RESILIENT_ORACLE_ARBITRUM_SEPOLIA } from "../../vips/vip-493/bsctestnet";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import { setMaxStalePeriod } from "src/utils";
 import ERC20_ABI from "./abi/ERC20.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -53,19 +53,15 @@ forking(151083977, async () => {
     it("check WBTC price", async () => {
       // set to 180 seconds but not yet updated from 1 hour
       const token = new ethers.Contract("0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D", ERC20_ABI, provider);
-      await setMaxStalePeriod(resilientOracle, token)
-      expect(await resilientOracle.getPrice(token.address)).to.equal(
-        parseUnits("103594.52", 28),
-      );
+      await setMaxStalePeriod(resilientOracle, token);
+      expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("103594.52", 28));
     });
 
     it("check WETH price", async () => {
       // set to 180 seconds but not yet updated from 1 hour
       const token = new ethers.Contract("0x980B62Da83eFf3D4576C647993b0c1D7faf17c73", ERC20_ABI, provider);
-      await setMaxStalePeriod(resilientOracle, token)
-      expect(await resilientOracle.getPrice(token.address)).to.equal(
-        parseUnits("2382.70878478", 18),
-      );
+      await setMaxStalePeriod(resilientOracle, token);
+      expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("2382.70878478", 18));
     });
 
     it("check weETH price", async () => {
@@ -117,19 +113,15 @@ forking(151083977, async () => {
     it("check WBTC price", async () => {
       // set to 180 seconds but not yet updated from 1 hour
       const token = new ethers.Contract("0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D", ERC20_ABI, provider);
-      await setMaxStalePeriod(resilientOracle, token)
-      expect(await resilientOracle.getPrice(token.address)).to.equal(
-        parseUnits("103594.52", 28),
-      );
+      await setMaxStalePeriod(resilientOracle, token);
+      expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("103594.52", 28));
     });
 
     it("check WETH price", async () => {
       // set to 180 seconds but not yet updated from 1 hour
       const token = new ethers.Contract("0x980B62Da83eFf3D4576C647993b0c1D7faf17c73", ERC20_ABI, provider);
-      await setMaxStalePeriod(resilientOracle, token)
-      expect(await resilientOracle.getPrice(token.address)).to.equal(
-        parseUnits("2382.70878478", 18),
-      );
+      await setMaxStalePeriod(resilientOracle, token);
+      expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("2382.70878478", 18));
     });
 
     it("check weETH price", async () => {

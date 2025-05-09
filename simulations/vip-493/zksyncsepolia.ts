@@ -7,8 +7,6 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { RESILIENT_ORACLE_ZKSYNC_SEPOLIA } from "../../vips/vip-493/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import { setMaxStalePeriod } from "src/utils";
-import ERC20_ABI from "./abi/ERC20.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
