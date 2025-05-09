@@ -3,6 +3,7 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
@@ -44,7 +45,23 @@ forking(15922000, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("update UNI market", await vip502());
+  testForkedNetworkVipCommands("update UNI market", await vip502(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI, VTOKEN_ABI],
+        [
+          "NewSupplyCap",
+          "NewBorrowCap",
+          "NewCollateralFactor",
+          "NewLiquidationThreshold",
+          "ActionPausedMarket",
+          "NewMarketInterestRateModel",
+        ],
+        [1, 1, 1, 1, 1, 1],
+      );
+    },
+  });
 
   describe("Post-Execution state", () => {
     let interestRateModelAddresses: string;

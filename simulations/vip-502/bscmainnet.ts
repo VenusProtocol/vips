@@ -26,6 +26,7 @@ forking(49241252, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [1, 0],
       );
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },
   });
 
