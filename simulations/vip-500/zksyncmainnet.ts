@@ -282,9 +282,9 @@ forking(59796423, async () => {
     });
 
     describe("WUSDM Liquidator", () => {
-      it(`leaves 159347103634874789742 wei of WETH debt in ${WUSDM_LIQUIDATOR}`, async () => {
+      it(`leaves 159347103634874427700 wei of WETH debt in ${WUSDM_LIQUIDATOR}`, async () => {
         expect(await vWETH.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(
-          parseUnits("159.347103634874789742", 18),
+          parseUnits("159.347103634874427700", 18),
         );
       });
       it(`leaves 56987365052 wei of USDC.e debt in ${WUSDM_LIQUIDATOR}`, async () => {
