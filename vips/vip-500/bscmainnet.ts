@@ -5,14 +5,26 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY, NORMAL_TIMELOCK } =
-  NETWORK_ADDRESSES.bscmainnet;
+export const {
+  RESILIENT_ORACLE,
+  REDSTONE_ORACLE,
+  UNITROLLER,
+  ACCESS_CONTROL_MANAGER,
+  VTREASURY,
+  NORMAL_TIMELOCK,
+  CHAINLINK_ORACLE,
+} = NETWORK_ADDRESSES.bscmainnet;
+export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const USD1 = "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d";
 export const VUSD1 = "0x0C1DA220D301155b87318B90692Da8dc43B67340";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const USDE_REDSTONE_FEED = "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb";
-export const MAX_STALE_PERIOD = 25200; // 7 hours max stale period
+export const USD1_CHAINLINK_FEED = "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0";
+export const REDSTONE_MAX_STALE_PERIOD = 25200; // 7 hours max stale period
+export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26 hours max stale period
+const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
+const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 
 // Converters
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -99,7 +111,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip500 = () => {
+export const vip500 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
     title: "VIP-500 [BNB Chain] Add support for USD1 on Venus Core Pool",
@@ -115,7 +127,21 @@ export const vip500 = () => {
       {
         target: REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[marketSpec.vToken.underlying.address, USDE_REDSTONE_FEED, MAX_STALE_PERIOD]],
+        params: [
+          [marketSpec.vToken.underlying.address, USDE_REDSTONE_FEED, maxStalePeriod || REDSTONE_MAX_STALE_PERIOD],
+        ],
+      },
+      {
+        target: CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [
+          [marketSpec.vToken.underlying.address, USD1_CHAINLINK_FEED, maxStalePeriod || CHAINLINK_MAX_STALE_PERIOD],
+        ],
+      },
+      {
+        target: BOUND_VALIDATOR,
+        signature: "setValidateConfig((address,uint256,uint256))",
+        params: [[marketSpec.vToken.underlying.address, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
       },
       {
         target: RESILIENT_ORACLE,
@@ -123,8 +149,8 @@ export const vip500 = () => {
         params: [
           [
             marketSpec.vToken.underlying.address,
-            [REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
+            [REDSTONE_ORACLE, CHAINLINK_ORACLE, CHAINLINK_ORACLE],
+            [true, true, true],
           ],
         ],
       },

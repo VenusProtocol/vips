@@ -28,10 +28,12 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
+const ONE_YEAR = 365 * 24 * 3600;
+
 const RATE_MODEL = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
 const INITIAL_VTOKENS = parseUnits("4988.03272766", 8);
 
-forking(49078474, async () => {
+forking(49361606, async () => {
   const comptroller = new ethers.Contract(marketSpec.vToken.comptroller, COMPTROLLER_ABI, ethers.provider);
   const usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
   const usd1 = new ethers.Contract(USD1, ERC20_ABI, ethers.provider);
@@ -52,7 +54,7 @@ forking(49078474, async () => {
     });
   });
 
-  testVip("VIP-500 Add USD1 Market", await vip500(), {
+  testVip("VIP-500 Add USD1 Market", await vip500(ONE_YEAR), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -127,7 +129,7 @@ forking(49078474, async () => {
 
     it("get correct price from oracle ", async () => {
       const price = await oracle.getPrice(USD1);
-      expect(price).to.equal(parseUnits("1.00066074", 18));
+      expect(price).to.equal(parseUnits("1.00049432", 18));
     });
 
     it("Refund to Vanguard", async () => {
