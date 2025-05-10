@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip494, { COMPTROLLER_LST, VasBNB_LST } from "../../vips/vip-494/bscmainnet";
+import vip494, { BNB_vasBNB_LST, COMPTROLLER_LST } from "../../vips/vip-494/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -14,7 +14,7 @@ forking(49241252, async () => {
 
   describe("Pre-Execution state", () => {
     it(`asBNB supply cap should be 2000`, async () => {
-      expect(await comptroller.supplyCaps(VasBNB_LST)).to.equal(parseUnits("2000", 18));
+      expect(await comptroller.supplyCaps(BNB_vasBNB_LST)).to.equal(parseUnits("2000", 18));
     });
   });
 
@@ -32,7 +32,7 @@ forking(49241252, async () => {
 
   describe("Post-Execution state", () => {
     it(`should set supply cap of asBNB to 10000`, async () => {
-      expect(await comptroller.supplyCaps(VasBNB_LST)).to.equal(parseUnits("10000", 18));
+      expect(await comptroller.supplyCaps(BNB_vasBNB_LST)).to.equal(parseUnits("10000", 18));
     });
   });
 });

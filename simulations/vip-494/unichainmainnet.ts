@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -15,7 +15,8 @@ import vip494, {
   COMPTROLLER_CORE,
   LIQUIDATION_THRESHOLD,
   UNI,
-  VUNI_CORE,
+  UNICHAIN_vUNI_CORE,
+  UNICHAIN_vUSDC_CORE,
 } from "../../vips/vip-494/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
@@ -30,18 +31,31 @@ const Actions = {
 };
 
 forking(15922000, async () => {
+  const vUNI = new ethers.Contract(UNICHAIN_vUNI_CORE, VTOKEN_ABI, ethers.provider);
+  const comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, ethers.provider);
+
   before(async () => {
     await setRedstonePrice(unichainmainnet.REDSTONE_ORACLE, UNI, UNI_REDSTONE_FEED, unichainmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Contracts setup", () => {
-    checkVToken(VUNI_CORE, {
+    checkVToken(UNICHAIN_vUNI_CORE, {
       name: "Venus UNI (Core)",
       symbol: "vUNI_Core",
       decimals: 8,
       underlying: UNI,
       exchangeRate: parseUnits("1.0000000111819070088746916836", 28),
       comptroller: COMPTROLLER_CORE,
+    });
+  });
+
+  describe("Pre-Execution state", () => {
+    it(`USDC supply cap is 10M`, async () => {
+      expect(await comptroller.supplyCaps(UNICHAIN_vUSDC_CORE)).to.equal(parseUnits("10000000", 6));
+    });
+
+    it(`USDC borrow cap is 8M`, async () => {
+      expect(await comptroller.borrowCaps(UNICHAIN_vUSDC_CORE)).to.equal(parseUnits("8000000", 6));
     });
   });
 
@@ -58,62 +72,56 @@ forking(15922000, async () => {
           "ActionPausedMarket",
           "NewMarketInterestRateModel",
         ],
-        [1, 1, 1, 1, 1, 1],
+        [2, 2, 1, 1, 1, 1],
       );
     },
   });
 
   describe("Post-Execution state", () => {
-    let interestRateModelAddresses: string;
-    let vToken: Contract;
-
-    before(async () => {
-      vToken = await ethers.getContractAt(VTOKEN_ABI, VUNI_CORE);
-      interestRateModelAddresses = await vToken.interestRateModel();
-    });
-
     describe("Risk parameters", () => {
       describe(`risk parameters`, () => {
-        let vToken: Contract;
-        let comptroller: Contract;
-
-        before(async () => {
-          vToken = await ethers.getContractAt(VTOKEN_ABI, VUNI_CORE);
-          comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
-        });
-
         it(`should set reserve factor to 0.25`, async () => {
-          expect(await vToken.reserveFactorMantissa()).to.equal(parseUnits("0.25", 18));
+          expect(await vUNI.reserveFactorMantissa()).to.equal(parseUnits("0.25", 18));
         });
 
         it(`should set collateral factor to 0.5`, async () => {
-          const market = await comptroller.markets(VUNI_CORE);
+          const market = await comptroller.markets(UNICHAIN_vUNI_CORE);
           expect(market.collateralFactorMantissa).to.equal(COLLATERAL_FACTOR);
         });
 
         it(`should set liquidation threshold to 0.55`, async () => {
-          const market = await comptroller.markets(VUNI_CORE);
+          const market = await comptroller.markets(UNICHAIN_vUNI_CORE);
           expect(market.liquidationThresholdMantissa).to.equal(LIQUIDATION_THRESHOLD);
         });
 
         it(`should set supply cap to 4000000`, async () => {
-          expect(await comptroller.supplyCaps(VUNI_CORE)).to.equal(parseUnits("4000000", 18));
+          expect(await comptroller.supplyCaps(UNICHAIN_vUNI_CORE)).to.equal(parseUnits("4000000", 18));
         });
 
         it(`should set borrow cap to 2000000`, async () => {
-          expect(await comptroller.borrowCaps(VUNI_CORE)).to.equal(parseUnits("2000000", 18));
+          expect(await comptroller.borrowCaps(UNICHAIN_vUNI_CORE)).to.equal(parseUnits("2000000", 18));
         });
 
         it("enter market not paused", async () => {
-          const borrowPaused = await comptroller.actionPaused(VUNI_CORE, Actions.BORROW);
+          const borrowPaused = await comptroller.actionPaused(UNICHAIN_vUNI_CORE, Actions.BORROW);
           expect(borrowPaused).to.equal(false);
         });
       });
     });
 
+    describe("USDC caps", () => {
+      it(`USDC supply cap is 15M`, async () => {
+        expect(await comptroller.supplyCaps(UNICHAIN_vUSDC_CORE)).to.equal(parseUnits("15000000", 6));
+      });
+
+      it(`USDC borrow cap is 12M`, async () => {
+        expect(await comptroller.borrowCaps(UNICHAIN_vUSDC_CORE)).to.equal(parseUnits("12000000", 6));
+      });
+    });
+
     it("Interest rates", async () => {
       checkInterestRate(
-        interestRateModelAddresses,
+        await vUNI.interestRateModel(),
         "VUNI",
         {
           base: "0",
