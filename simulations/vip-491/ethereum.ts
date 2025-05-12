@@ -13,6 +13,8 @@ import {
   VToken_vPT_USDe_27MAR2025_Ethena,
   VToken_vPT_sUSDE_27MAR2025_Ethena,
   VToken_vPT_weETH_26DEC2024_LiquidStakedETH,
+  VToken_vUSDC_Ethena,
+  VToken_vsUSDe_Ethena,
   VTreasury_Ethereum,
   vip491,
   weETH_Address,
@@ -43,33 +45,63 @@ forking(22380370, async () => {
 
   describe("Pre-VIP behavior", async () => {
     describe("Ethena Markets", () => {
-      it("Check USDe market CF is not zero", async () => {
+      it("Check PT_USDe market CF is not zero", async () => {
         const market = await comptrollerEthena.markets(VToken_vPT_USDe_27MAR2025_Ethena);
         expect(market.collateralFactorMantissa).not.equal(0);
       });
 
-      it("Check USDE market mint is not paused", async () => {
+      it("Check PT_USDE market mint is not paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.MINT);
         expect(isPaused).to.be.false;
       });
 
-      it("Check USDE enter market action is not paused", async () => {
+      it("Check PT_USDE enter market action is not paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.false;
       });
 
-      it("Check sUSDE market CF is not zero", async () => {
+      it("Check PT_sUSDE market CF is not zero", async () => {
         const market = await comptrollerEthena.markets(VToken_vPT_sUSDE_27MAR2025_Ethena);
         expect(market.collateralFactorMantissa).not.equal(0);
       });
 
-      it("Check sUSDE market mint is not paused", async () => {
+      it("Check PT_sUSDE market mint is not paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.MINT);
         expect(isPaused).to.be.false;
       });
 
-      it("Check sUSDE enter market action is not paused", async () => {
+      it("Check PT_sUSDE enter market action is not paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.ENTER_MARKET); // Enter market action
+        expect(isPaused).to.be.false;
+      });
+
+      it("Check sUSDE market CF is not zero", async () => {
+        const market = await comptrollerEthena.markets(VToken_vsUSDe_Ethena);
+        expect(market.collateralFactorMantissa).not.equal(0);
+      });
+
+      it("Check sUSDE market mint is not paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.MINT);
+        expect(isPaused).to.be.false;
+      });
+
+      it("Check sUSDE enter market action is not paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.ENTER_MARKET); // Enter market action
+        expect(isPaused).to.be.false;
+      });
+
+      it("Check USDC market CF is not zero", async () => {
+        const market = await comptrollerEthena.markets(VToken_vUSDC_Ethena);
+        expect(market.collateralFactorMantissa).equal(0);
+      });
+
+      it("Check USDC market mint is not paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.MINT);
+        expect(isPaused).to.be.false;
+      });
+
+      it("Check USDC enter market action is not paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.false;
       });
     });
@@ -109,33 +141,63 @@ forking(22380370, async () => {
 
   describe("Post-VIP behavior", async () => {
     describe("Ethena Markets", () => {
-      it("Check USDe market CF is zero", async () => {
+      it("Check PT_USDe market CF is zero", async () => {
         const market = await comptrollerEthena.markets(VToken_vPT_USDe_27MAR2025_Ethena);
         expect(market.collateralFactorMantissa).to.equal(0);
       });
 
-      it("Check USDe market mint is paused", async () => {
+      it("Check PT_USDe market mint is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.MINT);
         expect(isPaused).to.be.true;
       });
 
-      it("Check USDe enter market action is paused", async () => {
+      it("Check PT_USDe enter market action is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.true;
       });
 
-      it("Check sUSDE market CF is zero", async () => {
+      it("Check PT_sUSDE market CF is zero", async () => {
         const market = await comptrollerEthena.markets(VToken_vPT_sUSDE_27MAR2025_Ethena);
         expect(market.collateralFactorMantissa).to.equal(0);
       });
 
-      it("Check sUSDE market mint is paused", async () => {
+      it("Check PT_sUSDE market mint is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.MINT);
         expect(isPaused).to.be.true;
       });
 
-      it("Check sUSDE enter market action is paused", async () => {
+      it("Check PT_sUSDE enter market action is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.ENTER_MARKET); // Enter market action
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check sUSDE market CF is zero", async () => {
+        const market = await comptrollerEthena.markets(VToken_vsUSDe_Ethena);
+        expect(market.collateralFactorMantissa).to.equal(0);
+      });
+
+      it("Check sUSDE market mint is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.MINT);
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check sUSDE enter market action is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.ENTER_MARKET); // Enter market action
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check USDC market CF is zero", async () => {
+        const market = await comptrollerEthena.markets(VToken_vUSDC_Ethena);
+        expect(market.collateralFactorMantissa).to.equal(0);
+      });
+
+      it("Check USDC market mint is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.MINT);
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check USDC enter market action is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.true;
       });
     });
