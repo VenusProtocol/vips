@@ -66,8 +66,11 @@ const generateAddConverterNetworkCommands = () => {
   }));
 };
 
-export const incentiveAndAccessibilities = new Array(Assets.length - 1).fill(incentiveAndAccessibility);
+export const incentiveAndAccessibilities: IncentiveAndAccessibility[] = [];
 
+for (let i = 0; i < Assets.length - 1; i++) {
+  incentiveAndAccessibilities.push(incentiveAndAccessibility);
+}
 export const acceptOwnershipCommandsAllConverters: AcceptOwnership[] = generateAcceptOwnershipCommands(converters);
 
 export const setConverterNetworkCommands = generateSetConverterNetworkCommands();

@@ -4,8 +4,23 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { acceptOwnershipCommandsAllConverters, setConverterNetworkCommands } from "./commands";
-import { ACM, CONVERTER_NETWORK, XVS_VAULT_TREASURY } from "./testnetAddresses";
+import {
+  acceptOwnershipCommandsAllConverters,
+  incentiveAndAccessibilities,
+  setConverterNetworkCommands,
+} from "./commands";
+import {
+  ACM,
+  CONVERTER_NETWORK,
+  USDCPrimeConverterTokenOuts,
+  USDC_PRIME_CONVERTER,
+  WETHPrimeConverterTokenOuts,
+  WETH_PRIME_CONVERTER,
+  XVS,
+  XVSVaultConverterTokenOuts,
+  XVS_VAULT_CONVERTER,
+  XVS_VAULT_TREASURY,
+} from "./testnetAddresses";
 
 const { unichainsepolia, bsctestnet } = NETWORK_ADDRESSES;
 
@@ -19,12 +34,10 @@ export const vWETH = "0x3dEAcBe87e4B6333140a46aBFD12215f4130B132";
 export const vUSDC = "0x0CA7edfcCF5dbf8AFdeAFB2D918409d439E3320A";
 export const ACM_AGGREGATOR = "0xb0067C9CD83B00DE781e9b456Bf0Fec86D687Bb2";
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-
+export const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 const multisig = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 export const BSC_USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 export const BSC_ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
-
-const PRIME_POOL_ID = 0;
 
 export const vip501 = () => {
   const meta = {
@@ -54,12 +67,6 @@ export const vip501 = () => {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "initializeTokens(address[])",
         params: [[WETH, USDC]],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-      {
-        target: unichainsepolia.XVS_VAULT_PROXY,
-        signature: "setPrimeToken(address,address,uint256)",
-        params: [PRIME, unichainsepolia.XVS, PRIME_POOL_ID],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
@@ -117,6 +124,43 @@ export const vip501 = () => {
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
         dstChainId: LzChainId.unichainsepolia,
       },
+
+      {
+        target: PSR,
+        signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
+        params: [
+          [
+            [0, 6000, unichainsepolia.VTREASURY], // Values TBD
+            [0, 2000, XVS_VAULT_CONVERTER],
+            [0, 900, USDC_PRIME_CONVERTER],
+            [0, 1100, WETH_PRIME_CONVERTER],
+            [1, 8000, unichainsepolia.VTREASURY],
+            [1, 2000, XVS_VAULT_CONVERTER],
+          ],
+        ],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+
+      {
+        target: WETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [WETH, WETHPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [USDC, USDCPrimeConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [XVS, XVSVaultConverterTokenOuts, incentiveAndAccessibilities],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+
       ...setConverterNetworkCommands,
     ],
     meta,
@@ -125,11 +169,3 @@ export const vip501 = () => {
 };
 
 export default vip501;
-
-// BNB commands
-/**
- * 1. Mint USDC and weth to treasury (will do in simulations)
- * Withdraw from treasury to multisig
- * bridge off chain
- * unichain treasury to plp in next vip
- */

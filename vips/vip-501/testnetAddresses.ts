@@ -23,6 +23,6 @@ export const converters: string[] = [USDC_PRIME_CONVERTER, WETH_PRIME_CONVERTER,
 // Function to filter assets based on a base asset
 const filterAssets = (assets: string[], baseAsset: string) => assets.filter(asset => asset !== baseAsset);
 
-export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
-export const WETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[3]);
-export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[4]);
+export const USDCPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[0]);
+export const WETHPrimeConverterTokenOuts = filterAssets(Assets, BaseAssets[1]);
+export const XVSVaultConverterTokenOuts = filterAssets(Assets, BaseAssets[2]);
