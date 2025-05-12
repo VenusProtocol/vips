@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { BINANCE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-491/bscmainnet";
+import vip495, { BINANCE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-495/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { opbnbmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 365 * 24 * 60 * 60;
 
-forking(55898298, async () => {
+forking(57121037, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(opbnbmainnet.NORMAL_TIMELOCK);
@@ -54,7 +54,7 @@ forking(55898298, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491());
+  testForkedNetworkVipCommands("vip495", await vip495());
 
   describe("Post-VIP behaviour", async () => {
     it("check BTCB price", async () => {

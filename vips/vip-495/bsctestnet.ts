@@ -10,7 +10,7 @@ export const RESILIENT_ORACLE_IMPLEMENTATION = "0x2fD256De0E5e783A51d3a661bCD5D0
 export const BINANCE_ORACLE_IMPLEMENTATION = "0xCFbE7121c4Fb550502854B8c69f88f817D34AaB2";
 export const BOUND_VALIDATOR_IMPLEMENTATION = "0x73b615e88fDAe39fb8ED12d0dFeFBCDF5BA0E312";
 
-export const vip491 = () => {
+export const vip495 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -46,4 +46,4 @@ export const vip491 = () => {
   );
 };
 
-export default vip491;
+export default vip495;

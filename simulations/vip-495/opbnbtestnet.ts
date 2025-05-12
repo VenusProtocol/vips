@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { BINANCE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-491/bsctestnet";
+import vip495, { BINANCE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-495/bsctestnet";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -52,7 +52,7 @@ forking(62415086, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491());
+  testForkedNetworkVipCommands("vip495", await vip495());
 
   describe("Post-VIP behaviour", async () => {
     it("check BTCB price", async () => {
