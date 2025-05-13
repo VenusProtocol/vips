@@ -21,7 +21,7 @@ forking(51462851, async () => {
   let eth: Contract;
   let treasuryETHBefore: BigNumber;
   let multisigETHBefore: BigNumber;
-  const AMOUNT = parseUnits("1000", 18);
+  const AMOUNT = parseUnits("10000", 18);
 
   before(async () => {
     const impersonateMultisig = await initMainnetUser(multisig, ethers.utils.parseEther("2"));
