@@ -23,6 +23,10 @@ export const PT_weETH_26DEC2024_LiquidStakedETH = "0x6ee2b5E19ECBa773a352E5B2141
 export const YT_weETH_26DEC2024_LiquidStakedETH = "0x129e6B5DBC0Ecc12F9e486C5BC9cDF1a6A80bc6A";
 export const weETH_Address = "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee";
 
+// underlying assets associated with the vTokens held by the Venus Treasury
+export const PT_weETH_26DEC2024_expected = parseUnits("1.79961879253413783", 18);
+export const weETH_expected = parseUnits("1.687594369906750452", 18);
+
 export const Actions = {
   MINT: 0,
   REDEEM: 1,
@@ -133,7 +137,7 @@ export const vip491 = () => {
       {
         target: PT_weETH_26DEC2024_LiquidStakedETH,
         signature: "approve(address,uint256)",
-        params: [Pendle_Router, parseUnits("0.000000000179961879", 18)],
+        params: [Pendle_Router, PT_weETH_26DEC2024_expected],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -143,10 +147,10 @@ export const vip491 = () => {
         params: [
           VTreasury_Ethereum,
           YT_weETH_26DEC2024_LiquidStakedETH,
-          parseUnits("0.000000000179961879", 18),
+          PT_weETH_26DEC2024_expected,
           [
             weETH_Address, // tokenOut: weETH
-            "0",
+            weETH_expected, // minimum amount expected to be withdrawn
             weETH_Address,
             "0x0000000000000000000000000000000000000000",
             [0, "0x0000000000000000000000000000000000000000", "0x", false],

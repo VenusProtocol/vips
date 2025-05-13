@@ -18,6 +18,7 @@ import {
   VTreasury_Ethereum,
   vip491,
   weETH_Address,
+  weETH_expected,
 } from "../../vips/vip-491/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -231,9 +232,19 @@ forking(22380370, async () => {
         expect(treasuryBalance).to.equal(0);
       });
 
+      it("Check Normal Timelock holds no vPT tokens after redemption", async () => {
+        const vptBalance = await vPtTokenWeETH.balanceOf(Timelock_Ethereum);
+        expect(vptBalance).to.equal(0);
+      });
+
+      it("Check Normal Timelock holds no PT tokens after redemption", async () => {
+        const treasuryBalance = await ptTokenWeETH.balanceOf(Timelock_Ethereum);
+        expect(treasuryBalance).to.equal(0);
+      });
+
       it("Verify treasury received weEth after Pendle redemption", async () => {
         const weEthAfter = await weETH.balanceOf(VTreasury_Ethereum);
-        expect(weEthAfter).to.be.gt(weEthBefore);
+        expect(weEthAfter.sub(weEthBefore)).to.equal(weETH_expected);
       });
     });
   });
