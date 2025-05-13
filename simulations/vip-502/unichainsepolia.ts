@@ -16,7 +16,7 @@ import {
   WETH_DISTRIBUTION_SPEED,
   vip502,
 } from "../../vips/vip-502/bsctestnet";
-import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
+import PLP_ABI from "./abi/primeLiquidityProvider.json";
 import TREASURY_ABI from "./abi/treasury.json";
 import USDC_ABI from "./abi/usdc.json";
 import WETH_ABI from "./abi/weth.json";
@@ -42,7 +42,6 @@ forking(19755415, async () => {
     });
     it("set up", async () => {
       treasuryUSDCBefore = await usdc.balanceOf(NETWORK_ADDRESSES.unichainsepolia.VTREASURY);
-      console.log(treasuryUSDCBefore);
       treasuryETHBefore = await weth.balanceOf(NETWORK_ADDRESSES.unichainsepolia.VTREASURY);
     });
   });
