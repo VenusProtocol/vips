@@ -140,7 +140,7 @@ export const vip501 = () => {
         ],
         dstChainId: LzChainId.unichainsepolia,
       },
-
+      ...setConverterNetworkCommands,
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
@@ -160,8 +160,6 @@ export const vip501 = () => {
         params: [XVS, XVSVaultConverterTokenOuts, incentiveAndAccessibilities],
         dstChainId: LzChainId.unichainsepolia,
       },
-
-      ...setConverterNetworkCommands,
     ],
     meta,
     ProposalType.REGULAR,

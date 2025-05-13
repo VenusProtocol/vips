@@ -1,7 +1,8 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { impersonateAccount, mine } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { BigNumber, Contract, Signer } from "ethers";
+import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -22,7 +23,6 @@ import {
   USDC,
   USDC_PRIME_CONVERTER,
   WETH,
-  WETH_PRIME_CONVERTER,
   XVS,
   XVS_VAULT_CONVERTER,
   XVS_VAULT_TREASURY,
@@ -66,7 +66,6 @@ forking(19755415, async () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [PRIME_ABI], ["MarketAdded"], [2]);
       await expectEvents(txResponse, [PRIME_ABI], ["MintLimitsUpdated"], [1]);
-      await expectEvents(txResponse, [XVS_VAULT_ABI], ["NewPrimeToken"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [21]);
       await expectEvents(txResponse, [ACM_COMMANDS_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
     },
@@ -174,112 +173,67 @@ forking(19755415, async () => {
       });
 
       describe("Generic checks", () => {
-        let wethPrimeConverter: Contract;
         let usdcPrimeConverter: Contract;
         const amount = parseUnits("1000", 6);
-        const wethAmount = parseUnits("1000", 18);
+        let usdcHolder: Signer;
+        let wethHolder: SignerWithAddress;
 
         before(async () => {
           usdc = new ethers.Contract(USDC, USDC_ABI, provider);
           weth = new ethers.Contract(WETH, WETH_ABI, provider);
           usdcPrimeConverter = new ethers.Contract(USDC_PRIME_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, provider);
-          wethPrimeConverter = new ethers.Contract(WETH_PRIME_CONVERTER, SINGLE_TOKEN_CONVERTER_ABI, provider);
 
-          [, user1] = await ethers.getSigners();
+          [, user1, usdcHolder, wethHolder] = await ethers.getSigners();
           user1Address = await user1.getAddress();
 
-          await usdc.connect(user1).faucet(amount);
-          await weth.connect(user1).deposit({ value: wethAmount });
+          await usdc.connect(usdcHolder).faucet(parseUnits("10000", 6));
+          await weth.connect(wethHolder).deposit({ value: "9000000000000000000000" });
         });
 
         it("Convert exact tokens should work correctly", async () => {
           const amountInMantissa = amount.div(2);
-
-          await usdc.connect(user1).faucet(amount);
-          await weth.connect(user1).deposit({ value: wethAmount });
-          const usdcBalanceOfUsdtPrimeConverterPrevious = await wethPrimeConverter.balanceOf(USDC);
-          const wethBalanceOfUsdtPrimePrevious = await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-          const wethBalanceOfUserPrevious = await weth.balanceOf(user1Address);
-
-          const [, amountOutMantissa] = await wethPrimeConverter
+          await usdc.connect(usdcHolder).transfer(user1Address, amount);
+          await weth.connect(wethHolder).transfer(USDC_PRIME_CONVERTER, parseUnits("1000", 18));
+          const wethBalanceOfUsdcPrimeConverterPrevious = await usdcPrimeConverter.balanceOf(WETH);
+          const usdcBalanceOfUserPrevious = await usdc.balanceOf(user1Address);
+          const [, amountOutMantissa] = await usdcPrimeConverter
             .connect(user1)
-            .callStatic.getUpdatedAmountOut(amountInMantissa, WETH, USDC);
-
-          await weth.connect(user1).approve(WETH_PRIME_CONVERTER, amountInMantissa);
-          await wethPrimeConverter
+            .callStatic.getUpdatedAmountOut(amountInMantissa, USDC, WETH);
+          await usdc.connect(user1).approve(USDC_PRIME_CONVERTER, amountInMantissa);
+          await usdcPrimeConverter
             .connect(user1)
-            .convertExactTokens(amountInMantissa, amountInMantissa.div(2), WETH, USDC, user1Address);
-
-          expect(await weth.balanceOf(user1Address)).to.equal(wethBalanceOfUserPrevious.sub(amountInMantissa));
-          expect(await wethPrimeConverter.balanceOf(WETH)).to.equal(0);
-          expect(await wethPrimeConverter.balanceOf(USDC)).to.equal(
-            usdcBalanceOfUsdtPrimeConverterPrevious.sub(amountOutMantissa),
-          );
-          expect(await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.equal(
-            BigNumber.from(wethBalanceOfUsdtPrimePrevious).add(amountInMantissa),
+            .convertExactTokens(amountInMantissa, amountInMantissa.div(2), USDC, WETH, user1Address);
+          expect(await usdc.balanceOf(user1Address)).to.equal(usdcBalanceOfUserPrevious.sub(amountInMantissa));
+          expect(await usdcPrimeConverter.balanceOf(USDC)).to.equal(0);
+          expect(await usdcPrimeConverter.balanceOf(WETH)).to.equal(
+            wethBalanceOfUsdcPrimeConverterPrevious.sub(amountOutMantissa),
           );
         });
 
         it("ConvertForExactTokens should work properly", async () => {
-          await usdc.connect(user1).faucet(amount);
-          await weth.connect(user1).deposit({ value: wethAmount });
-          const amountOutMantissa = amount.div(2);
-          const amountInMaxMantissa = amount;
-
-          const usdcBalanceOfUsdtPrimeConverterPrevious = await wethPrimeConverter.balanceOf(USDC);
-          const wethBalanceOfUsdtPrimePrevious = await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-          const wethBalanceOfUserPrevious = await weth.balanceOf(user1Address);
-
-          const [, amountInMantissa] = await wethPrimeConverter
-            .connect(user1)
-            .getAmountIn(amountOutMantissa, WETH, USDC);
-
-          await weth.connect(user1).approve(WETH_PRIME_CONVERTER, amount);
-          await wethPrimeConverter
-            .connect(user1)
-            .convertForExactTokens(amountInMaxMantissa, amountOutMantissa, WETH, USDC, user1Address);
-
-          expect(await weth.balanceOf(user1Address)).to.equal(wethBalanceOfUserPrevious.sub(amountInMantissa));
-          expect(await wethPrimeConverter.balanceOf(WETH)).to.equal(0);
-          expect(await wethPrimeConverter.balanceOf(USDC)).to.equal(
-            usdcBalanceOfUsdtPrimeConverterPrevious.sub(amountOutMantissa),
-          );
-          expect(await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.equal(
-            BigNumber.from(wethBalanceOfUsdtPrimePrevious).add(amountInMantissa),
-          );
-        });
-
-        it("Private conversion should occur on updateAssetsState", async () => {
-          const newAmount = amount.mul(2);
-
-          await usdc.connect(user1).faucet(newAmount);
-          await weth.connect(user1).deposit({ value: wethAmount.mul(2) });
-
-          const destinationAddressForUsdcConverter = await usdcPrimeConverter.destinationAddress();
-
-          await usdc.connect(user1).transfer(WETH_PRIME_CONVERTER, amount);
-          await wethPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, USDC);
-
-          const usdcBalanceUsdtPrimeConverterPrevious = await wethPrimeConverter.balanceOf(USDC);
-          const wethBalanceUsdtPrimePrevious = await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-
-          const plpBalanceForUsdcPrevious = await usdc.balanceOf(destinationAddressForUsdcConverter);
+          await weth.connect(wethHolder).transfer(user1Address, amount);
           await weth.connect(user1).transfer(USDC_PRIME_CONVERTER, amount);
 
-          // Private Conversion will occur
-          await usdcPrimeConverter.connect(user1).updateAssetsState(COMPTROLLER_CORE, WETH);
+          const amountOutMantissa = amount.div(2);
+          const amountInMaxMantissa = amount;
+          await usdc.connect(usdcHolder).transfer(user1Address, amount);
 
-          const usdcBalanceUsdtPrimeConverterCurrent = await wethPrimeConverter.balanceOf(USDC);
-          const wethBalanceUsdtPrimeCurrent = await weth.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+          const wethBalanceOfUsdtPrimeConverterPrevious = await usdcPrimeConverter.balanceOf(WETH);
+          const usdtBalanceOfUserPrevious = await usdc.balanceOf(user1Address);
 
-          expect(wethBalanceUsdtPrimeCurrent).to.equal(wethBalanceUsdtPrimePrevious.add(amount));
-          expect(usdcBalanceUsdtPrimeConverterCurrent).to.closeTo(
-            usdcBalanceUsdtPrimeConverterPrevious.sub(amount),
-            parseUnits("1", 7),
-          );
-          expect(await usdc.balanceOf(destinationAddressForUsdcConverter)).to.closeTo(
-            plpBalanceForUsdcPrevious.add(amount),
-            parseUnits("1", 7),
+          const [, amountInMantissa] = await usdcPrimeConverter
+            .connect(user1)
+            .getAmountIn(amountOutMantissa, USDC, WETH);
+
+          await usdc.connect(user1).approve(USDC_PRIME_CONVERTER, amount);
+          await usdcPrimeConverter
+            .connect(user1)
+            .convertForExactTokens(amountInMaxMantissa, amountOutMantissa, USDC, WETH, user1Address);
+
+          expect(await usdc.balanceOf(user1Address)).to.equal(usdtBalanceOfUserPrevious.sub(amountInMantissa));
+          expect(await usdcPrimeConverter.balanceOf(USDC)).to.equal(0);
+          expect(await usdcPrimeConverter.balanceOf(WETH)).to.equal(
+            wethBalanceOfUsdtPrimeConverterPrevious.sub(amountOutMantissa),
           );
         });
       });

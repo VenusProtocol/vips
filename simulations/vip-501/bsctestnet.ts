@@ -8,9 +8,9 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip501, { BSC_ETH, BSC_USDC } from "../../vips/vip-501/bsctestnet";
+import USDC_ABI from "./abi/BSCUsdc.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import ETH_ABI from "./abi/eth.json";
-import USDC_ABI from "./abi/usdc.json";
 
 const multisig = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
