@@ -30,6 +30,7 @@ import bscmainnet2Vip491, {
   COMPTROLLER_CORE,
   USDe,
   USDe_INITIAL_SUPPLY,
+  VTOKEN_RECEIVER,
   VUSDe_CORE,
   VsUSDe_CORE,
   sUSDe,
@@ -342,11 +343,13 @@ forking(22475162, async () => {
       });
 
       describe("Initial supply", () => {
-        it(`should mint initial supply of ${VsUSDe_CORE} and ${VUSDe_CORE} to ${ethereum.VTREASURY}`, async () => {
+        it(`should mint initial supply of ${VsUSDe_CORE} and ${VUSDe_CORE} to ${VTOKEN_RECEIVER}`, async () => {
           const expectedSupply = parseUnits("10000", 8);
+          const supplyRemainingsUSDe = expectedSupply.sub(parseUnits("86", 8));
+          const supplyRemainingUSDe = expectedSupply.sub(parseUnits("100", 8));
 
-          expect(await vToken1.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
-          expect(await vToken2.balanceOf(ethereum.VTREASURY)).to.equal(expectedSupply);
+          expect(await vToken1.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingsUSDe);
+          expect(await vToken2.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingUSDe);
         });
       });
 

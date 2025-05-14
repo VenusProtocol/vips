@@ -9,7 +9,7 @@ import bsctestnetVip491, {
   COMPTROLLER_LiquidStakedBNB,
   VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
 } from "../../vips/vip-491/bsctestnet";
-import bsctestnet2Vip491 from "../../vips/vip-491/bsctestnet";
+import bsctestnet2Vip491 from "../../vips/vip-491/bsctestnet-2";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;

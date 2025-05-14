@@ -25,6 +25,21 @@ const REDSTONE_USDe_FEED = "0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58";
 const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 const STALE_PERIOD_YEAR = 60 * 60 * 24 * 365; // 1 Year
 
+// converters
+export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
+export const USDC_PRIME_CONVERTER = "0xcEB9503f10B781E30213c0b320bCf3b3cE54216E";
+export const WBTC_PRIME_CONVERTER = "0xDcCDE673Cd8988745dA384A7083B0bd22085dEA0";
+export const WETH_PRIME_CONVERTER = "0xb8fD67f215117FADeF06447Af31590309750529D";
+export const XVS_VAULT_CONVERTER = "0x1FD30e761C3296fE36D9067b1e398FD97B4C0407";
+export const BaseAssets = [
+  "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT USDTTokenConverter BaseAsset
+  "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC USDCTokenConverter BaseAsset
+  "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", // WBTC WBTCTokenConverter BaseAsset
+  "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH WETHTokenConverter BaseAsset
+  "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A", // XVS XVSTokenConverter BaseAsset
+];
+export const CONVERSION_INCENTIVE = parseUnits("3", 14);
+
 export const Actions = {
   MINT: 0,
   REDEEM: 1,
@@ -105,13 +120,29 @@ export const vip491 = () => {
             parseUnits("0.72", 18), // CF
             parseUnits("0.75", 18), // LT
             sUSDe_INITIAL_SUPPLY, // initial supply
-            VTOKEN_RECEIVER,
+            ethereum.NORMAL_TIMELOCK,
             parseUnits("20000000", 18), // supply cap
             parseUnits("0", 18), // borrow cap
           ],
         ],
         dstChainId: LzChainId.ethereum,
       },
+      {
+        target: VsUSDe_CORE,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, parseUnits("86", 8)], // around $100
+        dstChainId: LzChainId.ethereum,
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
+        const vTokensRemaining = vTokensMinted.sub(parseUnits("86", 8));
+        return {
+          target: VsUSDe_CORE,
+          signature: "transfer(address,uint256)",
+          params: [VTOKEN_RECEIVER, vTokensRemaining],
+          dstChainId: LzChainId.ethereum,
+        };
+      })(),
       {
         target: VsUSDe_CORE,
         signature: "setProtocolSeizeShare(uint256)",
@@ -166,7 +197,7 @@ export const vip491 = () => {
             parseUnits("0.72", 18), // CF
             parseUnits("0.75", 18), // LT
             USDe_INITIAL_SUPPLY, // initial supply
-            VTOKEN_RECEIVER,
+            ethereum.NORMAL_TIMELOCK,
             parseUnits("30000000", 18), // supply cap
             parseUnits("25000000", 18), // borrow cap
           ],
@@ -175,9 +206,56 @@ export const vip491 = () => {
       },
       {
         target: VUSDe_CORE,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, parseUnits("100", 8)], // around $100
+        dstChainId: LzChainId.ethereum,
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
+        const vTokensRemaining = vTokensMinted.sub(parseUnits("100", 8));
+        return {
+          target: VUSDe_CORE,
+          signature: "transfer(address,uint256)",
+          params: [VTOKEN_RECEIVER, vTokensRemaining],
+          dstChainId: LzChainId.ethereum,
+        };
+      })(),
+      {
+        target: VUSDe_CORE,
         signature: "setProtocolSeizeShare(uint256)",
         params: [parseUnits("0.05", 18)],
         dstChainId: LzChainId.ethereum,
+      },
+      // Conversion config of USDe
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[0], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: USDC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[1], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: WBTC_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[2], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: WETH_PRIME_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[3], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: XVS_VAULT_CONVERTER,
+        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+        params: [BaseAssets[4], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        dstChainId: LzChainId.sepolia,
       },
     ],
     meta,
