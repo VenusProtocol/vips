@@ -13,6 +13,34 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
+const prices = [
+  {
+    symbol: "cbBTC",
+    address: "0x2979ef1676bb28192ac304173C717D7322b3b586",
+    expectedPrice: parseUnits("65000", 28),
+  },
+  {
+    symbol: "USDC",
+    address: "0xf16d4774893eB578130a645d5c69E9c4d183F3A5",
+    expectedPrice: parseUnits("0.99995", 30),
+  },
+  {
+    symbol: "USDT",
+    address: "0x7bc1b67fde923fd3667Fde59684c6c354C8EbFdA",
+    expectedPrice: parseUnits("1", 30),
+  },
+  {
+    symbol: "WETH",
+    address: "0x4200000000000000000000000000000000000006",
+    expectedPrice: parseUnits("1807.1", 18),
+  },
+  {
+    symbol: "UNI",
+    address: "0x873A6C4B1e3D883920541a0C61Dc4dcb772140b3",
+    expectedPrice: parseUnits("10", 18),
+  },
+];
+
 forking(19591682, async () => {
   const provider = ethers.provider;
 
@@ -21,35 +49,11 @@ forking(19591682, async () => {
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_UNICHAIN_SEPOLIA, RESILIENT_ORACLE_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
-    it("check cbBTC price", async () => {
-      expect(await resilientOracle.getPrice("0x2979ef1676bb28192ac304173C717D7322b3b586")).to.equal(
-        parseUnits("65000", 28),
-      );
-    });
-
-    it("check USDC price", async () => {
-      expect(await resilientOracle.getPrice("0xf16d4774893eB578130a645d5c69E9c4d183F3A5")).to.equal(
-        parseUnits("0.99995", 30),
-      );
-    });
-
-    it("check USDT price", async () => {
-      expect(await resilientOracle.getPrice("0x7bc1b67fde923fd3667Fde59684c6c354C8EbFdA")).to.equal(
-        parseUnits("1", 30),
-      );
-    });
-
-    it("check WETH price", async () => {
-      expect(await resilientOracle.getPrice("0x4200000000000000000000000000000000000006")).to.equal(
-        parseUnits("1807.1", 18),
-      );
-    });
-
-    it("check UNI price", async () => {
-      expect(await resilientOracle.getPrice("0x873A6C4B1e3D883920541a0C61Dc4dcb772140b3")).to.equal(
-        parseUnits("10", 18),
-      );
-    });
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        expect(await resilientOracle.getPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
   });
 
   testForkedNetworkVipCommands("vip491", await vip491(), {
@@ -60,34 +64,10 @@ forking(19591682, async () => {
   });
 
   describe("Post-VIP behaviour", async () => {
-    it("check cbBTC price", async () => {
-      expect(await resilientOracle.getPrice("0x2979ef1676bb28192ac304173C717D7322b3b586")).to.equal(
-        parseUnits("65000", 28),
-      );
-    });
-
-    it("check USDC price", async () => {
-      expect(await resilientOracle.getPrice("0xf16d4774893eB578130a645d5c69E9c4d183F3A5")).to.equal(
-        parseUnits("0.99995", 30),
-      );
-    });
-
-    it("check USDT price", async () => {
-      expect(await resilientOracle.getPrice("0x7bc1b67fde923fd3667Fde59684c6c354C8EbFdA")).to.equal(
-        parseUnits("1", 30),
-      );
-    });
-
-    it("check WETH price", async () => {
-      expect(await resilientOracle.getPrice("0x4200000000000000000000000000000000000006")).to.equal(
-        parseUnits("1807.1", 18),
-      );
-    });
-
-    it("check UNI price", async () => {
-      expect(await resilientOracle.getPrice("0x873A6C4B1e3D883920541a0C61Dc4dcb772140b3")).to.equal(
-        parseUnits("10", 18),
-      );
-    });
+    for (const { symbol, address, expectedPrice } of prices) {
+      it(`check ${symbol} price`, async () => {
+        expect(await resilientOracle.getPrice(address)).to.equal(expectedPrice);
+      });
+    }
   });
 });

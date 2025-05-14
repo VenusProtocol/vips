@@ -16,6 +16,41 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 const { unichainmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 31536000;
 
+const prices = [
+  {
+    symbol: "USDC",
+    address: "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
+    expectedPrice: parseUnits("1.00004999", 30),
+    preVIP: async function (resilientOracle: any, address: string, redstoneOracle: any) {
+      const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
+      const data = await redstoneOracle.tokenConfigs(token.address);
+      await setRedstonePrice(REDSTONE_ORACLE_UNICHAIN, address, data.feed, unichainmainnet.NORMAL_TIMELOCK, ONE_YEAR, {
+        tokenDecimals: 6,
+      });
+    },
+  },
+  {
+    symbol: "WETH",
+    address: "0x4200000000000000000000000000000000000006",
+    expectedPrice: parseUnits("1829.21017888", 18),
+    preVIP: async function (resilientOracle: any, address: string, redstoneOracle: any) {
+      const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
+      const data = await redstoneOracle.tokenConfigs(token.address);
+      await setRedstonePrice(REDSTONE_ORACLE_UNICHAIN, address, data.feed, unichainmainnet.NORMAL_TIMELOCK);
+    },
+  },
+  {
+    symbol: "UNI",
+    address: "0x8f187aA05619a017077f5308904739877ce9eA21",
+    expectedPrice: parseUnits("4.902", 18),
+    preVIP: async function (resilientOracle: any, address: string, redstoneOracle: any) {
+      const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
+      const data = await redstoneOracle.tokenConfigs(token.address);
+      await setRedstonePrice(REDSTONE_ORACLE_UNICHAIN, address, data.feed, unichainmainnet.NORMAL_TIMELOCK);
+    },
+  },
+];
+
 forking(15854623, async () => {
   const provider = ethers.provider;
 
@@ -27,51 +62,14 @@ forking(15854623, async () => {
   const redstoneOracle = new ethers.Contract(REDSTONE_ORACLE_UNICHAIN, REDSTONE_ORACLE_ABI, signer);
 
   describe("Pre-VIP behaviour", async () => {
-    it("check USDC price", async () => {
-      const token = new ethers.Contract("0x078D782b760474a361dDA0AF3839290b0EF57AD6", ERC20_ABI, provider);
-      const data = await redstoneOracle.tokenConfigs(token.address);
-      await setRedstonePrice(
-        REDSTONE_ORACLE_UNICHAIN,
-        "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
-        data.feed,
-        unichainmainnet.NORMAL_TIMELOCK,
-        ONE_YEAR,
-        {
-          tokenDecimals: 6,
-        },
-      );
-      expect(await resilientOracle.getPrice("0x078D782b760474a361dDA0AF3839290b0EF57AD6")).to.equal(
-        parseUnits("1.00004999", 30),
-      );
-    });
-
-    it("check WETH price", async () => {
-      const token = new ethers.Contract("0x4200000000000000000000000000000000000006", ERC20_ABI, provider);
-      const data = await redstoneOracle.tokenConfigs(token.address);
-      await setRedstonePrice(
-        REDSTONE_ORACLE_UNICHAIN,
-        "0x4200000000000000000000000000000000000006",
-        data.feed,
-        unichainmainnet.NORMAL_TIMELOCK,
-      );
-      expect(await resilientOracle.getPrice("0x4200000000000000000000000000000000000006")).to.equal(
-        parseUnits("1829.21017888", 18),
-      );
-    });
-
-    it("check UNI price", async () => {
-      const token = new ethers.Contract("0x8f187aA05619a017077f5308904739877ce9eA21", ERC20_ABI, provider);
-      const data = await redstoneOracle.tokenConfigs(token.address);
-      await setRedstonePrice(
-        REDSTONE_ORACLE_UNICHAIN,
-        "0x8f187aA05619a017077f5308904739877ce9eA21",
-        data.feed,
-        unichainmainnet.NORMAL_TIMELOCK,
-      );
-      expect(await resilientOracle.getPrice("0x8f187aA05619a017077f5308904739877ce9eA21")).to.equal(
-        parseUnits("4.902", 18),
-      );
-    });
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        if (price.preVIP) {
+          await price.preVIP(resilientOracle, price.address, redstoneOracle);
+        }
+        expect(await resilientOracle.getPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
   });
 
   testForkedNetworkVipCommands("vip491", await vip491(), {
@@ -82,19 +80,10 @@ forking(15854623, async () => {
   });
 
   describe("Post-VIP behaviour", async () => {
-    it("check USDC price", async () => {
-      const token = new ethers.Contract("0x078D782b760474a361dDA0AF3839290b0EF57AD6", ERC20_ABI, provider);
-      expect(await redstoneOracle.getPrice(token.address)).to.equal(parseUnits("1.00004999", 30));
-    });
-
-    it("check WETH price", async () => {
-      const token = new ethers.Contract("0x4200000000000000000000000000000000000006", ERC20_ABI, provider);
-      expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("1829.21017888", 18));
-    });
-
-    it("check UNI price", async () => {
-      const token = new ethers.Contract("0x8f187aA05619a017077f5308904739877ce9eA21", ERC20_ABI, provider);
-      expect(await redstoneOracle.getPrice(token.address)).to.equal(parseUnits("4.902", 18));
-    });
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        expect(await resilientOracle.getPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
   });
 });
