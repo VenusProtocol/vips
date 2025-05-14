@@ -1,43 +1,42 @@
-import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { sepolia } = NETWORK_ADDRESSES;
-const sUSDe_ERC4626ORACLE = "0xeD4E76bAbA330287Ca2D8d5857da6703bc653621";
-const CHAINLINK_USDe_FEED = "0x55ec7c3ed0d7CB5DF4d3d8bfEd2ecaf28b4638fb";
-const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
 
-export const COMPTROLLER_CORE = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
-export const sUSDe = "0xA3A3e5ecEA56940a4Ae32d0927bfd8821DdA848A";
-export const USDe = "0x8bAe3E12870a002A0D4b6Eb0F0CBf91b29d9806F";
+// BNB Chain
+export const COMPTROLLER_LiquidStakedBNB = "0x596B11acAACF03217287939f88d63b51d3771704";
+export const VToken_vPT_clisBNB_APR25_LiquidStakedBNB = "0x7C4890D673985CE22A4D38761473f190e434c956";
 
-export const VsUSDe_CORE = "0x33e4C9227b8Fca017739419119BbBA33A089D4a0";
-export const VUSDe_CORE = "0x36e8955c305aa48A99e4c953C9883989a7364a42";
+// Ethereum
+export const VTreasury_Ethereum = sepolia.VTREASURY;
+export const Timelock_Ethereum = sepolia.NORMAL_TIMELOCK;
+export const Comptroller_Ethena = "0x05Cdc6c3dceA796971Db0d9edDbC7C56f2176D1c";
+export const Comptroller_LiquidStakedETH = "0xd79CeB8EF8188E44b7Eb899094e8A3A4d7A1e236";
 
-export const sUSDe_INITIAL_SUPPLY = parseUnits("10000", 18);
-export const USDe_INITIAL_SUPPLY = parseUnits("10000", 18);
+export const VToken_vPT_USDe_27MAR2025_Ethena = "0xf2C00a9C3314f7997721253c49276c8531a30803";
+export const VToken_vPT_sUSDE_27MAR2025_Ethena = "0x6c87587b1813eAf5571318E2139048b04eAaFf97";
+export const VToken_vPT_weETH_26DEC2024_LiquidStakedETH = "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1";
+export const VToken_vsUSDe_Ethena = "0x643a2BE96e7675Ca34bcceCB33F4f0fECA1ba9fC";
+export const VToken_vUSDC_Ethena = "0x466fe60aE3d8520e49D67e3483626786Ba0E6416";
+export const PT_weETH_26DEC2024_LiquidStakedETH = "0x56107201d3e4b7Db92dEa0Edb9e0454346AEb8B5";
+export const weETH_Address = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 
-// Converters
-export const USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
-export const USDC_PRIME_CONVERTER = "0x511a559a699cBd665546a1F75908f7E9454Bfc67";
-export const WBTC_PRIME_CONVERTER = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE";
-export const WETH_PRIME_CONVERTER = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
-export const XVS_VAULT_CONVERTER = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
-export const BaseAssets = [
-  "0x8d412FD0bc5d826615065B931171Eed10F5AF266", // USDT USDTPrimeConverter BaseAsset
-  "0x772d68929655ce7234C8C94256526ddA66Ef641E", // USDC USDCPrimeConverter BaseAsset
-  "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b", // WBTC WBTCPrimeConverter BaseAsset
-  "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // WETH WETHPrimeConverter BaseAsset
-  "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E", // XVS XVSPrimeConverter BaseAsset
-];
-export const CONVERSION_INCENTIVE = parseUnits("3", 14);
+// underlying assets associated with the vTokens held by the Venus Treasury
+export const PT_weETH_26DEC2024_expected = parseUnits("0.000000000179961879", 18);
+export const weETH_expected = parseUnits("1.687594369906750452", 18);
 
-export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
-  const EXP_SCALE = parseUnits("1", 18);
-  return amount.mul(EXP_SCALE).div(exchangeRate);
+export const Actions = {
+  MINT: 0,
+  REDEEM: 1,
+  BORROW: 2,
+  REPAY: 3,
+  SEIZE: 4,
+  LIQUIDATE: 5,
+  TRANSFER: 6,
+  ENTER_MARKET: 7,
+  EXIT_MARKET: 8,
 };
 
 const vip491 = () => {
@@ -52,232 +51,113 @@ const vip491 = () => {
 
   return makeProposal(
     [
-      // Add sUSDe Market
-      // oracle config
+      // === BNB Chain ===
+      // --- Market: PT-clisBNB-APR25 on Liquid Staked BNB
       {
-        target: sepolia.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [USDe, parseUnits("1", 18)],
+        target: COMPTROLLER_LiquidStakedBNB,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_clisBNB_APR25_LiquidStakedBNB, parseUnits("0", 18), parseUnits("0.85", 18)],
+      },
+      {
+        target: COMPTROLLER_LiquidStakedBNB,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_clisBNB_APR25_LiquidStakedBNB], [Actions.MINT, Actions.ENTER_MARKET], true],
+      },
+
+      // === Ethereum ===
+      // --- Market: PT-USDe-MAR25 on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_USDe_27MAR2025_Ethena, parseUnits("0", 18), parseUnits("0.88", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: sepolia.CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[USDe, CHAINLINK_USDe_FEED, STALE_PERIOD_26H]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: sepolia.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [USDe, [sepolia.REDSTONE_ORACLE, sepolia.CHAINLINK_ORACLE, sepolia.CHAINLINK_ORACLE], [true, true, true]],
-        ],
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_USDe_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.sepolia,
       },
 
-      // Market configurations
+      // --- Market: PT-sUSDE-MAR25 on Ethena
       {
-        target: VsUSDe_CORE,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["7200"],
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_sUSDE_27MAR2025_Ethena, parseUnits("0", 18), parseUnits("0.87", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: sUSDe,
-        signature: "faucet(uint256)",
-        params: [sUSDe_INITIAL_SUPPLY],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: sUSDe,
-        signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: sUSDe,
-        signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, sUSDe_INITIAL_SUPPLY],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: sepolia.POOL_REGISTRY,
-        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-        params: [
-          [
-            VsUSDe_CORE,
-            parseUnits("0.72", 18), // CF
-            parseUnits("0.75", 18), // LT
-            sUSDe_INITIAL_SUPPLY, // initial supply
-            sepolia.NORMAL_TIMELOCK,
-            parseUnits("20000000", 18), // supply cap
-            parseUnits("0", 18), // borrow cap
-          ],
-        ],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: VsUSDe_CORE,
-        signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, parseUnits("100", 8)], // around $100
-        dstChainId: LzChainId.sepolia,
-      },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
-        const vTokensRemaining = vTokensMinted.sub(parseUnits("100", 8));
-        return {
-          target: VsUSDe_CORE,
-          signature: "transfer(address,uint256)",
-          params: [sepolia.VTREASURY, vTokensRemaining],
-          dstChainId: LzChainId.sepolia,
-        };
-      })(),
-
-      {
-        target: VsUSDe_CORE,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.05", 18)],
-        dstChainId: LzChainId.sepolia,
-      },
-      // Add USDe Market
-      // oracle config
-      {
-        target: sepolia.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            sUSDe,
-            [sUSDe_ERC4626ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-          ],
-        ],
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_sUSDE_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.sepolia,
       },
 
-      // Market configurations
+      // --- Market: sUSDE on Ethena
       {
-        target: VUSDe_CORE,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["7200"],
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vsUSDe_Ethena, parseUnits("0", 18), parseUnits("0.92", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: USDe,
-        signature: "faucet(uint256)",
-        params: [USDe_INITIAL_SUPPLY],
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.sepolia,
       },
+
+      // // --- Market: USDC on Ethena
       {
-        target: USDe,
-        signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, 0],
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vUSDC_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.sepolia,
       },
+
+      // --- Market: PT-weETH-DEC24 on Liquid Staked ETH
       {
-        target: USDe,
-        signature: "approve(address,uint256)",
-        params: [sepolia.POOL_REGISTRY, USDe_INITIAL_SUPPLY],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: sepolia.POOL_REGISTRY,
-        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+        target: Comptroller_LiquidStakedETH,
+        signature: "setActionsPaused(address[],uint8[],bool)",
         params: [
+          [VToken_vPT_weETH_26DEC2024_LiquidStakedETH],
           [
-            VUSDe_CORE,
-            parseUnits("0.72", 18), // CF
-            parseUnits("0.75", 18), // LT
-            USDe_INITIAL_SUPPLY, // initial supply
-            sepolia.NORMAL_TIMELOCK,
-            parseUnits("30000000", 18), // supply cap
-            parseUnits("25000000", 18), // borrow cap
+            Actions.MINT,
+            Actions.REDEEM,
+            Actions.BORROW,
+            Actions.REPAY,
+            Actions.SEIZE,
+            Actions.TRANSFER,
+            Actions.LIQUIDATE,
+            Actions.ENTER_MARKET,
+            Actions.EXIT_MARKET,
           ],
+          true,
         ],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: VUSDe_CORE,
-        signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, parseUnits("100", 8)], // around $100
-        dstChainId: LzChainId.sepolia,
-      },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
-        const vTokensRemaining = vTokensMinted.sub(parseUnits("100", 8));
-        return {
-          target: VUSDe_CORE,
-          signature: "transfer(address,uint256)",
-          params: [sepolia.VTREASURY, vTokensRemaining],
-          dstChainId: LzChainId.sepolia,
-        };
-      })(),
-      {
-        target: VUSDe_CORE,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [parseUnits("0.05", 18)],
-        dstChainId: LzChainId.sepolia,
-      },
-      // configure converters for sUSDe and USDe
-      // Conversion config for sUSDe
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
+        target: Comptroller_LiquidStakedETH,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_weETH_26DEC2024_LiquidStakedETH, parseUnits("0", 18), parseUnits("0", 18)],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
+        target: Comptroller_LiquidStakedETH,
+        signature: "setMarketBorrowCaps(address[],uint256[])",
+        params: [[VToken_vPT_weETH_26DEC2024_LiquidStakedETH], [0]],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
+        target: Comptroller_LiquidStakedETH,
+        signature: "setMarketSupplyCaps(address[],uint256[])",
+        params: [[VToken_vPT_weETH_26DEC2024_LiquidStakedETH], [0]],
         dstChainId: LzChainId.sepolia,
       },
       {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      // Conversion config of USDe
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [USDe], [[CONVERSION_INCENTIVE, 1]]],
+        target: Comptroller_LiquidStakedETH,
+        signature: "unlistMarket(address)",
+        params: [VToken_vPT_weETH_26DEC2024_LiquidStakedETH],
         dstChainId: LzChainId.sepolia,
       },
     ],
