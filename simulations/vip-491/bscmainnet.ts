@@ -4,12 +4,12 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import {
+import bscmainnetVip491, {
   Actions,
   COMPTROLLER_LiquidStakedBNB,
   VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
-  vip491,
 } from "../../vips/vip-491/bscmainnet";
+import bscmainnet2Vip491 from "../../vips/vip-491/bscmainnet-2";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
@@ -38,11 +38,12 @@ forking(48837856, async () => {
     });
   });
 
-  testVip("VIP-491 BSC", await vip491(), {
+  testVip("VIP-491 bscmainnet", await bscmainnetVip491(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "ActionPausedMarket"], [1, 2]);
     },
   });
+  testVip("VIP-491 bscmainnet-2", await bscmainnet2Vip491());
 
   describe("Post-VIP behavior", async () => {
     it("Market CF should be zero", async () => {

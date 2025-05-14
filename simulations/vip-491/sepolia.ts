@@ -19,7 +19,6 @@ import bsctestnetVip491, {
   VToken_vsUSDe_Ethena,
   VTreasury_Ethereum,
 } from "../../vips/vip-491/bsctestnet";
-
 import bsctestnet2Vip491, {
   COMPTROLLER_CORE,
   USDe,
@@ -27,7 +26,6 @@ import bsctestnet2Vip491, {
   VsUSDe_CORE,
   sUSDe,
 } from "../../vips/vip-491/bsctestnet-2";
-
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 
