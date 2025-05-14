@@ -15,6 +15,10 @@ export const wSuperOETHb_ORACLE = "0xcd1d2C99642165440c2CC023AFa2092b487f033e";
 export const wSuperOETHb = "0x7FcD174E80f264448ebeE8c88a7C4476AAF58Ea6";
 export const wstETHOracle = "0xDDD4F0836c8016E11fC6741A4886E97B3c3d20C1";
 export const wstETH = "0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452";
+export const ACM_BASE = "0x9E6CeEfDC6183e4D0DF8092A9B90cDF659687daB";
+export const NORMAL_TIMELOCK_BASE = "0x21c12f2946a1a66cBFf7eb997022a37167eCf517";
+export const CRITICAL_TIMELOCK_BASE = "0x47F65466392ff2aE825d7a170889F7b5b9D8e60D";
+export const FASTTRACK_TIMELOCK_BASE = "0x209F73Ee2Fa9A72aF3Fa6aF1933A3B58ed3De5D7";
 
 export const RESILIENT_ORACLE_OP = "0x21FC48569bd3a6623281f55FC1F8B48B9386907b";
 export const CHAINLINK_ORACLE_OP = "0x1076e5A60F1aC98e6f361813138275F1179BEb52";
@@ -25,6 +29,10 @@ export const RESILIENT_ORACLE_IMPLEMENTATION_OP = "0xB4E073C5abB056D94f14f0F8748
 export const CHAINLINK_ORACLE_IMPLEMENTATION_OP = "0x1Abf4919dE8ae2B917d553475e9B1D9CdE6E36D3";
 export const BOUND_VALIDATOR_IMPLEMENTATION_OP = "0xc04C8dFF5a91f82f5617Ee9Bd83f6d96de0eb39C";
 export const REDSTONE_ORACLE_IMPLEMENTATION_OP = "0x5e448421aB3c505AdF0E5Ee2D2fCCD80FDe08a43";
+export const ACM_OP = "0xD71b1F33f6B0259683f11174EE4Ddc2bb9cE4eD6";
+export const NORMAL_TIMELOCK_OP = "0x0C6f1E6B4fDa846f63A0d5a8a73EB811E0e0C04b";
+export const CRITICAL_TIMELOCK_OP = "0xB82479bc345CAA7326D7d21306972033226fC185";
+export const FASTTRACK_TIMELOCK_OP = "0x508bD9C31E8d6760De04c70fe6c2b24B3cDea7E7";
 
 export const RESILIENT_ORACLE_UNICHAIN = "0x86D04d6FE928D888076851122dc6739551818f7E";
 export const REDSTONE_ORACLE_UNICHAIN = "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc";
@@ -33,6 +41,16 @@ export const RESILIENT_ORACLE_IMPLEMENTATION_UNICHAIN = "0x314197e6f1664C141F904
 export const REDSTONE_ORACLE_IMPLEMENTATION_UNICHAIN = "0x477FB8C53b0c9A2B18295BBA7B1dF41356fC09D0";
 export const BOUND_VALIDATOR_IMPLEMENTATION_UNICHAIN = "0x287F0f107ab4a5066bd257d684AFCc09c8d31Bde";
 export const DEFAULT_PROXY_ADMIN_UNICHAIN = "0x78e9fff2ab8daAB8559070d897C399E5e1C5074c";
+export const ACM_UNICHAIN = "0x1f12014c497a9d905155eB9BfDD9FaC6885e61d0";
+export const NORMAL_TIMELOCK_UNICHAIN = "0x918532A78d22419Da4091930d472bDdf532BE89a";
+export const CRITICAL_TIMELOCK_UNICHAIN = "0x1b05eCb489842786776a9A10e91AAb56e2CFe15e";
+export const FASTTRACK_TIMELOCK_UNICHAIN = "0x4121995b87f9EE8bA0a89e87470255e2E0fe48c7";
+
+export const ACM_OPBNB = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
+export const NORMAL_TIMELOCK_OPBNB = "0x10f504e939b912569Dca611851fDAC9E3Ef86819";
+export const CRITICAL_TIMELOCK_OPBNB = "0xA7DD2b15B24377296F11c702e758cd9141AB34AA";
+export const FASTTRACK_TIMELOCK_OPBNB = "0xEdD04Ecef0850e834833789576A1d435e7207C0d";
+
 
 export const vip492 = () => {
   const meta = {
@@ -97,6 +115,60 @@ export const vip492 = () => {
         dstChainId: LzChainId.basemainnet,
       },
       {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
         target: DEFAULT_PROXY_ADMIN_OP,
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE_OP, RESILIENT_ORACLE_IMPLEMENTATION_OP],
@@ -121,6 +193,60 @@ export const vip492 = () => {
         dstChainId: LzChainId.opmainnet,
       },
       {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OP,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_OP],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
         target: DEFAULT_PROXY_ADMIN_UNICHAIN,
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE_UNICHAIN, RESILIENT_ORACLE_IMPLEMENTATION_UNICHAIN],
@@ -137,6 +263,114 @@ export const vip492 = () => {
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_UNICHAIN, BOUND_VALIDATOR_IMPLEMENTATION_UNICHAIN],
         dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_UNICHAIN],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_OPBNB],
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,

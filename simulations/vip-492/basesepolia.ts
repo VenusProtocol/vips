@@ -9,6 +9,7 @@ import vip491, { RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-492/bsctes
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import { expectEvents } from "src/utils";
+import ACM_ABI from "./abi/ACM.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
@@ -56,6 +57,7 @@ forking(25337385, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
 

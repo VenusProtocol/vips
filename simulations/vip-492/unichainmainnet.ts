@@ -11,6 +11,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import PROXY_ABI from "./abi/Proxy.json";
+import ACM_ABI from "./abi/ACM.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 31536000;
@@ -76,6 +77,7 @@ forking(15854623, async () => {
   testForkedNetworkVipCommands("vip491", await vip491(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [3]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
 

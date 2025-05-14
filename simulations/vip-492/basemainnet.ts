@@ -10,6 +10,7 @@ import vip491, { CHAINLINK_ORACLE_ORACLE_BASE, RESILIENT_ORACLE_BASE } from "../
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import PROXY_ABI from "./abi/Proxy.json";
+import ACM_ABI from "./abi/ACM.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
@@ -86,6 +87,7 @@ forking(29870085, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
 

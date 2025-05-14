@@ -9,6 +9,7 @@ import vip491, { RESILIENT_ORACLE_UNICHAIN_SEPOLIA } from "../../vips/vip-492/bs
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import { expectEvents } from "src/utils";
+import ACM_ABI from "./abi/ACM.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
@@ -54,6 +55,7 @@ forking(19591682, async () => {
   testForkedNetworkVipCommands("vip491", await vip491(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [3]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
 

@@ -7,7 +7,7 @@ import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 forking(51177545, async () => {
   testVip("VIP-492", await vip492(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [OMNICHAIN_PROPOSAL_SENDER_ABI], ["ExecuteRemoteProposal"], [3]);
+      await expectEvents(txResponse, [OMNICHAIN_PROPOSAL_SENDER_ABI], ["ExecuteRemoteProposal"], [4]);
     },
   });
 });
