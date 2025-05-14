@@ -40,6 +40,7 @@ forking(8318124, async () => {
   });
 
   testForkedNetworkVipCommands("add sUSDe and USDe market", await vip491());
+
   describe("Post-Execution state", () => {
     let interestRateModelAddress1: string;
     let interestRateModelAddress2: string;
@@ -79,9 +80,10 @@ forking(8318124, async () => {
     describe("Initial supply", () => {
       it(`should have initial supply in ${sepolia.VTREASURY}`, async () => {
         const expectedSupply = parseUnits("10000", 8);
+        const supplyRemaining = expectedSupply.sub(parseUnits("100", 8));
 
-        expect(await vToken1.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
-        expect(await vToken2.balanceOf(sepolia.VTREASURY)).to.equal(expectedSupply);
+        expect(await vToken1.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
+        expect(await vToken2.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
       });
     });
 

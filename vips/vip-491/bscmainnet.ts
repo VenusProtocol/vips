@@ -110,12 +110,6 @@ export const vip491 = () => {
       // // --- Market: USDC on Ethena
       {
         target: Comptroller_Ethena,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [VToken_vUSDC_Ethena, parseUnits("0", 18), parseUnits("0", 18)],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: Comptroller_Ethena,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [[VToken_vUSDC_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.ethereum,
