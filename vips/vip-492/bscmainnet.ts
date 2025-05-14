@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -13,6 +15,7 @@ export const REDSTONE_ORACLE_IMPLEMENTATION_BASE = "0x08482c78427c2E83aA2EeedF06
 export const BOUND_VALIDATOR_IMPLEMENTATION_BASE = "0xc92eefCE80e7Ca529a060C485F462C90416cA38A";
 export const wSuperOETHb_ORACLE = "0xcd1d2C99642165440c2CC023AFa2092b487f033e";
 export const wSuperOETHb = "0x7FcD174E80f264448ebeE8c88a7C4476AAF58Ea6";
+export const wSuperOETHb_Initial_Exchange_Rate = parseUnits("1.058792829884507234", 18);
 export const wstETHOracle = "0xDDD4F0836c8016E11fC6741A4886E97B3c3d20C1";
 export const wstETH = "0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452";
 export const ACM_BASE = "0x9E6CeEfDC6183e4D0DF8092A9B90cDF659687daB";
@@ -51,6 +54,15 @@ export const NORMAL_TIMELOCK_OPBNB = "0x10f504e939b912569Dca611851fDAC9E3Ef86819
 export const CRITICAL_TIMELOCK_OPBNB = "0xA7DD2b15B24377296F11c702e758cd9141AB34AA";
 export const FASTTRACK_TIMELOCK_OPBNB = "0xEdD04Ecef0850e834833789576A1d435e7207C0d";
 
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  return exchangeRate.add(increaseAmount).toString();
+};
+
+export const DAYS_30 = 30 * 24 * 60 * 60;
 
 export const vip492 = () => {
   const meta = {
@@ -166,6 +178,21 @@ export const vip492 = () => {
         target: ACM_BASE,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_BASE],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: wSuperOETHb_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wSuperOETHb_Initial_Exchange_Rate, BigNumber.from("111")),
+          1746529509,
+        ],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: wSuperOETHb_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.1426", 18), DAYS_30],
         dstChainId: LzChainId.basemainnet,
       },
       {

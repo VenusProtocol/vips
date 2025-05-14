@@ -7,10 +7,10 @@ import { expectEvents, setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { RESILIENT_ORACLE_OP } from "../../vips/vip-492/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import PROXY_ABI from "./abi/Proxy.json";
 import ACM_ABI from "./abi/ACM.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { opmainnet } = NETWORK_ADDRESSES;
 

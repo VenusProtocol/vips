@@ -7,11 +7,11 @@ import { expectEvents, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { REDSTONE_ORACLE_UNICHAIN, RESILIENT_ORACLE_UNICHAIN } from "../../vips/vip-492/bscmainnet";
+import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import PROXY_ABI from "./abi/Proxy.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import PROXY_ABI from "./abi/Proxy.json";
-import ACM_ABI from "./abi/ACM.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 31536000;

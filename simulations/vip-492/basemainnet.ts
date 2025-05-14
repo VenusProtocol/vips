@@ -7,10 +7,10 @@ import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } f
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { CHAINLINK_ORACLE_ORACLE_BASE, RESILIENT_ORACLE_BASE } from "../../vips/vip-492/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import PROXY_ABI from "./abi/Proxy.json";
 import ACM_ABI from "./abi/ACM.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
 
@@ -22,7 +22,7 @@ const prices = [
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "cbBTC",
@@ -31,7 +31,7 @@ const prices = [
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "WETH",
@@ -40,7 +40,7 @@ const prices = [
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "wsuperOETHb",
@@ -49,7 +49,7 @@ const prices = [
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "wstETH",
@@ -63,9 +63,9 @@ const prices = [
         "0xB88BAc61a4Ca37C43a3725912B1f472c9A5bc061",
         basemainnet.NORMAL_TIMELOCK,
       );
-    }
-  }
-]
+    },
+  },
+];
 
 forking(29870085, async () => {
   const provider = ethers.provider;

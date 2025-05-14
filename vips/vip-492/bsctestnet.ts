@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -13,6 +15,7 @@ export const REDSTONE_ORACLE_IMPLEMENTATION_BASE_SEPOLIA = "0x91eEfAb71a8BD1E4f2
 export const BOUND_VALIDATOR_IMPLEMENTATION_BASE_SEPOLIA = "0xae3C407A1C30Ac7A55A97B6A55927f6a2580bD4f";
 export const wSuperOETHb_ORACLE = "0x6F6e9Fd240372435eb16dBE36362ECdF84AB0399";
 export const wSuperOETHb = "0x02B1136d9E223333E0083aeAB76bC441f230a033";
+export const wSuperOETHb_Initial_Exchange_Rate = parseUnits("1", 18);
 export const wstETHOracle = "0xB242450Ab1CBdd93409ee22c333F6f70aaA6Be08";
 export const wstETH = "0xAd69AA3811fE0EE7dBd4e25C4bae40e6422c76C8";
 export const ACM_BASE_SEPOLIA = "0x724138223D8F76b519fdE715f60124E7Ce51e051";
@@ -48,6 +51,16 @@ export const ACM_OPBNB_TESTNET = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 export const NORMAL_TIMELOCK_OPBNB_TESTNET = "0x1c4e015Bd435Efcf4f58D82B0d0fBa8fC4F81120";
 export const CRITICAL_TIMELOCK_OPBNB_TESTNET = "0xBd06aCDEF38230F4EdA0c6FD392905Ad463e42E3";
 export const FASTTRACK_TIMELOCK_OPBNB_TESTNET = "0xB2E6268085E75817669479b22c73C2AfEaADF7A6";
+
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  return exchangeRate.add(increaseAmount).toString();
+};
+
+export const DAYS_30 = 30 * 24 * 60 * 60;
 
 export const vip492 = () => {
   const meta = {
@@ -164,6 +177,21 @@ export const vip492 = () => {
         target: ACM_BASE_SEPOLIA,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_BASE_SEPOLIA],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: wSuperOETHb_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wSuperOETHb_Initial_Exchange_Rate, BigNumber.from("111")),
+          1746433990,
+        ],
+        dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: wSuperOETHb_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.1426", 18), DAYS_30],
         dstChainId: LzChainId.basesepolia,
       },
       {

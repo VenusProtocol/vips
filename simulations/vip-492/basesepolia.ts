@@ -3,13 +3,13 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-492/bsctestnet";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import PROXY_ABI from "./abi/Proxy.json";
-import { expectEvents } from "src/utils";
 import ACM_ABI from "./abi/ACM.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
 
