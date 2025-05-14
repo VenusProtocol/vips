@@ -3,13 +3,14 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setRedstonePrice } from "src/utils";
+import { expectEvents, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { REDSTONE_ORACLE_UNICHAIN, RESILIENT_ORACLE_UNICHAIN } from "../../vips/vip-492/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import PROXY_ABI from "./abi/Proxy.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 const ONE_YEAR = 31536000;
@@ -72,7 +73,11 @@ forking(15854623, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491());
+  testForkedNetworkVipCommands("vip491", await vip491(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [3]);
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     it("check USDC price", async () => {

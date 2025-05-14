@@ -7,6 +7,8 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip491, { RESILIENT_ORACLE_OP_SEPOLIA } from "../../vips/vip-492/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import { expectEvents } from "src/utils";
 
 const { opsepolia } = NETWORK_ADDRESSES;
 
@@ -50,7 +52,11 @@ forking(27320568, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491());
+  testForkedNetworkVipCommands("vip491", await vip491(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [3]);
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     it("check OP price", async () => {
