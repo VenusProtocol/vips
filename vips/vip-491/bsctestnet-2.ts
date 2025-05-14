@@ -217,38 +217,6 @@ const vip491 = () => {
         params: [parseUnits("0.05", 18)],
         dstChainId: LzChainId.sepolia,
       },
-      // configure converters for sUSDe and USDe
-      // Conversion config for sUSDe
-      {
-        target: USDT_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[0], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: USDC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[1], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WBTC_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[2], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: WETH_PRIME_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[3], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: XVS_VAULT_CONVERTER,
-        signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-        params: [BaseAssets[4], [sUSDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
-      },
       // Conversion config of USDe
       {
         target: USDT_PRIME_CONVERTER,
