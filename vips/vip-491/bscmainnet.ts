@@ -25,7 +25,7 @@ export const weETH_Address = "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee";
 
 // underlying assets associated with the vTokens held by the Venus Treasury
 export const PT_weETH_26DEC2024_expected = parseUnits("1.79961879253413783", 18);
-export const weETH_expected = parseUnits("1.687594369906750452", 18);
+export const weETH_expected = parseUnits("1.686015082188295918", 18);
 
 export const Actions = {
   MINT: 0,

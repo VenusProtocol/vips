@@ -94,14 +94,8 @@ forking(22475162, async () => {
     susde = await ethers.getContractAt(ERC20_ABI, sUSDe);
     usde = await ethers.getContractAt(ERC20_ABI, USDe);
 
-    console.log("susde : ", await susde.balanceOf(ethereum.VTREASURY));
-    console.log("usde : ", await usde.balanceOf(ethereum.VTREASURY));
-
     await susde.connect(sUSDeHolder).transfer(ethereum.VTREASURY, sUSDe_INITIAL_SUPPLY);
     await usde.connect(USDeHolder).transfer(ethereum.VTREASURY, USDe_INITIAL_SUPPLY);
-
-    console.log("susde : ", await susde.balanceOf(ethereum.VTREASURY));
-    console.log("usde : ", await usde.balanceOf(ethereum.VTREASURY));
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -198,8 +192,8 @@ forking(22475162, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-491", await bscmainnetVip491());
-  testForkedNetworkVipCommands("VIP-491", await bscmainnet2Vip491());
+  testForkedNetworkVipCommands("VIP-491 part 1", await bscmainnetVip491());
+  testForkedNetworkVipCommands("VIP-491 part 2", await bscmainnet2Vip491());
 
   describe("Post-VIP behavior", async () => {
     describe("Ethena Markets", () => {
