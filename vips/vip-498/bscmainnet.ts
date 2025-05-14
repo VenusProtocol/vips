@@ -39,10 +39,10 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip491 = () => {
+export const vip498 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-491 Unwind PT Markets (BNB Chain and Ethereum)",
+    title: "VIP-498 Unwind PT Markets (BNB Chain and Ethereum)",
     description: "",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -202,4 +202,4 @@ export const vip491 = () => {
   );
 };
 
-export default vip491;
+export default vip498;

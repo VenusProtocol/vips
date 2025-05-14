@@ -40,7 +40,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const vip491 = () => {
+const vip498 = () => {
   const meta = {
     version: "v2",
     title: "[sepolia] New sUSDe and USDe market in the Core pool",
@@ -254,4 +254,4 @@ const vip491 = () => {
   );
 };
 
-export default vip491;
+export default vip498;

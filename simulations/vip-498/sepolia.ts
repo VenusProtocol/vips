@@ -1,64 +1,44 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import bscmainnetVip491, {
+import bsctestnetVip498, {
   Actions,
   Comptroller_Ethena,
   Comptroller_LiquidStakedETH,
-  PT_weETH_26DEC2024_LiquidStakedETH,
-  Pendle_Router,
-  Timelock_Ethereum,
   VToken_vPT_USDe_27MAR2025_Ethena,
   VToken_vPT_sUSDE_27MAR2025_Ethena,
   VToken_vPT_weETH_26DEC2024_LiquidStakedETH,
   VToken_vUSDC_Ethena,
   VToken_vsUSDe_Ethena,
   VTreasury_Ethereum,
-  weETH_Address,
-  weETH_expected,
-} from "../../vips/vip-491/bscmainnet";
-import bscmainnet2Vip491, {
+} from "../../vips/vip-498/bsctestnet";
+import bsctestnet2Vip498, {
   COMPTROLLER_CORE,
   USDe,
-  USDe_INITIAL_SUPPLY,
-  VTOKEN_RECEIVER,
   VUSDe_CORE,
   VsUSDe_CORE,
   sUSDe,
-  sUSDe_INITIAL_SUPPLY,
-} from "../../vips/vip-491/bscmainnet-2";
+} from "../../vips/vip-498/bsctestnet-2";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 
 const provider = ethers.provider;
-const { ethereum } = NETWORK_ADDRESSES;
-const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
+const { sepolia } = NETWORK_ADDRESSES;
+const PSR = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
-const USDe_HOLDER = "0x33AE83071432116AE892693b45466949a38Ac74C";
-const sUSDe_HOLDER = "0x15Bb5D31048381c84a157526cEF9513531b8BE1e";
 
-forking(22475162, async () => {
+forking(8318124, async () => {
   let comptrollerEthena: Contract;
   let comptrollerLSETH: Contract;
   let comptrollerCore: Contract;
   let vPtTokenWeETH: Contract;
-  let ptTokenWeETH: Contract;
-  let weETH: Contract;
-  let weEthBefore: BigNumber;
-  let USDeHolder: SignerWithAddress;
-  let sUSDeHolder: SignerWithAddress;
-  let susde: Contract;
-  let usde: Contract;
 
   describe("Contracts setup", () => {
     checkVToken(VsUSDe_CORE, {
@@ -84,19 +64,6 @@ forking(22475162, async () => {
     comptrollerEthena = new ethers.Contract(Comptroller_Ethena, COMPTROLLER_ABI, provider);
     comptrollerLSETH = new ethers.Contract(Comptroller_LiquidStakedETH, COMPTROLLER_ABI, provider);
     vPtTokenWeETH = new ethers.Contract(VToken_vPT_weETH_26DEC2024_LiquidStakedETH, VTOKEN_ABI, provider);
-    ptTokenWeETH = new ethers.Contract(PT_weETH_26DEC2024_LiquidStakedETH, ERC20_ABI, provider);
-
-    weETH = new ethers.Contract(weETH_Address, ERC20_ABI, provider);
-    weEthBefore = await weETH.balanceOf(VTreasury_Ethereum);
-
-    USDeHolder = await initMainnetUser(USDe_HOLDER, parseEther("1"));
-    sUSDeHolder = await initMainnetUser(sUSDe_HOLDER, parseEther("1"));
-
-    susde = await ethers.getContractAt(ERC20_ABI, sUSDe);
-    usde = await ethers.getContractAt(ERC20_ABI, USDe);
-
-    await susde.connect(sUSDeHolder).transfer(ethereum.VTREASURY, sUSDe_INITIAL_SUPPLY);
-    await usde.connect(USDeHolder).transfer(ethereum.VTREASURY, USDe_INITIAL_SUPPLY);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -181,11 +148,6 @@ forking(22475162, async () => {
         expect(isPaused).to.be.false;
       });
 
-      it("Check PT token approval is zero", async () => {
-        const allowance = await ptTokenWeETH.allowance(Timelock_Ethereum, Pendle_Router);
-        expect(allowance).to.equal(0);
-      });
-
       it("Check treasury vToken balance", async () => {
         const balance = await vPtTokenWeETH.balanceOf(VTreasury_Ethereum);
         expect(balance).to.be.gt(0);
@@ -193,8 +155,8 @@ forking(22475162, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-491 part 1", await bscmainnetVip491());
-  testForkedNetworkVipCommands("VIP-491 part 2", await bscmainnet2Vip491());
+  testForkedNetworkVipCommands("add sUSDe and USDe market", await bsctestnetVip498());
+  testForkedNetworkVipCommands("add sUSDe and USDe market", await bsctestnet2Vip498());
 
   describe("Post-VIP behavior", async () => {
     describe("Ethena Markets", () => {
@@ -277,44 +239,17 @@ forking(22475162, async () => {
         ); // Enter market action
         expect(isPaused).to.be.true;
       });
-
-      it("Check treasury holds no vPT tokens after redemption", async () => {
-        const vptBalance = await vPtTokenWeETH.balanceOf(VTreasury_Ethereum);
-        expect(vptBalance).to.equal(0);
-      });
-
-      it("Verify Pendle redemption occurred", async () => {
-        const treasuryBalance = await ptTokenWeETH.balanceOf(VTreasury_Ethereum);
-        expect(treasuryBalance).to.equal(0);
-      });
-
-      it("Check Normal Timelock holds no vPT tokens after redemption", async () => {
-        const vptBalance = await vPtTokenWeETH.balanceOf(Timelock_Ethereum);
-        expect(vptBalance).to.equal(0);
-      });
-
-      it("Check Normal Timelock holds no PT tokens after redemption", async () => {
-        const treasuryBalance = await ptTokenWeETH.balanceOf(Timelock_Ethereum);
-        expect(treasuryBalance).to.equal(0);
-      });
-
-      it("Verify treasury received weEth after Pendle redemption", async () => {
-        const weEthAfter = await weETH.balanceOf(VTreasury_Ethereum);
-        expect(weEthAfter.sub(weEthBefore)).to.equal(weETH_expected);
-      });
     });
 
     describe("New markets sUSDe and USDe", () => {
       let interestRateModelAddress1: string;
       let interestRateModelAddress2: string;
-
       let vToken1: Contract;
       let vToken2: Contract;
 
       before(async () => {
         vToken1 = await ethers.getContractAt(VTOKEN_ABI, VsUSDe_CORE);
         vToken2 = await ethers.getContractAt(VTOKEN_ABI, VUSDe_CORE);
-
         interestRateModelAddress1 = await vToken1.interestRateModel();
         interestRateModelAddress2 = await vToken2.interestRateModel();
       });
@@ -330,8 +265,8 @@ forking(22475162, async () => {
 
       describe("Ownership", () => {
         it(`should transfer ownership of ${VsUSDe_CORE} and ${VUSDe_CORE} to NORMAL_TIMELOCK`, async () => {
-          expect(await vToken1.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
-          expect(await vToken2.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+          expect(await vToken1.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+          expect(await vToken2.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
         });
       });
 
@@ -343,13 +278,12 @@ forking(22475162, async () => {
       });
 
       describe("Initial supply", () => {
-        it(`should mint initial supply of ${VsUSDe_CORE} and ${VUSDe_CORE} to ${VTOKEN_RECEIVER}`, async () => {
+        it(`should have initial supply in ${sepolia.VTREASURY}`, async () => {
           const expectedSupply = parseUnits("10000", 8);
-          const supplyRemainingsUSDe = expectedSupply.sub(parseUnits("86", 8));
-          const supplyRemainingUSDe = expectedSupply.sub(parseUnits("100", 8));
+          const supplyRemaining = expectedSupply.sub(parseUnits("100", 8));
 
-          expect(await vToken1.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingsUSDe);
-          expect(await vToken2.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingUSDe);
+          expect(await vToken1.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
+          expect(await vToken2.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
         });
       });
 
