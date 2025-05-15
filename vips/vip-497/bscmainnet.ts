@@ -45,7 +45,7 @@ const TEN_PERCENT_VTOKENS = BigNumber.from(BNB_EXPLOITER_VTOKEN_BALANCE.sub(NINE
 const EXCHANGE_RATE = BigNumber.from("247776129138777185713728909");
 export const TEN_PERCENT_UNDERLYING = EXCHANGE_RATE.mul(TEN_PERCENT_VTOKENS).div(parseUnits("1", 18));
 
-export const vip490 = () => {
+export const vip497 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -155,4 +155,4 @@ export const vip490 = () => {
   );
 };
 
-export default vip490;
+export default vip497;
