@@ -1,14 +1,12 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const ERC4626_FACTORY_BNB = "";
 export const ERC4626_FACTORY_SEPOLIA = "0xa2f3ac3745E6C813f5bBd3D5c8b29b894E952F04";
-export const ERC4626_FACTORY_OPBNB = "";
-export const ERC4626_FACTORY_BASE = "";
-export const ERC4626_FACTORY_ARBITRUM = "";
-export const ERC4626_FACTORY_OPTIMISIM = "";
-export const ERC4626_FACTORY_ZKSYNC = "";
-export const ERC4626_FACTORY_UNICHAIN = "";
+export const ERC4626_FACTORY_OPBNB = "0x3dEDBD90EFC6E2257887FF36842337dF0739B8A1";
+export const ERC4626_FACTORY_BASE = "0xD13c5527d1a2a8c2cC9c9eb260AC4D9D811a02a4";
+export const ERC4626_FACTORY_ARBITRUM = "0xC6C8249a0B44973673f3Af673e530B85038a0480";
+export const ERC4626_FACTORY_OPTIMISIM = "0xc66c4058A8524253C22a9461Df6769CE09F7d61e";
+export const ERC4626_FACTORY_UNICHAIN = "0x1365820B9ba3B1b5601208437a5A24192a12C1fB";
 
 export const vip500 = () => {
   const meta = {
@@ -27,6 +25,36 @@ export const vip500 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ERC4626_FACTORY_UNICHAIN,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: ERC4626_FACTORY_ARBITRUM,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: ERC4626_FACTORY_OPTIMISIM,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.opsepolia,
+      },
+      {
+        target: ERC4626_FACTORY_OPBNB,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: ERC4626_FACTORY_BASE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.basesepolia,
       },
     ],
     meta,
