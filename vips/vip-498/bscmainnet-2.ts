@@ -40,18 +40,6 @@ export const BaseAssets = [
 ];
 export const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
-export const Actions = {
-  MINT: 0,
-  REDEEM: 1,
-  BORROW: 2,
-  REPAY: 3,
-  SEIZE: 4,
-  LIQUIDATE: 5,
-  TRANSFER: 6,
-  ENTER_MARKET: 7,
-  EXIT_MARKET: 8,
-};
-
 export const vip498 = () => {
   const meta = {
     version: "v2",
@@ -231,31 +219,31 @@ export const vip498 = () => {
         target: USDT_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[0], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: USDC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[1], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: WBTC_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[2], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: WETH_PRIME_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[3], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: XVS_VAULT_CONVERTER,
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[4], [USDe], [[CONVERSION_INCENTIVE, 1]]],
-        dstChainId: LzChainId.sepolia,
+        dstChainId: LzChainId.ethereum,
       },
     ],
     meta,
