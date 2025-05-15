@@ -25,7 +25,7 @@ import VBNB_ABI from "./abi/vBNB.json";
 
 const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 
-forking(48663751, async () => {
+forking(49712477, async () => {
   let vBNB: Contract;
   let prevRFBalance: BigNumber;
   let wbnb: Contract;
@@ -45,8 +45,8 @@ forking(48663751, async () => {
   });
 
   describe("Pre-VIP state", async () => {
-    it("Exploiter VBNB balance should be 1104498890317941", async () => {
-      expect(await vBNB.balanceOf(BNB_EXPLOITER)).equals("1104498890317941");
+    it("Exploiter VBNB balance should be 434904265070245", async () => {
+      expect(await vBNB.balanceOf(BNB_EXPLOITER)).equals("434904265070245");
     });
   });
 
