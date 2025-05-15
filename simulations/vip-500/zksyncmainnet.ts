@@ -38,7 +38,7 @@ const A3 = "0x924EDEd3D010b3F20009b872183eec48D0111265";
 const A4 = "0x2B379d8c90e02016658aD00ba2566F55E814C369";
 const A5 = "0xfffAB9120d9Df39EEa07063F6465a0aA45a80C52";
 
-forking(59796423, async () => {
+forking(60447320, async () => {
   let vwUSDM: Contract;
   let vWETH: Contract;
   let vUSDCe: Contract;
@@ -80,6 +80,12 @@ forking(59796423, async () => {
       ethers.constants.AddressZero,
       NETWORK_ADDRESSES.zksyncmainnet.NORMAL_TIMELOCK,
     );
+
+    // Accrue interest so that we check up to date liquidity data
+    await vwUSDM.accrueInterest();
+    await vWETH.accrueInterest();
+    await vUSDCe.accrueInterest();
+    await vUSDT.accrueInterest();
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -96,88 +102,92 @@ forking(59796423, async () => {
       });
     });
     describe(A1, () => {
-      it(`keeps 821453073191923071875035 wUSDM of debt in ${A1}`, async () => {
-        expect(await vwUSDM.callStatic.borrowBalanceCurrent(A1)).to.equal(parseUnits("821453.073191923071875035", 18));
+      it(`should have 839534.656415016491658636 wUSDM of debt in ${A1}`, async () => {
+        expect(await vwUSDM.callStatic.borrowBalanceCurrent(A1)).to.equal(parseUnits("839534.656415016491658636", 18));
       });
 
-      it(`keeps 287 wei of vWETH collateral in ${A1}`, async () => {
+      it(`should have 287 wei of vWETH collateral in ${A1}`, async () => {
         expect(await vWETH.balanceOf(A1)).to.equal(287);
       });
     });
 
     describe(A2, () => {
-      it(`have 159332061792005959391 WETH debt in ${A2}`, async () => {
-        expect(await vWETH.callStatic.borrowBalanceCurrent(A2)).to.equal(parseUnits("159.332061792005959391", 18));
+      it(`should have 159.448653259419343824 WETH debt in ${A2}`, async () => {
+        expect(await vWETH.callStatic.borrowBalanceCurrent(A2)).to.equal(parseUnits("159.448653259419343824", 18));
       });
 
-      it(`have 276009.71020155 vwUSDM of collateral in ${A2}`, async () => {
+      it(`should have 276009.71020155 vwUSDM of collateral in ${A2}`, async () => {
         expect(await vwUSDM.balanceOf(A2)).to.equal(parseUnits("276009.71020155", 8));
       });
-      it("Should have liquidity 0 and 50763221042535155079984 shortfall", async () => {
+
+      it("should have liquidity 0 and 174874.025871119755106135 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A2))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A2))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("50763221042535155079984");
+        expect(shortfall).to.equals(parseUnits("174874.025871119755106135", 18));
       });
     });
 
     describe(A3, () => {
-      it(`have 19381501170 of USDC.e debt in ${A3}`, async () => {
-        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A3)).to.equal(parseUnits("19381.501170", 6));
+      it(`should have 19454.410106 USDC.e debt in ${A3}`, async () => {
+        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A3)).to.equal(parseUnits("19454.410106", 6));
       });
 
-      it(`have 55230683244 of USDT debt in ${A3}`, async () => {
-        expect(await vUSDT.callStatic.borrowBalanceCurrent(A3)).to.equal(parseUnits("55230.683244", 6));
+      it(`should have 55443.557289 USDT debt in ${A3}`, async () => {
+        expect(await vUSDT.callStatic.borrowBalanceCurrent(A3)).to.equal(parseUnits("55443.557289", 6));
       });
 
-      it(`have 4929412019494 of vwUSDM collateral in ${A3}`, async () => {
+      it(`should have 49294.12019494 vwUSDM collateral in ${A3}`, async () => {
         expect(await vwUSDM.balanceOf(A3)).to.equals(parseUnits("49294.12019494", 8));
       });
-      it("Should have liquidity of 0 and 33047936970212011346903 shortfall", async () => {
+
+      it("should have liquidity of 0 and 33257.429189100283340737 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A3))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A3))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("33047936970212011346903");
+        expect(shortfall).to.equals(parseUnits("33257.429189100283340737", 18));
       });
     });
 
     describe(A4, () => {
-      it(`have 35059631167 of USDC.e debt in ${A4}`, async () => {
-        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A4)).to.equal(parseUnits("35059.631167", 6));
+      it(`should have 35191.517773 USDC.e debt in ${A4}`, async () => {
+        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A4)).to.equal(parseUnits("35191.517773", 6));
       });
 
-      it(`have 21622275610 of USDT debt in ${A4}`, async () => {
-        expect(await vUSDT.callStatic.borrowBalanceCurrent(A4)).to.equal(parseUnits("21622.275610", 6));
+      it(`should have 21705.613729 USDT debt in ${A4}`, async () => {
+        expect(await vUSDT.callStatic.borrowBalanceCurrent(A4)).to.equal(parseUnits("21705.613729", 6));
       });
 
-      it(`have 3528279214003 of vwUSDM collateral in ${A4}`, async () => {
+      it(`should have 3528279214003 vwUSDM collateral in ${A4}`, async () => {
         expect(await vwUSDM.balanceOf(A4)).to.equals(parseUnits("35282.79214003", 8));
       });
-      it("Should have liquidity of 0 and 26928032011371100330671 shortfall", async () => {
+
+      it("should have liquidity of 0 and 27090.461593010915596595 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A4))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A4))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("26928032011371100330671");
+        expect(shortfall).to.equals(parseUnits("27090.461593010915596595", 18));
       });
     });
 
     describe(A5, () => {
-      it(`have 2520139975 of USDC.e debt in ${A5}`, async () => {
-        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A5)).to.equal(parseUnits("2520.139975", 6));
+      it(`should have 2529.620186 USDC.e debt in ${A5}`, async () => {
+        expect(await vUSDCe.callStatic.borrowBalanceCurrent(A5)).to.equal(parseUnits("2529.620186", 6));
       });
 
-      it(`have 8362755443 of USDT debt in ${A5}`, async () => {
-        expect(await vUSDT.callStatic.borrowBalanceCurrent(A5)).to.equal(parseUnits("8362.755443", 6));
+      it(`should have 8394.987772 USDT debt in ${A5}`, async () => {
+        expect(await vUSDT.callStatic.borrowBalanceCurrent(A5)).to.equal(parseUnits("8394.987772", 6));
       });
 
-      it(`have 15966710 of vwUSDM collateral in ${A5}`, async () => {
+      it(`should have 0.15966710 vwUSDM collateral in ${A5}`, async () => {
         expect(await vwUSDM.balanceOf(A5)).to.equals(parseUnits("0.15966710", 8));
       });
-      it("Should have liquidity of 0 and 10884404074006198503076 shortfall", async () => {
+
+      it("should have liquidity of 0 and 10925.287183630828463940 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A5))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A5))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("10884404074006198503076");
+        expect(shortfall).to.equals(parseUnits("10925.287183630828463940", 18));
       });
     });
   });
@@ -189,15 +199,15 @@ forking(59796423, async () => {
         txResponse,
         [VTOKEN_ABI],
         ["NewProtocolSeizeShare", "Mint", "Borrow", "RepayBorrow"],
-        [8, 1, 3, 11],
+        [8, 1, 3, 10],
       );
     },
   });
 
   describe("Post-VIP behaviour", async () => {
     describe(A1, () => {
-      it(`keeps 823891.116497470853499569 wUSDM of debt in ${A1}`, async () => {
-        expect(await vwUSDM.callStatic.borrowBalanceCurrent(A1)).to.equal(parseUnits("823891.116497470853499569", 18));
+      it(`keeps 842087.779110167613836826 wUSDM of debt in ${A1}`, async () => {
+        expect(await vwUSDM.callStatic.borrowBalanceCurrent(A1)).to.equal(parseUnits("842087.779110167613836826", 18));
       });
 
       it(`keeps 287 wei of vWETH collateral in ${A1}`, async () => {
@@ -206,18 +216,19 @@ forking(59796423, async () => {
     });
 
     describe(A2, () => {
-      it(`leaves 1 wei of WETH debt in ${A2}`, async () => {
-        expect(await vWETH.callStatic.borrowBalanceCurrent(A2)).to.equal(1);
+      it(`leaves 53.265111039200025030 WETH debt in ${A2}`, async () => {
+        expect(await vWETH.callStatic.borrowBalanceCurrent(A2)).to.equal(parseUnits("53.265111039200025030", 18));
       });
 
       it(`leaves 0.0000000002 vwUSDM of collateral in ${A2}`, async () => {
         expect(await vwUSDM.balanceOf(A2)).to.equal(2);
       });
-      it("Should have liquidity 16868163938 and 0 shortfall", async () => {
+
+      it("should have liquidity 0 and 136315.550042031180889060 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A2))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A2))[2];
-        expect(liquidity).to.equals("16868163938");
-        expect(shortfall).to.equals("0");
+        expect(liquidity).to.equals("0");
+        expect(shortfall).to.equals(parseUnits("136315.550042031180889060", 18));
       });
     });
 
@@ -233,11 +244,12 @@ forking(59796423, async () => {
       it(`leaves less than 100 wei of vwUSDM collateral in ${A3}`, async () => {
         expect(await vwUSDM.balanceOf(A3)).to.be.lt(100);
       });
-      it("Should have liquidity of 0 and 1848406508543 shortfall", async () => {
+
+      it("should have liquidity of 0 and 0.000001839569463659 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A3))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A3))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("1848406508543");
+        expect(shortfall).to.equals(parseUnits("0.000001839569463659", 18));
       });
     });
 
@@ -253,11 +265,12 @@ forking(59796423, async () => {
       it(`leaves less than 100 wei of vwUSDM collateral in ${A4}`, async () => {
         expect(await vwUSDM.balanceOf(A4)).to.be.lt(100);
       });
-      it("Should have liquidity of 0 and 1519477277052 shortfall", async () => {
+
+      it("should have liquidity of 0 and 0.000001172141970450 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A4))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A4))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("1519477277052");
+        expect(shortfall).to.equals(parseUnits("0.000001172141970450", 18));
       });
     });
 
@@ -273,33 +286,38 @@ forking(59796423, async () => {
       it(`leaves less than 100 wei of vwUSDM collateral in ${A5}`, async () => {
         expect(await vwUSDM.balanceOf(A5)).to.be.lt(100);
       });
-      it("Should have liquidity of 0 and 1764065679956 shortfall", async () => {
+
+      it("should have liquidity of 0 and 0.000001467837695289 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(A5))[1];
         const shortfall = (await comptroller.getAccountLiquidity(A5))[2];
         expect(liquidity).to.equals(0);
-        expect(shortfall).to.equals("1764065679956");
+        expect(shortfall).to.equals(parseUnits("0.000001467837695289", 18));
       });
     });
 
     describe("WUSDM Liquidator", () => {
-      it(`leaves 159347103634874427700 wei of WETH debt in ${WUSDM_LIQUIDATOR}`, async () => {
+      it(`leaves 106.196819657296615137 WETH debt in ${WUSDM_LIQUIDATOR}`, async () => {
         expect(await vWETH.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(
-          parseUnits("159.347103634874427700", 18),
+          parseUnits("106.196819657296615137", 18),
         );
       });
-      it(`leaves 56987365052 wei of USDC.e debt in ${WUSDM_LIQUIDATOR}`, async () => {
-        expect(await vUSDCe.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(parseUnits("56987.365052", 6));
+
+      it(`leaves 57205.818391 USDC.e debt in ${WUSDM_LIQUIDATOR}`, async () => {
+        expect(await vUSDCe.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(parseUnits("57205.818391", 6));
       });
-      it(`leaves 85259737852 wei of USDT debt in ${WUSDM_LIQUIDATOR}`, async () => {
-        expect(await vUSDT.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(parseUnits("85259.737852", 6));
+
+      it(`leaves 85590.186761 USDT debt in ${WUSDM_LIQUIDATOR}`, async () => {
+        expect(await vUSDT.callStatic.borrowBalanceCurrent(WUSDM_LIQUIDATOR)).to.equal(parseUnits("85590.186761", 6));
       });
-      it(`leaves less than 72982327973014 wei of vwUSDM collateral in ${WUSDM_LIQUIDATOR}`, async () => {
-        expect(await vwUSDM.balanceOf(WUSDM_LIQUIDATOR)).equals("72982327973014");
+
+      it(`leaves 729823.27972937 vwUSDM collateral in ${WUSDM_LIQUIDATOR}`, async () => {
+        expect(await vwUSDM.balanceOf(WUSDM_LIQUIDATOR)).equals(parseUnits("729823.27972937", 8));
       });
-      it("Should have liquidity of 189693973657450104902580 and 0 shortfall", async () => {
+
+      it("should have liquidity of 202005.645192654857141673 and 0 shortfall", async () => {
         const liquidity = (await comptroller.getAccountLiquidity(WUSDM_LIQUIDATOR))[1];
         const shortfall = (await comptroller.getAccountLiquidity(WUSDM_LIQUIDATOR))[2];
-        expect(liquidity).to.equals("189693973657450104902580");
+        expect(liquidity).to.equals(parseUnits("202005.645192654857141673", 18));
         expect(shortfall).to.equals(0);
       });
     });
