@@ -5,8 +5,8 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const RESILIENT_ORACLE_BASE = "0xcBBf58bD5bAdE357b634419B70b215D5E9d6FbeD";
-export const CHAINLINK_ORACLE_ORACLE_BASE = "0x6F2eA73597955DB37d7C06e1319F0dC7C7455dEb";
-export const REDSTONE_ORACLE_ORACLE_BASE = "0xd101Bf51937A6718F402dA944CbfdcD12bB6a6eb";
+export const CHAINLINK_ORACLE_BASE = "0x6F2eA73597955DB37d7C06e1319F0dC7C7455dEb";
+export const REDSTONE_ORACLE_BASE = "0xd101Bf51937A6718F402dA944CbfdcD12bB6a6eb";
 export const BOUND_VALIDATOR_BASE = "0x66dDE062D3DC1BB5223A0096EbB89395d1f11DB0";
 export const DEFAULT_PROXY_ADMIN_BASE = "0x7B06EF6b68648C61aFE0f715740fE3950B90746B";
 export const RESILIENT_ORACLE_IMPLEMENTATION_BASE = "0x2632b7b2b34C80B7F854722CEB6b54714476C0A6";
@@ -64,11 +64,103 @@ export const increaseExchangeRateByPercentage = (
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
 
-export const vip492 = () => {
+export const vip497 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
+    title: "VIP-497 [Base][Optimism][Unichain] Capped Oracles and Cached Prices",
+    description: `#### Summary
+
+If passed, following the community proposal “[Provide Support for Capped Oracles for Enhanced Security](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xcd64c64eee56e75b56a0a0b84f1ffa2b4ea5fb2be76cca96a155137c46305c07)), this VIP will upgrade the implementations of the following contracts on Base, Optimism and Unichain, including support for Capped Oracles and Cached Prices:
+
+- ResilientOracle
+- ChainlinkOracle
+- RedStoneOracle
+- BoundValidator
+
+Moreover, the oracles for the following assets are updated:
+
+- [Base / wstETH](https://app.venus.io/#/core-pool/market/0x133d3BCD77158D125B75A17Cb517fFD4B4BE64C5?chainId=8453): using the [new implementation for the OneJumpOracle contract](https://github.com/VenusProtocol/oracle/pull/239), without changes in the risk parameters
+- [Base / wsuperOETHb](https://app.venus.io/#/core-pool/market/0x75201D81B3B0b9D17b179118837Be37f64fc4930?chainId=8453): using the [new implementation for the ERC4626Oracle contract](https://github.com/VenusProtocol/oracle/pull/239), **capping the price** with the following risk parameters, following the [Chaos Labs recommendation](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/4):
+    - Maximum annual growth rate: 14.26%
+    - Automatic snapshot period: 30 days (how frequently the reference value to calculate the cap in the price is updated)
+    - Automatic snapshot update gap: 1.11% of the current exchange rate
+
+#### Description
+
+**Capped Oracles** are a type of price oracle designed to limit the maximum value (or growth) of an asset's reported price to protect against manipulation or sudden volatility.
+
+**Cached Prices** is a new feature integrated into the Venus oracle contracts, that reduces the gas consumed by the functions that collect and return the prices, using [Transient Storage](https://soliditylang.org/blog/2024/01/26/transient-storage/) to cache the prices in the smart contract memory. This VIP doesn’t enable Cached Prices for any market on the affected networks. It only upgrades the oracle contracts to support that feature.
+
+More information about Capped Oracles and Cached Prices:
+
+- [VIP-495 [opBNB] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/495?chainId=56)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the new implementations are properly set on opBNB, and the asset prices don’t change
+- **Deployment on testnet**: the same upgrade has been performed on opBNB testnet, and used in the Venus Protocol testnet deployment
+
+Permissions are granted to Governance on Base, Optimism, Unichain and opBNB, to configure the new risk parameters related to Capped oracles.
+
+#### Audit reports
+
+- [Certik audit audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/125_capped_cached_certik_20250430.pdf) (2025/04/30)
+- [Quantstamp](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/127_capped_cached_quantstamp_20250325.pdf) (2025/03/25)
+- [Fairyproof audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/126_capped_cached_fairyproof_20250319.pdf) (2025/03/19)
+
+#### Deployed contracts
+
+Mainnet
+
+- Base
+    - [New ResilientOracle implementation](https://basescan.org/address/0x2632b7b2b34C80B7F854722CEB6b54714476C0A6)
+    - [New ChainlinkOracle implementation](https://basescan.org/address/0xdA079597acD9eda0c7638534fDB43F06393Fe507)
+    - [New RedStoneOracle implementation](https://basescan.org/address/0x08482c78427c2E83aA2EeedF06338E05a71bf925)
+    - [New BoundValidator implementation](https://basescan.org/address/0xc92eefCE80e7Ca529a060C485F462C90416cA38A)
+    - [New oracle for wstETH](https://basescan.org/address/0xDDD4F0836c8016E11fC6741A4886E97B3c3d20C1)
+    - [New oracle for wSuperOETHb](https://basescan.org/address/0xcd1d2C99642165440c2CC023AFa2092b487f033e)
+- Optimism
+    - [New ResilientOracle implementation](https://optimistic.etherscan.io/address/0xB4E073C5abB056D94f14f0F8748B6BFcb418fFe6)
+    - [New ChainlinkOracle implementation](https://optimistic.etherscan.io/address/0x1Abf4919dE8ae2B917d553475e9B1D9CdE6E36D3)
+    - [New RedStoneOracle implementation](https://optimistic.etherscan.io/address/0x5e448421aB3c505AdF0E5Ee2D2fCCD80FDe08a43)
+    - [New BoundValidator implementation](https://optimistic.etherscan.io/address/0xc04C8dFF5a91f82f5617Ee9Bd83f6d96de0eb39C)
+- Unichain
+    - [New ResilientOracle implementation](https://uniscan.xyz/address/0x314197e6f1664C141F90403c990b668e50460315)
+    - [New RedStoneOracle implementation](https://uniscan.xyz/address/0x477FB8C53b0c9A2B18295BBA7B1dF41356fC09D0)
+    - [New BoundValidator implementation](https://uniscan.xyz/address/0x287F0f107ab4a5066bd257d684AFCc09c8d31Bde)
+
+Testnet
+
+- Base
+    - [New ResilientOracle implementation](https://sepolia.basescan.org/address/0xe8c39006906a9015adC87996AcD1af20f514fdE6)
+    - [New ChainlinkOracle implementation](https://sepolia.basescan.org/address/0x238F42Bc8E204583877d670891dF1f67a861ef0a)
+    - [New RedStoneOracle implementation](https://sepolia.basescan.org/address/0x91eEfAb71a8BD1E4f2889D51806407cD55DBF2fC)
+    - [New BoundValidator implementation](https://sepolia.basescan.org/address/0xae3C407A1C30Ac7A55A97B6A55927f6a2580bD4f)
+    - [New oracle for wstETH](https://sepolia.basescan.org/address/0xB242450Ab1CBdd93409ee22c333F6f70aaA6Be08)
+    - [New oracle for wSuperOETHb](https://sepolia.basescan.org/address/0x6F6e9Fd240372435eb16dBE36362ECdF84AB0399)
+- Optimism
+    - [New ResilientOracle implementation](https://sepolia-optimism.etherscan.io/address/0xe36F76dc26885CcEce97B96f80f4FA58c89772Fc)
+    - [New ChainlinkOracle implementation](https://sepolia-optimism.etherscan.io/address/0x15242a55Ad1842A1aEa09c59cf8366bD2f3CE9B4)
+    - [New BoundValidator implementation](https://sepolia-optimism.etherscan.io/address/0xca8c824E577e1E2EDF4442cB46046ab000FE76CF)
+- Unichain
+    - [New ResilientOracle implementation](https://sepolia.uniscan.xyz/address/0x4E953e3741a17aFaD69776742d1ED1c0130F43f7)
+    - [New RedStoneOracle implementation](https://sepolia.uniscan.xyz/address/0x44A47AfC1A9467Dfe1D5E967cA78432C699a13d9)
+    - [New BoundValidator implementation](https://sepolia.uniscan.xyz/address/0x15242a55Ad1842A1aEa09c59cf8366bD2f3CE9B4)
+
+#### References
+
+- [Capped Oracles and Cached Prices feature](https://github.com/VenusProtocol/oracle/pull/239)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/551)
+- Upgrades on testnets
+    - [Base Sepolia](https://sepolia.basescan.org/tx/0x36df802b58633c6c13d5591e510f1fe0d7318cc7099b2dada83778b515a788d3)
+    - [Optimism Sepolia](https://sepolia-optimism.etherscan.io/tx/0x9c9f0cbfb9fa1ab61357be9bd1d78de0cb9bc6ac2b7b85c9dcf66907fc996785)
+    - [Unichain Sepolia](https://sepolia.uniscan.xyz/tx/0x83e3a6b86ec498a8d9bfc342213cfaeeae4e5e0df42468a61729559f68964d36)
+- Configuration of permissions on [opBNB testnet](https://testnet.opbnbscan.com/tx/0xf4e541bddfcd7204dc449d13157f2ba13294db270b4047ff80ee376b47e980c2)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -85,13 +177,13 @@ export const vip492 = () => {
       {
         target: DEFAULT_PROXY_ADMIN_BASE,
         signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ORACLE_BASE, CHAINLINK_ORACLE_IMPLEMENTATION_BASE],
+        params: [CHAINLINK_ORACLE_BASE, CHAINLINK_ORACLE_IMPLEMENTATION_BASE],
         dstChainId: LzChainId.basemainnet,
       },
       {
         target: DEFAULT_PROXY_ADMIN_BASE,
         signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ORACLE_BASE, REDSTONE_ORACLE_IMPLEMENTATION_BASE],
+        params: [REDSTONE_ORACLE_BASE, REDSTONE_ORACLE_IMPLEMENTATION_BASE],
         dstChainId: LzChainId.basemainnet,
       },
       {
@@ -405,4 +497,4 @@ export const vip492 = () => {
   );
 };
 
-export default vip492;
+export default vip497;

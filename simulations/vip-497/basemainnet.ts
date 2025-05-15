@@ -6,10 +6,21 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { CHAINLINK_ORACLE_ORACLE_BASE, RESILIENT_ORACLE_BASE } from "../../vips/vip-492/bscmainnet";
+import vip497, {
+  BOUND_VALIDATOR_BASE,
+  BOUND_VALIDATOR_IMPLEMENTATION_BASE,
+  CHAINLINK_ORACLE_BASE,
+  CHAINLINK_ORACLE_IMPLEMENTATION_BASE,
+  DEFAULT_PROXY_ADMIN_BASE,
+  REDSTONE_ORACLE_BASE,
+  REDSTONE_ORACLE_IMPLEMENTATION_BASE,
+  RESILIENT_ORACLE_BASE,
+  RESILIENT_ORACLE_IMPLEMENTATION_BASE,
+} from "../../vips/vip-497/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { basemainnet } = NETWORK_ADDRESSES;
@@ -58,7 +69,7 @@ const prices = [
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriodInChainlinkOracle(
-        CHAINLINK_ORACLE_ORACLE_BASE,
+        CHAINLINK_ORACLE_BASE,
         token.address,
         "0xB88BAc61a4Ca37C43a3725912B1f472c9A5bc061",
         basemainnet.NORMAL_TIMELOCK,
@@ -74,6 +85,7 @@ forking(29870085, async () => {
   await setBalance(basemainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
 
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_BASE, RESILIENT_ORACLE_ABI, provider);
+  const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN_BASE, PROXY_ADMIN_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
     for (const { symbol, address, expectedPrice } of prices) {
@@ -83,7 +95,7 @@ forking(29870085, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491(), {
+  testForkedNetworkVipCommands("vip497", await vip497(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
@@ -98,5 +110,28 @@ forking(29870085, async () => {
         expect(await resilientOracle.getPrice(address)).to.equal(expectedPrice);
       });
     }
+
+    describe("New implementations", () => {
+      it("Resilient oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE_BASE)).to.equal(
+          RESILIENT_ORACLE_IMPLEMENTATION_BASE,
+        );
+      });
+      it("Chainlink oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE_BASE)).to.equal(
+          CHAINLINK_ORACLE_IMPLEMENTATION_BASE,
+        );
+      });
+      it("RedStone oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE_BASE)).to.equal(
+          REDSTONE_ORACLE_IMPLEMENTATION_BASE,
+        );
+      });
+      it("Bound validator", async () => {
+        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR_BASE)).to.equal(
+          BOUND_VALIDATOR_IMPLEMENTATION_BASE,
+        );
+      });
+    });
   });
 });

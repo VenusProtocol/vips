@@ -5,8 +5,8 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const RESILIENT_ORACLE_BASE_SEPOLIA = "0xC34871C982cf0Bc6e7aCa2c2670Bc319bDA1C744";
-export const CHAINLINK_ORACLE_ORACLE_BASE_SEPOLIA = "0x801aB33A69AD867500fbCda7b3dB66C73151494b";
-export const REDSTONE_ORACLE_ORACLE_BASE_SEPOLIA = "0x8267FE3f75E0A37ee34e113E767F9C9727206838";
+export const CHAINLINK_ORACLE_BASE_SEPOLIA = "0x801aB33A69AD867500fbCda7b3dB66C73151494b";
+export const REDSTONE_ORACLE_BASE_SEPOLIA = "0x8267FE3f75E0A37ee34e113E767F9C9727206838";
 export const BOUND_VALIDATOR_BASE_SEPOLIA = "0xC76284488E57554A457A75a8b166fB2ADAB430dB";
 export const DEFAULT_PROXY_ADMIN_BASE_SEPOLIA = "0xB85dD19112c4BF1240FeD0f26E8D0b0576a82546";
 export const RESILIENT_ORACLE_IMPLEMENTATION_BASE_SEPOLIA = "0xe8c39006906a9015adC87996AcD1af20f514fdE6";
@@ -62,7 +62,7 @@ export const increaseExchangeRateByPercentage = (
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
 
-export const vip492 = () => {
+export const vip497 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -83,13 +83,13 @@ export const vip492 = () => {
       {
         target: DEFAULT_PROXY_ADMIN_BASE_SEPOLIA,
         signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ORACLE_BASE_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_BASE_SEPOLIA],
+        params: [CHAINLINK_ORACLE_BASE_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_BASE_SEPOLIA],
         dstChainId: LzChainId.basesepolia,
       },
       {
         target: DEFAULT_PROXY_ADMIN_BASE_SEPOLIA,
         signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ORACLE_BASE_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_BASE_SEPOLIA],
+        params: [REDSTONE_ORACLE_BASE_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_BASE_SEPOLIA],
         dstChainId: LzChainId.basesepolia,
       },
       {
@@ -398,4 +398,4 @@ export const vip492 = () => {
   );
 };
 
-export default vip492;
+export default vip497;

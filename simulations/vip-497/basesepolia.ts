@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-492/bsctestnet";
+import vip497, { RESILIENT_ORACLE_BASE_SEPOLIA } from "../../vips/vip-497/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -57,7 +57,7 @@ forking(25337385, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491(), {
+  testForkedNetworkVipCommands("vip497", await vip497(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
