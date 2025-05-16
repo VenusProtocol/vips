@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip497, { COMPTROLLER_CORE, NEW_IR, vSOL } from "../../vips/vip-497/bscmainnet";
+import vip498, { COMPTROLLER_CORE, NEW_IR, vSOL } from "../../vips/vip-498/bscmainnet";
 import VTOKEN_CORE_POOL_ABI from "./abi/VTokenCorePool.json";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
 
@@ -42,7 +42,7 @@ forking(49762075, async () => {
     });
   });
 
-  testVip("VIP-484", await vip497(), {
+  testVip("VIP-498", await vip498(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_CORE_POOL_ABI], ["NewMarketInterestRateModel"], [1]);
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
