@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { CHAINLINK_ORACLE_ORACLE_ARBITRUM, RESILIENT_ORACLE_ARBITRUM } from "../../vips/vip-493/bscmainnet";
+import vip491, { CHAINLINK_ORACLE_ORACLE_ARBITRUM, RESILIENT_ORACLE_ARBITRUM } from "../../vips/vip-499/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 

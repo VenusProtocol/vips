@@ -27,12 +27,12 @@ export const REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC = "0x3D45B3025c9Aa5c669B6F625
 export const BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC = "0xc79fE34320903dA7a19E6335417C7131293844ED";
 export const wUSDM_ORACLE_ZKSYNC = "0x22cE94e302c8C80a6C2dCfa9Da6c5286e9f28692";
 export const wUSDM_ZKSYNC = "0xA900cbE7739c96D2B153a273953620A701d5442b";
-export const wstETHOracle_ZKSYNC = "0x2DAaeb94E19145BA7633cAB2C38c76fD8c493198";
+export const wstETHOracle_ZKSYNC = "0x2DAaeb94E19145BA7633cAB2C38c76fD8c499198";
 export const wstETH_ZKSYNC = "0x703b52F2b28fEbcB60E1372858AF5b18849FE867";
 export const zkETHOracle_ZKSYNC = "0x407dE1229BCBD2Ec876d063F3F93c4D8a38bd81a";
 export const zkETH_ZKSYNC = "0xb72207E1FB50f341415999732A20B6D25d8127aa";
 
-export const vip493 = () => {
+export const vip499 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -164,4 +164,4 @@ export const vip493 = () => {
   );
 };
 
-export default vip493;
+export default vip499;

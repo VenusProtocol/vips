@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { RESILIENT_ORACLE_ARBITRUM_SEPOLIA } from "../../vips/vip-493/bsctestnet";
+import vip491, { RESILIENT_ORACLE_ARBITRUM_SEPOLIA } from "../../vips/vip-499/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 

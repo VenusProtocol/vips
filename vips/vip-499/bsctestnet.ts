@@ -32,7 +32,7 @@ export const wstETH_ZKSYNC_SEPOLIA = "0x8507bb4F4f0915D05432011E384850B65a7FCcD1
 export const zkETHOracle_ZKSYNC_SEPOLIA = "0x4C7cA0B8A23d6ff73D7dd1f74096D25628f90348";
 export const zkETH_ZKSYNC_SEPOLIA = "0x13231E8B60BE0900fB3a3E9dc52C2b39FA4794df";
 
-export const vip493 = () => {
+export const vip499 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -164,4 +164,4 @@ export const vip493 = () => {
   );
 };
 
-export default vip493;
+export default vip499;

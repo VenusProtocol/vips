@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { CHAINLINK_ORACLE_ORACLE_ZKSYNC, RESILIENT_ORACLE_ZKSYNC } from "../../vips/vip-493/bscmainnet";
+import vip491, { CHAINLINK_ORACLE_ORACLE_ZKSYNC, RESILIENT_ORACLE_ZKSYNC } from "../../vips/vip-499/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -33,7 +33,7 @@ forking(151083977, async () => {
     });
 
     it("check USDT price", async () => {
-      expect(await resilientOracle.getPrice("0x493257fD37EDB34451f62EDf8D2a0C418852bA4C")).to.equal(
+      expect(await resilientOracle.getPrice("0x499257fD37EDB34451f62EDf8D2a0C418852bA4C")).to.equal(
         parseUnits("0.99980003", 30),
       );
     });
@@ -91,7 +91,7 @@ forking(151083977, async () => {
     });
 
     it("check USDT price", async () => {
-      const token = new ethers.Contract("0x493257fD37EDB34451f62EDf8D2a0C418852bA4C", ERC20_ABI, provider);
+      const token = new ethers.Contract("0x499257fD37EDB34451f62EDf8D2a0C418852bA4C", ERC20_ABI, provider);
       await setMaxStalePeriod(resilientOracle, token);
       expect(await resilientOracle.getPrice(token.address)).to.equal(parseUnits("0.99980003", 30));
     });

@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { RESILIENT_ORACLE_ZKSYNC_SEPOLIA } from "../../vips/vip-493/bsctestnet";
+import vip491, { RESILIENT_ORACLE_ZKSYNC_SEPOLIA } from "../../vips/vip-499/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
