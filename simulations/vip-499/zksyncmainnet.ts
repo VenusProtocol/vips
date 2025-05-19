@@ -46,7 +46,7 @@ const prices = [
   },
   {
     symbol: "USDT",
-    address: "0x499257fD37EDB34451f62EDf8D2a0C418852bA4C",
+    address: "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C",
     expectedPrice: parseUnits("0.99980003", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
@@ -92,14 +92,19 @@ const prices = [
     address: "0xA900cbE7739c96D2B153a273953620A701d5442b",
     expectedPrice: parseUnits("1.077968786387565675", 18),
     postVIP: async function (resilientOracle: any, address: string) {
-      const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE_ZKSYNC,
+        "0x7715c206A14Ac93Cb1A6c0316A6E5f8aD7c9Dc31",
+        "0x6Ab6c24f9312a6cB458761143D373A8f11573C4B",
+        zksyncmainnet.NORMAL_TIMELOCK,
+      );
     },
   },
   {
     symbol: "ZK",
     address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
     expectedPrice: parseUnits("0.06927599", 18),
+    expectedPriceAfter: parseUnits("0.06935213", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       await setMaxStalePeriodInChainlinkOracle(
         CHAINLINK_ORACLE_ZKSYNC,
@@ -120,7 +125,7 @@ const prices = [
   },
 ]
 
-forking(151083977, async () => {
+forking(60153405, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(zksyncmainnet.NORMAL_TIMELOCK);
@@ -139,7 +144,7 @@ forking(151083977, async () => {
   testForkedNetworkVipCommands("vip491", await vip491(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [3]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
@@ -149,7 +154,7 @@ forking(151083977, async () => {
       it(`check ${price.symbol} price`, async () => {
         const token = new ethers.Contract(price.address, ERC20_ABI, provider);
         await price.postVIP(resilientOracle, token.address);
-        expect(await resilientOracle.getPrice(token.address)).to.equal(price.expectedPrice);
+        expect(await resilientOracle.getPrice(token.address)).to.equal(price.expectedPriceAfter || price.expectedPrice);
       });
     }
 
