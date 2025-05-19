@@ -23,10 +23,6 @@ export const VToken_vUSDC_Ethena = "0x466fe60aE3d8520e49D67e3483626786Ba0E6416";
 export const PT_weETH_26DEC2024_LiquidStakedETH = "0x56107201d3e4b7Db92dEa0Edb9e0454346AEb8B5";
 export const weETH_Address = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
 
-// underlying assets associated with the vTokens held by the Venus Treasury
-export const PT_weETH_26DEC2024_expected = parseUnits("0.000000000179961879", 18);
-export const weETH_expected = parseUnits("1.687594369906750452", 18);
-
 export const Actions = {
   MINT: 0,
   REDEEM: 1,
@@ -39,7 +35,7 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-const vip498 = () => {
+const vip500 = () => {
   const meta = {
     version: "v2",
     title: "[sepolia] New sUSDe and USDe market in the Core pool",
@@ -103,7 +99,7 @@ const vip498 = () => {
       {
         target: Comptroller_Ethena,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
+        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.sepolia,
       },
 
@@ -166,4 +162,4 @@ const vip498 = () => {
   );
 };
 
-export default vip498;
+export default vip500;

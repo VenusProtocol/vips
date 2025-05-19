@@ -4,17 +4,17 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import bsctestnetVip498, {
+import vip500, {
   Actions,
   COMPTROLLER_LiquidStakedBNB,
   VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
-} from "../../vips/vip-498/bsctestnet";
-import bsctestnet2Vip498 from "../../vips/vip-498/bsctestnet-2";
+} from "../../vips/vip-500/bscmainnet";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
 
-forking(51867242, async () => {
+forking(49928270, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -25,6 +25,11 @@ forking(51867242, async () => {
     it("Check market CF is not zero", async () => {
       const market = await comptroller.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
       expect(market.collateralFactorMantissa).not.equal(0);
+    });
+
+    it("Check market LI is not zero", async () => {
+      const market = await comptroller.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+      expect(market.liquidationIncentiveMantissa).not.equal(0);
     });
 
     it("Check mint action is not paused", async () => {
@@ -38,18 +43,27 @@ forking(51867242, async () => {
     });
   });
 
-  testVip("VIP-498 bsctestnet", await bsctestnetVip498(), {
+  testVip("VIP-500 bscmainnet", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "ActionPausedMarket"], [1, 2]);
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
+      );
     },
   });
-
-  testVip("VIP-498 bsctestnet-2", await bsctestnet2Vip498());
 
   describe("Post-VIP behavior", async () => {
     it("Market CF should be zero", async () => {
       const market = await comptroller.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
       expect(market.collateralFactorMantissa).to.equal(0);
+    });
+
+    it("Check market LI remains uneffected", async () => {
+      const market = await comptroller.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+      expect(market.liquidationIncentiveMantissa).not.equal(0);
     });
 
     it("Mint action should be paused", async () => {

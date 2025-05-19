@@ -39,10 +39,10 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip498 = () => {
+export const vip500 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-498 Unwind PT Markets (BNB Chain and Ethereum)",
+    title: "VIP-500 Unwind PT Markets (BNB Chain and Ethereum)",
     description: "",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -103,7 +103,7 @@ export const vip498 = () => {
       {
         target: Comptroller_Ethena,
         signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
+        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.ethereum,
       },
 
@@ -202,4 +202,4 @@ export const vip498 = () => {
   );
 };
 
-export default vip498;
+export default vip500;
