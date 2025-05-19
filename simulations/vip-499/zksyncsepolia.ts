@@ -92,7 +92,7 @@ forking(151083977, async () => {
   testForkedNetworkVipCommands("vip491", await vip491(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
-      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [2]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [3]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
