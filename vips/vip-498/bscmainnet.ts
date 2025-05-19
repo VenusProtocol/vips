@@ -92,7 +92,7 @@ export const weETHMarket: Market = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("3", 18),
+    amount: parseUnits("3.614915477041407445", 18),
     vTokensToBurn: parseUnits("0.03694", 8), // around $100
     vTokenReceiver: unichainmainnet.VTREASURY,
   },
@@ -124,7 +124,7 @@ export const wstETHMarket: Market = {
     protocolSeizeShare: parseUnits("0.05", 18),
   },
   initialSupply: {
-    amount: parseUnits("3", 18),
+    amount: parseUnits("3.208916246034338443", 18),
     vTokensToBurn: parseUnits("0.03309", 8), // around $100
     vTokenReceiver: unichainmainnet.VTREASURY,
   },
@@ -228,6 +228,7 @@ const vip498 = () => {
           target: weETHMarket.vToken.address,
           signature: "transfer(address,uint256)",
           params: [weETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainmainnet,
         };
       })(),
       {
@@ -235,11 +236,6 @@ const vip498 = () => {
         signature: "setProtocolSeizeShare(uint256)",
         params: [weETHMarket.riskParameters.protocolSeizeShare],
         dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("20000", 18), VANGUARD_TREASURY],
       },
 
       // <--- wstETH Market --->
@@ -325,6 +321,7 @@ const vip498 = () => {
           target: wstETHMarket.vToken.address,
           signature: "transfer(address,uint256)",
           params: [wstETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainmainnet,
         };
       })(),
       {
