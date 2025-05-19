@@ -8,6 +8,8 @@ import { makeProposal } from "src/utils";
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
 export const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
+export const WETH_ORACLE = "0xB5Ea3749E32757189B2fDFCbe9Cf09489f7eA888";
+export const WSTETH_ORACLE = "0x435BBC3aAc204423a223a98692A03Eb5b10789AE";
 
 export const CONVERSION_INCENTIVE = parseUnits("1", 14);
 
@@ -86,7 +88,7 @@ export const weETHMarket: Market = {
   },
   initialSupply: {
     amount: parseUnits("3", 18),
-    vTokensToBurn: parseUnits("0.03694", 8), // around $100
+    vTokensToBurn: parseUnits("0.03", 8), // around $100
     vTokenReceiver: unichainsepolia.VTREASURY,
   },
   interestRateModel: {
@@ -118,7 +120,7 @@ export const wstETHMarket: Market = {
   },
   initialSupply: {
     amount: parseUnits("3", 18),
-    vTokensToBurn: parseUnits("0.03309", 8), // around $100
+    vTokensToBurn: parseUnits("0.03", 8), // around $100
     vTokenReceiver: unichainsepolia.VTREASURY,
   },
   interestRateModel: {
@@ -156,7 +158,7 @@ const vip498 = () => {
         params: [
           [
             weETH.address,
-            [unichainsepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [WETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
           ],
         ],
@@ -218,6 +220,7 @@ const vip498 = () => {
           target: weETHMarket.vToken.address,
           signature: "transfer(address,uint256)",
           params: [weETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainsepolia,
         };
       })(),
       {
@@ -241,7 +244,7 @@ const vip498 = () => {
         params: [
           [
             wstETH.address,
-            [unichainsepolia.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
           ],
         ],
@@ -306,6 +309,7 @@ const vip498 = () => {
           target: wstETHMarket.vToken.address,
           signature: "transfer(address,uint256)",
           params: [wstETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainsepolia,
         };
       })(),
       {
