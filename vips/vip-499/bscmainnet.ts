@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -19,6 +21,9 @@ export const ACM_ARBITRUM = "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157";
 export const NORMAL_TIMELOCK_ARBITRUM = "0x4b94589Cc23F618687790036726f744D602c4017";
 export const FASTTRACK_TIMELOCK_ARBITRUM = "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04";
 export const CRITICAL_TIMELOCK_ARBITRUM = "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674";
+export const weETH_Initial_Exchange_Rate = parseUnits("1.067789208571946221", 18);
+export const wstETH_Initial_Exchange_Rate = parseUnits("1.203073466794064368", 18);
+
 
 export const RESILIENT_ORACLE_ZKSYNC = "0xDe564a4C887d5ad315a19a96DC81991c98b12182";
 export const CHAINLINK_ORACLE_ZKSYNC = "0x4FC29E1d3fFFbDfbf822F09d20A5BE97e59F66E5";
@@ -39,6 +44,17 @@ export const ACM_ZKSYNC = "0x526159A92A82afE5327d37Ef446b68FD9a5cA914";
 export const NORMAL_TIMELOCK_ZKSYNC = "0x093565Bc20AA326F4209eBaF3a26089272627613";
 export const FASTTRACK_TIMELOCK_ZKSYNC = "0x32f71c95BC8F9d996f89c642f1a84d06B2484AE9";
 export const CRITICAL_TIMELOCK_ZKSYNC = "0xbfbc79D4198963e4a66270F3EfB1fdA0F382E49c";
+export const zkETH_Initial_Exchange_Rate = parseUnits("1.011815149704219045", 18);
+export const wUSDM_Initial_Exchange_Rate = parseUnits("1.077939040602540747", 18);
+
+export const DAYS_30 = 30 * 24 * 60 * 60;
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  return exchangeRate.add(increaseAmount).toString();
+};
 
 export const vip499 = () => {
   const meta = {
@@ -74,32 +90,6 @@ export const vip499 = () => {
         target: DEFAULT_PROXY_ADMIN_ARBITRUM,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_ARBITRUM, BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: RESILIENT_ORACLE_ARBITRUM,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            weETH_ARBITRUM,
-            [weETH_ORACLE_ARBITRUM, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: RESILIENT_ORACLE_ARBITRUM,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ARBITRUM,
-            [wstETHOracle_ARBITRUM, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -157,6 +147,69 @@ export const vip499 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
+        target: weETH_ORACLE_ARBITRUM,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: weETH_ORACLE_ARBITRUM,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.053", 18), DAYS_30],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: weETH_ORACLE_ARBITRUM,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.044", 18)],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: RESILIENT_ORACLE_ARBITRUM,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            weETH_ARBITRUM,
+            [weETH_ORACLE_ARBITRUM, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: wstETHOracle_ARBITRUM,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: wstETHOracle_ARBITRUM,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.067", 18), DAYS_30],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: RESILIENT_ORACLE_ARBITRUM,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wstETH_ARBITRUM,
+            [wstETHOracle_ARBITRUM, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      
+      {
         target: DEFAULT_PROXY_ADMIN_ZKSYNC,
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE_ZKSYNC, RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC],
@@ -178,45 +231,6 @@ export const vip499 = () => {
         target: DEFAULT_PROXY_ADMIN_ZKSYNC,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_ZKSYNC, BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wUSDM_ZKSYNC,
-            [wUSDM_ORACLE_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ZKSYNC,
-            [wstETHOracle_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            zkETH_ZKSYNC,
-            [zkETHOracle_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -273,6 +287,91 @@ export const vip499 = () => {
         params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_ZKSYNC],
         dstChainId: LzChainId.zksyncmainnet,
       },
+      {
+        target: wUSDM_ORACLE_ZKSYNC,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")),
+          1746787630,
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: wUSDM_ORACLE_ZKSYNC,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.061", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wUSDM_ZKSYNC,
+            [wUSDM_ORACLE_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: wstETHOracle_ZKSYNC,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: wstETHOracle_ZKSYNC,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.067", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wstETH_ZKSYNC,
+            [wstETHOracle_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: zkETHOracle_ZKSYNC,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")),
+          1746787651,
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: zkETHOracle_ZKSYNC,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.053", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            zkETH_ZKSYNC,
+            [zkETHOracle_ZKSYNC, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      
     ],
     meta,
     ProposalType.REGULAR,

@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -19,6 +21,8 @@ export const ACM_ARBITRUM_SEPOLIA = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F"
 export const NORMAL_TIMELOCK_ARBITRUM_SEPOLIA = "0x794BCA78E606f3a462C31e5Aba98653Efc1322F8";
 export const FASTTRACK_TIMELOCK_ARBITRUM_SEPOLIA = "0x14642991184F989F45505585Da52ca6A6a7dD4c8";
 export const CRITICAL_TIMELOCK_ARBITRUM_SEPOLIA = "0x0b32Be083f7041608E023007e7802430396a2123";
+export const weETH_Initial_Exchange_Rate = parseUnits("1.100000000000000000", 18);
+export const wstETH_Initial_Exchange_Rate = parseUnits("1.100000000000000000", 18);
 
 export const RESILIENT_ORACLE_ZKSYNC_SEPOLIA = "0x748853B3bE26c46b4562Fd314dfb82708F395bDf";
 export const CHAINLINK_ORACLE_ZKSYNC_SEPOLIA = "0x0DFf10dCdb3526010Df01ECc42076C25C27F8323";
@@ -39,7 +43,18 @@ export const ACM_ZKSYNC_SEPOLIA = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
 export const NORMAL_TIMELOCK_ZKSYNC_SEPOLIA = "0x1730527a0f0930269313D77A317361b42971a67E";
 export const FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA = "0xb055e028b27d53a455a6c040a6952e44E9E615c4";
 export const CRITICAL_TIMELOCK_ZKSYNC_SEPOLIA = "0x0E6138bE0FA1915efC73670a20A10EFd720a6Cc8";
- 
+export const wUSDM_Initial_Exchange_Rate = parseUnits("1", 18);
+export const zkETH_Initial_Exchange_Rate = parseUnits("1.005", 18);
+
+export const DAYS_30 = 30 * 24 * 60 * 60;
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  return exchangeRate.add(increaseAmount).toString();
+};
+
 export const vip499 = () => {
   const meta = {
     version: "v2",
@@ -74,32 +89,6 @@ export const vip499 = () => {
         target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_ARBITRUM_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            weETH_ARBITRUM_SEPOLIA,
-            [weETH_ORACLE_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ARBITRUM_SEPOLIA,
-            [wstETHOracle_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -157,6 +146,62 @@ export const vip499 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
+        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.53", 18), DAYS_30],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            weETH_ARBITRUM_SEPOLIA,
+            [weETH_ORACLE_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: wstETHOracle_ARBITRUM_SEPOLIA,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: wstETHOracle_ARBITRUM_SEPOLIA,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.67", 18), DAYS_30],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wstETH_ARBITRUM_SEPOLIA,
+            [wstETHOracle_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
         target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
         signature: "upgrade(address,address)",
         params: [RESILIENT_ORACLE_ZKSYNC_SEPOLIA, RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
@@ -178,45 +223,6 @@ export const vip499 = () => {
         target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_ZKSYNC_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wUSDM_ZKSYNC_SEPOLIA,
-            [wUSDM_ORACLE_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ZKSYNC_SEPOLIA,
-            [wstETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            zkETH_ZKSYNC_SEPOLIA,
-            [zkETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
@@ -271,6 +277,90 @@ export const vip499 = () => {
         target: ACM_ZKSYNC_SEPOLIA,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")),
+          1746726168,
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.061", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wUSDM_ZKSYNC_SEPOLIA,
+            [wUSDM_ORACLE_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: wstETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
+          1747682525,
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: wstETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.067", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            wstETH_ZKSYNC_SEPOLIA,
+            [wstETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: zkETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")),
+          1746726159,
+        ],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: zkETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [parseUnits("0.053", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            zkETH_ZKSYNC_SEPOLIA,
+            [zkETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
         dstChainId: LzChainId.zksyncsepolia,
       },
     ],
