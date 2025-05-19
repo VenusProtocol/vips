@@ -109,11 +109,11 @@ forking(16554222, async () => {
 
     describe("Ownership", () => {
       it(`should transfer ownership of ${weETHMarket.vToken.address} to Normal Timelock`, async () => {
-        expect(await vweETH.owner()).to.equal(unichainmainnet.timelock);
+        expect(await vweETH.owner()).to.equal(unichainmainnet.GUARDIAN);
       });
 
       it(`should transfer ownership of ${wstETHMarket.vToken.address} to Normal Timelock`, async () => {
-        expect(await vwstETH.owner()).to.equal(unichainmainnet.timelock);
+        expect(await vwstETH.owner()).to.equal(unichainmainnet.GUARDIAN);
       });
     });
 
