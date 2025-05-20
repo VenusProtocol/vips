@@ -1,163 +1,205 @@
+import { BigNumber, BigNumberish } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { LzChainId, ProposalType } from "src/types";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+import { NORMAL_TIMELOCK } from "src/vip-framework";
 
-export const RESILIENT_ORACLE_ARBITRUM_SEPOLIA = "0x6708bAd042916B47311c8078b29d7f432342102F";
-export const CHAINLINK_ORACLE_ORACLE_ARBITRUM_SEPOLIA = "0xeDd02c7FfA31490b4107e8f2c25e9198a04F9E45";
-export const REDSTONE_ORACLE_ORACLE_ARBITRUM_SEPOLIA = "0x15058891ca0c71Bd724b873c41596A682420613C";
-export const BOUND_VALIDATOR_ARBITRUM_SEPOLIA = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
-export const DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA = "0xA78A1Df376c3CEeBC5Fab574fe6EdDbbF76fd03e";
-export const RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0x992127c0cd1af5c0Ae40995193ac1adA752C12a8";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0xc8614663Cc4ee868EF5267891E177586d7105D7F";
-export const REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
-export const BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
-export const weETH_ORACLE_ARBITRUM_SEPOLIA = "0x0E2a7C58e06d4924EF74fb14222aa087ECfc14D5";
-export const weETH_ARBITRUM_SEPOLIA = "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34";
-export const wstETHOracle_ARBITRUM_SEPOLIA = "0xFfc4869368a3954A1b933AC94471f12B7e83C24a";
-export const wstETH_ARBITRUM_SEPOLIA = "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE";
+const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
+  NETWORK_ADDRESSES.bsctestnet;
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+export const USD1 = "0x7792af341a10ccc4B1CDd7B317F0460a37346a0A";
+export const VUSD1 = "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf";
+export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
-export const RESILIENT_ORACLE_ZKSYNC_SEPOLIA = "0x748853B3bE26c46b4562Fd314dfb82708F395bDf";
-export const CHAINLINK_ORACLE_ORACLE_ZKSYNC_SEPOLIA = "0x0DFf10dCdb3526010Df01ECc42076C25C27F8323";
-export const REDSTONE_ORACLE_ORACLE_ZKSYNC_SEPOLIA = "0x3af097f1Dcec172D5ECdD0D1eFA6B118FF15f152";
-export const BOUND_VALIDATOR_ZKSYNC_SEPOLIA = "0x0A4daBeF41C83Af7e30FfC33feC56ba769f3D24b";
-export const DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA = "0x18E44f588a4DcF2F7145d35A5C226e129040b6D3";
-export const RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x4eE2399B57796A94644E1dFb5e4751FaCbE05c2E";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x58d8a589c111161dBb22742BF00671BEa1e32994";
-export const REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x04D8444A4aDbE4697B2Ba6Dd7Cd174bf5a37098c";
-export const BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x66e6744104fAa55C14A6CD356eF1016E50B907df";
-export const wUSDM_ORACLE_ZKSYNC_SEPOLIA = "0xBd09B8f1cD699F97d2c4387Fb6eA87853cF2A144";
-export const wUSDM_ZKSYNC_SEPOLIA = "0x0b3C8fB109f144f6296bF4Ac52F191181bEa003a";
-export const wstETHOracle_ZKSYNC_SEPOLIA = "0xE454a8795b0077C656B4a2B4C0e72C1f3959CfCA";
-export const wstETH_ZKSYNC_SEPOLIA = "0x8507bb4F4f0915D05432011E384850B65a7FCcD1";
-export const zkETHOracle_ZKSYNC_SEPOLIA = "0x4C7cA0B8A23d6ff73D7dd1f74096D25628f90348";
-export const zkETH_ZKSYNC_SEPOLIA = "0x13231E8B60BE0900fB3a3E9dc52C2b39FA4794df";
+// Converters
+const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
+const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
+const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
+const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
+const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+export const CONVERSION_INCENTIVE = 1e14;
+
+export const converterBaseAssets = {
+  [RISK_FUND_CONVERTER]: USDT,
+  [USDT_PRIME_CONVERTER]: USDT,
+  [USDC_PRIME_CONVERTER]: USDC,
+  [BTCB_PRIME_CONVERTER]: BTCB,
+  [ETH_PRIME_CONVERTER]: ETH,
+  [XVS_VAULT_CONVERTER]: XVS,
+};
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
+
+const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
+  enum ConversionAccessibility {
+    NONE = 0,
+    ALL = 1,
+    ONLY_FOR_CONVERTERS = 2,
+    ONLY_FOR_USERS = 3,
+  }
+
+  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
+    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
+    return {
+      target: converter,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [baseAsset, fromAssets, conversionConfigs],
+    };
+  });
+};
+
+export const marketSpec = {
+  vToken: {
+    address: VUSD1,
+    name: "Venus USD1",
+    symbol: "vUSD1",
+    underlying: {
+      address: USD1,
+      decimals: 18,
+      symbol: "USD1",
+    },
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: UNITROLLER,
+    isLegacyPool: true,
+  },
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.1",
+    jumpMultiplierPerYear: "2.5",
+    kink: "0.8",
+  },
+  initialSupply: {
+    amount: parseUnits("4988.032727667459257279", 18),
+    vTokensToBurn: parseUnits("100", 8), // Approximately $100
+    vTokenReceiver: VTREASURY,
+  },
+  riskParameters: {
+    supplyCap: parseUnits("16000000", 18),
+    borrowCap: parseUnits("14400000", 18),
+    collateralFactor: parseUnits("0", 18),
+    reserveFactor: parseUnits("0.2", 18),
+  },
+};
 
 export const vip493 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-493 [BNB Chain] Add support for USD1 on Venus Core Pool",
+    description: "",
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
     [
+      // Configure Oracle
       {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_ARBITRUM_SEPOLIA, RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
+        target: REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [marketSpec.vToken.underlying.address, parseUnits("1", 18)],
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ORACLE_ARBITRUM_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ORACLE_ARBITRUM_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_ARBITRUM_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
           [
-            weETH_ARBITRUM_SEPOLIA,
-            [weETH_ORACLE_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            marketSpec.vToken.underlying.address,
+            [REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
-            false,
           ],
         ],
-        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      // Add Market
+      {
+        target: marketSpec.vToken.comptroller,
+        signature: "_supportMarket(address)",
+        params: [marketSpec.vToken.address],
       },
       {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ARBITRUM_SEPOLIA,
-            [wstETHOracle_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-
-      {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_ZKSYNC_SEPOLIA, RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.comptroller,
+        signature: "_setMarketSupplyCaps(address[],uint256[])",
+        params: [[marketSpec.vToken.address], [marketSpec.riskParameters.supplyCap]],
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ORACLE_ZKSYNC_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.comptroller,
+        signature: "_setMarketBorrowCaps(address[],uint256[])",
+        params: [[marketSpec.vToken.address], [marketSpec.riskParameters.borrowCap]],
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ORACLE_ZKSYNC_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.address,
+        signature: "setAccessControlManager(address)",
+        params: [ACCESS_CONTROL_MANAGER],
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_ZKSYNC_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.address,
+        signature: "setProtocolShareReserve(address)",
+        params: [PROTOCOL_SHARE_RESERVE],
       },
       {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wUSDM_ZKSYNC_SEPOLIA,
-            [wUSDM_ORACLE_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: [REDUCE_RESERVES_BLOCK_DELTA],
       },
       {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ZKSYNC_SEPOLIA,
-            [wstETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.address,
+        signature: "_setReserveFactor(uint256)",
+        params: [marketSpec.riskParameters.reserveFactor],
       },
       {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            zkETH_ZKSYNC_SEPOLIA,
-            [zkETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: marketSpec.vToken.underlying.address,
+        signature: "faucet(uint256)",
+        params: [marketSpec.initialSupply.amount],
       },
+      {
+        target: marketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [marketSpec.vToken.address, marketSpec.initialSupply.amount],
+      },
+      {
+        target: marketSpec.vToken.address,
+        signature: "mintBehalf(address,uint256)",
+        params: [NORMAL_TIMELOCK, marketSpec.initialSupply.amount],
+      },
+      {
+        target: marketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [marketSpec.vToken.address, 0],
+      },
+      // Burn some vtokens
+      {
+        target: marketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, marketSpec.initialSupply.vTokensToBurn],
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(marketSpec.initialSupply.amount, marketSpec.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(marketSpec.initialSupply.vTokensToBurn);
+        return {
+          target: marketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+        };
+      })(),
+      {
+        target: marketSpec.vToken.comptroller,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[marketSpec.vToken.address], [7], true],
+      },
+      ...configureConverters([marketSpec.vToken.underlying.address]),
     ],
     meta,
     ProposalType.REGULAR,

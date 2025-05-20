@@ -1,44 +1,45 @@
-import { ethers } from "hardhat";
-import { LzChainId, ProposalType } from "src/types";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const RESILIENT_ORACLE_BASE = "0xcBBf58bD5bAdE357b634419B70b215D5E9d6FbeD";
-export const CHAINLINK_ORACLE_ORACLE_BASE = "0x6F2eA73597955DB37d7C06e1319F0dC7C7455dEb";
-export const REDSTONE_ORACLE_ORACLE_BASE = "0xd101Bf51937A6718F402dA944CbfdcD12bB6a6eb";
-export const BOUND_VALIDATOR_BASE = "0x66dDE062D3DC1BB5223A0096EbB89395d1f11DB0";
-export const DEFAULT_PROXY_ADMIN_BASE = "0x7B06EF6b68648C61aFE0f715740fE3950B90746B";
-export const RESILIENT_ORACLE_IMPLEMENTATION_BASE = "0x2632b7b2b34C80B7F854722CEB6b54714476C0A6";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_BASE = "0xdA079597acD9eda0c7638534fDB43F06393Fe507";
-export const REDSTONE_ORACLE_IMPLEMENTATION_BASE = "0x08482c78427c2E83aA2EeedF06338E05a71bf925";
-export const BOUND_VALIDATOR_IMPLEMENTATION_BASE = "0xc92eefCE80e7Ca529a060C485F462C90416cA38A";
-export const wSuperOETHb_ORACLE = "0xcd1d2C99642165440c2CC023AFa2092b487f033e";
-export const wSuperOETHb = "0x7FcD174E80f264448ebeE8c88a7C4476AAF58Ea6";
-export const wstETHOracle = "0xDDD4F0836c8016E11fC6741A4886E97B3c3d20C1";
-export const wstETH = "0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452";
-
-export const RESILIENT_ORACLE_OP = "0x21FC48569bd3a6623281f55FC1F8B48B9386907b";
-export const CHAINLINK_ORACLE_OP = "0x1076e5A60F1aC98e6f361813138275F1179BEb52";
-export const REDSTONE_ORACLE_OP = "0x7478e4656F6CCDCa147B6A7314fF68d0C144751a";
-export const BOUND_VALIDATOR_OP = "0x37A04a1eF784448377a19F2b1b67cD40c09eA505";
-export const DEFAULT_PROXY_ADMIN_OP = "0xeaF9490cBEA6fF9bA1D23671C39a799CeD0DCED2";
-export const RESILIENT_ORACLE_IMPLEMENTATION_OP = "0xB4E073C5abB056D94f14f0F8748B6BFcb418fFe6";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_OP = "0x1Abf4919dE8ae2B917d553475e9B1D9CdE6E36D3";
-export const BOUND_VALIDATOR_IMPLEMENTATION_OP = "0xc04C8dFF5a91f82f5617Ee9Bd83f6d96de0eb39C";
-export const REDSTONE_ORACLE_IMPLEMENTATION_OP = "0x5e448421aB3c505AdF0E5Ee2D2fCCD80FDe08a43";
-
-export const RESILIENT_ORACLE_UNICHAIN = "0x86D04d6FE928D888076851122dc6739551818f7E";
-export const REDSTONE_ORACLE_UNICHAIN = "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc";
-export const BOUND_VALIDATOR_UNICHAIN = "0xfdaA5dEEA7850997dA8A6E2F2Ab42E60F1011C19";
-export const RESILIENT_ORACLE_IMPLEMENTATION_UNICHAIN = "0x314197e6f1664C141F90403c990b668e50460315";
-export const REDSTONE_ORACLE_IMPLEMENTATION_UNICHAIN = "0x477FB8C53b0c9A2B18295BBA7B1dF41356fC09D0";
-export const BOUND_VALIDATOR_IMPLEMENTATION_UNICHAIN = "0x287F0f107ab4a5066bd257d684AFCc09c8d31Bde";
-export const DEFAULT_PROXY_ADMIN_UNICHAIN = "0x78e9fff2ab8daAB8559070d897C399E5e1C5074c";
+export const BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const vip492 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
+    title: "VIP-492 [BNB Chain] Configure Binance Oracle as the Fallback oracle for BNB on BNB Chain",
+    description: `#### Summary
+
+If passed, following the community proposal “[Proposal: Increase robustness of feeds configuration](https://community.venus.io/t/proposal-increase-robustness-of-feeds-configuration/4837)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xac3ec7729cce1cc99aa5b16d08ae1908a84ddbb25c4cc6ae22fd5e3722311dd9)), this VIP will set Binance Oracle as the fallback oracle for BNB on BNB Chain, instead of Chainlink, which will remain as the pivot oracle.
+
+#### Description
+
+The current Resilient Oracle setup for BNB on BNB Chain is:
+
+- MAIN - [RedStone oracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a)
+- PIVOT - [Chainlink oracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+- FALLBACK - [Chainlink oracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+
+The proposed Oracle setup for BNB on BNB Chain is:
+
+- MAIN - [RedStone oracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a)
+- PIVOT - [Chainlink oracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F)
+- FALLBACK - [Binance oracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820)
+
+[Chaos Labs reviewed and accepted this change](https://community.venus.io/t/proposal-increase-robustness-of-feeds-configuration/4837/8). It should increase the robustness of the protocol, by relying on multiple providers acting in three different roles (main, pivot and fallback).
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the BNB price returned by the Resilient Oracle is the same before and after the VIP execution, and the expected behavior if any of the three oracles fail or provide a significantly different price
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/465)
+- [BNB/USD price feed information on Binance Oracle](https://oracle.binance.com/data-feeds/detail/bsc/BNB-USD)
+- [Documentation about Resilient Oracle](https://docs-v4.venus.io/risk/resilient-price-oracle)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -47,96 +48,20 @@ export const vip492 = () => {
   return makeProposal(
     [
       {
-        target: DEFAULT_PROXY_ADMIN_BASE,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_BASE, RESILIENT_ORACLE_IMPLEMENTATION_BASE],
-        dstChainId: LzChainId.basemainnet,
+        target: bscmainnet.BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["BNB", "100"],
       },
       {
-        target: DEFAULT_PROXY_ADMIN_BASE,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ORACLE_BASE, CHAINLINK_ORACLE_IMPLEMENTATION_BASE],
-        dstChainId: LzChainId.basemainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_BASE,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ORACLE_BASE, REDSTONE_ORACLE_IMPLEMENTATION_BASE],
-        dstChainId: LzChainId.basemainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_BASE,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_BASE, BOUND_VALIDATOR_IMPLEMENTATION_BASE],
-        dstChainId: LzChainId.basemainnet,
-      },
-      {
-        target: RESILIENT_ORACLE_BASE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
           [
-            wSuperOETHb,
-            [wSuperOETHb_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            BNB,
+            [bscmainnet.REDSTONE_ORACLE, bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE],
+            [true, true, true],
           ],
         ],
-        dstChainId: LzChainId.basemainnet,
-      },
-      {
-        target: RESILIENT_ORACLE_BASE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH,
-            [wstETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.basemainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_OP,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_OP, RESILIENT_ORACLE_IMPLEMENTATION_OP],
-        dstChainId: LzChainId.opmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_OP,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_OP, CHAINLINK_ORACLE_IMPLEMENTATION_OP],
-        dstChainId: LzChainId.opmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_OP,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_OP, BOUND_VALIDATOR_IMPLEMENTATION_OP],
-        dstChainId: LzChainId.opmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_OP,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_OP, REDSTONE_ORACLE_IMPLEMENTATION_OP],
-        dstChainId: LzChainId.opmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_UNICHAIN,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_UNICHAIN, RESILIENT_ORACLE_IMPLEMENTATION_UNICHAIN],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_UNICHAIN,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_UNICHAIN, REDSTONE_ORACLE_IMPLEMENTATION_UNICHAIN],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_UNICHAIN,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_UNICHAIN, BOUND_VALIDATOR_IMPLEMENTATION_UNICHAIN],
-        dstChainId: LzChainId.unichainmainnet,
       },
     ],
     meta,
