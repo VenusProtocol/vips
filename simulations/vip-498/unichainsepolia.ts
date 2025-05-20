@@ -3,12 +3,13 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, NORMAL_TIMELOCK, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip498, { COMPTROLLER_CORE, weETHMarket, wstETHMarket } from "../../vips/vip-498/bsctestnet";
+import bsctestnet1 from "../../vips/vip-498/bsctestnet-1";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
@@ -19,7 +20,7 @@ const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-forking(20467197, async () => {
+forking(20881282, async () => {
   let comptroller: Contract;
 
   describe("Contracts setup", () => {
@@ -27,6 +28,7 @@ forking(20467197, async () => {
     checkVToken(wstETHMarket.vToken.address, wstETHMarket.vToken);
   });
 
+  testForkedNetworkVipCommands("Oracle setup", await bsctestnet1());
   testForkedNetworkVipCommands("add weETH and wstETH market", await vip498());
 
   describe("Post-Execution state", () => {
@@ -52,12 +54,12 @@ forking(20467197, async () => {
     });
 
     describe("Ownership", () => {
-      it(`should transfer ownership of ${weETHMarket.vToken.address} to GUARDIAN`, async () => {
-        expect(await vweETH.owner()).to.equal(GUARDIAN);
+      it(`should transfer ownership of ${weETHMarket.vToken.address} to NORMAL_TIMELOCK`, async () => {
+        expect(await vweETH.owner()).to.equal(NORMAL_TIMELOCK);
       });
 
-      it(`should transfer ownership of ${wstETHMarket.vToken.address} to GUARDIAN`, async () => {
-        expect(await vwstETH.owner()).to.equal(GUARDIAN);
+      it(`should transfer ownership of ${wstETHMarket.vToken.address} to NORMAL_TIMELOCK`, async () => {
+        expect(await vwstETH.owner()).to.equal(NORMAL_TIMELOCK);
       });
     });
 

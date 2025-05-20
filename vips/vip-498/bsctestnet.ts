@@ -1,15 +1,16 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
 export const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
-export const WETH_ORACLE = "0xB5Ea3749E32757189B2fDFCbe9Cf09489f7eA888";
-export const WSTETH_ORACLE = "0x435BBC3aAc204423a223a98692A03Eb5b10789AE";
+export const WETH_ORACLE = "0xa980158116316d0759C56D7E812D7D8cEf18B425";
+export const WSTETH_ORACLE = "0x555bD5dc1dCf87EEcC39778C3ba9DDCc40dF05c0";
+// export const ACM = "0x854C064EA6b503A97980F481FA3B7279012fdeDd";
 
 export const CONVERSION_INCENTIVE = parseUnits("1", 14);
 
@@ -70,7 +71,7 @@ type Market = {
 
 export const weETHMarket: Market = {
   vToken: {
-    address: "0xD557C78B798047252896DDa4B930979564cB2705",
+    address: "0xF46F0E1Fe165018EC778e0c61a71661f55aEa09B",
     name: "Venus weETH (Core)",
     symbol: "vweETH_Core",
     underlying: weETH,
@@ -102,7 +103,7 @@ export const weETHMarket: Market = {
 
 export const wstETHMarket: Market = {
   vToken: {
-    address: "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB",
+    address: "0xb24c9a851542B4599Eb6C1644ce2e245074c885f",
     name: "Venus wstETH (Core)",
     symbol: "vwstETH_Core",
     underlying: wstETH,
@@ -146,6 +147,11 @@ const vip498 = () => {
     [
       // <--- weETH Market --->
       // oracle config
+      // {
+      //   target: ACM,
+      //   signature: "giveCallPermission(address,string,address)",
+      //   params: [ZERO_ADDRESS, "setTokenConfig((address,address[3],bool[3]))", unichainsepolia.NORMAL_TIMELOCK],
+      // },
       {
         target: unichainsepolia.REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
