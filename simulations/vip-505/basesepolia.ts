@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip500, { ERC4626_FACTORY_BASE } from "../../vips/vip-500/bsctestnet";
+import vip505, { ERC4626_FACTORY_BASE } from "../../vips/vip-505/bsctestnet";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
 const { basesepolia } = NETWORK_ADDRESSES;
@@ -35,7 +35,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip500(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip505(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ERC4626FACTORY_ABI], ["OwnershipTransferred"], [1]);
     },
