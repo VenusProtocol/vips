@@ -153,14 +153,15 @@ const vip501 = () => {
       // Oracle config
       {
         target: unichainmainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[weETH.address, WEETH_REDSTONE_FEED, STALE_PERIOD_26H]],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[wstETH.address, WSTETH_REDSTONE_FEED, STALE_PERIOD_26H]],
+        signature: "setTokenConfigs((address,address,uint256)[])",
+        params: [
+          [
+            // weETH config
+            [weETH.address, WEETH_REDSTONE_FEED, STALE_PERIOD_26H],
+            // wstETH config
+            [wstETH.address, WSTETH_REDSTONE_FEED, STALE_PERIOD_26H],
+          ],
+        ],
         dstChainId: LzChainId.unichainmainnet,
       },
       {
