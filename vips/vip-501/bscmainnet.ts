@@ -158,14 +158,30 @@ const vip501 = () => {
         dstChainId: LzChainId.unichainmainnet,
       },
       {
+        target: unichainmainnet.REDSTONE_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[wstETH.address, WSTETH_REDSTONE_FEED, STALE_PERIOD_26H]],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
         target: unichainmainnet.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
           [
-            weETH.address,
-            [WEETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            // weETH config
+            [
+              weETH.address,
+              [WEETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
+            // wstETH config
+            [
+              wstETH.address,
+              [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
           ],
         ],
         dstChainId: LzChainId.unichainmainnet,
@@ -234,27 +250,6 @@ const vip501 = () => {
       })(),
 
       // <--- wstETH Market --->
-      // oracle config
-      {
-        target: unichainmainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[wstETH.address, WSTETH_REDSTONE_FEED, STALE_PERIOD_26H]],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH.address,
-            [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-
       // Market configurations
       {
         target: wstETHMarket.vToken.address,

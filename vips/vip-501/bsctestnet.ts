@@ -8,7 +8,7 @@ import { makeProposal } from "src/utils";
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
 export const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
-export const WETH_ORACLE = "0xa980158116316d0759C56D7E812D7D8cEf18B425";
+export const WEETH_ORACLE = "0xa980158116316d0759C56D7E812D7D8cEf18B425";
 export const WSTETH_ORACLE = "0x555bD5dc1dCf87EEcC39778C3ba9DDCc40dF05c0";
 
 export const CONVERSION_INCENTIVE = parseUnits("1", 14);
@@ -153,14 +153,30 @@ const vip501 = () => {
         dstChainId: LzChainId.unichainsepolia,
       },
       {
+        target: unichainsepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [wstETH.address, parseUnits("1", 18)],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
         target: unichainsepolia.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
           [
-            weETH.address,
-            [WETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            // weETH config
+            [
+              weETH.address,
+              [WEETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
+            // wstETH config
+            [
+              wstETH.address,
+              [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
           ],
         ],
         dstChainId: LzChainId.unichainsepolia,
@@ -191,7 +207,6 @@ const vip501 = () => {
         params: [unichainsepolia.POOL_REGISTRY, weETHMarket.initialSupply.amount],
         dstChainId: LzChainId.unichainsepolia,
       },
-
       {
         target: unichainsepolia.POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
@@ -225,28 +240,7 @@ const vip501 = () => {
         };
       })(),
 
-      //   // <--- wstETH Market --->
-      //   // oracle config
-      {
-        target: unichainsepolia.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [wstETH.address, parseUnits("1", 18)],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-      {
-        target: unichainsepolia.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH.address,
-            [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.unichainsepolia,
-      },
-
+      // <--- wstETH Market --->
       // Market configurations
       {
         target: wstETHMarket.vToken.address,
