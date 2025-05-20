@@ -1,147 +1,40 @@
-import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { LzChainId, ProposalType } from "src/types";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { unichainmainnet } = NETWORK_ADDRESSES;
+export const vSOL = "0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC";
+export const vSOL_SUPPLY_CAP = parseUnits("72000", 18);
+export const COMPTROLLER_CORE = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
-export const COMPTROLLER_CORE = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
-export const WEETH_REDSTONE_FEED = "0xBf3bA2b090188B40eF83145Be0e9F30C6ca63689";
-export const WSTETH_REDSTONE_FEED = "0xC3346631E0A9720582fB9CAbdBEA22BC2F57741b";
-export const WEETH_ORACLE = "0xa8f62DE954852c39BC66ff9B103c8D4758982309";
-export const WSTETH_ORACLE = "0xD557C78B798047252896DDa4B930979564cB2705";
-export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
-
-const STALE_PERIOD_26H = 26 * 60 * 60; // heartbeat of 24H
-export const CONVERSION_INCENTIVE = parseUnits("1", 14);
-
-export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
-  const EXP_SCALE = parseUnits("1", 18);
-  return amount.mul(EXP_SCALE).div(exchangeRate);
-};
-
-type Token = {
-  address: string;
-  decimals: number;
-  symbol: string;
-};
-
-export const weETH: Token = {
-  address: "0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7",
-  decimals: 18,
-  symbol: "weETH",
-};
-
-export const wstETH: Token = {
-  address: "0xc02fE7317D4eb8753a02c35fe019786854A92001",
-  decimals: 18,
-  symbol: "wstETH",
-};
-
-type Market = {
-  vToken: {
-    address: string;
-    name: string;
-    symbol: string;
-    underlying: Token;
-    decimals: number;
-    exchangeRate: BigNumber;
-    comptroller: string;
-  };
-  riskParameters: {
-    collateralFactor: BigNumber;
-    liquidationThreshold: BigNumber;
-    supplyCap: BigNumber;
-    borrowCap: BigNumber;
-    reserveFactor: BigNumber;
-    protocolSeizeShare: BigNumber;
-  };
-  initialSupply: {
-    amount: BigNumber;
-    vTokensToBurn: BigNumber;
-    vTokenReceiver: string;
-  };
-  interestRateModel: {
-    address: string;
-    base: string;
-    multiplier: string;
-    jump: string;
-    kink: string;
-  };
-};
-
-export const weETHMarket: Market = {
-  vToken: {
-    address: "0xd16b6f7f5b51e402fC1190dc6fc990a2a6ED794f",
-    name: "Venus weETH (Core)",
-    symbol: "vweETH_Core",
-    underlying: weETH,
-    decimals: 8,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: COMPTROLLER_CORE,
-  },
-  riskParameters: {
-    collateralFactor: parseUnits("0.7", 18),
-    liquidationThreshold: parseUnits("0.75", 18),
-    supplyCap: parseUnits("4000", 18),
-    borrowCap: parseUnits("400", 18),
-    reserveFactor: parseUnits("0.4", 18),
-    protocolSeizeShare: parseUnits("0.05", 18),
-  },
-  initialSupply: {
-    amount: parseUnits("3.614915477041407445", 18),
-    vTokensToBurn: parseUnits("0.03694", 8), // around $100
-    vTokenReceiver: unichainmainnet.VTREASURY,
-  },
-  interestRateModel: {
-    address: "0xc2edB1e96e45178b901618B96142C2743Ed0e7B3",
-    base: "0",
-    multiplier: "0.09",
-    jump: "3",
-    kink: "0.45",
-  },
-};
-
-export const wstETHMarket: Market = {
-  vToken: {
-    address: "0x3B3aCc90D848981E69052FD461123EA19dca6cAF",
-    name: "Venus wstETH (Core)",
-    symbol: "vwstETH_Core",
-    underlying: wstETH,
-    decimals: 8,
-    exchangeRate: parseUnits("1", 28),
-    comptroller: COMPTROLLER_CORE,
-  },
-  riskParameters: {
-    collateralFactor: parseUnits("0.7", 18),
-    liquidationThreshold: parseUnits("0.725", 18),
-    supplyCap: parseUnits("14000", 18),
-    borrowCap: parseUnits("7000", 18),
-    reserveFactor: parseUnits("0.25", 18),
-    protocolSeizeShare: parseUnits("0.05", 18),
-  },
-  initialSupply: {
-    amount: parseUnits("3.208916246034338443", 18),
-    vTokensToBurn: parseUnits("0.03309", 8), // around $100
-    vTokenReceiver: unichainmainnet.VTREASURY,
-  },
-  interestRateModel: {
-    address: "0x5C7D8858a25778d992eE803Ce79F1eff60c1d9D1",
-    base: "0",
-    multiplier: "0.15",
-    jump: "3",
-    kink: "0.45",
-  },
-};
+export const VBNB_ADMIN = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
+export const NEW_IR = "0x939c9458Bee63Bc21031be3d56dDD30Af7f2230A";
 
 const vip498 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-498 [Unichain] Add weETH and wstETH markets to the Core pool",
-    description: "",
+    title: "VIP-498 [BNB Chain] Risk Parameters Adjustments (BNB, SOL)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publications [Chaos Labs - BNB Interest Rate Updates 05/16/25](https://community.venus.io/t/chaos-labs-bnb-interest-rate-updates-05-16-25/5111) and [Chaos Labs - Risk Parameter Updates - 05/16/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-05-16-25/5110):
+
+- [BNB (Core pool)](https://bscscan.com/address/0xA07c5b74C9B40447a954e1466938b865b6BBea36): update the interest rate contract with another TwoKinksInterestRate contract, with the following attributes:
+    - First slope:
+        - Kink: 0.65 (from 0.8)
+        - Base rate: 0
+        - Multiplier: 0.045 (from 0.035)
+    - Second slope:
+        - Kink: 0.8 (from 0.9)
+        - Base: 0
+        - Multiplier: 1.4 (from 1.75)
+    - Jump multiplier: 3
+- [SOL (Core pool)](https://bscscan.com/address/0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC): increase the supply cap from 36,000 SOL to 72,000 SOL
+
+Complete analysis and details of these recommendations are available in the above publications.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/562)
+- [New Interest Rate contract for the vBNB market](https://github.com/VenusProtocol/venus-protocol/pull/592)
+- Source code of [TwoKinksInterestRateModel smart contract](https://github.com/VenusProtocol/venus-protocol/blob/main/contracts/InterestRateModels/TwoKinksInterestRateModel.sol)
+- [Documentation about TwoKinksInterestRate](https://docs-v4.venus.io/technical-reference/reference-technical-articles/two-kinks-interest-rate-curve)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -149,195 +42,19 @@ const vip498 = () => {
 
   return makeProposal(
     [
-      // <--- weETH Market --->
-      // Oracle config
       {
-        target: unichainmainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[weETH.address, WEETH_REDSTONE_FEED, STALE_PERIOD_26H]],
-        dstChainId: LzChainId.unichainmainnet,
+        target: COMPTROLLER_CORE,
+        signature: "_setMarketSupplyCaps(address[],uint256[])",
+        params: [[vSOL], [vSOL_SUPPLY_CAP]],
       },
       {
-        target: unichainmainnet.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            weETH.address,
-            [WEETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-          ],
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-
-      // Market configurations
-      {
-        target: weETHMarket.vToken.address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["86400"],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [
-          weETHMarket.vToken.underlying.address,
-          weETHMarket.initialSupply.amount,
-          unichainmainnet.NORMAL_TIMELOCK,
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: weETH.address,
-        signature: "approve(address,uint256)",
-        params: [unichainmainnet.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: weETH.address,
-        signature: "approve(address,uint256)",
-        params: [unichainmainnet.POOL_REGISTRY, weETHMarket.initialSupply.amount],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.POOL_REGISTRY,
-        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-        params: [
-          [
-            weETHMarket.vToken.address,
-            weETHMarket.riskParameters.collateralFactor, // CF
-            weETHMarket.riskParameters.liquidationThreshold, // LT
-            weETHMarket.initialSupply.amount, // initial supply
-            unichainmainnet.NORMAL_TIMELOCK, // vToken receiver
-            weETHMarket.riskParameters.supplyCap, // supply cap
-            weETHMarket.riskParameters.borrowCap, // borrow cap
-          ],
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: weETHMarket.vToken.address,
-        signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, weETHMarket.initialSupply.vTokensToBurn],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(weETHMarket.initialSupply.amount, weETHMarket.vToken.exchangeRate);
-        const vTokensRemaining = vTokensMinted.sub(weETHMarket.initialSupply.vTokensToBurn);
-        return {
-          target: weETHMarket.vToken.address,
-          signature: "transfer(address,uint256)",
-          params: [weETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
-          dstChainId: LzChainId.unichainmainnet,
-        };
-      })(),
-      {
-        target: weETHMarket.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [weETHMarket.riskParameters.protocolSeizeShare],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-
-      // <--- wstETH Market --->
-      // oracle config
-      {
-        target: unichainmainnet.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[wstETH.address, WSTETH_REDSTONE_FEED, STALE_PERIOD_26H]],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [
-            wstETH.address,
-            [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-          ],
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-
-      // Market configurations
-      {
-        target: wstETHMarket.vToken.address,
-        signature: "setReduceReservesBlockDelta(uint256)",
-        params: ["86400"],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: unichainmainnet.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [
-          wstETHMarket.vToken.underlying.address,
-          wstETHMarket.initialSupply.amount,
-          unichainmainnet.NORMAL_TIMELOCK,
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: wstETH.address,
-        signature: "approve(address,uint256)",
-        params: [unichainmainnet.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: wstETH.address,
-        signature: "approve(address,uint256)",
-        params: [unichainmainnet.POOL_REGISTRY, wstETHMarket.initialSupply.amount],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-
-      {
-        target: unichainmainnet.POOL_REGISTRY,
-        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
-        params: [
-          [
-            wstETHMarket.vToken.address,
-            wstETHMarket.riskParameters.collateralFactor, // CF
-            wstETHMarket.riskParameters.liquidationThreshold, // LT
-            wstETHMarket.initialSupply.amount, // initial supply
-            unichainmainnet.NORMAL_TIMELOCK, // vToken receiver
-            wstETHMarket.riskParameters.supplyCap, // supply cap
-            wstETHMarket.riskParameters.borrowCap, // borrow cap
-          ],
-        ],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: wstETHMarket.vToken.address,
-        signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, wstETHMarket.initialSupply.vTokensToBurn],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(
-          wstETHMarket.initialSupply.amount,
-          wstETHMarket.vToken.exchangeRate,
-        );
-        const vTokensRemaining = vTokensMinted.sub(wstETHMarket.initialSupply.vTokensToBurn);
-        return {
-          target: wstETHMarket.vToken.address,
-          signature: "transfer(address,uint256)",
-          params: [wstETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
-          dstChainId: LzChainId.unichainmainnet,
-        };
-      })(),
-      {
-        target: wstETHMarket.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [wstETHMarket.riskParameters.protocolSeizeShare],
-        dstChainId: LzChainId.unichainmainnet,
-      },
-      {
-        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("20000", 18), VANGUARD_TREASURY],
+        target: VBNB_ADMIN,
+        signature: "setInterestRateModel(address)",
+        params: [NEW_IR],
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 
