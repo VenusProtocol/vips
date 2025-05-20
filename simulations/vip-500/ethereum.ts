@@ -14,98 +14,99 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 const { ethereum } = NETWORK_ADDRESSES;
 
 const prices = [
-  // {
-  //   symbol: "vBAL",
-  //   address: "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8",
-  //   expectedPrice: parseUnits("1.12564575", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vCRV",
-  //   address: "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa",
-  //   expectedPrice: parseUnits("0.70213902", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vcrvUSD",
-  //   address: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
-  //   expectedPrice: parseUnits("0.99979988", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vDAI",
-  //   address: "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657",
-  //   expectedPrice: parseUnits("1.00005", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "veBTC",
-  //   address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2",
-  //   expectedPrice: parseUnits("103938.73", 28),
-  // },
-  // {
-  //   symbol: "vEIGEN",
-  //   address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e",
-  //   expectedPrice: parseUnits("1.3293277", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vFRAX",
-  //   address: "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95",
-  //   expectedPrice: parseUnits("1.00003279", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vLBTC",
-  //   address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91",
-  //   expectedPrice: parseUnits("103938.73", 28),
-  // },
-  // {
-  //   symbol: "vsFRAX",
-  //   address: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe",
-  //   expectedPrice: parseUnits("1.127837555520517443", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
+  {
+    symbol: "vBAL",
+    address: "0x0Ec5488e4F8f319213a14cab188E01fB8517Faa8",
+    expectedPrice: parseUnits("1.12564575", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vCRV",
+    address: "0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa",
+    expectedPrice: parseUnits("0.70213902", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vcrvUSD",
+    address: "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
+    expectedPrice: parseUnits("0.99979988", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vDAI",
+    address: "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657",
+    expectedPrice: parseUnits("1.00005", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "veBTC",
+    address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2",
+    expectedPrice: parseUnits("103938.73", 28),
+  },
+  {
+    symbol: "vEIGEN",
+    address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e",
+    expectedPrice: parseUnits("1.3293277", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vFRAX",
+    address: "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95",
+    expectedPrice: parseUnits("1.00003279", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vLBTC",
+    address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91",
+    expectedPrice: parseUnits("103938.73", 28),
+  },
+  {
+    symbol: "vsFRAX",
+    address: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe",
+    expectedPrice: parseUnits("1.127837555520517443", 18),
+    expectedPriceAfterVIP: parseUnits("1.128116619261278065", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
   {
     symbol: "vsUSDS",
     address: "0xE36Ae842DbbD7aE372ebA02C8239cd431cC063d6",
     expectedPrice: parseUnits("1.051536072541156975", 18),
-    expectedPriceAfterVIP: parseUnits("1.051789872654750758", 18),
+    expectedPriceAfterVIP: parseUnits("1.051790909100565227", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract("0xdC035D45d973E3EC169d2276DDab16f1e407384F", ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -192,7 +193,7 @@ const prices = [
     symbol: "vyvUSDC",
     address: "0xf87c0a64dc3a8622D6c63265FA29137788163879",
     expectedPrice: parseUnits("1.06154936228", 30),
-    expectedPriceAfterVIP: parseUnits("1.06172733736", 30),
+    expectedPriceAfterVIP: parseUnits("1.06172833722", 30),
   },
   {
     symbol: "vyvUSDT",
@@ -204,7 +205,7 @@ const prices = [
     symbol: "vyvUSDS",
     address: "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764",
     expectedPrice: parseUnits("1.047039175055351090", 18),
-    expectedPriceAfterVIP: parseUnits("1.047150053770318109", 18),
+    expectedPriceAfterVIP: parseUnits("1.03907222496", 18),
   },
   {
     symbol: "vyvWETH",
@@ -221,69 +222,69 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  // {
-  //   symbol: "vPT-USDe",
-  //   address: "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B",
-  //   expectedPrice: parseUnits("1.00096201", 18),
-  // },
-  // {
-  //   symbol: "vsUSDe",
-  //   address: "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0",
-  //   expectedPrice: parseUnits("1.173088328209851945", 18),
-  // },
-  // {
-  //   symbol: "vezETH",
-  //   address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
-  //   expectedPrice: parseUnits("2709.39746961216088", 18),
-  // },
-  // {
-  //   symbol: "vPT-weETH",
-  //   address: "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C",
-  //   expectedPrice: parseUnits("2586.318602", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vpufETH",
-  //   address: "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
-  //   expectedPrice: parseUnits("2705.48522305247354", 18),
-  // },
-  // {
-  //   symbol: "vrsETH",
-  //   address: "0xDB6C345f864883a8F4cae87852Ac342589E76D1B",
-  //   expectedPrice: parseUnits("2697.6624627665622", 18),
-  // },
-  // {
-  //   symbol: "vsfrxETH",
-  //   address: "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E",
-  //   expectedPrice: parseUnits("2911.810069620383749887", 18),
-  // },
-  // {
-  //   symbol: "vweETH",
-  //   address: "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
-  //   expectedPrice: parseUnits("2761.232027272503848846", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vwstETH",
-  //   address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
-  //   expectedPrice: parseUnits("3110.812104367399455347", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
+  {
+    symbol: "vPT-USDe",
+    address: "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B",
+    expectedPrice: parseUnits("1.00096201", 18),
+  },
+  {
+    symbol: "vsUSDe",
+    address: "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0",
+    expectedPrice: parseUnits("1.173088328209851945", 18),
+  },
+  {
+    symbol: "vezETH",
+    address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
+    expectedPrice: parseUnits("2709.39746961216088", 18),
+  },
+  {
+    symbol: "vPT-weETH",
+    address: "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C",
+    expectedPrice: parseUnits("2586.318602", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vpufETH",
+    address: "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
+    expectedPrice: parseUnits("2705.48522305247354", 18),
+  },
+  {
+    symbol: "vrsETH",
+    address: "0xDB6C345f864883a8F4cae87852Ac342589E76D1B",
+    expectedPrice: parseUnits("2697.6624627665622", 18),
+  },
+  {
+    symbol: "vsfrxETH",
+    address: "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E",
+    expectedPrice: parseUnits("2911.810069620383749887", 18),
+  },
+  {
+    symbol: "vweETH",
+    address: "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
+    expectedPrice: parseUnits("2761.232027272503848846", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vwstETH",
+    address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
+    expectedPrice: parseUnits("3110.812104367399455347", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
 ]
 
 forking(22497078, async () => {
