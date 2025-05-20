@@ -6,8 +6,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { WETH_ORACLE, WSTETH_ORACLE, vip500, weETH, wstETH } from "../../vips/vip-500/bsctestnet";
+import ORACLE_ABI from "./abi/Oracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import ORACLE_ABI from "./abi/oracle.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 

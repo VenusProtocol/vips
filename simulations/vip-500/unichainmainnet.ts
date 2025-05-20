@@ -7,8 +7,8 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip497 from "../../vips/vip-497/bscmainnet";
 import { WETH_ORACLE, WSTETH_ORACLE, vip500, weETH, wstETH } from "../../vips/vip-500/bscmainnet";
+import ORACLE_ABI from "./abi/Oracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import ORACLE_ABI from "./abi/oracle.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
