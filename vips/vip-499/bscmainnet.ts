@@ -160,7 +160,7 @@ export const vip499 = () => {
       {
         target: weETH_ORACLE_ARBITRUM,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.044", 18)],
+        params: [parseUnits("0.0044", 18)],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -191,7 +191,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ARBITRUM,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.055", 18)],
+        params: [parseUnits("0.0055", 18)],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -301,7 +301,7 @@ export const vip499 = () => {
       {
         target: wUSDM_ORACLE_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.049", 18)],
+        params: [parseUnits("0.0049", 18)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -332,7 +332,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.055", 18)],
+        params: [parseUnits("0.0055", 18)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -357,13 +357,13 @@ export const vip499 = () => {
       {
         target: zkETHOracle_ZKSYNC,
         signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.053", 18), DAYS_30],
+        params: [parseUnits("0.073", 18), DAYS_30],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
         target: zkETHOracle_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.044", 18)],
+        params: [parseUnits("0.0044", 18)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
