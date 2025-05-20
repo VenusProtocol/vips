@@ -42,7 +42,7 @@ export const yvUSDS_SEPOLIA = "0xC6A0e98B8D9E9F1160E9cE1f2E0172F41FB06BC2";
 export const yvWETHOracle_SEPOLIA = "0x8062dC1b38c0b2CF6188dF605B19cFF3c4dc9b29";
 export const yvWETH_SEPOLIA = "0x99AD7ecf9b1C5aC2A11BB00D7D8a7C54fCd41517";
 
-export const vip494 = () => {
+export const vip500 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -266,4 +266,4 @@ export const vip494 = () => {
   );
 };
 
-export default vip494;
+export default vip500;

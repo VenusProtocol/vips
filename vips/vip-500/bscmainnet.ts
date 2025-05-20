@@ -34,7 +34,7 @@ export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const sUSDSOracle = "0x4bfEB803d1156453198f2820450A2B64301e9E4C";
 export const sUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
 export const yvUSDCOracle = "0x74E7b5D3eD9b80473D5B28a6bd11C9C7E510b284";
-export const yvUSDC = "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204";
+export const yvUSDC = "0xBe53A109B500E5c9f97b9Cd39Fe969BE68BF6204";
 export const yvUSDTOracle = "0x0011b8A451DC619Dc39f5cB968A9dce329246FCF";
 export const yvUSDT = "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa";
 export const yvUSDSOracle = "0x3Bd4E87c0BD4FF33261D39fd0d5b1c9Cc468bBb5";
@@ -42,7 +42,7 @@ export const yvUSDS = "0x182863131F9a4630fF9E27830d945B1413e347E8";
 export const yvWETHOracle = "0xC14a07b33a49b2e663ACBC2DDc6e34d9e5ea1Ab8";
 export const yvWETH = "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0";
 
-export const vip494 = () => {
+export const vip500 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -266,4 +266,4 @@ export const vip494 = () => {
   );
 };
 
-export default vip494;
+export default vip500;

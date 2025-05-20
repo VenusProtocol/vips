@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip494, { RESILIENT_ORACLE } from "../../vips/vip-494/bscmainnet";
+import vip500, { RESILIENT_ORACLE } from "../../vips/vip-500/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -204,7 +204,7 @@ const prices = [
     symbol: "vyvUSDS",
     address: "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764",
     expectedPrice: parseUnits("1.047039175055351090", 18),
-    expectedPriceAfterVIP: parseUnits("1.047149453770318109", 18),
+    expectedPriceAfterVIP: parseUnits("1.047150053770318109", 18),
   },
   {
     symbol: "vyvWETH",
@@ -301,7 +301,7 @@ forking(22497078, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip494", await vip494());
+  testForkedNetworkVipCommands("vip500", await vip500());
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {
