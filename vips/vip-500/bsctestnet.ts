@@ -7,6 +7,7 @@ export const ERC4626_FACTORY_BASE = "0xD13c5527d1a2a8c2cC9c9eb260AC4D9D811a02a4"
 export const ERC4626_FACTORY_ARBITRUM = "0xC6C8249a0B44973673f3Af673e530B85038a0480";
 export const ERC4626_FACTORY_OPTIMISIM = "0xc66c4058A8524253C22a9461Df6769CE09F7d61e";
 export const ERC4626_FACTORY_UNICHAIN = "0x1365820B9ba3B1b5601208437a5A24192a12C1fB";
+export const ERC4626_FACTORY_ZKSYNC = "0xa30dcc21B8393A4031cD6364829CDfE2b6D7B283";
 
 export const vip500 = () => {
   const meta = {
@@ -55,6 +56,12 @@ export const vip500 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.basesepolia,
+      },
+      {
+        target: ERC4626_FACTORY_ZKSYNC,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.zksyncsepolia,
       },
     ],
     meta,
