@@ -1,30 +1,41 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NORMAL_TIMELOCK, forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip500 from "../../vips/vip-500/bsctestnet";
-import vip501, { COMPTROLLER_CORE, weETHMarket, wstETHMarket } from "../../vips/vip-501/bsctestnet";
+import vip501, {
+  COMPTROLLER_CORE,
+  DAYS_30,
+  WEETH_ORACLE,
+  WSTETH_ORACLE,
+  exchangeRatePercentage,
+  increaseExchangeRateByPercentage,
+  weETHMarket,
+  wstETHMarket,
+} from "../../vips/vip-501/bsctestnet";
+import CORRELATED_TOKEN_ORACLE_ABI from "./abi/CorrelatedTokenOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 
+const ONE_YEAR = 31536000;
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
 forking(20881282, async () => {
   let comptroller: Contract;
+  let oracle: Contract;
 
   describe("Contracts setup", () => {
     checkVToken(weETHMarket.vToken.address, weETHMarket.vToken);
     checkVToken(wstETHMarket.vToken.address, wstETHMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("Oracle setup", await vip500());
   testForkedNetworkVipCommands("add weETH and wstETH market", await vip501());
 
   describe("Post-Execution state", () => {
@@ -35,6 +46,7 @@ forking(20881282, async () => {
       vweETH = await ethers.getContractAt(VTOKEN_ABI, weETHMarket.vToken.address);
       vwstETH = await ethers.getContractAt(VTOKEN_ABI, wstETHMarket.vToken.address);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+      oracle = await ethers.getContractAt(PRICE_ORACLE_ABI, await comptroller.oracle());
     });
 
     describe("PoolRegistry state", () => {
@@ -146,6 +158,79 @@ forking(20881282, async () => {
           );
         });
       });
+    });
+
+    describe("Prices", () => {
+      it("get correct price from oracle for weETH", async () => {
+        const price = await oracle.getUnderlyingPrice(weETHMarket.vToken.address);
+        expect(price).to.equal(parseUnits("2534.7277552", 18));
+      });
+
+      it("get correct price from oracle for wstETH", async () => {
+        const price = await oracle.getUnderlyingPrice(wstETHMarket.vToken.address);
+        expect(price).to.equal(parseUnits("2534.7277552", 18));
+      });
+    });
+
+    describe("Capped oracles", () => {
+      for (const oracleConfigs of [
+        {
+          underlyingSymbol: "weETH",
+          oracleAddres: WEETH_ORACLE,
+          expectedConfiguration: weETHMarket.cappedOracles,
+        },
+        {
+          underlyingSymbol: "wstETH",
+          oracleAddres: WSTETH_ORACLE,
+          expectedConfiguration: wstETHMarket.cappedOracles,
+        },
+      ]) {
+        const correlatedOracle = new ethers.Contract(
+          oracleConfigs.oracleAddres,
+          CORRELATED_TOKEN_ORACLE_ABI,
+          ethers.provider,
+        );
+        const expectedMaxExchangeRate = increaseExchangeRateByPercentage(
+          oracleConfigs.expectedConfiguration.exchangeRateValue,
+          oracleConfigs.expectedConfiguration.snapshotGapBps,
+        );
+        describe(`Configuration for ${oracleConfigs.underlyingSymbol}`, () => {
+          it(`annual growth = ${formatUnits(oracleConfigs.expectedConfiguration.annualGrowthRate, 18)}`, async () => {
+            expect(await correlatedOracle.growthRatePerSecond()).to.equal(
+              oracleConfigs.expectedConfiguration.annualGrowthRate.div(ONE_YEAR),
+            );
+          });
+          it(`snapshot interval = ${
+            oracleConfigs.expectedConfiguration.snapshotIntervalInSeconds / DAYS_30
+          } months`, async () => {
+            expect(await correlatedOracle.snapshotInterval()).to.equal(
+              oracleConfigs.expectedConfiguration.snapshotIntervalInSeconds,
+            );
+          });
+          it(`snapshot gap = ${oracleConfigs.expectedConfiguration.snapshotGapBps} bps`, async () => {
+            expect(await correlatedOracle.snapshotGap()).to.equal(
+              exchangeRatePercentage(
+                oracleConfigs.expectedConfiguration.exchangeRateValue,
+                oracleConfigs.expectedConfiguration.snapshotGapBps,
+              ),
+            );
+          });
+          it(`snapshot maxExchangeRate = ${formatUnits(
+            expectedMaxExchangeRate,
+            18,
+          )} (current exchange rate = ${formatUnits(
+            oracleConfigs.expectedConfiguration.exchangeRateValue,
+            18,
+          )})`, async () => {
+            expect(await correlatedOracle.snapshotMaxExchangeRate()).to.equal(expectedMaxExchangeRate);
+          });
+          it(`snapshot timestamp = ${oracleConfigs.expectedConfiguration.exchangeRateTimestamp}`, async () => {
+            expect(await correlatedOracle.snapshotTimestamp()).to.equal(
+              oracleConfigs.expectedConfiguration.exchangeRateTimestamp,
+            );
+          });
+        });
+      }
     });
 
     it("Interest rates for weETH", async () => {

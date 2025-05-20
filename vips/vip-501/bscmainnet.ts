@@ -16,7 +16,6 @@ export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
 const STALE_PERIOD_26H = 26 * 60 * 60; // heartbeat of 24H
-export const CONVERSION_INCENTIVE = parseUnits("1", 14);
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -40,6 +39,8 @@ export const wstETH: Token = {
   decimals: 18,
   symbol: "wstETH",
 };
+
+export const DAYS_30 = 30 * 24 * 60 * 60;
 
 type Market = {
   vToken: {
@@ -70,6 +71,13 @@ type Market = {
     multiplier: string;
     jump: string;
     kink: string;
+  };
+  cappedOracles: {
+    exchangeRateValue: BigNumber;
+    exchangeRateTimestamp: number;
+    annualGrowthRate: BigNumber;
+    snapshotIntervalInSeconds: number;
+    snapshotGapBps: BigNumber;
   };
 };
 
@@ -103,6 +111,13 @@ export const weETHMarket: Market = {
     jump: "3",
     kink: "0.45",
   },
+  cappedOracles: {
+    exchangeRateValue: parseUnits("1.06786522", 18),
+    exchangeRateTimestamp: 1747675954,
+    annualGrowthRate: parseUnits("0.053", 18), // 5.3%
+    snapshotIntervalInSeconds: DAYS_30,
+    snapshotGapBps: BigNumber.from("44"), // 0.44%
+  },
 };
 
 export const wstETHMarket: Market = {
@@ -135,6 +150,28 @@ export const wstETHMarket: Market = {
     jump: "3",
     kink: "0.45",
   },
+  cappedOracles: {
+    exchangeRateValue: parseUnits("1.20307347", 18),
+    exchangeRateTimestamp: 1747675954,
+    annualGrowthRate: parseUnits("0.067", 18), // 6.7%
+    snapshotIntervalInSeconds: DAYS_30,
+    snapshotGapBps: BigNumber.from("55"), // 0.55%
+  },
+};
+
+export const exchangeRatePercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  return exchangeRate.mul(percentage).div(10000);
+};
+
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRatePercentage(exchangeRate, percentage);
+  return exchangeRate.add(increaseAmount).toString();
 };
 
 const vip501 = () => {
@@ -149,8 +186,62 @@ const vip501 = () => {
 
   return makeProposal(
     [
-      // <--- weETH Market --->
       // Oracle config
+      {
+        target: WEETH_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(
+            weETHMarket.cappedOracles.exchangeRateValue,
+            weETHMarket.cappedOracles.snapshotGapBps,
+          ),
+          weETHMarket.cappedOracles.exchangeRateTimestamp,
+        ],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: WEETH_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [weETHMarket.cappedOracles.annualGrowthRate, weETHMarket.cappedOracles.snapshotIntervalInSeconds],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: WEETH_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [
+          exchangeRatePercentage(weETHMarket.cappedOracles.exchangeRateValue, weETHMarket.cappedOracles.snapshotGapBps),
+        ],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: WSTETH_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(
+            wstETHMarket.cappedOracles.exchangeRateValue,
+            wstETHMarket.cappedOracles.snapshotGapBps,
+          ),
+          wstETHMarket.cappedOracles.exchangeRateTimestamp,
+        ],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: WSTETH_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [wstETHMarket.cappedOracles.annualGrowthRate, wstETHMarket.cappedOracles.snapshotIntervalInSeconds],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: WSTETH_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [
+          exchangeRatePercentage(
+            wstETHMarket.cappedOracles.exchangeRateValue,
+            wstETHMarket.cappedOracles.snapshotGapBps,
+          ),
+        ],
+        dstChainId: LzChainId.unichainmainnet,
+      },
       {
         target: unichainmainnet.REDSTONE_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
@@ -188,6 +279,7 @@ const vip501 = () => {
         dstChainId: LzChainId.unichainmainnet,
       },
 
+      // <--- weETH Market --->
       // Market configurations
       {
         target: weETHMarket.vToken.address,

@@ -1,61 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "correlatedToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "underlyingToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "resilientOracle",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "intermediateOracle",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "annualGrowthRate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_snapshotInterval",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "initialSnapshotMaxExchangeRate",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "initialSnapshotTimestamp",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "accessControlManager",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_snapshotGap",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
     "inputs": [],
     "name": "InvalidGrowthRate",
     "type": "error"
@@ -189,19 +133,6 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "INTERMEDIATE_ORACLE",
-    "outputs": [
-      {
-        "internalType": "contract OracleInterface",
         "name": "",
         "type": "address"
       }
