@@ -148,10 +148,7 @@ export const vip499 = () => {
       {
         target: weETH_ORACLE_ARBITRUM,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")), 1747682525],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -182,10 +179,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ARBITRUM,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -213,7 +207,7 @@ export const vip499 = () => {
         ],
         dstChainId: LzChainId.arbitrumone,
       },
-      
+
       {
         target: DEFAULT_PROXY_ADMIN_ZKSYNC,
         signature: "upgrade(address,address)",
@@ -295,10 +289,7 @@ export const vip499 = () => {
       {
         target: wUSDM_ORACLE_ZKSYNC,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")),
-          1746787630,
-        ],
+        params: [increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")), 1746787630],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -329,10 +320,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ZKSYNC,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -363,10 +351,7 @@ export const vip499 = () => {
       {
         target: zkETHOracle_ZKSYNC,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")),
-          1746787651,
-        ],
+        params: [increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")), 1746787651],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -394,7 +379,6 @@ export const vip499 = () => {
         ],
         dstChainId: LzChainId.zksyncmainnet,
       },
-      
     ],
     meta,
     ProposalType.REGULAR,

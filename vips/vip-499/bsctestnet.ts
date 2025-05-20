@@ -148,10 +148,7 @@ export const vip499 = () => {
       {
         target: weETH_ORACLE_ARBITRUM_SEPOLIA,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")), 1747682525],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -182,10 +179,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ARBITRUM_SEPOLIA,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -294,10 +288,7 @@ export const vip499 = () => {
       {
         target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")),
-          1746726168,
-        ],
+        params: [increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")), 1746726168],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
@@ -328,10 +319,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ZKSYNC_SEPOLIA,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")),
-          1747682525,
-        ],
+        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
@@ -362,10 +350,7 @@ export const vip499 = () => {
       {
         target: zkETHOracle_ZKSYNC_SEPOLIA,
         signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")),
-          1746726159,
-        ],
+        params: [increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")), 1746726159],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {

@@ -6,22 +6,22 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { 
-  CHAINLINK_ORACLE_ZKSYNC, 
-  RESILIENT_ORACLE_ZKSYNC, 
-  DEFAULT_PROXY_ADMIN_ZKSYNC,
-  RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC,
-  CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC,
-  REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC,
+import vip491, {
   BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC,
   BOUND_VALIDATOR_ZKSYNC,
-  REDSTONE_ORACLE_ZKSYNC 
+  CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC,
+  CHAINLINK_ORACLE_ZKSYNC,
+  DEFAULT_PROXY_ADMIN_ZKSYNC,
+  REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC,
+  REDSTONE_ORACLE_ZKSYNC,
+  RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC,
+  RESILIENT_ORACLE_ZKSYNC,
 } from "../../vips/vip-499/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ACM_ABI from "./abi/ACM.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
@@ -74,9 +74,7 @@ const prices = [
   {
     symbol: "wstETH",
     address: "0x703b52F2b28fEbcB60E1372858AF5b18849FE867",
-    expectedPrice: parseUnits("3044.741938982818484727",
-      18,
-    ),
+    expectedPrice: parseUnits("3044.741938982818484727", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriodInChainlinkOracle(
@@ -91,7 +89,7 @@ const prices = [
     symbol: "wUSDM",
     address: "0xA900cbE7739c96D2B153a273953620A701d5442b",
     expectedPrice: parseUnits("1.079092167934309420", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
+    postVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         CHAINLINK_ORACLE_ZKSYNC,
         "0x7715c206A14Ac93Cb1A6c0316A6E5f8aD7c9Dc31",
@@ -105,7 +103,7 @@ const prices = [
     address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
     expectedPrice: parseUnits("0.06680668", 18),
     expectedPriceAfter: parseUnits("0.06691457", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
+    postVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         CHAINLINK_ORACLE_ZKSYNC,
         "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
@@ -123,7 +121,7 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-]
+];
 
 forking(60671459, async () => {
   const provider = ethers.provider;

@@ -3,25 +3,24 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { 
-  CHAINLINK_ORACLE_ZKSYNC_SEPOLIA, 
-  RESILIENT_ORACLE_ZKSYNC_SEPOLIA, 
-  DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-  RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
-  CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
-  REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
+import vip491, {
   BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA,
   BOUND_VALIDATOR_ZKSYNC_SEPOLIA,
-  REDSTONE_ORACLE_ZKSYNC_SEPOLIA 
- } from "../../vips/vip-499/bsctestnet";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import ERC20_ABI from "./abi/ERC20.json";
+  CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
+  CHAINLINK_ORACLE_ZKSYNC_SEPOLIA,
+  DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
+  REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
+  REDSTONE_ORACLE_ZKSYNC_SEPOLIA,
+  RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
+  RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
+} from "../../vips/vip-499/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
-import { expectEvents } from "src/utils";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 
@@ -29,32 +28,32 @@ const prices = [
   {
     symbol: "USDC",
     address: "0x512F8b4a3c466a30e8c9BAC9c64638dd710968c2",
-    expectedPrice: parseUnits("1.00007109", 30),
+    expectedPrice: parseUnits("0.99993", 30),
   },
   {
     symbol: "USDC.e",
     address: "0xF98780C8a0843829f98e624d83C3FfDDf43BE984",
-    expectedPrice: parseUnits("1.00007109", 30),
+    expectedPrice: parseUnits("0.99993", 30),
   },
   {
     symbol: "USDT",
     address: "0x9Bf62C9C6AaB7AB8e01271f0d7A401306579709B",
-    expectedPrice: parseUnits("1.00011", 30),
+    expectedPrice: parseUnits("1.00018", 30),
   },
   {
     symbol: "WBTC",
     address: "0xeF891B3FA37FfD83Ce8cC7b682E4CADBD8fFc6F0",
-    expectedPrice: parseUnits("102900.2031", 28),
+    expectedPrice: parseUnits("105380.02140843", 28),
   },
   {
     symbol: "WETH",
     address: "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6",
-    expectedPrice: parseUnits("2340.22575314", 18),
+    expectedPrice: parseUnits("2528.05167055", 18),
   },
   {
     symbol: "wstETH",
     address: "0x8507bb4F4f0915D05432011E384850B65a7FCcD1",
-    expectedPrice: parseUnits("2574.248328454", 18),
+    expectedPrice: parseUnits("2780.856837605", 18),
   },
   {
     symbol: "wUSDM",
@@ -69,9 +68,9 @@ const prices = [
   {
     symbol: "ZKETH",
     address: "0x13231E8B60BE0900fB3a3E9dc52C2b39FA4794df",
-    expectedPrice: parseUnits("2351.9268819057", 18),
+    expectedPrice: parseUnits("2540.69192890275", 18),
   },
-]
+];
 
 forking(5157495, async () => {
   const provider = ethers.provider;

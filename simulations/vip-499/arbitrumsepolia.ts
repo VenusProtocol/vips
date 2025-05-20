@@ -6,22 +6,22 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { 
-  CHAINLINK_ORACLE_ARBITRUM_SEPOLIA, 
-  RESILIENT_ORACLE_ARBITRUM_SEPOLIA, 
-  DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-  RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-  CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-  REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-  BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+import vip491, {
   BOUND_VALIDATOR_ARBITRUM_SEPOLIA,
-  REDSTONE_ORACLE_ARBITRUM_SEPOLIA
+  BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+  CHAINLINK_ORACLE_ARBITRUM_SEPOLIA,
+  CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+  DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
+  REDSTONE_ORACLE_ARBITRUM_SEPOLIA,
+  REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+  RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
+  RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
 } from "../../vips/vip-499/bsctestnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ACM_ABI from "./abi/ACM.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 
@@ -33,7 +33,7 @@ const prices = [
     preVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "gmBTC",
@@ -62,7 +62,7 @@ const prices = [
     preVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "WETH",
@@ -71,7 +71,7 @@ const prices = [
     preVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
-    }
+    },
   },
   {
     symbol: "weETH",
@@ -82,8 +82,8 @@ const prices = [
     symbol: "wstETH",
     address: "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE",
     expectedPrice: parseUnits("2768.979670193", 18),
-  }
-]
+  },
+];
 
 forking(154837898, async () => {
   const provider = ethers.provider;
@@ -119,26 +119,26 @@ forking(154837898, async () => {
     }
 
     describe("New implementations", () => {
-          it("Resilient oracle", async () => {
-            expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
-              RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-            );
-          });
-          it("Chainlink oracle", async () => {
-            expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
-              CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-            );
-          });
-          it("RedStone oracle", async () => {
-            expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
-              REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-            );
-          });
-          it("Bound validator", async () => {
-            expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR_ARBITRUM_SEPOLIA)).to.equal(
-              BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA,
-            );
-          });
-        });
+      it("Resilient oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
+          RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+        );
+      });
+      it("Chainlink oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
+          CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+        );
+      });
+      it("RedStone oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE_ARBITRUM_SEPOLIA)).to.equal(
+          REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+        );
+      });
+      it("Bound validator", async () => {
+        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR_ARBITRUM_SEPOLIA)).to.equal(
+          BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA,
+        );
+      });
+    });
   });
 });

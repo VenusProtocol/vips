@@ -6,23 +6,22 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, { 
-  CHAINLINK_ORACLE_ARBITRUM, 
-  RESILIENT_ORACLE_ARBITRUM, 
-  DEFAULT_PROXY_ADMIN_ARBITRUM,
-  RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM,
-  CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM,
-  REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM,
-  BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM,
+import vip491, {
   BOUND_VALIDATOR_ARBITRUM,
+  BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM,
+  CHAINLINK_ORACLE_ARBITRUM,
+  CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM,
+  DEFAULT_PROXY_ADMIN_ARBITRUM,
   REDSTONE_ORACLE_ARBITRUM,
-  weETH_ORACLE_ARBITRUM
+  REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM,
+  RESILIENT_ORACLE_ARBITRUM,
+  RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM,
 } from "../../vips/vip-499/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ACM_ABI from "./abi/ACM.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
@@ -118,7 +117,7 @@ const prices = [
       );
     },
   },
-]
+];
 
 forking(338573922, async () => {
   const provider = ethers.provider;
