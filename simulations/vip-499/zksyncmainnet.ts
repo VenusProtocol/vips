@@ -29,7 +29,7 @@ const prices = [
   {
     symbol: "USDC",
     address: "0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4",
-    expectedPrice: parseUnits("1.00001", 30),
+    expectedPrice: parseUnits("0.99983", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -38,7 +38,7 @@ const prices = [
   {
     symbol: "USDC.e",
     address: "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-    expectedPrice: parseUnits("1.00001", 30),
+    expectedPrice: parseUnits("0.99983", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -47,7 +47,7 @@ const prices = [
   {
     symbol: "USDT",
     address: "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C",
-    expectedPrice: parseUnits("0.99980003", 30),
+    expectedPrice: parseUnits("1.00015529", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -56,7 +56,7 @@ const prices = [
   {
     symbol: "WBTC",
     address: "0xBBeB516fb02a01611cBBE0453Fe3c580D7281011",
-    expectedPrice: parseUnits("102953.39604417", 28),
+    expectedPrice: parseUnits("105368", 28),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -65,7 +65,7 @@ const prices = [
   {
     symbol: "WETH",
     address: "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
-    expectedPrice: parseUnits("2349.721224", 18),
+    expectedPrice: parseUnits("2530.803", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -74,7 +74,7 @@ const prices = [
   {
     symbol: "wstETH",
     address: "0x703b52F2b28fEbcB60E1372858AF5b18849FE867",
-    expectedPrice: parseUnits("2824.373206537034846170",
+    expectedPrice: parseUnits("3044.741938982818484727",
       18,
     ),
     postVIP: async function (resilientOracle: any, address: string) {
@@ -90,7 +90,7 @@ const prices = [
   {
     symbol: "wUSDM",
     address: "0xA900cbE7739c96D2B153a273953620A701d5442b",
-    expectedPrice: parseUnits("1.077968786387565675", 18),
+    expectedPrice: parseUnits("1.079092167934309420", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       await setMaxStalePeriodInChainlinkOracle(
         CHAINLINK_ORACLE_ZKSYNC,
@@ -103,8 +103,8 @@ const prices = [
   {
     symbol: "ZK",
     address: "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
-    expectedPrice: parseUnits("0.06927599", 18),
-    expectedPriceAfter: parseUnits("0.06935213", 18),
+    expectedPrice: parseUnits("0.06680668", 18),
+    expectedPriceAfter: parseUnits("0.06691457", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       await setMaxStalePeriodInChainlinkOracle(
         CHAINLINK_ORACLE_ZKSYNC,
@@ -117,7 +117,7 @@ const prices = [
   {
     symbol: "ZKETH",
     address: "0xb72207E1FB50f341415999732A20B6D25d8127aa",
-    expectedPrice: parseUnits("2377.483532024740812381", 18),
+    expectedPrice: parseUnits("2560.704816316886671743", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -125,7 +125,7 @@ const prices = [
   },
 ]
 
-forking(60153405, async () => {
+forking(60671459, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(zksyncmainnet.NORMAL_TIMELOCK);

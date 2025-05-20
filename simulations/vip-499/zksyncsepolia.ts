@@ -73,7 +73,7 @@ const prices = [
   },
 ]
 
-forking(151083977, async () => {
+forking(5157495, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(zksyncsepolia.NORMAL_TIMELOCK);
