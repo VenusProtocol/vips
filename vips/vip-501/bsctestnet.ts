@@ -224,12 +224,6 @@ const vip501 = () => {
           dstChainId: LzChainId.unichainsepolia,
         };
       })(),
-      {
-        target: weETHMarket.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [weETHMarket.riskParameters.protocolSeizeShare],
-        dstChainId: LzChainId.unichainsepolia,
-      },
 
       //   // <--- wstETH Market --->
       //   // oracle config
@@ -314,12 +308,6 @@ const vip501 = () => {
           dstChainId: LzChainId.unichainsepolia,
         };
       })(),
-      {
-        target: wstETHMarket.vToken.address,
-        signature: "setProtocolSeizeShare(uint256)",
-        params: [wstETHMarket.riskParameters.protocolSeizeShare],
-        dstChainId: LzChainId.unichainsepolia,
-      },
     ],
     meta,
     ProposalType.REGULAR,
