@@ -161,6 +161,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
+        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.044", 18)],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
         target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -186,6 +192,12 @@ export const vip499 = () => {
         target: wstETHOracle_ARBITRUM_SEPOLIA,
         signature: "setGrowthRate(uint256,uint256)",
         params: [parseUnits("0.67", 18), DAYS_30],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: wstETHOracle_ARBITRUM_SEPOLIA,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.055", 18)],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       {
@@ -295,6 +307,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
+        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.049", 18)],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
         target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -323,6 +341,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.zksyncsepolia,
       },
       {
+        target: wstETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.055", 18)],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
         target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -348,6 +372,12 @@ export const vip499 = () => {
         target: zkETHOracle_ZKSYNC_SEPOLIA,
         signature: "setGrowthRate(uint256,uint256)",
         params: [parseUnits("0.053", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: zkETHOracle_ZKSYNC_SEPOLIA,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.044", 18)],
         dstChainId: LzChainId.zksyncsepolia,
       },
       {

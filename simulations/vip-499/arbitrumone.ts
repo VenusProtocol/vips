@@ -15,7 +15,8 @@ import vip491, {
   REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM,
   BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM,
   BOUND_VALIDATOR_ARBITRUM,
-  REDSTONE_ORACLE_ARBITRUM
+  REDSTONE_ORACLE_ARBITRUM,
+  weETH_ORACLE_ARBITRUM
 } from "../../vips/vip-499/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -29,7 +30,7 @@ const prices = [
   {
     symbol: "ARB",
     address: "0x912ce59144191c1204e64559fe8253a0e49e6548",
-    expectedPrice: parseUnits("0.3793", 18),
+    expectedPrice: parseUnits("0.39625248", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -38,7 +39,7 @@ const prices = [
   {
     symbol: "gmBTC",
     address: "0x47c031236e19d024b42f8AE6780E44A573170703",
-    expectedPrice: parseUnits("2.42060495", 18),
+    expectedPrice: parseUnits("2.47630006", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -47,7 +48,7 @@ const prices = [
   {
     symbol: "gmETH",
     address: "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336",
-    expectedPrice: parseUnits("1.52301356", 18),
+    expectedPrice: parseUnits("1.59316565", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -56,7 +57,7 @@ const prices = [
   {
     symbol: "USDC",
     address: "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
-    expectedPrice: parseUnits("0.99999999", 30),
+    expectedPrice: parseUnits("0.99986994", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -65,7 +66,7 @@ const prices = [
   {
     symbol: "USDT",
     address: "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
-    expectedPrice: parseUnits("0.99985171", 30),
+    expectedPrice: parseUnits("1.000166", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -74,7 +75,7 @@ const prices = [
   {
     symbol: "WBTC",
     address: "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
-    expectedPrice: parseUnits("102913.05501665", 28),
+    expectedPrice: parseUnits("105630.64", 28),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -83,7 +84,7 @@ const prices = [
   {
     symbol: "WETH",
     address: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
-    expectedPrice: parseUnits("2347.54792634", 18),
+    expectedPrice: parseUnits("2548.13", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -92,7 +93,7 @@ const prices = [
   {
     symbol: "weETH",
     address: "0x35751007a407ca6FEFfE80b3cB397736D2cf4dbe",
-    expectedPrice: parseUnits("2504.914757687730060166", 18),
+    expectedPrice: parseUnits("2721.059411835291415425", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriodInChainlinkOracle(
@@ -106,7 +107,7 @@ const prices = [
   {
     symbol: "wstETH",
     address: "0x5979D7b546E38E414F7E9822514be443A4800529",
-    expectedPrice: parseUnits("2821.760895077259039789", 18),
+    expectedPrice: parseUnits("3065.587592941959238031", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriodInChainlinkOracle(
@@ -119,7 +120,7 @@ const prices = [
   },
 ]
 
-forking(334865555, async () => {
+forking(338573922, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(arbitrumone.NORMAL_TIMELOCK);

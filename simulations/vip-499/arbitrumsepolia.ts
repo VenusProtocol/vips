@@ -29,7 +29,11 @@ const prices = [
   {
     symbol: "ARB",
     address: "0x4371bb358aB5cC192E481543417D2F67b8781731",
-    expectedPrice: parseUnits("0.382117", 18),
+    expectedPrice: parseUnits("0.39084773", 18),
+    preVIP: async function (resilientOracle: any, address: string) {
+      const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    }
   },
   {
     symbol: "gmBTC",
@@ -44,17 +48,17 @@ const prices = [
   {
     symbol: "USDC",
     address: "0x86f096B1D970990091319835faF3Ee011708eAe8",
-    expectedPrice: parseUnits("1.00003147", 30),
+    expectedPrice: parseUnits("0.999911", 30),
   },
   {
     symbol: "USDT",
     address: "0xf3118a17863996B9F2A073c9A66Faaa664355cf8",
-    expectedPrice: parseUnits("0.99995", 30),
+    expectedPrice: parseUnits("1.0002295", 30),
   },
   {
     symbol: "WBTC",
     address: "0xFb8d93FD3Cf18386a5564bb5619cD1FdB130dF7D",
-    expectedPrice: parseUnits("103594.52", 28),
+    expectedPrice: parseUnits("105607.687254", 28),
     preVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -63,7 +67,7 @@ const prices = [
   {
     symbol: "WETH",
     address: "0x980B62Da83eFf3D4576C647993b0c1D7faf17c73",
-    expectedPrice: parseUnits("2382.70878478", 18),
+    expectedPrice: parseUnits("2517.25424563", 18),
     preVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract(address, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -72,16 +76,16 @@ const prices = [
   {
     symbol: "weETH",
     address: "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34",
-    expectedPrice: parseUnits("2620.979663258", 18),
+    expectedPrice: parseUnits("2768.979670193", 18),
   },
   {
     symbol: "wstETH",
     address: "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE",
-    expectedPrice: parseUnits("2620.979663258", 18),
+    expectedPrice: parseUnits("2768.979670193", 18),
   }
 ]
 
-forking(151083977, async () => {
+forking(154837898, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(arbitrumsepolia.NORMAL_TIMELOCK);

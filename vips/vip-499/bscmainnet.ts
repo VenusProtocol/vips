@@ -24,7 +24,6 @@ export const CRITICAL_TIMELOCK_ARBITRUM = "0x181E4f8F21D087bF02Ea2F64D5e550849FB
 export const weETH_Initial_Exchange_Rate = parseUnits("1.067789208571946221", 18);
 export const wstETH_Initial_Exchange_Rate = parseUnits("1.203073466794064368", 18);
 
-
 export const RESILIENT_ORACLE_ZKSYNC = "0xDe564a4C887d5ad315a19a96DC81991c98b12182";
 export const CHAINLINK_ORACLE_ZKSYNC = "0x4FC29E1d3fFFbDfbf822F09d20A5BE97e59F66E5";
 export const REDSTONE_ORACLE_ZKSYNC = "0xFa1e65e714CDfefDC9729130496AB5b5f3708fdA";
@@ -196,6 +195,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
+        target: wstETHOracle_ARBITRUM,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.055", 18)],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
         target: RESILIENT_ORACLE_ARBITRUM,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -303,6 +308,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
+        target: wUSDM_ORACLE_ZKSYNC,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.049", 18)],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
         target: RESILIENT_ORACLE_ZKSYNC,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -331,6 +342,12 @@ export const vip499 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
+        target: wstETHOracle_ZKSYNC,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.055", 18)],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
         target: RESILIENT_ORACLE_ZKSYNC,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -356,6 +373,12 @@ export const vip499 = () => {
         target: zkETHOracle_ZKSYNC,
         signature: "setGrowthRate(uint256,uint256)",
         params: [parseUnits("0.053", 18), DAYS_30],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: zkETHOracle_ZKSYNC,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.044", 18)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
