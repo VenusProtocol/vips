@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { parse } from "path";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -94,7 +93,7 @@ export const vip500 = () => {
       {
         target: WSTETH_ORACLE,
         signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.067", 18), DAYS_30], //6.7%
+        params: [parseUnits("0.067", 18), DAYS_30], // 6.7%
         dstChainId: LzChainId.unichainmainnet,
       },
       {
