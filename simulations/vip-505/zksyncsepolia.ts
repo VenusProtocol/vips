@@ -35,8 +35,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip505
-  (), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip505(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ERC4626FACTORY_ABI], ["OwnershipTransferred"], [1]);
     },
