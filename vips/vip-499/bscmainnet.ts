@@ -47,6 +47,7 @@ export const zkETH_Initial_Exchange_Rate = parseUnits("1.011815149704219045", 18
 export const wUSDM_Initial_Exchange_Rate = parseUnits("1.077939040602540747", 18);
 
 export const wSuperOETHb_ORACLE_BASE = "0xcd1d2C99642165440c2CC023AFa2092b487f033e";
+export const wSuperOETHb_Initial_Exchange_Rate = parseUnits("1.058792829884507234", 18);
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
 export const increaseExchangeRateByPercentage = (
@@ -55,6 +56,14 @@ export const increaseExchangeRateByPercentage = (
 ) => {
   const increaseAmount = exchangeRate.mul(percentage).div(10000);
   return exchangeRate.add(increaseAmount).toString();
+};
+export const getSnapshotGap = (
+  exchangeRate: BigNumber,
+  percentage: number, // BPS value (e.g., 10000 for 100%)
+) => {
+  // snapshot gap is percentage of the exchange rate
+  const snapshotGap = exchangeRate.mul(percentage).div(10000);
+  return snapshotGap.toString();
 };
 
 export const vip499 = () => {
@@ -72,7 +81,7 @@ export const vip499 = () => {
       {
         target: wSuperOETHb_ORACLE_BASE,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0111", 18)],
+        params: [getSnapshotGap(wSuperOETHb_Initial_Exchange_Rate, 111)],
         dstChainId: LzChainId.basemainnet,
       },
       {
@@ -168,7 +177,7 @@ export const vip499 = () => {
       {
         target: weETH_ORACLE_ARBITRUM,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0044", 18)],
+        params: [getSnapshotGap(weETH_Initial_Exchange_Rate, 44)],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -199,7 +208,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ARBITRUM,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0055", 18)],
+        params: [getSnapshotGap(wstETH_Initial_Exchange_Rate, 55)],
         dstChainId: LzChainId.arbitrumone,
       },
       {
@@ -309,7 +318,7 @@ export const vip499 = () => {
       {
         target: wUSDM_ORACLE_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0049", 18)],
+        params: [getSnapshotGap(wUSDM_Initial_Exchange_Rate, 49)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -340,7 +349,7 @@ export const vip499 = () => {
       {
         target: wstETHOracle_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0055", 18)],
+        params: [getSnapshotGap(wstETH_Initial_Exchange_Rate, 55)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
@@ -371,7 +380,7 @@ export const vip499 = () => {
       {
         target: zkETHOracle_ZKSYNC,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0044", 18)],
+        params: [getSnapshotGap(zkETH_Initial_Exchange_Rate, 44)],
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
