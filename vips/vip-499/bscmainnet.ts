@@ -46,6 +46,8 @@ export const CRITICAL_TIMELOCK_ZKSYNC = "0xbfbc79D4198963e4a66270F3EfB1fdA0F382E
 export const zkETH_Initial_Exchange_Rate = parseUnits("1.011815149704219045", 18);
 export const wUSDM_Initial_Exchange_Rate = parseUnits("1.077939040602540747", 18);
 
+export const wSuperOETHb_ORACLE_BASE = "0xcd1d2C99642165440c2CC023AFa2092b487f033e";
+
 export const DAYS_30 = 30 * 24 * 60 * 60;
 export const increaseExchangeRateByPercentage = (
   exchangeRate: BigNumber,
@@ -67,6 +69,12 @@ export const vip499 = () => {
 
   return makeProposal(
     [
+      {
+        target: wSuperOETHb_ORACLE_BASE,
+        signature: "setSnapshotGap(uint256)",
+        params: [parseUnits("0.0111", 18)],
+        dstChainId: LzChainId.basemainnet,
+      },
       {
         target: DEFAULT_PROXY_ADMIN_ARBITRUM,
         signature: "upgrade(address,address)",
