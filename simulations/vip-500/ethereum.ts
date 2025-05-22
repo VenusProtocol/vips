@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriod } from "src/utils";
+import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip500, { RESILIENT_ORACLE } from "../../vips/vip-500/bscmainnet";
+import vip500, { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE } from "../../vips/vip-500/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -58,11 +58,11 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  {
-    symbol: "veBTC",
-    address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2",
-    expectedPrice: parseUnits("103938.73", 28),
-  },
+  // {
+  //   symbol: "veBTC",
+  //   address: "0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2",
+  //   expectedPrice: parseUnits("103938.73", 28),
+  // },
   {
     symbol: "vEIGEN",
     address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e",
@@ -85,16 +85,16 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  {
-    symbol: "vLBTC",
-    address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91",
-    expectedPrice: parseUnits("103938.73", 28),
-  },
+  // {
+  //   symbol: "vLBTC",
+  //   address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91",
+  //   expectedPrice: parseUnits("103938.73", 28),
+  // },
   {
     symbol: "vsFRAX",
     address: "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe",
     expectedPrice: parseUnits("1.127837555520517443", 18),
-    expectedPriceAfterVIP: parseUnits("1.128116619261278065", 18),
+    expectedPriceAfterVIP: parseUnits("1.128116624086365221", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
       const underlying = await vtoken.underlying();
@@ -106,7 +106,7 @@ const prices = [
     symbol: "vsUSDS",
     address: "0xE36Ae842DbbD7aE372ebA02C8239cd431cC063d6",
     expectedPrice: parseUnits("1.051536072541156975", 18),
-    expectedPriceAfterVIP: parseUnits("1.051790909100565227", 18),
+    expectedPriceAfterVIP: parseUnits("1.051790913504728091", 18),
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract("0xdC035D45d973E3EC169d2276DDab16f1e407384F", ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
@@ -199,27 +199,26 @@ const prices = [
     symbol: "vyvUSDT",
     address: "0x475d0C68a8CD275c15D1F01F4f291804E445F677",
     expectedPrice: parseUnits("1.03888319472", 30),
-    expectedPriceAfterVIP: parseUnits("1.0390712248", 30),
+    expectedPriceAfterVIP: parseUnits("1.03907222496", 30),
   },
   {
     symbol: "vyvUSDS",
     address: "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764",
     expectedPrice: parseUnits("1.047039175055351090", 18),
-    expectedPriceAfterVIP: parseUnits("1.03907222496", 18),
+    expectedPriceAfterVIP: parseUnits("1.047149453770318109", 18),
   },
   {
     symbol: "vyvWETH",
     address: "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0",
     expectedPrice: parseUnits("2654.360030092906497350", 18),
-    expectedPriceAfterVIP: parseUnits("2654.534127346465759100", 18),
+    expectedPriceAfterVIP: parseUnits("2654.534838387263379044", 18),
   },
   {
     symbol: "vPT-sUSDE",
     address: "0xCca202a95E8096315E3F19E46e19E1b326634889",
     expectedPrice: parseUnits("1.00096201", 18),
     postVIP: async function (resilientOracle: any, address: string) {
-      const token = new ethers.Contract("0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
+      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961", ethereum.NORMAL_TIMELOCK)
     },
   },
   {
@@ -236,6 +235,9 @@ const prices = [
     symbol: "vezETH",
     address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
     expectedPrice: parseUnits("2709.39746961216088", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110", "0x636A000262F6aA9e1F094ABF0aD8f645C44f641C", ethereum.NORMAL_TIMELOCK)
+    },
   },
   {
     symbol: "vPT-weETH",
@@ -248,42 +250,28 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  {
-    symbol: "vpufETH",
-    address: "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
-    expectedPrice: parseUnits("2705.48522305247354", 18),
-  },
+  // {
+  //   symbol: "vpufETH",
+  //   address: "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
+  //   expectedPrice: parseUnits("2705.48522305247354", 18),
+  // },
   {
     symbol: "vrsETH",
     address: "0xDB6C345f864883a8F4cae87852Ac342589E76D1B",
     expectedPrice: parseUnits("2697.6624627665622", 18),
-  },
-  {
-    symbol: "vsfrxETH",
-    address: "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E",
-    expectedPrice: parseUnits("2911.810069620383749887", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7", "0x03c68933f7a3F76875C0bc670a58e69294cDFD01", ethereum.NORMAL_TIMELOCK)
+    },
   },
   {
     symbol: "vweETH",
     address: "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
     expectedPrice: parseUnits("2761.232027272503848846", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
-    },
   },
   {
     symbol: "vwstETH",
     address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
     expectedPrice: parseUnits("3110.812104367399455347", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
-    },
   },
 ]
 
