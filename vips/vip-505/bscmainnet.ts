@@ -3,6 +3,8 @@ import { makeProposal } from "src/utils";
 
 export const ERC4626_FACTORY_ARBITRUM = "0xC1422B928cb6FC9BA52880892078578a93aa5Cc7";
 export const ERC4626_FACTORY_OPTIMISIM = "0xc801B471F00Dc22B9a7d7b839CBE87E46d70946F";
+export const ERC4626_FACTORY_BASE = "0x1A430825B31DdA074751D6731Ce7Dca38D012D13";
+export const ERC4626_FACTORY_ETHEREUM = "0x39cb747453Be3416E659dAeA169540b6F000c885";
 
 export const vip505 = () => {
   const meta = {
@@ -27,6 +29,18 @@ export const vip505 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ERC4626_FACTORY_BASE,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ERC4626_FACTORY_ETHEREUM,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.ethereum,
       },
     ],
     meta,
