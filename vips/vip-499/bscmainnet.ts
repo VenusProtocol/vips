@@ -188,11 +188,114 @@ export const increaseExchangeRateByPercentage = (
 const vip499 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-499 [Unichain] Add weETH and wstETH markets to the Core pool",
-    description: "",
-    forDescription: "I agree that Venus Protocol should proceed with this proposal",
-    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
+    title:
+      "VIP-499 [Unichain][BNB Chain] Add weETH and wstETH markets to the Core pool on Unichain, Prime funding and USD1 rewards",
+    description: `If passed, this VIP will add markets for [weETH](https://uniscan.xyz/address/0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7) and [wstETH](https://uniscan.xyz/address/0xc02fE7317D4eb8753a02c35fe019786854A92001) to the Core pool on Unichain, following the Community proposals:
+
+- [Proposal to Add Ether.fi’s weETH to Venus Core pool on Unichain](https://community.venus.io/t/proposal-to-add-ether-fi-s-weeth-to-venus-core-pool-on-unichain/5006) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xe56a07ce811f7cb04f17b645faf1f18d111cf83e25b1ddeb03b4b65d210f3720))
+- [List Lido wstETH on Unichain Core Pool](https://community.venus.io/t/list-lido-wsteth-on-unichain-core-pool/4983) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x07975715c1d20426c5f0ee0694f39165a3fcb2257764c0d3b35288d5b9259363))
+
+Moreover, this VIP will withdraw the following tokens from the [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9):
+
+- Prime funding, following the community proposal [Proposal: Fund Venus Prime Rewards on BNB Chain](https://community.venus.io/t/proposal-fund-venus-prime-rewards-on-bnb-chain/5115) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x9876e5d3d9290407ad7c2864730a7684d187a8940f8d3f499a72cac3fce0910a)). The following tokens will be withdrawn from the [Venus Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9) on BNB Chain to the [PrimeLiquidityProvider contract on BNB Chain](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) (where Prime rewards are stored).
+    - 330,000 [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955)
+    - 180,000 [USDC](https://bscscan.com/address/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d)
+    - 31.78 [ETH](https://bscscan.com/address/0x2170Ed0880ac9A755fd29B2688956BD959F933F8)
+    - 0.37 [BTCB](https://bscscan.com/address/0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c)
+- Refund of 10,000 [USDT](https://bscscan.com/address/0x55d398326f99059fF775485246999027B3197955) to the [Vanguard Treasury](https://bscscan.com/address/0xf645a387180F5F74b968305dF81d54EB328d21ca), to compensate the funds spent to configure the rewards on the USD1 market, following the community proposal [USD1 Market Rewards Funding Proposal](https://community.venus.io/t/usd1-market-rewards-funding-proposal/5102) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x9cf903e7da4865095680b5e6cb188a96f4c83d8a6bb09d93357553787604fb62)).
+
+#### Description
+
+**Risk parameters for weETH**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-to-add-ether-fi-s-weeth-to-venus-core-pool-on-unichain/5006/6), the risk parameters for the new market are:
+
+Underlying token: [weETH](https://uniscan.xyz/address/0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7)
+
+- Borrow cap: 400 weETH
+- Supply cap: 4,000 weETH
+- Collateral factor: 70%
+- Liquidation threshold: 75%
+- Reserve factor: 40%
+
+Bootstrap liquidity: 3.6149 weETH provided by the [Venus Treasury](https://uniscan.xyz/address/0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B) (Vanguard Treasury should be refunded with 10,000 USDT, because they provided the bootstrap liquidity [here](https://uniscan.xyz/tx/0xa7f8fc27e749ec7fc1b1460382537b795ce43eac209127d1b7ec5bb7f631bfa0)).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration for weETH**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Unichain](https://uniscan.xyz/address/0x86D04d6FE928D888076851122dc6739551818f7E) is used for weETH, using the following configuration. The OneJumpOracle is used to get the USD price of weETH, first getting the conversion rate weETH/ETH using the feeds from RedStone, and then getting the USD price using the RedStone price feed for ETH/USD.
+
+- MAIN oracle for weETH on Unichain
+    - Contract: [OneJumpOracle](https://uniscan.xyz/address/0xF9ECA470E2458Fe2B6FcAe660bEd1e2C0FB87E01)
+    - CORRELATED_TOKEN: [weETH](https://uniscan.xyz/address/0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7)
+    - UNDERLYING_TOKEN: [WETH](https://uniscan.xyz/address/0x4200000000000000000000000000000000000006)
+    - INTERMEDIATE_ORACLE: [RedStoneOracle](https://uniscan.xyz/address/0x4d41a36D04D97785bcEA57b057C412b278e6Edcc), using its price feed [weETH/ETH](https://uniscan.xyz/address/0xBf3bA2b090188B40eF83145Be0e9F30C6ca63689)
+
+**Risk parameters for wstETH**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/list-lido-wsteth-on-unichain-core-pool/4983/8), the risk parameters for the new market are:
+
+Underlying token: [wstETH](https://uniscan.xyz/address/0xc02fE7317D4eb8753a02c35fe019786854A92001)
+
+- Borrow cap: 7,000 wstETH
+- Supply cap: 14,000 wstETH
+- Collateral factor: 70%
+- Liquidation threshold: 72.5%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 3.2089 wstETH provided by the [Venus Treasury](https://uniscan.xyz/address/0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B) (Vanguard Treasury should be refunded with 10,000 USDT, because they provided the bootstrap liquidity [here](https://uniscan.xyz/tx/0x0ba6334cba34da549a1d7ceb2f93d110ba1c4904c7650262be750ee1cf2f3588)).
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 15%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration for wstETH**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Unichain](https://uniscan.xyz/address/0x86D04d6FE928D888076851122dc6739551818f7E) is used for wstETH, using the following configuration. The OneJumpOracle is used to get the USD price of wstETH, first getting the conversion rate wstETH/stETH using the feeds from RedStone, and then getting the USD price using the RedStone price feed for ETH/USD.
+
+- MAIN oracle for wstETH on Unichain
+    - Contract: [OneJumpOracle](https://uniscan.xyz/address/0x3938D6414c261C6F450f1bD059DF9af2BBfb603D)
+    - CORRELATED_TOKEN: [wstETH](https://uniscan.xyz/address/0xc02fE7317D4eb8753a02c35fe019786854A92001)
+    - UNDERLYING_TOKEN: [WETH](https://uniscan.xyz/address/0x4200000000000000000000000000000000000006) (assuming 1 stETH is equal to 1 ETH)
+    - INTERMEDIATE_ORACLE: [RedStoneOracle](https://uniscan.xyz/address/0x4d41a36D04D97785bcEA57b057C412b278e6Edcc), using its price feed [wstETH/stETH](https://uniscan.xyz/address/0xC3346631E0A9720582fB9CAbdBEA22BC2F57741b)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation:** in a simulation environment, validating the new markets are properly added to the Core pool on Unichain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet:** the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+Unichain mainnet:
+
+- vweETH_Core: [0x0170398083eb0D0387709523baFCA6426146C218](https://uniscan.xyz/address/0x0170398083eb0D0387709523baFCA6426146C218)
+- vwstETH_Core: [0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB](https://uniscan.xyz/address/0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB)
+
+Unichain Sepolia testnet:
+
+- vweETH_Core: [0xF46F0E1Fe165018EC778e0c61a71661f55aEa09B](https://sepolia.uniscan.xyz/address/0xF46F0E1Fe165018EC778e0c61a71661f55aEa09B)
+- vwstETH_Core: [0xb24c9a851542B4599Eb6C1644ce2e245074c885f](https://sepolia.uniscan.xyz/address/0xb24c9a851542B4599Eb6C1644ce2e245074c885f)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/561)
+- [Deployment of weETH and wstETH to Unichain Sepolia testnet](https://sepolia.uniscan.xyz/tx/0x86a9ca1bb2c01ca97d4adaa4b6620981d1d4560d8c3a41fcfc46525d748bd4cc)
+- [Documentation](https://docs-v4.venus.io/)
+`,
+    forDescription: "Process to configure and launch the new markets",
+    againstDescription: "Defer configuration and launch of the new markets",
+    abstainDescription: "No opinion on the matter",
   };
 
   return makeProposal(
