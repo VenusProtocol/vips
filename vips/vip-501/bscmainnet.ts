@@ -14,6 +14,17 @@ export const WEETH_ORACLE = "0xF9ECA470E2458Fe2B6FcAe660bEd1e2C0FB87E01";
 export const WSTETH_ORACLE = "0x3938D6414c261C6F450f1bD059DF9af2BBfb603D";
 export const VANGUARD_TREASURY = "0xf645a387180F5F74b968305dF81d54EB328d21ca";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+export const VUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+export const VUSDC_AMOUNT_TO_WITHDRAW = parseUnits("7023314.39611841", 8); // 180,000 USDC
+export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
+export const PLP_USDT_AMOUNT = parseUnits("330000", 18);
+export const PLP_USDC_AMOUNT = parseUnits("180000", 18);
+export const PLP_ETH_AMOUNT = parseUnits("31.78", 18);
+export const PLP_BTCB_AMOUNT = parseUnits("0.37", 18);
 
 const STALE_PERIOD_26H = 26 * 60 * 60; // heartbeat of 24H
 
@@ -411,7 +422,32 @@ const vip501 = () => {
       {
         target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, parseUnits("20000", 18), VANGUARD_TREASURY],
+        params: [USDT, parseUnits("30000", 18), VANGUARD_TREASURY],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, PLP_USDT_AMOUNT, PRIME_LIQUIDITY_PROVIDER],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [VUSDC, VUSDC_AMOUNT_TO_WITHDRAW, TOKEN_REDEEMER],
+      },
+      {
+        target: TOKEN_REDEEMER,
+        signature: "redeemUnderlyingAndTransfer(address,address,uint256,address)",
+        params: [VUSDC, PRIME_LIQUIDITY_PROVIDER, PLP_USDC_AMOUNT, NETWORK_ADDRESSES.bscmainnet.VTREASURY],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [ETH, PLP_ETH_AMOUNT, PRIME_LIQUIDITY_PROVIDER],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [BTCB, PLP_BTCB_AMOUNT, PRIME_LIQUIDITY_PROVIDER],
       },
     ],
     meta,
