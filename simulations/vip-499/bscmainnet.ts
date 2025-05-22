@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip501, {
+import vip499, {
   BTCB,
   ETH,
   PLP_BTCB_AMOUNT,
@@ -19,7 +19,7 @@ import vip501, {
   VANGUARD_TREASURY,
   VUSDC,
   VUSDC_AMOUNT_TO_WITHDRAW,
-} from "../../vips/vip-501/bscmainnet";
+} from "../../vips/vip-499/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -63,7 +63,7 @@ forking(50130227, async () => {
     btcbPLPBalanceBefore = await btcb.balanceOf(PRIME_LIQUIDITY_PROVIDER);
   });
 
-  testVip("VIP-501", await vip501(), {
+  testVip("VIP-499", await vip499(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

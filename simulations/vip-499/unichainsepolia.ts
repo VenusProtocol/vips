@@ -7,7 +7,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip501, {
+import vip499, {
   COMPTROLLER_CORE,
   DAYS_30,
   WEETH_ORACLE,
@@ -16,7 +16,7 @@ import vip501, {
   increaseExchangeRateByPercentage,
   weETHMarket,
   wstETHMarket,
-} from "../../vips/vip-501/bsctestnet";
+} from "../../vips/vip-499/bsctestnet";
 import CORRELATED_TOKEN_ORACLE_ABI from "./abi/CorrelatedTokenOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -36,7 +36,7 @@ forking(20881282, async () => {
     checkVToken(wstETHMarket.vToken.address, wstETHMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("add weETH and wstETH market", await vip501());
+  testForkedNetworkVipCommands("add weETH and wstETH market", await vip499());
 
   describe("Post-Execution state", () => {
     let vweETH: Contract;
