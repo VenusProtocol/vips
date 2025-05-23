@@ -41,6 +41,17 @@ export const yvUSDSOracle_SEPOLIA = "0x553C5984d57203D6D36996B55cA3Ba4088016C5b"
 export const yvUSDS_SEPOLIA = "0xC6A0e98B8D9E9F1160E9cE1f2E0172F41FB06BC2";
 export const yvWETHOracle_SEPOLIA = "0x8062dC1b38c0b2CF6188dF605B19cFF3c4dc9b29";
 export const yvWETH_SEPOLIA = "0x99AD7ecf9b1C5aC2A11BB00D7D8a7C54fCd41517";
+export const eBTC = "0xd48392CCf3fe028023D0783E570DFc71996859d7";
+export const eBTCOracle = "0x93963F31583E445DbBA160ce84F464e41dD330Dc";
+export const LBTC = "0x37798CaB3Adde2F4064afBc1C7F9bbBc6A826375";
+export const LBTCOracle = "0x8b9a9AFF25C9065CE5b350f1c27215D1446788a7";
+export const pufETH = "0x6D9f78b57AEeB0543a3c3B32Cc038bFB14a4bA68";
+export const pufETHOracle = "0xbD2272b9f426dF6D18468fe5117fCFd547D6882b";
+
+export const ACM = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
+export const NORMAL_TIMELOCK = "0xc332F7D8D5eA72cf760ED0E1c0485c8891C6E0cF";
+export const CRITICAL_TIMELOCK = "0xA24A7A65b8968a749841988Bd7d05F6a94329fDe";
+export const FASTTRACK_TIMELOCK = "0x7F043F43Adb392072a3Ba0cC9c96e894C6f7e182";
 
 export const vip500 = () => {
   const meta = {
@@ -76,6 +87,60 @@ export const vip500 = () => {
         target: DEFAULT_PROXY_ADMIN_SEPOLIA,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_SEPOLIA],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.sepolia,
       },
       {

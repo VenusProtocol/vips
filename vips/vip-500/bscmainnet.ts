@@ -48,6 +48,11 @@ export const LBTCOracle = "0x27A8ca2aFa10B9Bc1E57FC4Ca610d9020Aab3739";
 export const pufETH = "0xD9A442856C234a39a81a089C06451EBAa4306a72";
 export const pufETHOracle = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 
+export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
+export const NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
+export const CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
+export const FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
+
 export const vip500 = () => {
   const meta = {
     version: "v2",
@@ -82,6 +87,60 @@ export const vip500 = () => {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [BOUND_VALIDATOR, BOUND_VALIDATOR_IMPLEMENTATION],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {

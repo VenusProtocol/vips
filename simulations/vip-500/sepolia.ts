@@ -31,12 +31,12 @@ const prices = [
   {
     symbol: "vDAI",
     address: "0xfe050f628bF5278aCfA1e7B13b59fF207e769235",
-    expectedPrice: parseUnits("0.99989177", 18),
+    expectedPrice: parseUnits("0.99994276", 18),
   },
   {
     symbol: "veBTC",
     address: "0x8E6241389e823111259413810b81a050bd45e5cE",
-    expectedPrice: parseUnits("104224.19767974", 28),
+    expectedPrice: parseUnits("108610.7", 28),
   },
   {
     symbol: "vEIGEN",
@@ -51,7 +51,7 @@ const prices = [
   {
     symbol: "vLBTC",
     address: "0x315F064cF5B5968fE1655436e1856F3ca558d395",
-    expectedPrice: parseUnits("114646.617447714", 28),
+    expectedPrice: parseUnits("119471.77", 28),
   },
   {
     symbol: "vsFRAX",
@@ -71,7 +71,7 @@ const prices = [
   {
     symbol: "vUSDC",
     address: "0xF87bceab8DD37489015B426bA931e08A4D787616",  
-    expectedPrice: parseUnits("0.99997749", 30),
+    expectedPrice: parseUnits("0.99982329", 30),
   },
   {
     symbol: "vUSDS",
@@ -86,22 +86,22 @@ const prices = [
   {
     symbol: "vWBTC",
     address: "0x74E708A7F5486ed73CCCAe54B63e71B1988F1383",
-    expectedPrice: parseUnits("104224.19767974", 28),
+    expectedPrice: parseUnits("108610.7", 28),
   },
   {
     symbol: "vWETH",
     address: "0xc2931B1fEa69b6D6dA65a50363A8D75d285e4da9",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
   {
     symbol: "vweETHs",
     address: "0x81aab41B868f8b5632E8eE6a98AdA7a7fDBc8823",
-    expectedPrice: parseUnits("2711.069361134754226902", 18),
+    expectedPrice: parseUnits("2564.938990726718070063", 18),
   },
   {
     symbol: "vyvUSDC",
     address: "0x4bC731477aF00ea83C5eCbAc31E1E9fF85eD8A1e",
-    expectedPrice: parseUnits("0.99997749", 30),
+    expectedPrice: parseUnits("0.99982329", 30),
   },
   {
     symbol: "vyvUSDT",
@@ -116,7 +116,7 @@ const prices = [
   {
     symbol: "vyvWETH",
     address: "0x271D914014Ac2CD8EB89a4e106Ac15a4e948eEE2",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
   {
     symbol: "vPT-sUSDE",
@@ -136,22 +136,22 @@ const prices = [
   {
     symbol: "vezETH",
     address: "0xF4C1B7528f8B266D8ADf1a85c91d93114FeDbA2A",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
   {
     symbol: "vPT-weETH",
     address: "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1",
-    expectedPrice: parseUnits("2573.357749172767027411", 18),
+    expectedPrice: parseUnits("2434.650224212355208389", 18),
   },
   {
     symbol: "vpufETH",
     address: "0x1E4d64B7c6f1F71969E5137B5Ee8cBa9Ab9c9356",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
   {
     symbol: "vrsETH",
     address: "0x20a83DE526F2CF2fCec2131E07b11F956d8f3Cdf",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
   {
     symbol: "vsfrxETH",
@@ -161,16 +161,16 @@ const prices = [
   {
     symbol: "vweETH",
     address: "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b",
-    expectedPrice: parseUnits("2795.118267568763126583", 18),
+    expectedPrice: parseUnits("2644.457545408881248592", 18),
   },
   {
     symbol: "vwstETH",
     address: "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D",
-    expectedPrice: parseUnits("2699.56", 18),
+    expectedPrice: parseUnits("2554.05", 18),
   },
 ]
 
-forking(8320080, async () => {
+forking(8389479, async () => {
   const provider = ethers.provider;
 
   await impersonateAccount(sepolia.NORMAL_TIMELOCK);
