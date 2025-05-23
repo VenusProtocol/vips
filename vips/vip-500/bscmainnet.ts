@@ -41,6 +41,12 @@ export const yvUSDSOracle = "0x3Bd4E87c0BD4FF33261D39fd0d5b1c9Cc468bBb5";
 export const yvUSDS = "0x182863131F9a4630fF9E27830d945B1413e347E8";
 export const yvWETHOracle = "0xC14a07b33a49b2e663ACBC2DDc6e34d9e5ea1Ab8";
 export const yvWETH = "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0";
+export const eBTC = "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642";
+export const eBTCOracle = "0xF68E8925d45fb6679aE8caF7f859C76BdD964325";
+export const LBTC = "0x8236a87084f8B84306f72007F36F2618A5634494";
+export const LBTCOracle = "0x27A8ca2aFa10B9Bc1E57FC4Ca610d9020Aab3739";
+export const pufETH = "0xD9A442856C234a39a81a089C06451EBAa4306a72";
+export const pufETHOracle = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 
 export const vip500 = () => {
   const meta = {
@@ -254,6 +260,45 @@ export const vip500 = () => {
           [
             yvWETH,
             [yvWETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            eBTC,
+            [eBTCOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            LBTC,
+            [LBTCOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            pufETH,
+            [pufETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
             false,
           ],
