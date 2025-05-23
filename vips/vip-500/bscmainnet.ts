@@ -69,11 +69,115 @@ export const getSnapshotGap = (
 export const vip500 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-500 [Arbitrum][ZKSync] Capped Oracles and Cached Prices",
+    description: `If passed, following the community proposal “[Provide Support for Capped Oracles for Enhanced Security](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xcd64c64eee56e75b56a0a0b84f1ffa2b4ea5fb2be76cca96a155137c46305c07)), this VIP will upgrade the implementations of the following contracts on Arbitrum one and ZKSync Era, including support for Capped Oracles and Cached Prices:
+
+- ResilientOracle
+- ChainlinkOracle
+- RedStoneOracle
+- BoundValidator
+
+Moreover, the oracles for the following assets are updated (following the [Chaos Labs recommendation](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/5)):
+
+- [ZKSync Era / zkETH](https://app.venus.io/#/core-pool/market/0xCEb7Da150d16aCE58F090754feF2775C23C8b631?chainId=324): using the [new implementation for the ZkETHOracle](https://github.com/VenusProtocol/oracle/pull/239):
+    - Maximum annual growth rate: 7.3%
+    - Automatic snapshot period: 30 days (how frequently the reference value to calculate the cap in the price is updated)
+    - Automatic snapshot update gap: 0.44% of the current exchange rate
+- [ZKSync Era / wUSDM](https://app.venus.io/#/core-pool/market/0x183dE3C349fCf546aAe925E1c7F364EA6FB4033c?chainId=324): using the [new implementation for the ERC4626Oracle](https://github.com/VenusProtocol/oracle/pull/239):
+    - Maximum annual growth rate: 6.1%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.49%
+- [ZKSync Era / wstETH](https://app.venus.io/#/core-pool/market/0x03CAd66259f7F34EE075f8B62D133563D249eDa4?chainId=324): using the [new implementation for the OneJumpOracle](https://github.com/VenusProtocol/oracle/pull/239)
+    - Maximum annual growth rate: 6.7%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.55%
+- [Arbitrum one / weETH](https://app.venus.io/#/isolated-pools/pool/0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16/market/0x246a35E79a3a0618535A469aDaF5091cAA9f7E88?chainId=42161): using the [new implementation for the OneJumpOracle](https://github.com/VenusProtocol/oracle/pull/239)
+    - Maximum annual growth rate: 5.3%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.44%
+- [Arbitrum one / wstETH](https://app.venus.io/#/lido-market?chainId=42161): using the [new implementation for the OneJumpOracle](https://github.com/VenusProtocol/oracle/pull/239)
+    - Maximum annual growth rate: 6.7%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.55%
+
+Finally, the risk parameter “snapshot gap” will be set to 1.11% for the oracle of the [wSuperOETHb market on Base](https://app.venus.io/#/core-pool/market/0x75201D81B3B0b9D17b179118837Be37f64fc4930?chainId=8453), following the [Chaos Labs recommendations](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/4). This had to be done in the [VIP-497](https://app.venus.io/#/governance/proposal/497?chainId=56).
+
+#### Description
+
+**Capped Oracles** are a type of price oracle designed to limit the maximum value (or growth) of an asset's reported price to protect against manipulation or sudden volatility.
+
+**Cached Prices** is a new feature integrated into the Venus oracle contracts, that reduces the gas consumed by the functions that collect and return the prices, using [Transient Storage](https://soliditylang.org/blog/2024/01/26/transient-storage/) to cache the prices in the smart contract memory. This VIP doesn’t enable Cached Prices for any market on the affected networks. It only upgrades the oracle contracts to support that feature.
+
+More information about Capped Oracles and Cached Prices:
+
+- [VIP-495 [opBNB] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/495?chainId=56)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits:** [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the new implementations are properly set on Arbitrum one and ZKSync Era, and the asset prices don’t change
+- **Deployment on testnet**: the same upgrade has been performed on Arbitrum sepolia and ZKSync sepolia, and used in the Venus Protocol testnet deployment
+
+Permissions are granted to Governance on Arbitrum one and ZKSync Era, to configure the new risk parameters related to Capped oracles.
+
+#### Audit reports
+
+- [Certik audit audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/125_capped_cached_certik_20250430.pdf) (2025/04/30)
+- [Quantstamp](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/127_capped_cached_quantstamp_20250325.pdf) (2025/03/25)
+- [Fairyproof audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/126_capped_cached_fairyproof_20250319.pdf) (2025/03/19)
+
+#### Deployed contracts
+
+Mainnet
+
+- Arbitrum one
+    - [New ResilientOracle implementation](https://arbiscan.io/address/0x6B85803c8a2FE134AC1964879Bafd319E1279ff8)
+    - [New ChainlinkOracle implementation](https://arbiscan.io/address/0x4256f572B8738126466e864D453BCCD0281b3C6C)
+    - [New RedStoneOracle implementation](https://arbiscan.io/address/0x5cfCC7F674DbC64f21E66FdDE921B4467aB79aB2)
+    - [New BoundValidator implementation](https://arbiscan.io/address/0x20Fb908a61C000431C4FCb4A51FcB67b73a8A526)
+    - [New oracle for weETH](https://arbiscan.io/address/0x0afD33490fBcF537ede00F9Cc4607230bBf65774)
+    - [New oracle for wstETH](https://arbiscan.io/address/0x17a5596DF05c7bfB2280D5B9cCcDAf711e957Ed4)
+- ZKSync Era
+    - [New ResilientOracle implementation](https://explorer.zksync.io/address/0x9d04692c4f86a5fa52a5dd02F61a9cc9F685B9EB)
+    - [New ChainlinkOracle implementation](https://explorer.zksync.io/address/0xb20d1B03C62D2c8Dc150298b8D151AF022068347)
+    - [New RedStoneOracle implementation](https://explorer.zksync.io/address/0x3D45B3025c9Aa5c669B6F625592cd70b5E1F3F87)
+    - [New BoundValidator implementation](https://explorer.zksync.io/address/0xc79fE34320903dA7a19E6335417C7131293844ED)
+    - [New oracle for zkETH](https://explorer.zksync.io/address/0x407dE1229BCBD2Ec876d063F3F93c4D8a38bd81a)
+    - [New oracle for wUSDM](https://sepolia.explorer.zksync.io/address/0x22cE94e302c8C80a6C2dCfa9Da6c5286e9f28692)
+    - [New oracle for wstETH](https://sepolia.explorer.zksync.io/address/0x2DAaeb94E19145BA7633cAB2C38c76fD8c493198)
+
+Testnet
+
+- Arbitrum one
+    - [New ResilientOracle implementation](https://sepolia.arbiscan.io/address/0x992127c0cd1af5c0Ae40995193ac1adA752C12a8)
+    - [New ChainlinkOracle implementation](https://sepolia.arbiscan.io/address/0xc8614663Cc4ee868EF5267891E177586d7105D7F)
+    - [New RedStoneOracle implementation](https://sepolia.arbiscan.io/address/0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0)
+    - [New BoundValidator implementation](https://sepolia.arbiscan.io/address/0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC)
+    - [New oracle for weETH](https://sepolia.arbiscan.io/address/0x0E2a7C58e06d4924EF74fb14222aa087ECfc14D5)
+    - [New oracle for wstETH](https://sepolia.arbiscan.io/address/0xFfc4869368a3954A1b933AC94471f12B7e83C24a)
+- ZKSync Era
+    - [New ResilientOracle implementation](https://sepolia.explorer.zksync.io/address/0x4eE2399B57796A94644E1dFb5e4751FaCbE05c2E)
+    - [New ChainlinkOracle implementation](https://sepolia.explorer.zksync.io/address/0x58d8a589c111161dBb22742BF00671BEa1e32994)
+    - [New RedStoneOracle implementation](https://sepolia.explorer.zksync.io/address/0x04D8444A4aDbE4697B2Ba6Dd7Cd174bf5a37098c)
+    - [New BoundValidator implementation](https://sepolia.explorer.zksync.io/address/0x66e6744104fAa55C14A6CD356eF1016E50B907df)
+    - [New oracle for zkETH](https://sepolia.explorer.zksync.io/address/0x4C7cA0B8A23d6ff73D7dd1f74096D25628f90348)
+    - [New oracle for wUSDM](https://sepolia.explorer.zksync.io/address/0xBd09B8f1cD699F97d2c4387Fb6eA87853cF2A144)
+    - [New oracle for wstETH](https://sepolia.explorer.zksync.io/address/0xE454a8795b0077C656B4a2B4C0e72C1f3959CfCA)
+
+#### References
+
+- [Capped Oracles and Cached Prices feature](https://github.com/VenusProtocol/oracle/pull/239)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/557)
+- Upgrades on testnets
+    - [Arbitrum Sepolia](https://sepolia.arbiscan.io/tx/0x2c75e291c0c2f790c99b09c0492b2ddd51ec0be472dc54f5941090f4f700ac89)
+    - [ZKSync Sepolia](https://sepolia.explorer.zksync.io/tx/0x3098c181c0cad0b87e5d2930f3a228c6d95d3528858d4a39f2fd52ffff63a85b)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
