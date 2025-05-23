@@ -66,7 +66,7 @@ export const getSnapshotGap = (
   return snapshotGap.toString();
 };
 
-export const vip499 = () => {
+export const vip500 = () => {
   const meta = {
     version: "v2",
     title: "",
@@ -402,4 +402,4 @@ export const vip499 = () => {
   );
 };
 
-export default vip499;
+export default vip500;

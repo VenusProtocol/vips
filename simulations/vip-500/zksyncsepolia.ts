@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, {
+import vip500, {
   BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA,
   BOUND_VALIDATOR_ZKSYNC_SEPOLIA,
   CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
@@ -16,7 +16,7 @@ import vip491, {
   REDSTONE_ORACLE_ZKSYNC_SEPOLIA,
   RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA,
   RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-} from "../../vips/vip-499/bsctestnet";
+} from "../../vips/vip-500/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
@@ -88,7 +88,7 @@ forking(5157495, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491(), {
+  testForkedNetworkVipCommands("vip500", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [3]);

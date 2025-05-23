@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip491, {
+import vip500, {
   BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC,
   BOUND_VALIDATOR_ZKSYNC,
   CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC,
@@ -16,7 +16,7 @@ import vip491, {
   REDSTONE_ORACLE_ZKSYNC,
   RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC,
   RESILIENT_ORACLE_ZKSYNC,
-} from "../../vips/vip-499/bscmainnet";
+} from "../../vips/vip-500/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
@@ -139,7 +139,7 @@ forking(60671459, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip491", await vip491(), {
+  testForkedNetworkVipCommands("vip500", await vip500(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [3]);
