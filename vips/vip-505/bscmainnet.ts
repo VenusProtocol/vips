@@ -7,6 +7,7 @@ export const ERC4626_FACTORY_BASE = "0x1A430825B31DdA074751D6731Ce7Dca38D012D13"
 export const ERC4626_FACTORY_ETHEREUM = "0x39cb747453Be3416E659dAeA169540b6F000c885";
 export const ERC4626_FACTORY_UNICHAIN = "0x102fEb723C25c67dbdfDccCa3B1c1a6e1a662D2f";
 export const ERC4626_FACTORY_ZKSYNC = "0xDC59Dd76Dd7A64d743C764a9aa8C96Ff2Ea8BAc3";
+export const ERC4626_FACTORY_OPBNB = "0x89A5Ce0A6db7e66E53F148B50D879b700dEB81C8";
 
 export const vip505 = () => {
   const meta = {
@@ -55,6 +56,12 @@ export const vip505 = () => {
         signature: "acceptOwnership()",
         params: [],
         dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ERC4626_FACTORY_OPBNB,
+        signature: "acceptOwnership()",
+        params: [],
+        dstChainId: LzChainId.opbnbmainnet,
       },
     ],
     meta,
