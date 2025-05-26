@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip500, { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, LBTCOracle } from "../../vips/vip-500/bscmainnet";
+import vip501, { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, LBTCOracle } from "../../vips/vip-501/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -321,7 +321,7 @@ forking(22545550, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip500", await vip500());
+  testForkedNetworkVipCommands("vip501", await vip501());
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {

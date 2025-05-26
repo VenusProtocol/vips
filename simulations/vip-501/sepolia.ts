@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip500, { RESILIENT_ORACLE_SEPOLIA } from "../../vips/vip-500/bsctestnet";
+import vip501, { RESILIENT_ORACLE_SEPOLIA } from "../../vips/vip-501/bsctestnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -185,7 +185,7 @@ forking(8389479, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip500", await vip500());
+  testForkedNetworkVipCommands("vip501", await vip501());
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {
