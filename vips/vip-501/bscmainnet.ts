@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -53,6 +54,46 @@ export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
 export const CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
 export const FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
+
+export const sFrax_Initial_Exchange_Rate = parseUnits("1.127615818747698952", 18);
+export const sFrax_Snapshot_Timestamp = 1747301231;
+export const sFrax_Snapshot_Gap = BigNumber.from("450"); // 4.5%
+export const sFrax_Annual_Growth_Rate = parseUnits("0.5404", 18) // 54.04% 
+
+export const sUSDS_Initial_Exchange_Rate = parseUnits("1.051460907636463236", 18);
+export const sUSDS_Snapshot_Timestamp = 1747302599;
+export const sUSDS_Snapshot_Gap = BigNumber.from("135"); // 1.35%
+export const sUSDS_Annual_Growth_Rate = parseUnits("0.1624", 18); // 16.24%
+
+export const yvUSDC_Initial_Exchange_Rate = parseUnits("1.061579", 6);
+export const yvUSDC_Snapshot_Timestamp = 1747302671;
+export const yvUSDC_Snapshot_Gap = BigNumber.from("107"); // 1.07%
+export const yvUSDC_Annual_Growth_Rate = parseUnits("0.1221", 18); // 12.21%
+
+export const yvUSDT_Initial_Exchange_Rate = parseUnits("1.038594", 6);
+export const yvUSDT_Snapshot_Timestamp = 1747302683;
+export const yvUSDT_Snapshot_Gap = BigNumber.from("92"); // 0.92%
+export const yvUSDT_Annual_Growth_Rate = parseUnits("0.1108", 18); // 11.08%
+
+export const yvUSDS_Initial_Exchange_Rate = parseUnits("1.046999830558885998", 18);
+export const yvUSDS_Snapshot_Timestamp = 1747302695;
+export const yvUSDS_Snapshot_Gap = BigNumber.from("185"); // 1.85%
+export const yvUSDS_Annual_Growth_Rate = parseUnits("0.2212", 18); // 22.12%
+
+export const yvWETH_Initial_Exchange_Rate = parseUnits("1.026237622495499213", 18);
+export const yvWETH_Snapshot_Timestamp = 1747302707;
+export const yvWETH_Snapshot_Gap = BigNumber.from("43"); // 0.43%
+export const yvWETH_Annual_Growth_Rate = parseUnits("0.0518", 18); // 5.18%
+
+export const LBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
+export const LBTC_Snapshot_Timestamp = 1748286732;
+export const LBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
+export const LBTC_Annual_Growth_Rate = parseUnits("0", 18); // 0%
+
+export const eBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
+export const eBTC_Snapshot_Timestamp = 1747915775;
+export const eBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
+export const eBTC_Annual_Growth_Rate = parseUnits("0", 18); // 0%
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
 export const increaseExchangeRateByPercentage = (
@@ -262,6 +303,150 @@ export const vip501 = () => {
         ],
         dstChainId: LzChainId.ethereum,
       },
+      {
+        target: sFraxOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap), sFrax_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: sFraxOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [sFrax_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: sFraxOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: sUSDSOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap), sUSDS_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: sUSDSOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [sUSDS_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: sUSDSOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDCOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap), yvUSDC_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDCOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [yvUSDC_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDCOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDTOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap), yvUSDT_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDTOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [yvUSDT_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDTOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDSOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap), yvUSDS_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDSOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [yvUSDS_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvUSDSOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvWETHOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap), yvWETH_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvWETHOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [yvWETH_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: yvWETHOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      // {
+      //   target: LBTCOracle,
+      //   signature: "setSnapshot(uint256,uint256)",
+      //   params: [increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap), LBTC_Snapshot_Timestamp],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // {
+      //   target: LBTCOracle,
+      //   signature: "setGrowthRate(uint256,uint256)",
+      //   params: [LBTC_Annual_Growth_Rate, DAYS_30],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // {
+      //   target: LBTCOracle,
+      //   signature: "setSnapshotGap(uint256)",
+      //   params: [getSnapshotGap(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap.toNumber())],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // {
+      //   target: eBTCOracle,
+      //   signature: "setSnapshot(uint256,uint256)",
+      //   params: [increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap), eBTC_Snapshot_Timestamp],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // {
+      //   target: eBTCOracle,
+      //   signature: "setGrowthRate(uint256,uint256)",
+      //   params: [eBTC_Annual_Growth_Rate, DAYS_30],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // {
+      //   target: eBTCOracle,
+      //   signature: "setSnapshotGap(uint256)",
+      //   params: [getSnapshotGap(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap.toNumber())],
+      //   dstChainId: LzChainId.ethereum,
+      // },
     ],
     meta,
     ProposalType.REGULAR,
