@@ -1,383 +1,398 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const RESILIENT_ORACLE_ARBITRUM_SEPOLIA = "0x6708bAd042916B47311c8078b29d7f432342102F";
-export const CHAINLINK_ORACLE_ARBITRUM_SEPOLIA = "0xeDd02c7FfA31490b4107e8f2c25e9198a04F9E45";
-export const REDSTONE_ORACLE_ARBITRUM_SEPOLIA = "0x15058891ca0c71Bd724b873c41596A682420613C";
-export const BOUND_VALIDATOR_ARBITRUM_SEPOLIA = "0xfe6bc1545Cc14C131bacA97476D6035ffcC0b889";
-export const DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA = "0xA78A1Df376c3CEeBC5Fab574fe6EdDbbF76fd03e";
-export const RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0x992127c0cd1af5c0Ae40995193ac1adA752C12a8";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0xc8614663Cc4ee868EF5267891E177586d7105D7F";
-export const REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0xbDd501dB1B0D6aab299CE69ef5B86C8578947AD0";
-export const BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA = "0x2Ec432F123FEbb114e6fbf9f4F14baF0B1F14AbC";
-export const weETH_ORACLE_ARBITRUM_SEPOLIA = "0x0E2a7C58e06d4924EF74fb14222aa087ECfc14D5";
-export const weETH_ARBITRUM_SEPOLIA = "0x243141DBff86BbB0a082d790fdC21A6ff615Fa34";
-export const wstETHOracle_ARBITRUM_SEPOLIA = "0xFfc4869368a3954A1b933AC94471f12B7e83C24a";
-export const wstETH_ARBITRUM_SEPOLIA = "0x4A9dc15aA6094eF2c7eb9d9390Ac1d71f9406fAE";
-export const ACM_ARBITRUM_SEPOLIA = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
-export const NORMAL_TIMELOCK_ARBITRUM_SEPOLIA = "0x794BCA78E606f3a462C31e5Aba98653Efc1322F8";
-export const FASTTRACK_TIMELOCK_ARBITRUM_SEPOLIA = "0x14642991184F989F45505585Da52ca6A6a7dD4c8";
-export const CRITICAL_TIMELOCK_ARBITRUM_SEPOLIA = "0x0b32Be083f7041608E023007e7802430396a2123";
-export const weETH_Initial_Exchange_Rate = parseUnits("1.100000000000000000", 18);
-export const wstETH_Initial_Exchange_Rate = parseUnits("1.100000000000000000", 18);
+const { unichainsepolia } = NETWORK_ADDRESSES;
 
-export const RESILIENT_ORACLE_ZKSYNC_SEPOLIA = "0x748853B3bE26c46b4562Fd314dfb82708F395bDf";
-export const CHAINLINK_ORACLE_ZKSYNC_SEPOLIA = "0x0DFf10dCdb3526010Df01ECc42076C25C27F8323";
-export const REDSTONE_ORACLE_ZKSYNC_SEPOLIA = "0x3af097f1Dcec172D5ECdD0D1eFA6B118FF15f152";
-export const BOUND_VALIDATOR_ZKSYNC_SEPOLIA = "0x0A4daBeF41C83Af7e30FfC33feC56ba769f3D24b";
-export const DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA = "0x18E44f588a4DcF2F7145d35A5C226e129040b6D3";
-export const RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x4eE2399B57796A94644E1dFb5e4751FaCbE05c2E";
-export const CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x58d8a589c111161dBb22742BF00671BEa1e32994";
-export const REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x04D8444A4aDbE4697B2Ba6Dd7Cd174bf5a37098c";
-export const BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA = "0x66e6744104fAa55C14A6CD356eF1016E50B907df";
-export const wUSDM_ORACLE_ZKSYNC_SEPOLIA = "0xBd09B8f1cD699F97d2c4387Fb6eA87853cF2A144";
-export const wUSDM_ZKSYNC_SEPOLIA = "0x0b3C8fB109f144f6296bF4Ac52F191181bEa003a";
-export const wstETHOracle_ZKSYNC_SEPOLIA = "0xE454a8795b0077C656B4a2B4C0e72C1f3959CfCA";
-export const wstETH_ZKSYNC_SEPOLIA = "0x8507bb4F4f0915D05432011E384850B65a7FCcD1";
-export const zkETHOracle_ZKSYNC_SEPOLIA = "0x4C7cA0B8A23d6ff73D7dd1f74096D25628f90348";
-export const zkETH_ZKSYNC_SEPOLIA = "0x13231E8B60BE0900fB3a3E9dc52C2b39FA4794df";
-export const ACM_ZKSYNC_SEPOLIA = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
-export const NORMAL_TIMELOCK_ZKSYNC_SEPOLIA = "0x1730527a0f0930269313D77A317361b42971a67E";
-export const FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA = "0xb055e028b27d53a455a6c040a6952e44E9E615c4";
-export const CRITICAL_TIMELOCK_ZKSYNC_SEPOLIA = "0x0E6138bE0FA1915efC73670a20A10EFd720a6Cc8";
-export const wUSDM_Initial_Exchange_Rate = parseUnits("1", 18);
-export const zkETH_Initial_Exchange_Rate = parseUnits("1.005", 18);
+export const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
+export const WEETH_ORACLE = "0xa980158116316d0759C56D7E812D7D8cEf18B425";
+export const WSTETH_ORACLE = "0x555bD5dc1dCf87EEcC39778C3ba9DDCc40dF05c0";
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
+
+type Token = {
+  address: string;
+  decimals: number;
+  symbol: string;
+};
+
+export const weETH: Token = {
+  address: "0x3B3aCc90D848981E69052FD461123EA19dca6cAF",
+  decimals: 18,
+  symbol: "weETH",
+};
+
+export const wstETH: Token = {
+  address: "0x114B3fD3dA17F8EDBc19a3AEE43aC168Ca5b03b4",
+  decimals: 18,
+  symbol: "wstETH",
+};
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
+
+type Market = {
+  vToken: {
+    address: string;
+    name: string;
+    symbol: string;
+    underlying: Token;
+    decimals: number;
+    exchangeRate: BigNumber;
+    comptroller: string;
+  };
+  riskParameters: {
+    collateralFactor: BigNumber;
+    liquidationThreshold: BigNumber;
+    supplyCap: BigNumber;
+    borrowCap: BigNumber;
+    reserveFactor: BigNumber;
+    protocolSeizeShare: BigNumber;
+  };
+  initialSupply: {
+    amount: BigNumber;
+    vTokensToBurn: BigNumber;
+    vTokenReceiver: string;
+  };
+  interestRateModel: {
+    address: string;
+    base: string;
+    multiplier: string;
+    jump: string;
+    kink: string;
+  };
+  cappedOracles: {
+    exchangeRateValue: BigNumber;
+    exchangeRateTimestamp: number;
+    annualGrowthRate: BigNumber;
+    snapshotIntervalInSeconds: number;
+    snapshotGapBps: BigNumber;
+  };
+};
+
+export const weETHMarket: Market = {
+  vToken: {
+    address: "0xF46F0E1Fe165018EC778e0c61a71661f55aEa09B",
+    name: "Venus weETH (Core)",
+    symbol: "vweETH_Core",
+    underlying: weETH,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.7", 18),
+    liquidationThreshold: parseUnits("0.75", 18),
+    supplyCap: parseUnits("4000", 18),
+    borrowCap: parseUnits("400", 18),
+    reserveFactor: parseUnits("0.4", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("3", 18),
+    vTokensToBurn: parseUnits("0.03", 8), // around $100
+    vTokenReceiver: unichainsepolia.VTREASURY,
+  },
+  interestRateModel: {
+    address: "0xa8f62DE954852c39BC66ff9B103c8D4758982309",
+    base: "0",
+    multiplier: "0.09",
+    jump: "3",
+    kink: "0.45",
+  },
+  cappedOracles: {
+    exchangeRateValue: parseUnits("1.06778921", 18),
+    exchangeRateTimestamp: 1747589544,
+    annualGrowthRate: parseUnits("0.053", 18), // 5.3%
+    snapshotIntervalInSeconds: DAYS_30,
+    snapshotGapBps: BigNumber.from("44"), // 0.44%
+  },
+};
+
+export const wstETHMarket: Market = {
+  vToken: {
+    address: "0xb24c9a851542B4599Eb6C1644ce2e245074c885f",
+    name: "Venus wstETH (Core)",
+    symbol: "vwstETH_Core",
+    underlying: wstETH,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.7", 18),
+    liquidationThreshold: parseUnits("0.725", 18),
+    supplyCap: parseUnits("14000", 18),
+    borrowCap: parseUnits("7000", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("3", 18),
+    vTokensToBurn: parseUnits("0.03", 8), // around $100
+    vTokenReceiver: unichainsepolia.VTREASURY,
+  },
+  interestRateModel: {
+    address: "0x5C7D8858a25778d992eE803Ce79F1eff60c1d9D1",
+    base: "0",
+    multiplier: "0.15",
+    jump: "3",
+    kink: "0.45",
+  },
+  cappedOracles: {
+    exchangeRateValue: parseUnits("1.20297267", 18),
+    exchangeRateTimestamp: 1747589544,
+    annualGrowthRate: parseUnits("0.067", 18), // 6.7%
+    snapshotIntervalInSeconds: DAYS_30,
+    snapshotGapBps: BigNumber.from("55"), // 0.55%
+  },
+};
+
+export const exchangeRatePercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  return exchangeRate.mul(percentage).div(10000);
+};
+
 export const increaseExchangeRateByPercentage = (
   exchangeRate: BigNumber,
   percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
 ) => {
-  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  const increaseAmount = exchangeRatePercentage(exchangeRate, percentage);
   return exchangeRate.add(increaseAmount).toString();
 };
 
-export const vip499 = () => {
+const vip499 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-499 [Unichain] Add weETH and wstETH markets to the Core pool",
+    description: "",
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
     [
+      // oracle config
       {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_ARBITRUM_SEPOLIA, RESILIENT_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ARBITRUM_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ARBITRUM_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: DEFAULT_PROXY_ADMIN_ARBITRUM_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_ARBITRUM_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: ACM_ARBITRUM_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_ARBITRUM_SEPOLIA],
-        dstChainId: LzChainId.arbitrumsepolia,
-      },
-      {
-        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        target: WEETH_ORACLE,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(weETH_Initial_Exchange_Rate, BigNumber.from("44")), 1747682525],
-        dstChainId: LzChainId.arbitrumsepolia,
+        params: [
+          increaseExchangeRateByPercentage(
+            weETHMarket.cappedOracles.exchangeRateValue,
+            weETHMarket.cappedOracles.snapshotGapBps,
+          ),
+          weETHMarket.cappedOracles.exchangeRateTimestamp,
+        ],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        target: WEETH_ORACLE,
         signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.053", 18), DAYS_30],
-        dstChainId: LzChainId.arbitrumsepolia,
+        params: [weETHMarket.cappedOracles.annualGrowthRate, weETHMarket.cappedOracles.snapshotIntervalInSeconds],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: weETH_ORACLE_ARBITRUM_SEPOLIA,
+        target: WEETH_ORACLE,
         signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0044", 18)],
-        dstChainId: LzChainId.arbitrumsepolia,
+        params: [
+          exchangeRatePercentage(weETHMarket.cappedOracles.exchangeRateValue, weETHMarket.cappedOracles.snapshotGapBps),
+        ],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        target: WSTETH_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(
+            wstETHMarket.cappedOracles.exchangeRateValue,
+            wstETHMarket.cappedOracles.snapshotGapBps,
+          ),
+          wstETHMarket.cappedOracles.exchangeRateTimestamp,
+        ],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: WSTETH_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [wstETHMarket.cappedOracles.annualGrowthRate, wstETHMarket.cappedOracles.snapshotIntervalInSeconds],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: WSTETH_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [
+          exchangeRatePercentage(
+            wstETHMarket.cappedOracles.exchangeRateValue,
+            wstETHMarket.cappedOracles.snapshotGapBps,
+          ),
+        ],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: unichainsepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [weETH.address, parseUnits("1", 18)],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: unichainsepolia.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [wstETH.address, parseUnits("1", 18)],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: unichainsepolia.RESILIENT_ORACLE,
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
           [
-            weETH_ARBITRUM_SEPOLIA,
-            [weETH_ORACLE_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            // weETH config
+            [
+              weETH.address,
+              [WEETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
+            // wstETH config
+            [
+              wstETH.address,
+              [WSTETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
           ],
         ],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.unichainsepolia,
+      },
+
+      // <--- weETH Market --->
+      // Market configurations
+      {
+        target: weETHMarket.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: ["86400"],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: wstETHOracle_ARBITRUM_SEPOLIA,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
-        dstChainId: LzChainId.arbitrumsepolia,
+        target: weETH.address,
+        signature: "faucet(uint256)",
+        params: [weETHMarket.initialSupply.amount],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: wstETHOracle_ARBITRUM_SEPOLIA,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.067", 18), DAYS_30],
-        dstChainId: LzChainId.arbitrumsepolia,
+        target: weETH.address,
+        signature: "approve(address,uint256)",
+        params: [unichainsepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: wstETHOracle_ARBITRUM_SEPOLIA,
-        signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0055", 18)],
-        dstChainId: LzChainId.arbitrumsepolia,
+        target: weETH.address,
+        signature: "approve(address,uint256)",
+        params: [unichainsepolia.POOL_REGISTRY, weETHMarket.initialSupply.amount],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: RESILIENT_ORACLE_ARBITRUM_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        target: unichainsepolia.POOL_REGISTRY,
+        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
           [
-            wstETH_ARBITRUM_SEPOLIA,
-            [wstETHOracle_ARBITRUM_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            weETHMarket.vToken.address,
+            weETHMarket.riskParameters.collateralFactor, // CF
+            weETHMarket.riskParameters.liquidationThreshold, // LT
+            weETHMarket.initialSupply.amount, // initial supply
+            unichainsepolia.NORMAL_TIMELOCK, // vToken receiver
+            weETHMarket.riskParameters.supplyCap, // supply cap
+            weETHMarket.riskParameters.borrowCap, // borrow cap
           ],
         ],
-        dstChainId: LzChainId.arbitrumsepolia,
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [RESILIENT_ORACLE_ZKSYNC_SEPOLIA, RESILIENT_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: weETHMarket.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, weETHMarket.initialSupply.vTokensToBurn],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(weETHMarket.initialSupply.amount, weETHMarket.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(weETHMarket.initialSupply.vTokensToBurn);
+        return {
+          target: weETHMarket.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [weETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainsepolia,
+        };
+      })(),
+
+      // <--- wstETH Market --->
+      // Market configurations
+      {
+        target: wstETHMarket.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: ["86400"],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [CHAINLINK_ORACLE_ZKSYNC_SEPOLIA, CHAINLINK_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: wstETH.address,
+        signature: "faucet(uint256)",
+        params: [wstETHMarket.initialSupply.amount],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [REDSTONE_ORACLE_ZKSYNC_SEPOLIA, REDSTONE_ORACLE_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: wstETH.address,
+        signature: "approve(address,uint256)",
+        params: [unichainsepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: DEFAULT_PROXY_ADMIN_ZKSYNC_SEPOLIA,
-        signature: "upgrade(address,address)",
-        params: [BOUND_VALIDATOR_ZKSYNC_SEPOLIA, BOUND_VALIDATOR_IMPLEMENTATION_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: wstETH.address,
+        signature: "approve(address,uint256)",
+        params: [unichainsepolia.POOL_REGISTRY, wstETHMarket.initialSupply.amount],
+        dstChainId: LzChainId.unichainsepolia,
       },
+
       {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", NORMAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", NORMAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", NORMAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", CRITICAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", CRITICAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", CRITICAL_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: ACM_ZKSYNC_SEPOLIA,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", FASTTRACK_TIMELOCK_ZKSYNC_SEPOLIA],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(wUSDM_Initial_Exchange_Rate, BigNumber.from("49")), 1746726168],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.061", 18), DAYS_30],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: wUSDM_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0049", 18)],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        target: unichainsepolia.POOL_REGISTRY,
+        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
           [
-            wUSDM_ZKSYNC_SEPOLIA,
-            [wUSDM_ORACLE_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
+            wstETHMarket.vToken.address,
+            wstETHMarket.riskParameters.collateralFactor, // CF
+            wstETHMarket.riskParameters.liquidationThreshold, // LT
+            wstETHMarket.initialSupply.amount, // initial supply
+            unichainsepolia.NORMAL_TIMELOCK, // vToken receiver
+            wstETHMarket.riskParameters.supplyCap, // supply cap
+            wstETHMarket.riskParameters.borrowCap, // borrow cap
           ],
         ],
-        dstChainId: LzChainId.zksyncsepolia,
+        dstChainId: LzChainId.unichainsepolia,
       },
       {
-        target: wstETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(wstETH_Initial_Exchange_Rate, BigNumber.from("55")), 1747682525],
-        dstChainId: LzChainId.zksyncsepolia,
+        target: wstETHMarket.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, wstETHMarket.initialSupply.vTokensToBurn],
+        dstChainId: LzChainId.unichainsepolia,
       },
-      {
-        target: wstETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.067", 18), DAYS_30],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: wstETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0055", 18)],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            wstETH_ZKSYNC_SEPOLIA,
-            [wstETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: zkETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(zkETH_Initial_Exchange_Rate, BigNumber.from("44")), 1746726159],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: zkETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [parseUnits("0.073", 18), DAYS_30],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: zkETHOracle_ZKSYNC_SEPOLIA,
-        signature: "setSnapshotGap(uint256)",
-        params: [parseUnits("0.0044", 18)],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
-      {
-        target: RESILIENT_ORACLE_ZKSYNC_SEPOLIA,
-        signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [
-          [
-            zkETH_ZKSYNC_SEPOLIA,
-            [zkETHOracle_ZKSYNC_SEPOLIA, ethers.constants.AddressZero, ethers.constants.AddressZero],
-            [true, false, false],
-            false,
-          ],
-        ],
-        dstChainId: LzChainId.zksyncsepolia,
-      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(
+          wstETHMarket.initialSupply.amount,
+          wstETHMarket.vToken.exchangeRate,
+        );
+        const vTokensRemaining = vTokensMinted.sub(wstETHMarket.initialSupply.vTokensToBurn);
+        return {
+          target: wstETHMarket.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [wstETHMarket.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.unichainsepolia,
+        };
+      })(),
     ],
     meta,
     ProposalType.REGULAR,
