@@ -12,8 +12,8 @@ import {
   WUSDM_LIQUIDATOR,
   ZKSYNCMAINNET_COMPTROLLER_BEACON,
   ZKSYNC_COMPTROLLER_IMPL,
-  vip500,
-} from "../../vips/vip-500/bscmainnet";
+  vip502,
+} from "../../vips/vip-502/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_BEACON_ABI from "./abi/Beacon.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -186,7 +186,7 @@ forking(60447320, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip500 WUSDM Liquidator", await vip500(), {
+  testForkedNetworkVipCommands("vip502 WUSDM Liquidator", await vip502(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted", "PermissionRevoked"], [5, 5]);
       await expectEvents(
