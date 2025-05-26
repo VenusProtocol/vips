@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { VUSD1, vip505 } from "../../vips/vip-505/bscmainnet";
+import { VUSD1, vip501 } from "../../vips/vip-501/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 export const USD1 = "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d";
@@ -26,7 +26,7 @@ forking(50329732, async () => {
     });
   });
 
-  testVip("VIP-505 Increase CF in USD1", await vip505(), {
+  testVip("VIP-501 Increase CF in USD1", await vip501(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor"], [1]);
     },
