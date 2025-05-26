@@ -3,9 +3,23 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip501, { RESILIENT_ORACLE_SEPOLIA } from "../../vips/vip-501/bsctestnet";
+import vip501, {
+  BOUND_VALIDATOR_IMPLEMENTATION_SEPOLIA,
+  BOUND_VALIDATOR_SEPOLIA,
+  CHAINLINK_ORACLE_IMPLEMENTATION_SEPOLIA,
+  CHAINLINK_ORACLE_SEPOLIA,
+  DEFAULT_PROXY_ADMIN_SEPOLIA,
+  REDSTONE_ORACLE_IMPLEMENTATION_SEPOLIA,
+  REDSTONE_ORACLE_SEPOLIA,
+  RESILIENT_ORACLE_IMPLEMENTATION_SEPOLIA,
+  RESILIENT_ORACLE_SEPOLIA,
+} from "../../vips/vip-501/bsctestnet";
+import ACM_ABI from "./abi/ACM.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
@@ -174,7 +188,7 @@ forking(8389479, async () => {
   await impersonateAccount(sepolia.NORMAL_TIMELOCK);
   await setBalance(sepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE_SEPOLIA, RESILIENT_ORACLE_ABI, provider);
-
+  const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN_SEPOLIA, PROXY_ADMIN_ABI, provider);
   describe("Pre-VIP behaviour", async () => {
     for (const price of prices) {
       it(`check ${price.symbol} price`, async () => {
@@ -183,7 +197,13 @@ forking(8389479, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip501", await vip501());
+  testForkedNetworkVipCommands("vip501", await vip501(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [17]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {
@@ -191,5 +211,28 @@ forking(8389479, async () => {
         expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
       });
     }
+
+    describe("New implementations", () => {
+      it("Resilient oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE_SEPOLIA)).to.equal(
+          RESILIENT_ORACLE_IMPLEMENTATION_SEPOLIA,
+        );
+      });
+      it("Chainlink oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE_SEPOLIA)).to.equal(
+          CHAINLINK_ORACLE_IMPLEMENTATION_SEPOLIA,
+        );
+      });
+      it("RedStone oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE_SEPOLIA)).to.equal(
+          REDSTONE_ORACLE_IMPLEMENTATION_SEPOLIA,
+        );
+      });
+      it("Bound validator", async () => {
+        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR_SEPOLIA)).to.equal(
+          BOUND_VALIDATOR_IMPLEMENTATION_SEPOLIA,
+        );
+      });
+    });
   });
 });

@@ -3,11 +3,24 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
+import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip501, { CHAINLINK_ORACLE, REDSTONE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-501/bscmainnet";
+import vip501, {
+  BOUND_VALIDATOR,
+  BOUND_VALIDATOR_IMPLEMENTATION,
+  CHAINLINK_ORACLE,
+  CHAINLINK_ORACLE_IMPLEMENTATION,
+  DEFAULT_PROXY_ADMIN,
+  REDSTONE_ORACLE,
+  REDSTONE_ORACLE_IMPLEMENTATION,
+  RESILIENT_ORACLE,
+  RESILIENT_ORACLE_IMPLEMENTATION,
+} from "../../vips/vip-501/bscmainnet";
+import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import PROXY_ABI from "./abi/Proxy.json";
+import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
@@ -320,6 +333,7 @@ forking(22545550, async () => {
   await impersonateAccount(ethereum.NORMAL_TIMELOCK);
   await setBalance(ethereum.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
   const resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
+  const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
   describe("Pre-VIP behaviour", async () => {
     for (const price of prices) {
       it(`check ${price.symbol} price`, async () => {
@@ -331,7 +345,13 @@ forking(22545550, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip501", await vip501());
+  testForkedNetworkVipCommands("vip501", await vip501(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [17]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {
@@ -344,5 +364,20 @@ forking(22545550, async () => {
         );
       });
     }
+
+    describe("New implementations", () => {
+      it("Resilient oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE)).to.equal(RESILIENT_ORACLE_IMPLEMENTATION);
+      });
+      it("Chainlink oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE)).to.equal(CHAINLINK_ORACLE_IMPLEMENTATION);
+      });
+      it("RedStone oracle", async () => {
+        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE)).to.equal(REDSTONE_ORACLE_IMPLEMENTATION);
+      });
+      it("Bound validator", async () => {
+        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR)).to.equal(BOUND_VALIDATOR_IMPLEMENTATION);
+      });
+    });
   });
 });

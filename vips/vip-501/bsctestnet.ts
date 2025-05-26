@@ -244,6 +244,12 @@ export const vip501 = () => {
               [true, false, false],
               false,
             ],
+            [
+              pufETH,
+              [pufETHOracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
           ],
         ],
         dstChainId: LzChainId.sepolia,
