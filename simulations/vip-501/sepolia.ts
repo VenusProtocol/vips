@@ -3,11 +3,9 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriod } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip501, { RESILIENT_ORACLE_SEPOLIA } from "../../vips/vip-501/bsctestnet";
-import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
@@ -70,7 +68,7 @@ const prices = [
   },
   {
     symbol: "vUSDC",
-    address: "0xF87bceab8DD37489015B426bA931e08A4D787616",  
+    address: "0xF87bceab8DD37489015B426bA931e08A4D787616",
     expectedPrice: parseUnits("0.99982329", 30),
   },
   {
@@ -168,7 +166,7 @@ const prices = [
     address: "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D",
     expectedPrice: parseUnits("2554.05", 18),
   },
-]
+];
 
 forking(8389479, async () => {
   const provider = ethers.provider;
@@ -193,5 +191,5 @@ forking(8389479, async () => {
         expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
       });
     }
-  })
+  });
 });

@@ -6,11 +6,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip501, { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, LBTCOracle } from "../../vips/vip-501/bscmainnet";
+import vip501, { CHAINLINK_ORACLE, REDSTONE_ORACLE, RESILIENT_ORACLE } from "../../vips/vip-501/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import VTOKEN_ABI from "./abi/VToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import ONE_JUMP_ABI from "./abi/OneJumpOracle.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
@@ -59,7 +58,7 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  
+
   {
     symbol: "vEIGEN",
     address: "0x256AdDBe0a387c98f487e44b85c29eb983413c5e",
@@ -97,14 +96,14 @@ const prices = [
     symbol: "vLBTC",
     address: "0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91",
     expectedPrice: parseUnits("107914.76", 28),
-    preVIP: async function (resilientOracle: any, address: string) {
+    preVIP: async function () {
       await setRedstonePrice(
-        REDSTONE_ORACLE, 
-        "0x8236a87084f8B84306f72007F36F2618A5634494", 
-        "0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81", 
+        REDSTONE_ORACLE,
+        "0x8236a87084f8B84306f72007F36F2618A5634494",
+        "0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81",
         ethereum.NORMAL_TIMELOCK,
         31536000,
-        { tokenDecimals: 8 }
+        { tokenDecimals: 8 },
       );
     },
   },
@@ -130,7 +129,7 @@ const prices = [
     address: "0xE36Ae842DbbD7aE372ebA02C8239cd431cC063d6",
     expectedPrice: parseUnits("1.052189541866986697", 18),
     expectedPriceAfterVIP: parseUnits("1.052444688096262922", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
+    postVIP: async function (resilientOracle: any) {
       const token = new ethers.Contract("0xdC035D45d973E3EC169d2276DDab16f1e407384F", ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
     },
@@ -148,7 +147,7 @@ const prices = [
   },
   {
     symbol: "vUSDC",
-    address: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",  
+    address: "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
     expectedPrice: parseUnits("0.99974", 30),
     postVIP: async function (resilientOracle: any, address: string) {
       const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
@@ -230,12 +229,13 @@ const prices = [
     address: "0xCca202a95E8096315E3F19E46e19E1b326634889",
     expectedPrice: parseUnits("1.00026326", 18),
     expectedPriceAfterVIP: parseUnits("1.00046097", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
+    postVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
-        CHAINLINK_ORACLE, 
-        "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3", 
-        "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961", 
-        ethereum.NORMAL_TIMELOCK)
+        CHAINLINK_ORACLE,
+        "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+        "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961",
+        ethereum.NORMAL_TIMELOCK,
+      );
     },
   },
   {
@@ -255,8 +255,13 @@ const prices = [
     address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
     expectedPrice: parseUnits("2658.9338837746224496", 18),
     expectedPriceAfterVIP: parseUnits("2658.846280146065974169", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110", "0x636A000262F6aA9e1F094ABF0aD8f645C44f641C", ethereum.NORMAL_TIMELOCK)
+    postVIP: async function () {
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110",
+        "0x636A000262F6aA9e1F094ABF0aD8f645C44f641C",
+        ethereum.NORMAL_TIMELOCK,
+      );
     },
   },
   {
@@ -274,11 +279,11 @@ const prices = [
     symbol: "vpufETH",
     address: "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
     expectedPrice: parseUnits("2653.2206967778723566", 18),
-    preVIP: async function (resilientOracle: any, address: string) {
+    preVIP: async function () {
       await setRedstonePrice(
-        REDSTONE_ORACLE, 
-        "0xD9A442856C234a39a81a089C06451EBAa4306a72", 
-        "0x76A495b0bFfb53ef3F0E94ef0763e03cE410835C", 
+        REDSTONE_ORACLE,
+        "0xD9A442856C234a39a81a089C06451EBAa4306a72",
+        "0x76A495b0bFfb53ef3F0E94ef0763e03cE410835C",
         ethereum.NORMAL_TIMELOCK,
       );
     },
@@ -288,8 +293,13 @@ const prices = [
     address: "0xDB6C345f864883a8F4cae87852Ac342589E76D1B",
     expectedPrice: parseUnits("2646.2260006032432054", 18),
     expectedPriceAfterVIP: parseUnits("2646.628509873306393614", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7", "0x03c68933f7a3F76875C0bc670a58e69294cDFD01", ethereum.NORMAL_TIMELOCK)
+    postVIP: async function () {
+      await setMaxStalePeriodInChainlinkOracle(
+        CHAINLINK_ORACLE,
+        "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7",
+        "0x03c68933f7a3F76875C0bc670a58e69294cDFD01",
+        ethereum.NORMAL_TIMELOCK,
+      );
     },
   },
   {
@@ -302,7 +312,7 @@ const prices = [
     address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
     expectedPrice: parseUnits("3050.858367961193361526", 18),
   },
-]
+];
 
 forking(22545550, async () => {
   const provider = ethers.provider;
@@ -314,7 +324,7 @@ forking(22545550, async () => {
     for (const price of prices) {
       it(`check ${price.symbol} price`, async () => {
         if (price.preVIP) {
-          await price.preVIP(resilientOracle, price.address);
+          await price.preVIP();
         }
         expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
       });
@@ -329,8 +339,10 @@ forking(22545550, async () => {
         if (price.postVIP) {
           await price.postVIP(resilientOracle, price.address);
         }
-        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPriceAfterVIP || price.expectedPrice);
+        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(
+          price.expectedPriceAfterVIP || price.expectedPrice,
+        );
       });
     }
-  })
+  });
 });
