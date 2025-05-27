@@ -35,7 +35,7 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-const vip500 = () => {
+const vip503 = () => {
   const meta = {
     version: "v2",
     title: "[sepolia] New sUSDe and USDe market in the Core pool",
@@ -162,4 +162,4 @@ const vip500 = () => {
   );
 };
 
-export default vip500;
+export default vip503;

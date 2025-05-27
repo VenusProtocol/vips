@@ -4,17 +4,17 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip500, {
+import vip503, {
   Actions,
   COMPTROLLER_LiquidStakedBNB,
   VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
-} from "../../vips/vip-500/bsctestnet";
+} from "../../vips/vip-503/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
 
-forking(52148327, async () => {
+forking(49928270, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -43,7 +43,7 @@ forking(52148327, async () => {
     });
   });
 
-  testVip("VIP-500 bsctestnet", await vip500(), {
+  testVip("VIP-503 bscmainnet", await vip503(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewCollateralFactor", "ActionPausedMarket"], [1, 2]);
       await expectEvents(

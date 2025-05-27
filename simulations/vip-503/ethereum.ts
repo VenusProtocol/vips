@@ -1,36 +1,51 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip500, {
+import vip503, {
   Actions,
   Comptroller_Ethena,
   Comptroller_LiquidStakedETH,
+  PT_weETH_26DEC2024_LiquidStakedETH,
+  Pendle_Router,
+  Timelock_Ethereum,
   VToken_vPT_USDe_27MAR2025_Ethena,
   VToken_vPT_sUSDE_27MAR2025_Ethena,
   VToken_vPT_weETH_26DEC2024_LiquidStakedETH,
   VToken_vUSDC_Ethena,
   VToken_vsUSDe_Ethena,
   VTreasury_Ethereum,
-} from "../../vips/vip-500/bsctestnet";
+  weETH_Address,
+  weETH_expected,
+} from "../../vips/vip-503/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import ERC20_ABI from "./abi/erc20.json";
+import PENDLE_ROUTER_ABI from "./abi/pendlerouter.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
+import VTREASURY_ABI from "./abi/vtreasury.json";
 
 const provider = ethers.provider;
 const VTREASURY_BALANCE_vPtTokenWeETH = parseUnits("1.79961879", 8);
 
-forking(8358866, async () => {
+forking(22475162, async () => {
   let comptrollerEthena: Contract;
   let comptrollerLSETH: Contract;
   let vPtTokenWeETH: Contract;
+  let ptTokenWeETH: Contract;
+  let weETH: Contract;
+  let weEthBefore: BigNumber;
 
   before(async () => {
     comptrollerEthena = new ethers.Contract(Comptroller_Ethena, COMPTROLLER_ABI, provider);
     comptrollerLSETH = new ethers.Contract(Comptroller_LiquidStakedETH, COMPTROLLER_ABI, provider);
     vPtTokenWeETH = new ethers.Contract(VToken_vPT_weETH_26DEC2024_LiquidStakedETH, VTOKEN_ABI, provider);
+    ptTokenWeETH = new ethers.Contract(PT_weETH_26DEC2024_LiquidStakedETH, ERC20_ABI, provider);
+
+    weETH = new ethers.Contract(weETH_Address, ERC20_ABI, provider);
+    weEthBefore = await weETH.balanceOf(VTreasury_Ethereum);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -115,6 +130,11 @@ forking(8358866, async () => {
         expect(isPaused).to.be.false;
       });
 
+      it("Check PT token approval is zero", async () => {
+        const allowance = await ptTokenWeETH.allowance(Timelock_Ethereum, Pendle_Router);
+        expect(allowance).to.equal(0);
+      });
+
       it("Check treasury vToken balance", async () => {
         const balance = await vPtTokenWeETH.balanceOf(VTreasury_Ethereum);
         expect(balance).to.equal(VTREASURY_BALANCE_vPtTokenWeETH);
@@ -122,20 +142,25 @@ forking(8358866, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-500 sepolia", await vip500(), {
+  testForkedNetworkVipCommands("VIP-503 ethereum", await vip503(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, VTOKEN_ABI],
+        [COMPTROLLER_ABI, VTOKEN_ABI, VTREASURY_ABI, PENDLE_ROUTER_ABI],
         [
           "ActionPausedMarket",
           "NewCollateralFactor",
           "NewLiquidationThreshold",
+          "WithdrawTreasuryToken",
+          "Redeem",
+          "RedeemPyToToken",
+          "Approval",
           "NewBorrowCap",
           "NewBorrowCap",
           "MarketUnlisted",
+          "Transfer",
         ],
-        [18, 4, 1, 1, 1, 1],
+        [18, 4, 1, 1, 1, 1, 2, 1, 1, 1, 8],
       );
     },
   });
@@ -225,6 +250,31 @@ forking(8358866, async () => {
           Actions.ENTER_MARKET,
         ); // Enter market action
         expect(isPaused).to.be.true;
+      });
+
+      it("Check treasury holds no vPT tokens after redemption", async () => {
+        const vptBalance = await vPtTokenWeETH.balanceOf(VTreasury_Ethereum);
+        expect(vptBalance).to.equal(0);
+      });
+
+      it("Verify Pendle redemption occurred", async () => {
+        const treasuryBalance = await ptTokenWeETH.balanceOf(VTreasury_Ethereum);
+        expect(treasuryBalance).to.equal(0);
+      });
+
+      it("Check Normal Timelock holds no vPT tokens after redemption", async () => {
+        const vptBalance = await vPtTokenWeETH.balanceOf(Timelock_Ethereum);
+        expect(vptBalance).to.equal(0);
+      });
+
+      it("Check Normal Timelock holds no PT tokens after redemption", async () => {
+        const treasuryBalance = await ptTokenWeETH.balanceOf(Timelock_Ethereum);
+        expect(treasuryBalance).to.equal(0);
+      });
+
+      it("Verify treasury received weEth after Pendle redemption", async () => {
+        const weEthAfter = await weETH.balanceOf(VTreasury_Ethereum);
+        expect(weEthAfter.sub(weEthBefore)).to.equal(weETH_expected);
       });
     });
   });
