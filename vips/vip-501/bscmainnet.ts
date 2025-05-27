@@ -60,7 +60,7 @@ export const SECONDS_PER_YEAR = 31_536_000;
 export const sFrax_Initial_Exchange_Rate = parseUnits("1.127615818747698952", 18);
 export const sFrax_Snapshot_Timestamp = 1747301231;
 export const sFrax_Snapshot_Gap = BigNumber.from("450"); // 4.5%
-export const sFrax_Annual_Growth_Rate = parseUnits("0.5404", 18) // 54.04% 
+export const sFrax_Annual_Growth_Rate = parseUnits("0.5404", 18); // 54.04%
 
 export const sUSDS_Initial_Exchange_Rate = parseUnits("1.051460907636463236", 18);
 export const sUSDS_Snapshot_Timestamp = 1747302599;
@@ -88,7 +88,7 @@ export const yvWETH_Snapshot_Gap = BigNumber.from("43"); // 0.43%
 export const yvWETH_Annual_Growth_Rate = parseUnits("0.0518", 18); // 5.18%
 
 export const LBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
-export const LBTC_Snapshot_Timestamp = 1748286732;
+export const LBTC_Snapshot_Timestamp = 1747301231;
 export const LBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
 export const LBTC_Annual_Growth_Rate = SECONDS_PER_YEAR; // 0%
 
@@ -308,7 +308,10 @@ export const vip501 = () => {
       {
         target: sFraxOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap), sFrax_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap),
+          sFrax_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -326,7 +329,10 @@ export const vip501 = () => {
       {
         target: sUSDSOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap), sUSDS_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap),
+          sUSDS_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -344,7 +350,10 @@ export const vip501 = () => {
       {
         target: yvUSDCOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap), yvUSDC_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap),
+          yvUSDC_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -362,7 +371,10 @@ export const vip501 = () => {
       {
         target: yvUSDTOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap), yvUSDT_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap),
+          yvUSDT_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -380,7 +392,10 @@ export const vip501 = () => {
       {
         target: yvUSDSOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap), yvUSDS_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap),
+          yvUSDS_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -398,7 +413,10 @@ export const vip501 = () => {
       {
         target: yvWETHOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap), yvWETH_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap),
+          yvWETH_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -416,7 +434,10 @@ export const vip501 = () => {
       {
         target: LBTCOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap), LBTC_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap),
+          LBTC_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -434,7 +455,10 @@ export const vip501 = () => {
       {
         target: eBTCOracle,
         signature: "setSnapshot(uint256,uint256)",
-        params: [increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap), eBTC_Snapshot_Timestamp],
+        params: [
+          increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap),
+          eBTC_Snapshot_Timestamp,
+        ],
         dstChainId: LzChainId.ethereum,
       },
       {

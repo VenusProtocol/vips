@@ -7,15 +7,15 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip501, {
-  BOUND_VALIDATOR_IMPLEMENTATION,
   BOUND_VALIDATOR,
-  CHAINLINK_ORACLE_IMPLEMENTATION,
+  BOUND_VALIDATOR_IMPLEMENTATION,
   CHAINLINK_ORACLE,
+  CHAINLINK_ORACLE_IMPLEMENTATION,
   DEFAULT_PROXY_ADMIN,
-  REDSTONE_ORACLE_IMPLEMENTATION,
   REDSTONE_ORACLE,
-  RESILIENT_ORACLE_IMPLEMENTATION,
+  REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE,
+  RESILIENT_ORACLE_IMPLEMENTATION,
 } from "../../vips/vip-501/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
@@ -214,24 +214,16 @@ forking(8389479, async () => {
 
     describe("New implementations", () => {
       it("Resilient oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE)).to.equal(
-          RESILIENT_ORACLE_IMPLEMENTATION,
-        );
+        expect(await proxyAdmin.getProxyImplementation(RESILIENT_ORACLE)).to.equal(RESILIENT_ORACLE_IMPLEMENTATION);
       });
       it("Chainlink oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE)).to.equal(
-          CHAINLINK_ORACLE_IMPLEMENTATION,
-        );
+        expect(await proxyAdmin.getProxyImplementation(CHAINLINK_ORACLE)).to.equal(CHAINLINK_ORACLE_IMPLEMENTATION);
       });
       it("RedStone oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE)).to.equal(
-          REDSTONE_ORACLE_IMPLEMENTATION,
-        );
+        expect(await proxyAdmin.getProxyImplementation(REDSTONE_ORACLE)).to.equal(REDSTONE_ORACLE_IMPLEMENTATION);
       });
       it("Bound validator", async () => {
-        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR)).to.equal(
-          BOUND_VALIDATOR_IMPLEMENTATION,
-        );
+        expect(await proxyAdmin.getProxyImplementation(BOUND_VALIDATOR)).to.equal(BOUND_VALIDATOR_IMPLEMENTATION);
       });
     });
   });
