@@ -12,21 +12,24 @@ import vip501, {
   QUANTSTAMP,
   QUANTSTAMP_AMOUNT,
   USDC,
+  USDT,
 } from "../../vips/vip-501/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
 forking(50391406, async () => {
   let usdc: Contract;
+  let usdt: Contract;
 
-  let prevUSDCBalanceOfCertik: BigNumber;
+  let prevUSDTBalanceOfCertik: BigNumber;
   let prevUSDCBalanceOfFairyproof: BigNumber;
   let prevUSDCBalanceOfQuantstamp: BigNumber;
 
   before(async () => {
     usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
+    usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
 
-    prevUSDCBalanceOfCertik = await usdc.balanceOf(CERTIK);
+    prevUSDTBalanceOfCertik = await usdt.balanceOf(CERTIK);
     prevUSDCBalanceOfFairyproof = await usdc.balanceOf(FAIRYPROOF);
     prevUSDCBalanceOfQuantstamp = await usdc.balanceOf(QUANTSTAMP);
   });
@@ -39,11 +42,11 @@ forking(50391406, async () => {
 
   describe("Post-VIP behavior", async () => {
     it("check balances", async () => {
-      const usdcBalanceOfCertik = await usdc.balanceOf(CERTIK);
+      const usdtBalanceOfCertik = await usdt.balanceOf(CERTIK);
       const usdcBalanceOfFairyproof = await usdc.balanceOf(FAIRYPROOF);
       const usdcBalanceOfQuantstamp = await usdc.balanceOf(QUANTSTAMP);
 
-      expect(usdcBalanceOfCertik.sub(prevUSDCBalanceOfCertik)).to.equal(CERTIK_AMOUNT);
+      expect(usdtBalanceOfCertik.sub(prevUSDTBalanceOfCertik)).to.equal(CERTIK_AMOUNT);
       expect(usdcBalanceOfFairyproof.sub(prevUSDCBalanceOfFairyproof)).to.equal(FAIRYPROOF_AMOUNT);
       expect(usdcBalanceOfQuantstamp.sub(prevUSDCBalanceOfQuantstamp)).to.equal(QUANTSTAMP_AMOUNT);
     });
