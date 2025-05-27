@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip501, { COMPTROLLER_CORE, USDe, VUSDe_CORE, VsUSDe_CORE, sUSDe } from "../../vips/vip-501/bsctestnet";
+import vip504, { COMPTROLLER_CORE, USDe, VUSDe_CORE, VsUSDe_CORE, sUSDe } from "../../vips/vip-504/bsctestnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkoracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -45,7 +45,7 @@ forking(8358866, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-501 sepolia", await vip501(), {
+  testForkedNetworkVipCommands("VIP-504 sepolia", await vip504(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

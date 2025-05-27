@@ -42,7 +42,7 @@ export const BaseAssets = [
 ];
 export const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
-export const vip501 = () => {
+export const vip504 = () => {
   const meta = {
     version: "v2",
     title: "[ethereum] New sUSDe and USDe market in the Core pool",
@@ -235,4 +235,4 @@ export const vip501 = () => {
   );
 };
 
-export default vip501;
+export default vip504;

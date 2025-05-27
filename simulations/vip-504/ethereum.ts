@@ -11,7 +11,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip501, {
+import vip504, {
   COMPTROLLER_CORE,
   USDe,
   USDe_INITIAL_SUPPLY,
@@ -20,7 +20,7 @@ import vip501, {
   VsUSDe_CORE,
   sUSDe,
   sUSDe_INITIAL_SUPPLY,
-} from "../../vips/vip-501/bscmainnet";
+} from "../../vips/vip-504/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkoracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -74,7 +74,7 @@ forking(22475162, async () => {
     await usde.connect(USDeHolder).transfer(ethereum.VTREASURY, USDe_INITIAL_SUPPLY);
   });
 
-  testForkedNetworkVipCommands("VIP-501 ethereum", await vip501(), {
+  testForkedNetworkVipCommands("VIP-504 ethereum", await vip504(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
