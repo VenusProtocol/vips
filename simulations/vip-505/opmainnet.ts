@@ -11,7 +11,7 @@ import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 const { opmainnet } = NETWORK_ADDRESSES;
 const ACM = "0xD71b1F33f6B0259683f11174EE4Ddc2bb9cE4eD6";
 const DEPLOYER = "0xC76363B887031e79E6A2954c5515f5E5507A6387";
-const BLOCK_NUMBER = 136149119;
+const BLOCK_NUMBER = 136371135;
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
