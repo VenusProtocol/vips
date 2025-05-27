@@ -55,6 +55,8 @@ export const NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
 export const CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
 export const FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
 
+export const SECONDS_PER_YEAR = 31_536_000;
+
 export const sFrax_Initial_Exchange_Rate = parseUnits("1.127615818747698952", 18);
 export const sFrax_Snapshot_Timestamp = 1747301231;
 export const sFrax_Snapshot_Gap = BigNumber.from("450"); // 4.5%
@@ -88,12 +90,12 @@ export const yvWETH_Annual_Growth_Rate = parseUnits("0.0518", 18); // 5.18%
 export const LBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
 export const LBTC_Snapshot_Timestamp = 1748286732;
 export const LBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
-export const LBTC_Annual_Growth_Rate = parseUnits("0", 18); // 0%
+export const LBTC_Annual_Growth_Rate = SECONDS_PER_YEAR; // 0%
 
 export const eBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
 export const eBTC_Snapshot_Timestamp = 1747915775;
 export const eBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
-export const eBTC_Annual_Growth_Rate = parseUnits("0", 18); // 0%
+export const eBTC_Annual_Growth_Rate = SECONDS_PER_YEAR; // 0%
 
 export const DAYS_30 = 30 * 24 * 60 * 60;
 export const increaseExchangeRateByPercentage = (
@@ -411,42 +413,42 @@ export const vip501 = () => {
         params: [getSnapshotGap(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap.toNumber())],
         dstChainId: LzChainId.ethereum,
       },
-      // {
-      //   target: LBTCOracle,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap), LBTC_Snapshot_Timestamp],
-      //   dstChainId: LzChainId.ethereum,
-      // },
-      // {
-      //   target: LBTCOracle,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [LBTC_Annual_Growth_Rate, DAYS_30],
-      //   dstChainId: LzChainId.ethereum,
-      // },
-      // {
-      //   target: LBTCOracle,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap.toNumber())],
-      //   dstChainId: LzChainId.ethereum,
-      // },
-      // {
-      //   target: eBTCOracle,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap), eBTC_Snapshot_Timestamp],
-      //   dstChainId: LzChainId.ethereum,
-      // },
-      // {
-      //   target: eBTCOracle,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [eBTC_Annual_Growth_Rate, DAYS_30],
-      //   dstChainId: LzChainId.ethereum,
-      // },
-      // {
-      //   target: eBTCOracle,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap.toNumber())],
-      //   dstChainId: LzChainId.ethereum,
-      // },
+      {
+        target: LBTCOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap), LBTC_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: LBTCOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [LBTC_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: LBTCOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: eBTCOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap), eBTC_Snapshot_Timestamp],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: eBTCOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [eBTC_Annual_Growth_Rate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: eBTCOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap.toNumber())],
+        dstChainId: LzChainId.ethereum,
+      },
     ],
     meta,
     ProposalType.REGULAR,
