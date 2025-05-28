@@ -16,8 +16,8 @@ import {
   TRANSFER_ALL_CONTRACT,
   VBNB,
   WBNB,
-  vip503,
-} from "../../vips/vip-503/bscmainnet";
+  vip504,
+} from "../../vips/vip-504/bscmainnet";
 import RISK_FUND_CONVERTER_ABI from "./abi/RiskFundConverter.json";
 import COMPTROLLER_ABI from "./abi/comptrollerAbi.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -50,7 +50,7 @@ forking(50408291, async () => {
     });
   });
 
-  testVip("VIP-503", await vip503(), {
+  testVip("VIP-504", await vip504(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["DiamondCut"], [2]);
       const events = await getEventArgs(txResponse, VBNB_ABI, "Redeem");

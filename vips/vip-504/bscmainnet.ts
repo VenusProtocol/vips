@@ -45,7 +45,7 @@ const TEN_PERCENT_VTOKENS = BigNumber.from(BNB_EXPLOITER_VTOKEN_BALANCE.sub(NINE
 const EXCHANGE_RATE = BigNumber.from("247776129138777185713728909");
 export const TEN_PERCENT_UNDERLYING = EXCHANGE_RATE.mul(TEN_PERCENT_VTOKENS).div(parseUnits("1", 18));
 
-export const vip503 = () => {
+export const vip504 = () => {
   const meta = {
     version: "v2",
     title: "VIP-503 [BNB Chain] 0x48..9BEC Account remediation: Concluding steps",
@@ -179,4 +179,4 @@ This VIP uses the following auxiliary contracts to perform the required steps:
   );
 };
 
-export default vip503;
+export default vip504;
