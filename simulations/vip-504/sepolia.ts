@@ -57,15 +57,8 @@ forking(8358866, async () => {
           RESILIENT_ORACLE_ABI,
           CHAINLINK_ORACLE_ABI,
         ],
-        [
-          "TokenConfigAdded",
-          "Approval",
-          "Transfer",
-          "ConversionConfigUpdated",
-          "NewReduceReservesBlockDelta",
-          "MarketAdded",
-        ],
-        [2, 24, 24, 5, 2, 2],
+        ["Approval", "Transfer", "ConversionConfigUpdated", "NewReduceReservesBlockDelta", "MarketAdded"],
+        [24, 24, 5, 2, 2],
       );
     },
   });
@@ -158,6 +151,10 @@ forking(8358866, async () => {
         it(`should set correct borrow cap`, async () => {
           expect(await comptroller.borrowCaps(VsUSDe_CORE)).to.equal(0);
           expect(await comptroller.borrowCaps(VUSDe_CORE)).to.equal(parseUnits("25000000", 18));
+        });
+
+        it("Should pause borrow action for sUSDe market", async () => {
+          expect(await comptroller.actionPaused(VsUSDe_CORE, 2)).to.equal(true);
         });
       });
 

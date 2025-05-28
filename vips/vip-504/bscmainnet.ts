@@ -6,9 +6,6 @@ import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { ethereum } = NETWORK_ADDRESSES;
-const BOUND_VALIDATOR = "0x1Cd5f336A1d28Dff445619CC63d3A0329B4d8a58";
-const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
-const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
 
 export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
@@ -22,10 +19,6 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   const EXP_SCALE = parseUnits("1", 18);
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
-
-const REDSTONE_USDe_FEED = "0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58";
-const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
-const STALE_PERIOD = 60 * 60 * 24 * 3;
 
 // converters
 export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
@@ -42,6 +35,10 @@ export const BaseAssets = [
 ];
 export const CONVERSION_INCENTIVE = parseUnits("3", 14);
 
+const Actions = {
+  BORROW: 2,
+};
+
 export const vip504 = () => {
   const meta = {
     version: "v2",
@@ -55,33 +52,6 @@ export const vip504 = () => {
   return makeProposal(
     [
       // Add Markets to the Core pool
-      {
-        target: BOUND_VALIDATOR,
-        signature: "setValidateConfig((address,uint256,uint256))",
-        params: [[USDe, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ethereum.REDSTONE_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[USDe, REDSTONE_USDe_FEED, STALE_PERIOD]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ethereum.CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[USDe, CHAINLINK_USDe_FEED, STALE_PERIOD]],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ethereum.RESILIENT_ORACLE,
-        signature: "setTokenConfig((address,address[3],bool[3]))",
-        params: [
-          [USDe, [ethereum.REDSTONE_ORACLE, ethereum.CHAINLINK_ORACLE, ethereum.CHAINLINK_ORACLE], [true, true, true]],
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-
       // Market configurations sUSDe
       {
         target: VsUSDe_CORE,
@@ -92,7 +62,7 @@ export const vip504 = () => {
       {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [sUSDe, parseUnits("10000", 18), ethereum.NORMAL_TIMELOCK],
+        params: [sUSDe, sUSDe_INITIAL_SUPPLY, ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -139,6 +109,12 @@ export const vip504 = () => {
           dstChainId: LzChainId.ethereum,
         };
       })(),
+      {
+        target: COMPTROLLER_CORE,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VsUSDe_CORE], [Actions.BORROW], true],
+        dstChainId: LzChainId.ethereum,
+      },
 
       // Market configurations USDe
       {
@@ -150,7 +126,7 @@ export const vip504 = () => {
       {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [USDe, parseUnits("10000", 18), ethereum.NORMAL_TIMELOCK],
+        params: [USDe, USDe_INITIAL_SUPPLY, ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {

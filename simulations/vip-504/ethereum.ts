@@ -6,6 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { expectEvents } from "src/utils";
+import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -35,6 +36,7 @@ const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
 const USDe_HOLDER = "0x33AE83071432116AE892693b45466949a38Ac74C";
 const sUSDe_HOLDER = "0x15Bb5D31048381c84a157526cEF9513531b8BE1e";
+const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
 forking(22475162, async () => {
   let comptrollerCore: Contract;
@@ -70,6 +72,12 @@ forking(22475162, async () => {
     susde = await ethers.getContractAt(ERC20_ABI, sUSDe);
     usde = await ethers.getContractAt(ERC20_ABI, USDe);
 
+    await setMaxStalePeriodInChainlinkOracle(
+      ethereum.CHAINLINK_ORACLE,
+      USDe,
+      CHAINLINK_USDe_FEED,
+      ethereum.NORMAL_TIMELOCK,
+    );
     await susde.connect(sUSDeHolder).transfer(ethereum.VTREASURY, sUSDe_INITIAL_SUPPLY);
     await usde.connect(USDeHolder).transfer(ethereum.VTREASURY, USDe_INITIAL_SUPPLY);
   });
@@ -88,7 +96,6 @@ forking(22475162, async () => {
           CHAINLINK_ORACLE_ABI,
         ],
         [
-          "TokenConfigAdded",
           "Approval",
           "Transfer",
           "ConversionConfigUpdated",
@@ -96,7 +103,7 @@ forking(22475162, async () => {
           "NewReduceReservesBlockDelta",
           "MarketAdded",
         ],
-        [3, 24, 24, 5, 2, 2, 2],
+        [24, 24, 5, 2, 2, 2],
       );
     },
   });
@@ -192,6 +199,10 @@ forking(22475162, async () => {
         it(`should set correct borrow cap`, async () => {
           expect(await comptroller.borrowCaps(VsUSDe_CORE)).to.equal(0);
           expect(await comptroller.borrowCaps(VUSDe_CORE)).to.equal(parseUnits("25000000", 18));
+        });
+
+        it("should pause borrow action for sUSDe market", async () => {
+          expect(await comptroller.actionPaused(VsUSDe_CORE, 2)).to.equal(true);
         });
       });
 
