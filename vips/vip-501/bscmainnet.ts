@@ -17,7 +17,7 @@ export const weETH_ORACLE = "0x07ac126C57640a53DFf378FF6A8603bEdF9fE94d";
 export const weETH = "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee";
 export const weETHsOracle = "0x77f5deEcd0418c396dB9A5fbf37e36D85c996CE5";
 export const weETHs = "0x917ceE801a67f933F2e6b33fC0cD1ED2d5909D88";
-export const sFraxOracle = "0x0e86F8203DAd5681bD512C3C0B49948b234a6023";
+export const sFraxOracle = "0x1aDCE75BB3164bBf6060a4f44262df5414473110";
 export const sFrax = "0xA663B02CF0a4b149d2aD41910CB81e23e1c41c32";
 export const PTweETHOracle = "0xB89C0F93442C269271cB4e9Acd10E81D3fC237Ba";
 export const PTweETH = "0x6ee2b5E19ECBa773a352E5B21415Dc419A700d1d";
@@ -33,20 +33,20 @@ export const ezETH_Redstone_Oracle = "0xA6efeF98D9C4E9FF8193f80FbABF92AD92D50500
 export const ezETH = "0xbf5495Efe5DB9ce00f80364C8B423567e58d2110";
 export const sUSDeOracle = "0x3150b7Ff6687a94dBdF0a3A7E99B20Dad428EA16";
 export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
-export const sUSDSOracle = "0x4bfEB803d1156453198f2820450A2B64301e9E4C";
+export const sUSDSOracle = "0xEC3865a8a5DCb8C507781DA17A38b754E3d01C50";
 export const sUSDS = "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD";
-export const yvUSDCOracle = "0x74E7b5D3eD9b80473D5B28a6bd11C9C7E510b284";
+export const yvUSDCOracle = "0xA938eFfc4f68262E17eAcfAFD41Ee68b0F8874D1";
 export const yvUSDC = "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204";
-export const yvUSDTOracle = "0x0011b8A451DC619Dc39f5cB968A9dce329246FCF";
+export const yvUSDTOracle = "0xbC0289BFbF3F14af0829f10640a7B7E539910723";
 export const yvUSDT = "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa";
-export const yvUSDSOracle = "0x3Bd4E87c0BD4FF33261D39fd0d5b1c9Cc468bBb5";
+export const yvUSDSOracle = "0xC96e808c4cb2538b4cd05A22D4132bA24aaa3793";
 export const yvUSDS = "0x182863131F9a4630fF9E27830d945B1413e347E8";
-export const yvWETHOracle = "0xC14a07b33a49b2e663ACBC2DDc6e34d9e5ea1Ab8";
+export const yvWETHOracle = "0x38b3643c1b5160591073cc4121Bd91A456F14Acd";
 export const yvWETH = "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0";
 export const eBTC = "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642";
-export const eBTCOracle = "0xF68E8925d45fb6679aE8caF7f859C76BdD964325";
+export const eBTCOracle = "0x04d6096A6F089047C7af6E4644D18fB766B8d4cE";
 export const LBTC = "0x8236a87084f8B84306f72007F36F2618A5634494";
-export const LBTCOracle = "0x27A8ca2aFa10B9Bc1E57FC4Ca610d9020Aab3739";
+export const LBTCOracle = "0x54B033D102db7DD734E0Ad649463E90fFA78D853";
 export const pufETH = "0xD9A442856C234a39a81a089C06451EBAa4306a72";
 export const pufETHOracle = "0x4fCbfE445396f31005b3Fd2F6DE2A986d6E2dCB5";
 
@@ -54,65 +54,6 @@ export const ACM = "0x230058da2D23eb8836EC5DB7037ef7250c56E25E";
 export const NORMAL_TIMELOCK = "0xd969E79406c35E80750aAae061D402Aab9325714";
 export const CRITICAL_TIMELOCK = "0xeB9b85342c34F65af734C7bd4a149c86c472bC00";
 export const FASTTRACK_TIMELOCK = "0x8764F50616B62a99A997876C2DEAaa04554C5B2E";
-
-export const SECONDS_PER_YEAR = 31_536_000;
-
-export const sFrax_Initial_Exchange_Rate = parseUnits("1.127615818747698952", 18);
-export const sFrax_Snapshot_Timestamp = 1747301231;
-export const sFrax_Snapshot_Gap = BigNumber.from("450"); // 4.5%
-export const sFrax_Annual_Growth_Rate = parseUnits("0.5404", 18); // 54.04%
-
-export const sUSDS_Initial_Exchange_Rate = parseUnits("1.051460907636463236", 18);
-export const sUSDS_Snapshot_Timestamp = 1747302599;
-export const sUSDS_Snapshot_Gap = BigNumber.from("135"); // 1.35%
-export const sUSDS_Annual_Growth_Rate = parseUnits("0.1624", 18); // 16.24%
-
-export const yvUSDC_Initial_Exchange_Rate = parseUnits("1.061579", 6);
-export const yvUSDC_Snapshot_Timestamp = 1747302671;
-export const yvUSDC_Snapshot_Gap = BigNumber.from("107"); // 1.07%
-export const yvUSDC_Annual_Growth_Rate = parseUnits("0.1221", 18); // 12.21%
-
-export const yvUSDT_Initial_Exchange_Rate = parseUnits("1.038594", 6);
-export const yvUSDT_Snapshot_Timestamp = 1747302683;
-export const yvUSDT_Snapshot_Gap = BigNumber.from("92"); // 0.92%
-export const yvUSDT_Annual_Growth_Rate = parseUnits("0.1108", 18); // 11.08%
-
-export const yvUSDS_Initial_Exchange_Rate = parseUnits("1.046999830558885998", 18);
-export const yvUSDS_Snapshot_Timestamp = 1747302695;
-export const yvUSDS_Snapshot_Gap = BigNumber.from("185"); // 1.85%
-export const yvUSDS_Annual_Growth_Rate = parseUnits("0.2212", 18); // 22.12%
-
-export const yvWETH_Initial_Exchange_Rate = parseUnits("1.026237622495499213", 18);
-export const yvWETH_Snapshot_Timestamp = 1747302707;
-export const yvWETH_Snapshot_Gap = BigNumber.from("43"); // 0.43%
-export const yvWETH_Annual_Growth_Rate = parseUnits("0.0518", 18); // 5.18%
-
-export const LBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
-export const LBTC_Snapshot_Timestamp = 1747301231;
-export const LBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
-export const LBTC_Annual_Growth_Rate = SECONDS_PER_YEAR; // 0%
-
-export const eBTC_Initial_Exchange_Rate = parseUnits("1.00000000", 8);
-export const eBTC_Snapshot_Timestamp = 1747915775;
-export const eBTC_Snapshot_Gap = BigNumber.from("400"); // 4%
-export const eBTC_Annual_Growth_Rate = SECONDS_PER_YEAR; // 0%
-
-export const DAYS_30 = 30 * 24 * 60 * 60;
-export const increaseExchangeRateByPercentage = (
-  exchangeRate: BigNumber,
-  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
-) => {
-  const increaseAmount = exchangeRate.mul(percentage).div(10000);
-  return exchangeRate.add(increaseAmount).toString();
-};
-export const getSnapshotGap = (
-  exchangeRate: BigNumber,
-  percentage: number, // BPS value (e.g., 10000 for 100%)
-) => {
-  // snapshot gap is percentage of the exchange rate
-  const snapshotGap = exchangeRate.mul(percentage).div(10000);
-  return snapshotGap.toString();
-};
 
 export const vip501 = () => {
   const meta = {
@@ -303,174 +244,6 @@ export const vip501 = () => {
             ],
           ],
         ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sFraxOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap),
-          sFrax_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sFraxOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [sFrax_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sFraxOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(sFrax_Initial_Exchange_Rate, sFrax_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sUSDSOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap),
-          sUSDS_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sUSDSOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [sUSDS_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: sUSDSOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(sUSDS_Initial_Exchange_Rate, sUSDS_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDCOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap),
-          yvUSDC_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDCOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [yvUSDC_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDCOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(yvUSDC_Initial_Exchange_Rate, yvUSDC_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDTOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap),
-          yvUSDT_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDTOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [yvUSDT_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDTOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(yvUSDT_Initial_Exchange_Rate, yvUSDT_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDSOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap),
-          yvUSDS_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDSOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [yvUSDS_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvUSDSOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(yvUSDS_Initial_Exchange_Rate, yvUSDS_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvWETHOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap),
-          yvWETH_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvWETHOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [yvWETH_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: yvWETHOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(yvWETH_Initial_Exchange_Rate, yvWETH_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: LBTCOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap),
-          LBTC_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: LBTCOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [LBTC_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: LBTCOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(LBTC_Initial_Exchange_Rate, LBTC_Snapshot_Gap.toNumber())],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: eBTCOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap),
-          eBTC_Snapshot_Timestamp,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: eBTCOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [eBTC_Annual_Growth_Rate, DAYS_30],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: eBTCOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(eBTC_Initial_Exchange_Rate, eBTC_Snapshot_Gap.toNumber())],
         dstChainId: LzChainId.ethereum,
       },
     ],
