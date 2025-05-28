@@ -6,9 +6,9 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip504, { USDT, USDT_AMOUNT, VTOKEN_RECEIVER } from "../../vips/vip-504/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTREASURY_ABI from "./abi/VTreasuryBEP20.json";
+import ERC20_ABI from "./abi/erc20.json";
 
 const { VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
