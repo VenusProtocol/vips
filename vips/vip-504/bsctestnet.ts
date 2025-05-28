@@ -16,6 +16,7 @@ export const VUSDe_CORE = "0x36e8955c305aa48A99e4c953C9883989a7364a42";
 
 export const sUSDe_INITIAL_SUPPLY = parseUnits("10000", 18);
 export const USDe_INITIAL_SUPPLY = parseUnits("10000", 18);
+export const VsUSDe_IR_MODEL = "0xc948752610D09E9f2B2A9C7114d9593DDED85487";
 
 // Converters
 export const USDT_PRIME_CONVERTER = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
@@ -59,6 +60,12 @@ const vip504 = () => {
         target: VsUSDe_CORE,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["7200"],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: VsUSDe_CORE,
+        signature: "setInterestRateModel(address)",
+        params: [VsUSDe_IR_MODEL],
         dstChainId: LzChainId.sepolia,
       },
       {

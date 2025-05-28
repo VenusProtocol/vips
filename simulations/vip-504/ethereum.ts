@@ -19,6 +19,7 @@ import vip504, {
   VTOKEN_RECEIVER,
   VUSDe_CORE,
   VsUSDe_CORE,
+  VsUSDe_IR_MODEL,
   sUSDe,
   sUSDe_INITIAL_SUPPLY,
 } from "../../vips/vip-504/bscmainnet";
@@ -158,6 +159,12 @@ forking(22475162, async () => {
         });
       });
 
+      describe("Interest rate model", () => {
+        it("should set interest rate model for sUSDe", async () => {
+          expect(await vToken1.interestRateModel()).to.equals(VsUSDe_IR_MODEL);
+        });
+      });
+
       describe(`risk parameters`, () => {
         let comptroller: Contract;
 
@@ -212,9 +219,9 @@ forking(22475162, async () => {
           "VsUSDe",
           {
             base: "0",
-            multiplier: "0",
-            jump: "0",
-            kink: "0",
+            multiplier: "0.08",
+            jump: "0.8",
+            kink: "0.8",
           },
           BLOCKS_PER_YEAR,
         );

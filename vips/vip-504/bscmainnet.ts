@@ -17,6 +17,7 @@ export const VsUSDe_CORE = "0xa836ce315b7A6Bb19397Ee996551659B1D92298e";
 export const VUSDe_CORE = "0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3";
 export const sUSDe_INITIAL_SUPPLY = parseUnits("10000", 18);
 export const USDe_INITIAL_SUPPLY = parseUnits("10000", 18);
+export const VsUSDe_IR_MODEL = "0x410a068C2ca9986d2b76d0A7b2b5DF336499114f";
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
   return amount.mul(EXP_SCALE).div(exchangeRate);
@@ -59,6 +60,12 @@ export const vip504 = () => {
         target: VsUSDe_CORE,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["7200"],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: VsUSDe_CORE,
+        signature: "setInterestRateModel(address)",
+        params: [VsUSDe_IR_MODEL],
         dstChainId: LzChainId.ethereum,
       },
       {

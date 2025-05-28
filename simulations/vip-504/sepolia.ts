@@ -9,7 +9,14 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip504, { COMPTROLLER_CORE, USDe, VUSDe_CORE, VsUSDe_CORE, sUSDe } from "../../vips/vip-504/bsctestnet";
+import vip504, {
+  COMPTROLLER_CORE,
+  USDe,
+  VUSDe_CORE,
+  VsUSDe_CORE,
+  VsUSDe_IR_MODEL,
+  sUSDe,
+} from "../../vips/vip-504/bsctestnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkoracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -110,6 +117,12 @@ forking(8358866, async () => {
         });
       });
 
+      describe("Interest rate model", () => {
+        it("should set interest rate model for sUSDe", async () => {
+          expect(await vToken1.interestRateModel()).to.equals(VsUSDe_IR_MODEL);
+        });
+      });
+
       describe(`risk parameters`, () => {
         let comptroller: Contract;
 
@@ -164,9 +177,9 @@ forking(8358866, async () => {
           "VsUSDe",
           {
             base: "0",
-            multiplier: "0",
-            jump: "0",
-            kink: "0",
+            multiplier: "0.08",
+            jump: "0.8",
+            kink: "0.8",
           },
           BLOCKS_PER_YEAR,
         );
