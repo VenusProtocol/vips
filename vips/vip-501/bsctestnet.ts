@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
