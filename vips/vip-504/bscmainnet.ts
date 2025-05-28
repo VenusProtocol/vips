@@ -5,12 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { ethereum } = NETWORK_ADDRESSES;
+const { ethereum, bscmainnet } = NETWORK_ADDRESSES;
 
 export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const USDe = "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const USDT_AMOUNT = parseUnits("200", 18);
 export const VsUSDe_CORE = "0xa836ce315b7A6Bb19397Ee996551659B1D92298e";
 export const VUSDe_CORE = "0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3";
 export const sUSDe_INITIAL_SUPPLY = parseUnits("10000", 18);
@@ -204,6 +206,11 @@ export const vip504 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[4], [USDe], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, USDT_AMOUNT, VTOKEN_RECEIVER],
       },
     ],
     meta,
