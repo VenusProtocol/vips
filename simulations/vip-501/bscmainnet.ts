@@ -15,6 +15,7 @@ import vip501, {
   USDT,
 } from "../../vips/vip-501/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
 
 forking(50391406, async () => {
@@ -37,6 +38,12 @@ forking(50391406, async () => {
   testVip("VIP-501", await vip501(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [3]);
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
+      );
     },
   });
 
