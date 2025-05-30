@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip501, {
+import vip506, {
   BOUND_VALIDATOR,
   BOUND_VALIDATOR_IMPLEMENTATION,
   CHAINLINK_ORACLE,
@@ -16,7 +16,7 @@ import vip501, {
   REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE,
   RESILIENT_ORACLE_IMPLEMENTATION,
-} from "../../vips/vip-501/bsctestnet";
+} from "../../vips/vip-506/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
@@ -197,7 +197,7 @@ forking(8430576, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip501", await vip501(), {
+  testForkedNetworkVipCommands("vip506", await vip506(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [4]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [17]);
