@@ -354,7 +354,7 @@ forking(52922185, async () => {
 
       for (const [name, address] of Object.entries(BNB_VTOKENS.BTC)) {
         it(`should set ${name} collateral factor to 0`, async () => {
-          const market = await comptroller_defi.markets(address);
+          const market = await comptroller_btc.markets(address);
           expect(market.collateralFactorMantissa).to.equal(0);
         });
       }
@@ -422,7 +422,7 @@ forking(52922185, async () => {
 
       for (const [name, address] of Object.entries(BNB_VTOKENS.LiquidStakedETH)) {
         it(`should set ${name} collateral factor to 0`, async () => {
-          const market = await comptroller_defi.markets(address);
+          const market = await comptroller_liquid_staked_eth.markets(address);
           expect(market.collateralFactorMantissa).to.equal(0);
         });
       }
@@ -452,7 +452,7 @@ forking(52922185, async () => {
 
       for (const [name, address] of Object.entries(BNB_VTOKENS.Meme)) {
         it(`should set ${name} collateral factor to 0`, async () => {
-          const market = await comptroller_defi.markets(address);
+          const market = await comptroller_meme.markets(address);
           expect(market.collateralFactorMantissa).to.equal(0);
         });
       }
@@ -524,7 +524,7 @@ forking(52922185, async () => {
       });
       for (const [name, address] of Object.entries(BNB_VTOKENS.Stablecoins)) {
         it(`should set ${name} collateral factor to 0`, async () => {
-          const market = await comptroller_defi.markets(address);
+          const market = await comptroller_stablecoin.markets(address);
           expect(market.collateralFactorMantissa).to.equal(0);
         });
       }
@@ -582,7 +582,7 @@ forking(52922185, async () => {
       });
       for (const [name, address] of Object.entries(BNB_VTOKENS.Tron)) {
         it(`should set ${name} collateral factor to 0`, async () => {
-          const market = await comptroller_defi.markets(address);
+          const market = await comptroller_tron.markets(address);
           expect(market.collateralFactorMantissa).to.equal(0);
         });
       }
