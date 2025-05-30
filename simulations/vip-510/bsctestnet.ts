@@ -143,18 +143,18 @@ forking(52922185, async () => {
     });
 
     describe("COMPTROLLER_STABLECOIN", async () => {
-      it("unpaused actions for VToken_vHAY_StableCoins", async () => {
+      it("unpaused actions for VToken_vlisUSD_StableCoins", async () => {
         let paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_StableCoins,
+          BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins,
           Actions.BORROW,
         );
         expect(paused).to.be.false;
 
-        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vHAY_StableCoins, Actions.MINT);
+        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins, Actions.MINT);
         expect(paused).to.be.false;
 
         paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_StableCoins,
+          BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins,
           Actions.ENTER_MARKET,
         );
         expect(paused).to.be.false;
@@ -458,18 +458,18 @@ forking(52922185, async () => {
       }
     });
     describe("COMPTROLLER_STABLECOIN", async () => {
-      it("unpaused actions for VToken_vHAY_StableCoins", async () => {
+      it("unpaused actions for VToken_vlisUSD_StableCoins", async () => {
         let paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_StableCoins,
+          BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins,
           Actions.BORROW,
         );
         expect(paused).to.be.true;
 
-        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vHAY_StableCoins, Actions.MINT);
+        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins, Actions.MINT);
         expect(paused).to.be.true;
 
         paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_StableCoins,
+          BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins,
           Actions.ENTER_MARKET,
         );
         expect(paused).to.be.true;

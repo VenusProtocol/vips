@@ -35,7 +35,7 @@ export const BNB_VTOKENS = {
   },
   Stablecoins: {
     vEURA_Stablecoins: "0x4E1D35166776825402d50AfE4286c500027211D1",
-    vHAY_StableCoins: "0x170d3b2da05cc2124334240fB34ad1359e34C562",
+    vlisUSD_StableCoins: "0x170d3b2da05cc2124334240fB34ad1359e34C562",
     vUSDD_StableCoins: "0x899dDf81DfbbF5889a16D075c352F2b959Dd24A4",
     vUSDT_StableCoins: "0x3338988d0beb4419Acb8fE624218754053362D06",
   },
@@ -163,7 +163,7 @@ export const vip510 = () => {
         params: [
           [
             BNB_VTOKENS.Stablecoins.vEURA_Stablecoins,
-            BNB_VTOKENS.Stablecoins.vHAY_StableCoins,
+            BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins,
             BNB_VTOKENS.Stablecoins.vUSDD_StableCoins,
             BNB_VTOKENS.Stablecoins.vUSDT_StableCoins,
           ],
@@ -179,7 +179,7 @@ export const vip510 = () => {
       {
         target: BNB_COMPTROLLERS.Stablecoins,
         signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [BNB_VTOKENS.Stablecoins.vHAY_StableCoins, COLLATERAL_FACTOR, parseUnits("0.7", 18)],
+        params: [BNB_VTOKENS.Stablecoins.vlisUSD_StableCoins, COLLATERAL_FACTOR, parseUnits("0.7", 18)],
       },
       {
         target: BNB_COMPTROLLERS.Stablecoins,
