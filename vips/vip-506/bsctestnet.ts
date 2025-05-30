@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -70,6 +71,10 @@ export const UNI_vUSDC_Core_IRM = "0x871C80dd0d165307eEeeCF6B0aC0a3Af91B90FE4";
 export const ZK_vUSDCe_Core_IRM = "0xad9Be61CEdcEf76Dd45843Aa2C303A98512F0bAD";
 export const ZK_vUSDT_Core_IRM = "0xad9Be61CEdcEf76Dd45843Aa2C303A98512F0bAD";
 export const ZK_vUSDC_Core_IRM = "0x73cF3585bE170f3813E1C26eBc0fd9042daCFB30";
+
+export const vBNB = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
+export const vBNB_ADMIN = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
+export const newRF = parseUnits("0.3", 18);
 
 const vip506 = () => {
   const meta = {
@@ -282,9 +287,16 @@ const vip506 = () => {
         params: [ZK_vUSDC_Core_IRM],
         dstChainId: LzChainId.zksyncsepolia,
       },
+
+      // Set RF in VBNB
+      {
+        target: vBNB_ADMIN,
+        signature: "_setReserveFactor(uint256)",
+        params: [newRF],
+      },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.REGULAR,
   );
 };
 

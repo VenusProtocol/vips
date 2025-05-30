@@ -1,5 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
@@ -34,6 +35,8 @@ import vip506, {
   BNB_vUSDT_Tron_IRM,
   BNB_vlisUSD_Stablecoin,
   BNB_vlisUSD_Stablecoin_IRM,
+  newRF,
+  vBNB,
 } from "../../vips/vip-506/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
@@ -74,12 +77,19 @@ const newIRMs = [
 ];
 
 forking(52603412, async () => {
+  let vbnb: Contract;
+  before(async () => {
+    vbnb = new ethers.Contract(vBNB, VTOKEN_ABI, ethers.provider);
+  });
   describe("Pre-VIP behaviour", async () => {
     it("check IRM address", async () => {
       for (const [market, expectedModel] of oldIRMs) {
         const marketContract = new ethers.Contract(market, VTOKEN_ABI, ethers.provider);
         expect(await marketContract.interestRateModel()).to.equals(expectedModel);
       }
+      it("check reserve factor of VBNB", async () => {
+        expect(await vbnb.reserveFactorMantissa()).to.equal(ethers.utils.parseUnits("0.1", 18));
+      });
     });
 
     checkInterestRate("0x2182450eC9780F17511FeAcE6FC3ED8F774157b3", "FDUSD_CORE", {
@@ -140,7 +150,7 @@ forking(52603412, async () => {
         [6, 0],
       );
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [10]);
-      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel"], [4]);
+      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [4, 1]);
     },
   });
 
@@ -150,6 +160,9 @@ forking(52603412, async () => {
         const marketContract = new ethers.Contract(market, VTOKEN_ABI, ethers.provider);
         expect(await marketContract.interestRateModel()).to.equals(expectedIRM);
       }
+      it("check reserve factor of VBNB", async () => {
+        expect(await vbnb.reserveFactorMantissa()).to.equal(newRF);
+      });
     });
 
     checkInterestRate(BNB_vFDUSD_CORE_IRM, "FDUSD_CORE", {
