@@ -7,25 +7,27 @@ import { makeProposal } from "src/utils";
 import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
-  NETWORK_ADDRESSES.bsctestnet;
-export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const xSolvBTC = "0x3ea87323806586A0282b50377e0FEa76070F532B";
-export const vxSolvBTC = "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e";
-export const xSolvBTC_Oracle = "0x9783294c8c2073A7e91A6F8B1b5f5658056232C8";
+  NETWORK_ADDRESSES.bscmainnet;
+export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+export const vxSolvBTC = "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5";
+export const xSolvBTC_Oracle = "0xD39f9280873EB8A312246ee85f7ff118cb8206bb";
+export const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
+export const stalePeriod = 7 * 60 * 60; // 7 hours in seconds
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
 // Converters
-const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
-const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
-const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
-const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
-const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
-const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
-const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
-const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 export const CONVERSION_INCENTIVE = 1e14;
 
 export const converterBaseAssets = {
@@ -84,7 +86,7 @@ export const marketSpec = {
   },
   initialSupply: {
     amount: parseUnits("1", 18),
-    vTokensToBurn: parseUnits("0.001666", 8), // Approximately $100
+    vTokensToBurn: parseUnits("0.0009615", 8), // Approximately $100
     vTokenReceiver: VTREASURY,
   },
   riskParameters: {
@@ -110,8 +112,8 @@ export const vip505 = () => {
       // Configure Oracle
       {
         target: REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [marketSpec.vToken.underlying.address, parseUnits("1", 8)],
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[marketSpec.vToken.underlying.address, xSolvBTC_RedStone_Feed, stalePeriod]],
       },
       {
         target: RESILIENT_ORACLE,
@@ -166,9 +168,9 @@ export const vip505 = () => {
         params: [marketSpec.vToken.address, marketSpec.riskParameters.collateralFactor],
       },
       {
-        target: marketSpec.vToken.underlying.address,
-        signature: "faucet(uint256)",
-        params: [marketSpec.initialSupply.amount],
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [marketSpec.vToken.underlying.address, marketSpec.initialSupply.amount, NORMAL_TIMELOCK],
       },
       {
         target: marketSpec.vToken.underlying.address,
