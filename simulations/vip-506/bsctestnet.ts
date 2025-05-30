@@ -36,6 +36,7 @@ import vip506, {
   BNB_vlisUSD_Stablecoin_IRM,
 } from "../../vips/vip-506/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+import VBEP20_ABI from "./abi/VBep20Abi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 const oldIRMs = [
@@ -139,6 +140,7 @@ forking(52603412, async () => {
         [6, 0],
       );
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [10]);
+      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel"], [4]);
     },
   });
 
