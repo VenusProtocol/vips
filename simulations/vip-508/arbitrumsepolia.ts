@@ -5,20 +5,20 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip505, { ERC4626_FACTORY_ZKSYNC } from "../../vips/vip-505/bsctestnet";
+import vip508, { ERC4626_FACTORY_ARBITRUM } from "../../vips/vip-508/bsctestnet";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
-const { zksyncsepolia } = NETWORK_ADDRESSES;
-const ACM = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
-const DEPLOYER = "0x50e36E99F4e89d3B8EB636f73a8A28B4A2f601C7";
-const BLOCK_NUMBER = 5211083;
+const { arbitrumsepolia } = NETWORK_ADDRESSES;
+const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
+const DEPLOYER = "0x638Eb8DFfF094Fd1d52c5A198b44984806C521E5";
+const BLOCK_NUMBER = 156959809;
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
   let erc4626Factory: Contract;
 
   before(async () => {
-    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ZKSYNC, ERC4626FACTORY_ABI, provider);
+    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ARBITRUM, ERC4626FACTORY_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -27,7 +27,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(zksyncsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
@@ -35,7 +35,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip505(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip508(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ERC4626FACTORY_ABI], ["OwnershipTransferred"], [1]);
     },
@@ -43,7 +43,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(zksyncsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(arbitrumsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {

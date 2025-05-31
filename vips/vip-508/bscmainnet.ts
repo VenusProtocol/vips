@@ -9,10 +9,10 @@ export const ERC4626_FACTORY_UNICHAIN = "0x102fEb723C25c67dbdfDccCa3B1c1a6e1a662
 export const ERC4626_FACTORY_ZKSYNC = "0xDC59Dd76Dd7A64d743C764a9aa8C96Ff2Ea8BAc3";
 export const ERC4626_FACTORY_OPBNB = "0x89A5Ce0A6db7e66E53F148B50D879b700dEB81C8";
 
-export const vip505 = () => {
+export const vip508 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-505",
+    title: "VIP-508",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
     againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
@@ -69,4 +69,4 @@ export const vip505 = () => {
   );
 };
 
-export default vip505;
+export default vip508;
