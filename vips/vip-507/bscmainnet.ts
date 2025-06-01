@@ -36,11 +36,93 @@ const Actions = {
   BORROW: 2,
 };
 
-export const vip504 = () => {
+export const vip507 = () => {
   const meta = {
     version: "v2",
-    title: "[ethereum] New sUSDe and USDe market in the Core pool",
-    description: "",
+    title: "VIP-507 [Ethereum] Add USDe and sUSDe to the Core pool",
+    description: `#### Summary
+
+If passed, this VIP will add markets for [USDe](https://etherscan.io/address/0x4c9edd5852cd905f086c759e8383e09bff1e68b3) and [sUSDe](https://etherscan.io/address/0x9D39A5DE30e57443BfF2A8307A4256c8797A3497) to the Core pool on Ethereum, following the Community proposal “[[Proposal] Decommission the Ethena Isolated Pool on Ethereum and Explore USDe and sUSDe Integration in the Core Pool](https://community.venus.io/t/proposal-decommission-the-ethena-isolated-pool-on-ethereum-and-explore-usde-and-susde-integration-in-the-core-pool/5051)”.
+
+#### Description
+
+**Risk parameters for USDe**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-decommission-the-ethena-isolated-pool-on-ethereum-and-explore-usde-and-susde-integration-in-the-core-pool/5051/6), the risk parameters for the new market are:
+
+Underlying token: [USDe](https://etherscan.io/address/0x4c9edd5852cd905f086c759e8383e09bff1e68b3)
+
+- Borrow cap: 25M USDe
+- Supply cap: 30M USDe
+- Collateral factor: 72%
+- Liquidation threshold: 75%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 100 USDe, that are burned for security reasons
+
+Interest rate curve for the new market:
+
+- kink: 80%
+- base (yearly): 0%
+- multiplier (yearly): 10%
+- jump multiplier (yearly): 250%
+
+**Oracles configuration for USDe**
+
+- Main oracle: [RedStoneOracle](https://etherscan.io/address/0x0FC8001B2c9Ec90352A46093130e284de5889C86) ([feed](https://etherscan.io/address/0xbC5FBcf58CeAEa19D523aBc76515b9AEFb5cfd58))
+- Pivot and fallback oracles: [ChainlinkOracle](https://etherscan.io/address/0x94c3A2d6B7B2c051aDa041282aec5B0752F8A1F2) ([feed](https://etherscan.io/address/0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961))
+
+**Risk parameters for sUSDe**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-decommission-the-ethena-isolated-pool-on-ethereum-and-explore-usde-and-susde-integration-in-the-core-pool/5051/6), the risk parameters for the new market are:
+
+Underlying token: [sUSDe](https://etherscan.io/address/0x9D39A5DE30e57443BfF2A8307A4256c8797A3497)
+
+- Borrow cap: 0 sUSDe
+- Supply cap: 20M sUSDe
+- Collateral factor: 72%
+- Liquidation threshold: 72.5%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 87 sUSDe, that are burned for security reasons
+
+Interest rate curve for the new market (not relevant, because the asset is not borrowable, but configured anyway):
+
+- kink: 80%
+- base (yearly): 0%
+- multiplier (yearly): 10%
+- jump multiplier (yearly): 250%
+
+**Oracles configuration for sUSDe**
+
+- Main oracle: [ERC4626Oracle](https://etherscan.io/address/0xaE847E81ff6dD2bdFB1fD563ccB4f848c74D2B70)
+    - correlated token: [sUSDe](https://etherscan.io/address/0x9D39A5DE30e57443BfF2A8307A4256c8797A3497)
+    - underlying token: [USDe](https://etherscan.io/address/0x4c9EDD5852cd905f086C759E8383e09bff1E68B3)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on Ethereum, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+Ethereum:
+
+- vUSDe_Core: [0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3](https://etherscan.io/address/0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3)
+- vsUSDe_Core: [0xa836ce315b7A6Bb19397Ee996551659B1D92298e](https://etherscan.io/address/0xa836ce315b7A6Bb19397Ee996551659B1D92298e)
+
+Sepolia:
+
+- vUSDe_Core: [0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3](https://etherscan.io/address/0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3)
+- vsUSDe_Core: [0xa836ce315b7A6Bb19397Ee996551659B1D92298e](https://etherscan.io/address/0xa836ce315b7A6Bb19397Ee996551659B1D92298e)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/552)
+- [Deployment of USDe and sUSDe to Sepolia](https://sepolia.etherscan.io/tx/0xba56df27f12f7cdd34ec90a892a8c18680e8ac9691c8399c3c9e82d997383eeb)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -194,4 +276,4 @@ export const vip504 = () => {
   );
 };
 
-export default vip504;
+export default vip507;

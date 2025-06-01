@@ -4,22 +4,19 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip504, {
+import vip507, {
   COMPTROLLER_CORE,
   USDe,
-  VSUSDE_EXPECTED,
-  VUSDE_EXPECTED,
   VUSDe_CORE,
   VsUSDe_CORE,
   VsUSDe_IR_MODEL,
   sUSDe,
-} from "../../vips/vip-504/bscmainnet";
+} from "../../vips/vip-507/bsctestnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkoracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -27,14 +24,12 @@ import POOL_REGISTRY_ABI from "./abi/poolregistry.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientoracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/singletokenconverter.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
-import VTREASURY_ABI from "./abi/vtreasury.json";
 
-const { ethereum } = NETWORK_ADDRESSES;
-const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
+const { sepolia } = NETWORK_ADDRESSES;
+const PSR = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
-const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
-forking(22609010, async () => {
+forking(8358866, async () => {
   let comptrollerCore: Contract;
 
   describe("Contracts setup", () => {
@@ -57,16 +52,7 @@ forking(22609010, async () => {
     });
   });
 
-  before(async () => {
-    await setMaxStalePeriodInChainlinkOracle(
-      ethereum.CHAINLINK_ORACLE,
-      USDe,
-      CHAINLINK_USDe_FEED,
-      ethereum.NORMAL_TIMELOCK,
-    );
-  });
-
-  testForkedNetworkVipCommands("VIP-504 ethereum", await vip504(), {
+  testForkedNetworkVipCommands("VIP-507 sepolia", await vip507(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -74,20 +60,12 @@ forking(22609010, async () => {
           ERC20_ABI,
           VTOKEN_ABI,
           SINGLE_TOKEN_CONVERTER_ABI,
-          VTREASURY_ABI,
           POOL_REGISTRY_ABI,
           RESILIENT_ORACLE_ABI,
           CHAINLINK_ORACLE_ABI,
         ],
-        [
-          "Approval",
-          "Transfer",
-          "ConversionConfigUpdated",
-          "WithdrawTreasuryToken",
-          "NewReduceReservesBlockDelta",
-          "MarketAdded",
-        ],
-        [24, 20, 5, 2, 2, 2],
+        ["Approval", "Transfer", "ConversionConfigUpdated", "NewReduceReservesBlockDelta", "MarketAdded"],
+        [24, 24, 5, 2, 2],
       );
     },
   });
@@ -96,14 +74,12 @@ forking(22609010, async () => {
     describe("New markets sUSDe and USDe", () => {
       let interestRateModelAddress1: string;
       let interestRateModelAddress2: string;
-
       let vToken1: Contract;
       let vToken2: Contract;
 
       before(async () => {
         vToken1 = await ethers.getContractAt(VTOKEN_ABI, VsUSDe_CORE);
         vToken2 = await ethers.getContractAt(VTOKEN_ABI, VUSDe_CORE);
-
         interestRateModelAddress1 = await vToken1.interestRateModel();
         interestRateModelAddress2 = await vToken2.interestRateModel();
       });
@@ -119,8 +95,8 @@ forking(22609010, async () => {
 
       describe("Ownership", () => {
         it(`should transfer ownership of ${VsUSDe_CORE} and ${VUSDe_CORE} to NORMAL_TIMELOCK`, async () => {
-          expect(await vToken1.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
-          expect(await vToken2.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
+          expect(await vToken1.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+          expect(await vToken2.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
         });
       });
 
@@ -132,30 +108,12 @@ forking(22609010, async () => {
       });
 
       describe("Initial supply", () => {
-        it("normal timelock should not hold any vToken", async () => {
-          const vToken1Balance = await vToken1.balanceOf(ethereum.NORMAL_TIMELOCK);
-          const vToken2Balance = await vToken2.balanceOf(ethereum.NORMAL_TIMELOCK);
+        it(`should have initial supply in ${sepolia.VTREASURY}`, async () => {
+          const expectedSupply = parseUnits("10000", 8);
+          const supplyRemaining = expectedSupply.sub(parseUnits("100", 8));
 
-          expect(vToken1Balance).to.equal(0);
-          expect(vToken2Balance).to.equal(0);
-        });
-
-        it("total supply of vTokens", async () => {
-          const vToken1Supply = await vToken1.totalSupply();
-          const vToken2Supply = await vToken2.totalSupply();
-
-          expect(vToken1Supply).to.equal(VSUSDE_EXPECTED);
-          expect(vToken2Supply).to.equal(VUSDE_EXPECTED);
-        });
-
-        it("zero address should hold total supply", async () => {
-          const vToken1Balance = await vToken1.balanceOf(ethers.constants.AddressZero);
-          const vToken2Balance = await vToken2.balanceOf(ethers.constants.AddressZero);
-          const vToken1Supply = await vToken1.totalSupply();
-          const vToken2Supply = await vToken2.totalSupply();
-
-          expect(vToken1Supply).to.equal(vToken1Balance);
-          expect(vToken2Supply).to.equal(vToken2Balance);
+          expect(await vToken1.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
+          expect(await vToken2.balanceOf(sepolia.VTREASURY)).to.equal(supplyRemaining);
         });
       });
 
@@ -208,7 +166,7 @@ forking(22609010, async () => {
           expect(await comptroller.borrowCaps(VUSDe_CORE)).to.equal(parseUnits("25000000", 18));
         });
 
-        it("should pause borrow action for sUSDe market", async () => {
+        it("Should pause borrow action for sUSDe market", async () => {
           expect(await comptroller.actionPaused(VsUSDe_CORE, 2)).to.equal(true);
         });
       });

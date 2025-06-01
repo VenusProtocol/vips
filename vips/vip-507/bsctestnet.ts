@@ -42,7 +42,7 @@ const Actions = {
   BORROW: 2,
 };
 
-const vip504 = () => {
+const vip507 = () => {
   const meta = {
     version: "v2",
     title: "[sepolia] New sUSDe and USDe market in the Core pool",
@@ -220,4 +220,4 @@ const vip504 = () => {
   );
 };
 
-export default vip504;
+export default vip507;
