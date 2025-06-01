@@ -6,37 +6,36 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import { NORMAL_TIMELOCK } from "src/vip-framework";
 
-const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
-  NETWORK_ADDRESSES.bscmainnet;
-export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
-export const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
-export const vxSolvBTC = "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5";
-export const xSolvBTC_Oracle = "0xD39f9280873EB8A312246ee85f7ff118cb8206bb";
-export const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
-export const stalePeriod = 7 * 60 * 60; // 7 hours in seconds
-export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+const bscmainnet = NETWORK_ADDRESSES.bscmainnet;
+export const PROTOCOL_SHARE_RESERVE_BSC = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const xSolvBTC_BSC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+export const vxSolvBTC_BSC = "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5";
+export const xSolvBTC_Oracle_BSC = "0xD39f9280873EB8A312246ee85f7ff118cb8206bb";
+export const xSolvBTC_RedStone_Feed_BSC = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
+export const stalePeriod_BSC = 7 * 60 * 60; // 7 hours in seconds
+export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
 
 // Converters
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
-const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
-const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
-const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
-const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
-const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
-const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
-export const CONVERSION_INCENTIVE = 1e14;
+const USDT_BSC= "0x55d398326f99059fF775485246999027B3197955";
+const USDC_BSC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+const BTCB_BSC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+const XVS_BSC = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
+const ETH_BSC = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const RISK_FUND_CONVERTER_BSC = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
+const USDT_PRIME_CONVERTER_BSC = "0xD9f101AA67F3D72662609a2703387242452078C3";
+const USDC_PRIME_CONVERTER_BSC = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+const BTCB_PRIME_CONVERTER_BSC = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+const ETH_PRIME_CONVERTER_BSC = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+const XVS_VAULT_CONVERTER_BSC = "0xd5b9AE835F4C59272032B3B954417179573331E0";
+export const CONVERSION_INCENTIVE_BSC = 1e14;
 
-export const converterBaseAssets = {
-  [RISK_FUND_CONVERTER]: USDT,
-  [USDT_PRIME_CONVERTER]: USDT,
-  [USDC_PRIME_CONVERTER]: USDC,
-  [BTCB_PRIME_CONVERTER]: BTCB,
-  [ETH_PRIME_CONVERTER]: ETH,
-  [XVS_VAULT_CONVERTER]: XVS,
+export const converterBaseAssetsBsc = {
+  [RISK_FUND_CONVERTER_BSC]: USDT_BSC,
+  [USDT_PRIME_CONVERTER_BSC]: USDT_BSC,
+  [USDC_PRIME_CONVERTER_BSC]: USDC_BSC,
+  [BTCB_PRIME_CONVERTER_BSC]: BTCB_BSC,
+  [ETH_PRIME_CONVERTER_BSC]: ETH_BSC,
+  [XVS_VAULT_CONVERTER_BSC]: XVS_BSC,
 };
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
@@ -44,7 +43,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
+const configureConvertersBsc = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE_BSC) => {
   enum ConversionAccessibility {
     NONE = 0,
     ALL = 1,
@@ -52,7 +51,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
     ONLY_FOR_USERS = 3,
   }
 
-  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
+  return Object.entries(converterBaseAssetsBsc).map(([converter, baseAsset]: [string, string]) => {
     const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
     return {
       target: converter,
@@ -62,19 +61,19 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const marketSpec = {
+export const xSolvBTCMarketSpec = {
   vToken: {
-    address: vxSolvBTC,
+    address: vxSolvBTC_BSC,
     name: "Venus xSolvBTC",
     symbol: "vxSolvBTC",
     underlying: {
-      address: xSolvBTC,
+      address: xSolvBTC_BSC,
       decimals: 18,
       symbol: "xSolvBTC",
     },
     decimals: 18,
     exchangeRate: parseUnits("1", 28),
-    comptroller: UNITROLLER,
+    comptroller: bscmainnet.UNITROLLER,
     isLegacyPool: true,
   },
   interestRateModel: {
@@ -87,7 +86,7 @@ export const marketSpec = {
   initialSupply: {
     amount: parseUnits("1", 18),
     vTokensToBurn: parseUnits("0.0009615", 8), // Approximately $100
-    vTokenReceiver: VTREASURY,
+    vTokenReceiver: bscmainnet.VTREASURY,
   },
   riskParameters: {
     supplyCap: parseUnits("100", 18),
@@ -111,103 +110,103 @@ export const vip505 = () => {
     [
       // Configure Oracle
       {
-        target: REDSTONE_ORACLE,
+        target: bscmainnet.REDSTONE_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[marketSpec.vToken.underlying.address, xSolvBTC_RedStone_Feed, stalePeriod]],
+        params: [[xSolvBTCMarketSpec.vToken.underlying.address, xSolvBTC_RedStone_Feed_BSC, stalePeriod_BSC]],
       },
       {
-        target: RESILIENT_ORACLE,
+        target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3]))",
         params: [
           [
-            marketSpec.vToken.underlying.address,
-            [xSolvBTC_Oracle, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            xSolvBTCMarketSpec.vToken.underlying.address,
+            [xSolvBTC_Oracle_BSC, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
           ],
         ],
       },
       // Add Market
       {
-        target: marketSpec.vToken.comptroller,
+        target: xSolvBTCMarketSpec.vToken.comptroller,
         signature: "_supportMarket(address)",
-        params: [marketSpec.vToken.address],
+        params: [xSolvBTCMarketSpec.vToken.address],
       },
       {
-        target: marketSpec.vToken.comptroller,
+        target: xSolvBTCMarketSpec.vToken.comptroller,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[marketSpec.vToken.address], [marketSpec.riskParameters.supplyCap]],
+        params: [[xSolvBTCMarketSpec.vToken.address], [xSolvBTCMarketSpec.riskParameters.supplyCap]],
       },
       {
-        target: marketSpec.vToken.comptroller,
+        target: xSolvBTCMarketSpec.vToken.comptroller,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[marketSpec.vToken.address], [marketSpec.riskParameters.borrowCap]],
+        params: [[xSolvBTCMarketSpec.vToken.address], [xSolvBTCMarketSpec.riskParameters.borrowCap]],
       },
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "setAccessControlManager(address)",
-        params: [ACCESS_CONTROL_MANAGER],
+        params: [bscmainnet.ACCESS_CONTROL_MANAGER],
       },
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "setProtocolShareReserve(address)",
-        params: [PROTOCOL_SHARE_RESERVE],
+        params: [PROTOCOL_SHARE_RESERVE_BSC],
       },
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "setReduceReservesBlockDelta(uint256)",
-        params: [REDUCE_RESERVES_BLOCK_DELTA],
+        params: [REDUCE_RESERVES_BLOCK_DELTA_BSC],
       },
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "_setReserveFactor(uint256)",
-        params: [marketSpec.riskParameters.reserveFactor],
+        params: [xSolvBTCMarketSpec.riskParameters.reserveFactor],
       },
       {
-        target: marketSpec.vToken.comptroller,
+        target: xSolvBTCMarketSpec.vToken.comptroller,
         signature: "_setCollateralFactor(address,uint256)",
-        params: [marketSpec.vToken.address, marketSpec.riskParameters.collateralFactor],
+        params: [xSolvBTCMarketSpec.vToken.address, xSolvBTCMarketSpec.riskParameters.collateralFactor],
       },
       {
-        target: VTREASURY,
+        target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpec.vToken.underlying.address, marketSpec.initialSupply.amount, NORMAL_TIMELOCK],
+        params: [xSolvBTCMarketSpec.vToken.underlying.address, xSolvBTCMarketSpec.initialSupply.amount, NORMAL_TIMELOCK],
       },
       {
-        target: marketSpec.vToken.underlying.address,
+        target: xSolvBTCMarketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
-        params: [marketSpec.vToken.address, marketSpec.initialSupply.amount],
+        params: [xSolvBTCMarketSpec.vToken.address, xSolvBTCMarketSpec.initialSupply.amount],
       },
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "mintBehalf(address,uint256)",
-        params: [NORMAL_TIMELOCK, marketSpec.initialSupply.amount],
+        params: [NORMAL_TIMELOCK, xSolvBTCMarketSpec.initialSupply.amount],
       },
       {
-        target: marketSpec.vToken.underlying.address,
+        target: xSolvBTCMarketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
-        params: [marketSpec.vToken.address, 0],
+        params: [xSolvBTCMarketSpec.vToken.address, 0],
       },
       // Burn some vtokens
       {
-        target: marketSpec.vToken.address,
+        target: xSolvBTCMarketSpec.vToken.address,
         signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, marketSpec.initialSupply.vTokensToBurn],
+        params: [ethers.constants.AddressZero, xSolvBTCMarketSpec.initialSupply.vTokensToBurn],
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(marketSpec.initialSupply.amount, marketSpec.vToken.exchangeRate);
-        const vTokensRemaining = vTokensMinted.sub(marketSpec.initialSupply.vTokensToBurn);
+        const vTokensMinted = convertAmountToVTokens(xSolvBTCMarketSpec.initialSupply.amount, xSolvBTCMarketSpec.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(xSolvBTCMarketSpec.initialSupply.vTokensToBurn);
         return {
-          target: marketSpec.vToken.address,
+          target: xSolvBTCMarketSpec.vToken.address,
           signature: "transfer(address,uint256)",
-          params: [marketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+          params: [xSolvBTCMarketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
         };
       })(),
       {
-        target: marketSpec.vToken.comptroller,
+        target: xSolvBTCMarketSpec.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",
-        params: [[marketSpec.vToken.address], [2], true],
+        params: [[xSolvBTCMarketSpec.vToken.address], [2], true],
       },
-      ...configureConverters([marketSpec.vToken.underlying.address]),
+      ...configureConvertersBsc([xSolvBTCMarketSpec.vToken.underlying.address]),
     ],
     meta,
     ProposalType.REGULAR,
