@@ -1,10 +1,8 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
 import { expectEvents } from "src/utils";
 import { setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
@@ -15,13 +13,12 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import vip504, {
   COMPTROLLER_CORE,
   USDe,
-  USDe_INITIAL_SUPPLY,
-  VTOKEN_RECEIVER,
+  VSUSDE_EXPECTED,
+  VUSDE_EXPECTED,
   VUSDe_CORE,
   VsUSDe_CORE,
   VsUSDe_IR_MODEL,
   sUSDe,
-  sUSDe_INITIAL_SUPPLY,
 } from "../../vips/vip-504/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkoracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -35,16 +32,10 @@ import VTREASURY_ABI from "./abi/vtreasury.json";
 const { ethereum } = NETWORK_ADDRESSES;
 const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
-const USDe_HOLDER = "0x33AE83071432116AE892693b45466949a38Ac74C";
-const sUSDe_HOLDER = "0x15Bb5D31048381c84a157526cEF9513531b8BE1e";
 const CHAINLINK_USDe_FEED = "0xa569d910839Ae8865Da8F8e70FfFb0cBA869F961";
 
-forking(22475162, async () => {
+forking(22609010, async () => {
   let comptrollerCore: Contract;
-  let USDeHolder: SignerWithAddress;
-  let sUSDeHolder: SignerWithAddress;
-  let susde: Contract;
-  let usde: Contract;
 
   describe("Contracts setup", () => {
     checkVToken(VsUSDe_CORE, {
@@ -67,20 +58,12 @@ forking(22475162, async () => {
   });
 
   before(async () => {
-    USDeHolder = await initMainnetUser(USDe_HOLDER, parseEther("1"));
-    sUSDeHolder = await initMainnetUser(sUSDe_HOLDER, parseEther("1"));
-
-    susde = await ethers.getContractAt(ERC20_ABI, sUSDe);
-    usde = await ethers.getContractAt(ERC20_ABI, USDe);
-
     await setMaxStalePeriodInChainlinkOracle(
       ethereum.CHAINLINK_ORACLE,
       USDe,
       CHAINLINK_USDe_FEED,
       ethereum.NORMAL_TIMELOCK,
     );
-    await susde.connect(sUSDeHolder).transfer(ethereum.VTREASURY, sUSDe_INITIAL_SUPPLY);
-    await usde.connect(USDeHolder).transfer(ethereum.VTREASURY, USDe_INITIAL_SUPPLY);
   });
 
   testForkedNetworkVipCommands("VIP-504 ethereum", await vip504(), {
@@ -104,7 +87,7 @@ forking(22475162, async () => {
           "NewReduceReservesBlockDelta",
           "MarketAdded",
         ],
-        [24, 24, 5, 2, 2, 2],
+        [24, 20, 5, 2, 2, 2],
       );
     },
   });
@@ -149,13 +132,30 @@ forking(22475162, async () => {
       });
 
       describe("Initial supply", () => {
-        it(`should mint initial supply of ${VsUSDe_CORE} and ${VUSDe_CORE} to ${VTOKEN_RECEIVER}`, async () => {
-          const expectedSupply = parseUnits("10000", 8);
-          const supplyRemainingsUSDe = expectedSupply.sub(parseUnits("86", 8));
-          const supplyRemainingUSDe = expectedSupply.sub(parseUnits("100", 8));
+        it("normal timelock should not hold any vToken", async () => {
+          const vToken1Balance = await vToken1.balanceOf(ethereum.NORMAL_TIMELOCK);
+          const vToken2Balance = await vToken2.balanceOf(ethereum.NORMAL_TIMELOCK);
 
-          expect(await vToken1.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingsUSDe);
-          expect(await vToken2.balanceOf(VTOKEN_RECEIVER)).to.equal(supplyRemainingUSDe);
+          expect(vToken1Balance).to.equal(0);
+          expect(vToken2Balance).to.equal(0);
+        });
+
+        it("total supply of vTokens", async () => {
+          const vToken1Supply = await vToken1.totalSupply();
+          const vToken2Supply = await vToken2.totalSupply();
+
+          expect(vToken1Supply).to.equal(VSUSDE_EXPECTED);
+          expect(vToken2Supply).to.equal(VUSDE_EXPECTED);
+        });
+
+        it("zero address should hold total supply", async () => {
+          const vToken1Balance = await vToken1.balanceOf(ethers.constants.AddressZero);
+          const vToken2Balance = await vToken2.balanceOf(ethers.constants.AddressZero);
+          const vToken1Supply = await vToken1.totalSupply();
+          const vToken2Supply = await vToken2.totalSupply();
+
+          expect(vToken1Supply).to.equal(vToken1Balance);
+          expect(vToken2Supply).to.equal(vToken2Balance);
         });
       });
 

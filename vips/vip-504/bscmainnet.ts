@@ -1,27 +1,21 @@
-import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { ethereum, bscmainnet } = NETWORK_ADDRESSES;
+const { ethereum } = NETWORK_ADDRESSES;
 
-export const VTOKEN_RECEIVER = "0x3e8734ec146c981e3ed1f6b582d447dde701d90c";
 export const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 export const sUSDe = "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497";
 export const USDe = "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3";
-export const USDT = "0x55d398326f99059fF775485246999027B3197955";
-export const USDT_AMOUNT = parseUnits("200", 18);
 export const VsUSDe_CORE = "0xa836ce315b7A6Bb19397Ee996551659B1D92298e";
 export const VUSDe_CORE = "0xa0EE2bAA024cC3AA1BC9395522D07B7970Ca75b3";
-export const sUSDe_INITIAL_SUPPLY = parseUnits("10000", 18);
-export const USDe_INITIAL_SUPPLY = parseUnits("10000", 18);
+export const sUSDe_INITIAL_SUPPLY = parseUnits("87.064925543819110686", 18);
+export const USDe_INITIAL_SUPPLY = parseUnits("100", 18);
+export const VSUSDE_EXPECTED = parseUnits("87.06492554", 8); // around $100
+export const VUSDE_EXPECTED = parseUnits("100", 8); // around $100
 export const VsUSDe_IR_MODEL = "0x410a068C2ca9986d2b76d0A7b2b5DF336499114f";
-export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
-  const EXP_SCALE = parseUnits("1", 18);
-  return amount.mul(EXP_SCALE).div(exchangeRate);
-};
 
 // converters
 export const USDT_PRIME_CONVERTER = "0x4f55cb0a24D5542a3478B0E284259A6B850B06BD";
@@ -105,19 +99,9 @@ export const vip504 = () => {
       {
         target: VsUSDe_CORE,
         signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, parseUnits("86", 8)], // around $100
+        params: [ethers.constants.AddressZero, VSUSDE_EXPECTED], // around $100
         dstChainId: LzChainId.ethereum,
       },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
-        const vTokensRemaining = vTokensMinted.sub(parseUnits("86", 8));
-        return {
-          target: VsUSDe_CORE,
-          signature: "transfer(address,uint256)",
-          params: [VTOKEN_RECEIVER, vTokensRemaining],
-          dstChainId: LzChainId.ethereum,
-        };
-      })(),
       {
         target: COMPTROLLER_CORE,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -169,19 +153,9 @@ export const vip504 = () => {
       {
         target: VUSDe_CORE,
         signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, parseUnits("100", 8)], // around $100
+        params: [ethers.constants.AddressZero, VUSDE_EXPECTED],
         dstChainId: LzChainId.ethereum,
       },
-      (() => {
-        const vTokensMinted = convertAmountToVTokens(USDe_INITIAL_SUPPLY, parseUnits("1", 28));
-        const vTokensRemaining = vTokensMinted.sub(parseUnits("100", 8));
-        return {
-          target: VUSDe_CORE,
-          signature: "transfer(address,uint256)",
-          params: [VTOKEN_RECEIVER, vTokensRemaining],
-          dstChainId: LzChainId.ethereum,
-        };
-      })(),
 
       // Conversion config of USDe
       {
@@ -213,11 +187,6 @@ export const vip504 = () => {
         signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
         params: [BaseAssets[4], [USDe], [[CONVERSION_INCENTIVE, 1]]],
         dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [USDT, USDT_AMOUNT, VTOKEN_RECEIVER],
       },
     ],
     meta,
