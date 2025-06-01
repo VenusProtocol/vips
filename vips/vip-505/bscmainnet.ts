@@ -2,7 +2,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ProposalType } from "src/types";
+import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import { NORMAL_TIMELOCK } from "src/vip-framework";
 
@@ -14,6 +14,12 @@ export const xSolvBTC_Oracle_BSC = "0xD39f9280873EB8A312246ee85f7ff118cb8206bb";
 export const xSolvBTC_RedStone_Feed_BSC = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
 export const stalePeriod_BSC = 7 * 60 * 60; // 7 hours in seconds
 export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
+
+const ethereum = NETWORK_ADDRESSES.ethereum;
+export const tBTC_Chainlink_Feed_ETH = "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c";
+export const tBTC_Stale_Period_ETH = 6000; // 100 minutes in seconds
+export const COMPTROLLER_CORE_ETH = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
+export const tBTC_ETH = "0x18084fbA666a33d37592fA2633fD49a74DD93a88";
 
 // Converters
 const USDT_BSC= "0x55d398326f99059fF775485246999027B3197955";
@@ -93,6 +99,39 @@ export const xSolvBTCMarketSpec = {
     borrowCap: parseUnits("0", 18),
     collateralFactor: parseUnits("0.72", 18),
     reserveFactor: parseUnits("0.1", 18),
+  },
+};
+
+
+export const tBTCMarketSpec = {
+  vToken: {
+    address: "0x5e35C312862d53FD566737892aDCf010cb4928F7",
+    name: "Venus tBTC (Core)",
+    symbol: "vtBTC_Core",
+    underlying: tBTC_ETH,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE_ETH,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.75", 18),
+    liquidationThreshold: parseUnits("0.78", 18),
+    supplyCap: parseUnits("120", 18),
+    borrowCap: parseUnits("6", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("0.24", 18),
+    vTokensToBurn: parseUnits("0.0009615", 8), // Approximately $100
+    vTokenReceiver: ethereum.VTREASURY,
+  },
+  interestRateModel: {
+    address: "0x8a7F7b9f5DD2366E4Caaeb0362726531B86B711E",
+    base: "0",
+    multiplier: "0.15",
+    jump: "3",
+    kink: "0.45",
   },
 };
 
@@ -207,6 +246,75 @@ export const vip505 = () => {
         params: [[xSolvBTCMarketSpec.vToken.address], [2], true],
       },
       ...configureConvertersBsc([xSolvBTCMarketSpec.vToken.underlying.address]),
+
+      // Configure Oracle
+      {
+        target: ethereum.CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[tBTCMarketSpec.vToken.underlying, tBTC_Chainlink_Feed_ETH, tBTC_Stale_Period_ETH]],
+        dstChainId: LzChainId.ethereum,
+      },
+      // Market config
+      {
+        target: tBTCMarketSpec.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: ["7200"],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ethereum.VTREASURY,
+        signature: "withdrawTreasuryToken(address,uint256,address)",
+        params: [
+          tBTCMarketSpec.vToken.underlying,
+          tBTCMarketSpec.initialSupply.amount,
+          ethereum.NORMAL_TIMELOCK,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: tBTCMarketSpec.vToken.underlying,
+        signature: "approve(address,uint256)",
+        params: [ethereum.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: tBTCMarketSpec.vToken.underlying,
+        signature: "approve(address,uint256)",
+        params: [ethereum.POOL_REGISTRY, tBTCMarketSpec.initialSupply.amount],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ethereum.POOL_REGISTRY,
+        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+        params: [
+          [
+            tBTCMarketSpec.vToken.address,
+            tBTCMarketSpec.riskParameters.collateralFactor, // CF
+            tBTCMarketSpec.riskParameters.liquidationThreshold, // LT
+            tBTCMarketSpec.initialSupply.amount, // initial supply
+            ethereum.NORMAL_TIMELOCK, // vToken receiver
+            tBTCMarketSpec.riskParameters.supplyCap, // supply cap
+            tBTCMarketSpec.riskParameters.borrowCap, // borrow cap
+          ],
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      // {
+      //   target: tBTCMarketSpec.vToken.address,
+      //   signature: "transfer(address,uint256)",
+      //   params: [ethers.constants.AddressZero, tBTCMarketSpec.initialSupply.vTokensToBurn],
+      //   dstChainId: LzChainId.ethereum,
+      // },
+      // (() => {
+      //   const vTokensMinted = convertAmountToVTokens(tBTCMarketSpec.initialSupply.amount, tBTCMarketSpec.vToken.exchangeRate);
+      //   const vTokensRemaining = vTokensMinted.sub(tBTCMarketSpec.initialSupply.vTokensToBurn);
+      //   return {
+      //     target: tBTCMarketSpec.vToken.address,
+      //     signature: "transfer(address,uint256)",
+      //     params: [tBTCMarketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+      //     dstChainId: LzChainId.ethereum,
+      //   };
+      // })(),
     ],
     meta,
     ProposalType.REGULAR,
