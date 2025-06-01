@@ -81,7 +81,7 @@ forking(53058755, async () => {
   describe("Post-VIP behavior", async () => {
     it("get price of xsolvbtc from oracle", async () => {
       const price = await oracle.getPrice(xSolvBTC);
-      expect(price).to.equal(parseUnits("60000", 8));
+      expect(price).to.equal(parseUnits("60000", 18));
     })
 
     it("adds a new xsolvbtc market and set collateral factor to 0%", async () => {

@@ -111,7 +111,7 @@ export const vip505 = () => {
       {
         target: REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
-        params: [marketSpec.vToken.underlying.address, parseUnits("1", 8)],
+        params: [marketSpec.vToken.underlying.address, parseUnits("1", 18)],
       },
       {
         target: RESILIENT_ORACLE,
