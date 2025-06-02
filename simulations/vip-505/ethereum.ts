@@ -22,6 +22,7 @@ const { ethereum } = NETWORK_ADDRESSES;
 const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
+const ONE_YEAR = 326 * 24 * 60 * 60; // 365 days in seconds
 
 forking(22609457, async () => {
   let comptroller: Contract;
@@ -31,7 +32,7 @@ forking(22609457, async () => {
     checkVToken(tBTCMarketSpec.vToken.address, tBTCMarketSpec.vToken);
   });
 
-  testForkedNetworkVipCommands("tBTC Market", await vip505());
+  testForkedNetworkVipCommands("tBTC Market", await vip505(ONE_YEAR));
 
   describe("Post-Execution state", () => {
     let vtBTC: Contract;
@@ -40,6 +41,13 @@ forking(22609457, async () => {
       vtBTC = await ethers.getContractAt(VTOKEN_ABI, tBTCMarketSpec.vToken.address);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE_ETH);
       oracle = await ethers.getContractAt(PRICE_ORACLE_ABI, await comptroller.oracle());
+    });
+
+    describe("Prices", () => {
+      it("get correct price from oracle for tBTC", async () => {
+        const price = await oracle.getPrice(tBTCMarketSpec.vToken.underlying);
+        expect(price).to.equal(parseUnits("103921.65", 18));
+      });
     });
 
     describe("PoolRegistry state", () => {
@@ -103,21 +111,13 @@ forking(22609457, async () => {
       });
     });
 
-    describe("Prices", () => {
-      it("get correct price from oracle for tBTC", async () => {
-        const price = await oracle.getUnderlyingPrice(tBTCMarketSpec.vToken.address);
-        expect(price).to.equal(parseUnits("2641.341950143873746", 18));
-      });
-    });
-
-
     it("Interest rates for tBTC", async () => {
       checkInterestRate(
         tBTCMarketSpec.interestRateModel.address,
         "vtBTC",
         {
           base: "0",
-          multiplier: "0.09",
+          multiplier: "0.15",
           jump: "3",
           kink: "0.45",
         },
