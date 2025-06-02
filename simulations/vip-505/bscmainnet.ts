@@ -18,6 +18,7 @@ import {
   xSolvBTC_BSC,
   xSolvBTC_RedStone_Feed_BSC,
 } from "../../vips/vip-505/bscmainnet";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import xSolvBTC_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -97,6 +98,13 @@ forking(50587150, async () => {
           "NewReduceReservesBlockDelta",
         ],
         [1, 1, 1, 1, 1, 1],
+      );
+
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
       );
     },
   });

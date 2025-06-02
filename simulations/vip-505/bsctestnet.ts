@@ -16,6 +16,7 @@ import {
   xSolvBTCMarketSpec,
   xSolvBTC_BSC,
 } from "../../vips/vip-505/bsctestnet";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import xSolvBTC_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import USD1_ABI from "./abi/mockToken.json";
@@ -72,6 +73,13 @@ forking(53058755, async () => {
           "NewReduceReservesBlockDelta",
         ],
         [1, 1, 1, 1, 1, 1],
+      );
+
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
       );
     },
   });
