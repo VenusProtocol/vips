@@ -170,7 +170,7 @@ export const tBTCMarketSpec = {
   },
 };
 
-export const vip505 = () => {
+export const vip508 = () => {
   const meta = {
     version: "v2",
     title: "VIP-508 [BNB Chain][Ethereum] Add xSolvBTC and tBTC markets to the Core pool",
@@ -372,4 +372,4 @@ export const vip505 = () => {
   );
 };
 
-export default vip505;
+export default vip508;

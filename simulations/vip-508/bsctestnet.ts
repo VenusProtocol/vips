@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
@@ -11,24 +11,21 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   PROTOCOL_SHARE_RESERVE_BSC,
   REDUCE_RESERVES_BLOCK_DELTA_BSC,
-  USDT_BSC,
-  vip505,
+  vip508,
   vxSolvBTC_BSC,
   xSolvBTCMarketSpec,
   xSolvBTC_BSC,
-  xSolvBTC_RedStone_Feed_BSC,
-} from "../../vips/vip-505/bscmainnet";
+} from "../../vips/vip-508/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import xSolvBTC_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import ERC20_ABI from "./abi/erc20.json";
 import USD1_ABI from "./abi/mockToken.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
-const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const RATE_MODEL = "0x52F63686D09d92c367c90BCDBF79A562f81bd6BF";
+const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
+const RATE_MODEL = "0xE0d3774406296322f42CBf25e96e8388cDAf0A66";
 const INITIAL_VTOKENS = parseUnits("1", 8);
-const { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bsctestnet;
 
 const Actions = {
   MINT: 0,
@@ -36,40 +33,18 @@ const Actions = {
   ENTER_MARKET: 7,
 };
 
-forking(50587150, async () => {
+forking(53058755, async () => {
   let comptroller: Contract;
   let xsolvbtc: Contract;
   let vxsolvbtc: Contract;
   let oracle: Contract;
   const provider = ethers.provider;
-  let usdt: Contract;
-  let prevVTokenReceiverUSDTBalance: BigNumber;
-  let prevTreasuryUSDTBalance: BigNumber;
 
   before(async () => {
     comptroller = new ethers.Contract(xSolvBTCMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     xsolvbtc = new ethers.Contract(xSolvBTC_BSC, USD1_ABI, provider);
     vxsolvbtc = new ethers.Contract(vxSolvBTC_BSC, xSolvBTC_ABI, provider);
     oracle = new ethers.Contract(RESILIENT_ORACLE, PRICE_ORACLE_ABI, provider);
-
-    await setMaxStalePeriodInChainlinkOracle(
-      CHAINLINK_ORACLE,
-      "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
-      "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
-      NORMAL_TIMELOCK,
-    );
-    await setRedstonePrice(
-      REDSTONE_ORACLE,
-      "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
-      "0xa51738d1937FFc553d5070f43300B385AA2D9F55",
-      NORMAL_TIMELOCK,
-    );
-    await setRedstonePrice(REDSTONE_ORACLE, xSolvBTC_BSC, xSolvBTC_RedStone_Feed_BSC, NORMAL_TIMELOCK);
-
-    usdt = await ethers.getContractAt(ERC20_ABI, USDT_BSC);
-
-    prevVTokenReceiverUSDTBalance = await usdt.balanceOf(xSolvBTCMarketSpec.initialSupply.vTokenReceiver);
-    prevTreasuryUSDTBalance = await usdt.balanceOf(VTREASURY);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -84,7 +59,7 @@ forking(50587150, async () => {
     });
   });
 
-  testVip("VIP-505", await vip505(), {
+  testVip("VIP-508-testnet", await vip508(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -110,17 +85,9 @@ forking(50587150, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("checks USDT balances", async () => {
-      const vTokenReceiverUSDTBalance = await usdt.balanceOf(xSolvBTCMarketSpec.initialSupply.vTokenReceiver);
-      const treasuryUSDTBalance = await usdt.balanceOf(VTREASURY);
-
-      expect(vTokenReceiverUSDTBalance).to.equal(prevVTokenReceiverUSDTBalance.add(parseUnits("100", 18)));
-      expect(treasuryUSDTBalance).to.equal(prevTreasuryUSDTBalance.sub(parseUnits("100", 18)));
-    });
-
     it("get price of xsolvbtc from oracle", async () => {
       const price = await oracle.getPrice(xSolvBTC_BSC);
-      expect(price).to.equal(parseUnits("104005.21462405", 18));
+      expect(price).to.equal(parseUnits("60000", 18));
     });
 
     it("adds a new xsolvbtc market and set collateral factor to 72%", async () => {

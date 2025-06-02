@@ -7,25 +7,37 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip505, { COMPTROLLER_CORE_ETH, tBTCMarketSpec } from "../../vips/vip-505/bsctestnet";
+import vip508, { COMPTROLLER_CORE_ETH, USDT_ETH, tBTCMarketSpec } from "../../vips/vip-508/bscmainnet";
+import ERC20_ABI from "./abi/erc20.json";
 import COMPTROLLER_ABI from "./abi/ilComptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { sepolia } = NETWORK_ADDRESSES;
-const PSR = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
+const { ethereum } = NETWORK_ADDRESSES;
+const PSR = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 
 const BLOCKS_PER_YEAR = BigNumber.from("2628000");
+const ONE_YEAR = 326 * 24 * 60 * 60; // 365 days in seconds
 
-forking(8461619, async () => {
+forking(22609457, async () => {
   let comptroller: Contract;
   let oracle: Contract;
+  let usdt: Contract;
+  let prevVTokenReceiverUSDTBalance: BigNumber;
+  let prevTreasuryUSDTBalance: BigNumber;
+
+  before(async () => {
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT_ETH);
+
+    prevVTokenReceiverUSDTBalance = await usdt.balanceOf(tBTCMarketSpec.initialSupply.vTokenReceiver);
+    prevTreasuryUSDTBalance = await usdt.balanceOf(ethereum.VTREASURY);
+  });
 
   describe("Contracts setup", () => {
     checkVToken(tBTCMarketSpec.vToken.address, tBTCMarketSpec.vToken);
   });
 
-  testForkedNetworkVipCommands("tBTC Market", await vip505());
+  testForkedNetworkVipCommands("tBTC Market", await vip508(ONE_YEAR));
 
   describe("Post-Execution state", () => {
     let vtBTC: Contract;
@@ -52,7 +64,7 @@ forking(8461619, async () => {
 
     describe("Ownership", () => {
       it(`should transfer ownership of ${tBTCMarketSpec.vToken.address} to Normal Timelock`, async () => {
-        expect(await vtBTC.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
+        expect(await vtBTC.owner()).to.equal(ethereum.NORMAL_TIMELOCK);
       });
     });
 
@@ -116,6 +128,14 @@ forking(8461619, async () => {
         },
         BLOCKS_PER_YEAR,
       );
+    });
+
+    it("checks USDT balances", async () => {
+      const vTokenReceiverUSDTBalance = await usdt.balanceOf(tBTCMarketSpec.initialSupply.vTokenReceiver);
+      const treasuryUSDTBalance = await usdt.balanceOf(ethereum.VTREASURY);
+
+      expect(vTokenReceiverUSDTBalance).to.equal(prevVTokenReceiverUSDTBalance.add(parseUnits("100", 6)));
+      expect(treasuryUSDTBalance).to.equal(prevTreasuryUSDTBalance.sub(parseUnits("100", 6)));
     });
   });
 });

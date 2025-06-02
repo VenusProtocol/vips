@@ -173,11 +173,99 @@ export const tBTCMarketSpec = {
   },
 };
 
-export const vip505 = (maxStalePeriod?: number) => {
+export const vip508 = (maxStalePeriod?: number) => {
   const meta = {
     version: "v2",
-    title: "VIP-505",
-    description: "",
+    title: "VIP-508 [Ethereum][BNB Chain] Add tBTC and xSolvBTC markets to the Core pools",
+    description: `#### Summary
+
+If passed, this VIP will add markets for [tBTC](https://etherscan.io/address/0x18084fbA666a33d37592fA2633fD49a74DD93a88) and [xSolvBTC](https://bscscan.com/address/0x1346b618dC92810EC74163e4c27004c921D446a5) to the Core pools on Ethereum and BNB Chain, respectively, following the Community proposals:
+
+- [Proposal: List Threshold Network’s tBTC on Venus Core Pool](https://community.venus.io/t/proposal-list-threshold-network-s-tbtc-on-venus-core-pool/4893) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xd6032874b555ef01878df224a60506b7eeffd5c33113d0e1bfc3c775687214f4))
+- [Add support for the xSolvBTC market on Venus Core Pool](https://community.venus.io/t/add-support-for-the-xsolvbtc-market-on-venus-core-pool/5088) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x3aab04d6cb9ec606fe61a6dc05f4703e8461609f2b97898888429863c371b220))
+
+#### Description
+
+**Risk parameters for tBTC**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-list-threshold-network-s-tbtc-on-venus-core-pool/4893/5), the risk parameters for the new market are:
+
+Underlying token: [tBTC](https://etherscan.io/address/0x18084fbA666a33d37592fA2633fD49a74DD93a88)
+
+- Borrow cap: 120 tBTC
+- Supply cap: 60 tBTC
+- Collateral factor: 75%
+- Liquidation threshold: 78%
+- Reserve factor: 25%
+
+Bootstrap liquidity: 0.24 tBTC provided by the [Threshold Network](https://etherscan.io/tx/0x4af8b55c15b0b5d620e9448710a2f0fc3129f2c9adbf18bfbc35bbfe3215556f) Treasury.
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 15%
+- jump multiplier (yearly): 300%
+
+**Oracles configuration for tBTC**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Ethereum](https://etherscan.io/address/0xd2ce3fb018805ef92b8C5976cb31F84b4E295F94) is used for tBTC, using under the hood the Chainlink price for BTC/USD ([feed](https://etherscan.io/address/0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c)), following the [Chaos Labs recommendations](https://community.venus.io/t/proposal-list-threshold-network-s-tbtc-on-venus-core-pool/4893/5#pricing-10).
+
+**Risk parameters for xSolvBTC**
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/add-support-for-the-xsolvbtc-market-on-venus-core-pool/5088/6), the risk parameters for the new market are:
+
+Underlying token: [xSolvBTC](https://bscscan.com/address/0x1346b618dC92810EC74163e4c27004c921D446a5)
+
+- Borrow cap: 100 xSolvBTC
+- Supply cap: 0 xSolvBTC
+- Collateral factor: 72%
+- Reserve factor: 10%
+
+Bootstrap liquidity: 1 xSolvBTC provided by the [Solv Finance project](https://bscscan.com/address/0x9c6e1e22db1feeacb2bb8497d0dc07feba06db16).
+
+Interest rate curve for the new market:
+
+- kink: 50%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 200%
+
+**Oracles configuration for xSolvBTC**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [BNB Chain](https://bscscan.com/address/0x6592b5DE802159F3E74B2486b091D11a8256ab8A) is used for xSolvBTC, using the following configuration. The OneJumpOracle is used to get the USD price of xSolvBTC, first getting the conversion rate xSolvBTC/SolvBTC using the feeds from RedStone, and then getting the USD price using the RedStone price feed for SolvBTC/USD.
+
+- MAIN oracle for wstETH on Unichain
+    - Contract: [OneJumpOracle](https://bscscan.com/address/0xD39f9280873EB8A312246ee85f7ff118cb8206bb)
+    - CORRELATED_TOKEN: [xSolvBTC](https://bscscan.com/address/0x1346b618dC92810EC74163e4c27004c921D446a5)
+    - UNDERLYING_TOKEN: [SolvBTC](https://bscscan.com/address/0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7)
+    - INTERMEDIATE_ORACLE: [RedStoneOracle](https://uniscan.xyz/address/0x4d41a36D04D97785bcEA57b057C412b278e6Edcc), using its price feed [xSolvBTC/SolvBTC](https://bscscan.com/address/0x24c8964338Deb5204B096039147B8e8C3AEa42Cc)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating that the new markets are properly added to the Core pool on Ethereum and BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+tBTC:
+
+- Ethereum: [0x5e35C312862d53FD566737892aDCf010cb4928F7](https://etherscan.io/address/0x5e35C312862d53FD566737892aDCf010cb4928F7)
+- Sepolia: [0x834078D691d431aAdC80197f7a61239F9F89547b](https://sepolia.etherscan.io/address/0x834078D691d431aAdC80197f7a61239F9F89547b)
+
+xSolvBTC:
+
+- BNB Chain: [0xd804dE60aFD05EE6B89aab5D152258fD461B07D5](https://bscscan.com/address/0xd804dE60aFD05EE6B89aab5D152258fD461B07D5)
+- BNB Chain testnet: [0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e](https://testnet.bscscan.com/address/0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/568)
+- [Deployment of tBTC to Sepolia](https://sepolia.etherscan.io/tx/0x9521b61bbda816061b436d13a2dd4c4fb56f2140b4ca9dc7190fcf0597092a9f)
+- [Deployment of xSolvBTC to BNB Chain testnet](https://testnet.bscscan.com/tx/0x382c4381cd3e1490ff95539b5cc491bbc79fd4600ce8f9e0e6fb6cae5f94bf73)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -389,4 +477,4 @@ export const vip505 = (maxStalePeriod?: number) => {
   );
 };
 
-export default vip505;
+export default vip508;
