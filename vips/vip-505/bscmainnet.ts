@@ -131,7 +131,7 @@ export const xSolvBTCMarketSpec = {
   initialSupply: {
     amount: parseUnits("1", 18),
     vTokensToBurn: parseUnits("0.0009615", 8), // Approximately $100
-    vTokenReceiver: bscmainnet.VTREASURY,
+    vTokenReceiver: "0x9C6e1E22DB1FEeAcB2bB8497D0Dc07Feba06db16",
   },
   riskParameters: {
     supplyCap: parseUnits("100", 18),
