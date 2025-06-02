@@ -2,7 +2,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { ProposalType } from "src/types";
+import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 import { NORMAL_TIMELOCK } from "src/vip-framework";
 
@@ -12,6 +12,11 @@ export const xSolvBTC_BSC = "0x3ea87323806586A0282b50377e0FEa76070F532B";
 export const vxSolvBTC_BSC = "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e";
 export const xSolvBTC_Oracle_BSC = "0x9783294c8c2073A7e91A6F8B1b5f5658056232C8";
 export const REDUCE_RESERVES_BLOCK_DELTA_BSC= "28800";
+
+const sepolia = NETWORK_ADDRESSES.sepolia;
+export const COMPTROLLER_CORE_ETH = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
+export const tBTC_ETH = "0x5B377e8d43D7D11978A83D7F055Dce30daf385AF";
+export const tBTC_Price = parseUnits("103921.65", 18);
 
 // Converters
 const ETH_BSC = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
@@ -36,6 +41,26 @@ export const converterBaseAssets = {
   [XVS_VAULT_CONVERTER_BSC]: XVS_BSC,
 };
 
+const USDT_ETH = "0x8d412FD0bc5d826615065B931171Eed10F5AF266";
+const USDC_ETH = "0x772d68929655ce7234C8C94256526ddA66Ef641E";
+const WBTC_ETH = "0x92A2928f5634BEa89A195e7BeCF0f0FEEDAB885b";
+const WETH_ETH = "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9";
+const XVS_ETH = "0x66ebd019E86e0af5f228a0439EBB33f045CBe63E";
+export const USDT_PRIME_CONVERTER_ETH = "0x3716C24EA86A67cAf890d7C9e4C4505cDDC2F8A2";
+export const USDC_PRIME_CONVERTER_ETH = "0x511a559a699cBd665546a1F75908f7E9454Bfc67";
+export const WBTC_PRIME_CONVERTER_ETH = "0x8a3937F27921e859db3FDA05729CbCea8cfd82AE";
+export const WETH_PRIME_CONVERTER_ETH = "0x274a834eFFA8D5479502dD6e78925Bc04ae82B46";
+export const XVS_VAULT_CONVERTER_ETH = "0xc203bfA9dCB0B5fEC510Db644A494Ff7f4968ed2";
+
+export const converterBaseAssetsEth = {
+  [USDT_PRIME_CONVERTER_ETH]: USDT_ETH,
+  [USDC_PRIME_CONVERTER_ETH]: USDC_ETH,
+  [WBTC_PRIME_CONVERTER_ETH]: WBTC_ETH,
+  [WETH_PRIME_CONVERTER_ETH]: WETH_ETH,
+  [XVS_VAULT_CONVERTER_ETH]: XVS_ETH,
+};
+export const CONVERSION_INCENTIVE_ETH = 3e14;
+
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
   return amount.mul(EXP_SCALE).div(exchangeRate);
@@ -58,6 +83,26 @@ const configureConvertersBsc = (fromAssets: string[], incentive: BigNumberish = 
     };
   });
 };
+
+const configureConvertersEth = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE_ETH) => {
+  enum ConversionAccessibility {
+    NONE = 0,
+    ALL = 1,
+    ONLY_FOR_CONVERTERS = 2,
+    ONLY_FOR_USERS = 3,
+  }
+
+  return Object.entries(converterBaseAssetsEth).map(([converter, baseAsset]: [string, string]) => {
+    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
+    return {
+      target: converter,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [baseAsset, fromAssets, conversionConfigs],
+      dstChainId: LzChainId.sepolia, 
+    };
+  });
+};
+
 
 export const xSolvBTCMarketSpec = {
   vToken: {
@@ -91,6 +136,38 @@ export const xSolvBTCMarketSpec = {
     borrowCap: parseUnits("0", 18),
     collateralFactor: parseUnits("0.72", 18),
     reserveFactor: parseUnits("0.1", 18),
+  },
+};
+
+export const tBTCMarketSpec = {
+  vToken: {
+    address: "0x834078D691d431aAdC80197f7a61239F9F89547b",
+    name: "Venus tBTC (Core)",
+    symbol: "vtBTC_Core",
+    underlying: tBTC_ETH,
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
+    comptroller: COMPTROLLER_CORE_ETH,
+  },
+  riskParameters: {
+    collateralFactor: parseUnits("0.75", 18),
+    liquidationThreshold: parseUnits("0.78", 18),
+    supplyCap: parseUnits("120", 18),
+    borrowCap: parseUnits("6", 18),
+    reserveFactor: parseUnits("0.25", 18),
+    protocolSeizeShare: parseUnits("0.05", 18),
+  },
+  initialSupply: {
+    amount: parseUnits("0.24", 18),
+    vTokensToBurn: parseUnits("0.0009615", 8), // Approximately $100
+    vTokenReceiver: sepolia.VTREASURY,
+  },
+  interestRateModel: {
+    address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
+    base: "0",
+    multiplier: "0.15",
+    jump: "3",
+    kink: "0.45",
   },
 };
 
@@ -205,6 +282,85 @@ export const vip505 = () => {
         params: [[xSolvBTCMarketSpec.vToken.address], [2], true],
       },
       ...configureConvertersBsc([xSolvBTCMarketSpec.vToken.underlying.address]),
+      
+      // Configure Oracle
+      {
+        target: sepolia.CHAINLINK_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [tBTCMarketSpec.vToken.underlying, tBTC_Price],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: sepolia.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            tBTCMarketSpec.vToken.underlying,
+            [sepolia.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false
+          ],
+        ],
+        dstChainId: LzChainId.sepolia,
+      },
+      // Market config
+      {
+        target: tBTCMarketSpec.vToken.address,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: ["7200"],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: tBTCMarketSpec.vToken.underlying,
+        signature: "faucet(uint256)",
+        params: [tBTCMarketSpec.initialSupply.amount],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: tBTCMarketSpec.vToken.underlying,
+        signature: "approve(address,uint256)",
+        params: [sepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: tBTCMarketSpec.vToken.underlying,
+        signature: "approve(address,uint256)",
+        params: [sepolia.POOL_REGISTRY, tBTCMarketSpec.initialSupply.amount],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: sepolia.POOL_REGISTRY,
+        signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
+        params: [
+          [
+            tBTCMarketSpec.vToken.address,
+            tBTCMarketSpec.riskParameters.collateralFactor, // CF
+            tBTCMarketSpec.riskParameters.liquidationThreshold, // LT
+            tBTCMarketSpec.initialSupply.amount, // initial supply
+            sepolia.NORMAL_TIMELOCK, // vToken receiver
+            tBTCMarketSpec.riskParameters.supplyCap, // supply cap
+            tBTCMarketSpec.riskParameters.borrowCap, // borrow cap
+          ],
+        ],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: tBTCMarketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, tBTCMarketSpec.initialSupply.vTokensToBurn],
+        dstChainId: LzChainId.sepolia,
+      },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(tBTCMarketSpec.initialSupply.amount, tBTCMarketSpec.vToken.exchangeRate);
+        const vTokensRemaining = vTokensMinted.sub(tBTCMarketSpec.initialSupply.vTokensToBurn);
+        return {
+          target: tBTCMarketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [tBTCMarketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+          dstChainId: LzChainId.sepolia,
+        };
+      })(),
+      ...configureConvertersEth([tBTCMarketSpec.vToken.underlying]),
     ],
     meta,
     ProposalType.REGULAR,
