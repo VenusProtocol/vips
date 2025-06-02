@@ -145,23 +145,6 @@ forking(50560525, async () => {
     });
 
     describe("COMPTROLLER_STABLECOIN", async () => {
-      it("unpaused actions for VToken_vHAY_StableCoins", async () => {
-        let paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_Stablecoins,
-          Actions.BORROW,
-        );
-        expect(paused).to.be.false;
-
-        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vHAY_Stablecoins, Actions.MINT);
-        expect(paused).to.be.false;
-
-        paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_Stablecoins,
-          Actions.ENTER_MARKET,
-        );
-        expect(paused).to.be.false;
-      });
-
       it("unpaused actions for VToken_vEURA_Stablecoins", async () => {
         // MINT already paused
         let paused = await comptroller_stablecoin.actionPaused(
@@ -349,7 +332,7 @@ forking(50560525, async () => {
         txResponse,
         [COMPTROLLER_ABI],
         ["ActionPausedMarket", "NewCollateralFactor", "NewLiquidationThreshold"],
-        [60, 17, 0],
+        [57, 15, 0],
       );
       await expectEvents(
         txResponse,
@@ -491,22 +474,6 @@ forking(50560525, async () => {
     });
 
     describe("COMPTROLLER_STABLECOIN", async () => {
-      it("paused actions for VToken_vHAY_StableCoins", async () => {
-        let paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_Stablecoins,
-          Actions.BORROW,
-        );
-        expect(paused).to.be.true;
-
-        paused = await comptroller_stablecoin.actionPaused(BNB_VTOKENS.Stablecoins.vHAY_Stablecoins, Actions.MINT);
-        expect(paused).to.be.true;
-
-        paused = await comptroller_stablecoin.actionPaused(
-          BNB_VTOKENS.Stablecoins.vHAY_Stablecoins,
-          Actions.ENTER_MARKET,
-        );
-        expect(paused).to.be.true;
-      });
       it("paused actions for VToken_vEURA_Stablecoins", async () => {
         let paused = await comptroller_stablecoin.actionPaused(
           BNB_VTOKENS.Stablecoins.vEURA_Stablecoins,

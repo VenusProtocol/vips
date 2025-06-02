@@ -24,7 +24,7 @@ export const BNB_VTOKENS = {
     vPT_SolvBTC_BBN_27MAR2025_BTC: "0x02243F036897E3bE1cce1E540FA362fd58749149", // CF already 0, actions already paused
   },
   LiquidStakedETH: {
-    vETH_LiquidStakedETH: "0xeCCACF760FEA7943C5b0285BD09F601505A29c05",
+    vETH_LiquidStakedETH: "0xeCCACF760FEA7943C5b0285BD09F601505A29c05", // CF already 0
     vweETH_LiquidStakedETH: "0xc5b24f347254bD8cF8988913d1fd0F795274900F",
     vwstETH_LiquidStakedETH: "0x94180a3948296530024Ef7d60f60B85cfe0422c8",
   },
@@ -34,7 +34,6 @@ export const BNB_VTOKENS = {
   },
   Stablecoins: {
     vEURA_Stablecoins: "0x795DE779Be00Ea46eA97a28BDD38d9ED570BCF0F", // actions already paused
-    vHAY_Stablecoins: "0xCa2D81AA7C09A1a025De797600A7081146dceEd9",
     vUSDD_Stablecoins: "0xc3a45ad8812189cAb659aD99E64B1376f6aCD035",
     vUSDT_Stablecoins: "0x5e3072305F9caE1c7A82F6Fe9E38811c74922c3B",
     vlisUSD_Stablecoins: "0xCa2D81AA7C09A1a025De797600A7081146dceEd9",
@@ -177,7 +176,6 @@ export const vip510 = () => {
             BNB_VTOKENS.Stablecoins.vEURA_Stablecoins,
             BNB_VTOKENS.Stablecoins.vUSDD_Stablecoins,
             BNB_VTOKENS.Stablecoins.vUSDT_Stablecoins,
-            BNB_VTOKENS.Stablecoins.vHAY_Stablecoins,
             BNB_VTOKENS.Stablecoins.vlisUSD_Stablecoins,
           ],
           [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET],
@@ -198,11 +196,6 @@ export const vip510 = () => {
         target: BNB_COMPTROLLERS.Stablecoins,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [BNB_VTOKENS.Stablecoins.vUSDT_Stablecoins, COLLATERAL_FACTOR, parseUnits("0.8", 18)],
-      },
-      {
-        target: BNB_COMPTROLLERS.Stablecoins,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [BNB_VTOKENS.Stablecoins.vHAY_Stablecoins, COLLATERAL_FACTOR, parseUnits("0.8", 18)],
       },
       {
         target: BNB_COMPTROLLERS.Stablecoins,
