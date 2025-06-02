@@ -127,7 +127,7 @@ export const xSolvBTCMarketSpec = {
   },
   initialSupply: {
     amount: parseUnits("1", 18),
-    vTokensToBurn: parseUnits("0.001666", 8), // Approximately $100
+    vTokensToBurn: parseUnits("0.00096154", 8), // Approximately $100
     vTokenReceiver: bsctestnet.VTREASURY,
   },
   riskParameters: {
@@ -152,7 +152,7 @@ export const tBTCMarketSpec = {
     collateralFactor: parseUnits("0.75", 18),
     liquidationThreshold: parseUnits("0.78", 18),
     supplyCap: parseUnits("120", 18),
-    borrowCap: parseUnits("6", 18),
+    borrowCap: parseUnits("60", 18),
     reserveFactor: parseUnits("0.25", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
   },
@@ -173,8 +173,8 @@ export const tBTCMarketSpec = {
 export const vip505 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-505",
-    description: "",
+    title: "VIP-508 [BNB Chain][Ethereum] Add xSolvBTC and tBTC markets to the Core pool",
+    description: "VIP-508 [BNB Chain][Ethereum] Add xSolvBTC and tBTC markets to the Core pool",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

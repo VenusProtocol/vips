@@ -155,7 +155,7 @@ export const tBTCMarketSpec = {
     collateralFactor: parseUnits("0.75", 18),
     liquidationThreshold: parseUnits("0.78", 18),
     supplyCap: parseUnits("120", 18),
-    borrowCap: parseUnits("6", 18),
+    borrowCap: parseUnits("60", 18),
     reserveFactor: parseUnits("0.25", 18),
     protocolSeizeShare: parseUnits("0.05", 18),
   },

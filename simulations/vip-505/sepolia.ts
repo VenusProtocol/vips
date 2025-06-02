@@ -72,16 +72,16 @@ forking(8461619, async () => {
           comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE_ETH);
         });
 
-        it(`should set reserve factor to 0.4`, async () => {
+        it(`should set reserve factor to 0.25`, async () => {
           expect(await vToken.reserveFactorMantissa()).to.equal(tBTCMarketSpec.riskParameters.reserveFactor);
         });
 
-        it(`should set collateral factor to 0.7`, async () => {
+        it(`should set collateral factor to 0.75`, async () => {
           const market = await comptroller.markets(tBTCMarketSpec.vToken.address);
           expect(market.collateralFactorMantissa).to.equal(tBTCMarketSpec.riskParameters.collateralFactor);
         });
 
-        it(`should set liquidation threshold to 0.75`, async () => {
+        it(`should set liquidation threshold to 0.78`, async () => {
           const market = await comptroller.markets(tBTCMarketSpec.vToken.address);
           expect(market.liquidationThresholdMantissa).to.equal(tBTCMarketSpec.riskParameters.liquidationThreshold);
         });
@@ -90,13 +90,13 @@ forking(8461619, async () => {
           expect(await vToken.protocolSeizeShareMantissa()).to.equal(parseUnits("0.05", 18));
         });
 
-        it(`should set supply cap to 4000`, async () => {
+        it(`should set supply cap to 120`, async () => {
           expect(await comptroller.supplyCaps(tBTCMarketSpec.vToken.address)).to.equal(
             tBTCMarketSpec.riskParameters.supplyCap,
           );
         });
 
-        it(`should set borrow cap to 400`, async () => {
+        it(`should set borrow cap to 60`, async () => {
           expect(await comptroller.borrowCaps(tBTCMarketSpec.vToken.address)).to.equal(
             tBTCMarketSpec.riskParameters.borrowCap,
           );

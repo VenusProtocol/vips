@@ -123,13 +123,13 @@ forking(50587150, async () => {
       expect(price).to.equal(parseUnits("104005.21462405", 18));
     });
 
-    it("adds a new xsolvbtc market and set collateral factor to 0%", async () => {
+    it("adds a new xsolvbtc market and set collateral factor to 72%", async () => {
       const market = await comptroller.markets(vxSolvBTC_BSC);
       expect(market.isListed).to.equal(true);
       expect(market.collateralFactorMantissa).to.equal(xSolvBTCMarketSpec.riskParameters.collateralFactor);
     });
 
-    it("reserves factor equals 25%", async () => {
+    it("reserves factor equals 10%", async () => {
       const reserveFactor = await vxsolvbtc.reserveFactorMantissa();
       expect(reserveFactor).to.equal(xSolvBTCMarketSpec.riskParameters.reserveFactor);
     });
