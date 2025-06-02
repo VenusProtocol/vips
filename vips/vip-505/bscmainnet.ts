@@ -22,7 +22,7 @@ export const COMPTROLLER_CORE_ETH = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B"
 export const tBTC_ETH = "0x18084fbA666a33d37592fA2633fD49a74DD93a88";
 
 // Converters
-const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
+export const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
 const USDC_BSC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const BTCB_BSC = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 const XVS_BSC = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
@@ -44,7 +44,7 @@ export const converterBaseAssetsBsc = {
   [XVS_VAULT_CONVERTER_BSC]: XVS_BSC,
 };
 
-const USDT_ETH = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+export const USDT_ETH = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 const USDC_ETH = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const WBTC_ETH = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
 const WETH_ETH = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
@@ -63,7 +63,6 @@ export const converterBaseAssetsEth = {
   [XVS_VAULT_CONVERTER_ETH]: XVS_ETH,
 };
 export const CONVERSION_INCENTIVE_ETH = 3e14;
-
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
   const EXP_SCALE = parseUnits("1", 18);
@@ -102,6 +101,7 @@ const configureConvertersEth = (fromAssets: string[], incentive: BigNumberish = 
       target: converter,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [baseAsset, fromAssets, conversionConfigs],
+      dstChainId: LzChainId.ethereum,
     };
   });
 };
@@ -140,7 +140,6 @@ export const xSolvBTCMarketSpec = {
     reserveFactor: parseUnits("0.1", 18),
   },
 };
-
 
 export const tBTCMarketSpec = {
   vToken: {
@@ -247,7 +246,11 @@ export const vip505 = (maxStalePeriod?: number) => {
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [xSolvBTCMarketSpec.vToken.underlying.address, xSolvBTCMarketSpec.initialSupply.amount, NORMAL_TIMELOCK],
+        params: [
+          xSolvBTCMarketSpec.vToken.underlying.address,
+          xSolvBTCMarketSpec.initialSupply.amount,
+          NORMAL_TIMELOCK,
+        ],
       },
       {
         target: xSolvBTCMarketSpec.vToken.underlying.address,
@@ -271,7 +274,10 @@ export const vip505 = (maxStalePeriod?: number) => {
         params: [ethers.constants.AddressZero, xSolvBTCMarketSpec.initialSupply.vTokensToBurn],
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(xSolvBTCMarketSpec.initialSupply.amount, xSolvBTCMarketSpec.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          xSolvBTCMarketSpec.initialSupply.amount,
+          xSolvBTCMarketSpec.vToken.exchangeRate,
+        );
         const vTokensRemaining = vTokensMinted.sub(xSolvBTCMarketSpec.initialSupply.vTokensToBurn);
         return {
           target: xSolvBTCMarketSpec.vToken.address,
@@ -285,6 +291,11 @@ export const vip505 = (maxStalePeriod?: number) => {
         params: [[xSolvBTCMarketSpec.vToken.address], [2], true],
       },
       ...configureConvertersBsc([xSolvBTCMarketSpec.vToken.underlying.address]),
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT_BSC, parseUnits("100", 18), xSolvBTCMarketSpec.initialSupply.vTokenReceiver],
+      },
 
       // Configure Oracle
       {
@@ -315,11 +326,7 @@ export const vip505 = (maxStalePeriod?: number) => {
       {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [
-          tBTCMarketSpec.vToken.underlying,
-          tBTCMarketSpec.initialSupply.amount,
-          ethereum.NORMAL_TIMELOCK,
-        ],
+        params: [tBTCMarketSpec.vToken.underlying, tBTCMarketSpec.initialSupply.amount, ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -357,7 +364,10 @@ export const vip505 = (maxStalePeriod?: number) => {
         dstChainId: LzChainId.ethereum,
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(tBTCMarketSpec.initialSupply.amount, tBTCMarketSpec.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          tBTCMarketSpec.initialSupply.amount,
+          tBTCMarketSpec.vToken.exchangeRate,
+        );
         const vTokensRemaining = vTokensMinted.sub(tBTCMarketSpec.initialSupply.vTokensToBurn);
         return {
           target: tBTCMarketSpec.vToken.address,
@@ -367,6 +377,12 @@ export const vip505 = (maxStalePeriod?: number) => {
         };
       })(),
       ...configureConvertersEth([tBTCMarketSpec.vToken.underlying]),
+      {
+        target: ethereum.VTREASURY,
+        signature: "withdrawTreasuryToken(address,uint256,address)",
+        params: [USDT_ETH, parseUnits("100", 6), tBTCMarketSpec.initialSupply.vTokenReceiver],
+        dstChainId: LzChainId.ethereum,
+      },
     ],
     meta,
     ProposalType.REGULAR,

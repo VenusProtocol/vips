@@ -11,7 +11,7 @@ export const PROTOCOL_SHARE_RESERVE_BSC = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3
 export const xSolvBTC_BSC = "0x3ea87323806586A0282b50377e0FEa76070F532B";
 export const vxSolvBTC_BSC = "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e";
 export const xSolvBTC_Oracle_BSC = "0x9783294c8c2073A7e91A6F8B1b5f5658056232C8";
-export const REDUCE_RESERVES_BLOCK_DELTA_BSC= "28800";
+export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
 
 const sepolia = NETWORK_ADDRESSES.sepolia;
 export const COMPTROLLER_CORE_ETH = "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70";
@@ -98,11 +98,10 @@ const configureConvertersEth = (fromAssets: string[], incentive: BigNumberish = 
       target: converter,
       signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
       params: [baseAsset, fromAssets, conversionConfigs],
-      dstChainId: LzChainId.sepolia, 
+      dstChainId: LzChainId.sepolia,
     };
   });
 };
-
 
 export const xSolvBTCMarketSpec = {
   vToken: {
@@ -268,7 +267,10 @@ export const vip505 = () => {
         params: [ethers.constants.AddressZero, xSolvBTCMarketSpec.initialSupply.vTokensToBurn],
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(xSolvBTCMarketSpec.initialSupply.amount, xSolvBTCMarketSpec.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          xSolvBTCMarketSpec.initialSupply.amount,
+          xSolvBTCMarketSpec.vToken.exchangeRate,
+        );
         const vTokensRemaining = vTokensMinted.sub(xSolvBTCMarketSpec.initialSupply.vTokensToBurn);
         return {
           target: xSolvBTCMarketSpec.vToken.address,
@@ -282,7 +284,7 @@ export const vip505 = () => {
         params: [[xSolvBTCMarketSpec.vToken.address], [2], true],
       },
       ...configureConvertersBsc([xSolvBTCMarketSpec.vToken.underlying.address]),
-      
+
       // Configure Oracle
       {
         target: sepolia.CHAINLINK_ORACLE,
@@ -298,7 +300,7 @@ export const vip505 = () => {
             tBTCMarketSpec.vToken.underlying,
             [sepolia.CHAINLINK_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
-            false
+            false,
           ],
         ],
         dstChainId: LzChainId.sepolia,
@@ -351,7 +353,10 @@ export const vip505 = () => {
         dstChainId: LzChainId.sepolia,
       },
       (() => {
-        const vTokensMinted = convertAmountToVTokens(tBTCMarketSpec.initialSupply.amount, tBTCMarketSpec.vToken.exchangeRate);
+        const vTokensMinted = convertAmountToVTokens(
+          tBTCMarketSpec.initialSupply.amount,
+          tBTCMarketSpec.vToken.exchangeRate,
+        );
         const vTokensRemaining = vTokensMinted.sub(tBTCMarketSpec.initialSupply.vTokensToBurn);
         return {
           target: tBTCMarketSpec.vToken.address,

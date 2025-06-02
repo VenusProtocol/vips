@@ -1,19 +1,13 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip505, {
-  COMPTROLLER_CORE_ETH,
-  tBTC_ETH,
-  tBTCMarketSpec,
-} from "../../vips/vip-505/bsctestnet";
+import vip505, { COMPTROLLER_CORE_ETH, tBTCMarketSpec } from "../../vips/vip-505/bsctestnet";
 import COMPTROLLER_ABI from "./abi/ilComptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";

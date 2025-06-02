@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -10,22 +11,20 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   PROTOCOL_SHARE_RESERVE_BSC,
   REDUCE_RESERVES_BLOCK_DELTA_BSC,
-  xSolvBTC_BSC,
-  xSolvBTCMarketSpec,
   vip505,
-  vxSolvBTC_BSC
+  vxSolvBTC_BSC,
+  xSolvBTCMarketSpec,
+  xSolvBTC_BSC,
 } from "../../vips/vip-505/bsctestnet";
 import xSolvBTC_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import USD1_ABI from "./abi/mockToken.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
 const RATE_MODEL = "0xE0d3774406296322f42CBf25e96e8388cDAf0A66";
 const INITIAL_VTOKENS = parseUnits("1", 8);
-const { RESILIENT_ORACLE, REDSTONE_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
-  NETWORK_ADDRESSES.bsctestnet;
+const { RESILIENT_ORACLE } = NETWORK_ADDRESSES.bsctestnet;
 
 const Actions = {
   MINT: 0,
@@ -81,7 +80,7 @@ forking(53058755, async () => {
     it("get price of xsolvbtc from oracle", async () => {
       const price = await oracle.getPrice(xSolvBTC_BSC);
       expect(price).to.equal(parseUnits("60000", 18));
-    })
+    });
 
     it("adds a new xsolvbtc market and set collateral factor to 0%", async () => {
       const market = await comptroller.markets(vxSolvBTC_BSC);

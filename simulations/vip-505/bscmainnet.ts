@@ -1,7 +1,8 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -10,23 +11,23 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   PROTOCOL_SHARE_RESERVE_BSC,
   REDUCE_RESERVES_BLOCK_DELTA_BSC,
-  xSolvBTC_BSC,
-  xSolvBTCMarketSpec,
+  USDT_BSC,
   vip505,
   vxSolvBTC_BSC,
-  xSolvBTC_RedStone_Feed_BSC
+  xSolvBTCMarketSpec,
+  xSolvBTC_BSC,
+  xSolvBTC_RedStone_Feed_BSC,
 } from "../../vips/vip-505/bscmainnet";
 import xSolvBTC_ABI from "./abi/VBep20_ABI.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import ERC20_ABI from "./abi/erc20.json";
 import USD1_ABI from "./abi/mockToken.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 const RATE_MODEL = "0x52F63686D09d92c367c90BCDBF79A562f81bd6BF";
 const INITIAL_VTOKENS = parseUnits("1", 8);
-const { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, UNITROLLER, ACCESS_CONTROL_MANAGER, VTREASURY } =
-  NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, REDSTONE_ORACLE, CHAINLINK_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
 
 const Actions = {
   MINT: 0,
@@ -40,6 +41,9 @@ forking(50587150, async () => {
   let vxsolvbtc: Contract;
   let oracle: Contract;
   const provider = ethers.provider;
+  let usdt: Contract;
+  let prevVTokenReceiverUSDTBalance: BigNumber;
+  let prevTreasuryUSDTBalance: BigNumber;
 
   before(async () => {
     comptroller = new ethers.Contract(xSolvBTCMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
@@ -51,10 +55,20 @@ forking(50587150, async () => {
       CHAINLINK_ORACLE,
       "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
       "0x264990fbd0A4796A3E3d8E37C4d5F87a3aCa5Ebf",
-      NORMAL_TIMELOCK
-    )
-    await setRedstonePrice(REDSTONE_ORACLE, "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7", "0xa51738d1937FFc553d5070f43300B385AA2D9F55", NORMAL_TIMELOCK);
+      NORMAL_TIMELOCK,
+    );
+    await setRedstonePrice(
+      REDSTONE_ORACLE,
+      "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+      "0xa51738d1937FFc553d5070f43300B385AA2D9F55",
+      NORMAL_TIMELOCK,
+    );
     await setRedstonePrice(REDSTONE_ORACLE, xSolvBTC_BSC, xSolvBTC_RedStone_Feed_BSC, NORMAL_TIMELOCK);
+
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT_BSC);
+
+    prevVTokenReceiverUSDTBalance = await usdt.balanceOf(xSolvBTCMarketSpec.initialSupply.vTokenReceiver);
+    prevTreasuryUSDTBalance = await usdt.balanceOf(VTREASURY);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -88,10 +102,18 @@ forking(50587150, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    it("checks USDT balances", async () => {
+      const vTokenReceiverUSDTBalance = await usdt.balanceOf(xSolvBTCMarketSpec.initialSupply.vTokenReceiver);
+      const treasuryUSDTBalance = await usdt.balanceOf(VTREASURY);
+
+      expect(vTokenReceiverUSDTBalance).to.equal(prevVTokenReceiverUSDTBalance.add(parseUnits("100", 18)));
+      expect(treasuryUSDTBalance).to.equal(prevTreasuryUSDTBalance.sub(parseUnits("100", 18)));
+    });
+
     it("get price of xsolvbtc from oracle", async () => {
       const price = await oracle.getPrice(xSolvBTC_BSC);
       expect(price).to.equal(parseUnits("104005.21462405", 18));
-    })
+    });
 
     it("adds a new xsolvbtc market and set collateral factor to 0%", async () => {
       const market = await comptroller.markets(vxSolvBTC_BSC);

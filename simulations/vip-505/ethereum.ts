@@ -1,19 +1,14 @@
 import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
-import { formatUnits, parseUnits } from "ethers/lib/utils";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
-import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip505, {
-  COMPTROLLER_CORE_ETH,
-  tBTC_ETH,
-  tBTCMarketSpec,
-} from "../../vips/vip-505/bscmainnet";
+import vip505, { COMPTROLLER_CORE_ETH, USDT_ETH, tBTCMarketSpec } from "../../vips/vip-505/bscmainnet";
+import ERC20_ABI from "./abi/erc20.json";
 import COMPTROLLER_ABI from "./abi/ilComptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
@@ -27,6 +22,16 @@ const ONE_YEAR = 326 * 24 * 60 * 60; // 365 days in seconds
 forking(22609457, async () => {
   let comptroller: Contract;
   let oracle: Contract;
+  let usdt: Contract;
+  let prevVTokenReceiverUSDTBalance: BigNumber;
+  let prevTreasuryUSDTBalance: BigNumber;
+
+  before(async () => {
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT_ETH);
+
+    prevVTokenReceiverUSDTBalance = await usdt.balanceOf(tBTCMarketSpec.initialSupply.vTokenReceiver);
+    prevTreasuryUSDTBalance = await usdt.balanceOf(ethereum.VTREASURY);
+  });
 
   describe("Contracts setup", () => {
     checkVToken(tBTCMarketSpec.vToken.address, tBTCMarketSpec.vToken);
@@ -123,6 +128,14 @@ forking(22609457, async () => {
         },
         BLOCKS_PER_YEAR,
       );
+    });
+
+    it("checks USDT balances", async () => {
+      const vTokenReceiverUSDTBalance = await usdt.balanceOf(tBTCMarketSpec.initialSupply.vTokenReceiver);
+      const treasuryUSDTBalance = await usdt.balanceOf(ethereum.VTREASURY);
+
+      expect(vTokenReceiverUSDTBalance).to.equal(prevVTokenReceiverUSDTBalance.add(parseUnits("100", 6)));
+      expect(treasuryUSDTBalance).to.equal(prevTreasuryUSDTBalance.sub(parseUnits("100", 6)));
     });
   });
 });
