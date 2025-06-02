@@ -33,7 +33,7 @@ const oldIRMs = [
   [ETH_vUSDS_Core, "0x322072b84434609ff64333A125516055B5B4405F"],
   [ETH_vUSDC_Core, "0x4A786e4653Ff7DBA74D6dA0861350F233f2dA73b"],
   [ETH_vcrvUSD_Core, "0x837996e7d74222965ACf1fdd478926e07336a291"],
-  [ETH_vFRAX_Core, "0x244dBE6d11Ae9AadBaD552E6BD8901B680028E31"],
+  [ETH_vFRAX_Core, "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9"],
   [ETH_vDAI_Core, "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9"],
   [ETH_vUSDT_Core, "0x4A786e4653Ff7DBA74D6dA0861350F233f2dA73b"],
   [ETH_vTUSD_Core, "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9"],
@@ -102,11 +102,11 @@ forking(22595258, async () => {
     );
 
     checkInterestRate(
-      "0x244dBE6d11Ae9AadBaD552E6BD8901B680028E31",
+      "0x675b3dF06a5F3A7d2f04e7852Dbf8f8d40959Ca9",
       "FRAX_Core",
       {
         base: "0",
-        multiplier: "0.15",
+        multiplier: "0.175",
         jump: "2.5",
         kink: "0.8",
       },

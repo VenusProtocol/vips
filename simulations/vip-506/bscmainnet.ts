@@ -69,14 +69,14 @@ const newIRMs = [
   [BNB_vTUSD_CORE, BNB_vTUSD_CORE_IRM],
   [BNB_vUSDT_CORE, BNB_vUSDT_CORE_IRM],
   [BNB_vUSDT_DeFi, BNB_vUSDT_DeFi_IRM],
-  [BNB_vUSDD_DeFi, BNB_vUSDD_DeFi_IRM], // no update required
+  [BNB_vUSDD_DeFi, BNB_vUSDD_DeFi_IRM],
   [BNB_vUSDT_GameFi, BNB_vUSDT_GameFi_IRM],
-  [BNB_vUSDD_GameFi, BNB_vUSDD_GameFi_IRM], // no update required
+  [BNB_vUSDD_GameFi, BNB_vUSDD_GameFi_IRM],
   [BNB_vUSDT_Meme, BNB_vUSDT_Meme_IRM],
-  [BNB_vUSDD_Stablecoin, BNB_vUSDD_Stablecoin_IRM], // no update required
+  [BNB_vUSDD_Stablecoin, BNB_vUSDD_Stablecoin_IRM],
   [BNB_vUSDT_Stablecoin, BNB_vUSDT_Stablecoin_IRM],
-  [BNB_vlisUSD_Stablecoin, BNB_vlisUSD_Stablecoin_IRM], // no update required
-  [BNB_vUSDD_Tron, BNB_vUSDD_Tron_IRM], // no update required
+  [BNB_vlisUSD_Stablecoin, BNB_vlisUSD_Stablecoin_IRM],
+  [BNB_vUSDD_Tron, BNB_vUSDD_Tron_IRM],
   [BNB_vUSDT_Tron, BNB_vUSDT_Tron_IRM],
 ];
 forking(50567390, async () => {
@@ -165,7 +165,7 @@ forking(50567390, async () => {
         [6, 0],
       );
       await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [5, 1]);
-      await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [5]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [10]);
     },
   });
 

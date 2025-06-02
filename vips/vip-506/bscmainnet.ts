@@ -29,7 +29,7 @@ export const BNB_vUSDD_Tron = "0xf1da185CCe5BeD1BeBbb3007Ef738Ea4224025F7";
 export const ETH_vUSDS_Core = "0x0c6B19287999f1e31a5c0a44393b24B62D2C0468";
 export const ETH_vUSDC_Core = "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb";
 export const ETH_vcrvUSD_Core = "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202";
-export const ETH_vFRAX_Core = "0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe";
+export const ETH_vFRAX_Core = "0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95";
 export const ETH_vDAI_Core = "0xd8AdD9B41D4E1cd64Edad8722AB0bA8D35536657";
 export const ETH_vUSDT_Core = "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E";
 export const ETH_vTUSD_Core = "0x13eB80FDBe5C5f4a7039728E258A6f05fb3B912b";
@@ -53,15 +53,15 @@ export const BNB_vDAI_CORE_IRM = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
 export const BNB_vTUSD_CORE_IRM = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
 export const BNB_vUSDT_CORE_IRM = "0x31d20C36A4804AB30F04fB606555f545b2bAE3b3";
 export const BNB_vUSDT_DeFi_IRM = "0xB43F967B8C8F9c415e09C2984A7869c02b0DEd8B";
-export const BNB_vUSDD_DeFi_IRM = "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1";
+export const BNB_vUSDD_DeFi_IRM = "0xB854f943E61EA81637C7296CF16E2503BA0FCda3";
 export const BNB_vUSDT_GameFi_IRM = "0xB43F967B8C8F9c415e09C2984A7869c02b0DEd8B";
-export const BNB_vUSDD_GameFi_IRM = "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1";
+export const BNB_vUSDD_GameFi_IRM = "0xB854f943E61EA81637C7296CF16E2503BA0FCda3";
 export const BNB_vUSDT_Meme_IRM = "0x21868705cb097C3e12d90C8BBC8c2bDc75E3B1eB";
 export const BNB_vUSDT_Stablecoin_IRM = "0x21868705cb097C3e12d90C8BBC8c2bDc75E3B1eB";
-export const BNB_vUSDD_Stablecoin_IRM = "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1";
-export const BNB_vlisUSD_Stablecoin_IRM = "0xA4471c68bB3D3d9301D540552311680F5cC35228";
+export const BNB_vUSDD_Stablecoin_IRM = "0xB854f943E61EA81637C7296CF16E2503BA0FCda3";
+export const BNB_vlisUSD_Stablecoin_IRM = "0x2dcDA3628f9d01Cc9c30bA3e1D84445d8dC941cc";
 export const BNB_vUSDT_Tron_IRM = "0xB43F967B8C8F9c415e09C2984A7869c02b0DEd8B";
-export const BNB_vUSDD_Tron_IRM = "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1";
+export const BNB_vUSDD_Tron_IRM = "0xB854f943E61EA81637C7296CF16E2503BA0FCda3";
 
 export const ETH_vUSDS_Core_IRM = "0x021206E942C9810734eE314CfdAd46920058f2b8";
 export const ETH_vUSDC_Core_IRM = "0x2D5bF63B6E72bBf9e0222BbA3d170f45fc9549E7";
@@ -152,12 +152,23 @@ const vip506 = () => {
         signature: "setInterestRateModel(address)",
         params: [BNB_vUSDT_DeFi_IRM],
       },
+      {
+        target: BNB_vUSDD_DeFi,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vUSDD_DeFi_IRM],
+      },
 
       // BNB GameFi
       {
         target: BNB_vUSDT_GameFi,
         signature: "setInterestRateModel(address)",
         params: [BNB_vUSDT_GameFi_IRM],
+      },
+
+      {
+        target: BNB_vUSDD_GameFi,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vUSDD_GameFi_IRM],
       },
 
       // BNB Meme
@@ -173,12 +184,27 @@ const vip506 = () => {
         signature: "setInterestRateModel(address)",
         params: [BNB_vUSDT_Stablecoin_IRM],
       },
+      {
+        target: BNB_vUSDD_Stablecoin,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vUSDD_Stablecoin_IRM],
+      },
+      {
+        target: BNB_vlisUSD_Stablecoin,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vlisUSD_Stablecoin_IRM],
+      },
 
       // BNB TRON
       {
         target: BNB_vUSDT_Tron,
         signature: "setInterestRateModel(address)",
         params: [BNB_vUSDT_Tron_IRM],
+      },
+      {
+        target: BNB_vUSDD_Tron,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vUSDD_Tron_IRM],
       },
 
       // ETH CORE
