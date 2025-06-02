@@ -12,7 +12,7 @@ import vip506, {
   ZK_vUSDCe_Core_IRM,
   ZK_vUSDT_Core,
   ZK_vUSDT_Core_IRM,
-} from "../../vips/vip-506/bsctestnet";
+} from "../../vips/vip-507/bsctestnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const SECONDS_PER_YEAR = 31_536_000;

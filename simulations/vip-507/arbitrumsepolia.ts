@@ -10,7 +10,7 @@ import vip506, {
   ARB_vUSDC_Core_IRM,
   ARB_vUSDT_Core,
   ARB_vUSDT_Core_IRM,
-} from "../../vips/vip-506/bsctestnet";
+} from "../../vips/vip-507/bsctestnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const SECONDS_PER_YEAR = 31_536_000;

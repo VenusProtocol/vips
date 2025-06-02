@@ -5,12 +5,12 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip506, {
+import vip507, {
   OPBNB_vFDUSD_Core,
   OPBNB_vFDUSD_Core_IRM,
   OPBNB_vUSDT_Core,
   OPBNB_vUSDT_Core_IRM,
-} from "../../vips/vip-506/bscmainnet";
+} from "../../vips/vip-507/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const OPBNB_BLOCKS_PER_YEAR = 63_072_000; // assuming a block is mined every 0.5 seconds
@@ -42,7 +42,7 @@ forking(60254298, async () => {
     );
   });
 
-  testForkedNetworkVipCommands("VIP 506", await vip506(), {
+  testForkedNetworkVipCommands("VIP 507", await vip507(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [2]);
     },

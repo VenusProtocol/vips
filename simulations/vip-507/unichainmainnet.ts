@@ -5,37 +5,35 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip506, { BASE_vUSDC_Core, BASE_vUSDC_Core_IRM } from "../../vips/vip-506/bscmainnet";
+import vip507, { UNI_vUSDC_Core, UNI_vUSDC_Core_IRM } from "../../vips/vip-507/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const SECONDS_PER_YEAR = 31_536_000; // seconds per year
+let vUSDC_Core: Contract;
 
-forking(30907412, async () => {
-  let vUSDC_Core: Contract;
-
+forking(17858329, async () => {
   before(async () => {
-    vUSDC_Core = new ethers.Contract(BASE_vUSDC_Core, VTOKEN_ABI, ethers.provider);
+    vUSDC_Core = new ethers.Contract(UNI_vUSDC_Core, VTOKEN_ABI, ethers.provider);
   });
-
   describe("Pre-VIP behaviour", async () => {
     it("check IRM address", async () => {
-      expect(await vUSDC_Core.interestRateModel()).to.equals("0xB7FCED42486F8DB8155fD509e726F9604fCdd41F");
+      expect(await vUSDC_Core.interestRateModel()).to.equals("0x2DAb0B51d7d899b66d4F16EA1c0cEB1767863523");
     });
 
     checkInterestRate(
-      "0xB7FCED42486F8DB8155fD509e726F9604fCdd41F",
+      "0x2DAb0B51d7d899b66d4F16EA1c0cEB1767863523",
       "USDC_CORE",
       {
         base: "0",
-        multiplier: "0.08",
-        jump: "2.5",
+        multiplier: "0.125",
+        jump: "3",
         kink: "0.8",
       },
       BigNumber.from(SECONDS_PER_YEAR),
     );
   });
 
-  testForkedNetworkVipCommands("VIP 506", await vip506(), {
+  testForkedNetworkVipCommands("VIP 507", await vip507(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [1]);
     },
@@ -43,11 +41,11 @@ forking(30907412, async () => {
 
   describe("Post-VIP behavior", () => {
     it("check IRM address", async () => {
-      expect(await vUSDC_Core.interestRateModel()).to.equals(BASE_vUSDC_Core_IRM);
+      expect(await vUSDC_Core.interestRateModel()).to.equals(UNI_vUSDC_Core_IRM);
     });
 
     checkTwoKinksInterestRateIL(
-      BASE_vUSDC_Core_IRM,
+      UNI_vUSDC_Core_IRM,
       "USDC_Core",
       {
         base: "0",
@@ -56,7 +54,7 @@ forking(30907412, async () => {
         multiplier2: "0.7",
         base2: "0",
         kink2: "0.9",
-        jump: "2.5",
+        jump: "3",
       },
       BigNumber.from(SECONDS_PER_YEAR),
     );

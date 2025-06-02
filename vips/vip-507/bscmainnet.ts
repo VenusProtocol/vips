@@ -80,7 +80,7 @@ export const ZK_vUSDCe_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 export const ZK_vUSDT_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 export const ZK_vUSDC_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 
-const vip506 = () => {
+const vip507 = () => {
   const meta = {
     version: "v2",
     title: "VIP-506 Update IR of stablecoins",
@@ -314,4 +314,4 @@ const vip506 = () => {
   );
 };
 
-export default vip506;
+export default vip507;

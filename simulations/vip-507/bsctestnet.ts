@@ -7,8 +7,6 @@ import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import vip506, {
-  BNB_vDAI_CORE,
-  BNB_vDAI_CORE_IRM,
   BNB_vFDUSD_CORE,
   BNB_vFDUSD_CORE_IRM,
   BNB_vTUSD_CORE,
@@ -39,33 +37,31 @@ import vip506, {
   BNB_vlisUSD_Stablecoin_IRM,
   newRF,
   vBNB,
-} from "../../vips/vip-506/bscmainnet";
+} from "../../vips/vip-507/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 const oldIRMs = [
-  [BNB_vFDUSD_CORE, "0x717dbabeCc502c8712e7646ab6801F802a997C20"],
-  [BNB_vUSDC_CORE, "0x81d6ae3EEa177d5D052B329dc74d39B935569359"],
-  [BNB_vDAI_CORE, "0x42Ef8ecCEe0782a4E644B3EB39761fb6c696ccF2"],
-  [BNB_vTUSD_CORE, "0x42Ef8ecCEe0782a4E644B3EB39761fb6c696ccF2"],
-  [BNB_vUSDT_CORE, "0x81d6ae3EEa177d5D052B329dc74d39B935569359"],
-  [BNB_vUSDT_DeFi, "0x9932Bb977b8EF5f5ff7D3780e0A2D430C108a7c4"],
-  [BNB_vUSDD_DeFi, "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1"],
-  [BNB_vUSDT_GameFi, "0x9932Bb977b8EF5f5ff7D3780e0A2D430C108a7c4"],
-  [BNB_vUSDD_GameFi, "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1"],
-  [BNB_vUSDT_Meme, "0xfF127d614899895f197fbEf8AF64a9B6540eb8a1"],
-  [BNB_vUSDT_Stablecoin, "0xAeD11F0453f59f2ed5533D016AA748Cd0b7108d7"],
-  [BNB_vUSDD_Stablecoin, "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1"],
-  [BNB_vlisUSD_Stablecoin, "0xA4471c68bB3D3d9301D540552311680F5cC35228"],
-  [BNB_vUSDT_Tron, "0x9932Bb977b8EF5f5ff7D3780e0A2D430C108a7c4"],
-  [BNB_vUSDD_Tron, "0xD63B54B8d187A0dDca4B9bcDe287923271409fb1"],
+  [BNB_vFDUSD_CORE, "0x2182450eC9780F17511FeAcE6FC3ED8F774157b3"],
+  [BNB_vUSDC_CORE, "0xc8dC4a0a29e2423664556a31349Da3FF26850e8D"],
+  [BNB_vTUSD_CORE, "0xdE06A850D42dcff216e1EfCa5358cB167Da247ca"],
+  [BNB_vUSDT_CORE, "0xc8dC4a0a29e2423664556a31349Da3FF26850e8D"],
+  [BNB_vUSDT_DeFi, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
+  [BNB_vUSDD_DeFi, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
+  [BNB_vUSDT_GameFi, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
+  [BNB_vUSDD_GameFi, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
+  [BNB_vUSDT_Meme, "0xa9797E6335f2cb6F5a316B4AE3FaC36038697196"],
+  [BNB_vUSDT_Stablecoin, "0x8Eb46681EF0D3d13a911C8b8556aA1A3819304eE"],
+  [BNB_vUSDD_Stablecoin, "0x372491CB9525b81E4fC9400abec86912998b7F87"],
+  [BNB_vlisUSD_Stablecoin, "0x372491CB9525b81E4fC9400abec86912998b7F87"],
+  [BNB_vUSDT_Tron, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
+  [BNB_vUSDD_Tron, "0xfe98c5cC866E67301C986e4daf267ce9970A6b69"],
 ];
 
 const newIRMs = [
   [BNB_vFDUSD_CORE, BNB_vFDUSD_CORE_IRM],
   [BNB_vUSDC_CORE, BNB_vUSDC_CORE_IRM],
-  [BNB_vDAI_CORE, BNB_vDAI_CORE_IRM],
   [BNB_vTUSD_CORE, BNB_vTUSD_CORE_IRM],
   [BNB_vUSDT_CORE, BNB_vUSDT_CORE_IRM],
   [BNB_vUSDT_DeFi, BNB_vUSDT_DeFi_IRM],
@@ -79,80 +75,69 @@ const newIRMs = [
   [BNB_vUSDD_Tron, BNB_vUSDD_Tron_IRM],
   [BNB_vUSDT_Tron, BNB_vUSDT_Tron_IRM],
 ];
-forking(50567390, async () => {
-  let vbnb: Contract;
 
+forking(52603412, async () => {
+  let vbnb: Contract;
   before(async () => {
     vbnb = new ethers.Contract(vBNB, VTOKEN_ABI, ethers.provider);
   });
   describe("Pre-VIP behaviour", async () => {
-    it("check reserve factor", async () => {
-      expect(await vbnb.reserveFactorMantissa()).to.equal(ethers.utils.parseUnits("0.1", 18));
-    });
     it("check IRM address", async () => {
       for (const [market, expectedModel] of oldIRMs) {
         const marketContract = new ethers.Contract(market, VTOKEN_ABI, ethers.provider);
         expect(await marketContract.interestRateModel()).to.equals(expectedModel);
       }
+      it("check reserve factor of VBNB", async () => {
+        expect(await vbnb.reserveFactorMantissa()).to.equal(ethers.utils.parseUnits("0.1", 18));
+      });
     });
 
-    checkInterestRate("0x717dbabeCc502c8712e7646ab6801F802a997C20", "FDUSD_CORE", {
+    checkInterestRate("0x2182450eC9780F17511FeAcE6FC3ED8F774157b3", "FDUSD_CORE", {
       base: "0",
-      multiplier: "0.075",
-      jump: "5",
+      multiplier: "0.06875",
+      jump: "2.5",
       kink: "0.8",
     });
 
-    checkTwoKinksInterestRate("0x81d6ae3EEa177d5D052B329dc74d39B935569359", "USDC_CORE_USDT_CORE", {
-      base: "0",
-      multiplier: "0.15",
-      kink1: "0.8",
-      base2: "0",
-      multiplier2: "0.9",
-      kink2: "0.9",
-      jump: "3",
+    // this is CheckpointView Contract
+    checkInterestRate("0xc8dC4a0a29e2423664556a31349Da3FF26850e8D", "USDC_CORE_USDT_CORE", {
+      base: "0.02",
+      multiplier: "0.1",
     });
 
-    checkInterestRate("0x42Ef8ecCEe0782a4E644B3EB39761fb6c696ccF2", "DAI_CORE_TUSD_CORE", {
+    checkInterestRate("0xdE06A850D42dcff216e1EfCa5358cB167Da247ca", "TUSD_CORE", {
+      base: "0",
+      multiplier: "0.05",
+      jump: "1.09",
+      kink: "0.8",
+    });
+
+    checkInterestRate("0xfe98c5cC866E67301C986e4daf267ce9970A6b69", "USDT_DeFi_USDD_DeFi_USDT_GameFi_USDD_GameFi", {
+      base: "0.03",
+      multiplier: "0.1",
+      jump: "2.5",
+      kink: "0.6",
+    });
+
+    checkInterestRate("0xa9797E6335f2cb6F5a316B4AE3FaC36038697196", "USDT_Meme", {
       base: "0",
       multiplier: "0.175",
       jump: "2.5",
       kink: "0.8",
     });
 
-    checkInterestRate("0x9932Bb977b8EF5f5ff7D3780e0A2D430C108a7c4", "USDT_DeFi_USDT_GameFi_USDT_Tron", {
+    checkInterestRate("0x8Eb46681EF0D3d13a911C8b8556aA1A3819304eE", "USDT_Stablecoin", {
       base: "0.02",
-      multiplier: "0.2",
+      multiplier: "0.083333333333333333",
       jump: "2.5",
-      kink: "0.8",
+      kink: "0.6",
     });
 
-    checkInterestRate("0xD63B54B8d187A0dDca4B9bcDe287923271409fb1", "USDD_DeFi_USDD_GameFi_USDD_Stablecoin_USDD_Tron", {
+    checkInterestRate("0x372491CB9525b81E4fC9400abec86912998b7F87", "USDD_Stablecoin_lisUSD_Stablecoin", {
       base: "0.02",
-      multiplier: "0.1",
-      jump: "2.5",
-      kink: "0.7",
-    });
-
-    checkInterestRate("0xfF127d614899895f197fbEf8AF64a9B6540eb8a1", "USDT_Meme", {
-      base: "0",
-      multiplier: "0.2",
-      jump: "2.5",
+      multiplier: "0.125",
+      jump: "3",
       kink: "0.8",
-    });
-
-    checkInterestRate("0xAeD11F0453f59f2ed5533D016AA748Cd0b7108d7", "USDT_Stablecoin", {
-      base: "0",
-      multiplier: "0.0375",
-      jump: "2.5",
-      kink: "0.8",
-    });
-
-    checkInterestRate("0xA4471c68bB3D3d9301D540552311680F5cC35228", "lisUSD_Stablecoin", {
-      base: "0.02",
-      multiplier: "0.1",
-      jump: "2.5",
-      kink: "0.5",
     });
   });
 
@@ -164,27 +149,27 @@ forking(50567390, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [6, 0],
       );
-      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [5, 1]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [10]);
+      await expectEvents(txResponse, [VBEP20_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [4, 1]);
     },
   });
 
   describe("Post-VIP behavior", () => {
-    it("check reserve factor", async () => {
-      expect(await vbnb.reserveFactorMantissa()).to.equal(newRF);
-    });
     it("check IRM address", async () => {
       for (const [market, expectedIRM] of newIRMs) {
         const marketContract = new ethers.Contract(market, VTOKEN_ABI, ethers.provider);
         expect(await marketContract.interestRateModel()).to.equals(expectedIRM);
       }
+      it("check reserve factor of VBNB", async () => {
+        expect(await vbnb.reserveFactorMantissa()).to.equal(newRF);
+      });
     });
 
     checkInterestRate(BNB_vFDUSD_CORE_IRM, "FDUSD_CORE", {
       base: "0",
       multiplier: "0.1",
       kink: "0.8",
-      jump: "5",
+      jump: "2.5",
     });
 
     checkTwoKinksInterestRate(BNB_vUSDC_CORE_IRM, "USDC_CORE", {
@@ -197,17 +182,10 @@ forking(50567390, async () => {
       jump: "3",
     });
 
-    checkInterestRate(BNB_vDAI_CORE_IRM, "DAI_CORE", {
-      base: "0",
-      multiplier: "0.1",
-      jump: "2.5",
-      kink: "0.8",
-    });
-
     checkInterestRate(BNB_vTUSD_CORE_IRM, "TUSD_CORE", {
       base: "0",
       multiplier: "0.1",
-      jump: "2.5",
+      jump: "1.09",
       kink: "0.8",
     });
 
@@ -259,7 +237,7 @@ forking(50567390, async () => {
     checkInterestRate(BNB_vUSDD_Stablecoin_IRM, "USDD_Stablecoin", {
       base: "0.02",
       multiplier: "0.1",
-      jump: "2.5",
+      jump: "3",
       kink: "0.7",
     });
 
@@ -274,7 +252,7 @@ forking(50567390, async () => {
       base: "0.02",
       multiplier: "0.1",
       kink: "0.5",
-      jump: "2.5",
+      jump: "3",
     });
 
     checkInterestRate(BNB_vUSDD_Tron_IRM, "USDD_Tron", {
