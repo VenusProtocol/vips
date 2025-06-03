@@ -2,6 +2,17 @@ import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+// BNB Chain
+export const COMPTROLLER_LiquidStakedBNB = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
+export const VToken_vPT_clisBNB_APR25_LiquidStakedBNB = "0xA537ACf381b12Bbb91C58398b66D1D220f1C77c8";
+
+// Ethereum
+export const Comptroller_Ethena = "0x562d2b6FF1dbf5f63E233662416782318cC081E4";
+export const VToken_vPT_USDe_27MAR2025_Ethena = "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B";
+export const VToken_vPT_sUSDE_27MAR2025_Ethena = "0xCca202a95E8096315E3F19E46e19E1b326634889";
+export const VToken_vsUSDe_Ethena = "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0";
+export const VToken_vUSDC_Ethena = "0xa8e7f9473635a5CB79646f14356a9Fc394CA111A";
+
 export const BNB_COMPTROLLERS = {
   BTC: "0x9DF11376Cf28867E2B0741348044780FbB7cb1d6",
   LiquidStakedETH: "0xBE609449Eb4D76AD8545f957bBE04b596E8fC529",
@@ -84,7 +95,7 @@ export const Actions = {
 export const vip510 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-510",
+    title: "VIP-510 [BNB Chain] [Ethereum] Deprecate low activity markets and matured PT tokens",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -92,6 +103,19 @@ export const vip510 = () => {
   };
   return makeProposal(
     [
+      // === BNB Chain ===
+      // --- Market: PT-clisBNB-APR25 on Liquid Staked BNB
+      {
+        target: COMPTROLLER_LiquidStakedBNB,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_clisBNB_APR25_LiquidStakedBNB, parseUnits("0", 18), parseUnits("0.85", 18)],
+      },
+      {
+        target: COMPTROLLER_LiquidStakedBNB,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_clisBNB_APR25_LiquidStakedBNB], [Actions.MINT, Actions.ENTER_MARKET], true],
+      },
+
       {
         target: BNB_COMPTROLLERS.BTC,
         signature: "setActionsPaused(address[],uint8[],bool)",
@@ -245,6 +269,56 @@ export const vip510 = () => {
       },
 
       // ETHEREUM
+      // --- Market: PT-USDe-MAR25 on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_USDe_27MAR2025_Ethena, parseUnits("0", 18), parseUnits("0.88", 18)],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_USDe_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // --- Market: PT-sUSDE-MAR25 on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vPT_sUSDE_27MAR2025_Ethena, parseUnits("0", 18), parseUnits("0.87", 18)],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vPT_sUSDE_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // --- Market: sUSDE on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setCollateralFactor(address,uint256,uint256)",
+        params: [VToken_vsUSDe_Ethena, parseUnits("0", 18), parseUnits("0.92", 18)],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // --- Market: USDC on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [[VToken_vUSDC_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
+        dstChainId: LzChainId.ethereum,
+      },
+
       {
         target: ETHEREUM_COMPTROLLER.Core,
         signature: "setActionsPaused(address[],uint8[],bool)",

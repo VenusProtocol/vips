@@ -4,11 +4,19 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { Actions, BNB_COMPTROLLERS, BNB_VTOKENS, vip510 } from "../../vips/vip-510/bscmainnet";
+import {
+  Actions,
+  BNB_COMPTROLLERS,
+  BNB_VTOKENS,
+  COMPTROLLER_LiquidStakedBNB,
+  VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
+  vip510,
+} from "../../vips/vip-510/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(50560525, async () => {
+  let comptroller_liquid_staked_bnb: Contract;
   let comptroller_btc: Contract;
   let comptroller_liquid_staked_eth: Contract;
   let comptroller_meme: Contract;
@@ -18,6 +26,7 @@ forking(50560525, async () => {
   let comptroller_gamefi: Contract;
 
   before(async () => {
+    comptroller_liquid_staked_bnb = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_LiquidStakedBNB);
     comptroller_btc = await ethers.getContractAt(COMPTROLLER_ABI, BNB_COMPTROLLERS.BTC);
     comptroller_liquid_staked_eth = await ethers.getContractAt(COMPTROLLER_ABI, BNB_COMPTROLLERS.LiquidStakedETH);
     comptroller_meme = await ethers.getContractAt(COMPTROLLER_ABI, BNB_COMPTROLLERS.Meme);
@@ -28,6 +37,34 @@ forking(50560525, async () => {
   });
 
   describe("Pre-VIP behavior", async () => {
+    describe("COMPTROLLER_LIQUID_STAKED_BNB", async () => {
+      it("Check market CF is not zero", async () => {
+        const market = await comptroller_liquid_staked_bnb.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+        expect(market.collateralFactorMantissa).not.equal(0);
+      });
+
+      it("Check market LI is not zero", async () => {
+        const market = await comptroller_liquid_staked_bnb.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+        expect(market.liquidationIncentiveMantissa).not.equal(0);
+      });
+
+      it("Check mint action is not paused", async () => {
+        const isPaused = await comptroller_liquid_staked_bnb.actionPaused(
+          VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
+          Actions.MINT,
+        ); // Mint action
+        expect(isPaused).to.be.false;
+      });
+
+      it("Check enter market action is not paused", async () => {
+        const isPaused = await comptroller_liquid_staked_bnb.actionPaused(
+          VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
+          Actions.ENTER_MARKET,
+        ); // Enter market action
+        expect(isPaused).to.be.false;
+      });
+    });
+
     describe("COMPTROLLER_BTC", async () => {
       it("unpaused actions for VToken_vPT_BTC", async () => {
         // BORROW already paused
@@ -332,7 +369,7 @@ forking(50560525, async () => {
         txResponse,
         [COMPTROLLER_ABI],
         ["ActionPausedMarket", "NewCollateralFactor", "NewLiquidationThreshold"],
-        [57, 15, 0],
+        [62, 18, 0],
       );
       await expectEvents(
         txResponse,
@@ -344,6 +381,34 @@ forking(50560525, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    describe("COMPTROLLER_LIQUID_STAKED_BNB", async () => {
+      it("Market CF should be zero", async () => {
+        const market = await comptroller_liquid_staked_bnb.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+        expect(market.collateralFactorMantissa).to.equal(0);
+      });
+
+      it("Check market LI remains uneffected", async () => {
+        const market = await comptroller_liquid_staked_bnb.markets(VToken_vPT_clisBNB_APR25_LiquidStakedBNB);
+        expect(market.liquidationIncentiveMantissa).not.equal(0);
+      });
+
+      it("Mint action should be paused", async () => {
+        const isPaused = await comptroller_liquid_staked_bnb.actionPaused(
+          VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
+          Actions.MINT,
+        );
+        expect(isPaused).to.be.true;
+      });
+
+      it("Enter market action should be paused", async () => {
+        const isPaused = await comptroller_liquid_staked_bnb.actionPaused(
+          VToken_vPT_clisBNB_APR25_LiquidStakedBNB,
+          Actions.ENTER_MARKET,
+        ); // Enter market action
+        expect(isPaused).to.be.true;
+      });
+    });
+
     describe("COMPTROLLER_BTC", async () => {
       it("paused actions for VToken_vPT_BTC", async () => {
         let paused = await comptroller_btc.actionPaused(BNB_VTOKENS.BTC.vPT_SolvBTC_BBN_27MAR2025_BTC, Actions.MINT);
@@ -374,6 +439,7 @@ forking(50560525, async () => {
         });
       }
     });
+
     describe("COMPTROLLER_LIQUID_STAKED_ETH", async () => {
       it("paused actions for VToken_vETH_LiquidStakedETH", async () => {
         let paused = await comptroller_liquid_staked_eth.actionPaused(
@@ -442,6 +508,7 @@ forking(50560525, async () => {
         });
       }
     });
+
     describe("COMPTROLLER_MEME", async () => {
       it("paused actions for VToken_vBabyDoge_Meme", async () => {
         let paused = await comptroller_meme.actionPaused(BNB_VTOKENS.Meme.vBabyDoge_Meme, Actions.BORROW);
