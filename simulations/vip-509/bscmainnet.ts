@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip507, {
+import vip509, {
   BNB_vDAI_CORE,
   BNB_vDAI_CORE_IRM,
   BNB_vFDUSD_CORE,
@@ -39,7 +39,7 @@ import vip507, {
   BNB_vlisUSD_Stablecoin_IRM,
   newRF,
   vBNB,
-} from "../../vips/vip-507/bscmainnet";
+} from "../../vips/vip-509/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VBEP20_ABI from "./abi/VBep20Abi.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -156,7 +156,7 @@ forking(50567390, async () => {
     });
   });
 
-  testVip("vip-507", await vip507(), {
+  testVip("vip-509", await vip509(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

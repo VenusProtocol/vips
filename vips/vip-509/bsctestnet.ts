@@ -76,11 +76,11 @@ export const vBNB = "0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c";
 export const vBNB_ADMIN = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
 export const newRF = parseUnits("0.3", 18);
 
-const vip506 = () => {
+const vip509 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-506 Update IR of stablecoins",
-    description: `VIP-506 Update IR of stablecoins, Chaos Labs - Stablecoin Interest Rate Curve Adjustment - 23/05/25`,
+    title: "VIP-509 Update IR of stablecoins",
+    description: `VIP-509 Update IR of stablecoins, Chaos Labs - Stablecoin Interest Rate Curve Adjustment - 23/05/25`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -300,4 +300,4 @@ const vip506 = () => {
   );
 };
 
-export default vip506;
+export default vip509;

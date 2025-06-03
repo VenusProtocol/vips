@@ -80,11 +80,41 @@ export const ZK_vUSDCe_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 export const ZK_vUSDT_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 export const ZK_vUSDC_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 
-const vip507 = () => {
+const vip509 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-506 Update IR of stablecoins",
-    description: `VIP-506 Update IR of stablecoins, Chaos Labs - Stablecoin Interest Rate Curve Adjustment - 23/05/25`,
+    title: "VIP-509 Risk Parameters Adjustments (Stablecoins)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Stablecoin Interest Rate Curve Adjustment - 23/05/25](https://community.venus.io/t/chaos-labs-stablecoin-interest-rate-curve-adjustment-23-05-25/5119): we recommend aligning this Multiplier across all active and borrowable stablecoins on Venus, significantly improving the user experience by providing a predictable IR curve. In some isolated pools with riskier collateral assets, there is a base rate of 0.02; we recommend leaving this as is. Additionally, we recommend implementing the Two Kink model for all USDC and USDT Core markets, aligning the 2nd Multiplier at 0.7. We do not recommend any changes to the JumpMultiplier and thus have excluded it from the table below.
+
+This VIP also increases the Reserve Factor of the [BNB market in the Core pool of BNB Chain](https://app.venus.io/#/core-pool/market/0xA07c5b74C9B40447a954e1466938b865b6BBea36?chainId=56), from 10% to 30%, following the [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-stablecoin-interest-rate-curve-adjustment-23-05-25/5119).
+
+Affected markets:
+
+- BNB Chain
+    - Core pool: FDUSD, USDC, DAI, TUSD, USDT
+    - DeFi pool: USDT, USDD
+    - GameFi pool: USDT, USDD
+    - Meme pool: USDT
+    - Stablecoins pool: USDD, USDT, lisUSD
+    - Tron pool: USDD, USDT
+- Ethereum
+    - Core pool: USDS, USDC, crvUSD, FRAX, DAI, USDT, TUSD
+    - Curve pool: crvUSD
+    - Ethena pool: USDC
+- Arbitrum one:
+    - Core pool: USDT, USDC
+- Base:
+    - Core pool: USDC
+- opBNB
+    - Core pool: USDC, FDUSD
+- Unichain:
+    - Core pool: USDC
+- ZKsync Era:
+    - Core pool: USDT, USDC, USDC.e
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+VIP simulation: [https://github.com/VenusProtocol/vips/pull/566](https://github.com/VenusProtocol/vips/pull/566)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -314,4 +344,4 @@ const vip507 = () => {
   );
 };
 
-export default vip507;
+export default vip509;

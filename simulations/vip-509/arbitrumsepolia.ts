@@ -1,51 +1,44 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
-import { checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
+import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip507, {
+import vip509, {
   ARB_vUSDC_Core,
   ARB_vUSDC_Core_IRM,
   ARB_vUSDT_Core,
   ARB_vUSDT_Core_IRM,
-} from "../../vips/vip-507/bscmainnet";
+} from "../../vips/vip-509/bsctestnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
-export const SECONDS_PER_YEAR = 31_536_000; // seconds per year
+export const SECONDS_PER_YEAR = 31_536_000;
 
-let vUSDC_Core: Contract;
-let vUSDT_Core: Contract;
-
-forking(342077800, async () => {
-  before(async () => {
-    vUSDC_Core = new ethers.Contract(ARB_vUSDC_Core, VTOKEN_ABI, ethers.provider);
-    vUSDT_Core = new ethers.Contract(ARB_vUSDT_Core, VTOKEN_ABI, ethers.provider);
-  });
+forking(157328501, async () => {
   describe("Pre-VIP behaviour", async () => {
     it("check IRM address", async () => {
-      expect(await vUSDC_Core.interestRateModel()).to.equals("0x8fd05f11a175A9b7E6dDcA8Ee2713E2c7f94c011");
-      expect(await vUSDT_Core.interestRateModel()).to.equals("0x8fd05f11a175A9b7E6dDcA8Ee2713E2c7f94c011");
+      const vUSDC_Core = new ethers.Contract(ARB_vUSDC_Core, VTOKEN_ABI, ethers.provider);
+      expect(await vUSDC_Core.interestRateModel()).to.equals("0xBbb522fCA8f5955942515D8EAa2222251a070a17");
+
+      const vUSDT_Core = new ethers.Contract(ARB_vUSDT_Core, VTOKEN_ABI, ethers.provider);
+      expect(await vUSDT_Core.interestRateModel()).to.equals("0xBbb522fCA8f5955942515D8EAa2222251a070a17");
     });
 
-    checkTwoKinksInterestRateIL(
-      "0x8fd05f11a175A9b7E6dDcA8Ee2713E2c7f94c011",
+    checkInterestRate(
+      "0xBbb522fCA8f5955942515D8EAa2222251a070a17",
       "USDC_CORE_USDT_CORE)",
       {
         base: "0",
-        multiplier: "0.15",
-        kink1: "0.8",
-        multiplier2: "0.9",
-        base2: "0",
-        kink2: "0.9",
-        jump: "3.0",
+        multiplier: "0.075",
+        jump: "2.5",
+        kink: "0.8",
       },
       BigNumber.from(SECONDS_PER_YEAR),
     );
   });
 
-  testForkedNetworkVipCommands("VIP 507", await vip507(), {
+  testForkedNetworkVipCommands("VIP 509", await vip509(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [2]);
     },
@@ -53,7 +46,10 @@ forking(342077800, async () => {
 
   describe("Post-VIP behavior", () => {
     it("check IRM address", async () => {
+      const vUSDC_Core = new ethers.Contract(ARB_vUSDC_Core, VTOKEN_ABI, ethers.provider);
       expect(await vUSDC_Core.interestRateModel()).to.equals(ARB_vUSDT_Core_IRM);
+
+      const vUSDT_Core = new ethers.Contract(ARB_vUSDT_Core, VTOKEN_ABI, ethers.provider);
       expect(await vUSDT_Core.interestRateModel()).to.equals(ARB_vUSDC_Core_IRM);
     });
 
@@ -67,7 +63,7 @@ forking(342077800, async () => {
         multiplier2: "0.7",
         base2: "0",
         kink2: "0.9",
-        jump: "3.0",
+        jump: "2.5",
       },
       BigNumber.from(SECONDS_PER_YEAR),
     );
@@ -82,7 +78,7 @@ forking(342077800, async () => {
         multiplier2: "0.7",
         base2: "0",
         kink2: "0.9",
-        jump: "3.0",
+        jump: "2.5",
       },
       BigNumber.from(SECONDS_PER_YEAR),
     );

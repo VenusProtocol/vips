@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip507, { BASE_vUSDC_Core, BASE_vUSDC_Core_IRM } from "../../vips/vip-507/bscmainnet";
+import vip509, { BASE_vUSDC_Core, BASE_vUSDC_Core_IRM } from "../../vips/vip-509/bscmainnet";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 export const SECONDS_PER_YEAR = 31_536_000; // seconds per year
@@ -35,7 +35,7 @@ forking(30907412, async () => {
     );
   });
 
-  testForkedNetworkVipCommands("VIP 507", await vip507(), {
+  testForkedNetworkVipCommands("VIP 509", await vip509(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel"], [1]);
     },
