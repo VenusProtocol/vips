@@ -5,13 +5,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip508, { ERC4626_FACTORY_BASE } from "../../vips/vip-508/bscmainnet";
+import vip511, { ACM_BASE, ERC4626_FACTORY_BASE, PSR_BASE } from "../../vips/vip-511/bsctestnet";
+import ACM_ABI from "./abi/ACM.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
-const { basemainnet } = NETWORK_ADDRESSES;
-const ACM = "0x9E6CeEfDC6183e4D0DF8092A9B90cDF659687daB";
-const DEPLOYER = "0x1461d2EcE51c07E88A54dB77Dade74a5B364037D";
-const BLOCK_NUMBER = 30776997;
+const { basesepolia } = NETWORK_ADDRESSES;
+const DEPLOYER = "0x4E8F79B53EB31E48F5096D6ac7503fDa734D5883";
+const BLOCK_NUMBER = 26628466;
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -27,27 +27,40 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(basesepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_BASE);
+    });
+
+    it("ERC4626Factory rewardRecipient should be the deployer", async () => {
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(DEPLOYER);
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip508(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip511(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ERC4626FACTORY_ABI], ["OwnershipTransferred"], [1]);
+      await expectEvents(
+        txResponse,
+        [ERC4626FACTORY_ABI, ACM_ABI],
+        ["OwnershipTransferred", "PermissionGranted", "RewardRecipientUpdated"],
+        [1, 1, 1],
+      );
     },
   });
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(basesepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
       expect(await erc4626Factory.pendingOwner()).to.be.equals(ethers.constants.AddressZero);
+    });
+
+    it("ERC4626Factory rewardRecipient should be the PSR", async () => {
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_BASE);
     });
   });
 });

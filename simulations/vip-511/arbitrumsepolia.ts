@@ -5,11 +5,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip508, { ERC4626_FACTORY_ARBITRUM } from "../../vips/vip-508/bsctestnet";
+import vip511, { ACM_ARBITRUM, ERC4626_FACTORY_ARBITRUM, PSR_ARBITRUM } from "../../vips/vip-511/bsctestnet";
+import ACM_ABI from "./abi/ACM.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
-const ACM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 const DEPLOYER = "0x638Eb8DFfF094Fd1d52c5A198b44984806C521E5";
 const BLOCK_NUMBER = 156959809;
 
@@ -31,13 +31,22 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_ARBITRUM);
+    });
+
+    it("ERC4626Factory rewardRecipient should be the deployer", async () => {
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(DEPLOYER);
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip508(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip511(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ERC4626FACTORY_ABI], ["OwnershipTransferred"], [1]);
+      await expectEvents(
+        txResponse,
+        [ERC4626FACTORY_ABI, ACM_ABI],
+        ["OwnershipTransferred", "PermissionGranted", "RewardRecipientUpdated"],
+        [1, 1, 1],
+      );
     },
   });
 
@@ -48,6 +57,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory pending owner should be zero address", async () => {
       expect(await erc4626Factory.pendingOwner()).to.be.equals(ethers.constants.AddressZero);
+    });
+
+    it("ERC4626Factory rewardRecipient should be the PSR", async () => {
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_ARBITRUM);
     });
   });
 });
