@@ -218,7 +218,7 @@ forking(22593783, async () => {
         txResponse,
         [COMPTROLLER_ABI],
         ["ActionPausedMarket", "NewCollateralFactor", "NewLiquidationThreshold"],
-        [36, 12, 0],
+        [39, 12, 0],
       );
     },
   });

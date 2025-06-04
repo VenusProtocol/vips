@@ -252,7 +252,21 @@ export const vip510 = () => {
       },
 
       // ETHEREUM
-      // --- Market: PT-USDe-MAR25 on Ethena
+      {
+        target: Comptroller_Ethena,
+        signature: "setActionsPaused(address[],uint8[],bool)",
+        params: [
+          [
+            VToken_vPT_USDe_27MAR2025_Ethena,
+            VToken_vPT_sUSDE_27MAR2025_Ethena,
+            VToken_vsUSDe_Ethena,
+            VToken_vUSDC_Ethena,
+          ],
+          [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET],
+          true,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
       {
         target: Comptroller_Ethena,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -261,44 +275,14 @@ export const vip510 = () => {
       },
       {
         target: Comptroller_Ethena,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vPT_USDe_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      // --- Market: PT-sUSDE-MAR25 on Ethena
-      {
-        target: Comptroller_Ethena,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [VToken_vPT_sUSDE_27MAR2025_Ethena, parseUnits("0", 18), parseUnits("0.87", 18)],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: Comptroller_Ethena,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vPT_sUSDE_27MAR2025_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      // --- Market: sUSDE on Ethena
-      {
-        target: Comptroller_Ethena,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [VToken_vsUSDe_Ethena, parseUnits("0", 18), parseUnits("0.92", 18)],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: Comptroller_Ethena,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vsUSDe_Ethena], [Actions.MINT, Actions.ENTER_MARKET], true],
-        dstChainId: LzChainId.ethereum,
-      },
-
-      // --- Market: USDC on Ethena
-      {
-        target: Comptroller_Ethena,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vUSDC_Ethena], [Actions.MINT, Actions.BORROW, Actions.ENTER_MARKET], true],
         dstChainId: LzChainId.ethereum,
       },
 
