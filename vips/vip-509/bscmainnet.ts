@@ -1,10 +1,12 @@
 import { parseUnits } from "ethers/lib/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 export const vBNB_ADMIN = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
 export const newRF = parseUnits("0.3", 18);
+export const newCF = parseUnits("0.8", 18);
 
 export const ARB_vUSDC_Core = "0x7D8609f8da70fF9027E9bc5229Af4F6727662707";
 export const ARB_vUSDT_Core = "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD";
@@ -47,6 +49,7 @@ export const ARB_vUSDC_Core_IRM = "0x35Caeb98849C5464Ee9F01C370729eb3775e5D57";
 export const ARB_vUSDT_Core_IRM = "0x35Caeb98849C5464Ee9F01C370729eb3775e5D57";
 export const BASE_vUSDC_Core_IRM = "0x453c1f3fC0354DBb10e27E3F13FB5b9D7A263DE4";
 
+export const BNB_vBNB_CORE_IRM = "0x66C928605F123d91462dCB3859811eC8403977a9";
 export const BNB_vFDUSD_CORE_IRM = "0x76cB08c25EF426F5444C28179D05F77cB1a6aBD0";
 export const BNB_vUSDC_CORE_IRM = "0x31d20C36A4804AB30F04fB606555f545b2bAE3b3";
 export const BNB_vDAI_CORE_IRM = "0x4eFbf2f6E63eCad12dE015E5be2a1094721633EE";
@@ -83,10 +86,13 @@ export const ZK_vUSDC_Core_IRM = "0xD7f9cba231205e3Fa2b3fdcceB317174Af271C0A";
 const vip509 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-509 Risk Parameters Adjustments (Stablecoins)",
+    title: "VIP-509 Risk Parameters Adjustments (Stablecoins, BNB)",
     description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Stablecoin Interest Rate Curve Adjustment - 23/05/25](https://community.venus.io/t/chaos-labs-stablecoin-interest-rate-curve-adjustment-23-05-25/5119): we recommend aligning this Multiplier across all active and borrowable stablecoins on Venus, significantly improving the user experience by providing a predictable IR curve. In some isolated pools with riskier collateral assets, there is a base rate of 0.02; we recommend leaving this as is. Additionally, we recommend implementing the Two Kink model for all USDC and USDT Core markets, aligning the 2nd Multiplier at 0.7. We do not recommend any changes to the JumpMultiplier and thus have excluded it from the table below.
 
-This VIP also increases the Reserve Factor of the [BNB market in the Core pool of BNB Chain](https://app.venus.io/#/core-pool/market/0xA07c5b74C9B40447a954e1466938b865b6BBea36?chainId=56), from 10% to 30%, following the [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-stablecoin-interest-rate-curve-adjustment-23-05-25/5119).
+This VIP also updates some risk parameters of the [BNB market (Core pool on BNB Chain)](https://app.venus.io/#/core-pool/market/0xA07c5b74C9B40447a954e1466938b865b6BBea36?chainId=56):
+
+- Increases the Reserve Factor, from 10% to 30%, following the [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-stablecoin-interest-rate-curve-adjustment-23-05-25/5119)
+- Increase the Collateral Factor, from 78% to 80%, and the first kink of the Interest Rate model, from 65% to 70%, following the [Chaos Labs recommendations](https://community.venus.io/t/chaos-labs-bnb-parameter-updates-04-06-25/5136)
 
 Affected markets:
 
@@ -126,6 +132,16 @@ VIP simulation: [https://github.com/VenusProtocol/vips/pull/566](https://github.
         target: vBNB_ADMIN,
         signature: "_setReserveFactor(uint256)",
         params: [newRF],
+      },
+      {
+        target: vBNB_ADMIN,
+        signature: "setInterestRateModel(address)",
+        params: [BNB_vBNB_CORE_IRM],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.UNITROLLER,
+        signature: "_setCollateralFactor(address,uint256)",
+        params: [vBNB, newCF],
       },
       // ARB CORE
       {
