@@ -2,10 +2,6 @@ import { parseUnits } from "ethers/lib/utils";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-// BNB Chain
-export const COMPTROLLER_LiquidStakedBNB = "0xd933909A4a2b7A4638903028f44D1d38ce27c352";
-export const VToken_vPT_clisBNB_APR25_LiquidStakedBNB = "0xA537ACf381b12Bbb91C58398b66D1D220f1C77c8";
-
 // Ethereum
 export const Comptroller_Ethena = "0x562d2b6FF1dbf5f63E233662416782318cC081E4";
 export const VToken_vPT_USDe_27MAR2025_Ethena = "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B";
@@ -103,19 +99,6 @@ export const vip510 = () => {
   };
   return makeProposal(
     [
-      // === BNB Chain ===
-      // --- Market: PT-clisBNB-APR25 on Liquid Staked BNB
-      {
-        target: COMPTROLLER_LiquidStakedBNB,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [VToken_vPT_clisBNB_APR25_LiquidStakedBNB, parseUnits("0", 18), parseUnits("0.85", 18)],
-      },
-      {
-        target: COMPTROLLER_LiquidStakedBNB,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [[VToken_vPT_clisBNB_APR25_LiquidStakedBNB], [Actions.MINT, Actions.ENTER_MARKET], true],
-      },
-
       {
         target: BNB_COMPTROLLERS.BTC,
         signature: "setActionsPaused(address[],uint8[],bool)",
