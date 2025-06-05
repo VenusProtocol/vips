@@ -1,10 +1,8 @@
-import { BigNumber, BigNumberish } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { BigNumberish } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { LzChainId, ProposalType } from "src/types";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 interface ConverterCommand {
   target: string;
@@ -103,22 +101,26 @@ const markets = {
   EURA: "0x12f31B73D812C6Bb0d735a218c086d44D5fe5f89",
   BTT: "0x352Cb5E19b12FC216548a2677bD0fce83BaE434B",
   WIN: "0xaeF0d72a118ce24feE3cD1d43d383897D05B4e99",
-}
+};
 
 const wbnbConverterMarkets = {
   ...markets,
   FDUSD: "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
-}
+};
 
 const fdusdConverterMarkets = {
   ...markets,
   WBNB: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-}
+};
 
 const TimelocksArray = [bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK];
 
-
-const configureConverters = (converter: string, baseAsset: string, fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
+const configureConverters = (
+  converter: string,
+  baseAsset: string,
+  fromAssets: string[],
+  incentive: BigNumberish = CONVERSION_INCENTIVE,
+) => {
   enum ConversionAccessibility {
     NONE = 0,
     ALL = 1,
@@ -133,7 +135,6 @@ const configureConverters = (converter: string, baseAsset: string, fromAssets: s
     params: [baseAsset, fromAssets, conversionConfigs],
   };
 };
-
 
 function generateConverterCommands(ConvertersArray: string[]): ConverterCommand[] {
   const commandsArray: ConverterCommand[] = [];
@@ -159,7 +160,6 @@ function generateConverterCommands(ConvertersArray: string[]): ConverterCommand[
 
   return commandsArray;
 }
-
 
 const grant = (target: string, signature: string, caller: string): CallPermission => {
   const config: CallPermission = {
@@ -194,7 +194,7 @@ function generateCallPermissionCommands(ConvertersArray: string[]): CallPermissi
 }
 
 const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands(
-  Object.keys(converterBaseAssets)
+  Object.keys(converterBaseAssets),
 );
 
 export const vip509 = () => {
@@ -209,7 +209,6 @@ export const vip509 = () => {
 
   return makeProposal(
     [
-      
       {
         target: PROTOCOL_SHARE_RESERVE,
         signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
@@ -225,18 +224,12 @@ export const vip509 = () => {
       {
         target: PROTOCOL_SHARE_RESERVE,
         signature: "removeDistributionConfig(uint8,address)",
-        params: [
-          0,
-          ETH_PRIME_CONVERTER
-        ],
+        params: [0, ETH_PRIME_CONVERTER],
       },
       {
         target: PROTOCOL_SHARE_RESERVE,
         signature: "removeDistributionConfig(uint8,address)",
-        params: [
-          0,
-          BTCB_PRIME_CONVERTER
-        ],
+        params: [0, BTCB_PRIME_CONVERTER],
       },
       {
         target: WBNB_PRIME_CONVERTER,
@@ -252,7 +245,7 @@ export const vip509 = () => {
       ...generateConverterCommands(Object.keys(converterBaseAssets)),
       configureConverters(WBNB_PRIME_CONVERTER, WBNB, Object.values(wbnbConverterMarkets)),
       configureConverters(FDUSD_PRIME_CONVERTER, FDUSD, Object.values(fdusdConverterMarkets)),
-       {
+      {
         target: PLP,
         signature: "initializeTokens(address[])",
         params: [[WBNB, FDUSD]],
@@ -266,7 +259,7 @@ export const vip509 = () => {
             0,
             0,
             100, // change it
-            100 // change it
+            100, // change it
           ],
         ],
       },

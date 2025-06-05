@@ -1,30 +1,67 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  vip509,
-  WBNB_PRIME_CONVERTER,
-  FDUSD_PRIME_CONVERTER,
+  BTCB,
+  BTCB_PRIME_CONVERTER,
   CONVERTER_NETWORK,
-  PROTOCOL_SHARE_RESERVE
+  ETH,
+  ETH_PRIME_CONVERTER,
+  FDUSD,
+  FDUSD_PRIME_CONVERTER,
+  PLP,
+  PRIME,
+  PROTOCOL_SHARE_RESERVE,
+  WBNB,
+  WBNB_PRIME_CONVERTER,
+  vBNB,
+  vFDUSD,
+  vip509,
 } from "../../vips/vip-509/bsctestnet";
-import PSR_ABI from "./abi/PSR.json";
-import CONVERTER_ABI from "./abi/Converter.json";
-import PLP_ABI from "./abi/PLP.json";
-import PRIME_ABI from "./abi/Prime.json";
 import ACM_ABI from "./abi/ACM.json";
+import CONVERTER_ABI from "./abi/Converter.json";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
-import { expectEvents } from "src/utils";
+import PLP_ABI from "./abi/PLP.json";
+import PSR_ABI from "./abi/PSR.json";
+import PRIME_ABI from "./abi/Prime.json";
+
+const { bsctestnet } = NETWORK_ADDRESSES;
 
 forking(53622696, async () => {
   const provider = ethers.provider;
+  let psr: Contract;
+  let wbnbPrimeConverter: Contract;
+  let fdusdPrimeConverter: Contract;
+  let converterNetwork: Contract;
+  let prime: Contract;
+  let plp: Contract;
 
   before(async () => {
+    psr = new ethers.Contract(PROTOCOL_SHARE_RESERVE, PSR_ABI, provider);
+    wbnbPrimeConverter = new ethers.Contract(WBNB_PRIME_CONVERTER, CONVERTER_ABI, provider);
+    fdusdPrimeConverter = new ethers.Contract(FDUSD_PRIME_CONVERTER, CONVERTER_ABI, provider);
+    converterNetwork = new ethers.Contract(CONVERTER_NETWORK, CONVERTER_NETWORK_ABI, provider);
+    prime = new ethers.Contract(PRIME, PRIME_ABI, provider);
+    plp = new ethers.Contract(PLP, PLP_ABI, provider);
   });
 
+  describe("Pre-VIP behavior", async () => {
+    it("check distribution config", async () => {
+      let target = await psr.distributionTargets(5);
+      expect(target.schema).to.equal(0);
+      expect(target.destination).to.equal(BTCB_PRIME_CONVERTER);
+      expect(target.percentage).to.equal(177);
+
+      target = await psr.distributionTargets(6);
+      expect(target.schema).to.equal(0);
+      expect(target.destination).to.equal(ETH_PRIME_CONVERTER);
+      expect(target.percentage).to.equal(211);
+    });
+  });
 
   testVip("VIP-508-testnet", await vip509(), {
     callbackAfterExecution: async txResponse => {
@@ -41,11 +78,70 @@ forking(53622696, async () => {
           "ConversionConfigUpdated",
           "TokenDistributionInitialized",
           "TokenDistributionSpeedUpdated",
-          "MarketAdded"
+          "MarketAdded",
         ],
         [2, 2, 2, 28, 2, 2, 108, 2, 4, 2],
       );
     },
   });
 
+  describe("Post-VIP behavior", async () => {
+    it("check distribution config", async () => {
+      let target = await psr.distributionTargets(5);
+      expect(target.schema).to.equal(0);
+      expect(target.destination).to.equal(WBNB_PRIME_CONVERTER);
+      expect(target.percentage).to.equal(177);
+
+      target = await psr.distributionTargets(6);
+      expect(target.schema).to.equal(0);
+      expect(target.destination).to.equal(FDUSD_PRIME_CONVERTER);
+      expect(target.percentage).to.equal(211);
+    });
+
+    it("check owner", async () => {
+      let owner = await wbnbPrimeConverter.owner();
+      expect(owner).to.equal(bsctestnet.NORMAL_TIMELOCK);
+
+      owner = await fdusdPrimeConverter.owner();
+      expect(owner).to.equal(bsctestnet.NORMAL_TIMELOCK);
+    });
+
+    it("check converter network", async () => {
+      let converterNetwork = await wbnbPrimeConverter.converterNetwork();
+      expect(converterNetwork).to.equal(CONVERTER_NETWORK);
+
+      converterNetwork = await fdusdPrimeConverter.converterNetwork();
+      expect(converterNetwork).to.equal(CONVERTER_NETWORK);
+    });
+
+    it("check single token converter added to converter network", async () => {
+      let converter = await converterNetwork.allConverters(6);
+      expect(converter).to.equal(WBNB_PRIME_CONVERTER);
+
+      converter = await converterNetwork.allConverters(7);
+      expect(converter).to.equal(FDUSD_PRIME_CONVERTER);
+    });
+
+    it("check distribution speed", async () => {
+      let speed = await plp.tokenDistributionSpeeds(BTCB);
+      expect(speed).to.equal(0);
+
+      speed = await plp.tokenDistributionSpeeds(ETH);
+      expect(speed).to.equal(0);
+
+      speed = await plp.tokenDistributionSpeeds(WBNB);
+      expect(speed).to.equal(100);
+
+      speed = await plp.tokenDistributionSpeeds(FDUSD);
+      expect(speed).to.equal(100);
+    });
+
+    it("check if market added to prime", async () => {
+      let market = await prime.markets(vBNB);
+      expect(market.exists).to.equal(true);
+
+      market = await prime.markets(vFDUSD);
+      expect(market.exists).to.equal(true);
+    });
+  });
 });
