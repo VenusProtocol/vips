@@ -91,8 +91,46 @@ export const Actions = {
 export const vip510 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-510 [BNB Chain] [Ethereum]",
-    description: `Deprecation of Low-Activity Markets and matured PT tokens from bnb and ethereum testnet`,
+    title: "VIP-510 [BNB Chain][Ethereum] Deprecation of Low-Activity Markets",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Deprecation Plan for Low-Activity Markets](https://community.venus.io/t/chaos-labs-deprecation-plan-for-low-activity-markets/5112), deprecating the following markets:
+
+**BNB Chain**
+
+Isolated Lending pools:
+
+- [BTC pool](https://app.venus.io/#/isolated-pools/pool/0x9DF11376Cf28867E2B0741348044780FbB7cb1d6?chainId=56) (every market: 2)
+- [Liquid Staked ETH pool](https://app.venus.io/#/isolated-pools/pool/0xBE609449Eb4D76AD8545f957bBE04b596E8fC529?chainId=56) (every market: 3)
+- [Meme pool](https://app.venus.io/#/isolated-pools/pool/0x33B6fa34cd23e5aeeD1B112d5988B026b8A5567d?chainId=56) (every market: 2)
+- [Stablecoins pool](https://app.venus.io/#/isolated-pools/pool/0x94c1495cD4c557f1560Cbd68EAB0d197e6291571?chainId=56) (every market: 4)
+- [Tron pool](https://app.venus.io/#/isolated-pools/pool/0x23b4404E4E5eC5FF5a6FFb70B7d14E3FabF237B0?chainId=56) (every market: 5)
+- [USDD](https://app.venus.io/#/isolated-pools/pool/0x3344417c9360b963ca93A4e8305361AEde340Ab9/market/0xA615467caE6B9E0bb98BC04B4411d9296fd1dFa0?chainId=56), [ankrBNB](https://app.venus.io/#/isolated-pools/pool/0x3344417c9360b963ca93A4e8305361AEde340Ab9/market/0x53728FD51060a85ac41974C6C3Eb1DaE42776723?chainId=56), and [ALPACA](https://app.venus.io/#/isolated-pools/pool/0x3344417c9360b963ca93A4e8305361AEde340Ab9/market/0x02c5Fb0F26761093D297165e902e96D08576D344?chainId=56) markets, from the [DeFi pool](https://app.venus.io/#/isolated-pools/pool/0x3344417c9360b963ca93A4e8305361AEde340Ab9?chainId=56)
+- [USDD](https://app.venus.io/#/isolated-pools/pool/0x1b43ea8622e76627B81665B1eCeBB4867566B963/market/0x9f2FD23bd0A5E08C5f2b9DD6CF9C96Bfb5fA515C?chainId=56) market, from the [GameFi pool](https://app.venus.io/#/isolated-pools/pool/0x1b43ea8622e76627B81665B1eCeBB4867566B963?chainId=56)
+
+**Ethereum**
+
+Isolated Pools:
+
+- [Curve pool](https://app.venus.io/#/isolated-pools/pool/0x67aA3eCc5831a65A5Ba7be76BED3B5dc7DB60796?chainId=1) (every market: 2)
+- [Ethena pool](https://app.venus.io/#/isolated-pools/pool/0x562d2b6FF1dbf5f63E233662416782318cC081E4?chainId=1) (every market: 4)
+- [sfrxETH](https://app.venus.io/#/isolated-pools/pool/0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3/market/0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E?chainId=1) market, from the [Liquid Staked ETH pool](https://app.venus.io/#/isolated-pools/pool/0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3?chainId=1)
+
+Core Pool Markets:
+
+- [sFRAX](https://app.venus.io/#/core-pool/market/0x17142a05fe678e9584FA1d88EfAC1bF181bF7ABe?chainId=1), [FRAX](https://app.venus.io/#/core-pool/market/0x4fAfbDc4F2a9876Bd1764827b26fb8dc4FD1dB95?chainId=1), [yvUSDT-1](https://app.venus.io/#/core-pool/market/0x475d0C68a8CD275c15D1F01F4f291804E445F677?chainId=1), [yvUSDS-1](https://app.venus.io/#/core-pool/market/0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764?chainId=1), [yvWETH-1](https://app.venus.io/#/core-pool/market/0xba3916302cBA4aBcB51a01e706fC6051AaF272A0?chainId=1), and [yvUSDC-1](https://app.venus.io/#/core-pool/market/0xf87c0a64dc3a8622D6c63265FA29137788163879?chainId=1) markets
+
+Total number of markets to be deprecated: 33.
+
+This VIP would perform the following specific actions on each mentioned market:
+
+- Pause borrowing, supplying and entering the market (start using the market as collateral)
+- Set Collateral Factor to 0 in the markets in which it does not affect liquidations (Liquidation Thresholds won’t be updated)
+
+Complete analysis and details of these recommendations are available in the above publication.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/567)
+- Execution on testnet ([BNB Chain](https://testnet.bscscan.com/tx/0xf11979d5c579c468b8c914fbae810efe0774ad86ea52b6dfebb2f23a5bab5909) and [Sepolia](https://sepolia.etherscan.io/tx/0x9028409bfcc9c903089b1cd1a215ee8c5c415cbd15da4127b5dc1be37ad31f1c))`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -381,7 +419,7 @@ export const vip510 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
 
