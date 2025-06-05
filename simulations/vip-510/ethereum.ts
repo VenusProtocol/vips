@@ -189,7 +189,7 @@ forking(22593783, async () => {
       });
     });
 
-    describe("COMPTROLLER_LIQUID_STAKED_ETH_SEPOLIA", async () => {
+    describe("COMPTROLLER_LIQUID_STAKED_ETH", async () => {
       it("unpaused actions for VToken_vsfrxETH_LiquidStakedETH", async () => {
         let paused = await comptroller_liquid_staked_eth.actionPaused(
           ETHEREUM_VTOKENS.LiquidStakedETH.vsfrxETH_LiquidStakedETH,
@@ -235,6 +235,11 @@ forking(22593783, async () => {
         expect(isPaused).to.be.true;
       });
 
+      it("Check PT_USDe market borrow is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.BORROW);
+        expect(isPaused).to.be.true;
+      });
+
       it("Check PT_USDe enter market action is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_USDe_27MAR2025_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.true;
@@ -247,6 +252,11 @@ forking(22593783, async () => {
 
       it("Check PT_sUSDE market mint is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.MINT);
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check PT_sUSDE market borrow is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vPT_sUSDE_27MAR2025_Ethena, Actions.BORROW);
         expect(isPaused).to.be.true;
       });
 
@@ -265,6 +275,11 @@ forking(22593783, async () => {
         expect(isPaused).to.be.true;
       });
 
+      it("Check sUSDE market borrow is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.BORROW);
+        expect(isPaused).to.be.true;
+      });
+
       it("Check sUSDE enter market action is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vsUSDe_Ethena, Actions.ENTER_MARKET); // Enter market action
         expect(isPaused).to.be.true;
@@ -277,6 +292,11 @@ forking(22593783, async () => {
 
       it("Check USDC market mint is paused", async () => {
         const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.MINT);
+        expect(isPaused).to.be.true;
+      });
+
+      it("Check USDC market borrow is paused", async () => {
+        const isPaused = await comptrollerEthena.actionPaused(VToken_vUSDC_Ethena, Actions.BORROW);
         expect(isPaused).to.be.true;
       });
 
