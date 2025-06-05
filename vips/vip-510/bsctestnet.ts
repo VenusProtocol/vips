@@ -86,7 +86,7 @@ export const vip510 = () => {
   const meta = {
     version: "v2",
     title: "VIP-510",
-    description: ``,
+    description: `Deprecation of Low-Activity Markets from bnb and ethereum testnet`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

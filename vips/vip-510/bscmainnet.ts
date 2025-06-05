@@ -91,8 +91,8 @@ export const Actions = {
 export const vip510 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-510 [BNB Chain] [Ethereum] Deprecate low activity markets and matured PT tokens",
-    description: ``,
+    title: "VIP-510 [BNB Chain] [Ethereum]",
+    description: `Deprecation of Low-Activity Markets and matured PT tokens from bnb and ethereum testnet`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
