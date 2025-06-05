@@ -2,9 +2,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { sepolia, unichainsepolia, arbitrumsepolia, opsepolia, basesepolia, opbnbtestnet, zksyncsepolia } =
+const { bsctestnet, sepolia, unichainsepolia, arbitrumsepolia, opsepolia, basesepolia, opbnbtestnet, zksyncsepolia } =
   NETWORK_ADDRESSES;
 
+export const ERC4626_FACTORY_BNB = "0x07fcd489aef6a3EEAA9e8adE4361Fe5CC5BF30f7";
 export const ERC4626_FACTORY_SEPOLIA = "0xbf76e9429BA565220d77831A9eC3606434e2106e";
 export const ERC4626_FACTORY_OPBNB = "0x3dEDBD90EFC6E2257887FF36842337dF0739B8A1";
 export const ERC4626_FACTORY_BASE = "0xD13c5527d1a2a8c2cC9c9eb260AC4D9D811a02a4";
@@ -13,6 +14,7 @@ export const ERC4626_FACTORY_OPTIMISM = "0xc66c4058A8524253C22a9461Df6769CE09F7d
 export const ERC4626_FACTORY_UNICHAIN = "0x1365820B9ba3B1b5601208437a5A24192a12C1fB";
 export const ERC4626_FACTORY_ZKSYNC = "0xa30dcc21B8393A4031cD6364829CDfE2b6D7B283";
 
+export const ERC4626_IMPLEMENTATION_BNB = "0xA1cA35B92DE0833706DD9BD721f2844c0609c58c";
 export const ERC4626_IMPLEMENTATION_SEPOLIA = "0xd1B290832F3094647a063db7C293cD5DF2843255";
 export const ERC4626_IMPLEMENTATION_OPBNB = "0x5b97A053a8c153f5BE27b84370FecD3959D8898f";
 export const ERC4626_IMPLEMENTATION_BASE = "0x66A2cC7c0ca012DfBfd7BDC5DC06A315A0269b20";
@@ -21,6 +23,7 @@ export const ERC4626_IMPLEMENTATION_OPTIMISM = "0x057E95A55E93DB89610AE2d64653b6
 export const ERC4626_IMPLEMENTATION_UNICHAIN = "0x7c0160E6638df7e7E6132Da4B60F210c38655D6e";
 export const ERC4626_IMPLEMENTATION_ZKSYNC = "0x97ab473c81C5E654B71690e3B4225180C687E3eB";
 
+export const PSR_BNB = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const PSR_SEPOLIA = "0xbea70755cc3555708ca11219adB0db4C80F6721B";
 export const PSR_OPBNB = "0xc355dEb1A9289f8C58CFAa076EEdBf51F3A8Da7F";
 export const PSR_BASE = "0x4Ae3D77Ece08Ec3E5f5842B195f746bd3bCb8d73";
@@ -29,6 +32,7 @@ export const PSR_OPTIMISM = "0x0F021c29283c47DF8237741dD5a0aA22952aFc88";
 export const PSR_UNICHAIN = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 export const PSR_ZKSYNC = "0x5722B43BD91fAaDC4E7f384F4d6Fb32456Ec5ffB";
 
+export const ACM_BNB = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const ACM_SEPOLIA = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const ACM_OPBNB = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
 export const ACM_BASE = "0x724138223D8F76b519fdE715f60124E7Ce51e051";
@@ -49,6 +53,57 @@ export const vip511 = () => {
 
   return makeProposal(
     [
+      // bsctestnet
+      {
+        target: ERC4626_FACTORY_BNB,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BNB, "setRewardRecipient(address)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BNB, "setRewardRecipient(address)", bsctestnet.FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BNB, "setRewardRecipient(address)", bsctestnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BNB, "setMaxLoopsLimit(uint256)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BNB, "setRewardRecipient(address)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BNB, "setRewardRecipient(address)", bsctestnet.FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BNB, "setRewardRecipient(address)", bsctestnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: ACM_BNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BNB, "setMaxLoopsLimit(uint256)", bsctestnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: ERC4626_FACTORY_BNB,
+        signature: "setRewardRecipient(address)",
+        params: [PSR_BNB],
+      },
       // sepolia
       {
         target: ERC4626_FACTORY_SEPOLIA,
