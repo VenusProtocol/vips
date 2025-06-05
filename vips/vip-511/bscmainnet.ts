@@ -13,6 +13,14 @@ export const ERC4626_FACTORY_UNICHAIN = "0x102fEb723C25c67dbdfDccCa3B1c1a6e1a662
 export const ERC4626_FACTORY_ZKSYNC = "0xDC59Dd76Dd7A64d743C764a9aa8C96Ff2Ea8BAc3";
 export const ERC4626_FACTORY_OPBNB = "0x89A5Ce0A6db7e66E53F148B50D879b700dEB81C8";
 
+export const ERC4626_IMPLEMENTATION_ETHEREUM = "0x6F0AB9E23f66ceB2b1BA0BB23C0e1f5f089a3cA1";
+export const ERC4626_IMPLEMENTATION_OPBNB = "0x2C0E328c118d22A549C8CB758C46775b9560A026";
+export const ERC4626_IMPLEMENTATION_BASE = "0x1062F74081026eE4777981B75D8DA7e6a5640010";
+export const ERC4626_IMPLEMENTATION_ARBITRUM = "0xff2C112F0FC927E89eA1f7ec56D0c76263708Bcb";
+export const ERC4626_IMPLEMENTATION_OPTIMISM = "0x28d408ad7E66c8de66FBf8D6724747250C8B349E";
+export const ERC4626_IMPLEMENTATION_UNICHAIN = "0xE5b7978b0DB9e6d6026d1C79B8174D47295f8117";
+export const ERC4626_IMPLEMENTATION_ZKSYNC = "0xBd86974B3a7348AC153aEFEe5Dc5111246a99c11";
+
 export const PSR_ETHEREUM = "0x8c8c8530464f7D95552A11eC31Adbd4dC4AC4d3E";
 export const PSR_OPBNB = "0xA2EDD515B75aBD009161B15909C19959484B0C1e";
 export const PSR_BASE = "0x3565001d57c91062367C3792B74458e3c6eD910a";
@@ -55,6 +63,48 @@ export const vip511 = () => {
         dstChainId: LzChainId.arbitrumone,
       },
       {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ARBITRUM, "setRewardRecipient(address)", arbitrumone.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ARBITRUM, "setRewardRecipient(address)", arbitrumone.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ARBITRUM, "setMaxLoopsLimit(uint256)", arbitrumone.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ARBITRUM, "setRewardRecipient(address)", arbitrumone.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ARBITRUM, "setRewardRecipient(address)", arbitrumone.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ARBITRUM, "setRewardRecipient(address)", arbitrumone.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
+        target: ACM_ARBITRUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ARBITRUM, "setMaxLoopsLimit(uint256)", arbitrumone.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.arbitrumone,
+      },
+      {
         target: ERC4626_FACTORY_ARBITRUM,
         signature: "setRewardRecipient(address)",
         params: [PSR_ARBITRUM],
@@ -71,6 +121,48 @@ export const vip511 = () => {
         target: ACM_OPTIMISM,
         signature: "giveCallPermission(address,string,address)",
         params: [ERC4626_FACTORY_OPTIMISM, "setRewardRecipient(address)", opmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPTIMISM, "setRewardRecipient(address)", opmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPTIMISM, "setRewardRecipient(address)", opmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPTIMISM, "setMaxLoopsLimit(uint256)", opmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPTIMISM, "setRewardRecipient(address)", opmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPTIMISM, "setRewardRecipient(address)", opmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPTIMISM, "setRewardRecipient(address)", opmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opmainnet,
+      },
+      {
+        target: ACM_OPTIMISM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPTIMISM, "setMaxLoopsLimit(uint256)", opmainnet.NORMAL_TIMELOCK],
         dstChainId: LzChainId.opmainnet,
       },
       {
@@ -93,6 +185,48 @@ export const vip511 = () => {
         dstChainId: LzChainId.basemainnet,
       },
       {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BASE, "setRewardRecipient(address)", basemainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BASE, "setRewardRecipient(address)", basemainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_BASE, "setMaxLoopsLimit(uint256)", basemainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BASE, "setRewardRecipient(address)", basemainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BASE, "setRewardRecipient(address)", basemainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BASE, "setRewardRecipient(address)", basemainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
+        target: ACM_BASE,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_BASE, "setMaxLoopsLimit(uint256)", basemainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.basemainnet,
+      },
+      {
         target: ERC4626_FACTORY_BASE,
         signature: "setRewardRecipient(address)",
         params: [PSR_BASE],
@@ -109,6 +243,48 @@ export const vip511 = () => {
         target: ACM_ETHEREUM,
         signature: "giveCallPermission(address,string,address)",
         params: [ERC4626_FACTORY_ETHEREUM, "setRewardRecipient(address)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ETHEREUM, "setRewardRecipient(address)", ethereum.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ETHEREUM, "setRewardRecipient(address)", ethereum.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ETHEREUM, "setMaxLoopsLimit(uint256)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ETHEREUM, "setRewardRecipient(address)", ethereum.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ETHEREUM, "setRewardRecipient(address)", ethereum.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ETHEREUM, "setRewardRecipient(address)", ethereum.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: ACM_ETHEREUM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ETHEREUM, "setMaxLoopsLimit(uint256)", ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -131,6 +307,48 @@ export const vip511 = () => {
         dstChainId: LzChainId.unichainmainnet,
       },
       {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_UNICHAIN, "setRewardRecipient(address)", unichainmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_UNICHAIN, "setRewardRecipient(address)", unichainmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_UNICHAIN, "setMaxLoopsLimit(uint256)", unichainmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_UNICHAIN, "setRewardRecipient(address)", unichainmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_UNICHAIN, "setRewardRecipient(address)", unichainmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_UNICHAIN, "setRewardRecipient(address)", unichainmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
+        target: ACM_UNICHAIN,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_UNICHAIN, "setMaxLoopsLimit(uint256)", unichainmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.unichainmainnet,
+      },
+      {
         target: ERC4626_FACTORY_UNICHAIN,
         signature: "setRewardRecipient(address)",
         params: [PSR_UNICHAIN],
@@ -150,6 +368,48 @@ export const vip511 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ZKSYNC, "setRewardRecipient(address)", zksyncmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ZKSYNC, "setRewardRecipient(address)", zksyncmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_ZKSYNC, "setMaxLoopsLimit(uint256)", zksyncmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ZKSYNC, "setRewardRecipient(address)", zksyncmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ZKSYNC, "setRewardRecipient(address)", zksyncmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ZKSYNC, "setRewardRecipient(address)", zksyncmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
+        target: ACM_ZKSYNC,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_ZKSYNC, "setMaxLoopsLimit(uint256)", zksyncmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
         target: ERC4626_FACTORY_ZKSYNC,
         signature: "setRewardRecipient(address)",
         params: [PSR_ZKSYNC],
@@ -166,6 +426,48 @@ export const vip511 = () => {
         target: ACM_OPBNB,
         signature: "giveCallPermission(address,string,address)",
         params: [ERC4626_FACTORY_OPBNB, "setRewardRecipient(address)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPBNB, "setRewardRecipient(address)", opbnbmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPBNB, "setRewardRecipient(address)", opbnbmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_FACTORY_OPBNB, "setMaxLoopsLimit(uint256)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPBNB, "setRewardRecipient(address)", opbnbmainnet.NORMAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPBNB, "setRewardRecipient(address)", opbnbmainnet.FAST_TRACK_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPBNB, "setRewardRecipient(address)", opbnbmainnet.CRITICAL_TIMELOCK],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: ACM_OPBNB,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ERC4626_IMPLEMENTATION_OPBNB, "setMaxLoopsLimit(uint256)", opbnbmainnet.NORMAL_TIMELOCK],
         dstChainId: LzChainId.opbnbmainnet,
       },
       {
