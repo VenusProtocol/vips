@@ -13,7 +13,7 @@ const prices = [
   {
     symbol: "vweETHs",
     address: "0x81aab41B868f8b5632E8eE6a98AdA7a7fDBc8823",
-    expectedPrice: parseUnits("2466.121880320135852029", 18),
+    expectedPrice: parseUnits("2482.678646927923418144", 18),
   },
   {
     symbol: "vPT-sUSDE",
@@ -33,31 +33,31 @@ const prices = [
   {
     symbol: "vezETH",
     address: "0xF4C1B7528f8B266D8ADf1a85c91d93114FeDbA2A",
-    expectedPrice: parseUnits("2455.6524", 18),
+    expectedPrice: parseUnits("2472.13887781", 18),
   },
   {
     symbol: "vPT-weETH",
     address: "0x3AF2bE7AbEF0f840b196D99d79F4B803a5dB14a1",
-    expectedPrice: parseUnits("2340.852632582607301006", 18),
+    expectedPrice: parseUnits("2356.568380863411717079", 18),
   },
   {
     symbol: "vpufETH",
     address: "0x1E4d64B7c6f1F71969E5137B5Ee8cBa9Ab9c9356",
-    expectedPrice: parseUnits("2455.6524", 18),
+    expectedPrice: parseUnits("2472.13887781", 18),
   },
   {
     symbol: "vweETH",
     address: "0x30c31bA6f4652B548fe7a142A949987c3f3Bf80b",
-    expectedPrice: parseUnits("2542.576894767693748916", 18),
+    expectedPrice: parseUnits("2559.646956294238095379", 18),
   },
   {
     symbol: "vwstETH",
     address: "0x0a95088403229331FeF1EB26a11F9d6C8E73f23D",
-    expectedPrice: parseUnits("2455.6524", 18),
+    expectedPrice: parseUnits("2472.13887781", 18),
   },
 ];
 
-forking(8488336, async () => {
+forking(8488820, async () => {
   const provider = ethers.provider;
   const resilientOracle = new ethers.Contract(sepolia.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   describe("Pre-VIP behaviour", async () => {

@@ -15,7 +15,7 @@ export const PTweETH = "0x6ee2b5E19ECBa773a352E5B21415Dc419A700d1d";
 export const weETH_ORACLE = "0xaB663D4a701229DFF407Eb4B45007921029072e9";
 export const weETH = "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee";
 export const wstETH = "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"; //
-export const wstETHOracle = "0x7831156A181288ce76B5952624Df6C842F4Cc0c1"; //
+export const wstETHOracle = "0x7831156A181288ce76B5952624Df6C842F4Cc0c1";
 export const PTUSDeOracle = "0x4CD93DcD2E11835D06a45F7eF9F7225C249Bb6Db";
 export const PTUSDe = "0x8A47b431A7D947c6a3ED6E42d501803615a97EAa";
 export const PTsUSDeOracle = "0x51B83bbbdCa078b2497C41c9f54616D1aDBEF86F";
@@ -75,6 +75,10 @@ export const sUSDe_InitialExchangeRate = parseUnits("1.176209554338116464", 18);
 export const sUSDe_Timestamp = 1749194547;
 export const sUSDe_GrowthRate = parseUnits("0.2857", 18); // 28.57%
 export const sUSDe_SnapshotGap = 236; // 2.36%
+export const wstETH_InitialExchangeRate = parseUnits("1.204650122672303343", 18);
+export const wstETH_Timestamp = 1749194547;
+export const wstETH_GrowthRate = parseUnits("0.067", 18); // 6.7%
+export const wstETH_SnapshotGap = 55; // 0.55%
 
 export const vip509 = () => {
   const meta = {
@@ -275,6 +279,27 @@ export const vip509 = () => {
         target: sUSDeOracle,
         signature: "setSnapshotGap(uint256)",
         params: [getSnapshotGap(sUSDe_InitialExchangeRate, sUSDe_SnapshotGap)],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: wstETHOracle,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(wstETH_InitialExchangeRate, BigNumber.from(wstETH_SnapshotGap)),
+          wstETH_Timestamp,
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: wstETHOracle,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [wstETH_GrowthRate, DAYS_30],
+        dstChainId: LzChainId.ethereum,
+      },
+      {
+        target: wstETHOracle,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(wstETH_InitialExchangeRate, wstETH_SnapshotGap)],
         dstChainId: LzChainId.ethereum,
       },
     ],
