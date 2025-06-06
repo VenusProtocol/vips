@@ -71,7 +71,7 @@ export const PTsUSDe_GrowthRate = SECONDS_PER_YEAR; // 0%
 export const PTsUSDe_SnapshotGap = 400; // 4.00%
 export const sUSDe_InitialExchangeRate = parseUnits("1.176209554338116464", 18);
 export const sUSDe_Timestamp = 1749194547;
-export const sUSDe_GrowthRate = parseUnits("0.2857", 18); // 28.57%
+export const sUSDe_GrowthRate = parseUnits("0.2827", 18); // 28.27%
 export const sUSDe_SnapshotGap = 236; // 2.36%
 
 export const vip509 = () => {
