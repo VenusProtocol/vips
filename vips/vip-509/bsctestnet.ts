@@ -14,8 +14,6 @@ export const PTweETHOracle = "0x5CDE9fec66D89B931fB7a5DB8cFf2cDb642f4e7d";
 export const PTweETH = "0x56107201d3e4b7Db92dEa0Edb9e0454346AEb8B5";
 export const weETH_ORACLE = "0xf3ebD2A722c2039E6f66179Ad7F9f1462B14D8e0";
 export const weETH = "0x3b8b6E96e57f0d1cD366AaCf4CcC68413aF308D0";
-export const wstETH = "0x9b87ea90fdb55e1a0f17fbeddcf7eb0ac4d50493";
-export const wstETHOracle = "0x8Fe880308A872f98D5631051a91325bfB54b0e71";
 export const PTUSDeOracle = "0x16D54113De89ACE580918D15653e9C0d1DE05C35";
 export const PTUSDe = "0x74671106a04496199994787B6BcB064d08afbCCf";
 export const PTsUSDeOracle = "0x1bB3faB3813267d5b6c2abE5A284C621350544aD";
@@ -75,10 +73,6 @@ export const sUSDe_InitialExchangeRate = parseUnits("1", 18);
 export const sUSDe_Timestamp = 1749194547;
 export const sUSDe_GrowthRate = parseUnits("0.2857", 18); // 28.57%
 export const sUSDe_SnapshotGap = 236; // 2.36%
-export const wstETH_InitialExchangeRate = parseUnits("1", 18);
-export const wstETH_Timestamp = 1749194547;
-export const wstETH_GrowthRate = parseUnits("0.067", 18); // 6.7%
-export const wstETH_SnapshotGap = 55; // 0.55%
 
 export const vip509 = () => {
   const meta = {
@@ -279,27 +273,6 @@ export const vip509 = () => {
         target: sUSDeOracle,
         signature: "setSnapshotGap(uint256)",
         params: [getSnapshotGap(sUSDe_InitialExchangeRate, sUSDe_SnapshotGap)],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: wstETHOracle,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(wstETH_InitialExchangeRate, BigNumber.from(wstETH_SnapshotGap)),
-          wstETH_Timestamp,
-        ],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: wstETHOracle,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [wstETH_GrowthRate, DAYS_30],
-        dstChainId: LzChainId.sepolia,
-      },
-      {
-        target: wstETHOracle,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(wstETH_InitialExchangeRate, wstETH_SnapshotGap)],
         dstChainId: LzChainId.sepolia,
       },
     ],

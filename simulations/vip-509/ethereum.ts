@@ -105,11 +105,6 @@ const prices = [
     address: "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
     expectedPrice: parseUnits("2647.131312257631374177", 18),
   },
-  {
-    symbol: "vwstETH",
-    address: "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
-    expectedPrice: parseUnits("2982.460727210861893565", 18),
-  },
 ];
 
 forking(22644795, async () => {
