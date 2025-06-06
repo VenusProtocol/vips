@@ -40,7 +40,7 @@ const prices = [
     symbol: "vPT-sUSDE",
     address: "0xCca202a95E8096315E3F19E46e19E1b326634889",
     expectedPrice: parseUnits("1.0013723", 18),
-    expectedPriceAfterVIP: parseUnits("1.00099335", 18),
+    expectedPriceAfterVIP: parseUnits("1.0013723", 18),
     postVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         ethereum.CHAINLINK_ORACLE,
@@ -54,19 +54,19 @@ const prices = [
     symbol: "vPT-USDe",
     address: "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B",
     expectedPrice: parseUnits("1.0013723", 18),
-    expectedPriceAfterVIP: parseUnits("1.00099335", 18),
+    expectedPriceAfterVIP: parseUnits("1.0013723", 18),
   },
   {
     symbol: "vsUSDe",
     address: "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0",
     expectedPrice: parseUnits("1.177824836694072347", 18),
-    expectedPriceAfterVIP: parseUnits("1.177415340047417918", 18),
+    expectedPriceAfterVIP: parseUnits("1.177861078815923193", 18),
   },
   {
     symbol: "vezETH",
     address: "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
     expectedPrice: parseUnits("2604.1954123918", 18),
-    expectedPriceAfterVIP: parseUnits("2601.195268200189169617", 18),
+    expectedPriceAfterVIP: parseUnits("2604.1954123918", 18),
     postVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         ethereum.CHAINLINK_ORACLE,
