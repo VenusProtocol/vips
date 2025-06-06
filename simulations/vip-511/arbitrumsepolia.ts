@@ -5,20 +5,30 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip511, { ACM_ARBITRUM, ERC4626_FACTORY_ARBITRUM, PSR_ARBITRUM } from "../../vips/vip-511/bsctestnet";
+import vip511, {
+  ACM_ARBITRUM,
+  ERC4626_FACTORY_ARBITRUM,
+  PROXY_ADMIN_ARBITRUM,
+  PSR_ARBITRUM,
+  PSR_ARBITRUM_NEW_IMPLEMENTATION,
+} from "../../vips/vip-511/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
+import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
 const { arbitrumsepolia } = NETWORK_ADDRESSES;
 const DEPLOYER = "0x638Eb8DFfF094Fd1d52c5A198b44984806C521E5";
-const BLOCK_NUMBER = 156959809;
+const BLOCK_NUMBER = 160697330;
+const PSR_ARBITRUM_OLD_IMPLEMENTATION = "0xF5B07c27d213A2B838A3D155FFEC0d52B17E91fd";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
   let erc4626Factory: Contract;
+  let defaultProxyAdmin: Contract;
 
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ARBITRUM, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ARBITRUM, PROXY_ADMIN_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -36,6 +46,12 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(DEPLOYER);
+    });
+
+    it("old PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ARBITRUM)).to.be.equals(
+        PSR_ARBITRUM_OLD_IMPLEMENTATION,
+      );
     });
   });
 
@@ -61,6 +77,12 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_ARBITRUM);
+    });
+
+    it("new PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ARBITRUM)).to.be.equals(
+        PSR_ARBITRUM_NEW_IMPLEMENTATION,
+      );
     });
   });
 });

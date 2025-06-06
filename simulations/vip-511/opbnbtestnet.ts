@@ -5,20 +5,30 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip511, { ACM_OPBNB, ERC4626_FACTORY_OPBNB, PSR_OPBNB } from "../../vips/vip-511/bsctestnet";
+import vip511, {
+  ACM_OPBNB,
+  ERC4626_FACTORY_OPBNB,
+  PROXY_ADMIN_OPBNB,
+  PSR_OPBNB,
+  PSR_OPBNB_NEW_IMPLEMENTATION,
+} from "../../vips/vip-511/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
+import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
 const { opbnbtestnet } = NETWORK_ADDRESSES;
 const DEPLOYER = "0x4c65A0342C8E632209147345c973A18f6A8c1979";
-const BLOCK_NUMBER = 67608801;
+const BLOCK_NUMBER = 68008267;
+const PSR_OPBNB_OLD_IMPLEMENTATION = "0xD91a8d928413daEc12028800cb934562138b8b36";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
   let erc4626Factory: Contract;
+  let defaultProxyAdmin: Contract;
 
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_OPBNB, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_OPBNB, PROXY_ADMIN_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -36,6 +46,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(DEPLOYER);
+    });
+
+    it("old PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_OPBNB)).to.be.equals(PSR_OPBNB_OLD_IMPLEMENTATION);
     });
   });
 
@@ -61,6 +75,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_OPBNB);
+    });
+
+    it("new PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_OPBNB)).to.be.equals(PSR_OPBNB_NEW_IMPLEMENTATION);
     });
   });
 });

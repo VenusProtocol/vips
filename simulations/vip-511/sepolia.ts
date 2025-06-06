@@ -5,20 +5,30 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip511, { ACM_SEPOLIA, ERC4626_FACTORY_SEPOLIA, PSR_SEPOLIA } from "../../vips/vip-511/bsctestnet";
+import vip511, {
+  ACM_SEPOLIA,
+  ERC4626_FACTORY_SEPOLIA,
+  PROXY_ADMIN_SEPOLIA,
+  PSR_SEPOLIA,
+  PSR_SEPOLIA_NEW_IMPLEMENTATION,
+} from "../../vips/vip-511/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
+import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 const DEPLOYER = "0xFEA1c651A47FE29dB9b1bf3cC1f224d8D9CFF68C";
-const BLOCK_NUMBER = 8473611;
+const BLOCK_NUMBER = 8489818;
+const PSR_SEPOLIA_OLD_IMPLEMENTATION = "0x5429E6DDc967c7f6A1E2C13bB812b6c6a57cBE19";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
   let erc4626Factory: Contract;
+  let defaultProxyAdmin: Contract;
 
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_SEPOLIA, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_SEPOLIA, PROXY_ADMIN_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -36,6 +46,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(DEPLOYER);
+    });
+
+    it("old PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_SEPOLIA)).to.be.equals(PSR_SEPOLIA_OLD_IMPLEMENTATION);
     });
   });
 
@@ -61,6 +75,10 @@ forking(BLOCK_NUMBER, async () => {
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
       expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_SEPOLIA);
+    });
+
+    it("new PSR implementation should be correct", async () => {
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_SEPOLIA)).to.be.equals(PSR_SEPOLIA_NEW_IMPLEMENTATION);
     });
   });
 });

@@ -32,6 +32,15 @@ export const PSR_OPTIMISM = "0x0F021c29283c47DF8237741dD5a0aA22952aFc88";
 export const PSR_UNICHAIN = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 export const PSR_ZKSYNC = "0x5722B43BD91fAaDC4E7f384F4d6Fb32456Ec5ffB";
 
+export const PSR_BNB_NEW_IMPLEMENTATION = "0xC23631E757d15680a8686D97Cf200625ad30c826";
+export const PSR_SEPOLIA_NEW_IMPLEMENTATION = "0x0Bb458A710333A3f3a6DD689136A999238E7341D";
+export const PSR_OPBNB_NEW_IMPLEMENTATION = "0x87fe63539af70B0634f1f831A194BD0C97CffAfF";
+export const PSR_BASE_NEW_IMPLEMENTATION = "0x4f43F45066A371F38Bb9257c3A9d6a5036665F23";
+export const PSR_ARBITRUM_NEW_IMPLEMENTATION = "0x032032F7A2F990D4946398FCc5f5B6E715C2298A";
+export const PSR_OPTIMISM_NEW_IMPLEMENTATION = "0xC27D48Be9B4c544B976dF5028b78E22720F58C99";
+export const PSR_UNICHAIN_NEW_IMPLEMENTATION = "0x2Ffcb190F3C7d5F8626262d450e151018D23524c";
+export const PSR_ZKSYNC_NEW_IMPLEMENTATION = "0x2c138F31F91404D9A96B3D3e887fB5aBA287D2a0";
+
 export const ACM_BNB = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const ACM_SEPOLIA = "0xbf705C00578d43B6147ab4eaE04DBBEd1ccCdc96";
 export const ACM_OPBNB = "0x049f77F7046266d27C3bC96376f53C17Ef09c986";
@@ -40,6 +49,15 @@ export const ACM_ARBITRUM = "0xa36AD96441cB931D8dFEAAaC97D3FaB4B39E590F";
 export const ACM_OPTIMISM = "0x1652E12C8ABE2f0D84466F0fc1fA4286491B3BC1";
 export const ACM_UNICHAIN = "0x854C064EA6b503A97980F481FA3B7279012fdeDd";
 export const ACM_ZKSYNC = "0xD07f543d47c3a8997D6079958308e981AC14CD01";
+
+export const PROXY_ADMIN_BNB = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
+export const PROXY_ADMIN_BASE = "0xB85dD19112c4BF1240FeD0f26E8D0b0576a82546";
+export const PROXY_ADMIN_ARBITRUM = "0xA78A1Df376c3CEeBC5Fab574fe6EdDbbF76fd03e";
+export const PROXY_ADMIN_SEPOLIA = "0x01435866babd91311b1355cf3af488cca36db68e";
+export const PROXY_ADMIN_OPBNB = "0xB1281ADC816fba7df64B798D7A0BC4bd2a6d42f4";
+export const PROXY_ADMIN_OPTIMISM = "0xa9aaf2A1cCf2C3a87997942abaA740887cC89241";
+export const PROXY_ADMIN_UNICHAIN = "0x256735eFdfDf135bD6991854e0065909e57804aa";
+export const PROXY_ADMIN_ZKSYNC = "0x18E44f588a4DcF2F7145d35A5C226e129040b6D3";
 
 export const vip511 = () => {
   const meta = {
@@ -104,6 +122,11 @@ export const vip511 = () => {
         signature: "setRewardRecipient(address)",
         params: [PSR_BNB],
       },
+      {
+        target: PROXY_ADMIN_BNB,
+        signature: "upgrade(address,address)",
+        params: [PSR_BNB, PSR_BNB_NEW_IMPLEMENTATION],
+      },
       // sepolia
       {
         target: ERC4626_FACTORY_SEPOLIA,
@@ -163,6 +186,12 @@ export const vip511 = () => {
         target: ERC4626_FACTORY_SEPOLIA,
         signature: "setRewardRecipient(address)",
         params: [PSR_SEPOLIA],
+        dstChainId: LzChainId.sepolia,
+      },
+      {
+        target: PROXY_ADMIN_SEPOLIA,
+        signature: "upgrade(address,address)",
+        params: [PSR_SEPOLIA, PSR_SEPOLIA_NEW_IMPLEMENTATION],
         dstChainId: LzChainId.sepolia,
       },
       // unichainsepolia
@@ -226,6 +255,12 @@ export const vip511 = () => {
         params: [PSR_UNICHAIN],
         dstChainId: LzChainId.unichainsepolia,
       },
+      {
+        target: PROXY_ADMIN_UNICHAIN,
+        signature: "upgrade(address,address)",
+        params: [PSR_UNICHAIN, PSR_UNICHAIN_NEW_IMPLEMENTATION],
+        dstChainId: LzChainId.unichainsepolia,
+      },
       // arbitrumsepolia
       {
         target: ERC4626_FACTORY_ARBITRUM,
@@ -285,6 +320,12 @@ export const vip511 = () => {
         target: ERC4626_FACTORY_ARBITRUM,
         signature: "setRewardRecipient(address)",
         params: [PSR_ARBITRUM],
+        dstChainId: LzChainId.arbitrumsepolia,
+      },
+      {
+        target: PROXY_ADMIN_ARBITRUM,
+        signature: "upgrade(address,address)",
+        params: [PSR_ARBITRUM, PSR_ARBITRUM_NEW_IMPLEMENTATION],
         dstChainId: LzChainId.arbitrumsepolia,
       },
       // opsepolia
@@ -348,6 +389,12 @@ export const vip511 = () => {
         params: [PSR_OPTIMISM],
         dstChainId: LzChainId.opsepolia,
       },
+      {
+        target: PROXY_ADMIN_OPTIMISM,
+        signature: "upgrade(address,address)",
+        params: [PSR_OPTIMISM, PSR_OPTIMISM_NEW_IMPLEMENTATION],
+        dstChainId: LzChainId.opsepolia,
+      },
       // opbnbtestnet
       {
         target: ERC4626_FACTORY_OPBNB,
@@ -407,6 +454,12 @@ export const vip511 = () => {
         target: ERC4626_FACTORY_OPBNB,
         signature: "setRewardRecipient(address)",
         params: [PSR_OPBNB],
+        dstChainId: LzChainId.opbnbtestnet,
+      },
+      {
+        target: PROXY_ADMIN_OPBNB,
+        signature: "upgrade(address,address)",
+        params: [PSR_OPBNB, PSR_OPBNB_NEW_IMPLEMENTATION],
         dstChainId: LzChainId.opbnbtestnet,
       },
       // basesepolia
@@ -470,6 +523,12 @@ export const vip511 = () => {
         params: [PSR_BASE],
         dstChainId: LzChainId.basesepolia,
       },
+      {
+        target: PROXY_ADMIN_BASE,
+        signature: "upgrade(address,address)",
+        params: [PSR_BASE, PSR_BASE_NEW_IMPLEMENTATION],
+        dstChainId: LzChainId.basesepolia,
+      },
       // zksyncsepolia
       {
         target: ERC4626_FACTORY_ZKSYNC,
@@ -529,6 +588,12 @@ export const vip511 = () => {
         target: ERC4626_FACTORY_ZKSYNC,
         signature: "setRewardRecipient(address)",
         params: [PSR_ZKSYNC],
+        dstChainId: LzChainId.zksyncsepolia,
+      },
+      {
+        target: PROXY_ADMIN_ZKSYNC,
+        signature: "upgrade(address,address)",
+        params: [PSR_ZKSYNC, PSR_ZKSYNC_NEW_IMPLEMENTATION],
         dstChainId: LzChainId.zksyncsepolia,
       },
     ],
