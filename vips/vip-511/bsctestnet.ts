@@ -74,10 +74,10 @@ export const sUSDe_Timestamp = 1749194547;
 export const sUSDe_GrowthRate = parseUnits("0.2827", 18); // 28.27%
 export const sUSDe_SnapshotGap = 236; // 2.36%
 
-export const vip509 = () => {
+export const vip511 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-509",
+    title: "VIP-511",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -281,4 +281,4 @@ export const vip509 = () => {
   );
 };
 
-export default vip509;
+export default vip511;

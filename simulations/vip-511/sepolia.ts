@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip509 from "../../vips/vip-509/bsctestnet";
+import vip511 from "../../vips/vip-511/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
@@ -63,7 +63,7 @@ forking(8488820, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip509", await vip509());
+  testForkedNetworkVipCommands("vip511", await vip511());
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {

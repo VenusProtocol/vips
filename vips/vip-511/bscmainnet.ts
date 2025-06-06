@@ -74,11 +74,75 @@ export const sUSDe_Timestamp = 1749194547;
 export const sUSDe_GrowthRate = parseUnits("0.2827", 18); // 28.27%
 export const sUSDe_SnapshotGap = 236; // 2.36%
 
-export const vip509 = () => {
+export const vip511 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-509",
-    description: ``,
+    title: "VIP-511 [Ethereum] Capped Oracles and Cached Prices (2/2)",
+    description: `#### Summary
+
+If passed, following the community proposal “[Provide Support for Capped Oracles for Enhanced Security](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xcd64c64eee56e75b56a0a0b84f1ffa2b4ea5fb2be76cca96a155137c46305c07)), this VIP will configure the caps on the prices for the following assets on Ethereum (following the [Chaos Labs recommendation](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/8)):
+
+- [ezETH](https://etherscan.io/address/0xbf5495Efe5DB9ce00f80364C8B423567e58d2110)
+    - Maximum annual growth rate: 23.51%
+    - Automatic snapshot period: 30 days (how frequently the reference value to calculate the cap in the price is updated)
+    - Automatic snapshot update gap: 1.96% of the current exchange rate
+- [pufETH](https://etherscan.io/address/0xD9A442856C234a39a81a089C06451EBAa4306a72)
+    - Maximum annual growth rate: 22.31%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 1.85%
+- [sUSDe](https://etherscan.io/address/0x9D39A5DE30e57443BfF2A8307A4256c8797A3497)
+    - Maximum annual growth rate: 28.27%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 2.36%
+- [PT-sUSDe-27MAR2025](https://etherscan.io/address/0xE00bd3Df25fb187d6ABBB620b3dfd19839947b81), [PT-USDe-27MAR2025](https://etherscan.io/address/0x8A47b431A7D947c6a3ED6E42d501803615a97EAa) and [PT-weETH-DEC24](https://etherscan.io/address/0x6ee2b5e19ecba773a352e5b21415dc419a700d1d)
+    - Maximum annual growth rate: 0.00%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 4.00%
+- [weETHs](https://etherscan.io/address/0x917ceE801a67f933F2e6b33fC0cD1ED2d5909D88)
+    - Maximum annual growth rate: 4.52%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.38%
+- [weETH](https://etherscan.io/address/0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee)
+    - Maximum annual growth rate: 5.3%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.44%
+
+For [wstETH](https://etherscan.io/address/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0), a new contract supporting caps will be configured in an upcoming VIP.
+
+#### Description
+
+**Capped Oracles** are a type of price oracle designed to limit the maximum value (or growth) of an asset's reported price to protect against manipulation or sudden volatility.
+
+**Cached Prices** is a new feature integrated into the Venus oracle contracts, that reduces the gas consumed by the functions that collect and return the prices, using [Transient Storage](https://soliditylang.org/blog/2024/01/26/transient-storage/) to cache the prices in the smart contract memory. This VIP doesn’t enable Cached Prices for any market on the affected networks. It only upgrades the oracle contracts to support that feature.
+
+More information about Capped Oracles and Cached Prices:
+
+- [VIP-495 [opBNB] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/495?chainId=56)
+- [VIP-497 [Base][Optimism][Unichain] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/497?chainId=56)
+- [VIP-500 [Arbitrum][ZKSync] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/500?chainId=56)
+- [VIP-506 [Ethereum] Capped Oracles and Cached Prices (1/2)](https://app.venus.io/#/governance/proposal/506?chainId=56)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the new caps are properly set on Ethereum, and the asset prices don’t change
+- **Deployment on testnet**: the same change has been performed on Sepolia, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/125_capped_cached_certik_20250430.pdf) (2025/04/30)
+- [Quantstamp](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/127_capped_cached_quantstamp_20250325.pdf) (2025/03/25)
+- [Fairyproof audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/126_capped_cached_fairyproof_20250319.pdf) (2025/03/19)
+
+#### References
+
+- [Capped Oracles and Cached Prices feature](https://github.com/VenusProtocol/oracle/pull/239)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/571)
+- [VIP execution on Sepolia](https://sepolia.etherscan.io/tx/0xa041c8883c9d4c6540690379dd8ad869e8bc1bb76f725af7f0e2a48d2dc96c23)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -281,4 +345,4 @@ export const vip509 = () => {
   );
 };
 
-export default vip509;
+export default vip511;
