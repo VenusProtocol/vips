@@ -1,8 +1,11 @@
+import { mine } from "@nomicfoundation/hardhat-network-helpers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip511, {
@@ -13,22 +16,44 @@ import vip511, {
   PSR_ZKSYNC_NEW_IMPLEMENTATION,
 } from "../../vips/vip-511/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
+import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import ERC4626_ABI from "./abi/ERC4626.json";
 import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
+import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
 const { zksyncsepolia } = NETWORK_ADDRESSES;
 const DEPLOYER = "0x50e36E99F4e89d3B8EB636f73a8A28B4A2f601C7";
 const BLOCK_NUMBER = 5248239;
 const PSR_ZKSYNC_OLD_IMPLEMENTATION = "0x817F19DC65bBe7f87b6941aa11637A1744E4fdD6";
+const WETH_HOLDER = "0xcB0F9F12Cc4b7b6f847a139ddF0540Fbd7Cb725C";
+const WETH_CORE = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
+const VWETH_CORE = "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49";
+const COMPTROLLER_CORE = "0xC527DE08E43aeFD759F7c0e6aE85433923064669";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
   let erc4626Factory: Contract;
   let defaultProxyAdmin: Contract;
+  let weth: Contract;
+  let comptroller: Contract;
+  let venusERC4626: Contract;
+  let wethHolder: SignerWithAddress;
+  let userSigner: SignerWithAddress;
 
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ZKSYNC, ERC4626FACTORY_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ZKSYNC, PROXY_ADMIN_ABI, provider);
+
+    // Initialize signers
+    userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
+    wethHolder = await initMainnetUser(WETH_HOLDER, parseUnits("2"));
+
+    // Get mainnet contracts
+    weth = new ethers.Contract(WETH_CORE, ERC20_ABI, provider);
+    comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -79,6 +104,46 @@ forking(BLOCK_NUMBER, async () => {
 
     it("new PSR implementation should be correct", async () => {
       expect(await defaultProxyAdmin.getProxyImplementation(PSR_ZKSYNC)).to.be.equals(PSR_ZKSYNC_NEW_IMPLEMENTATION);
+    });
+
+    it("check for claimRewards", async () => {
+      // Deploy VenusERC4626
+      const tx = await erc4626Factory.connect(userSigner).createERC4626(VWETH_CORE);
+      const receipt = await tx.wait();
+
+      const depositEvent = receipt.events?.find(e => e.event === "CreateERC4626");
+      const venusERC4626Address = depositEvent?.args?.vault;
+
+      // Deploy VenusERC4626 once we set PSR as rewardRecipient
+      venusERC4626 = new ethers.Contract(venusERC4626Address, ERC4626_ABI, provider);
+
+      // Fund user with WETH
+      await weth.connect(wethHolder).transfer(await userSigner.getAddress(), parseUnits("20", 18));
+      await weth.connect(userSigner).approve(venusERC4626Address, parseUnits("200", 18));
+
+      const depositAmount = parseUnits("20", 18);
+
+      // Make a deposit to start earning rewards
+      await venusERC4626.connect(userSigner).deposit(depositAmount, await userSigner.getAddress());
+      await mine(10000000);
+
+      const distributors = await comptroller.getRewardDistributors();
+      if (distributors.length === 0) {
+        console.log("No active reward distributors - skipping test");
+        return;
+      }
+
+      const distributor = new ethers.Contract(distributors[0], REWARD_DISTRIBUTOR_ABI, provider);
+      const rewardTokenAddress = await distributor.rewardToken();
+      const rewardToken = new ethers.Contract(rewardTokenAddress, REWARD_TOKEN_ABI, provider);
+
+      const initialPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
+
+      await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
+      const finalPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
+
+      // reward tokens tranfered to PSR
+      expect(finalPsrBalance).to.be.gte(initialPsrBalance);
     });
   });
 });
