@@ -142,7 +142,7 @@ forking(BLOCK_NUMBER, async () => {
       await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
       const finalPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
 
-      // reward tokens tranfered to PSR
+      // reward tokens transfered to PSR
       expect(finalPsrBalance).to.be.gte(initialPsrBalance);
     });
   });
