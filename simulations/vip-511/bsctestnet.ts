@@ -58,12 +58,6 @@ forking(BLOCK_NUMBER, async () => {
     // Get mainnet contracts
     usdt = new ethers.Contract(USDT_STABLECOIN, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_STABLECOIN, COMPTROLLER_ABI, provider);
-
-    // we already paused USDT market in stablecoins
-    await comptroller.connect(adminSigner).setActionsPaused([VUSDT_STABLECOIN], [0], false);
-
-    // we need to set the MarketSupplyCaps for USDT
-    await comptroller.connect(adminSigner).setMarketSupplyCaps([VUSDT_STABLECOIN], [parseUnits("2000", 18)]);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -128,11 +122,17 @@ forking(BLOCK_NUMBER, async () => {
       const tx = await erc4626Factory.connect(userSigner).createERC4626(VUSDT_STABLECOIN);
       const receipt = await tx.wait();
 
-      const depositEvent = receipt.events?.find(e => e.event === "CreateERC4626");
-      const venusERC4626Address = depositEvent?.args?.vault;
+      const createERC4626Event = receipt.events?.find(e => e.event === "CreateERC4626");
+      const venusERC4626Address = createERC4626Event?.args?.vault;
 
       // Deploy VenusERC4626 once we set PSR as rewardRecipient
       venusERC4626 = new ethers.Contract(venusERC4626Address, ERC4626_ABI, provider);
+
+      // we already paused USDT market in stablecoins
+      await comptroller.connect(adminSigner).setActionsPaused([VUSDT_STABLECOIN], [0], false);
+
+      // we need to set the MarketSupplyCaps for USDT
+      await comptroller.connect(adminSigner).setMarketSupplyCaps([VUSDT_STABLECOIN], [parseUnits("2000", 18)]);
 
       // Fund user with USDT
       await usdt.connect(usdtHolder).transfer(await userSigner.getAddress(), parseUnits("1000", 18));

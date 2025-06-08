@@ -111,8 +111,8 @@ forking(BLOCK_NUMBER, async () => {
       const tx = await erc4626Factory.connect(userSigner).createERC4626(VUSDT_CORE);
       const receipt = await tx.wait();
 
-      const depositEvent = receipt.events?.find(e => e.event === "CreateERC4626");
-      const venusERC4626Address = depositEvent?.args?.vault;
+      const createERC4626Event = receipt.events?.find(e => e.event === "CreateERC4626");
+      const venusERC4626Address = createERC4626Event?.args?.vault;
 
       // Deploy VenusERC4626 once we set PSR as rewardRecipient
       venusERC4626 = new ethers.Contract(venusERC4626Address, ERC4626_ABI, provider);
