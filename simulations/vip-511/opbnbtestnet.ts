@@ -51,7 +51,7 @@ forking(BLOCK_NUMBER, async () => {
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
     usdtHolder = await initMainnetUser(USDT_HOLDER, parseUnits("2"));
 
-    // Get mainnet contracts
+    // Get testnet contracts
     usdt = new ethers.Contract(USDT_CORE, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   });

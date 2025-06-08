@@ -51,7 +51,7 @@ forking(BLOCK_NUMBER, async () => {
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
     wethHolder = await initMainnetUser(WETH_HOLDER, parseUnits("2"));
 
-    // Get mainnet contracts
+    // Get testnet contracts
     weth = new ethers.Contract(WETH_CORE, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   });
