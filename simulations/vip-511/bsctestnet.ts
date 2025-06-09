@@ -2,7 +2,7 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { Contract, Event } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -122,7 +122,7 @@ forking(BLOCK_NUMBER, async () => {
       const tx = await erc4626Factory.connect(userSigner).createERC4626(VUSDT_STABLECOIN);
       const receipt = await tx.wait();
 
-      const createERC4626Event = receipt.events?.find(e => e.event === "CreateERC4626");
+      const createERC4626Event = receipt.events?.find((e: Event) => e.event === "CreateERC4626");
       const venusERC4626Address = createERC4626Event?.args?.vault;
 
       // Deploy VenusERC4626 once we set PSR as rewardRecipient
