@@ -11,6 +11,7 @@ import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framewor
 
 import vip512, { COMPTROLLER_CORE, USDTOMarket, WBTCMarket } from "../../vips/vip-512/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const VWBTC_IRM = "0x15d00fe9605D69c818Fe78627FF9367DcC9E363B";
@@ -35,11 +36,13 @@ forking(22338935, async () => {
   describe("Post-Execution state", () => {
     let vWBTC: Contract;
     let vUSDTO: Contract;
+    let oracle: Contract;
 
     before(async () => {
       vWBTC = await ethers.getContractAt(VTOKEN_ABI, WBTCMarket.vToken.address);
       vUSDTO = await ethers.getContractAt(VTOKEN_ABI, USDTOMarket.vToken.address);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+      oracle = await ethers.getContractAt(PRICE_ORACLE_ABI, await comptroller.oracle());
 
       // Required for the checkIsolatedPoolsComptrollers call, where WETH will be borrowed
       await setRedstonePrice(
@@ -154,6 +157,18 @@ forking(22338935, async () => {
             USDTOMarket.riskParameters.borrowCap,
           );
         });
+      });
+    });
+
+    describe("Prices", () => {
+      it("get correct price from oracle for WBTC", async () => {
+        const price = await oracle.getUnderlyingPrice(WBTCMarket.vToken.address);
+        expect(price).to.equal(parseUnits("1000000000000000", 18));
+      });
+
+      it("get correct price from oracle for USDTO", async () => {
+        const price = await oracle.getUnderlyingPrice(USDTOMarket.vToken.address);
+        expect(price).to.equal(parseUnits("1000000000000", 18));
       });
     });
 

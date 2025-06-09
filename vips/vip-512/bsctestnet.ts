@@ -119,7 +119,7 @@ const vip512 = () => {
       {
         target: unichainsepolia.REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
-        params: [WBTC.address, parseUnits("1", 18)],
+        params: [WBTC.address, parseUnits("100000", 18)],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
