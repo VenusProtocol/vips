@@ -59,10 +59,10 @@ export const PROXY_ADMIN_OPTIMISM = "0xeaF9490cBEA6fF9bA1D23671C39a799CeD0DCED2"
 export const PROXY_ADMIN_UNICHAIN = "0x78e9fff2ab8daAB8559070d897C399E5e1C5074c";
 export const PROXY_ADMIN_ZKSYNC = "0x8Ea1A989B036f7Ef21bb95CE4E7961522Ca00287";
 
-export const vip511 = () => {
+export const vip515 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-511",
+    title: "VIP-515",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
     againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
@@ -602,4 +602,4 @@ export const vip511 = () => {
   );
 };
 
-export default vip511;
+export default vip515;

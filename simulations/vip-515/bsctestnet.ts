@@ -9,13 +9,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip511, {
+import vip515, {
   ACM_BNB,
   ERC4626_FACTORY_BNB,
   PROXY_ADMIN_BNB,
   PSR_BNB,
   PSR_BNB_NEW_IMPLEMENTATION,
-} from "../../vips/vip-511/bscmainnet";
+} from "../../vips/vip-515/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -26,14 +26,14 @@ import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-const DEPLOYER = "0x7Bf1Fe2C42E79dbA813Bf5026B7720935a55ec5f";
-const BLOCK_NUMBER = 51080281;
-const PSR_BNB_OLD_IMPLEMENTATION = "0x86a2a5EB77984E923E7B5Af45819A8c8f870f061";
-const USDT_HOLDER = "0x98B4be9C7a32A5d3bEFb08bB98d65E6D204f7E98";
-const USDT_STABLECOIN = "0x55d398326f99059fF775485246999027B3197955";
-const VUSDT_STABLECOIN = "0x5e3072305F9caE1c7A82F6Fe9E38811c74922c3B";
-const COMPTROLLER_STABLECOIN = "0x94c1495cD4c557f1560Cbd68EAB0d197e6291571";
+const { bsctestnet } = NETWORK_ADDRESSES;
+const DEPLOYER = "0x33C6476F88eeA28D7E7900F759B4597704Ef95B7";
+const BLOCK_NUMBER = 53864628;
+const PSR_BNB_OLD_IMPLEMENTATION = "0x91B67df8B13a1B53a3828EAAD3f4233B55FEc26d";
+const USDT_HOLDER = "0x1818bc7F71F7314b8fb63da2956DC710CEf60994";
+const USDT_STABLECOIN = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const VUSDT_STABLECOIN = "0x3338988d0beb4419Acb8fE624218754053362D06";
+const COMPTROLLER_STABLECOIN = "0x10b57706AD2345e590c2eA4DC02faef0d9f5b08B";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -49,13 +49,13 @@ forking(BLOCK_NUMBER, async () => {
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_BNB, ERC4626FACTORY_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_BNB, PROXY_ADMIN_ABI, provider);
-    adminSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, parseUnits("2"));
+    adminSigner = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, parseUnits("2"));
 
     // Initialize signers
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
     usdtHolder = await initMainnetUser(USDT_HOLDER, parseUnits("2"));
 
-    // Get mainnet contracts
+    // Get testnet contracts
     usdt = new ethers.Contract(USDT_STABLECOIN, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_STABLECOIN, COMPTROLLER_ABI, provider);
   });
@@ -66,7 +66,7 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(bscmainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(bsctestnet.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
@@ -82,7 +82,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-511", await vip511(), {
+  testVip("VIP-515", await vip515(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -94,15 +94,15 @@ forking(BLOCK_NUMBER, async () => {
       await expectEvents(
         txResponse,
         [ERC4626FACTORY_ABI, ACM_ABI],
-        ["OwnershipTransferred", "RewardRecipientUpdated"],
-        [1, 1],
+        ["OwnershipTransferred", "PermissionGranted", "RewardRecipientUpdated"],
+        [1, 8, 1],
       );
     },
   });
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(bscmainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(bsctestnet.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
@@ -130,6 +130,9 @@ forking(BLOCK_NUMBER, async () => {
 
       // we already paused USDT market in stablecoins
       await comptroller.connect(adminSigner).setActionsPaused([VUSDT_STABLECOIN], [0], false);
+
+      // we need to set the MarketSupplyCaps for USDT
+      await comptroller.connect(adminSigner).setMarketSupplyCaps([VUSDT_STABLECOIN], [parseUnits("2000", 18)]);
 
       // Fund user with USDT
       await usdt.connect(usdtHolder).transfer(await userSigner.getAddress(), parseUnits("1000", 18));

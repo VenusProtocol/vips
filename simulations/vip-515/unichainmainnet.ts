@@ -1,20 +1,20 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract, Event, Wallet } from "ethers";
+import { Contract, Event } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip511, {
-  ACM_ZKSYNC,
-  ERC4626_FACTORY_ZKSYNC,
-  PROXY_ADMIN_ZKSYNC,
-  PSR_ZKSYNC,
-  PSR_ZKSYNC_NEW_IMPLEMENTATION,
-} from "../../vips/vip-511/bsctestnet";
+import vip515, {
+  ACM_UNICHAIN,
+  ERC4626_FACTORY_UNICHAIN,
+  PROXY_ADMIN_UNICHAIN,
+  PSR_UNICHAIN,
+  PSR_UNICHAIN_NEW_IMPLEMENTATION,
+} from "../../vips/vip-515/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -24,14 +24,14 @@ import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
-const { zksyncsepolia } = NETWORK_ADDRESSES;
-const DEPLOYER = "0x50e36E99F4e89d3B8EB636f73a8A28B4A2f601C7";
-const BLOCK_NUMBER = 5248239;
-const PSR_ZKSYNC_OLD_IMPLEMENTATION = "0x817F19DC65bBe7f87b6941aa11637A1744E4fdD6";
-const WETH_HOLDER = "0xEF4B807f9442b0EbD8a051C2cAEA81e5e7BAcFBD";
-const WETH_CORE = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
-const VWETH_CORE = "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49";
-const COMPTROLLER_CORE = "0xC527DE08E43aeFD759F7c0e6aE85433923064669";
+const { unichainmainnet } = NETWORK_ADDRESSES;
+const DEPLOYER = "0x916fEb0881f0ae2dbFA6F3e3088200075F197458";
+const BLOCK_NUMBER = 18628777;
+const PSR_UNICHAIN_OLD_IMPLEMENTATION = "0xDb8347b96c94Be24B9c077A4CDDAAD074F6480cf";
+const WETH_HOLDER = "0x2c7118c4C88B9841FCF839074c26Ae8f035f2921";
+const WETH_CORE = "0x4200000000000000000000000000000000000006";
+const VWETH_CORE = "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374";
+const COMPTROLLER_CORE = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -41,31 +41,17 @@ forking(BLOCK_NUMBER, async () => {
   let comptroller: Contract;
   let venusERC4626: Contract;
   let wethHolder: SignerWithAddress;
-  let userSigner: Wallet;
+  let userSigner: SignerWithAddress;
 
   before(async () => {
-    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ZKSYNC, ERC4626FACTORY_ABI, provider);
-    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ZKSYNC, PROXY_ADMIN_ABI, provider);
+    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_UNICHAIN, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_UNICHAIN, PROXY_ADMIN_ABI, provider);
 
     // Initialize signers
-    userSigner = ethers.Wallet.createRandom().connect(provider);
-
-    await ethers.provider.send("hardhat_setBalance", [
-      userSigner.address,
-      parseUnits("10", 18).toHexString(), // Set balance in hex
-    ]);
-
-    const tx = {
-      to: userSigner.address,
-      value: parseUnits("0", 18),
-      nonce: 0,
-    };
-
-    await userSigner.sendTransaction(tx);
-
+    userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
     wethHolder = await initMainnetUser(WETH_HOLDER, parseUnits("2"));
 
-    // Get testnet contracts
+    // Get mainnet contracts
     weth = new ethers.Contract(WETH_CORE, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   });
@@ -76,11 +62,11 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(zksyncsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(unichainmainnet.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_ZKSYNC);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_UNICHAIN);
     });
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
@@ -88,11 +74,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("old PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ZKSYNC)).to.be.equals(PSR_ZKSYNC_OLD_IMPLEMENTATION);
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
+        PSR_UNICHAIN_OLD_IMPLEMENTATION,
+      );
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip511(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip515(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -105,7 +93,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(zksyncsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(unichainmainnet.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
@@ -113,11 +101,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
-      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_ZKSYNC);
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_UNICHAIN);
     });
 
     it("new PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ZKSYNC)).to.be.equals(PSR_ZKSYNC_NEW_IMPLEMENTATION);
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
+        PSR_UNICHAIN_NEW_IMPLEMENTATION,
+      );
     });
 
     it("check for claimRewards", async () => {
@@ -132,13 +122,14 @@ forking(BLOCK_NUMBER, async () => {
       venusERC4626 = new ethers.Contract(venusERC4626Address, ERC4626_ABI, provider);
 
       // Fund user with WETH
-      await weth.connect(wethHolder).transfer(await userSigner.getAddress(), parseUnits("1", 16));
-      await weth.connect(userSigner).approve(venusERC4626Address, parseUnits("1", 18));
-      const depositAmount = parseUnits("1", 16);
+      await weth.connect(wethHolder).transfer(await userSigner.getAddress(), parseUnits("20", 18));
+      await weth.connect(userSigner).approve(venusERC4626Address, parseUnits("200", 18));
+
+      const depositAmount = parseUnits("20", 18);
 
       // Make a deposit to start earning rewards
       await venusERC4626.connect(userSigner).deposit(depositAmount, await userSigner.getAddress());
-      await mine(3);
+      await mine(10000000);
 
       const distributors = await comptroller.getRewardDistributors();
       if (distributors.length === 0) {
@@ -150,10 +141,10 @@ forking(BLOCK_NUMBER, async () => {
       const rewardTokenAddress = await distributor.rewardToken();
       const rewardToken = new ethers.Contract(rewardTokenAddress, REWARD_TOKEN_ABI, provider);
 
-      const initialPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
+      const initialPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
 
       await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
-      const finalPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
+      const finalPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
 
       // reward tokens transfered to PSR
       expect(finalPsrBalance).to.be.gte(initialPsrBalance);
