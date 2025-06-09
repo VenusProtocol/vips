@@ -28,7 +28,7 @@ const { zksyncmainnet } = NETWORK_ADDRESSES;
 const DEPLOYER = "0xF39495A0AbcD780C367E6abA747dB98DD54187bC";
 const BLOCK_NUMBER = 61454735;
 const PSR_ZKSYNC_OLD_IMPLEMENTATION = "0x72FdEC477A5652E4a012CEE2e50A4150459Ec296";
-const WETH_HOLDER = "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF"; // need to change the holder
+const WETH_HOLDER = "0xE0B015E54d54fc84a6cB9B666099c46adE9335FF";
 const WETH_CORE = "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91";
 const VWETH_CORE = "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8";
 const COMPTROLLER_CORE = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
@@ -125,7 +125,7 @@ forking(BLOCK_NUMBER, async () => {
 
       // Make a deposit to start earning rewards
       await venusERC4626.connect(userSigner).deposit(depositAmount, await userSigner.getAddress());
-      await mine(10000000);
+      await mine(3);
 
       const distributors = await comptroller.getRewardDistributors();
       if (distributors.length === 0) {
@@ -143,7 +143,7 @@ forking(BLOCK_NUMBER, async () => {
       const finalPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
 
       // reward tokens transfered to PSR
-      expect(finalPsrBalance).to.be.gte(initialPsrBalance);
+      expect(finalPsrBalance).to.be.gte(initialPsrBalance); 
     });
   });
 });
