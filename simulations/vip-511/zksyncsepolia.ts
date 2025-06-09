@@ -1,7 +1,7 @@
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract, Event } from "ethers";
+import { Contract, Event, Wallet } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -28,7 +28,7 @@ const { zksyncsepolia } = NETWORK_ADDRESSES;
 const DEPLOYER = "0x50e36E99F4e89d3B8EB636f73a8A28B4A2f601C7";
 const BLOCK_NUMBER = 5248239;
 const PSR_ZKSYNC_OLD_IMPLEMENTATION = "0x817F19DC65bBe7f87b6941aa11637A1744E4fdD6";
-const WETH_HOLDER = "0xcB0F9F12Cc4b7b6f847a139ddF0540Fbd7Cb725C";
+const WETH_HOLDER = "0xEF4B807f9442b0EbD8a051C2cAEA81e5e7BAcFBD";
 const WETH_CORE = "0x53F7e72C7ac55b44c7cd73cC13D4EF4b121678e6";
 const VWETH_CORE = "0x31eb7305f9fE281027028D0ba0d7f57ddA836d49";
 const COMPTROLLER_CORE = "0xC527DE08E43aeFD759F7c0e6aE85433923064669";
@@ -41,14 +41,28 @@ forking(BLOCK_NUMBER, async () => {
   let comptroller: Contract;
   let venusERC4626: Contract;
   let wethHolder: SignerWithAddress;
-  let userSigner: SignerWithAddress;
+  let userSigner: Wallet;
 
   before(async () => {
     erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ZKSYNC, ERC4626FACTORY_ABI, provider);
     defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ZKSYNC, PROXY_ADMIN_ABI, provider);
 
     // Initialize signers
-    userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
+    userSigner = ethers.Wallet.createRandom().connect(provider);
+
+    await ethers.provider.send("hardhat_setBalance", [
+      userSigner.address,
+      parseUnits("10", 18).toHexString(), // Set balance in hex
+    ]);
+
+    const tx = {
+      to: userSigner.address,
+      value: parseUnits("0", 18),
+      nonce: 0,
+    };
+
+    await userSigner.sendTransaction(tx);
+
     wethHolder = await initMainnetUser(WETH_HOLDER, parseUnits("2"));
 
     // Get testnet contracts
@@ -118,14 +132,13 @@ forking(BLOCK_NUMBER, async () => {
       venusERC4626 = new ethers.Contract(venusERC4626Address, ERC4626_ABI, provider);
 
       // Fund user with WETH
-      await weth.connect(wethHolder).transfer(await userSigner.getAddress(), parseUnits("20", 18));
-      await weth.connect(userSigner).approve(venusERC4626Address, parseUnits("200", 18));
-
-      const depositAmount = parseUnits("20", 18);
+      await weth.connect(wethHolder).transfer(await userSigner.getAddress(), parseUnits("1", 16));
+      await weth.connect(userSigner).approve(venusERC4626Address, parseUnits("1", 18));
+      const depositAmount = parseUnits("1", 16);
 
       // Make a deposit to start earning rewards
       await venusERC4626.connect(userSigner).deposit(depositAmount, await userSigner.getAddress());
-      await mine(10000000);
+      await mine(3);
 
       const distributors = await comptroller.getRewardDistributors();
       if (distributors.length === 0) {
