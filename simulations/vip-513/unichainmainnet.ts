@@ -9,48 +9,79 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip514, { COMPTROLLER_CORE, USDTOMarket, WBTCMarket } from "../../vips/vip-514/bsctestnet";
+import vip513, {
+  COMPTROLLER_CORE,
+  USDTO,
+  USDTOMarket,
+  USDTO_REDSTONE_FEED,
+  WBTC,
+  WBTCMarket,
+  WBTC_REDSTONE_FEED,
+} from "../../vips/vip-513/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const VWBTC_IRM = "0x15d00fe9605D69c818Fe78627FF9367DcC9E363B";
-const VUSDTO_IRM = "0x208DedbBc74525764DE7521C12B53CcEd0FCcA4B";
-const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
+const { unichainmainnet } = NETWORK_ADDRESSES;
+
+const VWBTC_IRM = "0xf781f2D923f37F4dD10c3541D8A1Be04571e7966";
+const VUSDTO_IRM = "0x3AD4F23275F8d3eda8C210e9FDB875769BBa1987";
+const PSR = "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242";
+const ONE_YEAR = 31536000; // 1 year in seconds
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
-const { unichainsepolia } = NETWORK_ADDRESSES;
 const WETH = "0x4200000000000000000000000000000000000006";
-const WETH_REDSTONE_FEED = "0xd9c93081210dFc33326B2af4C2c11848095E6a9a";
+const WETH_REDSTONE_FEED = "0xe8D9FbC10e00ecc9f0694617075fDAF657a76FB2";
 
-forking(22338935, async () => {
+forking(18443512, async () => {
   let comptroller: Contract;
+  let oracle: Contract;
+
+  before(async () => {
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      WBTC.address,
+      WBTC_REDSTONE_FEED,
+      unichainmainnet.NORMAL_TIMELOCK,
+      ONE_YEAR,
+      { tokenDecimals: 8 },
+    );
+
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      USDTO.address,
+      USDTO_REDSTONE_FEED,
+      unichainmainnet.NORMAL_TIMELOCK,
+      ONE_YEAR,
+      { tokenDecimals: 6 },
+    );
+
+    // Required for the checkIsolatedPoolsComptrollers call, where WETH will be borrowed
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      WETH,
+      WETH_REDSTONE_FEED,
+      unichainmainnet.NORMAL_TIMELOCK,
+      ONE_YEAR,
+    );
+  });
 
   describe("Contracts setup", () => {
     checkVToken(WBTCMarket.vToken.address, WBTCMarket.vToken);
     checkVToken(USDTOMarket.vToken.address, USDTOMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip514());
+  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip513());
 
   describe("Post-Execution state", () => {
     let vWBTC: Contract;
     let vUSDTO: Contract;
-    let oracle: Contract;
 
     before(async () => {
       vWBTC = await ethers.getContractAt(VTOKEN_ABI, WBTCMarket.vToken.address);
       vUSDTO = await ethers.getContractAt(VTOKEN_ABI, USDTOMarket.vToken.address);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
       oracle = await ethers.getContractAt(PRICE_ORACLE_ABI, await comptroller.oracle());
-
-      // Required for the checkIsolatedPoolsComptrollers call, where WETH will be borrowed
-      await setRedstonePrice(
-        unichainsepolia.REDSTONE_ORACLE,
-        WETH,
-        WETH_REDSTONE_FEED,
-        unichainsepolia.NORMAL_TIMELOCK,
-      );
     });
 
     describe("PoolRegistry state", () => {
@@ -163,12 +194,12 @@ forking(22338935, async () => {
     describe("Prices", () => {
       it("get correct price from oracle for WBTC", async () => {
         const price = await oracle.getUnderlyingPrice(WBTCMarket.vToken.address);
-        expect(price).to.equal(parseUnits("1000000000000000", 18));
+        expect(price).to.equal(parseUnits("1028534353071000", 18));
       });
 
       it("get correct price from oracle for USDTO", async () => {
         const price = await oracle.getUnderlyingPrice(USDTOMarket.vToken.address);
-        expect(price).to.equal(parseUnits("1000000000000", 18));
+        expect(price).to.equal(parseUnits("1000357360000", 18));
       });
     });
 
@@ -202,9 +233,11 @@ forking(22338935, async () => {
         BLOCKS_PER_YEAR,
       );
     });
-
     it("check isolated pools", async () => {
-      checkIsolatedPoolsComptrollers();
+      const USDT0_SUPPLIER = "0x907C912A74a0fF7bf83968b271ED7Bd3333E4559";
+      checkIsolatedPoolsComptrollers({
+        [COMPTROLLER_CORE]: USDT0_SUPPLIER,
+      });
     });
   });
 });

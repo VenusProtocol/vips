@@ -103,11 +103,91 @@ export const USDTOMarket: Market = {
   },
 };
 
-export const vip514 = async () => {
+export const vip513 = async () => {
   const meta = {
     version: "v2",
-    title: "VIP-514 [Unichain] add WBTC and USDTO markets to the Core pool",
-    description: "",
+    title: "VIP-513 [Unichain] Add WBTC and USD₮0 markets to the Core pool",
+    description: `#### Summary
+
+If passed, this VIP will add markets for [WBTC](https://uniscan.xyz/address/0x0555e30da8f98308edb960aa94c0db47230d2b9c) and [USD₮0](https://uniscan.xyz/token/0x9151434b16b9763660705744891fa906f660ecc5) to the Core pool on Unichain, following the Community proposals:
+
+- [Proposal: Add support for WBTC to the Venus Core Pool on Unichain](https://community.venus.io/t/proposal-add-support-for-wbtc-to-the-venus-core-pool-on-unichain/5134) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x858565d6f4fa73652f26796e9d7fc00750f2029ea6e094ed47f24708b23a585c))
+- [[UNICHAIN] Add Support for USD₮0 Market on Venus Core Pool](https://community.venus.io/t/unichain-add-support-for-usd-0-market-on-venus-core-pool/5104) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xc0aa772f95bddaa21743ad49bf8a0345af2089c12eb6a504457d23e133f58823))
+
+#### Description
+
+#### Risk parameters for WBTC
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/proposal-add-support-for-wbtc-to-the-venus-core-pool-on-unichain/5134/4), the risk parameters for the new market are:
+
+Underlying token: [WBTC](https://uniscan.xyz/address/0x0555e30da8f98308edb960aa94c0db47230d2b9c)
+
+- Borrow cap: 40 WBTC
+- Supply cap: 400 WBTC
+- Collateral factor: 77%
+- Liquidation threshold: 80%
+- Reserve factor: 20%
+
+Interest rate curve for the new market:
+
+- kink: 45%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 200%
+
+**Oracles configuration for WBTC**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Unichain](https://uniscan.xyz/address/0x86D04d6FE928D888076851122dc6739551818f7E) is used for WBTC, using [price feed provided by RedStone](https://uniscan.xyz/address/0xc44be6D00307c3565FDf753e852Fc003036cBc13) for the MAIN oracle.
+
+#### Risk parameters for USD₮0
+
+Following [Chaos Labs recommendations](https://community.venus.io/t/unichain-add-support-for-usd-0-market-on-venus-core-pool/5104/5), the risk parameters for the new market are:
+
+Underlying token: [USD₮0](https://uniscan.xyz/token/0x9151434b16b9763660705744891fa906f660ecc5)
+
+- Borrow cap: 45M USD₮0
+- Supply cap: 50M USD₮0
+- Collateral factor: 77%
+- Liquidation threshold: 80%
+- Reserve factor: 10%
+
+Interest rate curve for the new market:
+
+- Kink 1: 80%
+- Base: 0%
+- Multiplier: 10%
+- Kink 2: 90%
+- Multiplier 2: 70%
+- Jump Multiplier: 80%
+
+**Oracles configuration for USD₮0**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [Unichain](https://uniscan.xyz/address/0x86D04d6FE928D888076851122dc6739551818f7E) is used for USD₮0, using [price feed provided by RedStone](https://uniscan.xyz/address/0x58fa68A373956285dDfb340EDf755246f8DfCA16) for the MAIN oracle.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on Unichain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same markets have been deployed to testnet, and used in the Venus Protocol testnet deployment
+
+#### Deployed contracts
+
+Unichain mainnet:
+
+- vWBTC_Core: [0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5](https://uniscan.xyz/address/0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5)
+- vUSD₮0_Core: [0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD](https://uniscan.xyz/address/0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD)
+
+Unichain Sepolia testnet:
+
+- vWBTC_Core: [0x3aaa754E66fcACd84b01Ae5493c922AF8D4E77c7](https://sepolia.uniscan.xyz/address/0x3aaa754E66fcACd84b01Ae5493c922AF8D4E77c7)
+- vUSD₮0_Core: [0x02A5E844C4B0FF5a587B4EE239BEe7c479530447](https://sepolia.uniscan.xyz/address/0x02A5E844C4B0FF5a587B4EE239BEe7c479530447)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/570)
+- Deployment of WBTC and USD₮0 to Unichain Sepolia testnet
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -262,4 +342,4 @@ export const vip514 = async () => {
   );
 };
 
-export default vip514;
+export default vip513;
