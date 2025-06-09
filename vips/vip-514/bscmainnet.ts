@@ -99,7 +99,7 @@ export const USDTOMarket: Market = {
   },
   initialSupply: {
     amount: parseUnits("102.84258", 6),
-    vTokensToBurn: parseUnits("102.84258", 6), // 100%
+    vTokensToBurn: parseUnits("102.84258", 8), // 100%
   },
 };
 

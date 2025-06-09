@@ -234,10 +234,7 @@ forking(18443512, async () => {
       );
     });
     it("check isolated pools", async () => {
-      const USDT0_SUPPLIER = "0x907C912A74a0fF7bf83968b271ED7Bd3333E4559";
-      checkIsolatedPoolsComptrollers({
-        [COMPTROLLER_CORE]: USDT0_SUPPLIER,
-      });
+      checkIsolatedPoolsComptrollers();
     });
   });
 });
