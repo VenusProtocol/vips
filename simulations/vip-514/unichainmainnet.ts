@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip512, {
+import vip514, {
   COMPTROLLER_CORE,
   USDTO,
   USDTOMarket,
@@ -17,7 +17,7 @@ import vip512, {
   WBTC,
   WBTCMarket,
   WBTC_REDSTONE_FEED,
-} from "../../vips/vip-512/bscmainnet";
+} from "../../vips/vip-514/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
@@ -71,7 +71,7 @@ forking(18443512, async () => {
     checkVToken(USDTOMarket.vToken.address, USDTOMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip512());
+  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip514());
 
   describe("Post-Execution state", () => {
     let vWBTC: Contract;
