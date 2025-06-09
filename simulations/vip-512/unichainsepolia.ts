@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { setRedstonePrice } from "src/utils";
 import { NORMAL_TIMELOCK, forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIsolatedPoolsComptrollers";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -15,6 +17,10 @@ const VWBTC_IRM = "0x15d00fe9605D69c818Fe78627FF9367DcC9E363B";
 const VUSDTO_IRM = "0x208DedbBc74525764DE7521C12B53CcEd0FCcA4B";
 const PSR = "0xcCcFc9B37A5575ae270352CC85D55C3C52a646C0";
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
+
+const { unichainsepolia } = NETWORK_ADDRESSES;
+const WETH = "0x4200000000000000000000000000000000000006";
+const WETH_REDSTONE_FEED = "0xd9c93081210dFc33326B2af4C2c11848095E6a9a";
 
 forking(22338935, async () => {
   let comptroller: Contract;
@@ -34,6 +40,14 @@ forking(22338935, async () => {
       vWBTC = await ethers.getContractAt(VTOKEN_ABI, WBTCMarket.vToken.address);
       vUSDTO = await ethers.getContractAt(VTOKEN_ABI, USDTOMarket.vToken.address);
       comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER_CORE);
+
+      // Required for the checkIsolatedPoolsComptrollers call, where WETH will be borrowed
+      await setRedstonePrice(
+        unichainsepolia.REDSTONE_ORACLE,
+        WETH,
+        WETH_REDSTONE_FEED,
+        unichainsepolia.NORMAL_TIMELOCK,
+      );
     });
 
     describe("PoolRegistry state", () => {

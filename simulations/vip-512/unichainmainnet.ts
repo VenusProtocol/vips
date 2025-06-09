@@ -30,6 +30,9 @@ const PSR = "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242";
 const ONE_YEAR = 31536000; // 1 year in seconds
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
+const WETH = "0x4200000000000000000000000000000000000006";
+const WETH_REDSTONE_FEED = "0xe8D9FbC10e00ecc9f0694617075fDAF657a76FB2";
+
 forking(18443512, async () => {
   let comptroller: Contract;
   let oracle: Contract;
@@ -51,6 +54,15 @@ forking(18443512, async () => {
       unichainmainnet.NORMAL_TIMELOCK,
       ONE_YEAR,
       { tokenDecimals: 6 },
+    );
+
+    // Required for the checkIsolatedPoolsComptrollers call, where WETH will be borrowed
+    await setRedstonePrice(
+      unichainmainnet.REDSTONE_ORACLE,
+      WETH,
+      WETH_REDSTONE_FEED,
+      unichainmainnet.NORMAL_TIMELOCK,
+      ONE_YEAR,
     );
   });
 
@@ -222,7 +234,10 @@ forking(18443512, async () => {
       );
     });
     it("check isolated pools", async () => {
-      checkIsolatedPoolsComptrollers();
+      const USDT0_SUPPLIER = "0x907C912A74a0fF7bf83968b271ED7Bd3333E4559";
+      checkIsolatedPoolsComptrollers({
+        [COMPTROLLER_CORE]: USDT0_SUPPLIER,
+      });
     });
   });
 });

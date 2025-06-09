@@ -99,6 +99,10 @@ export const USDTOMarket: Market = {
   },
 };
 
+const STALE_PERIOD_26H = 60 * 60 * 26; // 26 hours (pricefeeds with heartbeat of 24 hr)
+const WETH = "0x4200000000000000000000000000000000000006";
+const WETH_REDSTONE_FEED = "0xd9c93081210dFc33326B2af4C2c11848095E6a9a";
+
 const vip512 = () => {
   const meta = {
     version: "v2",
@@ -122,6 +126,12 @@ const vip512 = () => {
         target: unichainsepolia.REDSTONE_ORACLE,
         signature: "setDirectPrice(address,uint256)",
         params: [USDTO.address, parseUnits("1", 18)],
+        dstChainId: LzChainId.unichainsepolia,
+      },
+      {
+        target: unichainsepolia.REDSTONE_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[WETH, WETH_REDSTONE_FEED, STALE_PERIOD_26H]],
         dstChainId: LzChainId.unichainsepolia,
       },
       {
