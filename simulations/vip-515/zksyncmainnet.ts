@@ -143,7 +143,7 @@ forking(BLOCK_NUMBER, async () => {
       const finalPsrBalance = await rewardToken.balanceOf(PSR_ZKSYNC);
 
       // reward tokens transfered to PSR
-      expect(finalPsrBalance).to.be.gte(initialPsrBalance); 
+      expect(finalPsrBalance).to.be.gte(initialPsrBalance);
     });
   });
 });
