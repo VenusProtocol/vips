@@ -12,7 +12,7 @@ export const vip514 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
     title: "VIP-514 [BNB Chain] Risk Parameters Adjustments (vxSolvBTC)",
-    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Risk Parameter Updates - 06/XX/25](https://community.venus.io/):
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Risk Parameter Updates - 06/09/25](https://community.venus.io/):
 
 - [vxSolvBTC (Core pool)](https://bscscan.com/address/${vxSolvBTC_BSC}): increase the supply cap from 100 vxSolvBTC to 150 vxSolvBTC
 
@@ -35,7 +35,7 @@ Complete analysis and details of these recommendations are available in the abov
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 

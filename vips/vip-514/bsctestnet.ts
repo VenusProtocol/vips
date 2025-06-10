@@ -35,7 +35,7 @@ Complete analysis and details of these recommendations are available in the abov
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 
