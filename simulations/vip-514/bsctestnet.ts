@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { vip514, vxSolvBTC_BSC, vxSolvBTC_BSC_SUPPLY_CAP } from "../../vips/vip-514/bscmainnet";
+import { vip514, vxSolvBTC_BSC, vxSolvBTC_BSC_SUPPLY_CAP } from "../../vips/vip-514/bsctestnet";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
