@@ -72,7 +72,7 @@ export const processGnosisTxBuilder = async () => {
 
   const result = await processJson(batchJson);
   if (result && network.name === "bscmainnet") {
-    await fs.writeFile("accrueInterestGnosisTXBuilder.json", result);
+    await fs.writeFile("accrueInterestGnosisTXBuilder2.json", result);
   }
   if ((network.name === "zksyncsepolia" || network.name === "zksyncmainnet") && result) {
     await fs.writeFile("gnosisTXBuilder.json", result);
