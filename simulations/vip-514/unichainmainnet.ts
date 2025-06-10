@@ -9,7 +9,7 @@ import { checkIsolatedPoolsComptrollers } from "src/vip-framework/checks/checkIs
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate, checkTwoKinksInterestRateIL } from "src/vip-framework/checks/interestRateModel";
 
-import vip513, {
+import vip514, {
   COMPTROLLER_CORE,
   USDTO,
   USDTOMarket,
@@ -17,7 +17,7 @@ import vip513, {
   WBTC,
   WBTCMarket,
   WBTC_REDSTONE_FEED,
-} from "../../vips/vip-513/bscmainnet";
+} from "../../vips/vip-514/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
@@ -33,7 +33,7 @@ const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a yea
 const WETH = "0x4200000000000000000000000000000000000006";
 const WETH_REDSTONE_FEED = "0xe8D9FbC10e00ecc9f0694617075fDAF657a76FB2";
 
-forking(18443512, async () => {
+forking(18823411, async () => {
   let comptroller: Contract;
   let oracle: Contract;
 
@@ -71,7 +71,7 @@ forking(18443512, async () => {
     checkVToken(USDTOMarket.vToken.address, USDTOMarket.vToken);
   });
 
-  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip513());
+  testForkedNetworkVipCommands("add WBTC and USDTO market", await vip514());
 
   describe("Post-Execution state", () => {
     let vWBTC: Contract;
@@ -194,12 +194,12 @@ forking(18443512, async () => {
     describe("Prices", () => {
       it("get correct price from oracle for WBTC", async () => {
         const price = await oracle.getUnderlyingPrice(WBTCMarket.vToken.address);
-        expect(price).to.equal(parseUnits("1028534353071000", 18));
+        expect(price).to.equal(parseUnits("1088158746611600", 18));
       });
 
       it("get correct price from oracle for USDTO", async () => {
         const price = await oracle.getUnderlyingPrice(USDTOMarket.vToken.address);
-        expect(price).to.equal(parseUnits("1000357360000", 18));
+        expect(price).to.equal(parseUnits("1000066690000", 18));
       });
     });
 

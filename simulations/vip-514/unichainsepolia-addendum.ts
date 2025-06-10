@@ -5,13 +5,13 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip513, { USDC, USDT } from "../../vips/vip-513/bsctestnet-addendum";
+import vip514, { USDC, USDT } from "../../vips/vip-514/bsctestnet-addendum";
 import PRICE_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { unichainsepolia } = NETWORK_ADDRESSES;
 
 forking(22338935, async () => {
-  testForkedNetworkVipCommands("Configure price feed for USDT and USDC on Unichain", await vip513());
+  testForkedNetworkVipCommands("Configure price feed for USDT and USDC on Unichain", await vip514());
 
   describe("Post-Execution state", () => {
     let oracle: Contract;

@@ -8,7 +8,7 @@ const { unichainsepolia } = NETWORK_ADDRESSES;
 export const USDT = "0x7bc1b67fde923fd3667Fde59684c6c354C8EbFdA";
 export const USDC = "0xf16d4774893eB578130a645d5c69E9c4d183F3A5";
 
-const vip513 = () => {
+const vip514 = () => {
   const meta = {
     version: "v2",
     title: "Fix USDC and USDT price feed on Unichain Sepolia",
@@ -39,4 +39,4 @@ const vip513 = () => {
   );
 };
 
-export default vip513;
+export default vip514;
