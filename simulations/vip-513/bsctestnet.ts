@@ -5,14 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { vip514, vxSolvBTC_BSC, vxSolvBTC_BSC_SUPPLY_CAP } from "../../vips/vip-514/bscmainnet";
+import { vip513, vxSolvBTC_BSC, vxSolvBTC_BSC_SUPPLY_CAP } from "../../vips/vip-513/bsctestnet";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(51199926, async () => {
+forking(54284238, async () => {
   const provider = ethers.provider;
-  const coreComptroller = new ethers.Contract(bscmainnet.UNITROLLER, CORE_COMPTROLLER_ABI, provider);
+  const coreComptroller = new ethers.Contract(bsctestnet.UNITROLLER, CORE_COMPTROLLER_ABI, provider);
 
   describe("Pre-VIP behaviour", async () => {
     it("check vxSolvBTC supply cap", async () => {
@@ -23,7 +23,7 @@ forking(51199926, async () => {
     });
   });
 
-  testVip("VIP-512", await vip514(), {
+  testVip("VIP-513", await vip513(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },

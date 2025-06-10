@@ -8,19 +8,19 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 export const vxSolvBTC_BSC = "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e";
 export const vxSolvBTC_BSC_SUPPLY_CAP = parseUnits("150", 18);
 
-export const vip514 = async () => {
+export const vip513 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-514 [BNB Chain] Risk Parameters Adjustments (vxSolvBTC)",
-    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Risk Parameter Updates - 06/09/25](https://community.venus.io/):
+    title: "VIP-513 [BNB Chain] Risk Parameters Adjustments (xSolvBTC)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Risk Parameter Updates - 06/10/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-06-10-25/5143):
 
-- [vxSolvBTC (Core pool)](https://testnet.bscscan.com/address/${vxSolvBTC_BSC}): increase the supply cap from 100 vxSolvBTC to 150 vxSolvBTC
+- [xSolvBTC (Core pool)](https://app.venus.io/#/core-pool/market/0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e?chainId=56): increase the Supply Cap, from 100 xSolvBTC to 150 xSolvBTC
 
-Complete analysis and details of these recommendations are available in the above publications.
+Complete analysis and details of this recommendation are available in the above publication.
 
+#### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/)
-    `,
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/574)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -39,4 +39,4 @@ Complete analysis and details of these recommendations are available in the abov
   );
 };
 
-export default vip514;
+export default vip513;
