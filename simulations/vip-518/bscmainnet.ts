@@ -12,13 +12,13 @@ import vip518, {
   DEFAULT_PROXY_ADMIN,
   REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE_IMPLEMENTATION,
-} from "../../vips/vip-518/bsctestnet";
+} from "../../vips/vip-518/bscmainnet";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(54422799, async () => {
+forking(51270995, async () => {
   const provider = ethers.provider;
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
 
@@ -31,22 +31,22 @@ forking(54422799, async () => {
   describe("Post-VIP behaviour", async () => {
     describe("New implementations", () => {
       it("Resilient oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(bsctestnet.RESILIENT_ORACLE)).to.equal(
+        expect(await proxyAdmin.getProxyImplementation(bscmainnet.RESILIENT_ORACLE)).to.equal(
           RESILIENT_ORACLE_IMPLEMENTATION,
         );
       });
       it("Chainlink oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(bsctestnet.CHAINLINK_ORACLE)).to.equal(
+        expect(await proxyAdmin.getProxyImplementation(bscmainnet.CHAINLINK_ORACLE)).to.equal(
           CHAINLINK_ORACLE_IMPLEMENTATION,
         );
       });
       it("RedStone oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(bsctestnet.REDSTONE_ORACLE)).to.equal(
+        expect(await proxyAdmin.getProxyImplementation(bscmainnet.REDSTONE_ORACLE)).to.equal(
           REDSTONE_ORACLE_IMPLEMENTATION,
         );
       });
       it("Binance oracle", async () => {
-        expect(await proxyAdmin.getProxyImplementation(bsctestnet.BINANCE_ORACLE)).to.equal(
+        expect(await proxyAdmin.getProxyImplementation(bscmainnet.BINANCE_ORACLE)).to.equal(
           BINANCE_ORACLE_IMPLEMENTATION,
         );
       });
