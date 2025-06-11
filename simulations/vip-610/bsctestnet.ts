@@ -16,10 +16,12 @@ import {
   BSCTESTNET_GOVERNANCE_BRAVO,
   BSCTESTNET_NEW_PLP_IMPLEMENTATION,
   BSCTESTNET_NEW_PRIME_IMPLEMENTATION,
+  BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION,
   BSCTESTNET_NEW_VAI_IMPLEMENTATION,
   BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION,
   BSCTESTNET_PLP_PROXY,
   BSCTESTNET_PRIME_PROXY,
+  BSCTESTNET_SHORTFALL_PROXY,
   BSCTESTNET_USDC,
   BSCTESTNET_USDC_PER_BLOCK_REWARD,
   BSCTESTNET_USDT,
@@ -48,11 +50,12 @@ import PROXY_ADMIN_ABI from "./abi/defaultProxyAdmin.json";
 import DELEGATE_ABI from "./abi/governorBravodelegate.json";
 import PROXY_ABI from "./abi/manualProxy.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
+import SHORTFALL_ABI from "./abi/shortfall.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-forking(54198173, async () => {
+forking(54418106, async () => {
   let plp: Contract;
   let xvsVault: Contract;
   let comptroller: Contract;
@@ -65,6 +68,7 @@ forking(54198173, async () => {
   let vslisBeacon: Contract;
   let vplanetBeacon: Contract;
   let delegate: Contract;
+  let shortfall: Contract;
 
   before(async () => {
     plp = await ethers.getContractAt(PLP_ABI, BSCTESTNET_PLP_PROXY);
@@ -79,6 +83,7 @@ forking(54198173, async () => {
     vplanetBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, BSCTESTNET_VPLANET_BEACON);
     poolRegistry = await ethers.getContractAt(POOL_REGISTRY_ABI, NETWORK_ADDRESSES.bsctestnet.POOL_REGISTRY);
     delegate = await ethers.getContractAt(DELEGATE_ABI, BSCTESTNET_GOVERNANCE_BRAVO);
+    shortfall = await ethers.getContractAt(SHORTFALL_ABI, BSCTESTNET_SHORTFALL_PROXY);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -150,6 +155,13 @@ forking(54198173, async () => {
         });
         it("VAI Controller should have block rate of 21024000", async () => {
           expect(await vaicontroller.getBlocksPerYear()).equals(21024000);
+        });
+      });
+      describe("Shortfall", () => {
+        it("Shortfall should not point to new impl", async () => {
+          expect(await proxyAdmin.getProxyImplementation(BSCTESTNET_SHORTFALL_PROXY)).not.equals(
+            BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION,
+          );
         });
       });
       describe("XVS Vault", () => {
@@ -254,6 +266,16 @@ forking(54198173, async () => {
         });
         it("VAI Controller should have block rate of 42048000", async () => {
           expect(await vaicontroller.getBlocksPerYear()).equals(42048000);
+        });
+      });
+      describe("Shortfall", () => {
+        it("Shortfall should point to new impl", async () => {
+          expect(await proxyAdmin.getProxyImplementation(BSCTESTNET_SHORTFALL_PROXY)).equals(
+            BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION,
+          );
+        });
+        it("Shortfall should have block rate of 42048000", async () => {
+          expect(await shortfall.blocksOrSecondsPerYear()).equals(42048000);
         });
       });
       describe("XVS Vault", async () => {

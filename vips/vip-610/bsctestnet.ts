@@ -31,6 +31,8 @@ export const BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0xaaCe28600A02E42198AfEe60A
 export const BSCTESTNET_VSLIS_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C23A";
 export const BSCTESTNET_VPLANET_BEACON = "0x6f48cf8e94562b5c37be1d0b6c50c845118cc498";
 export const BSCTESTNET_GOVERNANCE_BRAVO = "0x5573422A1a59385C247ec3a66B93B7C08eC2f8f2";
+export const BSCTESTNET_SHORTFALL_PROXY = "0x503574a82fE2A9f968d355C8AAc1Ba0481859369";
+export const BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION = "0xdD939b73C40cE3fe540bE46cA378f74196Dc86b7";
 
 // Doubling the previous value, to be reviewed
 export const MIN_VOTING_PERIOD = 100 * 2;
@@ -277,6 +279,11 @@ export const vip610 = () => {
           PREVIOUS_XVS_EMISSIONS.map(s => BigNumber.from(s.supplySideSpeed).div(2).toString()),
           PREVIOUS_XVS_EMISSIONS.map(s => BigNumber.from(s.borrowSideSpeed).div(2).toString()),
         ],
+      },
+      {
+        target: BSCTESTNET_DEFAULT_PROXY_ADMIN,
+        signature: "upgrade(address,address)",
+        params: [BSCTESTNET_SHORTFALL_PROXY, BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION],
       },
     ],
     meta,
