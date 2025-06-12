@@ -1,3 +1,4 @@
+import { BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -6,8 +7,14 @@ import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
+export const Actions = {
+  MINT: 0,
+  BORROW: 2,
+  ENTER_MARKET: 7,
+};
+
 export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
-export const PROTOCOL_SHARE_RESERVE_BSC = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+export const CONVERSION_INCENTIVE = 1e14;
 
 export const asBNBMarketSpec = {
   vToken: {
@@ -71,12 +78,12 @@ export const USDFMarketSpec = {
   },
   initialSupply: {
     amount: parseUnits("100", 18), // 100 USDF
-    vTokensToBurn: parseUnits("100", 18), // 100 vUSDF
+    vTokensToBurn: parseUnits("100", 8), // 100 vUSDF
     vTokenReceiver: bsctestnet.VTREASURY,
   },
   riskParameters: {
     supplyCap: parseUnits("30000000", 18), // 30,000,000 USDF
-    borrowCap: parseUnits("27000000", 18), // 0 USDF
+    borrowCap: parseUnits("27000000", 18), // 27,000,000 USDF
     collateralFactor: parseUnits("0.6", 18),
     reserveFactor: parseUnits("0.1", 18),
   },
@@ -88,14 +95,65 @@ export const USDFMarketSpec = {
   },
 };
 
+const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
+const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
+const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
+const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
+const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
+
+export const converterBaseAssets = {
+  [RISK_FUND_CONVERTER]: USDT,
+  [USDT_PRIME_CONVERTER]: USDT,
+  [USDC_PRIME_CONVERTER]: USDC,
+  [BTCB_PRIME_CONVERTER]: BTCB,
+  [ETH_PRIME_CONVERTER]: ETH,
+  [XVS_VAULT_CONVERTER]: XVS,
+};
+
+const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
+  enum ConversionAccessibility {
+    NONE = 0,
+    ALL = 1,
+    ONLY_FOR_CONVERTERS = 2,
+    ONLY_FOR_USERS = 3,
+  }
+
+  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
+    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
+    return {
+      target: converter,
+      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
+      params: [baseAsset, fromAssets, conversionConfigs],
+    };
+  });
+};
+
 export const vip514 = (overrides: { maxStalePeriod?: number }) => {
   const meta: ProposalMeta = {
     version: "v2",
     title: "VIP-514",
-    description: "",
-    forDescription: "",
-    againstDescription: "",
-    abstainDescription: "",
+    description: `If passed, this VIP will enable [BNB](https://bscscan.com/address/0xA07c5b74C9B40447a954e1466938b865b6BBea36) and [FDUSD](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba) markets on the Core pool (BNB Chain) as Prime Markets, following these community posts:
+
+- [VRC: Enable BNB as a Prime Market on BNB Chain](https://community.venus.io/t/vrc-enable-bnb-as-a-prime-market-on-bnb-chain/5127) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb262d9574010ffbe2981bdaf96f26d9cb6769b4f048fb654b4e041f1d1d5f222))
+- [Proposal: Add FDUSD as a Prime Market to the Venus Core Pool on BNB Chain](https://community.venus.io/t/proposal-add-fdusd-as-a-prime-market-to-the-venus-core-pool-on-bnb-chain/4989) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xc330c51fa8db6d1485290eacfcb49a493d9ebdf3041dd87be6b5da54a51ae2a7))
+
+Moreover, the [BTCB](https://bscscan.com/address/0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B) and [ETH](https://bscscan.com/address/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8) markets will be removed from the list of Prime Markets. The new reward distribution will be:
+
+Complete analysis and details of these changes are available in the above publications.
+
+**References**:
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/598)
+- Execution on testnet ([BNB Chain](https://testnet.bscscan.com/tx/0x))`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   const redstoneStalePeriod = overrides?.maxStalePeriod ?? USDFMarketSpec.priceFeed.redstone.stalePeriod;
@@ -145,7 +203,7 @@ export const vip514 = (overrides: { maxStalePeriod?: number }) => {
       {
         target: asBNBMarketSpec.vToken.address,
         signature: "setProtocolShareReserve(address)",
-        params: [PROTOCOL_SHARE_RESERVE_BSC],
+        params: [bsctestnet.PROTOCOL_SHARE_RESERVE],
       },
       {
         target: asBNBMarketSpec.vToken.address,
@@ -174,7 +232,7 @@ export const vip514 = (overrides: { maxStalePeriod?: number }) => {
       },
       {
         target: asBNBMarketSpec.vToken.address,
-        signature: "mintBehalf(address,uint256)", // TODO: Ask why some vips use `mintBehalf` and others use `mint`
+        signature: "mintBehalf(address,uint256)",
         params: [bsctestnet.NORMAL_TIMELOCK, asBNBMarketSpec.initialSupply.amount],
       },
       {
@@ -211,7 +269,7 @@ export const vip514 = (overrides: { maxStalePeriod?: number }) => {
       {
         target: USDFMarketSpec.vToken.address,
         signature: "setProtocolShareReserve(address)",
-        params: [PROTOCOL_SHARE_RESERVE_BSC],
+        params: [bsctestnet.PROTOCOL_SHARE_RESERVE],
       },
       {
         target: USDFMarketSpec.vToken.address,
@@ -240,7 +298,7 @@ export const vip514 = (overrides: { maxStalePeriod?: number }) => {
       },
       {
         target: USDFMarketSpec.vToken.address,
-        signature: "mintBehalf(address,uint256)", // TODO: Ask why some vips use `mintBehalf` and others use `mint`
+        signature: "mintBehalf(address,uint256)",
         params: [bsctestnet.NORMAL_TIMELOCK, USDFMarketSpec.initialSupply.amount],
       },
       {
@@ -252,6 +310,14 @@ export const vip514 = (overrides: { maxStalePeriod?: number }) => {
         target: USDFMarketSpec.vToken.address,
         signature: "transfer(address,uint256)",
         params: [USDFMarketSpec.initialSupply.vTokenReceiver, USDFMarketSpec.initialSupply.vTokensToBurn],
+      },
+      // Configure converters for USDF
+      ...configureConverters([USDFMarketSpec.vToken.underlying.address], CONVERSION_INCENTIVE),
+      // Pause asBNB market
+      {
+        target: asBNBMarketSpec.vToken.comptroller,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[asBNBMarketSpec.vToken.address], [2], true],
       },
     ],
     meta,

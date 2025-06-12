@@ -1,199 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "timeBased_",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "blocksPerYear_",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "maxBorrowRateMantissa_",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "actualAddAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "AddReservesFactorFreshCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "BorrowCashNotAvailable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "BorrowFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "DelegateNotApproved",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ForceLiquidateBorrowUnauthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "HealBorrowUnauthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidBlocksPerYear",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidTimeBasedConfiguration",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "errorCode",
-        "type": "uint256"
-      }
-    ],
-    "name": "LiquidateAccrueCollateralInterestFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateCloseAmountIsUintMax",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateCloseAmountIsZero",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateCollateralFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateLiquidatorIsBorrower",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "LiquidateSeizeLiquidatorIsBorrower",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "MintFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ProtocolSeizeShareTooBig",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "RedeemFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "RedeemTransferOutNotPossible",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReduceReservesCashNotAvailable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReduceReservesCashValidation",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReduceReservesFreshCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "RepayBorrowFreshnessCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetInterestRateModelFreshCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetReserveFactorBoundsCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "SetReserveFactorFreshCheck",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "TransferNotAllowed",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "sender",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "calledContract",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "methodSignature",
-        "type": "string"
-      }
-    ],
-    "name": "Unauthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ZeroAddressNotAllowed",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -253,57 +59,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "badDebtDelta",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "badDebtOld",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "badDebtNew",
-        "type": "uint256"
-      }
-    ],
-    "name": "BadDebtIncreased",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "badDebtOld",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "badDebtNew",
-        "type": "uint256"
-      }
-    ],
-    "name": "BadDebtRecovered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "borrower",
         "type": "address"
@@ -334,25 +90,25 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "payer",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "error",
+        "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "repayAmount",
+        "name": "info",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "detail",
         "type": "uint256"
       }
     ],
-    "name": "HealBorrow",
+    "name": "Failure",
     "type": "event"
   },
   {
@@ -360,25 +116,12 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint8",
-        "name": "version",
-        "type": "uint8"
-      }
-    ],
-    "name": "Initialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "liquidator",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "borrower",
         "type": "address"
@@ -390,7 +133,7 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "vTokenCollateral",
         "type": "address"
@@ -409,7 +152,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "minter",
         "type": "address"
@@ -429,7 +172,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "accountBalance",
+        "name": "totalSupply",
         "type": "uint256"
       }
     ],
@@ -442,13 +185,50 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "oldAccessControlManager",
+        "name": "payer",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "address",
-        "name": "newAccessControlManager",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "mintAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "mintTokens",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalSupply",
+        "type": "uint256"
+      }
+    ],
+    "name": "MintBehalf",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAccessControlAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAccessControlAddress",
         "type": "address"
       }
     ],
@@ -459,13 +239,32 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldAdmin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "NewAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "contract ComptrollerInterface",
         "name": "oldComptroller",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract ComptrollerInterface",
         "name": "newComptroller",
         "type": "address"
@@ -478,13 +277,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract InterestRateModel",
         "name": "oldInterestRateModel",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "contract InterestRateModel",
         "name": "newInterestRateModel",
         "type": "address"
@@ -498,18 +297,18 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "oldProtocolSeizeShareMantissa",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "oldPendingAdmin",
+        "type": "address"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "newProtocolSeizeShareMantissa",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "newPendingAdmin",
+        "type": "address"
       }
     ],
-    "name": "NewProtocolSeizeShare",
+    "name": "NewPendingAdmin",
     "type": "event"
   },
   {
@@ -537,13 +336,13 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "oldReduceReservesBlockOrTimestampDelta",
+        "name": "oldReduceReservesBlockDelta",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "newReduceReservesBlockOrTimestampDelta",
+        "name": "newReduceReservesBlockDelta",
         "type": "uint256"
       }
     ],
@@ -573,89 +372,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "oldShortfall",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newShortfall",
-        "type": "address"
-      }
-    ],
-    "name": "NewShortfallContract",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferStarted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "ProtocolSeize",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "redeemer",
         "type": "address"
@@ -675,7 +392,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "accountBalance",
+        "name": "totalSupply",
         "type": "uint256"
       }
     ],
@@ -686,13 +403,38 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
+        "internalType": "address",
+        "name": "redeemer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "redeemTokens",
+        "type": "uint256"
+      }
+    ],
+    "name": "RedeemFee",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "payer",
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "borrower",
         "type": "address"
@@ -723,7 +465,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "benefactor",
         "type": "address"
@@ -748,7 +490,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "address",
         "name": "protocolShareReserve",
         "type": "address"
@@ -766,20 +508,7 @@
         "type": "uint256"
       }
     ],
-    "name": "SpreadReservesReduced",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "SweepToken",
+    "name": "ReservesReduced",
     "type": "event"
   },
   {
@@ -808,8 +537,9 @@
     "type": "event"
   },
   {
+    "constant": false,
     "inputs": [],
-    "name": "NO_ERROR",
+    "name": "_acceptAdmin",
     "outputs": [
       {
         "internalType": "uint256",
@@ -817,30 +547,153 @@
         "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "acceptOwnership",
-    "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "addAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "_addReserves",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "reduceAmount_",
+        "type": "uint256"
+      }
+    ],
+    "name": "_reduceReserves",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "contract ComptrollerInterface",
+        "name": "newComptroller",
+        "type": "address"
+      }
+    ],
+    "name": "_setComptroller",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "contract InterestRateModel",
+        "name": "newInterestRateModel_",
+        "type": "address"
+      }
+    ],
+    "name": "_setInterestRateModel",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "newPendingAdmin",
+        "type": "address"
+      }
+    ],
+    "name": "_setPendingAdmin",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newReserveFactorMantissa_",
+        "type": "uint256"
+      }
+    ],
+    "name": "_setReserveFactor",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "accessControlManager",
     "outputs": [
       {
-        "internalType": "contract IAccessControlManagerV8",
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "accrualBlockNumber",
     "outputs": [
@@ -850,10 +703,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [],
     "name": "accrueInterest",
     "outputs": [
@@ -863,23 +718,27 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
+    "constant": true,
+    "inputs": [],
+    "name": "admin",
+    "outputs": [
       {
-        "internalType": "uint256",
-        "name": "addAmount",
-        "type": "uint256"
+        "internalType": "address payable",
+        "name": "",
+        "type": "address"
       }
     ],
-    "name": "addReserves",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -900,10 +759,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -924,36 +785,12 @@
         "type": "bool"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "badDebt",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "recoveredAmount_",
-        "type": "uint256"
-      }
-    ],
-    "name": "badDebtRecovered",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -969,10 +806,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -988,23 +827,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "blocksOrSecondsPerYear",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1020,10 +848,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1039,10 +869,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1058,10 +890,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1082,10 +916,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "borrowIndex",
     "outputs": [
@@ -1095,10 +931,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "borrowRatePerBlock",
     "outputs": [
@@ -1108,10 +946,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "comptroller",
     "outputs": [
@@ -1121,10 +961,12 @@
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "decimals",
     "outputs": [
@@ -1134,34 +976,12 @@
         "type": "uint8"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "subtractedValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "decreaseAllowance",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
     "inputs": [],
     "name": "exchangeRateCurrent",
     "outputs": [
@@ -1171,10 +991,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "exchangeRateStored",
     "outputs": [
@@ -1184,43 +1006,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "liquidator",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "repayAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "contract VTokenInterface",
-        "name": "vTokenCollateral",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "skipLiquidityCheck",
-        "type": "bool"
-      }
-    ],
-    "name": "forceLiquidateBorrow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [
       {
         "internalType": "address",
@@ -1232,42 +1023,31 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "error",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "vTokenBalance",
+        "name": "",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "borrowBalance",
+        "name": "",
         "type": "uint256"
       },
-      {
-        "internalType": "uint256",
-        "name": "exchangeRate",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getBlockNumberOrTimestamp",
-    "outputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "getCash",
     "outputs": [
@@ -1277,57 +1057,27 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "payer",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "borrower",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "repayAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "healBorrow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "addedValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "increaseAllowance",
+    "constant": true,
+    "inputs": [],
+    "name": "implementation",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "address",
         "name": "",
-        "type": "bool"
+        "type": "address"
       }
     ],
-    "stateMutability": "nonpayable",
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1363,46 +1113,56 @@
         "internalType": "uint8",
         "name": "decimals_",
         "type": "uint8"
-      },
-      {
-        "internalType": "address",
-        "name": "admin_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "accessControlManager_",
-        "type": "address"
-      },
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "shortfall",
-            "type": "address"
-          },
-          {
-            "internalType": "address payable",
-            "name": "protocolShareReserve",
-            "type": "address"
-          }
-        ],
-        "internalType": "struct VTokenInterface.RiskManagementInit",
-        "name": "riskManagement",
-        "type": "tuple"
-      },
-      {
-        "internalType": "uint256",
-        "name": "reserveFactorMantissa_",
-        "type": "uint256"
       }
     ],
     "name": "initialize",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "contract ComptrollerInterface",
+        "name": "comptroller_",
+        "type": "address"
+      },
+      {
+        "internalType": "contract InterestRateModel",
+        "name": "interestRateModel_",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialExchangeRateMantissa_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "name_",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "symbol_",
+        "type": "string"
+      },
+      {
+        "internalType": "uint8",
+        "name": "decimals_",
+        "type": "uint8"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "interestRateModel",
     "outputs": [
@@ -1412,23 +1172,12 @@
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "isTimeBased",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "isVToken",
     "outputs": [
@@ -1438,10 +1187,12 @@
         "type": "bool"
       }
     ],
-    "stateMutability": "pure",
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1467,10 +1218,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1486,14 +1239,16 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
-        "name": "minter",
+        "name": "receiver",
         "type": "address"
       },
       {
@@ -1510,10 +1265,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "name",
     "outputs": [
@@ -1523,49 +1280,27 @@
         "type": "string"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
-    "name": "owner",
+    "name": "pendingAdmin",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "address payable",
         "name": "",
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "pendingOwner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "protocolSeizeShareMantissa",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "protocolShareReserve",
     "outputs": [
@@ -1575,10 +1310,12 @@
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1594,10 +1331,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1618,10 +1357,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1637,10 +1378,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1661,23 +1404,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "reduceAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "reduceReserves",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "reduceReservesBlockDelta",
     "outputs": [
@@ -1687,10 +1419,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "reduceReservesBlockNumber",
     "outputs": [
@@ -1700,17 +1434,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
@@ -1726,10 +1455,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1750,10 +1481,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "reserveFactorMantissa",
     "outputs": [
@@ -1763,10 +1496,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -1785,115 +1520,70 @@
       }
     ],
     "name": "seize",
-    "outputs": [],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
-        "name": "accessControlManager_",
+        "name": "newAccessControlManagerAddress",
         "type": "address"
       }
     ],
     "name": "setAccessControlManager",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "contract InterestRateModel",
-        "name": "newInterestRateModel",
-        "type": "address"
-      }
-    ],
-    "name": "setInterestRateModel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "newProtocolSeizeShareMantissa_",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "setProtocolSeizeShare",
-    "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address payable",
-        "name": "protocolShareReserve_",
+        "name": "protcolShareReserve_",
         "type": "address"
       }
     ],
     "name": "setProtocolShareReserve",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_newReduceReservesBlockOrTimestampDelta",
+        "name": "newReduceReservesBlockDelta_",
         "type": "uint256"
       }
     ],
     "name": "setReduceReservesBlockDelta",
     "outputs": [],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "newReserveFactorMantissa",
-        "type": "uint256"
-      }
-    ],
-    "name": "setReserveFactor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "shortfall_",
-        "type": "address"
-      }
-    ],
-    "name": "setShortfallContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "shortfall",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "supplyRatePerBlock",
     "outputs": [
@@ -1903,23 +1593,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "contract IERC20Upgradeable",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "sweepToken",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "symbol",
     "outputs": [
@@ -1929,10 +1608,12 @@
         "type": "string"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "totalBorrows",
     "outputs": [
@@ -1942,10 +1623,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [],
     "name": "totalBorrowsCurrent",
     "outputs": [
@@ -1955,10 +1638,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "totalReserves",
     "outputs": [
@@ -1968,10 +1653,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": true,
     "inputs": [],
     "name": "totalSupply",
     "outputs": [
@@ -1981,10 +1668,12 @@
         "type": "uint256"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2005,10 +1694,12 @@
         "type": "bool"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "constant": false,
     "inputs": [
       {
         "internalType": "address",
@@ -2034,23 +1725,12 @@
         "type": "bool"
       }
     ],
+    "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": true,
     "inputs": [],
     "name": "underlying",
     "outputs": [
@@ -2060,6 +1740,7 @@
         "type": "address"
       }
     ],
+    "payable": false,
     "stateMutability": "view",
     "type": "function"
   }
