@@ -1,13 +1,13 @@
 import { parseUnits } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-export const asBNB = "0xc625f060ad25f4A6c2d9eBF30C133dB61B7AF072";
-export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800"; // TODO: Ask about this
-export const PROTOCOL_SHARE_RESERVE_BSC = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446"; // TODO: Ask about this
+export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
+export const PROTOCOL_SHARE_RESERVE_BSC = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446"; // TODO: Verify with documentation
 
 export const asBNBMarketSpec = {
   vToken: {
@@ -15,12 +15,12 @@ export const asBNBMarketSpec = {
     name: "Venus asBNB",
     symbol: "vasBNB",
     underlying: {
-      address: asBNB,
+      address: "0xc625f060ad25f4A6c2d9eBF30C133dB61B7AF072",
       symbol: "asBNB",
       decimals: 18,
     },
-    decimals: 18,
-    exchangeRate: parseUnits("1", 18), // TODO: Ask about this
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
     comptroller: bsctestnet.UNITROLLER,
     isLegacyPool: true,
   },
@@ -33,7 +33,7 @@ export const asBNBMarketSpec = {
   },
   initialSupply: {
     amount: parseUnits("0.14", 18), // 0.14 asBNB
-    vTokensToBurn: parseUnits("0.14", 18), // 0.14 vasBNB // TODO: Ask about this
+    vTokensToBurn: parseUnits("0.14", 8), // 0.14 vasBNB
     vTokenReceiver: bsctestnet.VTREASURY,
   },
   riskParameters: {
@@ -45,6 +45,7 @@ export const asBNBMarketSpec = {
 };
 
 export const MockedUSDF = "0xC7a2b79432Fd3e3d5bd2d96A456c734AB93A0484";
+export const MockedUSDFOracleAddress = "0xEca2605f0BCF2BA5966372C99837b1F182d3D620"; // Chainlink Price Feed USDT/USD on BSC Testnet
 
 export const USDFMarketSpec = {
   vToken: {
@@ -56,32 +57,38 @@ export const USDFMarketSpec = {
       symbol: "USDF",
       decimals: 18,
     },
-    decimals: 18,
-    exchangeRate: parseUnits("1", 18), // TODO: Ask about this
+    decimals: 8,
+    exchangeRate: parseUnits("1", 28),
     comptroller: bsctestnet.UNITROLLER,
     isLegacyPool: true,
-    interestRateModel: {
-      model: "jump",
-      baseRatePerYear: "0",
-      multiplierPerYear: "0.09",
-      jumpMultiplierPerYear: "2",
-      kink: "0.5",
-    },
-    initialSupply: {
-      amount: parseUnits("100", 18), // 100 USDF
-      vTokensToBurn: parseUnits("100", 18), // 100 vUSDF // TODO: Ask about this
-      vTokenReceiver: bsctestnet.VTREASURY,
-    },
-    riskParameters: {
-      supplyCap: parseUnits("30000000", 18), // 30,000,000 USDF
-      borrowCap: parseUnits("27000000", 18), // 0 USDF
-      collateralFactor: parseUnits("0.6", 18),
-      reserveFactor: parseUnits("0.1", 18),
+  },
+  interestRateModel: {
+    model: "jump",
+    baseRatePerYear: "0",
+    multiplierPerYear: "0.09",
+    jumpMultiplierPerYear: "2",
+    kink: "0.5",
+  },
+  initialSupply: {
+    amount: parseUnits("100", 18), // 100 USDF
+    vTokensToBurn: parseUnits("100", 18), // 100 vUSDF
+    vTokenReceiver: bsctestnet.VTREASURY,
+  },
+  riskParameters: {
+    supplyCap: parseUnits("30000000", 18), // 30,000,000 USDF
+    borrowCap: parseUnits("27000000", 18), // 0 USDF
+    collateralFactor: parseUnits("0.6", 18),
+    reserveFactor: parseUnits("0.1", 18),
+  },
+  priceFeed: {
+    redstone: {
+      address: MockedUSDFOracleAddress,
+      stalePeriod: 26 * 60 * 60, // 26 hours in seconds
     },
   },
 };
 
-export const vip514 = () => {
+export const vip514 = (overrides: { maxStalePeriod?: number }) => {
   const meta: ProposalMeta = {
     version: "v2",
     title: "VIP-514",
@@ -91,12 +98,33 @@ export const vip514 = () => {
     abstainDescription: "",
   };
 
+  const redstoneStalePeriod = overrides?.maxStalePeriod ?? USDFMarketSpec.priceFeed.redstone.stalePeriod;
+
   return makeProposal(
     [
+      // Configure Oracle for USDF
+      {
+        target: bsctestnet.REDSTONE_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [
+          [USDFMarketSpec.vToken.underlying.address, USDFMarketSpec.priceFeed.redstone.address, redstoneStalePeriod],
+        ],
+      },
+      {
+        target: bsctestnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3]))",
+        params: [
+          [
+            USDFMarketSpec.vToken.underlying.address,
+            [bsctestnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+          ],
+        ],
+      },
       // Add Market for asBNB
       {
         target: asBNBMarketSpec.vToken.comptroller,
-        signature: "_supportMarket(addess)",
+        signature: "_supportMarket(address)",
         params: [asBNBMarketSpec.vToken.address],
       },
       {
@@ -134,7 +162,31 @@ export const vip514 = () => {
         signature: "_setCollateralFactor(address,uint256)",
         params: [asBNBMarketSpec.vToken.address, asBNBMarketSpec.riskParameters.collateralFactor],
       },
-
+      {
+        target: asBNBMarketSpec.vToken.underlying.address,
+        signature: "faucet(uint256)",
+        params: [asBNBMarketSpec.initialSupply.amount],
+      },
+      {
+        target: asBNBMarketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [asBNBMarketSpec.vToken.address, asBNBMarketSpec.initialSupply.amount],
+      },
+      {
+        target: asBNBMarketSpec.vToken.address,
+        signature: "mintBehalf(address,uint256)", // TODO: Ask why some vips use `mintBehalf` and others use `mint`
+        params: [bsctestnet.NORMAL_TIMELOCK, asBNBMarketSpec.initialSupply.amount],
+      },
+      {
+        target: asBNBMarketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [asBNBMarketSpec.vToken.address, 0],
+      },
+      {
+        target: asBNBMarketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [asBNBMarketSpec.initialSupply.vTokenReceiver, asBNBMarketSpec.initialSupply.vTokensToBurn],
+      },
       // Add Market for USDF
       {
         target: USDFMarketSpec.vToken.comptroller,
@@ -144,12 +196,12 @@ export const vip514 = () => {
       {
         target: USDFMarketSpec.vToken.comptroller,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[USDFMarketSpec.vToken.address], [USDFMarketSpec.vToken.riskParameters.supplyCap]],
+        params: [[USDFMarketSpec.vToken.address], [USDFMarketSpec.riskParameters.supplyCap]],
       },
       {
         target: USDFMarketSpec.vToken.comptroller,
         signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[USDFMarketSpec.vToken.address], [USDFMarketSpec.vToken.riskParameters.borrowCap]],
+        params: [[USDFMarketSpec.vToken.address], [USDFMarketSpec.riskParameters.borrowCap]],
       },
       {
         target: USDFMarketSpec.vToken.address,
@@ -169,12 +221,37 @@ export const vip514 = () => {
       {
         target: USDFMarketSpec.vToken.address,
         signature: "_setReserveFactor(uint256)",
-        params: [USDFMarketSpec.vToken.riskParameters.reserveFactor],
+        params: [USDFMarketSpec.riskParameters.reserveFactor],
       },
       {
         target: USDFMarketSpec.vToken.comptroller,
         signature: "_setCollateralFactor(address,uint256)",
-        params: [USDFMarketSpec.vToken.address, USDFMarketSpec.vToken.riskParameters.collateralFactor],
+        params: [USDFMarketSpec.vToken.address, USDFMarketSpec.riskParameters.collateralFactor],
+      },
+      {
+        target: USDFMarketSpec.vToken.underlying.address,
+        signature: "faucet(uint256)",
+        params: [USDFMarketSpec.initialSupply.amount],
+      },
+      {
+        target: USDFMarketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [USDFMarketSpec.vToken.address, USDFMarketSpec.initialSupply.amount],
+      },
+      {
+        target: USDFMarketSpec.vToken.address,
+        signature: "mintBehalf(address,uint256)", // TODO: Ask why some vips use `mintBehalf` and others use `mint`
+        params: [bsctestnet.NORMAL_TIMELOCK, USDFMarketSpec.initialSupply.amount],
+      },
+      {
+        target: USDFMarketSpec.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [USDFMarketSpec.vToken.address, 0],
+      },
+      {
+        target: USDFMarketSpec.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [USDFMarketSpec.initialSupply.vTokenReceiver, USDFMarketSpec.initialSupply.vTokensToBurn],
       },
     ],
     meta,
