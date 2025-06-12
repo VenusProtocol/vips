@@ -76,13 +76,7 @@ forking(51202850, async () => {
           it("set to 21024000 blocks per year", async () => {
             const rateModelAddress = await vToken.contract.interestRateModel();
             const rateModel = await ethers.getContractAt(CORE_POOL_RATE_MODEL_ABI, rateModelAddress);
-            let blocksPerYear;
-            try {
-              blocksPerYear = await Promise.any([rateModel.blocksPerYear(), rateModel.BLOCKS_PER_YEAR()]);
-            } catch (err) {
-              console.warn(`Couldn't identify blocks per year for ${vToken.symbol} rate model at ${rateModelAddress}`);
-              blocksPerYear = 21024000; // assume it's correct
-            }
+            const blocksPerYear = await Promise.any([rateModel.blocksPerYear(), rateModel.BLOCKS_PER_YEAR()]);
             expect(blocksPerYear).to.equal(21024000);
           });
         });
@@ -120,13 +114,7 @@ forking(51202850, async () => {
           it("set to 21024000 blocks per year", async () => {
             const rateModelAddress = await vToken.contract.interestRateModel();
             const rateModel = await ethers.getContractAt(RATE_MODEL_ABI, rateModelAddress);
-            let blocksPerYear;
-            try {
-              blocksPerYear = await Promise.any([rateModel.blocksPerYear(), rateModel.blocksOrSecondsPerYear()]);
-            } catch (err) {
-              console.warn(`Couldn't identify blocks per year for ${vToken.symbol} rate model at ${rateModelAddress}`);
-              blocksPerYear = 21024000; // assume it's correct
-            }
+            const blocksPerYear = await Promise.any([rateModel.blocksPerYear(), rateModel.blocksOrSecondsPerYear()]);
             expect(blocksPerYear).to.equal(21024000);
           });
         });
