@@ -7,7 +7,7 @@ import { makeProposal } from "src/utils";
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
-export const PROTOCOL_SHARE_RESERVE_BSC = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446"; // TODO: Verify with documentation
+export const PROTOCOL_SHARE_RESERVE_BSC = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 
 export const asBNBMarketSpec = {
   vToken: {
