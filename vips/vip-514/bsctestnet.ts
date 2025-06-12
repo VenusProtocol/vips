@@ -149,7 +149,7 @@ Complete analysis and details of these changes are available in the above public
 
 **References**:
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/598)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/577)
 - Execution on testnet ([BNB Chain](https://testnet.bscscan.com/tx/0x))`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
