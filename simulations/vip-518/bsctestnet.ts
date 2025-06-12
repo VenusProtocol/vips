@@ -13,6 +13,7 @@ import vip518, {
   REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE_IMPLEMENTATION,
 } from "../../vips/vip-518/bsctestnet";
+import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 
@@ -25,6 +26,7 @@ forking(54422799, async () => {
   testVip("VIP-518", await vip518(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [5]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
     },
   });
 

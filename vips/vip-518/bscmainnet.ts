@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -48,6 +49,51 @@ export const vip518 = () => {
         target: DEFAULT_PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [bscmainnet.BINANCE_ORACLE, BINANCE_ORACLE_IMPLEMENTATION],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", bscmainnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", bscmainnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", bscmainnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshot(uint256,uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setGrowthRate(uint256,uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
       },
     ],
     meta,
