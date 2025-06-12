@@ -6,6 +6,7 @@ export const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
 export const VBNB_ADMIN = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
 export const IL_RATE_MODEL_SETTER = "0xe17aB0c10be44c64d9B41385a2d3C2335f57701B";
 export const CORE_POOL_RATE_MODEL_SETTER = "0x8A5d8c7b49Fddd56676A0d887B8B1698850F8382";
+export const LORENTZ_CORE_POOL_RATE_MODEL_SETTER = "0xB3eE9073a1a394ef242d27267C1A5D3b9ed739fA";
 
 export const vip520 = () => {
   const meta = {
@@ -52,7 +53,12 @@ export const vip520 = () => {
       {
         target: ACM,
         signature: "revokeCallPermission(address,string,address)",
-        params: [VBNB_ADMIN, "_setInterestRateModel(address)", CORE_POOL_RATE_MODEL_SETTER],
+        params: [VBNB_ADMIN, "setInterestRateModel(address)", CORE_POOL_RATE_MODEL_SETTER],
+      },
+      {
+        target: ACM,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [VBNB_ADMIN, "setInterestRateModel(address)", LORENTZ_CORE_POOL_RATE_MODEL_SETTER],
       },
       {
         target: ACM,
