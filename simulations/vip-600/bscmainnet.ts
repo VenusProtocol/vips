@@ -15,12 +15,16 @@ import {
   USDC_PRIME_CONVERTER,
   USDT_PRIME_CONVERTER,
   VTREASURY,
+  WBNB,
   XVS_VAULT_CONVERTER,
   vip600,
 } from "../../vips/vip-600/bscmainnet";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
+import ERC20_ABI from "./abi/erc20.json";
 import CONVERTER_ABI from "./abi/singletokenconverter.json";
+
+const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";
 
 const oldMarketPercentage = [
   [RISK_FUND_CONVERTER, 0],
@@ -140,7 +144,21 @@ forking(51144461, async () => {
       expect(converter).to.equal(BURNING_CONVERTER);
     });
     it("check destination address", async () => {
-      expect(await burningConverter.destinationAddress()).equals("0x0000000000000000000000000000000000000001");
+      expect(await burningConverter.destinationAddress()).equals(ADDRESS_ONE);
+    });
+    it("WBNB should be transferred to burning converter", async () => {
+      const wbnb = await ethers.getContractAt(ERC20_ABI, WBNB);
+
+      const balanceBefore = await wbnb.balanceOf(ADDRESS_ONE);
+      const psrWbnbBalance = await wbnb.balanceOf(PSR);
+
+      const expectedTransferAmount = psrWbnbBalance.mul(25).div(100); // 25%
+
+      await psr.releaseFunds(NETWORK_ADDRESSES.bscmainnet.UNITROLLER, [WBNB]);
+
+      const balanceAfter = await wbnb.balanceOf(ADDRESS_ONE);
+
+      expect(balanceAfter).to.closeTo(balanceBefore.add(expectedTransferAmount), 1);
     });
   });
 });
