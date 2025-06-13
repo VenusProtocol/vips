@@ -75,6 +75,14 @@ forking(54543355, async () => {
   await setBalance(bsctestnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1000000"));
   const resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
+  describe("Pre-VIP behaviour", async () => {
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        expect(await resilientOracle.getPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
+  });
+
   testVip("VIP-518", await vip518(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [5]);
