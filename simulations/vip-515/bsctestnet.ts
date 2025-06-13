@@ -1,6 +1,5 @@
-import { parseUnits } from "@ethersproject/units";
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
@@ -15,6 +14,7 @@ import {
   PROTOCOL_SHARE_RESERVE,
   USDFMarketSpec,
   asBNBMarketSpec,
+  convertAmountToVTokens,
   converterBaseAssets,
   vip514,
 } from "../../vips/vip-515/bsctestnet";
@@ -28,11 +28,6 @@ import MOCKTOKEN_ABI from "./abi/mockToken.json";
 const RATE_MODEL = "0xE0d3774406296322f42CBf25e96e8388cDAf0A66";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-
-const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
-  const EXP_SCALE = parseUnits("1", 18);
-  return amount.mul(EXP_SCALE).div(exchangeRate);
-};
 
 forking(54514316, async () => {
   let comptroller: Contract;
@@ -184,12 +179,22 @@ forking(54514316, async () => {
       expect(usdfBalance).to.equal(USDFMarketSpec.initialSupply.amount);
     });
 
-    it("should send vTokens to receiver", async () => {
-      const vasBNBBalance = await vasBNB.balanceOf(asBNBMarketSpec.initialSupply.vTokenReceiver);
-      const vUSDFBalance = await vUSDF.balanceOf(USDFMarketSpec.initialSupply.vTokenReceiver);
+    it("should burn vTokens (on testnet transfer to VTreasury)", async () => {
+      const vasBNBBalance = await vasBNB.balanceOf(bsctestnet.VTREASURY);
+      const vUSDFBalance = await vUSDF.balanceOf(bsctestnet.VTREASURY);
 
       expect(vasBNBBalance).to.equal(asBNBMarketSpec.initialSupply.vTokensToBurn);
       expect(vUSDFBalance).to.equal(USDFMarketSpec.initialSupply.vTokensToBurn);
+    });
+
+    it("should transfer vTokens to receiver", async () => {
+      const vUSDFReceiverBalance = await vUSDF.balanceOf(USDFMarketSpec.initialSupply.vTokenReceiver);
+
+      expect(vUSDFReceiverBalance).to.equal(
+        convertAmountToVTokens(USDFMarketSpec.initialSupply.amount, USDFMarketSpec.vToken.exchangeRate).sub(
+          USDFMarketSpec.initialSupply.vTokensToBurn,
+        ),
+      );
     });
 
     it("should not leave any vTokens in the timelock", async () => {

@@ -1,4 +1,4 @@
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -6,6 +6,11 @@ import { ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
+
+export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
+  const EXP_SCALE = parseUnits("1", 18);
+  return amount.mul(EXP_SCALE).div(exchangeRate);
+};
 
 export const Actions = {
   MINT: 0,
@@ -78,9 +83,9 @@ export const USDFMarketSpec = {
     kink: "0.5",
   },
   initialSupply: {
-    amount: parseUnits("100", 18), // 100 USDF
+    amount: parseUnits("20100", 18), // 20100 USDF
     vTokensToBurn: parseUnits("100", 8), // 100 vUSDF
-    vTokenReceiver: bsctestnet.VTREASURY,
+    vTokenReceiver: "0xa8c0C6Ee62F5AD95730fe23cCF37d1c1FFAA1c3f",
   },
   riskParameters: {
     supplyCap: parseUnits("30000000", 18), // 30,000,000 USDF
@@ -310,8 +315,25 @@ Complete analysis and details of these changes are available in the above public
       {
         target: USDFMarketSpec.vToken.address,
         signature: "transfer(address,uint256)",
-        params: [USDFMarketSpec.initialSupply.vTokenReceiver, USDFMarketSpec.initialSupply.vTokensToBurn],
+        params: [bsctestnet.VTREASURY, USDFMarketSpec.initialSupply.vTokensToBurn],
       },
+      // {
+      //   target: USDFMarketSpec.vToken.address,
+      //   signature: "transfer(address,uint256)",
+      //   params: [USDFMarketSpec.initialSupply.vTokenReceiver, USDFMarketSpec.initialSupply.vTokensToTransfer],
+      // },
+      (() => {
+        const vTokensMinted = convertAmountToVTokens(
+          USDFMarketSpec.initialSupply.amount,
+          USDFMarketSpec.vToken.exchangeRate,
+        );
+        const vTokensRemaining = vTokensMinted.sub(USDFMarketSpec.initialSupply.vTokensToBurn);
+        return {
+          target: USDFMarketSpec.vToken.address,
+          signature: "transfer(address,uint256)",
+          params: [USDFMarketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+        };
+      })(),
       // Configure converters for USDF
       ...configureConverters([USDFMarketSpec.vToken.underlying.address], CONVERSION_INCENTIVE),
       // Pause asBNB market
