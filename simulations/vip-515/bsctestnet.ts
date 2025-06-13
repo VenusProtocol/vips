@@ -16,7 +16,7 @@ import {
   asBNBMarketSpec,
   convertAmountToVTokens,
   converterBaseAssets,
-  vip514,
+  vip515,
 } from "../../vips/vip-515/bsctestnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import MOCKTOKEN_ABI from "./abi/MockToken.json";
@@ -78,7 +78,7 @@ forking(54514316, async () => {
 
   testVip(
     "VIP-514",
-    await vip514({
+    await vip515({
       maxStalePeriod: 365 * 24 * 60 * 60, // 1 year in seconds
     }),
     {
