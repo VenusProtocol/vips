@@ -16,7 +16,7 @@ import {
   asBNBMarketSpec,
   converterBaseAssets,
   vip514,
-} from "../../vips/vip-514/bsctestnet";
+} from "../../vips/vip-515/bsctestnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
