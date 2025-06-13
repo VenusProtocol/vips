@@ -19,11 +19,11 @@ import {
   vip514,
 } from "../../vips/vip-515/bsctestnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
+import MOCKTOKEN_ABI from "./abi/MockToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import MOCKTOKEN_ABI from "./abi/mockToken.json";
 
 const RATE_MODEL = "0xE0d3774406296322f42CBf25e96e8388cDAf0A66";
 
