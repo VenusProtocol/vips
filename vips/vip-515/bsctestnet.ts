@@ -13,6 +13,7 @@ export const Actions = {
   ENTER_MARKET: 7,
 };
 
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const REDUCE_RESERVES_BLOCK_DELTA_BSC = "28800";
 export const CONVERSION_INCENTIVE = 1e14;
 
@@ -203,7 +204,7 @@ Complete analysis and details of these changes are available in the above public
       {
         target: asBNBMarketSpec.vToken.address,
         signature: "setProtocolShareReserve(address)",
-        params: [bsctestnet.PROTOCOL_SHARE_RESERVE],
+        params: [PROTOCOL_SHARE_RESERVE],
       },
       {
         target: asBNBMarketSpec.vToken.address,
@@ -269,7 +270,7 @@ Complete analysis and details of these changes are available in the above public
       {
         target: USDFMarketSpec.vToken.address,
         signature: "setProtocolShareReserve(address)",
-        params: [bsctestnet.PROTOCOL_SHARE_RESERVE],
+        params: [PROTOCOL_SHARE_RESERVE],
       },
       {
         target: USDFMarketSpec.vToken.address,
@@ -317,7 +318,7 @@ Complete analysis and details of these changes are available in the above public
       {
         target: asBNBMarketSpec.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",
-        params: [[asBNBMarketSpec.vToken.address], [2], true],
+        params: [[asBNBMarketSpec.vToken.address], [Actions.BORROW], true],
       },
     ],
     meta,

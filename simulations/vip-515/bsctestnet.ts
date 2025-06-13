@@ -12,6 +12,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 import {
   Actions,
   CONVERSION_INCENTIVE,
+  PROTOCOL_SHARE_RESERVE,
   USDFMarketSpec,
   asBNBMarketSpec,
   converterBaseAssets,
@@ -159,8 +160,8 @@ forking(54514316, async () => {
     });
 
     it("markets should have correct protocol share reserve", async () => {
-      expect(await vasBNB.protocolShareReserve()).to.equal(bsctestnet.PROTOCOL_SHARE_RESERVE);
-      expect(await vUSDF.protocolShareReserve()).to.equal(bsctestnet.PROTOCOL_SHARE_RESERVE);
+      expect(await vasBNB.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
+      expect(await vUSDF.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
     });
 
     it("markets should have correct total supply", async () => {

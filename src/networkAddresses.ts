@@ -73,7 +73,6 @@ export const NETWORK_ADDRESSES = {
     BINANCE_ORACLE: oracleBsctestnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBsctestnetContracts.addresses.ResilientOracle,
     REDSTONE_ORACLE: oracleBsctestnetContracts.addresses.RedStoneOracle,
-    PROTOCOL_SHARE_RESERVE: "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3",
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",
