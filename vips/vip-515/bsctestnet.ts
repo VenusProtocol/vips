@@ -317,11 +317,6 @@ Complete analysis and details of these changes are available in the above public
         signature: "transfer(address,uint256)",
         params: [bsctestnet.VTREASURY, USDFMarketSpec.initialSupply.vTokensToBurn],
       },
-      // {
-      //   target: USDFMarketSpec.vToken.address,
-      //   signature: "transfer(address,uint256)",
-      //   params: [USDFMarketSpec.initialSupply.vTokenReceiver, USDFMarketSpec.initialSupply.vTokensToTransfer],
-      // },
       (() => {
         const vTokensMinted = convertAmountToVTokens(
           USDFMarketSpec.initialSupply.amount,
