@@ -84,7 +84,7 @@ forking(BLOCK_NUMBER, async () => {
         txResponse,
         [ERC4626FACTORY_ABI, ACM_ABI],
         ["OwnershipTransferred", "PermissionGranted", "RewardRecipientUpdated"],
-        [1, 8, 1],
+        [1, 4, 1],
       );
     },
   });
