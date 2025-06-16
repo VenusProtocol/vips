@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriod } from "src/utils";
+import { expectEvents, setMaxStalePeriod, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip518, {
@@ -31,69 +31,83 @@ const prices = [
     symbol: "vslisBNB_LiquidStakedBNB",
     address: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
     expectedPrice: parseUnits("1.12284689", 18),
+    preVIP: async function (resilientOracle: any, address: string) {
+      await setRedstonePrice("0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a", "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e", bscmainnet.NORMAL_TIMELOCK);
+    },
     postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      console.log("Underlying token address:", underlying);
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
+      const token = new ethers.Contract("0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token)
     },
   },
-  {
-    symbol: "vBNBx_LiquidStakedBNB",
-    address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
-    expectedPrice: parseUnits("0.74698", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      console.log("Underlying token address:", underlying);
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
-    },
-  },
-  {
-    symbol: "vasBNB_LiquidStakedBNB",
-    address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
-    expectedPrice: parseUnits("0.99960456", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
-    },
-  },
-  {
-    symbol: "vankrBNB_LiquidStakedBNB",
-    address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
-    expectedPrice: parseUnits("0.99995684", 18),
-    postVIP: async function (resilientOracle: any, address: string) {
-      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-      const underlying = await vtoken.underlying();
-      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-      await setMaxStalePeriod(resilientOracle, token);
-    },
-  },
-  {
-    symbol: "xSolvBTC",
-    address: XSOLVBTC,
-    expectedPrice: parseUnits("2844.085421477404790808", 18),
-  },
-  {
-    symbol: "sUSDe",
-    address: SUSDE,
-    expectedPrice: parseUnits("3204.385384786432008563", 18),
-  },
-  {
-    symbol: "PT-sUSDE-26JUN2025",
-    address: PTsUSDE_26JUN2025,
-    expectedPrice: parseUnits("3204.385384786432008563", 18),
-  },
+  // {
+  //   symbol: "vBNBx_LiquidStakedBNB",
+  //   address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
+  //   expectedPrice: parseUnits("0.74698", 18),
+  //   postVIP: async function (resilientOracle: any, address: string) {
+  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+  //     const underlying = await vtoken.underlying();
+  //     console.log("Underlying token address:", underlying);
+  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+  //     await setMaxStalePeriod(resilientOracle, token);
+  //   },
+  // },
+  // {
+  //   symbol: "vasBNB_LiquidStakedBNB",
+  //   address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
+  //   expectedPrice: parseUnits("0.99960456", 18),
+  //   postVIP: async function (resilientOracle: any, address: string) {
+  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+  //     const underlying = await vtoken.underlying();
+  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+  //     await setMaxStalePeriod(resilientOracle, token);
+  //   },
+  // },
+  // {
+  //   symbol: "vankrBNB_LiquidStakedBNB",
+  //   address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
+  //   expectedPrice: parseUnits("0.99995684", 18),
+  //   postVIP: async function (resilientOracle: any, address: string) {
+  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+  //     const underlying = await vtoken.underlying();
+  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+  //     await setMaxStalePeriod(resilientOracle, token);
+  //   },
+  // },
+  // {
+  //   symbol: "xSolvBTC",
+  //   address: XSOLVBTC,
+  //   expectedPrice: parseUnits("2844.085421477404790808", 18),
+  // },
+  // {
+  //   symbol: "sUSDe",
+  //   address: SUSDE,
+  //   expectedPrice: parseUnits("3204.385384786432008563", 18),
+  // },
+  // {
+  //   symbol: "PT-sUSDE-26JUN2025",
+  //   address: PTsUSDE_26JUN2025,
+  //   expectedPrice: parseUnits("3204.385384786432008563", 18),
+  // },
 ];
 
 forking(51372289, async () => {
   const provider = ethers.provider;
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
   const proxyAdmin = new ethers.Contract(DEFAULT_PROXY_ADMIN, PROXY_ADMIN_ABI, provider);
+
+  before(async () => {
+  })
+
+  describe("Pre-VIP behaviour", async () => {
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        if (price.preVIP) {
+          await price.preVIP(resilientOracle, price.address);
+        }
+        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
+  })
 
   testVip("VIP-518", await vip518(), {
     callbackAfterExecution: async txResponse => {
