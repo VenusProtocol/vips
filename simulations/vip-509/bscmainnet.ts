@@ -6,10 +6,8 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  BTCB,
   BTCB_PRIME_CONVERTER,
   CONVERTER_NETWORK,
-  ETH,
   ETH_PRIME_CONVERTER,
   FDUSD,
   FDUSD_PRIME_CONVERTER,
@@ -79,7 +77,7 @@ forking(50925525, async () => {
           "TokenDistributionSpeedUpdated",
           "MarketAdded",
         ],
-        [2, 2, 2, 2, 2, 120, 2, 4, 2],
+        [2, 2, 2, 2, 2, 116, 2, 2, 2],
       );
     },
   });
@@ -122,13 +120,7 @@ forking(50925525, async () => {
     });
 
     it("check distribution speed", async () => {
-      let speed = await plp.tokenDistributionSpeeds(BTCB);
-      expect(speed).to.equal(0);
-
-      speed = await plp.tokenDistributionSpeeds(ETH);
-      expect(speed).to.equal(0);
-
-      speed = await plp.tokenDistributionSpeeds(WBNB);
+      let speed = await plp.tokenDistributionSpeeds(WBNB);
       expect(speed).to.equal(100);
 
       speed = await plp.tokenDistributionSpeeds(FDUSD);
@@ -141,6 +133,20 @@ forking(50925525, async () => {
 
       market = await prime.markets(vFDUSD);
       expect(market.exists).to.equal(true);
+    });
+
+    it("check destination address", async () => {
+      let converter = new ethers.Contract(WBNB_PRIME_CONVERTER, CONVERTER_ABI, provider);
+      expect(await converter.destinationAddress()).to.equal(PLP);
+
+      converter = new ethers.Contract(FDUSD_PRIME_CONVERTER, CONVERTER_ABI, provider);
+      expect(await converter.destinationAddress()).to.equal(PLP);
+
+      converter = new ethers.Contract(BTCB_PRIME_CONVERTER, CONVERTER_ABI, provider);
+      expect(await converter.destinationAddress()).to.equal(PLP);
+
+      converter = new ethers.Contract(ETH_PRIME_CONVERTER, CONVERTER_ABI, provider);
+      expect(await converter.destinationAddress()).to.equal(PLP);
     });
   });
 });

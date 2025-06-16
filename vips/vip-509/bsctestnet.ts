@@ -248,10 +248,8 @@ export const vip509 = () => {
         target: PLP,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
         params: [
-          [BTCB, ETH, WBNB, FDUSD],
+          [WBNB, FDUSD],
           [
-            0,
-            0,
             100, // change it
             100, // change it
           ],
