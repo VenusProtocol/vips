@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -27,9 +27,12 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const RATE_MODEL = "0x52F63686D09d92c367c90BCDBF79A562f81bd6BF";
 
+const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
+const CHAINLINK_BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
+
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(51538152, async () => {
+forking(51547465, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let asBNB: Contract;
@@ -46,6 +49,15 @@ forking(51538152, async () => {
     usdf = new ethers.Contract(USDFMarketSpec.vToken.underlying.address, MOCKTOKEN_ABI, provider);
     vUSDF = new ethers.Contract(USDFMarketSpec.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      NATIVE_TOKEN_ADDR,
+      CHAINLINK_BNB_FEED,
+      bscmainnet.NORMAL_TIMELOCK,
+    );
+
+    await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "BNB");
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -79,7 +91,7 @@ forking(51538152, async () => {
   testVip(
     "VIP-515",
     await vip515({
-      maxStalePeriod: 365 * 24 * 60 * 60, // 1 year in seconds
+      maxStalePeriod: 30 * 24 * 60 * 60, // 30 days in seconds
     }),
     {
       callbackAfterExecution: async txResponse => {
@@ -139,7 +151,7 @@ forking(51538152, async () => {
     checkRiskParameters(USDFMarketSpec.vToken.address, USDFMarketSpec.vToken, USDFMarketSpec.riskParameters);
 
     it("check price USDF", async () => {
-      const expectedPrice = "1000168910000000000"; // 1.00016891 USD
+      const expectedPrice = "1000174500000000000"; // 1.0001745 USD
       expect(await resilientOracle.getPrice(USDFMarketSpec.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(USDFMarketSpec.vToken.address)).to.equal(expectedPrice);
     });
