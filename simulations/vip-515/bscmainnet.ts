@@ -17,7 +17,7 @@ import {
   convertAmountToVTokens,
   converterBaseAssets,
   vip515,
-} from "../../vips/vip-515/bsctestnet";
+} from "../../vips/vip-515/bscmainnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import MOCKTOKEN_ABI from "./abi/MockToken.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -25,11 +25,11 @@ import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
-const RATE_MODEL = "0xE0d3774406296322f42CBf25e96e8388cDAf0A66";
+const RATE_MODEL = "0x52F63686D09d92c367c90BCDBF79A562f81bd6BF";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(54514316, async () => {
+forking(51538152, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let asBNB: Contract;
@@ -45,7 +45,7 @@ forking(54514316, async () => {
     vasBNB = new ethers.Contract(asBNBMarketSpec.vToken.address, VTOKEN_ABI, provider);
     usdf = new ethers.Contract(USDFMarketSpec.vToken.underlying.address, MOCKTOKEN_ABI, provider);
     vUSDF = new ethers.Contract(USDFMarketSpec.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+    resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -145,13 +145,13 @@ forking(54514316, async () => {
     });
 
     it("markets have correct owner", async () => {
-      expect(await vasBNB.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await vUSDF.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vasBNB.admin()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+      expect(await vUSDF.admin()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("markets have correct ACM", async () => {
-      expect(await vasBNB.accessControlManager()).to.equal(bsctestnet.ACCESS_CONTROL_MANAGER);
-      expect(await vUSDF.accessControlManager()).to.equal(bsctestnet.ACCESS_CONTROL_MANAGER);
+      expect(await vasBNB.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
+      expect(await vUSDF.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
     });
 
     it("markets should have correct protocol share reserve", async () => {
@@ -179,12 +179,12 @@ forking(54514316, async () => {
       expect(usdfBalance).to.equal(USDFMarketSpec.initialSupply.amount);
     });
 
-    it("should burn vTokens (on testnet transfer to VTreasury)", async () => {
-      const vasBNBBalance = await vasBNB.balanceOf(bsctestnet.VTREASURY);
-      const vUSDFBalance = await vUSDF.balanceOf(bsctestnet.VTREASURY);
+    it("should burn vTokens", async () => {
+      const vasBNBBalanceBurned = await vasBNB.balanceOf(ethers.constants.AddressZero);
+      const vUSDFBalanceBurned = await vUSDF.balanceOf(ethers.constants.AddressZero);
 
-      expect(vasBNBBalance).to.equal(asBNBMarketSpec.initialSupply.vTokensToBurn);
-      expect(vUSDFBalance).to.equal(USDFMarketSpec.initialSupply.vTokensToBurn);
+      expect(vasBNBBalanceBurned).to.equal(asBNBMarketSpec.initialSupply.vTokensToBurn);
+      expect(vUSDFBalanceBurned).to.equal(USDFMarketSpec.initialSupply.vTokensToBurn);
     });
 
     it("should transfer vTokens to receiver", async () => {
@@ -198,8 +198,8 @@ forking(54514316, async () => {
     });
 
     it("should not leave any vTokens in the timelock", async () => {
-      const vasBNBTimelockBalance = await vasBNB.balanceOf(bsctestnet.NORMAL_TIMELOCK);
-      const vUSDFTimelockBalance = await vUSDF.balanceOf(bsctestnet.NORMAL_TIMELOCK);
+      const vasBNBTimelockBalance = await vasBNB.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+      const vUSDFTimelockBalance = await vUSDF.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
       expect(vasBNBTimelockBalance).to.equal(0);
       expect(vUSDFTimelockBalance).to.equal(0);
