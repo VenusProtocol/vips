@@ -25,69 +25,70 @@ import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
-
+const REDSTONE_BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
+const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+export const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
 const prices = [
   {
     symbol: "vslisBNB_LiquidStakedBNB",
     address: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
-    expectedPrice: parseUnits("1.12284689", 18),
-    preVIP: async function (resilientOracle: any, address: string) {
-      await setRedstonePrice("0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a", "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e", bscmainnet.NORMAL_TIMELOCK);
+    expectedPrice: parseUnits("679.232458680906975761", 18),
+    preVIP: async function () {
+      await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", REDSTONE_BNB_FEED, bscmainnet.NORMAL_TIMELOCK);
     },
     postVIP: async function (resilientOracle: any, address: string) {
       const token = new ethers.Contract("0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB", ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token)
     },
   },
-  // {
-  //   symbol: "vBNBx_LiquidStakedBNB",
-  //   address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
-  //   expectedPrice: parseUnits("0.74698", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     console.log("Underlying token address:", underlying);
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vasBNB_LiquidStakedBNB",
-  //   address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
-  //   expectedPrice: parseUnits("0.99960456", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "vankrBNB_LiquidStakedBNB",
-  //   address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
-  //   expectedPrice: parseUnits("0.99995684", 18),
-  //   postVIP: async function (resilientOracle: any, address: string) {
-  //     const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
-  //     const underlying = await vtoken.underlying();
-  //     const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
-  //     await setMaxStalePeriod(resilientOracle, token);
-  //   },
-  // },
-  // {
-  //   symbol: "xSolvBTC",
-  //   address: XSOLVBTC,
-  //   expectedPrice: parseUnits("2844.085421477404790808", 18),
-  // },
-  // {
-  //   symbol: "sUSDe",
-  //   address: SUSDE,
-  //   expectedPrice: parseUnits("3204.385384786432008563", 18),
-  // },
-  // {
-  //   symbol: "PT-sUSDE-26JUN2025",
-  //   address: PTsUSDE_26JUN2025,
-  //   expectedPrice: parseUnits("3204.385384786432008563", 18),
-  // },
+  {
+    symbol: "vBNBx_LiquidStakedBNB",
+    address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
+    expectedPrice: parseUnits("728.119713523375363029", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vasBNB_LiquidStakedBNB",
+    address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
+    expectedPrice: parseUnits("697.048129566730189937", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vankrBNB_LiquidStakedBNB",
+    address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
+    expectedPrice: parseUnits("723.810113538611356903", 18),
+    postVIP: async function (resilientOracle: any, address: string) {
+      const vtoken = new ethers.Contract(address, VTOKEN_ABI, ethers.provider);
+      const underlying = await vtoken.underlying();
+      const token = new ethers.Contract(underlying, ERC20_ABI, ethers.provider);
+      await setMaxStalePeriod(resilientOracle, token);
+    },
+  },
+  {
+    symbol: "vxSolvBTC",
+    address: "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5",
+    expectedPrice: parseUnits("105398.219535200000000000", 18),
+  },
+  {
+    symbol: "vsUSDe",
+    address: "0x699658323d58eE25c69F1a29d476946ab011bD18",
+    expectedPrice: parseUnits("1.178344469589636600", 18),
+  },
+  {
+    symbol: "vPT-sUSDE-26JUN2025",
+    address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
+    expectedPrice: parseUnits("0.997740018926510169", 18),
+  },
 ];
 
 forking(51372289, async () => {
@@ -102,7 +103,7 @@ forking(51372289, async () => {
     for (const price of prices) {
       it(`check ${price.symbol} price`, async () => {
         if (price.preVIP) {
-          await price.preVIP(resilientOracle, price.address);
+          await price.preVIP();
         }
         expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
       });
