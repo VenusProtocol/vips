@@ -146,11 +146,48 @@ function generateCallPermissionCommands(): CallPermission[] {
 
 const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands();
 
-export const vip600 = () => {
+export const vip515 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-600 New tokenomics for bnb-chain",
-    description: `New tokenomics for bnb-chain`,
+    title: "VIP-515 [BNB Chain] BNB Afterburn – Allocating 25% of Venus BNB Chain Revenue to BNB Burn",
+    description: `#### Summary
+
+If passed, following the community proposal “[BNB Chain <> Venus BNB Burn Proposal](https://community.venus.io/t/bnb-chain-venus-bnb-burn-proposal/5142)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb8f03ad2dd2988a6d2e89a1adbebc52c7a62b284ea493008752c71b7f00b3386)), this VIP will update the distribution of the protocol income in the [Protocol Share Reserve contract on BNB Chain](https://bscscan.com/address/0xCa01D5A9A248a830E9D93231e791B1afFed7c446):
+
+**Protocol Reserves:**
+
+- Risk Fund: 20% (previously 0%)
+- Venus Prime: 20% (unchanged)
+- XVS Buybacks (Vault Rewards): 20% (unchanged)
+- BNB Burn: 25% (previously 0%)
+- Treasury: 15% (previously 60%)
+
+**Liquidation Fees:**
+
+- Risk Fund: 20 (previously 0%)
+- XVS Buybacks (Vault Rewards): 20% (unchanged)
+- BNB Burn: 25% (previously 0%)
+- Treasury: 35% (previously 80%)
+
+#### Description
+
+A new [Token Converter](https://docs-v4.venus.io/whats-new/token-converter) has been deployed: WBNBBurnConverter. It will be configured in this VIP, receiving 25% of the protocol income, and converting it into WBNB, which will be burned (transferred to the [Null address on BNB Chain](https://bscscan.com/address/0x0000000000000000000000000000000000000001)). Effectively, with this architecture, 25% of the Venus Protocol income on the BNB Chain (considering every market) is used to burn BNB.
+
+#### Deployed contracts
+
+BNB Chain mainnet:
+
+- WBNBBurnConverter: [0x42DBA48e7cCeB030eC73AaAe29d4A3F0cD4facba](https://testnet.bscscan.com/address/0x42DBA48e7cCeB030eC73AaAe29d4A3F0cD4facba)
+
+BNB Chain testnet:
+
+- WBNBBurnConverter: [0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE](https://bscscan.com/address/0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/578)
+- [Activation of the new tokenomics on BNB testnet](https://testnet.bscscan.com/tx/0x002466c70e95a452ad0894eb8c43dcc7ffd05a5865f91f6681be8272139505fe)
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -194,4 +231,4 @@ export const vip600 = () => {
   );
 };
 
-export default vip600;
+export default vip515;

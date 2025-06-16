@@ -17,8 +17,8 @@ import {
   VTREASURY,
   WBNB,
   XVS_VAULT_CONVERTER,
-  vip600,
-} from "../../vips/vip-600/bsctestnet";
+  vip515,
+} from "../../vips/vip-515/bscmainnet";
 import CONVERTER_NETWORK_ABI from "./abi/ConverterNetwork.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -27,16 +27,15 @@ import CONVERTER_ABI from "./abi/singletokenconverter.json";
 const ADDRESS_ONE = "0x0000000000000000000000000000000000000001";
 
 const oldMarketPercentage = [
-  [RISK_FUND_CONVERTER, 4000],
-  [VTREASURY, 4000],
-  [XVS_VAULT_CONVERTER, 1000],
-  [USDT_PRIME_CONVERTER, 420],
-  [BTCB_PRIME_CONVERTER, 177],
-  [ETH_PRIME_CONVERTER, 211],
-  [USDC_PRIME_CONVERTER, 192],
+  [RISK_FUND_CONVERTER, 0],
+  [VTREASURY, 6000],
+  [XVS_VAULT_CONVERTER, 2000],
+  [USDT_PRIME_CONVERTER, 1100],
+  [BTCB_PRIME_CONVERTER, 100],
+  [ETH_PRIME_CONVERTER, 200],
+  [USDC_PRIME_CONVERTER, 600],
 ];
 
-// This percentage is being matched to the mainnet
 const newMarketPercentage = [
   [RISK_FUND_CONVERTER, 2000],
   [VTREASURY, 1500],
@@ -49,12 +48,11 @@ const newMarketPercentage = [
 ];
 
 const oldLiquidityPercentage = [
-  [RISK_FUND_CONVERTER, 5000],
-  [VTREASURY, 4000],
-  [XVS_VAULT_CONVERTER, 1000],
+  [RISK_FUND_CONVERTER, 0],
+  [VTREASURY, 8000],
+  [XVS_VAULT_CONVERTER, 2000],
 ];
 
-// This percentage is being matched to the mainnet
 const newLiquidityPercentage = [
   [RISK_FUND_CONVERTER, 2000],
   [VTREASURY, 3500],
@@ -62,7 +60,7 @@ const newLiquidityPercentage = [
   [BURNING_CONVERTER, 2500],
 ];
 
-forking(54173556, async () => {
+forking(51144461, async () => {
   let psr: Contract;
   let converterNetwork: Contract;
   let burningConverter: Contract;
@@ -75,7 +73,7 @@ forking(54173556, async () => {
 
   describe("Pre-VIP behaviour", async () => {
     it("check ProtocolShareReserve distribution configs", async () => {
-      expect(await psr.totalDistributions()).to.equal(10);
+      expect(await psr.totalDistributions()).to.equal(8);
       for (const [target, percent] of oldMarketPercentage) {
         expect(await psr.getPercentageDistribution(target, 0)).to.equal(percent);
       }
@@ -90,13 +88,13 @@ forking(54173556, async () => {
     });
   });
 
-  testVip("VIP-600", await vip600(), {
+  testVip("VIP-515", await vip515(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
         [PSR_ABI, CONVERTER_ABI],
         ["DistributionConfigUpdated", "DistributionConfigAdded", "ConversionConfigUpdated"],
-        [10, 2, 54],
+        [4, 4, 60],
       );
       await expectEvents(txResponse, [CONVERTER_NETWORK_ABI], ["ConverterAdded"], [1]);
     },
@@ -125,7 +123,7 @@ forking(54173556, async () => {
       expect(target.destination).to.equal(BURNING_CONVERTER);
       expect(target.percentage).to.equal(2500);
 
-      target = await psr.distributionTargets(10);
+      target = await psr.distributionTargets(9);
       expect(target.schema).to.equal(0);
       expect(target.destination).to.equal(BURNING_CONVERTER);
       expect(target.percentage).to.equal(2500);
@@ -133,7 +131,7 @@ forking(54173556, async () => {
 
     it("check owner", async () => {
       const owner = await burningConverter.owner();
-      expect(owner).to.equal(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
+      expect(owner).to.equal(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("check converter network", async () => {
@@ -156,11 +154,11 @@ forking(54173556, async () => {
 
       const expectedTransferAmount = psrWbnbBalance.mul(25).div(100); // 25%
 
-      await psr.releaseFunds(NETWORK_ADDRESSES.bsctestnet.UNITROLLER, [WBNB]);
+      await psr.releaseFunds(NETWORK_ADDRESSES.bscmainnet.UNITROLLER, [WBNB]);
 
       const balanceAfter = await wbnb.balanceOf(ADDRESS_ONE);
 
-      expect(balanceAfter).to.closeTo(balanceBefore.add(expectedTransferAmount), "12740413497264448"); // 0.012740413497264448
+      expect(balanceAfter).to.closeTo(balanceBefore.add(expectedTransferAmount), 1);
     });
   });
 });

@@ -147,7 +147,7 @@ function generateCallPermissionCommands(): CallPermission[] {
 
 const callPermissionCommandsAllConverter: CallPermission[] = generateCallPermissionCommands();
 
-export const vip600 = () => {
+export const vip515 = () => {
   const meta = {
     version: "v2",
     title: "VIP-600 New tokenomics for bnb-chain",
@@ -200,4 +200,4 @@ export const vip600 = () => {
   );
 };
 
-export default vip600;
+export default vip515;
