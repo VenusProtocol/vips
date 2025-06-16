@@ -57,7 +57,7 @@ export const asBNBMarketSpec = {
 };
 
 // TODO: Change to the USDF oracle
-export const RedstoneUSDFOracleAddress = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320"; // Chainlink Price Feed USDT/USD on BSC Testnet
+export const RedstoneUSDFOracleAddress = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320"; // Chainlink Price Feed USDT/USD on BSC Mainnet
 
 export const USDFMarketSpec = {
   vToken: {
@@ -229,6 +229,15 @@ Complete analysis and details of these changes are available in the above public
         params: [asBNBMarketSpec.vToken.address, asBNBMarketSpec.riskParameters.collateralFactor],
       },
       {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [
+          asBNBMarketSpec.vToken.underlying.address,
+          asBNBMarketSpec.initialSupply.amount,
+          bscmainnet.NORMAL_TIMELOCK,
+        ],
+      },
+      {
         target: asBNBMarketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [asBNBMarketSpec.vToken.address, asBNBMarketSpec.initialSupply.amount],
@@ -291,6 +300,15 @@ Complete analysis and details of these changes are available in the above public
         params: [USDFMarketSpec.vToken.address, USDFMarketSpec.riskParameters.collateralFactor],
       },
       {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [
+          USDFMarketSpec.vToken.underlying.address,
+          USDFMarketSpec.initialSupply.amount,
+          bscmainnet.NORMAL_TIMELOCK,
+        ],
+      },
+      {
         target: USDFMarketSpec.vToken.underlying.address,
         signature: "approve(address,uint256)",
         params: [USDFMarketSpec.vToken.address, USDFMarketSpec.initialSupply.amount],
@@ -311,6 +329,7 @@ Complete analysis and details of these changes are available in the above public
         signature: "transfer(address,uint256)",
         params: [ethers.constants.AddressZero, USDFMarketSpec.initialSupply.vTokensToBurn],
       },
+      // Transfer remaining vTokens to receiver
       (() => {
         const vTokensMinted = convertAmountToVTokens(
           USDFMarketSpec.initialSupply.amount,
