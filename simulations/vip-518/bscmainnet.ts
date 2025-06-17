@@ -11,8 +11,12 @@ import vip518, {
   BOUND_VALIDATOR_IMPLEMENTATION,
   CHAINLINK_ORACLE_IMPLEMENTATION,
   DEFAULT_PROXY_ADMIN,
+  PT_SUSDE_FIXED_PRICE,
   REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE_IMPLEMENTATION,
+  SUSDE,
+  USDE,
+  XSOLVBTC,
 } from "../../vips/vip-518/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -24,13 +28,13 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 const REDSTONE_BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
 const SolvBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
 export const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc"; // RedStone Price Feed for SolvBTC.BBN_FUNDAMENTAL
-export const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
 
 const prices = [
   {
     symbol: "vslisBNB_LiquidStakedBNB",
     address: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
     expectedPrice: parseUnits("679.232458680906975761", 18),
+    expectedPriceAfterVIP: parseUnits("679.232458680906975761", 18),
     preVIP: async function () {
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
@@ -48,21 +52,25 @@ const prices = [
     symbol: "vBNBx_LiquidStakedBNB",
     address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
     expectedPrice: parseUnits("728.119713523375363029", 18),
+    expectedPriceAfterVIP: parseUnits("728.119713523375363029", 18),
   },
   {
     symbol: "vasBNB_LiquidStakedBNB",
     address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
     expectedPrice: parseUnits("697.048129566730189937", 18),
+    expectedPriceAfterVIP: parseUnits("697.048129566730189937", 18),
   },
   {
     symbol: "vankrBNB_LiquidStakedBNB",
     address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
     expectedPrice: parseUnits("723.810113538611356903", 18),
+    expectedPriceAfterVIP: parseUnits("723.810113538611356903", 18),
   },
   {
     symbol: "vxSolvBTC",
     address: "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5",
     expectedPrice: parseUnits("105398.219535200000000000", 18),
+    expectedPriceAfterVIP: parseUnits("105398.219535200000000000", 18),
     preVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         bscmainnet.CHAINLINK_ORACLE,
@@ -76,10 +84,10 @@ const prices = [
         "0xa51738d1937FFc553d5070f43300B385AA2D9F55", // Red stone for solvBTC
         bscmainnet.NORMAL_TIMELOCK,
       );
-      await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
+      await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, XSOLVBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
     },
     postVIP: async function (resilientOracle: any) {
-      const token = new ethers.Contract(xSolvBTC, ERC20_ABI, ethers.provider);
+      const token = new ethers.Contract(XSOLVBTC, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
@@ -88,28 +96,29 @@ const prices = [
     symbol: "vsUSDe",
     address: "0x699658323d58eE25c69F1a29d476946ab011bD18",
     expectedPrice: parseUnits("1.178344469589636600", 18),
+    expectedPriceAfterVIP: parseUnits("1.178344469589636600", 18),
     preVIP: async function () {
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
-        "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2",
+        SUSDE,
         "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0",
         bscmainnet.NORMAL_TIMELOCK,
       );
       await setMaxStalePeriodInChainlinkOracle(
         bscmainnet.CHAINLINK_ORACLE,
-        "0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2", // sUSDe
+        SUSDE, // sUSDe
         "0x1a269eA1b209DA2c12bDCDab22635C9e6C5028B2", // SUSDE / USDE Exchange Rate
         bscmainnet.NORMAL_TIMELOCK,
       );
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
-        "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34",
+        USDE,
         "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb",
         bscmainnet.NORMAL_TIMELOCK,
       ); // RedStone Price Feed for USDe
       await setMaxStalePeriodInChainlinkOracle(
         bscmainnet.CHAINLINK_ORACLE,
-        "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34", // USDe
+        USDE, // USDe
         "0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC", // USDE / USD  Exchange Rate
         bscmainnet.NORMAL_TIMELOCK,
       );
@@ -120,11 +129,12 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  // {
-  //   symbol: "vPT-sUSDE-26JUN2025",
-  //   address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
-  //   expectedPrice: parseUnits("0.997740027134182571", 18),
-  // }
+  {
+    symbol: "vPT-sUSDE-26JUN2025",
+    address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
+    expectedPrice: parseUnits("0.997740049021309311", 18),
+    expectedPriceAfterVIP: PT_SUSDE_FIXED_PRICE,
+  },
 ];
 
 forking(51372289, async () => {
@@ -157,7 +167,7 @@ forking(51372289, async () => {
         if (price.postVIP) {
           await price.postVIP(resilientOracle);
         }
-        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
+        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPriceAfterVIP);
       });
     }
 

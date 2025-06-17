@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
@@ -17,6 +18,7 @@ export const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
 export const SUSDE_ONEJUMP_CHAINLINK_ORACLE = "0xA67F01322AF8EBa444D788Ee398775b446de51a0";
 export const SUSDE_ONEJUMP_REDSTONE_ORACLE = "0x2B2895104f958E1EC042E6Ba5cbfeCbAD3C5beDb";
 export const SUSDE = "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2";
+export const USDE = "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34";
 export const XSOLVBTC_ONEJUMP_REDSTONE_ORACLE = "0xf5534f78Df9b610B19A63956d498d00CFaD8B9D3";
 export const XSOLVBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
 export const AnkrBNB_ORACLE = "0x4512e9579734f7B8730f0a05Cd0D92DC33EB2675";
@@ -27,6 +29,46 @@ export const BNBx_ORACLE = "0xC2E2b6f9CdE2BFA5Ba5fda2Dd113CAcD781bdb31";
 export const BNBx = "0x1bdd3cf7f79cfb8edbb955f20ad99211551ba275";
 export const SlisBNB_ORACLE = "0xDDE6446E66c786afF4cd3D183a908bCDa57DF9c1";
 export const SlisBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
+export const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
+
+const getPendleOracleCommand = (mockPendleOracleConfiguration: boolean) => {
+  if (mockPendleOracleConfiguration) {
+    return [
+      {
+        target: bscmainnet.REDSTONE_ORACLE,
+        signature: "setDirectPrice(address,uint256)",
+        params: [PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE],
+      },
+      {
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            PTsUSDE_26JUN2025,
+            [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
+    ];
+  } else {
+    return [
+      {
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            PTsUSDE_26JUN2025,
+            [PTsUSDe_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
+    ];
+  }
+};
 
 export const vip518 = () => {
   const meta = {
@@ -110,6 +152,7 @@ export const vip518 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "setSnapshotGap(uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
       },
+
       {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
@@ -118,12 +161,6 @@ export const vip518 = () => {
             [
               XSOLVBTC,
               [XSOLVBTC_ONEJUMP_REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-              [true, false, false],
-              false,
-            ],
-            [
-              PTsUSDE_26JUN2025,
-              [PTsUSDe_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
               [true, false, false],
               false,
             ],
@@ -160,6 +197,7 @@ export const vip518 = () => {
           ],
         ],
       },
+      ...getPendleOracleCommand(true),
     ],
     meta,
     ProposalType.REGULAR,
