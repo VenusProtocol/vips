@@ -13,11 +13,11 @@ export const vip516 = async () => {
     version: "v2",
     title: "VIP-516 [BNB Chain] Risk Parameters Adjustments (xSolvBTC)",
     description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos
-Labs
+Labs - Risk Parameter Updates - 06/16/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-06-16-25/5149):
 
-- Risk Parameter Updates - 06/16/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-06-16-25/5149):
 - [xSolvBTC (Core pool)](https://app.venus.io/#/core-pool/market/0xd804dE60aFD05EE6B89aab5D152258fD461B07D5?chainId=56):
 increase the Supply Cap, from 150 xSolvBTC to 250 xSolvBTC
+
 Complete analysis and details of this recommendation are available in the above publication.
 
 #### References
