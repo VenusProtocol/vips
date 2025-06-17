@@ -35,11 +35,6 @@ const getPendleOracleCommand = (mockPendleOracleConfiguration: boolean) => {
   if (mockPendleOracleConfiguration) {
     return [
       {
-        target: bscmainnet.REDSTONE_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE],
-      },
-      {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
@@ -70,7 +65,7 @@ const getPendleOracleCommand = (mockPendleOracleConfiguration: boolean) => {
   }
 };
 
-export const vip518 = () => {
+export const vip518 = (mockPendleOracleConfiguration: boolean) => {
   const meta = {
     version: "v2",
     title: "",
@@ -197,7 +192,7 @@ export const vip518 = () => {
           ],
         ],
       },
-      ...getPendleOracleCommand(true),
+      ...getPendleOracleCommand(mockPendleOracleConfiguration),
     ],
     meta,
     ProposalType.REGULAR,

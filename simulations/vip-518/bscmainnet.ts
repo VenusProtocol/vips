@@ -2,7 +2,13 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
+import {
+  expectEvents,
+  initMainnetUser,
+  setMaxStalePeriod,
+  setMaxStalePeriodInChainlinkOracle,
+  setRedstonePrice,
+} from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip518, {
@@ -12,6 +18,7 @@ import vip518, {
   CHAINLINK_ORACLE_IMPLEMENTATION,
   DEFAULT_PROXY_ADMIN,
   PT_SUSDE_FIXED_PRICE,
+  PTsUSDE_26JUN2025,
   REDSTONE_ORACLE_IMPLEMENTATION,
   RESILIENT_ORACLE_IMPLEMENTATION,
   SUSDE,
@@ -22,6 +29,7 @@ import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+import REDSTONE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -134,6 +142,11 @@ const prices = [
     address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
     expectedPrice: parseUnits("0.997740049021309311", 18),
     expectedPriceAfterVIP: PT_SUSDE_FIXED_PRICE,
+    postVIP: async function () {
+      const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
+      const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
+      await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
+    },
   },
 ];
 
@@ -153,7 +166,7 @@ forking(51372289, async () => {
     }
   });
 
-  testVip("VIP-518", await vip518(), {
+  testVip("VIP-518", await vip518(true), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [5]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [7]);
