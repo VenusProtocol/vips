@@ -31,8 +31,8 @@ export const slisBNB = "0xd2aF6A916Bc77764dc63742BC30f71AF4cF423F4";
 export const vip518 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: ``,
+    title: "VIP-518 [BNB Chain]",
+    description: "[VIP-18] Update oracles implementation in BNB",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
