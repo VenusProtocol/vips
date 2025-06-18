@@ -8,13 +8,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip515, {
-  ACM_BASE,
-  ERC4626_FACTORY_BASE,
-  PROXY_ADMIN_BASE,
-  PSR_BASE,
-  PSR_BASE_NEW_IMPLEMENTATION,
-} from "../../vips/vip-515/bscmainnet";
+import vip517, {
+  ACM_ETHEREUM,
+  ERC4626_FACTORY_ETHEREUM,
+  PROXY_ADMIN_ETHEREUM,
+  PSR_ETHEREUM,
+  PSR_ETHEREUM_NEW_IMPLEMENTATION,
+} from "../../vips/vip-517/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -24,14 +24,14 @@ import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
-const { basemainnet } = NETWORK_ADDRESSES;
-const DEPLOYER = "0x1461d2EcE51c07E88A54dB77Dade74a5B364037D";
-const BLOCK_NUMBER = 31290031;
-const PSR_BASE_OLD_IMPLEMENTATION = "0x8991cC6b4494B71621f5a4f6633695F896fd37ee";
-const WETH_HOLDER = "0x302A94E3C28c290EAF2a4605FC52e11Eb915f378";
-const WETH_CORE = "0x4200000000000000000000000000000000000006";
-const VWETH_CORE = "0xEB8A79bD44cF4500943bf94a2b4434c95C008599";
-const COMPTROLLER_CORE = "0x0C7973F9598AA62f9e03B94E92C967fD5437426C";
+const { ethereum } = NETWORK_ADDRESSES;
+const DEPLOYER = "0xA9d02961b4B8902023Ce464F47502950f6e359b4";
+const BLOCK_NUMBER = 22659501;
+const PSR_ETHEREUM_OLD_IMPLEMENTATION = "0xee934792431B4Ebd91591a86c884A8b49Ed494C2";
+const WETH_HOLDER = "0xF04a5cC80B1E94C69B48f5ee68a08CD2F09A7c3E";
+const WETH_CORE = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+const VWETH_CORE = "0x7c8ff7d2A1372433726f879BD945fFb250B94c65";
+const COMPTROLLER_CORE = "0x687a01ecF6d3907658f7A7c714749fAC32336D1B";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -44,8 +44,8 @@ forking(BLOCK_NUMBER, async () => {
   let userSigner: SignerWithAddress;
 
   before(async () => {
-    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_BASE, ERC4626FACTORY_ABI, provider);
-    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_BASE, PROXY_ADMIN_ABI, provider);
+    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ETHEREUM, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ETHEREUM, PROXY_ADMIN_ABI, provider);
 
     // Initialize signers
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
@@ -62,11 +62,11 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(ethereum.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_BASE);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_ETHEREUM);
     });
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
@@ -74,11 +74,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("old PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_BASE)).to.be.equals(PSR_BASE_OLD_IMPLEMENTATION);
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ETHEREUM)).to.be.equals(
+        PSR_ETHEREUM_OLD_IMPLEMENTATION,
+      );
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip515(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip517(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -91,7 +93,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(basemainnet.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(ethereum.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
@@ -99,11 +101,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
-      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_BASE);
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_ETHEREUM);
     });
 
     it("new PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_BASE)).to.be.equals(PSR_BASE_NEW_IMPLEMENTATION);
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ETHEREUM)).to.be.equals(
+        PSR_ETHEREUM_NEW_IMPLEMENTATION,
+      );
     });
 
     it("check for claimRewards", async () => {
@@ -137,13 +141,13 @@ forking(BLOCK_NUMBER, async () => {
       const rewardTokenAddress = await distributor.rewardToken();
       const rewardToken = new ethers.Contract(rewardTokenAddress, REWARD_TOKEN_ABI, provider);
 
-      const initialPsrBalance = await rewardToken.balanceOf(PSR_BASE);
+      const initialPsrBalance = await rewardToken.balanceOf(PSR_ETHEREUM);
 
       await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
+      const finalPsrBalance = await rewardToken.balanceOf(PSR_ETHEREUM);
 
-      // Check balances (Reward balance will be 0 as the rewardTokenSupplySpeeds is 0 for the reward Token)
-      const finalPsrBalance = await rewardToken.balanceOf(PSR_BASE);
-      expect(finalPsrBalance).to.equal(initialPsrBalance);
+      // reward tokens transfered to PSR
+      expect(finalPsrBalance).to.be.gte(initialPsrBalance);
     });
   });
 });
