@@ -89,7 +89,7 @@ const prices = [
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
         SolvBTC,
-        "0xa51738d1937FFc553d5070f43300B385AA2D9F55", // Red stone for solvBTC
+        "0xa51738d1937FFc553d5070f43300B385AA2D9F55", // Red stone for BTC/USD
         bscmainnet.NORMAL_TIMELOCK,
       );
       await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, XSOLVBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
@@ -109,7 +109,7 @@ const prices = [
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
         SUSDE,
-        "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0",
+        "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0", // RedStone price feed for sUSDe/USDe
         bscmainnet.NORMAL_TIMELOCK,
       );
       await setMaxStalePeriodInChainlinkOracle(
@@ -133,7 +133,7 @@ const prices = [
     },
 
     postVIP: async function (resilientOracle: any) {
-      const token = new ethers.Contract("0x211cc4dd073734da055fbf44a2b4667d5e5fe5d2", ERC20_ABI, ethers.provider);
+      const token = new ethers.Contract(SUSDE, ERC20_ABI, ethers.provider);
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
