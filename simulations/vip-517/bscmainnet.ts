@@ -11,7 +11,7 @@ import {
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip518, {
+import vip517, {
   BINANCE_ORACLE_IMPLEMENTATION,
   BOUND_VALIDATOR,
   BOUND_VALIDATOR_IMPLEMENTATION,
@@ -24,7 +24,7 @@ import vip518, {
   SUSDE,
   USDE,
   XSOLVBTC,
-} from "../../vips/vip-518/bscmainnet";
+} from "../../vips/vip-517/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import PROXY_ABI from "./abi/Proxy.json";
@@ -166,7 +166,7 @@ forking(51372289, async () => {
     }
   });
 
-  testVip("VIP-518", await vip518(true), {
+  testVip("VIP-517", await vip517(true), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [5]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [7]);

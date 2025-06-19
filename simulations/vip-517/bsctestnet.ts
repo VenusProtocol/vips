@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip518, {
+import vip517, {
   BINANCE_ORACLE_IMPLEMENTATION,
   BNBx,
   BOUND_VALIDATOR,
@@ -21,7 +21,7 @@ import vip518, {
   sUSDe,
   slisBNB,
   xSolvBTC,
-} from "../../vips/vip-518/bsctestnet";
+} from "../../vips/vip-517/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import PROXY_ABI from "./abi/Proxy.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
@@ -83,7 +83,7 @@ forking(54543355, async () => {
     }
   });
 
-  testVip("VIP-518", await vip518(), {
+  testVip("VIP-517", await vip517(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PROXY_ABI], ["Upgraded"], [5]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [7]);

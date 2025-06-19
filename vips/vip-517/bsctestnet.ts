@@ -28,7 +28,7 @@ export const BNBx = "0x327d6E6FAC0228070884e913263CFF9eFed4a2C8";
 export const slisBNBOracle = "0x6a8154699b6670Ba6166ba59d1c094663E603cA8";
 export const slisBNB = "0xd2aF6A916Bc77764dc63742BC30f71AF4cF423F4";
 
-export const vip518 = () => {
+export const vip517 = () => {
   const meta = {
     version: "v2",
     title: "VIP-518 [BNB Chain]",
@@ -161,4 +161,4 @@ export const vip518 = () => {
   );
 };
 
-export default vip518;
+export default vip517;
