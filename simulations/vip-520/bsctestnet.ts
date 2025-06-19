@@ -16,8 +16,6 @@ import {
   vip520,
 } from "../../vips/vip-520/bsctestnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
-import MOCKTOKEN_ABI from "./abi/MockToken.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -27,7 +25,6 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 
 forking(54514316, async () => {
   let comptroller: Contract;
-  let resilientOracle: Contract;
   let asBNB: Contract;
   let vasBNB: Contract;
 
@@ -37,7 +34,6 @@ forking(54514316, async () => {
     comptroller = new ethers.Contract(asBNBMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     asBNB = new ethers.Contract(asBNBMarketSpec.vToken.underlying.address, ASBNB_ABI, provider);
     vasBNB = new ethers.Contract(asBNBMarketSpec.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {

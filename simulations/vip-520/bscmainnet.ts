@@ -16,7 +16,6 @@ import {
   vip520,
 } from "../../vips/vip-520/bscmainnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -29,7 +28,6 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(51547465, async () => {
   let comptroller: Contract;
-  let resilientOracle: Contract;
   let asBNB: Contract;
   let vasBNB: Contract;
 
@@ -39,7 +37,6 @@ forking(51547465, async () => {
     comptroller = new ethers.Contract(asBNBMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     asBNB = new ethers.Contract(asBNBMarketSpec.vToken.underlying.address, ASBNB_ABI, provider);
     vasBNB = new ethers.Contract(asBNBMarketSpec.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
     await setMaxStalePeriodInChainlinkOracle(
       bscmainnet.CHAINLINK_ORACLE,
