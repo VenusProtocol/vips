@@ -8,7 +8,6 @@ import { LzChainId } from "src/types";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip458 from "../../vips/vip-458/bsctestnet";
 import vip459, {
   MIN_DST_GAS,
   RemoteBridgeEntry,
@@ -25,7 +24,7 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 const XVSProxyOFTSrc = "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0";
 const XVS_HOLDER = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
-forking(48618958, async () => {
+forking(55336782, async () => {
   const provider = ethers.provider;
   let bridge: Contract;
   let xvs: Contract;
@@ -43,7 +42,6 @@ forking(48618958, async () => {
     defaultAdapterParams = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
   });
 
-  testVip("vip458 give permissions to timelock", await vip458());
   testVip("VIP-459", await vip459(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
@@ -72,11 +70,11 @@ forking(48618958, async () => {
 
   describe("Post-VIP behavior", () => {
     it("Should match trusted remote address", async () => {
-      expect(await bridge.getTrustedRemoteAddress(LzChainId.berachainbartio)).to.equal(XVS_BRIDGE_DEST.toLowerCase());
+      expect(await bridge.getTrustedRemoteAddress(LzChainId.berachainbepolia)).to.equal(XVS_BRIDGE_DEST.toLowerCase());
     });
 
     it("Should match minDestGas value", async () => {
-      expect(await bridge.minDstGasLookup(LzChainId.berachainbartio, 0)).to.equal(MIN_DST_GAS);
+      expect(await bridge.minDstGasLookup(LzChainId.berachainbepolia, 0)).to.equal(MIN_DST_GAS);
     });
 
     describe("Limits", () => {
@@ -87,25 +85,25 @@ forking(48618958, async () => {
       });
 
       it("Should match single send transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.berachainbartio)).to.equal(
+        expect(await bridge.chainIdToMaxSingleTransactionLimit(LzChainId.berachainbepolia)).to.equal(
           remoteBridgeEntry.maxSingleTransactionLimit,
         );
       });
 
       it("Should match single receive transaction limit", async () => {
-        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.berachainbartio)).to.equal(
+        expect(await bridge.chainIdToMaxSingleReceiveTransactionLimit(LzChainId.berachainbepolia)).to.equal(
           remoteBridgeEntry.maxSingleReceiveTransactionLimit,
         );
       });
 
       it("Should match max daily send limit", async () => {
-        expect(await bridge.chainIdToMaxDailyLimit(LzChainId.berachainbartio)).to.equal(
+        expect(await bridge.chainIdToMaxDailyLimit(LzChainId.berachainbepolia)).to.equal(
           remoteBridgeEntry.maxDailyLimit,
         );
       });
 
       it("Should match max daily receive limit", async () => {
-        expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.berachainbartio)).to.equal(
+        expect(await bridge.chainIdToMaxDailyReceiveLimit(LzChainId.berachainbepolia)).to.equal(
           remoteBridgeEntry.maxDailyReceiveLimit,
         );
       });
@@ -115,7 +113,7 @@ forking(48618958, async () => {
       const amount = parseUnits("0.5", 18);
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.berachainbartio,
+          LzChainId.berachainbepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -130,7 +128,7 @@ forking(48618958, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.berachainbartio,
+            LzChainId.berachainbepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -138,7 +136,7 @@ forking(48618958, async () => {
           ),
       )
         .to.be.emit(bridge, "SendToChain")
-        .withArgs(LzChainId.berachainbartio, XVS_HOLDER, receiverAddressBytes32, amount);
+        .withArgs(LzChainId.berachainbepolia, XVS_HOLDER, receiverAddressBytes32, amount);
       const bridgeBalAfter = await xvs.balanceOf(XVSProxyOFTSrc);
 
       expect(bridgeBalAfter.sub(bridgeBalPrev)).to.equal(amount);
@@ -150,7 +148,7 @@ forking(48618958, async () => {
 
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.berachainbartio,
+          LzChainId.berachainbepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -162,7 +160,7 @@ forking(48618958, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.berachainbartio,
+            LzChainId.berachainbepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -176,7 +174,7 @@ forking(48618958, async () => {
       await xvs.connect(xvsHolderSigner).approve(bridge.address, ethers.constants.MaxUint256); // Let's approve enough XVS
       const nativeFee = (
         await bridge.estimateSendFee(
-          LzChainId.berachainbartio,
+          LzChainId.berachainbepolia,
           receiverAddressBytes32,
           amount,
           false,
@@ -184,12 +182,12 @@ forking(48618958, async () => {
         )
       ).nativeFee;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 6; i++) {
         await bridge
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.berachainbartio,
+            LzChainId.berachainbepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],
@@ -201,7 +199,7 @@ forking(48618958, async () => {
           .connect(xvsHolderSigner)
           .sendFrom(
             xvsHolderSigner.address,
-            LzChainId.berachainbartio,
+            LzChainId.berachainbepolia,
             receiverAddressBytes32,
             amount,
             [xvsHolderSigner.address, ethers.constants.AddressZero, defaultAdapterParams],

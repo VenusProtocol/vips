@@ -45,8 +45,8 @@ export type RemoteBridgeCommand = {
 
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {
-    bridgeAdmin: "0xC07dF2bdee34861B5c3398bD8c2E6a00f414dffC",
-    proxyOFT: "0x723b7CB226d86bd89638ec77936463453a46C656",
+    bridgeAdmin: "0xB164Cb262328Ca44a806bA9e3d4094931E658513",
+    proxyOFT: "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0",
     dstChainId: undefined,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
