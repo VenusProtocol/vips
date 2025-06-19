@@ -58,7 +58,7 @@ forking(54514316, async () => {
   });
 
   testVip(
-    "vip-520",
+    "vip-521",
     await vip521({
       maxStalePeriod: 365 * 24 * 60 * 60, // 1 year in seconds
     }),
