@@ -8,14 +8,14 @@ interface Permissions {
   [key: string]: string[][];
 }
 
-const BERACHAINBARTIO_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
-const XVS_BRIDGE_ADMIN = "0xdE489177E607F1C6D9d27325FA38152fA462F7cC";
-const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
-const XVS_VAULT = "0x622E4e8104F7ebc94Aa81Db2613A751c39e6688b";
-const XVS_BRIDGE_DEST = "0x95676A9Ec0d7c11f207Bc180350Bd53bfed31a59";
+const BERACHAINBEPOLIA_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
+const XVS_BRIDGE_ADMIN = "0xC07dF2bdee34861B5c3398bD8c2E6a00f414dffC";
+const XVS = "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0";
+const XVS_VAULT = "0x19AdEbF431D855684EBb7bcD627CD0e72A47421a";
+const XVS_BRIDGE_DEST = "0x723b7CB226d86bd89638ec77936463453a46C656";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [
+  berachainbepolia: [
     ...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN),
     ...getXVSPermissions(XVS),
     ...getXVSVaultPermissions(XVS_VAULT),
@@ -23,14 +23,14 @@ const grantPermissions: Permissions = {
 };
 
 const acmCommandsAggreator: any = {
-  berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
+  berachainbepolia: "0x1EAA596ad8101bb321a5999e509A61747893078B",
 };
 
 const accounts: any = {
-  NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
-  FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
-  CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
-  Guardian: BERACHAINBARTIO_GUARDIAN,
+  NormalTimelock: "0xAb3DBA18664B96AD54459D06Ca8BD18C9146d5CE",
+  FastTrackTimelock: "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE",
+  CriticalTimelock: "0x2aae1073B2219729Ff8e5952887905A8da498062",
+  Guardian: BERACHAINBEPOLIA_GUARDIAN,
   XVSBridgeDest: XVS_BRIDGE_DEST,
 };
 

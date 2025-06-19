@@ -4,15 +4,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+const { berachainbepolia } = NETWORK_ADDRESSES;
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
-export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
-export const XVS_BRIDGE_ADMIN_PROXY = "0xdE489177E607F1C6D9d27325FA38152fA462F7cC";
-export const XVS = "0x75A3668f0b0d06E45601C883b0c66f7Dd2364208";
-export const XVS_BRIDGE_DEST = "0x95676A9Ec0d7c11f207Bc180350Bd53bfed31a59";
-export const XVS_STORE = "0xED54Eaa582f07886c15A22eF81582f68dBd987C1";
+export const ACM_AGGREGATOR = "0x1EAA596ad8101bb321a5999e509A61747893078B";
+export const ACM = "0x243313C1cC198FF80756ed2ef14D9dcd94Ee762b";
+export const XVS_BRIDGE_ADMIN_PROXY = "0xC07dF2bdee34861B5c3398bD8c2E6a00f414dffC";
+export const XVS = "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0";
+export const XVS_BRIDGE_DEST = "0x723b7CB226d86bd89638ec77936463453a46C656";
+export const XVS_STORE = "0x8AE454acEC6B57086244c0668D205bC5773952e5";
 
 export const OPBNB_TESTNET_TRUSTED_REMOTE = "0xa03205bc635a772e533e7be36b5701e331a70ea3";
 export const SEPOLIA_TRUSTED_REMOTE = "0xc340b7d3406502f43dc11a988e4ec5bbe536e642";
@@ -45,8 +45,8 @@ export type RemoteBridgeCommand = {
 
 export const remoteBridgeEntries: RemoteBridgeEntry[] = [
   {
-    bridgeAdmin: "0xB164Cb262328Ca44a806bA9e3d4094931E658513",
-    proxyOFT: "0x0E132cd94fd70298b747d2b4D977db8d086e5fD0",
+    bridgeAdmin: "0xC07dF2bdee34861B5c3398bD8c2E6a00f414dffC",
+    proxyOFT: "0x723b7CB226d86bd89638ec77936463453a46C656",
     dstChainId: undefined,
     maxDailyLimit: parseUnits("100000", 18),
     maxSingleTransactionLimit: parseUnits("20000", 18),
@@ -123,37 +123,37 @@ function getRemoteBridgeCommands(remoteBridgeEntry: RemoteBridgeEntry): RemoteBr
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setTrustedRemoteAddress(uint16,bytes)",
-      params: [LzChainId.berachainbartio, XVS_BRIDGE_DEST],
+      params: [LzChainId.berachainbepolia, XVS_BRIDGE_DEST],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMinDstGas(uint16,uint16,uint256)",
-      params: [LzChainId.berachainbartio, 0, MIN_DST_GAS],
+      params: [LzChainId.berachainbepolia, 0, MIN_DST_GAS],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxDailyLimit(uint16,uint256)",
-      params: [LzChainId.berachainbartio, remoteBridgeEntry.maxDailyLimit],
+      params: [LzChainId.berachainbepolia, remoteBridgeEntry.maxDailyLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxSingleTransactionLimit(uint16,uint256)",
-      params: [LzChainId.berachainbartio, remoteBridgeEntry.maxSingleTransactionLimit],
+      params: [LzChainId.berachainbepolia, remoteBridgeEntry.maxSingleTransactionLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxDailyReceiveLimit(uint16,uint256)",
-      params: [LzChainId.berachainbartio, remoteBridgeEntry.maxDailyReceiveLimit],
+      params: [LzChainId.berachainbepolia, remoteBridgeEntry.maxDailyReceiveLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
     {
       target: remoteBridgeEntry.bridgeAdmin,
       signature: "setMaxSingleReceiveTransactionLimit(uint16,uint256)",
-      params: [LzChainId.berachainbartio, remoteBridgeEntry.maxSingleReceiveTransactionLimit],
+      params: [LzChainId.berachainbepolia, remoteBridgeEntry.maxSingleReceiveTransactionLimit],
       dstChainId: remoteBridgeEntry.dstChainId,
     },
   ];
@@ -175,116 +175,116 @@ const vip459 = () => {
         target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [10],
-        dstChainId: LzChainId.berachainbartio,
+        params: [1],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.bsctestnet, BNB_TESTNET_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.opbnbtestnet, OPBNB_TESTNET_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.sepolia, SEPOLIA_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.arbitrumsepolia, ARBITRUM_SEPOLIA_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.zksyncsepolia, ZYSYNC_SEPOLIA_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.opsepolia, OP_SEPOLIA_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.unichainsepolia, UNICHAIN_SEPOLIA_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setTrustedRemoteAddress(uint16,bytes)",
         params: [LzChainId.basesepolia, BASE_SEPOLIA_TRUSTED_REMOTE],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setWhitelist(address,bool)",
-        params: [berachainbartio.VTREASURY, true],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.VTREASURY, true],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_BRIDGE_ADMIN_PROXY,
         signature: "setWhitelist(address,bool)",
-        params: [berachainbartio.NORMAL_TIMELOCK, true],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.NORMAL_TIMELOCK, true],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS,
         signature: "setMintCap(address,uint256)",
         params: [XVS_BRIDGE_DEST, XVS_MINT_LIMIT],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       ...remoteBridgeEntries.flatMap(getRemoteBridgeCommands),
       {
-        target: berachainbartio.XVS_VAULT_PROXY,
+        target: berachainbepolia.XVS_VAULT_PROXY,
         signature: "_acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: XVS_STORE,
         signature: "acceptAdmin()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.XVS_VAULT_PROXY,
+        target: berachainbepolia.XVS_VAULT_PROXY,
         signature: "add(address,uint256,address,uint256,uint256)",
         params: [XVS, 100, XVS, "0", 300],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.XVS_VAULT_PROXY,
+        target: berachainbepolia.XVS_VAULT_PROXY,
         signature: "pause()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
     ],
     meta,

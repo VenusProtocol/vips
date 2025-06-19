@@ -10,7 +10,6 @@ import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkXVSVault } from "src/vip-framework/checks/checkXVSVault";
 
-import vip458 from "../../vips/vip-458/bsctestnet";
 import vip459, {
   ARBITRUM_SEPOLIA_REMOTE,
   BASE_SEPOLIA_TRUSTED_REMOTE,
@@ -32,7 +31,7 @@ import XVS_ABI from "./abi/xvs.json";
 import XVS_BRIDGE_ADMIN_ABI from "./abi/xvsBridgeAdmin.json";
 import XVS_BRIDGE_ABI from "./abi/xvsProxyOFTDest.json";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+const { berachainbepolia } = NETWORK_ADDRESSES;
 const SINGLE_SEND_LIMIT = parseUnits("20000", 18);
 const MAX_DAILY_SEND_LIMIT = parseUnits("100000", 18);
 const MAX_DAILY_RECEIVE_LIMIT = parseUnits("102000", 18);
@@ -42,7 +41,7 @@ const MIN_DEST_GAS = "300000";
 
 const REGULAR_USER = "0xd7b572EeE55B6C4725469ef6Df5ceaa77374E641";
 
-forking(10987820, async () => {
+forking(5509597, async () => {
   let xvs: Contract;
   let xvsBridgeAdmin: Contract;
   let xvsBridge: Contract;
@@ -54,14 +53,14 @@ forking(10987820, async () => {
     xvs = await ethers.getContractAt(XVS_ABI, XVS);
     xvsBridgeAdmin = await ethers.getContractAt(XVS_BRIDGE_ADMIN_ABI, XVS_BRIDGE_ADMIN_PROXY);
     xvsBridge = await ethers.getContractAt(XVS_BRIDGE_ABI, XVS_BRIDGE_DEST);
-    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, berachainbartio.XVS_VAULT_PROXY);
+    xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, berachainbepolia.XVS_VAULT_PROXY);
     xvsStore = await ethers.getContractAt(XVS_STORE_ABI, XVS_STORE);
   });
 
   describe("Pre-VIP behaviour", async () => {
     it("Bridge Owner != NT", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).not.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(owner).not.equal(berachainbepolia.NORMAL_TIMELOCK);
     });
 
     it("Trusted remote should not exist for any network(bsctestnet, opbnbtestnet, sepolia, arbitumsepolia, zksyncsepolia, unichainsepolia, basesepolia)", async () => {
@@ -94,20 +93,19 @@ forking(10987820, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip458 configures bridge", await vip458());
   testForkedNetworkVipCommands("vip459 configures bridge", await vip459());
 
   describe("Post-VIP behaviour", async () => {
     it("Should set bridge owner to NT", async () => {
       const owner = await xvsBridgeAdmin.owner();
-      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+      expect(owner).equals(berachainbepolia.NORMAL_TIMELOCK);
     });
 
     it("Should whitelist NT and TREASURY", async () => {
-      let res = await xvsBridge.whitelist(berachainbartio.NORMAL_TIMELOCK);
+      let res = await xvsBridge.whitelist(berachainbepolia.NORMAL_TIMELOCK);
       expect(res).equals(true);
 
-      res = await xvsBridge.whitelist(berachainbartio.VTREASURY);
+      res = await xvsBridge.whitelist(berachainbepolia.VTREASURY);
       expect(res).equals(true);
     });
 
@@ -296,11 +294,11 @@ forking(10987820, async () => {
 
   describe("XVS Vault checks", async () => {
     before(async () => {
-      const xvs: Contract = await ethers.getContractAt(XVS_ABI, berachainbartio.XVS);
+      const xvs: Contract = await ethers.getContractAt(XVS_ABI, berachainbepolia.XVS);
       xvsMinter = await initMainnetUser(XVS_BRIDGE_DEST, ethers.utils.parseEther("1"));
-      const admin = await initMainnetUser(berachainbartio.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
-      const xvsHolder = await initMainnetUser(berachainbartio.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
-      await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(berachainbartio.XVS, "61805555555555555");
+      const admin = await initMainnetUser(berachainbepolia.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      const xvsHolder = await initMainnetUser(berachainbepolia.GENERIC_TEST_USER_ACCOUNT, ethers.utils.parseEther("1"));
+      await xvsVault.connect(admin).setRewardAmountPerBlockOrSecond(berachainbepolia.XVS, "61805555555555555");
       await xvsVault.connect(admin).resume();
       await xvs.connect(xvsMinter).mint(xvsHolder.address, parseEther("10"));
 
@@ -312,12 +310,12 @@ forking(10987820, async () => {
 
     it("Should set xvs vault owner to NTL", async () => {
       const owner = await xvsVault.admin();
-      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+      expect(owner).equals(berachainbepolia.NORMAL_TIMELOCK);
     });
 
     it("Should set xvs store owner to NTL", async () => {
       const owner = await xvsStore.admin();
-      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+      expect(owner).equals(berachainbepolia.NORMAL_TIMELOCK);
     });
 
     it("Should set correct xvs store address", async () => {
@@ -326,7 +324,7 @@ forking(10987820, async () => {
     });
 
     it("Should set correct reward token address", async () => {
-      const isActive = await xvsStore.rewardTokens(berachainbartio.XVS);
+      const isActive = await xvsStore.rewardTokens(berachainbepolia.XVS);
       expect(isActive).equals(true);
     });
   });
