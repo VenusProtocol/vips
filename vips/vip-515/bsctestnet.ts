@@ -121,15 +121,14 @@ export const converterBaseAssets = {
   [ETH_PRIME_CONVERTER]: ETH,
   [XVS_VAULT_CONVERTER]: XVS,
 };
+export enum ConversionAccessibility {
+  NONE = 0,
+  ALL = 1,
+  ONLY_FOR_CONVERTERS = 2,
+  ONLY_FOR_USERS = 3,
+}
 
 const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
-  enum ConversionAccessibility {
-    NONE = 0,
-    ALL = 1,
-    ONLY_FOR_CONVERTERS = 2,
-    ONLY_FOR_USERS = 3,
-  }
-
   return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
     const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
     return {
