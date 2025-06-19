@@ -2,33 +2,23 @@ import ACM_COMMANDS_AGGREATOR_ABI from "@venusprotocol/governance-contracts/arti
 import { ACMCommandsAggregator } from "@venusprotocol/governance-contracts/typechain/contracts/Utils/ACMCommandsAggregator";
 import { ethers } from "hardhat";
 import hre from "hardhat";
-import {
-  AccountType,
-  getBoundValidatorPermissions,
-  getChainlinkOraclePermissions,
-  getOmniChainExecutorOwnerPermissions,
-  getRedstoneOraclePermissions,
-  getResilientOraclePermissions,
-} from "src/permissions";
+import { AccountType, getXVSBridgeAdminPermissions, getXVSPermissions, getXVSVaultPermissions } from "src/permissions";
 
 interface Permissions {
   [key: string]: string[][];
 }
 
-const BERACHAINBEPOLIA_RESILIENT_ORACLE = "0x150B667d42FB80409f162aB84065f0c8E9B3A7a0";
-const BERACHAINBEPOLIA_CHAINLINK_ORACLE = "0xF7451caCcb32E6E3695e4B4bcF42152D57B73aD5";
-const BERACHAINBEPOLIA_REDSTONE_ORACLE = "0xedc00668FC314fcc85a574c8DBa0BB205810F247";
-const BERACHAINBEPOLIA_BOUND_VALIDATOR = "0xd3A635930300ea87548A1C3428Ac5DDfE3FFE66E";
-const BERACHAINBEPOLIA_OMNICHAIN_EXECUTOR_OWNER = "0x61ed025c4EB50604F367316B8E18dB7eb7283D49";
 const BERACHAINBEPOLIA_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
+const XVS_BRIDGE_ADMIN = "0xC07dF2bdee34861B5c3398bD8c2E6a00f414dffC";
+const XVS = "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0";
+const XVS_VAULT = "0x19AdEbF431D855684EBb7bcD627CD0e72A47421a";
+const XVS_BRIDGE_DEST = "0x723b7CB226d86bd89638ec77936463453a46C656";
 
 const grantPermissions: Permissions = {
   berachainbepolia: [
-    ...getResilientOraclePermissions(BERACHAINBEPOLIA_RESILIENT_ORACLE),
-    ...getChainlinkOraclePermissions(BERACHAINBEPOLIA_CHAINLINK_ORACLE),
-    ...getRedstoneOraclePermissions(BERACHAINBEPOLIA_REDSTONE_ORACLE),
-    ...getBoundValidatorPermissions(BERACHAINBEPOLIA_BOUND_VALIDATOR),
-    ...getOmniChainExecutorOwnerPermissions(BERACHAINBEPOLIA_OMNICHAIN_EXECUTOR_OWNER),
+    ...getXVSBridgeAdminPermissions(XVS_BRIDGE_ADMIN),
+    ...getXVSPermissions(XVS),
+    ...getXVSVaultPermissions(XVS_VAULT),
   ],
 };
 
@@ -37,12 +27,11 @@ const acmCommandsAggreator: any = {
 };
 
 const accounts: any = {
-  berachainbepolia: {
-    NormalTimelock: "0xAb3DBA18664B96AD54459D06Ca8BD18C9146d5CE",
-    FastTrackTimelock: "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE",
-    CriticalTimelock: "0x2aae1073B2219729Ff8e5952887905A8da498062",
-    Guardian: BERACHAINBEPOLIA_GUARDIAN,
-  },
+  NormalTimelock: "0xAb3DBA18664B96AD54459D06Ca8BD18C9146d5CE",
+  FastTrackTimelock: "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE",
+  CriticalTimelock: "0x2aae1073B2219729Ff8e5952887905A8da498062",
+  Guardian: BERACHAINBEPOLIA_GUARDIAN,
+  XVSBridgeDest: XVS_BRIDGE_DEST,
 };
 
 async function main() {
@@ -50,12 +39,11 @@ async function main() {
     ACM_COMMANDS_AGGREATOR_ABI.abi,
     acmCommandsAggreator[hre.network.name],
   );
-
   const networkGrantPermissions = grantPermissions[hre.network.name];
 
   for (const permission of networkGrantPermissions) {
     if (Object.values(AccountType).includes(permission[2] as AccountType)) {
-      permission[2] = accounts[hre.network.name][permission[2]];
+      permission[2] = accounts[permission[2]];
     }
   }
 

@@ -5,6 +5,7 @@ export enum AccountType {
   FAST_TRACK_TIMELOCK = "FastTrackTimelock",
   CRITICAL_TIMELOCK = "CriticalTimelock",
   GUARDIAN = "Guardian",
+  XVS_BRIDGE_DEST = "XVSBridgeDest",
 }
 
 const timelocks = [AccountType.NORMAL_TIMELOCK]
@@ -59,6 +60,8 @@ export const getXVSPermissions = (xvs: string): string[][] => {
     ...accounts.map(account => [xvs, "updateBlacklist(address,bool)", account]),
     ...accounts.map(account => [xvs, "pause()", account]),
     ...accounts.map(account => [xvs, "unpause()", account]),
+    [xvs, "mint(address,uint256)", AccountType.XVS_BRIDGE_DEST],
+    [xvs, "burn(address,uint256)", AccountType.XVS_BRIDGE_DEST],
   ];
 };
 
