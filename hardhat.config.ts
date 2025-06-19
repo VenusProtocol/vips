@@ -10,6 +10,7 @@ import { ChainId } from "src/chains";
 import "./type-extensions";
 
 dotenv.config();
+
 const DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -35,6 +36,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   basemainnet: 198000000,
   unichainsepolia: 30000000,
   unichainmainnet: 30000000,
+  berachainbepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -139,6 +141,7 @@ const config: HardhatUserConfig = {
         [ChainId.basemainnet]: assumeCancun,
         [ChainId.unichainsepolia]: assumeCancun,
         [ChainId.unichainmainnet]: assumeCancun,
+        [ChainId.berachainbepolia]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -225,6 +228,12 @@ const config: HardhatUserConfig = {
       chainId: ChainId.unichainmainnet,
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainmainnet,
+    },
+    berachainbepolia: {
+      url: process.env.ARCHIVE_NODE_berachainbepolia || "https://bepolia.rpc.berachain.com",
+      chainId: 80069,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.berachainbepolia,
     },
   },
   paths: {
