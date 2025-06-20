@@ -36,7 +36,7 @@ const BLOCK_GAS_LIMIT_PER_NETWORK = {
   basemainnet: 198000000,
   unichainsepolia: 30000000,
   unichainmainnet: 30000000,
-  berachainbartio: 30000000,
+  berachainbepolia: 30000000,
 };
 
 task("propose", "Propose proposal")
@@ -131,7 +131,7 @@ const config: HardhatUserConfig = {
         [ChainId.basemainnet]: assumeCancun,
         [ChainId.unichainsepolia]: assumeCancun,
         [ChainId.unichainmainnet]: assumeCancun,
-        [ChainId.berachainbartio]: assumeCancun,
+        [ChainId.berachainbepolia]: assumeCancun,
       },
     },
     bsctestnet: {
@@ -219,14 +219,11 @@ const config: HardhatUserConfig = {
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.unichainmainnet,
     },
-    berachainbartio: {
-      url: process.env.ARCHIVE_NODE_berachainbartio || "https://bartio.rpc.berachain.com",
-      chainId: 80084,
-      // accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
-      accounts: {
-        mnemonic: process.env.MNEMONIC || "",
-      },
-      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.berachainbartio,
+    berachainbepolia: {
+      url: process.env.ARCHIVE_NODE_berachainbepolia || "https://bepolia.rpc.berachain.com",
+      chainId: 80069,
+      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.berachainbepolia,
     },
   },
   paths: {
