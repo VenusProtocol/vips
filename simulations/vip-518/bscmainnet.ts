@@ -13,8 +13,8 @@ import {
   PROTOCOL_SHARE_RESERVE,
   asBNBMarketSpec,
   convertAmountToVTokens,
-  vip520,
-} from "../../vips/vip-520/bscmainnet";
+  vip518,
+} from "../../vips/vip-518/bscmainnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -26,7 +26,7 @@ const CHAINLINK_BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(51547465, async () => {
+forking(51771903, async () => {
   let comptroller: Contract;
   let asBNB: Contract;
   let vasBNB: Contract;
@@ -63,7 +63,7 @@ forking(51547465, async () => {
     });
   });
 
-  testVip("vip-520", await vip520(), {
+  testVip("VIP-518", await vip518(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

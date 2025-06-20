@@ -55,25 +55,75 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-export const vip520 = () => {
+export const vip518 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "vip-520 [BNB Chain] Enable BNB and FDUSD as Prime Markets on BNB Chain",
-    description: `vip-520 [BNB Chain] Enable BNB and FDUSD as Prime Markets on BNB Chain
+    title: "VIP-518 [BNB Chain] New asBNB market in the Core pool",
+    description: `#### Summary
 
-If passed, this VIP will enable [BNB](https://bscscan.com/address/0xA07c5b74C9B40447a954e1466938b865b6BBea36) and [FDUSD](https://bscscan.com/address/0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba) markets on the Core pool (BNB Chain) as Prime Markets, following these community posts:
+If passed, this VIP will add the [asBNB](https://bscscan.com/address/0x77734e70b6E88b4d82fE632a168EDf6e700912b6) market to the [Core pool on BNB Chain](https://app.venus.io/#/core-pool?chainId=56), following the Community proposal “[Support USDF/asBNB from Aster on Venus Core Pool of BNB Chain](https://community.venus.io/t/support-usdf-asbnb-from-aster-on-venus-core-pool-of-bnb-chain/5035)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x07c8120b7a01b90df5531543d6ed6ead21af7367fc9f1ec445ef9403f089e5c7)).
 
-- [VRC: Enable BNB as a Prime Market on BNB Chain](https://community.venus.io/t/vrc-enable-bnb-as-a-prime-market-on-bnb-chain/5127) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb262d9574010ffbe2981bdaf96f26d9cb6769b4f048fb654b4e041f1d1d5f222))
-- [Proposal: Add FDUSD as a Prime Market to the Venus Core Pool on BNB Chain](https://community.venus.io/t/proposal-add-fdusd-as-a-prime-market-to-the-venus-core-pool-on-bnb-chain/4989) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xc330c51fa8db6d1485290eacfcb49a493d9ebdf3041dd87be6b5da54a51ae2a7))
+#### Description
 
-Moreover, the [BTCB](https://bscscan.com/address/0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B) and [ETH](https://bscscan.com/address/0xf508fCD89b8bd15579dc79A6827cB4686A3592c8) markets will be removed from the list of Prime Markets. The new reward distribution will be:
+**Risk parameters**
 
-Complete analysis and details of these changes are available in the above publications.
+Following [Chaos Labs recommendations](https://community.venus.io/t/support-usdf-asbnb-from-aster-on-venus-core-pool-of-bnb-chain/5035/8), the risk parameters for the new market are:
 
-**References**:
+Underlying token: [asBNB](https://bscscan.com/address/0x77734e70b6E88b4d82fE632a168EDf6e700912b6)
+
+- Borrow cap: 0 asBNB
+- Supply cap: 2,000 asBNB
+- Collateral factor: 72%
+- Reserve factor: 10%
+- Liquidation Penalty: 10%
+
+The interest rate curve for the new market is not relevant because the asset is not borrowable, but these parameters will be set anyway:
+
+- kink: 50%
+- base (yearly): 0%
+- multiplier (yearly): 9%
+- jump multiplier (yearly): 200%
+
+**Oracles configuration**
+
+The [ResilientOracle](https://docs-v4.venus.io/risk/resilient-price-oracle) deployed to [BNB Chain](https://bscscan.com/address/0x6592b5DE802159F3E74B2486b091D11a8256ab8A) is used for asBNB, with the following configuration
+
+- asBNB
+    - Main oracle: [AsBNBOracle](https://bscscan.com/address/0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5), that will internally use the ratio asBNB/slisBNB
+- slisBNB
+    - Main oracle: [SlisBNBOracle](https://bscscan.com/address/0xDDE6446E66c786afF4cd3D183a908bCDa57DF9c1), that will internally use the ratio slisBNB/BNB provided by [StakeManager contract](https://bscscan.com/address/0x1adB950d8bB3dA4bE104211D5AB038628e477fE6)
+- BNB
+    - Main oracle: [RedStoneOracle](https://bscscan.com/address/0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a) ([feed](https://bscscan.com/address/0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e))
+    - Pivot oracle: [ChainlinkOracle](https://bscscan.com/address/0x1B2103441A0A108daD8848D8F5d790e4D402921F) ([feed](https://bscscan.com/address/0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE))
+    - Fallback oracle: [BinanceOracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this VIP:
+
+- **Audit**: Certik, Peckshield, Hacken and Code4rena have audited the market code. Certik has audited the AsBNBOracle code
+- **VIP execution simulation**: in a simulation environment, validating the new markets are properly added to the Core pool on BNB Chain, with the right parameters and the expected bootstrap liquidity
+- **Deployment on testnet**: the same market has been deployed to BNB testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report of AsBNBOracle (2025/March/20)](https://github.com/VenusProtocol/oracle/blob/e33dd9b60a29d3e69df554136383a6477fa904c5/audits/128_AsBNBOracle_certik_20250320.pdf)
+- [Certik audit report](https://github.com/VenusProtocol/oracle/blob/93a79c97e867f61652fc063abb5df323acc9bed4/audits/116_WeETHAccountantOracle_certik_20240823.pdf) (2024/08/23)
+- [Certik audit report](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/036_isolatedPools_certik_20230619.pdf) (2023/June/19)
+- [Code4rena contest](https://code4rena.com/contests/2023-05-venus-protocol-isolated-pools) (2023/May/05)
+- [Hacken audit report](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/016_isolatedPools_hacken_20230426.pdf) (2023/April/26)
+- [Peckshield audit report 1](https://github.com/VenusProtocol/isolated-pools/blob/c801e898e034e313e885c5d486ed27c15e7e2abf/audits/003_isolatedPools_peckshield_20230112.pdf) (2023/January/12)
+- [Peckshield audit report 2](https://github.com/VenusProtocol/isolated-pools/blob/1d60500e28d4912601bac461870c754dd9e72341/audits/037_isolatedPools_peckshield_20230625.pdf) (2023/June/25)
+
+#### Deployed contracts
+
+- Mainnet VToken_vasBNB: [0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF](https://bscscan.com/address/0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF)
+- Testnet VToken_vasBNB: [0x73F506Aefd5e169D48Ea21A373B9B0a200E37585](https://testnet.bscscan.com/address/0x73F506Aefd5e169D48Ea21A373B9B0a200E37585)
+
+#### References
 
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/577)
-- Execution on testnet ([BNB Chain](https://testnet.bscscan.com/tx/0x))`,
+- [Documentation](https://docs-v4.venus.io/)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -164,4 +214,4 @@ Complete analysis and details of these changes are available in the above public
   );
 };
 
-export default vip520;
+export default vip518;

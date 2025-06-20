@@ -13,8 +13,8 @@ import {
   PROTOCOL_SHARE_RESERVE,
   asBNBMarketSpec,
   convertAmountToVTokens,
-  vip520,
-} from "../../vips/vip-520/bsctestnet";
+  vip518,
+} from "../../vips/vip-518/bsctestnet";
 import VTOKEN_ABI from "./abi/LegacyPoolVToken.json";
 import ASBNB_ABI from "./abi/asBNB.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -51,7 +51,7 @@ forking(54514316, async () => {
     });
   });
 
-  testVip("vip-520", await vip520(), {
+  testVip("VIP-518", await vip518(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
