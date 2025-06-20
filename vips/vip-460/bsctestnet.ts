@@ -1,24 +1,23 @@
 import { parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+const { berachainbepolia } = NETWORK_ADDRESSES;
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
-export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
-export const PSR = "0xE4dD1B52c3D9d93d42B44cB77D769A9F73225012";
-export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0x9aEDab5FFD5CfeA4aF0bcFBC618cB48a53936034";
-export const COMPTROLLER_CORE = "0x854Ba54c41bE5e54408EDF432e28A195Bcd3E88d";
+export const ACM_AGGREGATOR = "0x1EAA596ad8101bb321a5999e509A61747893078B";
+export const ACM = "0x243313C1cC198FF80756ed2ef14D9dcd94Ee762b";
+export const PSR = "0xC081DF6860E7E537b0330cD6c1b6529378838D5e";
+export const NATIVE_TOKEN_GATEWAY_CORE_POOL = "0x54EBb1FF397e395e752986B73D515963bA2F6AC8";
+export const COMPTROLLER_CORE = "0x2cAD397672BD86269E0fD41E4c61D91974e78FD0";
 
-export const MOCK_USDCe = "0x0A912ebEc8D4a35568C1BFE368AD68A548597906";
-export const VUSDCe = "0x758bCc00C4436d23de0290EFdE106793Af9f3a6B";
-export const WETH = "0x5A4bcFa0cf7f029bb5A62Cd52a24F7B2d0C18d2A";
-export const VWETH = "0x5479B79B9719C558Ed69234E4fE77ce2167cA291";
-export const WBERA = "0x7507c1dc16935B82698e4C63f2746A2fCf994dF8";
-export const VWBERA = "0x860B3A4B7B6BaA714BB72AD67092E3e858fDb621";
+export const MOCK_USDCe = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
+export const VUSDCe = "0xe803c6d3F68c6F7f63624F7d1c60EBf5C64eC669";
+export const WETH = "0x434BB500fA491Daa03375D2B9762dD6080064e2D";
+export const VWETH = "0xbadbf9421301467ec6d4634864e0D8780dBbC5B0";
+export const WBERA = "0x6969696969696969696969696969696969696969";
+export const VWBERA = "0x6C015F64af86e335a20cC6AA74A1094f49b6201b";
 
 const vip453 = () => {
   const meta = {
@@ -36,70 +35,70 @@ const vip453 = () => {
         target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [7],
-        dstChainId: LzChainId.berachainbartio,
+        params: [2],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PSR,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PSR,
         signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
         params: [
           [
-            [0, 10000, berachainbartio.VTREASURY],
-            [1, 10000, berachainbartio.VTREASURY],
+            [0, 10000, berachainbepolia.VTREASURY],
+            [1, 10000, berachainbepolia.VTREASURY],
           ],
         ],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PSR,
         signature: "setPoolRegistry(address)",
-        params: [berachainbartio.POOL_REGISTRY],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: NATIVE_TOKEN_GATEWAY_CORE_POOL,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
 
       {
-        target: berachainbartio.POOL_REGISTRY,
+        target: berachainbepolia.POOL_REGISTRY,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
-      { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [], dstChainId: LzChainId.berachainbartio },
+      { target: COMPTROLLER_CORE, signature: "acceptOwnership()", params: [], dstChainId: LzChainId.berachainbepolia },
       {
         target: COMPTROLLER_CORE,
         signature: "setPriceOracle(address)",
-        params: [berachainbartio.RESILIENT_ORACLE],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.RESILIENT_ORACLE],
+        dstChainId: LzChainId.berachainbepolia,
       },
 
       // Add pool
       {
-        target: berachainbartio.POOL_REGISTRY,
+        target: berachainbepolia.POOL_REGISTRY,
         signature: "addPool(string,address,uint256,uint256,uint256)",
         params: ["Core", COMPTROLLER_CORE, parseUnits("0.5", 18), parseUnits("1.1", 18), parseUnits("100", 18)],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
 
       // Add USDC.e market
@@ -107,28 +106,28 @@ const vip453 = () => {
         target: MOCK_USDCe,
         signature: "faucet(uint256)",
         params: [parseUnits("5000", 6)],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: MOCK_USDCe,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: MOCK_USDCe,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, parseUnits("5000", 6)],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, parseUnits("5000", 6)],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: VUSDCe,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.POOL_REGISTRY,
+        target: berachainbepolia.POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
           [
@@ -136,12 +135,12 @@ const vip453 = () => {
             parseUnits("0.78", 18), // CF
             parseUnits("0.8", 18), // LT
             parseUnits("5000", 6), // INITIAL_SUPPLY
-            berachainbartio.VTREASURY,
+            berachainbepolia.VTREASURY,
             parseUnits("20000000", 6), // SUPPLY_CAP
             parseUnits("18000000", 6), // BORROW_CAP
           ],
         ],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
 
       // Add WETH market
@@ -149,28 +148,28 @@ const vip453 = () => {
         target: WETH,
         signature: "faucet(uint256)",
         params: [parseUnits("2", 18)],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: WETH,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: WETH,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, parseUnits("2", 18)],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, parseUnits("2", 18)],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: VWETH,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.POOL_REGISTRY,
+        target: berachainbepolia.POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
           [
@@ -178,12 +177,12 @@ const vip453 = () => {
             parseUnits("0.78", 18), // CF
             parseUnits("0.8", 18), // LT
             parseUnits("2", 18), // INITIAL_SUPPLY
-            berachainbartio.VTREASURY,
+            berachainbepolia.VTREASURY,
             parseUnits("700", 18), // SUPPLY_CAP
             parseUnits("350", 18), // BORROW_CAP
           ],
         ],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
 
       // Add WBERA market
@@ -191,29 +190,29 @@ const vip453 = () => {
         target: WBERA,
         signature: "deposit()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
         value: parseUnits("0.05", 18).toString(),
       },
       {
         target: WBERA,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, 0],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, 0],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: WBERA,
         signature: "approve(address,uint256)",
-        params: [berachainbartio.POOL_REGISTRY, parseUnits("0.05", 18)],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY, parseUnits("0.05", 18)],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: VWBERA,
         signature: "setReduceReservesBlockDelta(uint256)",
         params: ["86400"],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.POOL_REGISTRY,
+        target: berachainbepolia.POOL_REGISTRY,
         signature: "addMarket((address,uint256,uint256,uint256,address,uint256,uint256))",
         params: [
           [
@@ -221,12 +220,12 @@ const vip453 = () => {
             parseUnits("0.78", 18), // CF
             parseUnits("0.8", 18), // LT
             parseUnits("0.05", 18), // INITIAL_SUPPLY
-            berachainbartio.VTREASURY,
+            berachainbepolia.VTREASURY,
             parseUnits("4000000", 18), // SUPPLY_CAP
             parseUnits("3500000", 18), // BORROW_CAP
           ],
         ],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
     ],
     meta,

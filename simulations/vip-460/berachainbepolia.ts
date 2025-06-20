@@ -9,9 +9,8 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip452 from "../../vips/vip-452/bsctestnet";
-import vip453 from "../../vips/vip-453/bsctestnet";
-import vip454, {
+import vip459 from "../../vips/vip-459/bsctestnet";
+import vip460, {
   ACM,
   COMPTROLLER_CORE,
   MOCK_USDCe,
@@ -21,7 +20,7 @@ import vip454, {
   VWETH,
   WBERA,
   WETH,
-} from "../../vips/vip-454/bsctestnet";
+} from "../../vips/vip-460/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager_ABI.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -29,10 +28,10 @@ import ERC20_ABI from "./abi/erc20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+const { berachainbepolia } = NETWORK_ADDRESSES;
 
-const RESILIENT_ORACLE = berachainbartio.RESILIENT_ORACLE;
-const POOL_REGISTRY = berachainbartio.POOL_REGISTRY;
+const RESILIENT_ORACLE = berachainbepolia.RESILIENT_ORACLE;
+const POOL_REGISTRY = berachainbepolia.POOL_REGISTRY;
 
 const BLOCKS_PER_YEAR = BigNumber.from("31536000"); // equal to seconds in a year as it is timebased deployment
 
@@ -106,7 +105,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "5000",
-    vTokenReceiver: berachainbartio.VTREASURY,
+    vTokenReceiver: berachainbepolia.VTREASURY,
   },
   vWETH_Core: {
     borrowCap: "350",
@@ -115,7 +114,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "2",
-    vTokenReceiver: berachainbartio.VTREASURY,
+    vTokenReceiver: berachainbepolia.VTREASURY,
   },
   vWBERA_Core: {
     borrowCap: "3500000",
@@ -124,7 +123,7 @@ const riskParameters: { [key in VTokenSymbol]: RiskParameters } = {
     liquidationThreshold: "0.8",
     reserveFactor: "0.1",
     initialSupply: "0.05",
-    vTokenReceiver: berachainbartio.VTREASURY,
+    vTokenReceiver: berachainbepolia.VTREASURY,
   },
 };
 
@@ -147,12 +146,12 @@ const interestRateModels: InterestRateModelSpec[] = [
 ];
 
 const interestRateModelAddresses: { [key in VTokenSymbol]: string } = {
-  vUSDCe_Core: "",
-  vWETH_Core: "",
-  vWBERA_Core: "",
+  vUSDCe_Core: "0x1c8d09ebdA6dad7a1fd7D6D8A670B7E599602d18",
+  vWETH_Core: "0x1c8d09ebdA6dad7a1fd7D6D8A670B7E599602d18",
+  vWBERA_Core: "0x1c8d09ebdA6dad7a1fd7D6D8A670B7E599602d18",
 };
 
-forking(10914719, async () => {
+forking(5560844, async () => {
   let protocolShareReserve: Contract;
   let accessControlManager: Contract;
   let psrSigner: SignerWithAddress;
@@ -179,9 +178,8 @@ forking(10914719, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip452 configures bridge", await vip452());
-  testForkedNetworkVipCommands("vip453 configures bridge", await vip453());
-  testForkedNetworkVipCommands("vip454 configures bridge", await vip454());
+  testForkedNetworkVipCommands("vip459", await vip459());
+  testForkedNetworkVipCommands("vip460", await vip460());
 
   describe("Post-VIP behaviour", async () => {
     let registeredPools: { name: string; creator: string; comptroller: string }[];
@@ -192,7 +190,7 @@ forking(10914719, async () => {
 
     it("PSR owner should be NT", async () => {
       const owner = await protocolShareReserve.owner();
-      expect(owner).equals(berachainbartio.NORMAL_TIMELOCK);
+      expect(owner).equals(berachainbepolia.NORMAL_TIMELOCK);
     });
 
     it("PSR should have correct ACM reference", async () => {
@@ -201,27 +199,27 @@ forking(10914719, async () => {
     });
 
     it("PSR should have correct PoolRegistry reference", async () => {
-      expect(await protocolShareReserve.poolRegistry()).to.equal(berachainbartio.POOL_REGISTRY);
+      expect(await protocolShareReserve.poolRegistry()).to.equal(berachainbepolia.POOL_REGISTRY);
     });
 
     it("Verify Multisig permissions for PSR", async () => {
       expect(
         await accessControlManager
           .connect(psrSigner)
-          .isAllowedToCall(berachainbartio.GUARDIAN, "addOrUpdateDistributionConfigs(DistributionConfig[])"),
+          .isAllowedToCall(berachainbepolia.GUARDIAN, "addOrUpdateDistributionConfigs(DistributionConfig[])"),
       ).to.be.true;
 
       expect(
         await accessControlManager
           .connect(psrSigner)
-          .isAllowedToCall(berachainbartio.GUARDIAN, "removeDistributionConfig(Schema,address)"),
+          .isAllowedToCall(berachainbepolia.GUARDIAN, "removeDistributionConfig(Schema,address)"),
       ).to.be.true;
     });
 
     it("Validate PSR distribution config", async () => {
       expect(await protocolShareReserve.totalDistributions()).to.equal(2);
-      expect(await protocolShareReserve.getPercentageDistribution(berachainbartio.VTREASURY, 0)).to.equal(10000);
-      expect(await protocolShareReserve.getPercentageDistribution(berachainbartio.VTREASURY, 1)).to.equal(10000);
+      expect(await protocolShareReserve.getPercentageDistribution(berachainbepolia.VTREASURY, 0)).to.equal(10000);
+      expect(await protocolShareReserve.getPercentageDistribution(berachainbepolia.VTREASURY, 1)).to.equal(10000);
     });
 
     it("should have 1 pool(Core Pool)", async () => {
@@ -231,7 +229,7 @@ forking(10914719, async () => {
     it("should register Core pool in PoolRegistry", async () => {
       const pool = registeredPools[0];
       expect(pool.name).to.equal("Core");
-      expect(pool.creator).to.equal(berachainbartio.NORMAL_TIMELOCK);
+      expect(pool.creator).to.equal(berachainbepolia.NORMAL_TIMELOCK);
       expect(pool.comptroller).to.equal(COMPTROLLER_CORE);
     });
 
@@ -254,7 +252,7 @@ forking(10914719, async () => {
     for (const [symbol, address] of Object.entries(vTokens) as [VTokenSymbol, string][]) {
       it(`should transfer ownership of ${symbol} to GUARDIAN`, async () => {
         const vToken = await ethers.getContractAt(VTOKEN_ABI, address);
-        expect(await vToken.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+        expect(await vToken.owner()).to.equal(berachainbepolia.NORMAL_TIMELOCK);
       });
     }
 
@@ -350,7 +348,7 @@ forking(10914719, async () => {
           });
 
           it("should have owner = GUARDIAN", async () => {
-            expect(await comptroller.owner()).to.equal(berachainbartio.NORMAL_TIMELOCK);
+            expect(await comptroller.owner()).to.equal(berachainbepolia.NORMAL_TIMELOCK);
           });
         });
       };
@@ -358,7 +356,7 @@ forking(10914719, async () => {
       checkComptroller(COMPTROLLER_CORE, "Core");
     });
 
-    it.only("Interest rates", async () => {
+    it("Interest rates", async () => {
       for (const model of interestRateModels) {
         for (const symbol of model.vTokens) {
           checkInterestRate(
