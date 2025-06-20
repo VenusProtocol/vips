@@ -222,7 +222,10 @@ const config: HardhatUserConfig = {
     berachainbepolia: {
       url: process.env.ARCHIVE_NODE_berachainbepolia || "https://bepolia.rpc.berachain.com",
       chainId: 80069,
-      accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      // accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
+      accounts: {
+        mnemonic: process.env.MNEMONIC || "",
+      },
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.berachainbepolia,
     },
   },
