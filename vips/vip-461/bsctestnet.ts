@@ -2,15 +2,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { berachainbartio } = NETWORK_ADDRESSES;
+const { berachainbepolia } = NETWORK_ADDRESSES;
 
 export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
-export const ACM_AGGREGATOR = "0x1ba10ca9a744131aD8428D719767816A693c3b71";
-export const ACM = "0xEf368e4c1f9ACC9241E66CD67531FEB195fF7536";
-export const PSR = "0xE4dD1B52c3D9d93d42B44cB77D769A9F73225012";
-export const PRIME = "0x3AAEd911374A60856a205cEf545F5Af49969aAa7";
-export const PRIME_LIQUIDITY_PROVIDER = "0x4039Ba7b3837FA9C2Ae95e59573f5CBfB4691c40";
-export const COMPTROLLER_CORE = "0x854Ba54c41bE5e54408EDF432e28A195Bcd3E88d";
+export const ACM_AGGREGATOR = "0x1EAA596ad8101bb321a5999e509A61747893078B";
+export const ACM = "0x243313C1cC198FF80756ed2ef14D9dcd94Ee762b";
+export const PSR = "0xC081DF6860E7E537b0330cD6c1b6529378838D5e";
+export const PRIME = "0x6C3cB3CacBDEB37aAa3Ff12d18D19C49FA82f425";
+export const PRIME_LIQUIDITY_PROVIDER = "0x6c680DE00C8D57c14f0ec23Bd16b41d04961E1Cf";
+export const COMPTROLLER_CORE = "0x2cAD397672BD86269E0fD41E4c61D91974e78FD0";
 
 const PRIME_POOL_ID = 0;
 
@@ -30,49 +30,49 @@ const vip453 = () => {
         target: ACM,
         signature: "grantRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM_AGGREGATOR,
         signature: "executeGrantPermissions(uint256)",
-        params: [8],
-        dstChainId: LzChainId.berachainbartio,
+        params: [3],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: ACM,
         signature: "revokeRole(bytes32,address)",
         params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME,
         signature: "initializeV2(address)",
-        params: [berachainbartio.POOL_REGISTRY],
-        dstChainId: LzChainId.berachainbartio,
+        params: [berachainbepolia.POOL_REGISTRY],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME,
         signature: "acceptOwnership()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setPrimeToken(address)",
         params: [PRIME],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.XVS_VAULT_PROXY,
+        target: berachainbepolia.XVS_VAULT_PROXY,
         signature: "setPrimeToken(address,address,uint256)",
-        params: [PRIME, berachainbartio.XVS, PRIME_POOL_ID],
-        dstChainId: LzChainId.berachainbartio,
+        params: [PRIME, berachainbepolia.XVS, PRIME_POOL_ID],
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME,
@@ -81,25 +81,25 @@ const vip453 = () => {
           0, // irrevocable
           0, // revocable
         ],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "pauseFundsTransfer()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
-        target: berachainbartio.XVS_VAULT_PROXY,
+        target: berachainbepolia.XVS_VAULT_PROXY,
         signature: "resume()",
         params: [],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
       {
         target: COMPTROLLER_CORE,
         signature: "setPrimeToken(address)",
         params: [PRIME],
-        dstChainId: LzChainId.berachainbartio,
+        dstChainId: LzChainId.berachainbepolia,
       },
     ],
     meta,

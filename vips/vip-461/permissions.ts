@@ -8,24 +8,24 @@ interface Permissions {
   [key: string]: string[][];
 }
 
-const BERACHAINBARTIO_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
-const PRIME = "0x3AAEd911374A60856a205cEf545F5Af49969aAa7";
-const PLP = "0x4039Ba7b3837FA9C2Ae95e59573f5CBfB4691c40";
+const BERACHAINBEPOLIA_GUARDIAN = "0xdf3b635d2b535f906BB02abb22AED71346E36a00";
+const PRIME = "0x6C3cB3CacBDEB37aAa3Ff12d18D19C49FA82f425";
+const PLP = "0x6c680DE00C8D57c14f0ec23Bd16b41d04961E1Cf";
 
 const grantPermissions: Permissions = {
-  berachainbartio: [...getPrimePermissions(PRIME), ...getPrimeLiquidityProviderPermissions(PLP)],
+  berachainbepolia: [...getPrimePermissions(PRIME), ...getPrimeLiquidityProviderPermissions(PLP)],
 };
 
 const acmCommandsAggreator: any = {
-  berachainbartio: "0x1ba10ca9a744131aD8428D719767816A693c3b71",
+  berachainbepolia: "0x1EAA596ad8101bb321a5999e509A61747893078B",
 };
 
 const accounts: any = {
-  berachainbartio: {
-    NormalTimelock: "0x8699D418D8bae5CFdc566E4fce897B08bd9B03B0",
-    FastTrackTimelock: "0x723b7CB226d86bd89638ec77936463453a46C656",
-    CriticalTimelock: "0x920eeE8A5581e80Ca9C47CbF11B7A6cDB30204BD",
-    Guardian: BERACHAINBARTIO_GUARDIAN,
+  berachainbepolia: {
+    NormalTimelock: "0xAb3DBA18664B96AD54459D06Ca8BD18C9146d5CE",
+    FastTrackTimelock: "0x08Cf9d51df988F1E69174D22b7f93f97e1aAEbeE",
+    CriticalTimelock: "0x2aae1073B2219729Ff8e5952887905A8da498062",
+    Guardian: BERACHAINBEPOLIA_GUARDIAN,
   },
 };
 
