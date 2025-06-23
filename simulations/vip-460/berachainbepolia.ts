@@ -24,7 +24,7 @@ import vip460, {
 import ACM_ABI from "./abi/AccessControlManager_ABI.json";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import ERC20_ABI from "./abi/erc20.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
