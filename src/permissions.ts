@@ -6,6 +6,7 @@ export enum AccountType {
   CRITICAL_TIMELOCK = "CriticalTimelock",
   GUARDIAN = "Guardian",
   POOL_REGISTRY = "PoolRegistry",
+  XVS_BRIDGE_DEST = "XVSBridgeDest",
 }
 
 const timelocks = [AccountType.NORMAL_TIMELOCK]
@@ -33,8 +34,8 @@ export const getChainlinkOraclePermissions = (chainlinkOracle: string): string[]
 
 export const getRedstoneOraclePermissions = (redstoneOracle: string): string[][] => {
   return [
-    ...timelocks.map(account => [redstoneOracle, "setTokenConfig(TokenConfig)", account]),
-    ...timelocks.map(account => [redstoneOracle, "setDirectPrice(address,uint256)", account]),
+    ...accounts.map(account => [redstoneOracle, "setTokenConfig(TokenConfig)", account]),
+    ...accounts.map(account => [redstoneOracle, "setDirectPrice(address,uint256)", account]),
   ];
 };
 
@@ -60,6 +61,8 @@ export const getXVSPermissions = (xvs: string): string[][] => {
     ...accounts.map(account => [xvs, "updateBlacklist(address,bool)", account]),
     ...accounts.map(account => [xvs, "pause()", account]),
     ...accounts.map(account => [xvs, "unpause()", account]),
+    [xvs, "mint(address,uint256)", AccountType.XVS_BRIDGE_DEST],
+    [xvs, "burn(address,uint256)", AccountType.XVS_BRIDGE_DEST],
   ];
 };
 
@@ -172,7 +175,7 @@ export const getComptrollerPermissions = (): string[][] => {
       .map(account => [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", account]),
     ...accounts.map(account => [ethers.constants.AddressZero, "setActionsPaused(address[],uint256[],bool)", account]),
     ...timelocks.map(account => [ethers.constants.AddressZero, "setForcedLiquidation(address,bool)", account]),
-    ...timelocks.map(account => [ethers.constants.AddressZero, "unlistMarket(address)", account]),
+    ...accounts.map(account => [ethers.constants.AddressZero, "unlistMarket(address)", account]),
     [ethers.constants.AddressZero, "setCloseFactor(uint256)", AccountType.NORMAL_TIMELOCK],
     [ethers.constants.AddressZero, "setLiquidationIncentive(uint256)", AccountType.NORMAL_TIMELOCK],
     [ethers.constants.AddressZero, "setMinLiquidatableCollateral(uint256)", AccountType.NORMAL_TIMELOCK],
@@ -213,16 +216,6 @@ export const getRewardDistributorPermissionsBlockbased = (): string[][] => {
 export const getIRMPermissions = (): string[][] => {
   return [
     [ethers.constants.AddressZero, "updateJumpRateModel(uint256,uint256,uint256,uint256)", AccountType.NORMAL_TIMELOCK],
-    [
-      ethers.constants.AddressZero,
-      "updateJumpRateModel(uint256,uint256,uint256,uint256)",
-      AccountType.CRITICAL_TIMELOCK,
-    ],
-    [
-      ethers.constants.AddressZero,
-      "updateJumpRateModel(uint256,uint256,uint256,uint256)",
-      AccountType.FAST_TRACK_TIMELOCK,
-    ],
   ];
 };
 
@@ -251,9 +244,6 @@ export const getOmniChainExecutorOwnerPermissions = (omniChainExecutor: string):
     ...accounts.map(account => [omniChainExecutor, "setMaxDailyReceiveLimit(uint256)", account]),
     ...accounts.map(account => [omniChainExecutor, "pause()", account]),
     [omniChainExecutor, "unpause()", AccountType.GUARDIAN],
-    [omniChainExecutor, "setPrecrime(address)", AccountType.GUARDIAN],
-    [omniChainExecutor, "setMinDstGas(uint16,uint16,uint256)", AccountType.GUARDIAN],
-    [omniChainExecutor, "setPayloadSizeLimit(uint16,uint256)", AccountType.GUARDIAN],
     ...accounts.map(account => [omniChainExecutor, "addTimelocks(address[])", account]),
     ...accounts.map(account => [omniChainExecutor, "setConfig(uint16,uint16,uint256,bytes)", account]),
     [omniChainExecutor, "setTrustedRemoteAddress(uint16,bytes)", AccountType.GUARDIAN],

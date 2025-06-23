@@ -129,7 +129,7 @@ export const NETWORK_CONFIG = {
     },
     XVS_VAULT_POOL_ID: 0,
   },
-  berachainbartio: {
+  berachainbepolia: {
     DELAY_BLOCKS: {
       [ProposalType.REGULAR]: 200,
       [ProposalType.FAST_TRACK]: 100,
