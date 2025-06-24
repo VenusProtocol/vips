@@ -8,13 +8,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip517, {
-  ACM_UNICHAIN,
-  ERC4626_FACTORY_UNICHAIN,
-  PROXY_ADMIN_UNICHAIN,
-  PSR_UNICHAIN,
-  PSR_UNICHAIN_NEW_IMPLEMENTATION,
-} from "../../vips/vip-517/bsctestnet";
+import vip522, {
+  ACM_OPTIMISM,
+  ERC4626_FACTORY_OPTIMISM,
+  PROXY_ADMIN_OPTIMISM,
+  PSR_OPTIMISM,
+  PSR_OPTIMISM_NEW_IMPLEMENTATION,
+} from "../../vips/vip-522/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -24,14 +24,14 @@ import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
-const { unichainsepolia } = NETWORK_ADDRESSES;
-const DEPLOYER = "0xA03893a7f835C6A216E63F8C212EEB4310416dDF";
-const BLOCK_NUMBER = 22372802;
-const PSR_UNICHAIN_OLD_IMPLEMENTATION = "0x856CeD0855383ead1992f0B13a10A71Ecd5917ca";
-const WETH_HOLDER = "0x600C9250DD0D41BF658Ead8B0BCfD8e7B9484B2C";
+const { opsepolia } = NETWORK_ADDRESSES;
+const DEPLOYER = "0x476c66CA1fE0E8AbB45c8566D635DcA9dC930F73";
+const BLOCK_NUMBER = 28710871;
+const PSR_OPTIMISM_OLD_IMPLEMENTATION = "0x28A2Acd72be0CFdfeEEEa8E6c2556774b0B4f13c";
+const WETH_HOLDER = "0x4e8E101924eDE233C13e2D8622DC8aED2872d505";
 const WETH_CORE = "0x4200000000000000000000000000000000000006";
-const VWETH_CORE = "0x3dEAcBe87e4B6333140a46aBFD12215f4130B132";
-const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
+const VWETH_CORE = "0x4E610626BeF901EEE22D558b2ed19e6f7B87cf51";
+const COMPTROLLER_CORE = "0x59d10988974223B042767aaBFb6D926863069535";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -44,8 +44,8 @@ forking(BLOCK_NUMBER, async () => {
   let userSigner: SignerWithAddress;
 
   before(async () => {
-    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_UNICHAIN, ERC4626FACTORY_ABI, provider);
-    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_UNICHAIN, PROXY_ADMIN_ABI, provider);
+    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_OPTIMISM, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_OPTIMISM, PROXY_ADMIN_ABI, provider);
 
     // Initialize signers
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
@@ -62,11 +62,11 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(unichainsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(opsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_UNICHAIN);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_OPTIMISM);
     });
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
@@ -74,13 +74,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("old PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
-        PSR_UNICHAIN_OLD_IMPLEMENTATION,
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_OPTIMISM)).to.be.equals(
+        PSR_OPTIMISM_OLD_IMPLEMENTATION,
       );
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip517(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip522(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -93,7 +93,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(unichainsepolia.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(opsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
@@ -101,12 +101,12 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
-      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_UNICHAIN);
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_OPTIMISM);
     });
 
     it("new PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
-        PSR_UNICHAIN_NEW_IMPLEMENTATION,
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_OPTIMISM)).to.be.equals(
+        PSR_OPTIMISM_NEW_IMPLEMENTATION,
       );
     });
 
@@ -141,10 +141,10 @@ forking(BLOCK_NUMBER, async () => {
       const rewardTokenAddress = await distributor.rewardToken();
       const rewardToken = new ethers.Contract(rewardTokenAddress, REWARD_TOKEN_ABI, provider);
 
-      const initialPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
+      const initialPsrBalance = await rewardToken.balanceOf(PSR_OPTIMISM);
 
       await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
-      const finalPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
+      const finalPsrBalance = await rewardToken.balanceOf(PSR_OPTIMISM);
 
       // reward tokens transfered to PSR
       expect(finalPsrBalance).to.be.gte(initialPsrBalance);

@@ -50,11 +50,11 @@ export const PROXY_ADMIN_OPTIMISM = "0xa9aaf2A1cCf2C3a87997942abaA740887cC89241"
 export const PROXY_ADMIN_UNICHAIN = "0x256735eFdfDf135bD6991854e0065909e57804aa";
 export const PROXY_ADMIN_ZKSYNC = "0x18E44f588a4DcF2F7145d35A5C226e129040b6D3";
 
-export const vip517 = () => {
+export const vip522 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-517",
-    description: ``,
+    title: "VIP-522 Enable ERC4626 Factory on every network",
+    description: `This VIP enables ERC4626Factory on every network : Ethereum, BNB, opBNB, Arbitrum, ZKsync, Optimism, Base and Unichain`,
     forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
     againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Vault Upgrades or not",
@@ -405,4 +405,4 @@ export const vip517 = () => {
   );
 };
 
-export default vip517;
+export default vip522;

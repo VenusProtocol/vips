@@ -8,13 +8,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip517, {
-  ACM_ARBITRUM,
-  ERC4626_FACTORY_ARBITRUM,
-  PROXY_ADMIN_ARBITRUM,
-  PSR_ARBITRUM,
-  PSR_ARBITRUM_NEW_IMPLEMENTATION,
-} from "../../vips/vip-517/bscmainnet";
+import vip522, {
+  ACM_UNICHAIN,
+  ERC4626_FACTORY_UNICHAIN,
+  PROXY_ADMIN_UNICHAIN,
+  PSR_UNICHAIN,
+  PSR_UNICHAIN_NEW_IMPLEMENTATION,
+} from "../../vips/vip-522/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -24,14 +24,14 @@ import ERC4626FACTORY_ABI from "./abi/ERC4626Factory.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 import REWARD_TOKEN_ABI from "./abi/RewardToken.json";
 
-const { arbitrumone } = NETWORK_ADDRESSES;
-const DEPLOYER = "0x2A94EAb15be8557e6dDAE87eCeCf69ba58aAE2AD";
-const BLOCK_NUMBER = 345124221;
-const PSR_ARBITRUM_OLD_IMPLEMENTATION = "0x6B2D272CD89585BCE8404006f366a77680324F7d";
-const WETH_HOLDER = "0x70d95587d40A2caf56bd97485aB3Eec10Bee6336";
-const WETH_CORE = "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1";
-const VWETH_CORE = "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0";
-const COMPTROLLER_CORE = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
+const { unichainsepolia } = NETWORK_ADDRESSES;
+const DEPLOYER = "0xA03893a7f835C6A216E63F8C212EEB4310416dDF";
+const BLOCK_NUMBER = 22372802;
+const PSR_UNICHAIN_OLD_IMPLEMENTATION = "0x856CeD0855383ead1992f0B13a10A71Ecd5917ca";
+const WETH_HOLDER = "0x600C9250DD0D41BF658Ead8B0BCfD8e7B9484B2C";
+const WETH_CORE = "0x4200000000000000000000000000000000000006";
+const VWETH_CORE = "0x3dEAcBe87e4B6333140a46aBFD12215f4130B132";
+const COMPTROLLER_CORE = "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1";
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -44,14 +44,14 @@ forking(BLOCK_NUMBER, async () => {
   let userSigner: SignerWithAddress;
 
   before(async () => {
-    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_ARBITRUM, ERC4626FACTORY_ABI, provider);
-    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_ARBITRUM, PROXY_ADMIN_ABI, provider);
+    erc4626Factory = new ethers.Contract(ERC4626_FACTORY_UNICHAIN, ERC4626FACTORY_ABI, provider);
+    defaultProxyAdmin = new ethers.Contract(PROXY_ADMIN_UNICHAIN, PROXY_ADMIN_ABI, provider);
 
     // Initialize signers
     userSigner = await initMainnetUser(await ethers.provider.getSigner().getAddress(), parseUnits("2"));
     wethHolder = await initMainnetUser(WETH_HOLDER, parseUnits("2"));
 
-    // Get mainnet contracts
+    // Get testnet contracts
     weth = new ethers.Contract(WETH_CORE, ERC20_ABI, provider);
     comptroller = new ethers.Contract(COMPTROLLER_CORE, COMPTROLLER_ABI, provider);
   });
@@ -62,11 +62,11 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory pending owner should be Normal Timelock", async () => {
-      expect(await erc4626Factory.pendingOwner()).to.be.equals(arbitrumone.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.pendingOwner()).to.be.equals(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory should have correct ACM", async () => {
-      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_ARBITRUM);
+      expect(await erc4626Factory.accessControlManager()).to.be.equals(ACM_UNICHAIN);
     });
 
     it("ERC4626Factory rewardRecipient should be the deployer", async () => {
@@ -74,13 +74,13 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("old PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ARBITRUM)).to.be.equals(
-        PSR_ARBITRUM_OLD_IMPLEMENTATION,
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
+        PSR_UNICHAIN_OLD_IMPLEMENTATION,
       );
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip517(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip522(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -93,7 +93,7 @@ forking(BLOCK_NUMBER, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("ERC4626Factory ownership transferred to Normal Timelock", async () => {
-      expect(await erc4626Factory.owner()).to.be.equals(arbitrumone.NORMAL_TIMELOCK);
+      expect(await erc4626Factory.owner()).to.be.equals(unichainsepolia.NORMAL_TIMELOCK);
     });
 
     it("ERC4626Factory pending owner should be zero address", async () => {
@@ -101,12 +101,12 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("ERC4626Factory rewardRecipient should be the PSR", async () => {
-      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_ARBITRUM);
+      expect(await erc4626Factory.rewardRecipient()).to.be.equals(PSR_UNICHAIN);
     });
 
     it("new PSR implementation should be correct", async () => {
-      expect(await defaultProxyAdmin.getProxyImplementation(PSR_ARBITRUM)).to.be.equals(
-        PSR_ARBITRUM_NEW_IMPLEMENTATION,
+      expect(await defaultProxyAdmin.getProxyImplementation(PSR_UNICHAIN)).to.be.equals(
+        PSR_UNICHAIN_NEW_IMPLEMENTATION,
       );
     });
 
@@ -141,10 +141,10 @@ forking(BLOCK_NUMBER, async () => {
       const rewardTokenAddress = await distributor.rewardToken();
       const rewardToken = new ethers.Contract(rewardTokenAddress, REWARD_TOKEN_ABI, provider);
 
-      const initialPsrBalance = await rewardToken.balanceOf(PSR_ARBITRUM);
+      const initialPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
 
       await expect(venusERC4626.connect(userSigner).claimRewards()).to.emit(venusERC4626, "ClaimRewards");
-      const finalPsrBalance = await rewardToken.balanceOf(PSR_ARBITRUM);
+      const finalPsrBalance = await rewardToken.balanceOf(PSR_UNICHAIN);
 
       // reward tokens transfered to PSR
       expect(finalPsrBalance).to.be.gte(initialPsrBalance);
