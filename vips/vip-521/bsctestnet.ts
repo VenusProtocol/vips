@@ -50,7 +50,7 @@ export const PROXY_ADMIN_OPTIMISM = "0xa9aaf2A1cCf2C3a87997942abaA740887cC89241"
 export const PROXY_ADMIN_UNICHAIN = "0x256735eFdfDf135bD6991854e0065909e57804aa";
 export const PROXY_ADMIN_ZKSYNC = "0x18E44f588a4DcF2F7145d35A5C226e129040b6D3";
 
-export const vip522 = () => {
+export const vip521 = () => {
   const meta = {
     version: "v2",
     title: "VIP-522 Enable ERC4626 Factory on every network",
@@ -405,4 +405,4 @@ export const vip522 = () => {
   );
 };
 
-export default vip522;
+export default vip521;

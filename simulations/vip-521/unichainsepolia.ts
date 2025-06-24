@@ -8,13 +8,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip522, {
+import vip521, {
   ACM_UNICHAIN,
   ERC4626_FACTORY_UNICHAIN,
   PROXY_ADMIN_UNICHAIN,
   PSR_UNICHAIN,
   PSR_UNICHAIN_NEW_IMPLEMENTATION,
-} from "../../vips/vip-522/bsctestnet";
+} from "../../vips/vip-521/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/DefaultProxyAdmin.json";
@@ -80,7 +80,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip522(), {
+  testForkedNetworkVipCommands("Accept ownerships for ERC4626Factory", await vip521(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

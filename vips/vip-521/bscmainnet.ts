@@ -50,14 +50,123 @@ export const PROXY_ADMIN_OPTIMISM = "0xeaF9490cBEA6fF9bA1D23671C39a799CeD0DCED2"
 export const PROXY_ADMIN_UNICHAIN = "0x78e9fff2ab8daAB8559070d897C399E5e1C5074c";
 export const PROXY_ADMIN_ZKSYNC = "0x8Ea1A989B036f7Ef21bb95CE4E7961522Ca00287";
 
-export const vip522 = () => {
+export const vip521 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-522 Enable ERC4626 Factory on every network",
-    description: ``,
-    forDescription: "I agree that Venus Protocol should proceed with the Vault Upgrades",
-    againstDescription: "I do not think that Venus Protocol should proceed with the Vault Upgrades",
-    abstainDescription: "I am indifferent to whether Venus Protocol proceeds with the Vault Upgrades or not",
+    title: "VIP-521 Venus ERC-4626 Vaults",
+    description: `#### Summary
+
+If passed, following the community proposal "[[VRC] Venus ERC-4626 Vaults](https://community.venus.io/t/vrc-venus-erc-4626-vaults/5151)" ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xd9f0b28bf88b9685e1d9e8b09f8e1804846113502033d88a6911e0495666fdf8)), this VIP will enable the Factory contracts that allow anyone (permissionlessly) to deploy fully compatible [ERC-4626 vaults](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) for the Venus markets: there will be one ERC-4626 vault for each Venus market. Users and third-party projects will be able to deposit and withdraw tokens supported by Venus into these vaults using a standardized interface. Under the hood, these tokens will be deposited into the associated VTokens, accruing interests allocated to the users.
+
+The Venus ERC-4626 Vaults will be available on every network supported by Venus: BNB Chain, Ethereum, Arbitrum one, Optimism, ZKSync Era, Base, Unichain and opBNB. Support for the VTokens of the Core pool on BNB Chain will be added soon.
+
+#### Description
+
+Venus Protocol introduces **native ERC-4626 Vaults**, bringing standardized, composable yield vaults to the Venus ecosystem. This integration represents a significant advancement in making Venus's yield-bearing markets more accessible and composable within the broader DeFi ecosystem.
+
+**Key Benefits**
+
+- Full ERC-4626 Compliance – Interoperable with DeFi primitives (DAOs, aggregators, etc.)
+- Native Venus Yield Integration – Auto-compounding via [VTokens](https://docs-v4.venus.io/technical-reference/reference-isolated-pools/vtoken/vtoken#vtoken)
+- Gas-Optimized Architecture – [Beacon proxy pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#beacon) for efficient deployments, so all vaults share the same implementation contract
+- Secure & Upgradeable – Governance-controlled upgrades and reward management
+
+**Business Case - Market Opportunity**
+
+Standardised yield vaults are quickly becoming the default on‑ramp for both retail strategies and institutional wrappers (e.g. Ondo, Mountain, Superform). ERC‑4626 compliance is a prerequisite for aggregator listings, CEX structured‑product wrappers, and real‑world‑asset tokenisers.
+
+Protocols that exposed ERC‑4626 vaults early captured **+95 % TVL growth in <30 days** after launch
+
+**Business Case - Strategic Fit for Venus**
+
+*Composability moat*: ERC‑4626 turns every VToken into an instantly whitelisted collateral primitive for dozens of front‑ends, abstractions and risk frameworks. This neutral interface lowers integration overhead from ~3 weeks custom dev ➞ 1 day of config.
+
+*Network flywheel*: Vault TVL drives incremental interest spread, boosts Protocol Share Reserve inflows, and increases XVS buy‑and‑burn pressure—reinforcing existing token‑economic programmes (e.g. Borrow‑n‑Burn).
+
+*Multi‑chain scale*: Because ERC‑4626 vaults are chain‑agnostic, liquidity routed to Venus on Base or Arbitrum can be marketed identically to liquidity on BNB Chain, letting us scale without fragmenting documentation or SDKs.
+
+#### Understanding ERC-4626
+
+[ERC-4626](https://ethereum.org/en/developers/docs/standards/tokens/erc-4626/) is a tokenized vault standard designed to unify how yield-bearing assets are deposited, managed, and withdrawn in DeFi protocols. It builds on the ERC-20 token standard and introduces a consistent interface for vaults that accept a specific asset (like USDC) and issue shares representing ownership in the vault.
+
+The primary goal of ERC-4626 is **standardization**—allowing developers to integrate with vaults without needing to understand their internal mechanics. Functions like deposit, withdraw, mint, and redeem, follow predictable behaviors across all compliant contracts.
+
+In essence, ERC-4626 makes it easier for users to earn yield on their assets and for protocols to plug into vaults in a reliable, composable way—enhancing both usability and interoperability across the DeFi ecosystem.
+
+#### Technical Details
+
+The implementation of the Venus ERC-4626 vaults consists of two core smart contracts:
+
+1. VenusERC4626Factory.sol - The factory contract for deploying standardized vaults
+
+- Deploys individual vaults for individual VTokens via BeaconProxy
+- Ensures deterministic addresses using [CREATE2](https://eips.ethereum.org/EIPS/eip-1014)
+- Managed by Venus Governance
+- Vault Tracking: Maintains a mapping of VTokens to their corresponding deployed ERC-4626 vaults
+- Reward Routing: Allows configuration of a centralized reward recipient for all vaults and supports liquidity mining incentives.
+
+2. VenusERC4626.sol - The vault logic implementing ERC-4626 functionality
+
+- ERC-4626-compliant mint, deposit, redeem, and withdraw functions
+- Integrates with Venus VToken interest accrual
+- Handles reward distribution (e.g., XVS)
+
+Rewards accrued by the funds that the ERC-4626 Vaults will deposit into the Venus markets, will be transferred to the Protocol Share Reserve contracts on each network. These rewards will be considered "Additional Revenue", and distributed following the [Venus Tokenomics](https://docs-v4.venus.io/governance/tokenomics#allocation-for-additional-revenue-streams).
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits:** [Certik](https://www.certik.com/), [Pessimistic](https://pessimistic.io/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the ownership of the Factory contracts and the expected configuration
+- **Deployment on testnet**: the same commands have been executed on every testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit audit report](https://github.com/VenusProtocol/isolated-pools/blob/1faa46139aaec06e0eb2e48341bff22cd6c38c6c/audits/129_erc4626_certik_20250514.pdf) (2025/05/14)
+- [Pessimistic](https://github.com/VenusProtocol/isolated-pools/blob/1faa46139aaec06e0eb2e48341bff22cd6c38c6c/audits/131_erc4626_pessimistic_20250502.pdf) (2025/05/02)
+- [Fairyproof audit report](https://github.com/VenusProtocol/isolated-pools/blob/1faa46139aaec06e0eb2e48341bff22cd6c38c6c/audits/130_erc4626_fairyproof_20250414.pdf) (2025/04/14)
+
+#### Deployed contracts
+
+Factories on Mainnets
+
+- [BNB Chain](https://bscscan.com/address/0xC2f7924809830886EB04c6b40725Fd68F1891fA2)
+- [Ethereum](https://etherscan.io/address/0x39cb747453Be3416E659dAeA169540b6F000c885)
+- [Arbitrum one](https://arbiscan.io/address/0xC1422B928cb6FC9BA52880892078578a93aa5Cc7)
+- [Optimism](https://optimistic.etherscan.io/address/0xc801B471F00Dc22B9a7d7b839CBE87E46d70946F)
+- [ZKSync Era](https://explorer.zksync.io/address/0xDC59Dd76Dd7A64d743C764a9aa8C96Ff2Ea8BAc3)
+- [Base](https://basescan.org/address/0x1A430825B31DdA074751D6731Ce7Dca38D012D13)
+- [Unichain](https://uniscan.xyz/address/0x102fEb723C25c67dbdfDccCa3B1c1a6e1a662D2f)
+- [opBNB](https://opbnbscan.com/address/0x89A5Ce0A6db7e66E53F148B50D879b700dEB81C8)
+
+Factories on Testnets
+
+- [BNB Chain](https://testnet.bscscan.com/address/0x07fcd489aef6a3EEAA9e8adE4361Fe5CC5BF30f7)
+- [Ethereum (sepolia)](https://sepolia.etherscan.io/address/0xbf76e9429BA565220d77831A9eC3606434e2106e)
+- [Arbitrum one](https://sepolia.arbiscan.io/address/0xC6C8249a0B44973673f3Af673e530B85038a0480)
+- [Optimism](https://sepolia-optimism.etherscan.io/address/0xc66c4058A8524253C22a9461Df6769CE09F7d61e)
+- [ZKSync Era](https://sepolia.explorer.zksync.io/address/0xa30dcc21B8393A4031cD6364829CDfE2b6D7B283)
+- [Base](https://sepolia.basescan.org/address/0xD13c5527d1a2a8c2cC9c9eb260AC4D9D811a02a4)
+- [Unichain](https://sepolia.uniscan.xyz/address/0x1365820B9ba3B1b5601208437a5A24192a12C1fB)
+- [opBNB](https://testnet.opbnbscan.com/address/0x3dEDBD90EFC6E2257887FF36842337dF0739B8A1)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/559)
+- [Codebase of the Venus ERC 4626 vaults](https://github.com/VenusProtocol/isolated-pools/pull/497)
+- Testnet executions of the VIP
+    - [BNB Chain testnet](https://testnet.bscscan.com/tx/0x2d3bedeeaee6454bac24954d4ae3a80feeb8d7bc20d95ff1956f2c84ab84c0ab)
+    - [Base sepolia](https://sepolia.basescan.org/tx/0xd279164df6418a66530c5e512d37056d3054e4fd662cac09ad5cf860f551a7e8)
+    - [ZKSync sepolia](https://sepolia.explorer.zksync.io/tx/0x73e496cc83e9368df97b060ec956fa5e6aaea3243df537f376ec6b45dec0e216)
+    - [Unichain sepolia](https://sepolia.uniscan.xyz/tx/0x5bb1c134d43d156f311927fd268ac24725cadd4aecdeffd473cfe424ac333eac)
+    - [Sepolia](https://sepolia.etherscan.io/tx/0xf3b45441af951dd65661cc4155772a2fe977563dd97bf64eb5e79260c264dd8b)
+    - [opBNB testnet](https://testnet.opbnbscan.com/tx/0x3049117cc4f661d289a6cd5a62d51f167108521f070e28eb7611a2020be4e46e)
+    - [Arbitrum one sepolia](https://sepolia.arbiscan.io/tx/0x165a6611b867f66bf3ee917a977ad82e6185fe1e9534a950cc8aebf48cce9e46)
+    - [Optimism sepolia](https://sepolia-optimism.etherscan.io/tx/0x6b75317d84719318658bbe747884cd5c9667ae318a15d75a4f73532797544236)`,
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
@@ -405,4 +514,4 @@ export const vip522 = () => {
   );
 };
 
-export default vip522;
+export default vip521;
