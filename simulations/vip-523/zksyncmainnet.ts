@@ -4,10 +4,10 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip519, { COMPTROLLER, vwUSDM, wUSDM, wUSDMMLiquidator } from "../../vips/vip-519/bscmainnet";
+import vip523, { COMPTROLLER, vwUSDM, wUSDM, wUSDMMLiquidator } from "../../vips/vip-523/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import VTOKEN_ABI from "./abi/VToken.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import VTOKEN_ABI from "./abi/vToken.json";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 
@@ -50,7 +50,7 @@ forking(62088882, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip519", await vip519());
+  testForkedNetworkVipCommands("vip523", await vip523());
 
   describe("Post-VIP behaviour", async () => {
     it("check wUSDM balance of the treasury", async () => {
