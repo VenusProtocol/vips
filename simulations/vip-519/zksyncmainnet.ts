@@ -40,6 +40,14 @@ forking(62088882, async () => {
       const actionPaused = await comptroller.actionPaused(vwUSDM, 0);
       expect(actionPaused).to.equal(true);
     });
+
+    it("check wUSDM balance of vwUSDM", async () => {
+      const balance = await wusdm.balanceOf(vwUSDM);
+      expect(balance).to.equal(parseUnits("318.759041639401694935", 18));
+
+      const reserves = await vwusdm.totalReserves();
+      expect(reserves).to.equal(parseUnits("145.204271375432918131", 18));
+    });
   });
 
   testForkedNetworkVipCommands("vip519", await vip519());
@@ -71,6 +79,14 @@ forking(62088882, async () => {
     it("check if mint is paused", async () => {
       const actionPaused = await comptroller.actionPaused(vwUSDM, 0);
       expect(actionPaused).to.equal(true);
+    });
+
+    it("check wUSDM balance of vwUSDM", async () => {
+      const balance = await wusdm.balanceOf(vwUSDM);
+      expect(balance).to.equal(parseUnits("147948.759041639401694935", 18));
+
+      const reserves = await vwusdm.totalReserves();
+      expect(reserves).to.equal(parseUnits("18116.308274305550828548", 18));
     });
   });
 });

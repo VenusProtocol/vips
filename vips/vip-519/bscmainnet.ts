@@ -29,6 +29,12 @@ export const vip519 = () => {
         dstChainId: LzChainId.zksyncmainnet,
       },
       {
+        target: vwUSDM,
+        signature: "setReduceReservesBlockDelta(uint256)",
+        params: [31536000],
+        dstChainId: LzChainId.zksyncmainnet,
+      },
+      {
         target: wUSDM,
         signature: "approve(address,uint256)",
         params: [vwUSDM, AMOUNT],
