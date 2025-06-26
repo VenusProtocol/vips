@@ -77,7 +77,6 @@ export const vip525 = () => {
           [
             Actions.MINT,
             Actions.REDEEM,
-            Actions.BORROW,
             Actions.REPAY,
             Actions.SEIZE,
             Actions.TRANSFER,

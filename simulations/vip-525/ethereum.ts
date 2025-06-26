@@ -51,8 +51,6 @@ forking(22787453, async () => {
 
       it("Check treasury vToken balance", async () => {
         const balance = await vPtTokenWeETH.balanceOf(VTreasury_Ethereum);
-        console.log("balance : ", balance);
-        console.log("VTREASURY_BALANCE_vPtTokenWeETH : ", VTREASURY_BALANCE_vPtTokenWeETH);
         expect(balance).to.equal(VTREASURY_BALANCE_vPtTokenWeETH);
       });
     });
@@ -74,7 +72,7 @@ forking(22787453, async () => {
           "MarketUnlisted",
           "Transfer",
         ],
-        [9, 1, 1, 1, 1, 1, 1, 1, 4],
+        [8, 1, 1, 1, 1, 1, 1, 1, 4],
       );
     },
   });
