@@ -32,8 +32,8 @@ export const Actions = {
 export const vip525 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-525 [BNB Chain] [Ethereum]",
-    description: ``,
+    title: "VIP-525 [BNB Chain] [Ethereum] : VIP to pause/unlist PT markets",
+    description: `pause actions of PT-sUSDE-JUN2025 on BNB chain for Core-Pool and unlist PT-weETH-DEC24 on Ethereum for Liquid-Staked ETH poo`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -42,7 +42,7 @@ export const vip525 = () => {
   return makeProposal(
     [
       // === BNB Chain ===
-      // --- Market: PT_sUSDE_26JUN2025 on Liquid Staked BNB
+      // --- Market: PT_sUSDE_26JUN2025 on Core Pool
       {
         target: COMPTROLLER_Core,
         signature: "_setActionsPaused(address[],uint8[],bool)",
