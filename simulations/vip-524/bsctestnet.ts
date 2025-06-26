@@ -40,8 +40,8 @@ import {
   MIN_VOTING_PERIOD,
   PREVIOUS_XVS_EMISSIONS,
   PROPOSAL_CONFIGS,
-  vip610,
-} from "../../vips/vip-610/bsctestnet";
+  vip524,
+} from "../../vips/vip-524/bsctestnet";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -192,7 +192,7 @@ forking(54418106, async () => {
     });
   });
 
-  testVip("VIP-610", await vip610(), {
+  testVip("VIP-524", await vip524(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

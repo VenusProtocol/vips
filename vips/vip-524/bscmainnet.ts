@@ -65,11 +65,66 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip610 = () => {
+export const vip524 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-610 [BNB Chain] Block Rate Upgrade",
-    description: `[BNB Chain] Block Rate Upgrade `,
+    title: "VIP-524 [BNB Chain] Block Rate Upgrade (2/2)",
+    description: `#### Summary
+
+If passed, following the community proposal “[Maxwell Hardfork Upgrade Pt 2](https://community.venus.io/t/maxwell-hardfork-upgrade-pt-2/5154)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xfc592b816f1a327bf432d20877c706d807f4d2f3dbb934958a2a074f7a033f6d)), this VIP will perform the following changes, taking into account the increase in the block rate on BNB Chain, from one block every 1.5 seconds to one block every 0.75 seconds:
+
+- Upgrade implementation of VAIController, Prime, PrimeLiquidityProvider and every VToken contract, with the new blocks per year (42,048,000)
+- Set the new blocks per year in the XVSVaultProxy contract
+- Update the voting periods for each VIP type (these periods are defined in block numbers)
+- Update of the rewards per block on the XVS Vault, VAI Vault and Prime Liquidity Provider, halving the rewards per block. Halve the XVS emissions per block in the XVS market
+
+#### Description
+
+These changes are mandatory to accommodate the Venus Protocol to the Maxwell hardfork on BNB Chain: [BEP-524: Short Block Interval Phase Two: 0.75 seconds](https://github.com/bnb-chain/BEPs/blob/master/BEPs/BEP-524.md), which will happen on [June 30th, at 2:30AM UTC](https://github.com/bnb-chain/bsc/releases/tag/v1.5.16).
+
+VAIController, Prime, PrimeLiquidityProvider and every VToken contract had a constant value with the number of blocks per year. Most of the implementations have been simply redeployed using the new value.
+
+The different types of “rewards” are defined per block on Venus (XVS Vault, VAI Vault, Prime and emissions). They must be halved to maintain the same daily amounts.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Certik](https://www.certik.com/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the new implementations and configurations are properly set on BNB Chain, with the right parameters
+- **Deployment on testnet**: the same upgrade has been performed on BNB Chain testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Fairyproof audit report](https://github.com/VenusProtocol/venus-protocol/blob/ee06e15429036841e9bf43c0f0b29c2b1a3d6efc/audits/132_block_rate_fairyproof_20250414.pdf) (2025/04/14)
+- [Certik audit audit report](https://github.com/VenusProtocol/venus-protocol/blob/0246a8913216a56bab0f9a9ea3e772a5cbd69f99/audits/133_block_rate_certik_20250417.pdf) (2025/04/17)
+
+#### Deployed contracts
+
+BNB Chain mainnet
+
+- [New implementation of VToken for Isolated pools](https://bscscan.com/address/0x228Ea224d62D14a2e2cb9B43083aE43954C39B67)
+- [New implementation of Shortfall](https://bscscan.com/address/0x4F41EcAce160f6ef893102D64f84E8040c06d8B0)
+- [New PoolLens](https://bscscan.com/address/0x59a96A6f463d57dA20bcc15359e55310D1CAD8B0)
+- [New VAIController implementation](https://bscscan.com/address/0xF1A8B40CA68d08EFfa31a16a83f4fd9b5c174872)
+- [New Prime implementation](https://bscscan.com/address/0x211b1c2C778daeeD39cE0E6a91Edb1d82a20BB2B)
+- [New PrimeLiquidityProvider implementation](https://bscscan.com/address/0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF)
+
+BNB Chain testnet
+
+- [New implementation of VToken for Isolated pools](https://testnet.bscscan.com/address/0xaaCe28600A02E42198AfEe60A2cCDADC9FFe513B)
+- [New implementation of Shortfall](https://testnet.bscscan.com/address/0xdD939b73C40cE3fe540bE46cA378f74196Dc86b7)
+- [New PoolLens](https://testnet.bscscan.com/address/0xa6cDad72854d338d75C40f1a863A0f9c488f4D7F)
+- [New VAIController implementation](https://testnet.bscscan.com/address/0xDFcbfb82a416B5CEbB80FECFbBF4E055299931FF)
+- [New Prime implementation](https://testnet.bscscan.com/address/0x0323505ACde55903D0AC8da7c4d146A7F4b25f77)
+- [New PrimeLiquidityProvider implementation](https://testnet.bscscan.com/address/0xFB136764E8F3ffA2Ed57F150853dbf08B8a09988)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/573)
+- [Upgrade on BNB Chain testnet](https://testnet.bscscan.com/tx/0x91961771aef4e92ca0563a3b35262b04a10795a40ad8fe699bd0292d430ddfb1)
+- [Commit with the confirmed timestamp for the Maxwell hardfork](https://github.com/bnb-chain/bsc/pull/3130)
+- [VIP-520 [BNB Chain] Block Rate Upgrade (1/2)](https://app.venus.io/#/governance/proposal/520?chainId=56)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -156,4 +211,4 @@ export const vip610 = () => {
   );
 };
 
-export default vip610;
+export default vip524;

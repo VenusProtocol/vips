@@ -40,8 +40,8 @@ import {
   XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
   XVS_PER_BLOCK_REWARD,
   XVS_VAULT_PROXY,
-  vip610,
-} from "../../vips/vip-610/bscmainnet";
+  vip524,
+} from "../../vips/vip-524/bscmainnet";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -175,7 +175,7 @@ forking(51263918, async () => {
     });
   });
 
-  testVip("VIP-610", await vip610(), {
+  testVip("VIP-524", await vip524(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
