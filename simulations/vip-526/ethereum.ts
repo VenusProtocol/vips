@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip525, {
+import vip526, {
   Actions,
   Comptroller_LiquidStakedETH,
   PT_weETH_26DEC2024_LiquidStakedETH,
@@ -13,7 +13,7 @@ import vip525, {
   Timelock_Ethereum,
   VToken_vPT_weETH_26DEC2024_LiquidStakedETH,
   VTreasury_Ethereum,
-} from "../../vips/vip-525/bscmainnet";
+} from "../../vips/vip-526/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import ERC20_ABI from "./abi/erc20.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
@@ -56,7 +56,7 @@ forking(22787453, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-525 ethereum", await vip525(), {
+  testForkedNetworkVipCommands("VIP-526 ethereum", await vip526(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

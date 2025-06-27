@@ -10,10 +10,10 @@ export const Actions = {
   ENTER_MARKET: 7,
 };
 
-export const vip525 = () => {
+export const vip526 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-525 [BNB Chain] [Ethereum]: VIP to pause PT markets",
+    title: "VIP-526 [BNB Chain] [Ethereum]: VIP to pause PT markets",
     description: `pause actions of PT-sUSDE-JUN2025 on BNB chain for Core-Pool`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -35,4 +35,4 @@ export const vip525 = () => {
   );
 };
 
-export default vip525;
+export default vip526;

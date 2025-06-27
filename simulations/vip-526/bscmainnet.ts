@@ -4,12 +4,13 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip525, { Actions, COMPTROLLER_Core, VToken_vPT_sUSDE_26JUN2025 } from "../../vips/vip-525/bsctestnet";
+import vip526, { Actions, COMPTROLLER_Core, VToken_vPT_sUSDE_26JUN2025 } from "../../vips/vip-526/bscmainnet";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/SetterFacet.json";
 
 const provider = ethers.provider;
 
-forking(56145209, async () => {
+forking(52121155, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -28,9 +29,15 @@ forking(56145209, async () => {
     });
   });
 
-  testVip("VIP-525 bscmainnet", await vip525(), {
+  testVip("VIP-526 bscmainnet", await vip526(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket"], [2]);
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
+      );
     },
   });
 

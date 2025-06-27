@@ -29,11 +29,24 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip525 = () => {
+export const vip526 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-525 [BNB Chain] [Ethereum] : VIP to pause/unlist PT markets",
-    description: `pause actions of PT-sUSDE-JUN2025 on BNB chain for Core-Pool and unlist PT-weETH-DEC24 on Ethereum for Liquid-Staked ETH poo`,
+    title: "VIP-526 [BNB Chain][Ethereum] Deprecation of matured PT Pendle markets",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Implement Generalized Risk Policy for Matured PT Markets](https://community.venus.io/t/implement-generalized-risk-policy-for-matured-pt-markets/5050), deprecating the following markets:
+
+- [PT-sUSDE-JUN2025 (Core pool) on BNB Chain](https://app.venus.io/#/core-pool/market/0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866?chainId=56)
+    - Pause supplying and entering the market (start using the market as collateral)
+- [PT-weETH-DEC24 (Liquid Staked ETH) on Ethereum](https://app.venus.io/#/isolated-pools/pool/0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3/market/0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C?chainId=1)
+    - Pause every action
+    - Set Collateral Factor to zero
+    - Set supply and borrow cap to zero
+
+Moreover, the bootstrap liquidity provided by the [Venus Treasury](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA) in the [VIP-305](https://app.venus.io/#/governance/proposal/305?chainId=56) to the [PT-weETH-DEC24](https://app.venus.io/#/isolated-pools/pool/0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3/market/0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C?chainId=1) market will be withdrawn in this VIP. That is 1.799618792534137830 PT-weETH-DEC24 tokens. Finally, this market will be removed from the pool (there are no more suppliers in that market).
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/585)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -118,4 +131,4 @@ export const vip525 = () => {
   );
 };
 
-export default vip525;
+export default vip526;
