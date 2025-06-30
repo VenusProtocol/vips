@@ -1,14 +1,14 @@
 {
   "version": "1.0",
   "chainId": "56",
-  "createdAt": 1749549815710,
+  "createdAt": 1751271243303,
   "meta": {
     "name": "Transactions Batch",
     "description": "Created from @morpho-labs/gnosis-tx-builder",
     "txBuilderVersion": "1.10.0",
     "createdFromSafeAddress": "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B",
     "createdFromOwnerAddress": "",
-    "checksum": "0x9adf221e4d6ffad986cad7fa45914abe3d441f90f867f2eeff0427c116529a1e"
+    "checksum": "0x729563e43a47d6f56811a8a4c7f8ab0cb22b48c56afd13a6866178feb32bbf1b"
   },
   "transactions": [
     {
@@ -253,6 +253,12 @@
     },
     {
       "to": "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5",
+      "data": "0xa6afed95",
+      "value": "0",
+      "operation": 0
+    },
+    {
+      "to": "0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF",
       "data": "0xa6afed95",
       "value": "0",
       "operation": 0
