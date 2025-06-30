@@ -10,7 +10,7 @@ import COMPTROLLER_ABI from "./abi/SetterFacet.json";
 
 const provider = ethers.provider;
 
-forking(52121155, async () => {
+forking(52363875, async () => {
   let comptroller: Contract;
 
   before(async () => {
