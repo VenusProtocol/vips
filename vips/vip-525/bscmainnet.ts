@@ -76,11 +76,11 @@ export const asBNB_Timestamp = 1751269105;
 export const asBNB_GrowthRate = parseUnits("0.3049", 18); // 30.49% per year
 export const asBNB_SnapshotGap = 254; // 2.54%
 
-export const vip517 = () => {
+export const vip525 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-518 [BNB Chain]",
-    description: "[VIP-18] Update oracles implementation in BNB",
+    title: "VIP-525",
+    description: "",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -256,4 +256,4 @@ export const vip517 = () => {
   );
 };
 
-export default vip517;
+export default vip525;
