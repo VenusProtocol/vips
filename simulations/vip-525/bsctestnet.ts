@@ -15,11 +15,8 @@ import vip525, {
   slisBNB,
   xSolvBTC,
 } from "../../vips/vip-525/bsctestnet";
-import ACM_ABI from "./abi/ACM.json";
-import PROXY_ABI from "./abi/Proxy.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 

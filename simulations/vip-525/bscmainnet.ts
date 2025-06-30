@@ -2,25 +2,12 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import {
-  expectEvents,
-  initMainnetUser,
-  setMaxStalePeriod,
-  setMaxStalePeriodInChainlinkOracle,
-  setRedstonePrice,
-} from "src/utils";
+import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip525, {
-  SUSDE,
-  USDE,
-  XSOLVBTC,
-} from "../../vips/vip-525/bscmainnet";
-import ACM_ABI from "./abi/ACM.json";
+import vip525, { SUSDE, USDE, XSOLVBTC } from "../../vips/vip-525/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import PROXY_ABI from "./abi/Proxy.json";
-import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
-import REDSTONE_ABI from "./abi/RedstoneOracle.json";
+import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -32,8 +19,8 @@ const prices = [
   {
     symbol: "vslisBNB_LiquidStakedBNB",
     address: "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
-    expectedPrice: parseUnits("673.659491090621679716", 18),
-    expectedPriceAfterVIP: parseUnits("673.659491090621679716", 18),
+    expectedPrice: parseUnits("673.718710364265960533", 18),
+    expectedPriceAfterVIP: parseUnits("673.718710364265960533", 18),
     preVIP: async function () {
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
@@ -50,26 +37,26 @@ const prices = [
   {
     symbol: "vBNBx_LiquidStakedBNB",
     address: "0x5E21bF67a6af41c74C1773E4b473ca5ce8fd3791",
-    expectedPrice: parseUnits("722.156256410101957852", 18),
-    expectedPriceAfterVIP: parseUnits("728.119713523375363029", 18),
+    expectedPrice: parseUnits("722.219738880887077931", 18),
+    expectedPriceAfterVIP: parseUnits("722.219738880887077931", 18),
   },
   {
     symbol: "vasBNB_LiquidStakedBNB",
     address: "0x4A50a0a1c832190362e1491D5bB464b1bc2Bd288",
-    expectedPrice: parseUnits("691.328987930760005294", 18),
-    expectedPriceAfterVIP: parseUnits("697.048129566730189937", 18),
+    expectedPrice: parseUnits("691.389760473945310282", 18),
+    expectedPriceAfterVIP: parseUnits("691.389760473945310282", 18),
   },
   {
     symbol: "vankrBNB_LiquidStakedBNB",
     address: "0xBfe25459BA784e70E2D7a718Be99a1f3521cA17f",
-    expectedPrice: parseUnits("717.877320842643630228", 18),
-    expectedPriceAfterVIP: parseUnits("723.810113538611356903", 18),
+    expectedPrice: parseUnits("717.940427165746387329", 18),
+    expectedPriceAfterVIP: parseUnits("717.940427165746387329", 18),
   },
   {
     symbol: "vxSolvBTC",
     address: "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5",
-    expectedPrice: parseUnits("105398.219535200000000000", 18),
-    expectedPriceAfterVIP: parseUnits("105398.219535200000000000", 18),
+    expectedPrice: parseUnits("107669.93698694", 18),
+    expectedPriceAfterVIP: parseUnits("107669.93698694", 18),
     preVIP: async function () {
       await setMaxStalePeriodInChainlinkOracle(
         bscmainnet.CHAINLINK_ORACLE,
@@ -80,7 +67,7 @@ const prices = [
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
         SolvBTC,
-        "0xa52538d1937FFc553d5070f43300B385AA2D9F55", // Red stone for BTC/USD
+        "0xa51738d1937FFc553d5070f43300B385AA2D9F55", // Red stone for BTC/USD
         bscmainnet.NORMAL_TIMELOCK,
       );
       await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, XSOLVBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
@@ -95,7 +82,7 @@ const prices = [
     symbol: "vsUSDe",
     address: "0x699658323d58eE25c69F1a29d476946ab011bD18",
     expectedPrice: parseUnits("1.180041577035167000", 18),
-    expectedPriceAfterVIP: parseUnits("1.178344469589636600", 18),
+    expectedPriceAfterVIP: parseUnits("1.180041577035167000", 18),
     preVIP: async function () {
       await setRedstonePrice(
         bscmainnet.REDSTONE_ORACLE,
@@ -128,36 +115,31 @@ const prices = [
       await setMaxStalePeriod(resilientOracle, token);
     },
   },
-  // {
-  //   symbol: "vPT-sUSDE-26JUN2025",
-  //   address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
-  //   expectedPrice: parseUnits("0.997740049021309311", 18),
-  //   expectedPriceAfterVIP: PT_SUSDE_FIXED_PRICE,
-  //   postVIP: async function () {
-  //     const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-  //     const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
-  //     await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
-  //   },
-  // },
 ];
 
 forking(52370694, async () => {
   const provider = ethers.provider;
   const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
-  // describe("Pre-VIP behaviour", async () => {
-  //   for (const price of prices) {
-  //     it(`check ${price.symbol} price`, async () => {
-  //       if (price.preVIP) {
-  //         await price.preVIP();
-  //       }
-  //       expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
-  //     });
-  //   }
-  // });
+  describe("Pre-VIP behaviour", async () => {
+    for (const price of prices) {
+      it(`check ${price.symbol} price`, async () => {
+        if (price.preVIP) {
+          await price.preVIP();
+        }
+        expect(await resilientOracle.getUnderlyingPrice(price.address)).to.equal(price.expectedPrice);
+      });
+    }
+  });
 
   testVip("VIP-525", await vip525(), {
     callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [OMNICHAIN_PROPOSAL_SENDER_ABI],
+        ["ExecuteRemoteProposal", "StorePayload"],
+        [1, 0],
+      );
     },
   });
 

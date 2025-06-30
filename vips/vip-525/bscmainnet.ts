@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, ethereum } = NETWORK_ADDRESSES;
+const { ethereum } = NETWORK_ADDRESSES;
 
 export const PTsUSDe_ORACLE = "0xC407403fa78Bce509821D776b6Be7f91cC04474f";
 export const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
@@ -54,7 +54,7 @@ export const sUSDe_SnapshotGap = 236; // 2.36%
 export const PTsUSDE26JUN2025_InitialExchangeRate = parseUnits("0.847697123107543722", 18);
 export const PTsUSDE26JUN2025_Timestamp = 1751269105;
 export const PTsUSDE26JUN2025_GrowthRate = SECONDS_PER_YEAR; // 0% per yeat
-export const PTsUSDE26JUN2025_SnapshotGap = 400; // 4.00% 
+export const PTsUSDE26JUN2025_SnapshotGap = 400; // 4.00%
 export const xSolvBTC_InitialExchangeRate = parseUnits("1", 18);
 export const xSolvBTC_Timestamp = 1751269105;
 export const xSolvBTC_GrowthRate = SECONDS_PER_YEAR; // 0%
@@ -96,157 +96,160 @@ export const vip517 = () => {
           sUSDe_Chainlink_Timestamp,
         ],
       },
-      // {
-      //   target: SUSDE_ONEJUMP_CHAINLINK_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [sUSDe_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: SUSDE_ONEJUMP_CHAINLINK_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(sUSDe_Chainlink_InitialExchangeRate, sUSDe_SnapshotGap)],
-      // },     
-      // {
-      //   target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(sUSDe_Redstone_InitialExchangeRate, BigNumber.from(sUSDe_SnapshotGap)),
-      //     sUSDe_Redstone_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [sUSDe_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(sUSDe_Redstone_InitialExchangeRate, sUSDe_SnapshotGap)],
-      // },
-      // {
-      //   target: PTsUSDe_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(PTsUSDE26JUN2025_InitialExchangeRate, BigNumber.from(PTsUSDE26JUN2025_SnapshotGap)),
-      //     PTsUSDE26JUN2025_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: PTsUSDe_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [PTsUSDE26JUN2025_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: PTsUSDe_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(PTsUSDE26JUN2025_InitialExchangeRate, PTsUSDE26JUN2025_SnapshotGap)],
-      // },
-      // {
-      //   target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(xSolvBTC_InitialExchangeRate, BigNumber.from(xSolvBTC_SnapshotGap)),
-      //     xSolvBTC_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [xSolvBTC_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(xSolvBTC_InitialExchangeRate, xSolvBTC_SnapshotGap)],
-      // },
-      // {
-      //   target: BNBx_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(BNBx_InitialExchangeRate, BigNumber.from(BNBx_SnapshotGap)),
-      //     BNBx_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: BNBx_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [BNBx_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: BNBx_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(BNBx_InitialExchangeRate, BNBx_SnapshotGap)],
-      // },
-      // {
-      //   target: AnkrBNB_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(ankrBNB_InitialExchangeRate, BigNumber.from(ankrBNB_SnapshotGap)),
-      //     ankrBNB_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: AnkrBNB_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [ankrBNB_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: AnkrBNB_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(ankrBNB_InitialExchangeRate, ankrBNB_SnapshotGap)],
-      // },
-      // {
-      //   target: SlisBNB_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(slisBNB_InitialExchangeRate, BigNumber.from(slisBNB_SnapshotGap)),
-      //     slisBNB_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: SlisBNB_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [slisBNB_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: SlisBNB_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(slisBNB_InitialExchangeRate, slisBNB_SnapshotGap)],
-      // },
-      // {
-      //   target: AsBNB_ORACLE,
-      //   signature: "setSnapshot(uint256,uint256)",
-      //   params: [
-      //     increaseExchangeRateByPercentage(asBNB_InitialExchangeRate, BigNumber.from(asBNB_SnapshotGap)),
-      //     asBNB_Timestamp,
-      //   ],
-      // },
-      // {
-      //   target: AsBNB_ORACLE,
-      //   signature: "setGrowthRate(uint256,uint256)",
-      //   params: [asBNB_GrowthRate, DAYS_30],
-      // },
-      // {
-      //   target: AsBNB_ORACLE,
-      //   signature: "setSnapshotGap(uint256)",
-      //   params: [getSnapshotGap(asBNB_InitialExchangeRate, asBNB_SnapshotGap)],
-      // },
-      // {
-      //   target: ethereum.RESILIENT_ORACLE,
-      //   signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
-      //   params: [
-      //     [
-      //       [
-      //         wstETH,
-      //         [wstETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-      //         [true, false, false],
-      //         false,
-      //       ],
-      //     ],
-      //   ],
-      //   dstChainId: LzChainId.ethereum,
-      // },
+      {
+        target: SUSDE_ONEJUMP_CHAINLINK_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [sUSDe_GrowthRate, DAYS_30],
+      },
+      {
+        target: SUSDE_ONEJUMP_CHAINLINK_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(sUSDe_Chainlink_InitialExchangeRate, sUSDe_SnapshotGap)],
+      },
+      {
+        target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(sUSDe_Redstone_InitialExchangeRate, BigNumber.from(sUSDe_SnapshotGap)),
+          sUSDe_Redstone_Timestamp,
+        ],
+      },
+      {
+        target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [sUSDe_GrowthRate, DAYS_30],
+      },
+      {
+        target: SUSDE_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(sUSDe_Redstone_InitialExchangeRate, sUSDe_SnapshotGap)],
+      },
+      {
+        target: PTsUSDe_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(
+            PTsUSDE26JUN2025_InitialExchangeRate,
+            BigNumber.from(PTsUSDE26JUN2025_SnapshotGap),
+          ),
+          PTsUSDE26JUN2025_Timestamp,
+        ],
+      },
+      {
+        target: PTsUSDe_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [PTsUSDE26JUN2025_GrowthRate, DAYS_30],
+      },
+      {
+        target: PTsUSDe_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(PTsUSDE26JUN2025_InitialExchangeRate, PTsUSDE26JUN2025_SnapshotGap)],
+      },
+      {
+        target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(xSolvBTC_InitialExchangeRate, BigNumber.from(xSolvBTC_SnapshotGap)),
+          xSolvBTC_Timestamp,
+        ],
+      },
+      {
+        target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [xSolvBTC_GrowthRate, DAYS_30],
+      },
+      {
+        target: XSOLVBTC_ONEJUMP_REDSTONE_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(xSolvBTC_InitialExchangeRate, xSolvBTC_SnapshotGap)],
+      },
+      {
+        target: BNBx_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(BNBx_InitialExchangeRate, BigNumber.from(BNBx_SnapshotGap)),
+          BNBx_Timestamp,
+        ],
+      },
+      {
+        target: BNBx_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [BNBx_GrowthRate, DAYS_30],
+      },
+      {
+        target: BNBx_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(BNBx_InitialExchangeRate, BNBx_SnapshotGap)],
+      },
+      {
+        target: AnkrBNB_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(ankrBNB_InitialExchangeRate, BigNumber.from(ankrBNB_SnapshotGap)),
+          ankrBNB_Timestamp,
+        ],
+      },
+      {
+        target: AnkrBNB_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [ankrBNB_GrowthRate, DAYS_30],
+      },
+      {
+        target: AnkrBNB_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(ankrBNB_InitialExchangeRate, ankrBNB_SnapshotGap)],
+      },
+      {
+        target: SlisBNB_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(slisBNB_InitialExchangeRate, BigNumber.from(slisBNB_SnapshotGap)),
+          slisBNB_Timestamp,
+        ],
+      },
+      {
+        target: SlisBNB_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [slisBNB_GrowthRate, DAYS_30],
+      },
+      {
+        target: SlisBNB_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(slisBNB_InitialExchangeRate, slisBNB_SnapshotGap)],
+      },
+      {
+        target: AsBNB_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(asBNB_InitialExchangeRate, BigNumber.from(asBNB_SnapshotGap)),
+          asBNB_Timestamp,
+        ],
+      },
+      {
+        target: AsBNB_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [asBNB_GrowthRate, DAYS_30],
+      },
+      {
+        target: AsBNB_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(asBNB_InitialExchangeRate, asBNB_SnapshotGap)],
+      },
+      {
+        target: ethereum.RESILIENT_ORACLE,
+        signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
+        params: [
+          [
+            [
+              wstETH,
+              [wstETH_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+              [true, false, false],
+              false,
+            ],
+          ],
+        ],
+        dstChainId: LzChainId.ethereum,
+      },
     ],
     meta,
     ProposalType.REGULAR,

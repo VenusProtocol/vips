@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bsctestnet, sepolia } = NETWORK_ADDRESSES;
+const { sepolia } = NETWORK_ADDRESSES;
 
 export const PTsUSDE26JUN2025Oracle = "0x85201328baa52061E6648d9b4c285529411Cd33B";
 export const PTsUSDE26JUN2025 = "0x95e58161BA2423c3034658d957F3f5b94DeAbf81";
@@ -53,7 +53,7 @@ export const sUSDe_SnapshotGap = 236; // 2.36%
 export const PTsUSDE26JUN2025_InitialExchangeRate = parseUnits("0.85", 18);
 export const PTsUSDE26JUN2025_Timestamp = 1751269105;
 export const PTsUSDE26JUN2025_GrowthRate = SECONDS_PER_YEAR; // 0% per yeat
-export const PTsUSDE26JUN2025_SnapshotGap = 400; // 4.00% 
+export const PTsUSDE26JUN2025_SnapshotGap = 400; // 4.00%
 export const xSolvBTC_InitialExchangeRate = parseUnits("1.", 18);
 export const xSolvBTC_Timestamp = 1751269105;
 export const xSolvBTC_GrowthRate = SECONDS_PER_YEAR; // 0%
@@ -104,7 +104,7 @@ export const vip517 = () => {
         target: sUSDe_Chainlink_Oracle,
         signature: "setSnapshotGap(uint256)",
         params: [getSnapshotGap(sUSDe_Chainlink_InitialExchangeRate, sUSDe_SnapshotGap)],
-      },     
+      },
       {
         target: sUSDe_Redstone_Oracle,
         signature: "setSnapshot(uint256,uint256)",
@@ -127,7 +127,10 @@ export const vip517 = () => {
         target: PTsUSDE26JUN2025Oracle,
         signature: "setSnapshot(uint256,uint256)",
         params: [
-          increaseExchangeRateByPercentage(PTsUSDE26JUN2025_InitialExchangeRate, BigNumber.from(PTsUSDE26JUN2025_SnapshotGap)),
+          increaseExchangeRateByPercentage(
+            PTsUSDE26JUN2025_InitialExchangeRate,
+            BigNumber.from(PTsUSDE26JUN2025_SnapshotGap),
+          ),
           PTsUSDE26JUN2025_Timestamp,
         ],
       },
