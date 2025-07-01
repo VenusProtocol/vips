@@ -19,6 +19,9 @@ import opbnbmainnetDeployedContracts from "@venusprotocol/venus-protocol/deploym
 import opbnbtestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbtestnet_addresses.json";
 import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import { ethers } from "ethers";
+import { ACCESS_CONTROL_MANAGER } from "vips/vip-384/bscmainnet";
+
+import { FAST_TRACK_TIMELOCK } from "./vip-framework";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;
 export const ORACLE_BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
@@ -76,7 +79,10 @@ export const NETWORK_ADDRESSES = {
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",
+    FAST_TRACK_TIMELOCK: "0x8764F50616B62a99A997876C2DEAaa04554C5B2E",
+    CRITICAL_TIMELOCK: "0xeB9b85342c34F65af734C7bd4a149c86c472bC00",
     GUARDIAN: "0x285960C5B22fD66A736C7136967A3eB15e93CC67",
+    ACCESS_CONTROL_MANAGER: "0x230058da2D23eb8836EC5DB7037ef7250c56E25E",
     VTREASURY: ethereumDeployedContracts.addresses.VTreasuryV8,
     POOL_REGISTRY: ilEthereumDeployedContracts.addresses.PoolRegistry,
     RESILIENT_ORACLE: oracleEthereumContracts.addresses.ResilientOracle,
