@@ -15,6 +15,7 @@ import vip525, {
   slisBNB,
   xSolvBTC,
 } from "../../vips/vip-525/bsctestnet";
+import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -80,6 +81,13 @@ forking(56589695, async () => {
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
         [1, 0],
+      );
+
+      await expectEvents(
+        txResponse,
+        [CAPPED_ORACLE_ABI],
+        ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
+        [8, 8, 8],
       );
     },
   });

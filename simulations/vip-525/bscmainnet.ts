@@ -6,6 +6,7 @@ import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle, se
 import { forking, testVip } from "src/vip-framework";
 
 import vip525, { SUSDE, USDE, XSOLVBTC } from "../../vips/vip-525/bscmainnet";
+import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -139,6 +140,13 @@ forking(52370694, async () => {
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
         ["ExecuteRemoteProposal", "StorePayload"],
         [1, 0],
+      );
+
+      await expectEvents(
+        txResponse,
+        [CAPPED_ORACLE_ABI],
+        ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
+        [8, 8, 8],
       );
     },
   });

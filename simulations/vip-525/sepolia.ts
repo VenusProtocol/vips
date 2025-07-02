@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip525, { wstETH } from "../../vips/vip-525/bsctestnet";
@@ -28,7 +29,11 @@ forking(8660631, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip525", await vip525());
+  testForkedNetworkVipCommands("vip525", await vip525(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     for (const price of prices) {
