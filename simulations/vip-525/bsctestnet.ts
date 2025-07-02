@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip525, {
@@ -85,6 +85,15 @@ forking(56589695, async () => {
   });
 
   describe("Post-VIP behaviour", async () => {
+    before(async () => {
+      await setMaxStalePeriodInChainlinkOracle(
+        bsctestnet.CHAINLINK_ORACLE,
+        "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+        "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526",
+        bsctestnet.NORMAL_TIMELOCK,
+      );
+    });
+
     for (const price of prices) {
       it(`check ${price.symbol} price`, async () => {
         expect(await resilientOracle.getPrice(price.address)).to.equal(price.expectedPrice);
