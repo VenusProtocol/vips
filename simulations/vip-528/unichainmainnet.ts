@@ -8,27 +8,26 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip528, {
-  DISTRIBUTION_SPEED_ARB,
-  RELEASE_AMOUNT_ARB,
-  XVS_STORE_ARB,
-  XVS_TOTAL_AMOUNT_ARB,
+  DISTRIBUTION_SPEED_UNICHAIN,
+  XVS_STORE_UNICHAIN,
+  XVS_TOTAL_AMOUNT_UNICHAIN,
 } from "../../vips/vip-528/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
-const { arbitrumone } = NETWORK_ADDRESSES;
-const BRIDGE = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
+const { unichainmainnet } = NETWORK_ADDRESSES;
+const BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 
-forking(353742639, async () => {
-  const xvs = new ethers.Contract(arbitrumone.XVS, XVS_ABI, ethers.provider);
+forking(20788301, async () => {
+  const xvs = new ethers.Contract(unichainmainnet.XVS, XVS_ABI, ethers.provider);
   let previousBalance: BigNumber;
 
   before(async () => {
     await impersonateAccount(BRIDGE);
     await setBalance(BRIDGE, parseUnits("10", 18));
-    await xvs.connect(await ethers.getSigner(BRIDGE)).mint(arbitrumone.VTREASURY, XVS_TOTAL_AMOUNT_ARB);
+    await xvs.connect(await ethers.getSigner(BRIDGE)).mint(unichainmainnet.VTREASURY, XVS_TOTAL_AMOUNT_UNICHAIN);
 
-    previousBalance = await xvs.balanceOf(XVS_STORE_ARB);
+    previousBalance = await xvs.balanceOf(XVS_STORE_UNICHAIN);
   });
 
   testForkedNetworkVipCommands("VIP 528", await vip528(), {
@@ -39,13 +38,15 @@ forking(353742639, async () => {
 
   describe("Post-VIP behaviour", async () => {
     it("check xvs vault speed", async () => {
-      const xvsVault = new ethers.Contract(arbitrumone.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
-      expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(arbitrumone.XVS)).to.equals(DISTRIBUTION_SPEED_ARB);
+      const xvsVault = new ethers.Contract(unichainmainnet.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
+      expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(unichainmainnet.XVS)).to.equals(
+        DISTRIBUTION_SPEED_UNICHAIN,
+      );
     });
 
     it("check xvs balance", async () => {
-      const currentBalance = await xvs.balanceOf(XVS_STORE_ARB);
-      expect(currentBalance).to.equals(previousBalance.add(XVS_TOTAL_AMOUNT_ARB).add(RELEASE_AMOUNT_ARB));
+      const currentBalance = await xvs.balanceOf(XVS_STORE_UNICHAIN);
+      expect(currentBalance).to.equals(previousBalance.add(XVS_TOTAL_AMOUNT_UNICHAIN));
     });
   });
 });

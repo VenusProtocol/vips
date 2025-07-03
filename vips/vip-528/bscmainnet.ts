@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, ethereum , arbitrumone, zksyncmainnet, unichainmainnet } = NETWORK_ADDRESSES;
+const { bscmainnet, ethereum, arbitrumone, zksyncmainnet, unichainmainnet } = NETWORK_ADDRESSES;
 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 const BRIDGE_FEES = parseUnits("0.5", 18);
@@ -16,7 +16,7 @@ export const XVS_BRIDGE_BSC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const XVS_STORE_BSC = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 
 export const XVS_VAULT_TREASURY_ETH = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
-export const RELEASE_AMOUNT_ETH = parseUnits("1008", 18);
+export const RELEASE_AMOUNT_ETH = parseUnits("1007", 18);
 export const DISTRIBUTION_SPEED_ETH = "23472222222222222";
 export const XVS_STORE_ETH = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
 
@@ -36,16 +36,13 @@ export const XVS_TOTAL_AMOUNT_ETH = parseUnits("10584", 18);
 export const XVS_TOTAL_AMOUNT_ARB = parseUnits("2205", 18);
 export const XVS_TOTAL_AMOUNT_ZKSYNC = parseUnits("2205", 18);
 export const XVS_TOTAL_AMOUNT_UNICHAIN = parseUnits("600", 18);
-export const TOTAL_XVS = XVS_TOTAL_AMOUNT_BSC
-  .add(XVS_TOTAL_AMOUNT_ETH)
+export const TOTAL_XVS = XVS_TOTAL_AMOUNT_BSC.add(XVS_TOTAL_AMOUNT_ETH)
   .add(XVS_TOTAL_AMOUNT_ARB)
   .add(XVS_TOTAL_AMOUNT_ZKSYNC)
   .add(XVS_TOTAL_AMOUNT_UNICHAIN);
-export const TOTAL_XVS_REMOTE = XVS_TOTAL_AMOUNT_ETH
-  .add(XVS_TOTAL_AMOUNT_ARB)
+export const TOTAL_XVS_REMOTE = XVS_TOTAL_AMOUNT_ETH.add(XVS_TOTAL_AMOUNT_ARB)
   .add(XVS_TOTAL_AMOUNT_ZKSYNC)
   .add(XVS_TOTAL_AMOUNT_UNICHAIN);
-
 
 export const vip528 = async () => {
   const meta: ProposalMeta = {
@@ -60,7 +57,7 @@ export const vip528 = async () => {
   return makeProposal(
     [
       // Bridge XVS
-       {
+      {
         target: bscmainnet.UNITROLLER,
         signature: "_grantXVS(address,uint256)",
         params: [bscmainnet.NORMAL_TIMELOCK, TOTAL_XVS],
