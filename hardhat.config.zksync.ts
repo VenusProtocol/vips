@@ -37,6 +37,16 @@ task("createProposal", "Create proposal objects for various destinations").setAc
   await createProposal();
 });
 
+task("safeTxData", "Get a Safe TX hash and data for execution of a multisig VIP")
+  .addPositionalParam("proposalPath", "Proposal path to pass to script")
+  .addOptionalParam("nonce", "Nonce of the multisig TX to be considered")
+  .setAction(async function (taskArguments) {
+    const { proposalPath, nonce } = taskArguments;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const calculateSafeTxData = require("./scripts/calculateSafeTxData.ts").default;
+    await calculateSafeTxData(proposalPath, nonce);
+  });
+
 task("multisig", "Execute multisig vip")
   .addPositionalParam("proposalPath", "Proposal path to pass to script")
   .setAction(async function (taskArguments) {
@@ -162,7 +172,7 @@ const config: HardhatUserConfig = {
     },
     zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 300, // change it to 324 for zksyncmainnet
+      chainId: 324, // change it to 324 for zksyncmainnet
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,
