@@ -1,5 +1,3 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 
 import { vip599_Addendum } from "./../../vips/vip-xxx/bsctestnet-addendum";

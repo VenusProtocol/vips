@@ -19,9 +19,6 @@ import opbnbmainnetDeployedContracts from "@venusprotocol/venus-protocol/deploym
 import opbnbtestnetDeployedContracts from "@venusprotocol/venus-protocol/deployments/opbnbtestnet_addresses.json";
 import sepoliaDeployedContracts from "@venusprotocol/venus-protocol/deployments/sepolia_addresses.json";
 import { ethers } from "ethers";
-import { ACCESS_CONTROL_MANAGER } from "vips/vip-384/bscmainnet";
-
-import { FAST_TRACK_TIMELOCK } from "./vip-framework";
 
 export const ZERO_ADDRESS = ethers.constants.AddressZero;
 export const ORACLE_BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
