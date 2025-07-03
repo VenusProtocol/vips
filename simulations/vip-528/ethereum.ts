@@ -4,14 +4,14 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip519, {
+import vip528, {
   MESSARI,
   MESSARI_USDC_AMOUNT,
   USDC_ETH,
   sUSDe_ETH,
   sUSDe_REFUND_ADDRESS,
   sUSDe_REFUND_AMOUNT,
-} from "../../vips/vip-519/bscmainnet";
+} from "../../vips/vip-528/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -24,7 +24,7 @@ forking(22774245, async () => {
   const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(ethereum.VTREASURY);
   const vtreasurySUSDEBalanceBefore = await susde.balanceOf(ethereum.VTREASURY);
 
-  testForkedNetworkVipCommands("vip519", await vip519());
+  testForkedNetworkVipCommands("vip528", await vip528());
 
   describe("Post-VIP behavior", async () => {
     it("check Messari USDC balance", async () => {

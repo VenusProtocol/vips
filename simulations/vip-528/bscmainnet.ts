@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip519, {
+import vip528, {
   CERTIK,
   CERTIK_USDT_AMOUNT_1,
   CERTIK_USDT_AMOUNT_2,
@@ -15,7 +15,7 @@ import vip519, {
   QUANTSTAMP_USDC_AMOUNT,
   USDC_BSC,
   USDT_BSC,
-} from "../../vips/vip-519/bscmainnet";
+} from "../../vips/vip-528/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
@@ -30,7 +30,7 @@ forking(52015098, async () => {
   const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(bscmainnet.VTREASURY);
   const vtreasuryUSDTBalanceBefore = await usdt.balanceOf(bscmainnet.VTREASURY);
 
-  testVip("VIP-519", await vip519(), {
+  testVip("VIP-528", await vip528(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
