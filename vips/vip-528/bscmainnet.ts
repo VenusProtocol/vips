@@ -29,20 +29,15 @@ export const DISTRIBUTION_SPEED_ZKSYNC = "403935185185185";
 export const XVS_STORE_ZKSYNC = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
 
 export const DISTRIBUTION_SPEED_UNICHAIN = "77160493827160";
-export const XVS_STORE_UNICHAIN = "0x0ee4b35c2cEAb19856Bf35505F81608d12B2a7Bb";
 
 export const XVS_TOTAL_AMOUNT_BSC = parseUnits("56492", 18);
 export const XVS_TOTAL_AMOUNT_ETH = parseUnits("10584", 18);
 export const XVS_TOTAL_AMOUNT_ARB = parseUnits("2205", 18);
 export const XVS_TOTAL_AMOUNT_ZKSYNC = parseUnits("2205", 18);
-export const XVS_TOTAL_AMOUNT_UNICHAIN = parseUnits("600", 18);
 export const TOTAL_XVS = XVS_TOTAL_AMOUNT_BSC.add(XVS_TOTAL_AMOUNT_ETH)
   .add(XVS_TOTAL_AMOUNT_ARB)
-  .add(XVS_TOTAL_AMOUNT_ZKSYNC)
-  .add(XVS_TOTAL_AMOUNT_UNICHAIN);
-export const TOTAL_XVS_REMOTE = XVS_TOTAL_AMOUNT_ETH.add(XVS_TOTAL_AMOUNT_ARB)
-  .add(XVS_TOTAL_AMOUNT_ZKSYNC)
-  .add(XVS_TOTAL_AMOUNT_UNICHAIN);
+  .add(XVS_TOTAL_AMOUNT_ZKSYNC);
+export const TOTAL_XVS_REMOTE = XVS_TOTAL_AMOUNT_ETH.add(XVS_TOTAL_AMOUNT_ARB).add(XVS_TOTAL_AMOUNT_ZKSYNC);
 
 export const vip528 = async () => {
   const meta: ProposalMeta = {
@@ -109,18 +104,6 @@ export const vip528 = async () => {
         value: BRIDGE_FEES.toString(),
       },
       {
-        target: XVS_BRIDGE_BSC,
-        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
-        params: [
-          bscmainnet.NORMAL_TIMELOCK,
-          LzChainId.unichainmainnet,
-          ethers.utils.defaultAbiCoder.encode(["address"], [unichainmainnet.VTREASURY]),
-          XVS_TOTAL_AMOUNT_UNICHAIN,
-          [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
-        ],
-        value: BRIDGE_FEES.toString(),
-      },
-      {
         target: ethereum.VTREASURY,
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [ethereum.XVS, XVS_TOTAL_AMOUNT_ETH, XVS_STORE_ETH],
@@ -137,12 +120,6 @@ export const vip528 = async () => {
         signature: "withdrawTreasuryToken(address,uint256,address)",
         params: [zksyncmainnet.XVS, XVS_TOTAL_AMOUNT_ZKSYNC, XVS_STORE_ZKSYNC],
         dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
-        target: unichainmainnet.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [unichainmainnet.XVS, XVS_TOTAL_AMOUNT_UNICHAIN, XVS_STORE_UNICHAIN],
-        dstChainId: LzChainId.unichainmainnet,
       },
 
       // Set Emissions
