@@ -9,6 +9,8 @@ import vip519, {
   CERTIK,
   CERTIK_USDT_AMOUNT_1,
   CERTIK_USDT_AMOUNT_2,
+  NODEREAL,
+  NODEREAL_USDT_AMOUNT,
   QUANTSTAMP,
   QUANTSTAMP_USDC_AMOUNT,
   USDC_BSC,
@@ -24,6 +26,7 @@ forking(52015098, async () => {
   const usdt = new Contract(USDT_BSC, ERC20_ABI, ethers.provider);
   const certikBalanceBefore = await usdt.balanceOf(CERTIK);
   const quantstampBalanceBefore = await usdc.balanceOf(QUANTSTAMP);
+  const noderealBalanceBefore = await usdt.balanceOf(NODEREAL);
   const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(bscmainnet.VTREASURY);
   const vtreasuryUSDTBalanceBefore = await usdt.balanceOf(bscmainnet.VTREASURY);
 
@@ -49,6 +52,11 @@ forking(52015098, async () => {
       expect(quantstampBalanceAfter).to.equal(quantstampBalanceBefore.add(QUANTSTAMP_USDC_AMOUNT));
     });
 
+    it("check NodeReal USDT balance", async () => {
+      const noderealBalanceAfter = await usdt.balanceOf(NODEREAL);
+      expect(noderealBalanceAfter).to.equal(noderealBalanceBefore.add(NODEREAL_USDT_AMOUNT));
+    });
+
     it("check VTreasury USDC balance", async () => {
       const vtreasuryUSDCBalanceAfter = await usdc.balanceOf(bscmainnet.VTREASURY);
       expect(vtreasuryUSDCBalanceAfter).to.equal(vtreasuryUSDCBalanceBefore.sub(QUANTSTAMP_USDC_AMOUNT));
@@ -57,7 +65,7 @@ forking(52015098, async () => {
     it("check VTreasury USDT balance", async () => {
       const vtreasuryUSDTBalanceAfter = await usdt.balanceOf(bscmainnet.VTREASURY);
       expect(vtreasuryUSDTBalanceAfter).to.equal(
-        vtreasuryUSDTBalanceBefore.sub(CERTIK_USDT_AMOUNT_1).sub(CERTIK_USDT_AMOUNT_2),
+        vtreasuryUSDTBalanceBefore.sub(CERTIK_USDT_AMOUNT_1).sub(CERTIK_USDT_AMOUNT_2).sub(NODEREAL_USDT_AMOUNT),
       );
     });
   });
