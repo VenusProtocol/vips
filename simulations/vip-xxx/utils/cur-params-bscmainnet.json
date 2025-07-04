@@ -1,0 +1,21 @@
+{
+  "cutParams": [
+    ["0x94573965fbCCAC5cD4558208A8cCB3F18E71B7Db", 0, ["0x3d98a1e5", "0xcab4f84c"]],
+    ["0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9", 0, ["0x528a174c"]],
+    [
+      "0x9D1fdD581Bd6E638A7b98ac5567248A0c4E88f64",
+      0,
+      [
+        "0x8b3113f6",
+        "0xc32094c7",
+        "0x24aaa220",
+        "0xd136af44",
+        "0x186db48f",
+        "0xa8431081",
+        "0x5cc4fdeb",
+        "0x12348e96",
+        "0x530e784f"
+      ]
+    ]
+  ]
+}
