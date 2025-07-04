@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-xxx/utils/cur-params-test.json";
+import { cutParams as params } from "../../simulations/vip-xxx/utils/cur-params-bsctestnet.json";
 
 export const cutParams = params;
 
