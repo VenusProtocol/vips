@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip525, {
+import vip530, {
   BNBx,
   PTsUSDE26JUN2025,
   ankrBNB,
@@ -14,7 +14,7 @@ import vip525, {
   sUSDe,
   slisBNB,
   xSolvBTC,
-} from "../../vips/vip-525/bsctestnet";
+} from "../../vips/vip-530/bsctestnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -74,7 +74,7 @@ forking(56589695, async () => {
     }
   });
 
-  testVip("VIP-525", await vip525(), {
+  testVip("VIP-530", await vip530(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

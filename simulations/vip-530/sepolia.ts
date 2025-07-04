@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip525, { wstETH } from "../../vips/vip-525/bsctestnet";
+import vip530, { wstETH } from "../../vips/vip-530/bsctestnet";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
@@ -29,7 +29,7 @@ forking(8660631, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("vip525", await vip525(), {
+  testForkedNetworkVipCommands("vip530", await vip530(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
     },
