@@ -6,7 +6,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip528, { DISTRIBUTION_SPEED_BSC, TOTAL_XVS } from "../../vips/vip-528/bscmainnet";
+import vip528, {
+  DISTRIBUTION_SPEED_BSC,
+  RELEASE_AMOUNT_BSC,
+  TOTAL_XVS,
+  XVS_STORE_BSC,
+  XVS_TOTAL_AMOUNT_BSC,
+} from "../../vips/vip-528/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -21,6 +27,7 @@ forking(52704740, async () => {
   let provider: any;
   let xvs: any;
   let comptrollerPreviousXVSBalance: any;
+  let xvsStorePreviousBalance: any;
 
   describe("Pre-VIP behaviour", () => {
     before(async () => {
@@ -28,6 +35,7 @@ forking(52704740, async () => {
       provider = ethers.provider;
       xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
       comptrollerPreviousXVSBalance = await xvs.balanceOf(bscmainnet.UNITROLLER);
+      xvsStorePreviousBalance = await xvs.balanceOf(XVS_STORE_BSC);
     });
 
     it("check XVS vault speed", async () => {
@@ -57,11 +65,14 @@ forking(52704740, async () => {
       const comptrollerXVSBalanceAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
       expect(comptrollerXVSBalanceAfter).to.equal(comptrollerPreviousXVSBalance.sub(TOTAL_XVS));
     });
-  });
 
-  describe("Post-VIP behavior", () => {
     it("check XVS vault speed", async () => {
       expect(await xvsVault.rewardTokenAmountsPerBlockOrSecond(bscmainnet.XVS)).to.equals(DISTRIBUTION_SPEED_BSC);
+    });
+
+    it("should transfer XVS to the XVS Store", async () => {
+      const xvsStoreBalanceAfter = await xvs.balanceOf(XVS_STORE_BSC);
+      expect(xvsStoreBalanceAfter).to.equal(xvsStorePreviousBalance.add(XVS_TOTAL_AMOUNT_BSC).add(RELEASE_AMOUNT_BSC));
     });
   });
 });

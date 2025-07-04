@@ -20,14 +20,16 @@ const BRIDGE = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
 forking(62438618, async () => {
   const xvs = new ethers.Contract(zksyncmainnet.XVS, XVS_ABI, ethers.provider);
-  let previousBalance: BigNumber;
+  let previousBalanceXVSStore: BigNumber;
+  let previousBalanceTreasury: BigNumber;
 
   before(async () => {
+    previousBalanceTreasury = await xvs.balanceOf(zksyncmainnet.VTREASURY);
     const xvsMinter = await initMainnetUser(BRIDGE, ethers.utils.parseEther("1"));
     await setBalance(BRIDGE, parseUnits("10", 18));
     await xvs.connect(xvsMinter).mint(zksyncmainnet.VTREASURY, XVS_TOTAL_AMOUNT_ZKSYNC);
 
-    previousBalance = await xvs.balanceOf(XVS_STORE_ZKSYNC);
+    previousBalanceXVSStore = await xvs.balanceOf(XVS_STORE_ZKSYNC);
   });
 
   testForkedNetworkVipCommands("VIP 528", await vip528(), {
@@ -44,7 +46,12 @@ forking(62438618, async () => {
 
     it("check xvs balance", async () => {
       const currentBalance = await xvs.balanceOf(XVS_STORE_ZKSYNC);
-      expect(currentBalance).to.equals(previousBalance.add(XVS_TOTAL_AMOUNT_ZKSYNC));
+      expect(currentBalance).to.equals(previousBalanceXVSStore.add(XVS_TOTAL_AMOUNT_ZKSYNC));
+    });
+
+    it("check treasury balance", async () => {
+      const currentBalance = await xvs.balanceOf(zksyncmainnet.VTREASURY);
+      expect(currentBalance).to.equals(previousBalanceTreasury);
     });
   });
 });
