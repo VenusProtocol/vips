@@ -53,7 +53,7 @@ export const sUSDe_GrowthRate = parseUnits("0.2827", 18); // 28.27% per year
 export const sUSDe_SnapshotGap = 236; // 2.36%
 export const PTsUSDE26JUN2025_InitialExchangeRate = parseUnits("0.847697123107543722", 18);
 export const PTsUSDE26JUN2025_Timestamp = 1751269105;
-export const PTsUSDE26JUN2025_GrowthRate = SECONDS_PER_YEAR; // 0% per yeat
+export const PTsUSDE26JUN2025_GrowthRate = SECONDS_PER_YEAR; // 0% per year
 export const PTsUSDE26JUN2025_SnapshotGap = 400; // 4.00%
 export const xSolvBTC_InitialExchangeRate = parseUnits("1", 18);
 export const xSolvBTC_Timestamp = 1751269105;
@@ -76,11 +76,99 @@ export const asBNB_Timestamp = 1751269105;
 export const asBNB_GrowthRate = parseUnits("0.3049", 18); // 30.49% per year
 export const asBNB_SnapshotGap = 254; // 2.54%
 
-export const vip525 = () => {
+export const vip529 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-525",
-    description: "",
+    title: "VIP-529 [BNB Chain] Capped Oracles and Cached Prices (2/2)",
+    description: `#### Summary
+
+If passed, following the community proposal “[Provide Support for Capped Oracles for Enhanced Security](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xcd64c64eee56e75b56a0a0b84f1ffa2b4ea5fb2be76cca96a155137c46305c07)), this VIP will configure the caps on the prices for the following assets on BNB Chain (following the [Chaos Labs recommendation](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/9)):
+
+- [ankrBNB](https://bscscan.com/address/0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827)
+    - Maximum annual growth rate: 6.12%
+    - Automatic snapshot period: 30 days (how frequently the reference value to calculate the cap in the price is updated)
+    - Automatic snapshot update gap: 0.51% of the current exchange rate
+- [BNBx](https://bscscan.com/address/0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275)
+    - Maximum annual growth rate: 7.53%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.63%
+- [asBNB](https://bscscan.com/address/0x77734e70b6E88b4d82fE632a168EDf6e700912b6)
+    - Maximum annual growth rate: 30.49%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 2.54%
+- [slisBNB](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B)
+    - Maximum annual growth rate: 4.12%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 0.35%
+- [sUSDe](https://bscscan.com/address/0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2)
+    - Maximum annual growth rate: 28.27%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 2.36%
+- [PT-sUSDE-26JUN2025](https://bscscan.com/address/0xDD809435ba6c9d6903730f923038801781cA66ce)
+    - Maximum annual growth rate: 0%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 4%
+- [xSolvBTC](https://bscscan.com/address/0x1346b618dC92810EC74163e4c27004c921D446a5)
+    - Maximum annual growth rate: 0%
+    - Automatic snapshot period: 30 days
+    - Automatic snapshot update gap: 4%
+
+Moreover, on Ethereum, the oracle used for [wstETH](https://etherscan.io/address/0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0) will be updated. The new [WstETHOracleV2](https://github.com/VenusProtocol/oracle/pull/286) contract will be used. This contract supports caps on the acceptable growth for the wstETH yield. The following caps are configured (following the [Chaos Labs recommendations](https://community.venus.io/t/provide-support-for-capped-oracles-for-enhanced-security/5092/5)):
+
+- Maximum annual growth rate: 6.7%
+- Automatic snapshot period: 30 days
+- Automatic snapshot update gap: 0.55%
+
+#### Description
+
+**Capped Oracles** are a type of price oracle designed to limit the maximum value (or growth) of an asset's reported price to protect against manipulation or sudden volatility.
+
+**Cached Prices** is a new feature integrated into the Venus oracle contracts, that reduces the gas consumed by the functions that collect and return the prices, using [Transient Storage](https://soliditylang.org/blog/2024/01/26/transient-storage/) to cache the prices in the smart contract memory. This VIP doesn’t enable Cached Prices for any market on the affected networks. It only upgrades the oracle contracts to support that feature.
+
+More information about Capped Oracles and Cached Prices:
+
+- [VIP-495 [opBNB] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/495?chainId=56)
+- [VIP-497 [Base][Optimism][Unichain] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/497?chainId=56)
+- [VIP-500 [Arbitrum][ZKSync] Capped Oracles and Cached Prices](https://app.venus.io/#/governance/proposal/500?chainId=56)
+- [VIP-506 [Ethereum] Capped Oracles and Cached Prices (1/2)](https://app.venus.io/#/governance/proposal/506?chainId=56)
+- [VIP-511 [Ethereum] Capped Oracles and Cached Prices (2/2)](https://app.venus.io/#/governance/proposal/511?chainId=56)
+- [VIP-517 [BNB Chain] Capped Oracles and Cached Prices (1/2)](https://app.venus.io/#/governance/proposal/517?chainId=56)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [Fairyproof](https://www.fairyproof.com/) have audited the deployed code. Certik also audited the new WstETHOracleV2 contract
+- **VIP execution simulation**: in a simulation environment, validating the asset prices don’t change after configuring the caps
+- **Deployment on testnet**: the same changes has been performed on BNB Chain testnet and Sepolia, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/125_capped_cached_certik_20250430.pdf) (2025/04/30)
+- [Quantstamp audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/127_capped_cached_quantstamp_20250325.pdf) (2025/03/25)
+- [Fairyproof audit report](https://github.com/VenusProtocol/oracle/blob/d6497b924d6255db8aa664076b703713296439d0/audits/126_capped_cached_fairyproof_20250319.pdf) (2025/03/19)
+- [Certik audit report for WstETHOracleV2](https://github.com/VenusProtocol/oracle/blob/25411038a1c2afb632d5377874349f62b98e03eb/audits/137_wstETHOracleV2_certik_20250623.pdf) (2025/06/23)
+
+#### Deployed contracts
+
+Ethereum
+
+- [New oracle for wstETH](https://etherscan.io/address/0x6b51Ee3aF70b350AaADc05f418502b330c5Aad7c)
+
+Sepolia
+
+- [New oracle for wstETH](https://sepolia.etherscan.io/address/0xA33f06dB4c0DD8E41BA3d2C8917a27e6B9200662)
+
+#### References
+
+- [Capped Oracles and Cached Prices feature](https://github.com/VenusProtocol/oracle/pull/239)
+- [New WstETHOracleV2](https://github.com/VenusProtocol/oracle/pull/286)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/587)
+- VIP execution on testnets
+    - [BNB Chain testnet](https://testnet.bscscan.com/tx/0xb118b50fb4daf80af6064f013f78b8ed79224f64fa91f64e0da9845badf2ef39)
+    - [Sepolia](https://sepolia.etherscan.io/tx/0x4c47493edec255b44d19d185f2b49131b33e8fe82a065b249ddac9fc74e229d7)
+- [Technical article about Capped Oracles](https://docs-v4.venus.io/technical-reference/reference-technical-articles/capped-oracles)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -256,4 +344,4 @@ export const vip525 = () => {
   );
 };
 
-export default vip525;
+export default vip529;
