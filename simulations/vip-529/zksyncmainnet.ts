@@ -7,11 +7,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip528, {
+import vip529, {
   DISTRIBUTION_SPEED_ZKSYNC,
   XVS_STORE_ZKSYNC,
   XVS_TOTAL_AMOUNT_ZKSYNC,
-} from "../../vips/vip-528/bscmainnet";
+} from "../../vips/vip-529/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -32,7 +32,7 @@ forking(62438618, async () => {
     previousBalanceXVSStore = await xvs.balanceOf(XVS_STORE_ZKSYNC);
   });
 
-  testForkedNetworkVipCommands("VIP 528", await vip528(), {
+  testForkedNetworkVipCommands("VIP 529", await vip529(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },

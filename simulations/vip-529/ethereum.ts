@@ -7,12 +7,12 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip528, {
+import vip529, {
   DISTRIBUTION_SPEED_ETH,
   RELEASE_AMOUNT_ETH,
   XVS_STORE_ETH,
   XVS_TOTAL_AMOUNT_ETH,
-} from "../../vips/vip-528/bscmainnet";
+} from "../../vips/vip-529/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -33,7 +33,7 @@ forking(22837909, async () => {
     previousBalanceXVSStore = await xvs.balanceOf(XVS_STORE_ETH);
   });
 
-  testForkedNetworkVipCommands("VIP 528", await vip528(), {
+  testForkedNetworkVipCommands("VIP 529", await vip529(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },

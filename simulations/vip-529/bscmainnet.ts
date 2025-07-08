@@ -6,13 +6,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip528, {
+import vip529, {
   DISTRIBUTION_SPEED_BSC,
   RELEASE_AMOUNT_BSC,
   TOTAL_XVS,
   XVS_STORE_BSC,
   XVS_TOTAL_AMOUNT_BSC,
-} from "../../vips/vip-528/bscmainnet";
+} from "../../vips/vip-529/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -45,7 +45,7 @@ forking(52704740, async () => {
     });
   });
 
-  testVip("vip-528", await vip528(), {
+  testVip("vip-529", await vip529(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

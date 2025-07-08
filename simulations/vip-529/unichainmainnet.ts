@@ -4,13 +4,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip528, { DISTRIBUTION_SPEED_UNICHAIN } from "../../vips/vip-528/bscmainnet";
+import vip529, { DISTRIBUTION_SPEED_UNICHAIN } from "../../vips/vip-529/bscmainnet";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
 forking(20788301, async () => {
-  testForkedNetworkVipCommands("VIP 528", await vip528(), {
+  testForkedNetworkVipCommands("VIP 529", await vip529(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [XVS_VAULT_ABI], ["RewardAmountUpdated"], [1]);
     },
