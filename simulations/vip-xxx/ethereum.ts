@@ -41,7 +41,7 @@ forking(22829643, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI, VENUS_RISK_STEWARD_RECEIVER_ABI],
         ["PermissionGranted", "RiskParameterConfigSet"],
-        [16, 2],
+        [15, 2],
       );
     },
   });
