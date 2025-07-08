@@ -5,7 +5,7 @@ import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { ANY_TARGET_CONTRACT, MARKET_CAP_RISK_STEWARD_ETHEREUM } from "../../vips/vip-xxx/bscmainnet";
 import vipxxx from "../../vips/vip-xxx/bscmainnet";
