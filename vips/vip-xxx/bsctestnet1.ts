@@ -123,19 +123,19 @@ export const permissions = (
     {
       target: acm,
       signature: "giveCallPermission(address,string,address)",
-      params: [marketCapRiskSteward, "setMaxIncreaseBps(uint256)", normalTimelock],
+      params: [marketCapRiskSteward, "setMaxDeltaBps(uint256)", normalTimelock],
       dstChainId: chain,
     },
     {
       target: acm,
       signature: "giveCallPermission(address,string,address)",
-      params: [marketCapRiskSteward, "setMaxIncreaseBps(uint256)", criticalTimelock],
+      params: [marketCapRiskSteward, "setMaxDeltaBps(uint256)", criticalTimelock],
       dstChainId: chain,
     },
     {
       target: acm,
       signature: "giveCallPermission(address,string,address)",
-      params: [marketCapRiskSteward, "setMaxIncreaseBps(uint256)", fastTrackTimelock],
+      params: [marketCapRiskSteward, "setMaxDeltaBps(uint256)", fastTrackTimelock],
       dstChainId: chain,
     },
   ];

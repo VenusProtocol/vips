@@ -33,7 +33,6 @@ forking(22829643, async () => {
     executor = new ethers.Contract(ethereum.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
 
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vipxxx());
   });
 
   testForkedNetworkVipCommands("vipxxx Configuring Risk Stewards", await vipxxx(), {
@@ -79,12 +78,12 @@ forking(22829643, async () => {
       await expect(
         isolatedPoolComptroller
           .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_ETHEREUM))
-          .setMarketSupplyCaps(["0xA31D67c056Aadc2501535f2776bF1157904f810e"], ["180000000000"]),
+          .setMarketSupplyCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["180000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewSupplyCap");
       await expect(
         isolatedPoolComptroller
           .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_ETHEREUM))
-          .setMarketBorrowCaps(["0xA31D67c056Aadc2501535f2776bF1157904f810e"], ["150000000000"]),
+          .setMarketBorrowCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["150000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewBorrowCap");
     });
   });

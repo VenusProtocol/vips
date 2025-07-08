@@ -1,7 +1,126 @@
+import { TransactionResponse } from "@ethersproject/providers";
+import { expect } from "chai";
+import { Contract } from "ethers";
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip599 from "../../vips/vip-xxx/bscmainnet";
+import COMPTROLLER_ABI from "./abi/Comproller.json";
+import DIAMOND_ABI from "./abi/Diamond.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+const OLD_SETTER_FACET = "0x9B0D9D7c50d90f23449c4BbCAA671Ce7cd19DbCf";
+const OLD_MARKET_FACET = "0x4b093a3299F39615bA6b34B7897FDedCe7b83D63";
+const OLD_POLICY_FACET = "0x93e7Ff7c87B496aE76fFb22d437c9d46461A9B51";
+
+const NEW_SETTER_FACET = "0x9D1fdD581Bd6E638A7b98ac5567248A0c4E88f64";
+const NEW_MARKET_FACET = "0x94573965fbCCAC5cD4558208A8cCB3F18E71B7Db";
+const NEW_POLICY_FACET = "0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9";
+
+const UNCHANGED_REWARD_FACET = "0xc2F6bDCEa4907E8CB7480d3d315bc01c125fb63C";
 
 forking(52815412, async () => {
-  testVip("vip-599", await vip599(), {});
+  const provider = ethers.provider;
+  let unitroller: Contract;
+  let marketFacetFunctionSelectors: string[];
+  let policyFacetFunctionSelectors: string[];
+  let rewardFacetFuntionSelectors: string[];
+  let setterFacetFuntionSelectors: string[];
+
+  before(async () => {
+    unitroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
+    rewardFacetFuntionSelectors = await unitroller.facetFunctionSelectors(UNCHANGED_REWARD_FACET);
+    setterFacetFuntionSelectors = await unitroller.facetFunctionSelectors(OLD_SETTER_FACET);
+    marketFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
+    policyFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_POLICY_FACET);
+  });
+
+  describe("Pre-VIP behaviour", async () => {
+    it("market facet function selectors should be correct", async () => {
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal(marketFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal([]);
+    });
+
+    it("policy facet function selectors should be correct", async () => {
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal([]);
+    });
+
+    it("setter facet function selectors should be correct", async () => {
+      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal(setterFacetFuntionSelectors);
+      expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal([]);
+    });
+
+    it("reward facet function selectors should be correct", async () => {
+      expect(await unitroller.facetFunctionSelectors(UNCHANGED_REWARD_FACET)).to.deep.equal(
+        rewardFacetFuntionSelectors,
+      );
+    });
+
+    it("unitroller should contain only old facet addresses", async () => {
+      expect(await unitroller.facetAddresses()).to.include(OLD_SETTER_FACET);
+      expect(await unitroller.facetAddresses()).to.include(OLD_POLICY_FACET);
+      expect(await unitroller.facetAddresses()).to.include(OLD_MARKET_FACET);
+      expect(await unitroller.facetAddresses()).to.include(UNCHANGED_REWARD_FACET);
+
+      expect(await unitroller.facetAddresses()).to.not.include(NEW_SETTER_FACET);
+      expect(await unitroller.facetAddresses()).to.not.include(NEW_POLICY_FACET);
+      expect(await unitroller.facetAddresses()).to.not.include(NEW_MARKET_FACET);
+    });
+  });
+
+  testVip("vip-599", await vip599(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+    },
+  });
+
+  describe("Post-VIP behavior", async () => {
+    it("market facet function selectors should be updated for new facet address", async () => {
+      const newMarketFacetFunctionSelectors = ["0x3d98a1e5", "0xcab4f84c"];
+
+      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(newMarketFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal(marketFacetFunctionSelectors);
+    });
+
+    it("policy facet function selectors should be updated for new facet address", async () => {
+      const newPolicyFacetFunctionSelectors = ["0x528a174c"];
+
+      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(newPolicyFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
+    });
+
+    it("setter facet function selectors should be updated for new facet address", async () => {
+      const newSetterFacetFunctionSelectors = [
+        "0x8b3113f6",
+        "0xc32094c7",
+        "0x24aaa220",
+        "0xd136af44",
+        "0x186db48f",
+        "0xa8431081",
+        "0x5cc4fdeb",
+        "0x12348e96",
+        "0x530e784f",
+      ];
+
+      expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(newSetterFacetFunctionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal(setterFacetFuntionSelectors);
+    });
+
+    it("reward facet function selectors should not be changed", async () => {
+      expect(await unitroller.facetFunctionSelectors(UNCHANGED_REWARD_FACET)).to.deep.equal(
+        rewardFacetFuntionSelectors,
+      );
+    });
+
+    it("unitroller should contain the new and old facet addresses", async () => {
+      expect(await unitroller.facetAddresses()).to.include(NEW_SETTER_FACET, OLD_SETTER_FACET);
+      expect(await unitroller.facetAddresses()).to.include(NEW_POLICY_FACET, OLD_POLICY_FACET);
+      expect(await unitroller.facetAddresses()).to.include(NEW_MARKET_FACET, OLD_MARKET_FACET);
+      expect(await unitroller.facetAddresses()).to.include(UNCHANGED_REWARD_FACET);
+    });
+  });
 });

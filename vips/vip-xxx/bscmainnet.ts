@@ -113,29 +113,19 @@ Configure Remote Risk Stewards
       {
         target: ethereum.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          MARKET_CAP_RISK_STEWARD_ETHEREUM,
-          "processUpdate(RiskParameterUpdate)",
-          RISK_STEWARD_RECEIVER_ETHEREUM,
-        ],
+        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.NORMAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ethereum.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxIncreaseBps(uint256)", ethereum.NORMAL_TIMELOCK],
+        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.CRITICAL_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
       {
         target: ethereum.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxIncreaseBps(uint256)", ethereum.CRITICAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxIncreaseBps(uint256)", ethereum.FAST_TRACK_TIMELOCK],
+        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.FAST_TRACK_TIMELOCK],
         dstChainId: LzChainId.ethereum,
       },
 
