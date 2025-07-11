@@ -18,14 +18,7 @@
         "0xc5b4db55"
       ]
     ],
-    [
-      "0x94573965fbCCAC5cD4558208A8cCB3F18E71B7Db",
-      0,
-      [
-        "0x3d98a1e5",
-        "0xcab4f84c"
-      ]
-    ],
+    ["0x94573965fbCCAC5cD4558208A8cCB3F18E71B7Db", 0, ["0x3d98a1e5", "0xcab4f84c"]],
     [
       "0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9",
       1,
@@ -49,13 +42,7 @@
         "0x6a56947e"
       ]
     ],
-    [
-      "0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9",
-      0,
-      [
-        "0x528a174c"
-      ]
-    ],
+    ["0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9", 0, ["0x528a174c"]],
     [
       "0x9D1fdD581Bd6E638A7b98ac5567248A0c4E88f64",
       1,
