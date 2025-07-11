@@ -82,15 +82,21 @@ forking(56931937, async () => {
     it("market facet function selectors should be updated for new facet address", async () => {
       const newMarketFacetFunctionSelectors = ["0x3d98a1e5", "0xcab4f84c"];
 
-      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(newMarketFacetFunctionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal(marketFacetFunctionSelectors);
+      const expectSelectors = [...marketFacetFunctionSelectors, ...newMarketFacetFunctionSelectors].sort();
+      const updatedSelectors = [...(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET))].sort();
+
+      expect(updatedSelectors).to.deep.equal(expectSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
     });
 
     it("policy facet function selectors should be updated for new facet address", async () => {
       const newPolicyFacetFunctionSelectors = ["0x528a174c"];
 
-      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(newPolicyFacetFunctionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal(policyFacetFunctionSelectors);
+      const expectSelectors = [...policyFacetFunctionSelectors, ...newPolicyFacetFunctionSelectors].sort();
+      const updatedSelectors = [...(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET))].sort();
+
+      expect(updatedSelectors).to.deep.equal(expectSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
     });
 
     it("setter facet function selectors should be updated for new facet address", async () => {
@@ -106,8 +112,11 @@ forking(56931937, async () => {
         "0x530e784f",
       ];
 
-      expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(newSetterFacetFunctionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal(setterFacetFuntionSelectors);
+      const expectSelectors = [...setterFacetFuntionSelectors, ...newSetterFacetFunctionSelectors].sort();
+      const updatedSelectors = [...(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET))].sort();
+
+      expect(updatedSelectors).to.deep.equal(expectSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
     });
 
     it("reward facet function selectors should not be changed", async () => {
