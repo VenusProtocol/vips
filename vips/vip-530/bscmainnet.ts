@@ -5,7 +5,7 @@ import { makeProposal } from "src/utils";
 
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 export const USDM = "0x7715c206A14Ac93Cb1A6c0316A6E5f8aD7c9Dc31";
-export const PRICE = parseUnits("1", 36);
+export const PRICE = parseUnits("1", 18);
 
 export const vip530 = async () => {
   const meta: ProposalMeta = {
