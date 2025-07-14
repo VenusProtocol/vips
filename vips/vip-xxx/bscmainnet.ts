@@ -137,6 +137,24 @@ Configure Remote Risk Stewards
         signature: "setRiskParameterConfig(string,address,uint256)",
         params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BSCMAINNET, MORE_THAN_1_DAY],
       },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          bscmainnet.UNITROLLER,
+          "_setMarketSupplyCaps(address[],uint256[])",
+          MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        ],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          bscmainnet.UNITROLLER,
+          "_setMarketBorrowCaps(address[],uint256[])",
+          MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        ],
+      },
     ],
     meta,
     ProposalType.REGULAR,
