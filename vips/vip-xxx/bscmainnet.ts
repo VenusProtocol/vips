@@ -114,18 +114,6 @@ Configure Remote Risk Stewards
         signature: "giveCallPermission(address,string,address)",
         params: [MARKET_CAP_RISK_STEWARD_BSCMAINNET, "setMaxDeltaBps(uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
       },
-      // Accept ownership of Risk Steward Receiver
-      {
-        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
-        signature: "acceptOwnership()",
-        params: [],
-      },
-      // Accept ownership of Market Cap Risk Steward
-      {
-        target: MARKET_CAP_RISK_STEWARD_BSCMAINNET,
-        signature: "acceptOwnership()",
-        params: [],
-      },
       // Set risk parameter configurations
       {
         target: RISK_STEWARD_RECEIVER_BSCMAINNET,
@@ -137,23 +125,17 @@ Configure Remote Risk Stewards
         signature: "setRiskParameterConfig(string,address,uint256)",
         params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BSCMAINNET, MORE_THAN_1_DAY],
       },
+      // Accept ownership of Risk Steward Receiver
       {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          bscmainnet.UNITROLLER,
-          "_setMarketSupplyCaps(address[],uint256[])",
-          MARKET_CAP_RISK_STEWARD_BSCMAINNET,
-        ],
+        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
+        signature: "acceptOwnership()",
+        params: [],
       },
+      // Accept ownership of Market Cap Risk Steward
       {
-        target: bscmainnet.ACCESS_CONTROL_MANAGER,
-        signature: "giveCallPermission(address,string,address)",
-        params: [
-          bscmainnet.UNITROLLER,
-          "_setMarketBorrowCaps(address[],uint256[])",
-          MARKET_CAP_RISK_STEWARD_BSCMAINNET,
-        ],
+        target: MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        signature: "acceptOwnership()",
+        params: [],
       },
     ],
     meta,

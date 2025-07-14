@@ -8,7 +8,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip599, { ANY_TARGET_CONTRACT, MARKET_CAP_RISK_STEWARD_BSCMAINNET } from "../../vips/vip-xxx/bscmainnet";
+import vip599, {
+  ANY_TARGET_CONTRACT,
+  MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+  RISK_STEWARD_RECEIVER_BSCMAINNET,
+} from "../../vips/vip-xxx/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -46,7 +50,11 @@ forking(54002305, async () => {
     policyFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_POLICY_FACET);
 
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
-    isolatedPoolComptroller = new ethers.Contract(bscmainnet.UNITROLLER, ISOLATED_POOL_COMPTROLLER_ABI, provider);
+    isolatedPoolComptroller = new ethers.Contract(
+      "0xBE609449Eb4D76AD8545f957bBE04b596E8fC529",
+      ISOLATED_POOL_COMPTROLLER_ABI,
+      provider,
+    );
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -81,6 +89,24 @@ forking(54002305, async () => {
       expect(await unitroller.facetAddresses()).to.not.include(NEW_POLICY_FACET);
       expect(await unitroller.facetAddresses()).to.not.include(NEW_MARKET_FACET);
     });
+
+    it("normal timelock is not owner of risk steward receiver", async () => {
+      const riskStewardReceiver = new ethers.Contract(
+        RISK_STEWARD_RECEIVER_BSCMAINNET,
+        VENUS_RISK_STEWARD_RECEIVER_ABI,
+        provider,
+      );
+      expect(await riskStewardReceiver.owner()).to.not.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("normal timelock is not owner of market cap risk steward", async () => {
+      const marketCapRiskSteward = new ethers.Contract(
+        MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        VENUS_RISK_STEWARD_RECEIVER_ABI,
+        provider,
+      );
+      expect(await marketCapRiskSteward.owner()).to.not.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
   });
 
   testVip("vip-599", await vip599(), {
@@ -89,7 +115,7 @@ forking(54002305, async () => {
         txResponse,
         [DIAMOND_ABI, ACCESS_CONTROL_MANAGER_ABI, VENUS_RISK_STEWARD_RECEIVER_ABI],
         ["DiamondCut", "RiskParameterConfigSet", "RoleGranted"],
-        [1, 2, 17],
+        [1, 2, 15],
       );
     },
   });
@@ -152,7 +178,7 @@ forking(54002305, async () => {
       expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET);
     });
 
-    it("Grants timelock permissions to setRiskParameterConfig on Market Cap Risk Steward", async () => {
+    it("grants Market Cap Risk Steward permissions to call setMarketSupplyCaps and setMarketBorrowCaps on any target contract (Isolated Pools)", async () => {
       const supplyCapRole = ethers.utils.solidityPack(
         ["address", "string"],
         [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
@@ -162,24 +188,26 @@ forking(54002305, async () => {
 
       const borrowCapRole = ethers.utils.solidityPack(
         ["address", "string"],
-        [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
+        [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])"],
       );
       const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
       expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
+    });
 
+    it("does not grant permissions for Market Cap Risk Steward to call CORE pool comptlorer", async () => {
       const supplyCapCorePoolRole = ethers.utils.solidityPack(
         ["address", "string"],
         [bscmainnet.UNITROLLER, "_setMarketSupplyCaps(address[],uint256[])"],
       );
       const supplyCapCorePoolRoleHash = ethers.utils.keccak256(supplyCapCorePoolRole);
-      expect(await acm.hasRole(supplyCapCorePoolRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
+      expect(await acm.hasRole(supplyCapCorePoolRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.false;
 
       const borrowCapCorePoolRole = ethers.utils.solidityPack(
         ["address", "string"],
         [bscmainnet.UNITROLLER, "_setMarketSupplyCaps(address[],uint256[])"],
       );
       const borrowCapCorePoolRoleHash = ethers.utils.keccak256(borrowCapCorePoolRole);
-      expect(await acm.hasRole(borrowCapCorePoolRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
+      expect(await acm.hasRole(borrowCapCorePoolRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.false;
     });
 
     it("Market Cap Risk Steward should be able to set supply and borrow caps on markets", async () => {
@@ -189,13 +217,32 @@ forking(54002305, async () => {
       await expect(
         isolatedPoolComptroller
           .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_BSCMAINNET))
-          .setMarketSupplyCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["180000000000"]),
+          .setMarketSupplyCaps(["0xef470AbC365F88e4582D8027172a392C473A5B53"], ["150000000000000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewSupplyCap");
+
       await expect(
         isolatedPoolComptroller
           .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_BSCMAINNET))
-          .setMarketBorrowCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["150000000000"]),
+          .setMarketBorrowCaps(["0xef470AbC365F88e4582D8027172a392C473A5B53"], ["55000000000000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewBorrowCap");
+    });
+
+    it("normal timelock is owner of risk steward receiver", async () => {
+      const riskStewardReceiver = new ethers.Contract(
+        RISK_STEWARD_RECEIVER_BSCMAINNET,
+        VENUS_RISK_STEWARD_RECEIVER_ABI,
+        provider,
+      );
+      expect(await riskStewardReceiver.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("normal timelock is owner of market cap risk steward", async () => {
+      const marketCapRiskSteward = new ethers.Contract(
+        MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        VENUS_RISK_STEWARD_RECEIVER_ABI,
+        provider,
+      );
+      expect(await marketCapRiskSteward.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
   });
 });

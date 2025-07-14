@@ -55,7 +55,7 @@ forking(48650752, async () => {
 
       const borrowCapRole = ethers.utils.solidityPack(
         ["address", "string"],
-        [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
+        [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])"],
       );
       const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
       expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_BSC_TESTNET)).to.be.true;
