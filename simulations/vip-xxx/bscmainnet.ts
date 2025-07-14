@@ -51,7 +51,7 @@ forking(54002305, async () => {
 
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
     isolatedPoolComptroller = new ethers.Contract(
-      "0xBE609449Eb4D76AD8545f957bBE04b596E8fC529",
+      "0x1b43ea8622e76627B81665B1eCeBB4867566B963",
       ISOLATED_POOL_COMPTROLLER_ABI,
       provider,
     );
