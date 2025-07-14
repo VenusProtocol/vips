@@ -9,7 +9,6 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip599, {
-  ANY_TARGET_CONTRACT,
   MARKET_CAP_RISK_STEWARD_BSCMAINNET,
   RISK_STEWARD_RECEIVER_BSCMAINNET,
 } from "../../vips/vip-xxx/bscmainnet";
@@ -30,6 +29,8 @@ const NEW_MARKET_FACET = "0x94573965fbCCAC5cD4558208A8cCB3F18E71B7Db";
 const NEW_POLICY_FACET = "0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9";
 
 const UNCHANGED_REWARD_FACET = "0xc2F6bDCEa4907E8CB7480d3d315bc01c125fb63C";
+
+const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 forking(54002305, async () => {
   const provider = ethers.provider;
@@ -181,14 +182,14 @@ forking(54002305, async () => {
     it("grants Market Cap Risk Steward permissions to call setMarketSupplyCaps and setMarketBorrowCaps on any target contract (Isolated Pools)", async () => {
       const supplyCapRole = ethers.utils.solidityPack(
         ["address", "string"],
-        [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
+        [DEFAULT_ADMIN_ROLE, "setMarketSupplyCaps(address[],uint256[])"],
       );
       const supplyCapRoleHash = ethers.utils.keccak256(supplyCapRole);
       expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
 
       const borrowCapRole = ethers.utils.solidityPack(
         ["address", "string"],
-        [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])"],
+        [DEFAULT_ADMIN_ROLE, "setMarketBorrowCaps(address[],uint256[])"],
       );
       const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
       expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
