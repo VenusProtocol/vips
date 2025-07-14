@@ -1,4 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { parseUnits } from "@ethersproject/units";
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
@@ -6,9 +8,11 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip599 from "../../vips/vip-xxx/bscmainnet";
+import vip599, { ANY_TARGET_CONTRACT, MARKET_CAP_RISK_STEWARD_BSCMAINNET } from "../../vips/vip-xxx/bscmainnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
+import VENUS_RISK_STEWARD_RECEIVER_ABI from "./abi/VenusRiskStewardReceiver.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -22,9 +26,11 @@ const NEW_POLICY_FACET = "0x5bb2Dfe996629E558Cd5BDBfC4c0eC7367BB96E9";
 
 const UNCHANGED_REWARD_FACET = "0xc2F6bDCEa4907E8CB7480d3d315bc01c125fb63C";
 
-forking(52815412, async () => {
+forking(54002305, async () => {
   const provider = ethers.provider;
   let unitroller: Contract;
+  let acm: Contract;
+
   let marketFacetFunctionSelectors: string[];
   let policyFacetFunctionSelectors: string[];
   let rewardFacetFuntionSelectors: string[];
@@ -36,6 +42,8 @@ forking(52815412, async () => {
     setterFacetFuntionSelectors = await unitroller.facetFunctionSelectors(OLD_SETTER_FACET);
     marketFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
     policyFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_POLICY_FACET);
+
+    acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -74,7 +82,12 @@ forking(52815412, async () => {
 
   testVip("vip-599", await vip599(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+      await expectEvents(
+        txResponse,
+        [DIAMOND_ABI, ACCESS_CONTROL_MANAGER_ABI, VENUS_RISK_STEWARD_RECEIVER_ABI],
+        ["DiamondCut", "RiskParameterConfigSet", "RoleGranted"],
+        [1, 2, 15],
+      );
     },
   });
 
@@ -134,6 +147,38 @@ forking(52815412, async () => {
       expect(await unitroller.facetAddresses()).to.not.include(OLD_SETTER_FACET);
       expect(await unitroller.facetAddresses()).to.not.include(OLD_POLICY_FACET);
       expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET);
+    });
+
+    it("grants timelock permissions to setRiskParameterConfig on Market Cap Risk Steward", async () => {
+      const supplyCapRole = ethers.utils.solidityPack(
+        ["address", "string"],
+        [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
+      );
+      const supplyCapRoleHash = ethers.utils.keccak256(supplyCapRole);
+      expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
+
+      const borrowCapRole = ethers.utils.solidityPack(
+        ["address", "string"],
+        [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
+      );
+      const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
+      expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.true;
+    });
+
+    it("Market Cap Risk Steward should be able to set supply and borrow caps on markets", async () => {
+      await impersonateAccount(MARKET_CAP_RISK_STEWARD_BSCMAINNET);
+      await setBalance(MARKET_CAP_RISK_STEWARD_BSCMAINNET, parseUnits("1000000", 18));
+
+      await expect(
+        unitroller
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_BSCMAINNET))
+          .setMarketSupplyCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["180000000000"]),
+      ).to.emit(unitroller, "NewSupplyCap");
+      await expect(
+        unitroller
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_BSCMAINNET))
+          .setMarketBorrowCaps(["0xa8e7f9473635a5CB79646f14356a9Fc394CA111A"], ["150000000000"]),
+      ).to.emit(unitroller, "NewBorrowCap");
     });
   });
 });

@@ -1,14 +1,15 @@
+import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { LzChainId, ProposalType } from "src/types";
+import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 import { cutParams as params } from "../../simulations/vip-xxx/utils/cur-params-bscmainnet.json";
 
-const { ethereum, bscmainnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const RISK_STEWARD_RECEIVER_ETHEREUM = "0x5086Dc718D1288E4cc4F6a75991E4a0bD0611bF1";
-export const MARKET_CAP_RISK_STEWARD_ETHEREUM = "0x7191b4602Fe9d36E1A4b2cb84D0c80C543F13f9A";
-export const ANY_TARGET_CONTRACT = "0x0000000000000000000000000000000000000000";
+export const RISK_STEWARD_RECEIVER_BSCMAINNET = "0xBa2a43279a228cf9cD94d072777d8d98e7e0a229";
+export const MARKET_CAP_RISK_STEWARD_BSCMAINNET = "0xE7252dccd79F2A555E314B9cdd440745b697D562";
+export const ANY_TARGET_CONTRACT = ethers.constants.AddressZero;
 
 export const MORE_THAN_1_DAY = 86401; // 24 hours + 1 second
 export const cutParams = params;
@@ -27,7 +28,7 @@ Configure Remote Risk Stewards
 
   return makeProposal(
     [
-      // Update dimond cut
+      // Update diamond cut
       {
         target: bscmainnet.UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
@@ -35,113 +36,106 @@ Configure Remote Risk Stewards
       },
       // Permissions
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [
-          RISK_STEWARD_RECEIVER_ETHEREUM,
+          RISK_STEWARD_RECEIVER_BSCMAINNET,
           "setRiskParameterConfig(string,address,uint256)",
-          ethereum.NORMAL_TIMELOCK,
+          bscmainnet.NORMAL_TIMELOCK,
         ],
-        dstChainId: LzChainId.ethereum,
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])", MARKET_CAP_RISK_STEWARD_ETHEREUM],
-        dstChainId: LzChainId.ethereum,
+        params: [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])", MARKET_CAP_RISK_STEWARD_BSCMAINNET],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])", MARKET_CAP_RISK_STEWARD_ETHEREUM],
-        dstChainId: LzChainId.ethereum,
+        params: [ANY_TARGET_CONTRACT, "setMarketBorrowCaps(address[],uint256[])", MARKET_CAP_RISK_STEWARD_BSCMAINNET],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "toggleConfigActive(string)", ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "toggleConfigActive(string)", bscmainnet.NORMAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "toggleConfigActive(string)", ethereum.CRITICAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "toggleConfigActive(string)", bscmainnet.CRITICAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "toggleConfigActive(string)", ethereum.FAST_TRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "toggleConfigActive(string)", bscmainnet.FAST_TRACK_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "pause()", ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "pause()", bscmainnet.NORMAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "pause()", ethereum.CRITICAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "pause()", bscmainnet.CRITICAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "pause()", ethereum.FAST_TRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "pause()", bscmainnet.FAST_TRACK_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "unpause()", ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.NORMAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "unpause()", ethereum.CRITICAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.CRITICAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [RISK_STEWARD_RECEIVER_ETHEREUM, "unpause()", ethereum.FAST_TRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.FAST_TRACK_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.NORMAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [MARKET_CAP_RISK_STEWARD_BSCMAINNET, "setMaxDeltaBps(uint256)", bscmainnet.NORMAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.CRITICAL_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [MARKET_CAP_RISK_STEWARD_BSCMAINNET, "setMaxDeltaBps(uint256)", bscmainnet.CRITICAL_TIMELOCK],
       },
       {
-        target: ethereum.ACCESS_CONTROL_MANAGER,
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [MARKET_CAP_RISK_STEWARD_ETHEREUM, "setMaxDeltaBps(uint256)", ethereum.FAST_TRACK_TIMELOCK],
-        dstChainId: LzChainId.ethereum,
+        params: [MARKET_CAP_RISK_STEWARD_BSCMAINNET, "setMaxDeltaBps(uint256)", bscmainnet.FAST_TRACK_TIMELOCK],
       },
-
+      // Accept ownership of Risk Steward Receiver
+      {
+        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      // Accept ownership of Market Cap Risk Steward
+      {
+        target: MARKET_CAP_RISK_STEWARD_BSCMAINNET,
+        signature: "acceptOwnership()",
+        params: [],
+      },
       // Set risk parameter configurations
       {
-        target: RISK_STEWARD_RECEIVER_ETHEREUM,
+        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_ETHEREUM, MORE_THAN_1_DAY],
-        dstChainId: LzChainId.ethereum,
+        params: ["supplyCap", MARKET_CAP_RISK_STEWARD_BSCMAINNET, MORE_THAN_1_DAY],
       },
-
       {
-        target: RISK_STEWARD_RECEIVER_ETHEREUM,
+        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
         signature: "setRiskParameterConfig(string,address,uint256)",
-        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_ETHEREUM, MORE_THAN_1_DAY],
-        dstChainId: LzChainId.ethereum,
+        params: ["borrowCap", MARKET_CAP_RISK_STEWARD_BSCMAINNET, MORE_THAN_1_DAY],
       },
     ],
     meta,
