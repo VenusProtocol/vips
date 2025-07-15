@@ -6,7 +6,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip530, { BORROW_CAP, MATIC, SUPPLY_CAP, vMATIC } from "../../vips/vip-530/bscmainnet";
+import vip531, { BORROW_CAP, MATIC, SUPPLY_CAP, vMATIC } from "../../vips/vip-531/bscmainnet";
+import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -35,7 +36,7 @@ forking(53622111, async () => {
     });
   });
 
-  testVip("vip-530", await vip530(365 * 24 * 60 * 60), {
+  testVip("vip-531", await vip531(365 * 24 * 60 * 60), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
@@ -43,6 +44,8 @@ forking(53622111, async () => {
         ["ExecuteRemoteProposal", "StorePayload"],
         [1, 0],
       );
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
+      await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
     },
   });
 
