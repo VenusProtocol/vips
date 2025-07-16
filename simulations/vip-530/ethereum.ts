@@ -202,8 +202,15 @@ forking(22912233, async () => {
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI],
-        ["NewSupplyCap", "NewBorrowCap", "MarketUnlisted", "NewCollateralFactor"],
-        [9, 2, 9, 1],
+        [
+          "NewSupplyCap",
+          "NewBorrowCap",
+          "MarketUnlisted",
+          "NewCollateralFactor",
+          "NewLiquidationThreshold",
+          "ActionPausedMarket",
+        ],
+        [9, 2, 9, 1, 1, 56],
       );
     },
   });

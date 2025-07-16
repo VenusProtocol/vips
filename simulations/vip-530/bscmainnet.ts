@@ -22,9 +22,10 @@ forking(53658652, async () => {
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF is zero", async () => {
+    it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF and LT is zero", async () => {
       const market = await comptroller.markets(vPT_SolvBTC_BBN_27MAR2025_BTC);
       expect(market.collateralFactorMantissa).to.be.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(0);
     });
 
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market actions are paused or not", async () => {
@@ -53,7 +54,12 @@ forking(53658652, async () => {
 
   testVip("VIP-530 bscmainnet", await vip530(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "MarketUnlisted"], [1, 1]);
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI],
+        ["NewSupplyCap", "MarketUnlisted", "ActionPausedMarket"],
+        [1, 1, 6],
+      );
       await expectEvents(
         txResponse,
         [OMNICHAIN_PROPOSAL_SENDER_ABI],
@@ -64,9 +70,10 @@ forking(53658652, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF is zero", async () => {
+    it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF and LT is zero", async () => {
       const market = await comptroller.markets(vPT_SolvBTC_BBN_27MAR2025_BTC);
       expect(market.collateralFactorMantissa).equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(0);
     });
 
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market actions are paused", async () => {
