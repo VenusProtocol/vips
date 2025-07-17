@@ -1,30 +1,74 @@
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, arbitrumone, zksyncmainnet, unichainmainnet } = NETWORK_ADDRESSES;
-
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-const BRIDGE_FEES = parseUnits("0.5", 18);
 
-export const XVS_BRIDGE_BSC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
-
-export const RewardsDistributor_Core_0_ARB = "0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a";
-export const RewardsDistributor_Liquid_Staked_ETH_0_ARB = "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D";
-export const RewardsDistributor_Core_0_Amount_ARB = parseUnits("1560", 18);
-export const RewardsDistributor_Liquid_Staked_ETH_0_Amount_ARB = parseUnits("1000", 18);
-
-export const RewardsDistributor_Core_0_ZKSYNC = "0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894";
-export const RewardsDistributor_Core_0_Amount_ZKSYNC = parseUnits("2000", 18);
-
-export const RewardsDistributor_Core_0_UNICHAIN = "0x4630B71C1BD27c99DD86aBB2A18C50c3F75C88fb";
-export const RewardsDistributor_Core_0_Amount_UNICHAIN = parseUnits("12000", 18);
-
-export const TOTAL_XVS = RewardsDistributor_Core_0_Amount_ARB.add(RewardsDistributor_Liquid_Staked_ETH_0_Amount_ARB)
-  .add(RewardsDistributor_Core_0_Amount_ZKSYNC)
-  .add(RewardsDistributor_Core_0_Amount_UNICHAIN);
+export const rewardDistributors = [
+  {
+    address: "0x7C7846A74AB38A8d554Bc5f7652eCf8Efb58c894",
+    markets: [
+      "0x1aF23bD57c62A99C59aD48236553D0Dd11e49D2D",
+      "0x69cDA960E3b20DFD480866fFfd377Ebe40bd0A46",
+      "0xAF8fD83cFCbe963211FAaf1847F0F217F80B4719",
+      "0x1Fa916C27c7C2c4602124A14C77Dbb40a5FF1BE8",
+      "0x697a70779C1A03Ba2BD28b7627a902BFf831b616",
+    ],
+    chainId: LzChainId.zksyncmainnet,
+  },
+  {
+    address: "0x53b488baA4052094495b6De9E5505FE1Ee3EAc7a",
+    markets: [
+      "0xAeB0FEd69354f34831fe1D16475D9A83ddaCaDA6",
+      "0x7D8609f8da70fF9027E9bc5229Af4F6727662707",
+      "0xB9F9117d4200dC296F9AcD1e8bE1937df834a2fD",
+      "0xaDa57840B372D4c28623E87FC175dE8490792811",
+      "0x68a34332983f4Bf866768DD6D6E638b02eF5e1f0",
+    ],
+    chainId: LzChainId.arbitrumone,
+  },
+  {
+    address: "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D",
+    markets: ["0x39D6d13Ea59548637104E40e729E4aABE27FE106"],
+    chainId: LzChainId.arbitrumone,
+  },
+  {
+    address: "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8",
+    markets: [
+      "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
+      "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
+      "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
+      "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
+      "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
+    ],
+    chainId: LzChainId.ethereum,
+  },
+  {
+    address: "0x886767B62C7ACD601672607373048FFD96Cf27B2",
+    markets: ["0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E"],
+    chainId: LzChainId.ethereum,
+  },
+  {
+    address: "0x8473B767F68250F5309bae939337136a899E43F9",
+    markets: ["0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa", "0x2d499800239C4CD3012473Cb1EAE33562F0A6933"],
+    chainId: LzChainId.ethereum,
+  },
+  {
+    address: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
+    markets: ["0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2", "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB"],
+    chainId: LzChainId.ethereum,
+  },
+  {
+    address: "0x1e25CF968f12850003Db17E0Dba32108509C4359",
+    markets: ["0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2"],
+    chainId: LzChainId.ethereum,
+  },
+  {
+    address: "0x4630B71C1BD27c99DD86aBB2A18C50c3F75C88fb",
+    markets: ["0xb953f92b9f759d97d2f2dec10a8a3cf75fce3a95", "0xc219bc179c7cdb37eacb03f993f9fdc2495e3374"],
+    chainId: LzChainId.unichainmainnet,
+  },
+];
 
 export const vip530 = async () => {
   const meta: ProposalMeta = {
@@ -38,81 +82,14 @@ export const vip530 = async () => {
 
   return makeProposal(
     [
-      // Bridge XVS
-      {
-        target: bscmainnet.UNITROLLER,
-        signature: "_grantXVS(address,uint256)",
-        params: [bscmainnet.NORMAL_TIMELOCK, TOTAL_XVS],
-      },
-      {
-        target: bscmainnet.XVS,
-        signature: "approve(address,uint256)",
-        params: [XVS_BRIDGE_BSC, TOTAL_XVS],
-      },
-      {
-        target: XVS_BRIDGE_BSC,
-        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
-        params: [
-          bscmainnet.NORMAL_TIMELOCK,
-          LzChainId.arbitrumone,
-          ethers.utils.defaultAbiCoder.encode(["address"], [arbitrumone.VTREASURY]),
-          RewardsDistributor_Core_0_Amount_ARB.add(RewardsDistributor_Liquid_Staked_ETH_0_Amount_ARB),
-          [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
-        ],
-        value: BRIDGE_FEES.toString(),
-      },
-      {
-        target: XVS_BRIDGE_BSC,
-        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
-        params: [
-          bscmainnet.NORMAL_TIMELOCK,
-          LzChainId.zksyncmainnet,
-          ethers.utils.defaultAbiCoder.encode(["address"], [zksyncmainnet.VTREASURY]),
-          RewardsDistributor_Core_0_Amount_ZKSYNC,
-          [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
-        ],
-        value: BRIDGE_FEES.toString(),
-      },
-      {
-        target: XVS_BRIDGE_BSC,
-        signature: "sendFrom(address,uint16,bytes32,uint256,(address,address,bytes))",
-        params: [
-          bscmainnet.NORMAL_TIMELOCK,
-          LzChainId.unichainmainnet,
-          ethers.utils.defaultAbiCoder.encode(["address"], [unichainmainnet.VTREASURY]),
-          RewardsDistributor_Core_0_Amount_UNICHAIN,
-          [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
-        ],
-        value: BRIDGE_FEES.toString(),
-      },
-      {
-        target: arbitrumone.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [arbitrumone.XVS, RewardsDistributor_Core_0_Amount_ARB, RewardsDistributor_Core_0_ARB],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: arbitrumone.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [
-          arbitrumone.XVS,
-          RewardsDistributor_Liquid_Staked_ETH_0_Amount_ARB,
-          RewardsDistributor_Liquid_Staked_ETH_0_ARB,
-        ],
-        dstChainId: LzChainId.arbitrumone,
-      },
-      {
-        target: zksyncmainnet.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [zksyncmainnet.XVS, RewardsDistributor_Core_0_Amount_ZKSYNC, RewardsDistributor_Core_0_ZKSYNC],
-        dstChainId: LzChainId.zksyncmainnet,
-      },
-      {
-        target: unichainmainnet.VTREASURY,
-        signature: "withdrawTreasuryToken(address,uint256,address)",
-        params: [unichainmainnet.XVS, RewardsDistributor_Core_0_Amount_UNICHAIN, RewardsDistributor_Core_0_UNICHAIN],
-        dstChainId: LzChainId.unichainmainnet,
-      },
+      ...rewardDistributors.flatMap(rd => {
+        return rd.markets.map(market => ({
+          target: rd.address,
+          signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+          params: [[market], [0], [0]],
+          dstChainId: rd.chainId,
+        }));
+      }),
     ],
     meta,
     ProposalType.REGULAR,

@@ -1,50 +1,45 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { LzChainId } from "src/types";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip530, {
-  RewardsDistributor_Core_0_Amount_UNICHAIN,
-  RewardsDistributor_Core_0_UNICHAIN,
-} from "../../vips/vip-530/bscmainnet";
-import XVS_ABI from "./abi/XVS.json";
-
-const { unichainmainnet } = NETWORK_ADDRESSES;
-const BRIDGE = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
+import vip530, { rewardDistributors } from "../../vips/vip-530/bscmainnet";
+import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 
 forking(21389776, async () => {
-  const xvs = new ethers.Contract(unichainmainnet.XVS, XVS_ABI, ethers.provider);
-  let previousBalanceRewardDistributorCore: BigNumber;
-  let previousBalanceTreasury: BigNumber;
+  describe("Post-VIP behaviour", async () => {
+    it("check speed", async () => {
+      for (const distributor of rewardDistributors) {
+        if (distributor.chainId !== LzChainId.unichainmainnet) continue;
 
-  before(async () => {
-    previousBalanceTreasury = await xvs.balanceOf(unichainmainnet.VTREASURY);
+        const rewardDistributor = new ethers.Contract(distributor.address, REWARD_DISTRIBUTOR_ABI, ethers.provider);
 
-    await impersonateAccount(BRIDGE);
-    await setBalance(BRIDGE, parseUnits("10", 18));
-    await xvs
-      .connect(await ethers.getSigner(BRIDGE))
-      .mint(unichainmainnet.VTREASURY, RewardsDistributor_Core_0_Amount_UNICHAIN);
+        for (const market of distributor.markets) {
+          const supplySpeed = await rewardDistributor.rewardTokenSupplySpeeds(market);
+          const borrowSpeed = await rewardDistributor.rewardTokenBorrowSpeeds(market);
 
-    previousBalanceRewardDistributorCore = await xvs.balanceOf(RewardsDistributor_Core_0_UNICHAIN);
+          expect(supplySpeed != 0 || borrowSpeed != 0).to.be.true;
+        }
+      }
+    });
   });
 
   testForkedNetworkVipCommands("VIP 530", await vip530());
 
   describe("Post-VIP behaviour", async () => {
-    it("check xvs balance", async () => {
-      const currentBalanceRewardDistributorCore = await xvs.balanceOf(RewardsDistributor_Core_0_UNICHAIN);
-      expect(currentBalanceRewardDistributorCore).to.equals(
-        previousBalanceRewardDistributorCore.add(RewardsDistributor_Core_0_Amount_UNICHAIN),
-      );
-    });
+    it("check speed", async () => {
+      for (const distributor of rewardDistributors) {
+        if (distributor.chainId !== LzChainId.unichainmainnet) continue;
 
-    it("check treasury balance", async () => {
-      const currentBalance = await xvs.balanceOf(unichainmainnet.VTREASURY);
-      expect(currentBalance).to.equals(previousBalanceTreasury);
+        const rewardDistributor = new ethers.Contract(distributor.address, REWARD_DISTRIBUTOR_ABI, ethers.provider);
+
+        for (const market of distributor.markets) {
+          const supplySpeed = await rewardDistributor.rewardTokenSupplySpeeds(market);
+          const borrowSpeed = await rewardDistributor.rewardTokenBorrowSpeeds(market);
+
+          expect(supplySpeed == 0 && borrowSpeed == 0).to.be.true;
+        }
+      }
     });
   });
 });
