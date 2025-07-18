@@ -38,11 +38,32 @@ export const eBTC_GrowthRate = parseUnits("0.019", 18); // 1.9% growth rate
 export const LBTC_SnapshotGap = 17; // 0.17%
 export const eBTC_SnapshotGap = 16; // 0.16%
 
-export const vip531 = async () => {
+export const vip532 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-531",
-    description: ``,
+    title: "VIP-532 [Ethereum] Risk Parameters Adjustments (LBTC, eBTC)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - LBTC and eBTC Oracle and Risk Parameter Update - 07/17/25](https://community.venus.io/t/chaos-labs-lbtc-and-ebtc-oracle-and-risk-parameter-update-07-17-25/5230):
+
+- [LBTC (Core pool)](https://app.venus.io/#/pools/pool/0x687a01ecF6d3907658f7A7c714749fAC32336D1B/market/0x25C20e6e110A1cE3FEbaCC8b7E48368c7b2F0C91?chainId=1):
+    - decrease borrow cap, from 45 LBTC to 0 LBTC
+    - update the risk parameters of the [associated Capped Oracle](https://etherscan.io/address/0x54B033D102db7DD734E0Ad649463E90fFA78D853):
+        - Annual Growth Rate: 2%
+        - Snapshot Interval: 30 days
+        - Snapshot Gap: 0.17%
+- [eBTC (Core pool)](https://app.venus.io/#/pools/pool/0x687a01ecF6d3907658f7A7c714749fAC32336D1B/market/0x325cEB02fe1C2fF816A83a5770eA0E88e2faEcF2?chainId=1):
+    - decrease borrow cap, from 12.6 eBTC to 0 eBTC
+    - update the risk parameters of the [associated Capped Oracle](https://etherscan.io/address/0x04d6096A6F089047C7af6E4644D18fB766B8d4cE):
+        - Annual Growth Rate: 1.9%
+        - Snapshot Interval: 30 days
+        - Snapshot Gap: 0.16%
+
+Complete analysis and details of this recommendation are available in the above publication.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/594)
+- [Oracle contract for LBTC](https://etherscan.io/address/0x54B033D102db7DD734E0Ad649463E90fFA78D853)
+- [Oracle contract for eBTC](https://etherscan.io/address/0x04d6096A6F089047C7af6E4644D18fB766B8d4cE)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -98,4 +119,4 @@ export const vip531 = async () => {
   );
 };
 
-export default vip531;
+export default vip532;

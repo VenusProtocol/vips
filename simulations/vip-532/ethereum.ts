@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setRedstonePrice } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip531, { Actions, COMPTROLLER, vLBTC, veBTC } from "../../vips/vip-531/bscmainnet";
+import vip532, { Actions, COMPTROLLER, vLBTC, veBTC } from "../../vips/vip-532/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -83,7 +83,7 @@ forking(22944397, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("vip506", await vip531(), {
+  testForkedNetworkVipCommands("vip532", await vip532(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewBorrowCap", "ActionPausedMarket"], [2, 2]);
     },
