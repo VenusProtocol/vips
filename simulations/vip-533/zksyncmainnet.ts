@@ -3,14 +3,14 @@ import { ethers } from "hardhat";
 import { LzChainId } from "src/types";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip530, { rewardDistributors } from "../../vips/vip-530/bscmainnet";
+import vip533, { rewardDistributors } from "../../vips/vip-533/bscmainnet";
 import REWARD_DISTRIBUTOR_ABI from "./abi/RewardDistributor.json";
 
-forking(356174917, async () => {
+forking(62675633, async () => {
   describe("Post-VIP behaviour", async () => {
     it("check speed", async () => {
       for (const distributor of rewardDistributors) {
-        if (distributor.chainId !== LzChainId.arbitrumone) continue;
+        if (distributor.chainId !== LzChainId.zksyncmainnet) continue;
 
         const rewardDistributor = new ethers.Contract(distributor.address, REWARD_DISTRIBUTOR_ABI, ethers.provider);
 
@@ -24,12 +24,12 @@ forking(356174917, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP 530", await vip530());
+  testForkedNetworkVipCommands("VIP 533", await vip533());
 
   describe("Post-VIP behaviour", async () => {
     it("check speed", async () => {
       for (const distributor of rewardDistributors) {
-        if (distributor.chainId !== LzChainId.arbitrumone) continue;
+        if (distributor.chainId !== LzChainId.zksyncmainnet) continue;
 
         const rewardDistributor = new ethers.Contract(distributor.address, REWARD_DISTRIBUTOR_ABI, ethers.provider);
 
