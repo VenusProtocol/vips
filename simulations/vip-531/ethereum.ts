@@ -75,7 +75,10 @@ forking(22944397, async () => {
     });
 
     it("Check market actions are paused", async () => {
-      const isPaused = await comptroller.actionPaused(veBTC, Actions.BORROW);
+      let isPaused = await comptroller.actionPaused(veBTC, Actions.BORROW);
+      expect(isPaused).to.be.false;
+
+      isPaused = await comptroller.actionPaused(vLBTC, Actions.BORROW);
       expect(isPaused).to.be.false;
     });
   });
@@ -105,7 +108,10 @@ forking(22944397, async () => {
     });
 
     it("Check market actions are paused", async () => {
-      const isPaused = await comptroller.actionPaused(veBTC, Actions.BORROW);
+      let isPaused = await comptroller.actionPaused(veBTC, Actions.BORROW);
+      expect(isPaused).to.be.true;
+
+      isPaused = await comptroller.actionPaused(vLBTC, Actions.BORROW);
       expect(isPaused).to.be.true;
     });
   });
