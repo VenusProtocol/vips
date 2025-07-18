@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { LzChainId } from "src/types";
+import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip533, { rewardDistributors } from "../../vips/vip-533/bscmainnet";
@@ -39,7 +40,16 @@ forking(21389776, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP 533", await vip533());
+  testForkedNetworkVipCommands("VIP 533", await vip533(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [REWARD_DISTRIBUTOR_ABI],
+        ["RewardTokenBorrowSpeedUpdated", "RewardTokenSupplySpeedUpdated"],
+        [2, 2],
+      );
+    },
+  });
 
   describe("Post-VIP behaviour", async () => {
     it("check speed", async () => {
