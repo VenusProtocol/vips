@@ -33,29 +33,13 @@ export const rewardDistributors = [
     chainId: LzChainId.arbitrumone,
   },
   {
-    address: "0x134bfDEa7e68733921Bc6A87159FB0d68aBc6Cf8",
-    markets: [
-      "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
-      "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
-      "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
-      "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
-      "0x672208C10aaAA2F9A6719F449C4C8227bc0BC202",
-    ],
-    chainId: LzChainId.ethereum,
-  },
-  {
     address: "0x886767B62C7ACD601672607373048FFD96Cf27B2",
-    markets: ["0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E"],
-    chainId: LzChainId.ethereum,
-  },
-  {
-    address: "0x8473B767F68250F5309bae939337136a899E43F9",
-    markets: ["0x30aD10Bd5Be62CAb37863C2BfcC6E8fb4fD85BDa", "0x2d499800239C4CD3012473Cb1EAE33562F0A6933"],
-    chainId: LzChainId.ethereum,
-  },
-  {
-    address: "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
-    markets: ["0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2", "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB"],
+    markets: [
+      "0x8C3e3821259B82fFb32B2450A95d2dcbf161C24E",
+      "0x17C07e0c232f2f80DfDbd7a95b942D893A4C5ACb",
+      "0x7c8ff7d2A1372433726f879BD945fFb250B94c65",
+      "0x8716554364f20BCA783cb2BAA744d39361fd1D8d",
+    ],
     chainId: LzChainId.ethereum,
   },
   {
