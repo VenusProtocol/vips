@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStaleCoreAssets, setMaxStalePeriod } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -29,7 +29,7 @@ import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const vETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 const OLD_vETH_SUPPLY_CAP = parseUnits("3600", 18);
 const OLD_vETH_BORROW_CAP = parseUnits("3250", 18);
 
@@ -38,7 +38,7 @@ const OLD_weETH_SUPPLY_CAP = parseUnits("120", 18);
 const OLD_weETH_BORROW_CAP = parseUnits("60", 18);
 const OLD_weETH_COLLATERAL_FACTOR = parseUnits("0", 18);
 
-const vETwstETH = "0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C";
+const wstETH = "0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C";
 const OLD_wstETH_SUPPLY_CAP = parseUnits("3200", 18);
 const OLD_wstETH_BORROW_CAP = parseUnits("320", 18);
 const OLD_wstETH_COLLATERAL_FACTOR = parseUnits("0", 18);
@@ -52,16 +52,24 @@ forking(54799658, async () => {
     comptroller = new ethers.Contract(liquidStakedETH_Comptroller, COMPTROLLER_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
-    await setMaxStaleCoreAssets(bscmainnet.CHAINLINK_ORACLE, bscmainnet.NORMAL_TIMELOCK);
-
-    const vETHContract = new ethers.Contract(vETH, ERC20_ABI, provider);
-    await setMaxStalePeriod(resilientOracle, vETHContract);
-
-    const weETHContract = new ethers.Contract(weETH, ERC20_ABI, provider);
-    await setMaxStalePeriod(resilientOracle, weETHContract);
-
-    const wstETHContract = new ethers.Contract(vETwstETH, ERC20_ABI, provider);
-    await setMaxStalePeriod(resilientOracle, wstETHContract);
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      ETH,
+      ethers.constants.AddressZero,
+      bscmainnet.NORMAL_TIMELOCK,
+    );
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      weETH,
+      ethers.constants.AddressZero,
+      bscmainnet.NORMAL_TIMELOCK,
+    );
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      wstETH,
+      ethers.constants.AddressZero,
+      bscmainnet.NORMAL_TIMELOCK,
+    );
   });
 
   describe("Pre-VIP behaviour", async () => {

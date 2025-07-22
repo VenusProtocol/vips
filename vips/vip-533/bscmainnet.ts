@@ -56,12 +56,12 @@ Complete analysis and details of this recommendation are available in the above 
       {
         target: liquidStakedETH_Comptroller,
         signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [vweETH_LiquidStakedETH, wstETH_CF, wstETH_LIQUIDATION_THRESHOLD],
+        params: [vweETH_LiquidStakedETH, weETH_CF, weETH_LIQUIDATION_THRESHOLD],
       },
       {
         target: liquidStakedETH_Comptroller,
         signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [vwstETH_LiquidStakedETH, weETH_CF, weETH_LIQUIDATION_THRESHOLD],
+        params: [vwstETH_LiquidStakedETH, wstETH_CF, wstETH_LIQUIDATION_THRESHOLD],
       },
     ],
     meta,
