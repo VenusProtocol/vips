@@ -147,6 +147,11 @@ We applied the following security procedures for this upgrade:
       {
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "pause()", bscmainnet.GUARDIAN],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
         params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.NORMAL_TIMELOCK],
       },
       {
@@ -158,6 +163,11 @@ We applied the following security procedures for this upgrade:
         target: bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()", bscmainnet.GUARDIAN],
       },
       {
         target: bscmainnet.ACCESS_CONTROL_MANAGER,

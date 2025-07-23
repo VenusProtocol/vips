@@ -116,7 +116,7 @@ forking(54002305, async () => {
         txResponse,
         [DIAMOND_ABI, ACCESS_CONTROL_MANAGER_ABI, VENUS_RISK_STEWARD_RECEIVER_ABI],
         ["DiamondCut", "RiskParameterConfigSet", "RoleGranted"],
-        [1, 2, 15],
+        [1, 2, 17],
       );
     },
   });
@@ -209,6 +209,25 @@ forking(54002305, async () => {
       );
       const borrowCapCorePoolRoleHash = ethers.utils.keccak256(borrowCapCorePoolRole);
       expect(await acm.hasRole(borrowCapCorePoolRoleHash, MARKET_CAP_RISK_STEWARD_BSCMAINNET)).to.be.false;
+    });
+
+    it("grants timelocks and guardian permissions to pause and unpause Risk Steward Receiver", async () => {
+      const pauseRole = ethers.utils.solidityPack(["address", "string"], [RISK_STEWARD_RECEIVER_BSCMAINNET, "pause()"]);
+      const pauseRoleHash = ethers.utils.keccak256(pauseRole);
+      expect(await acm.hasRole(pauseRoleHash, bscmainnet.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(pauseRoleHash, bscmainnet.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(pauseRoleHash, bscmainnet.CRITICAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(pauseRoleHash, bscmainnet.FAST_TRACK_TIMELOCK)).to.be.true;
+
+      const unpauseRole = ethers.utils.solidityPack(
+        ["address", "string"],
+        [RISK_STEWARD_RECEIVER_BSCMAINNET, "unpause()"],
+      );
+      const unpauseRoleHash = ethers.utils.keccak256(unpauseRole);
+      expect(await acm.hasRole(unpauseRoleHash, bscmainnet.GUARDIAN)).to.be.true;
+      expect(await acm.hasRole(unpauseRoleHash, bscmainnet.NORMAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(unpauseRoleHash, bscmainnet.CRITICAL_TIMELOCK)).to.be.true;
+      expect(await acm.hasRole(unpauseRoleHash, bscmainnet.FAST_TRACK_TIMELOCK)).to.be.true;
     });
 
     it("Market Cap Risk Steward should be able to set supply and borrow caps on markets", async () => {
