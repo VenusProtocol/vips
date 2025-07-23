@@ -23,8 +23,6 @@ import {
   wstETH_LIQUIDATION_THRESHOLD,
   wstETH_SUPPLY_CAP,
 } from "../../vips/vip-533/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -46,11 +44,9 @@ const OLD_wstETH_COLLATERAL_FACTOR = parseUnits("0", 18);
 forking(54799658, async () => {
   const provider = ethers.provider;
   let comptroller: Contract;
-  let resilientOracle: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(liquidStakedETH_Comptroller, COMPTROLLER_ABI, provider);
-    resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
 
     await setMaxStalePeriodInChainlinkOracle(
       NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
