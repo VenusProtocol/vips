@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -22,7 +22,7 @@ import {
   wstETH_CF,
   wstETH_LIQUIDATION_THRESHOLD,
   wstETH_SUPPLY_CAP,
-} from "../../vips/vip-533/bscmainnet";
+} from "../../vips/vip-534/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -37,6 +37,7 @@ const OLD_weETH_BORROW_CAP = parseUnits("60", 18);
 const OLD_weETH_COLLATERAL_FACTOR = parseUnits("0", 18);
 
 const wstETH = "0x26c5e01524d2E6280A48F2c50fF6De7e52E9611C";
+const WSTETH_REDSTONE_FEED = "0xa76dB2Cb356ba111cCB5a7Ca369D17E1592f42Dd";
 const OLD_wstETH_SUPPLY_CAP = parseUnits("3200", 18);
 const OLD_wstETH_BORROW_CAP = parseUnits("320", 18);
 const OLD_wstETH_COLLATERAL_FACTOR = parseUnits("0", 18);
@@ -49,23 +50,19 @@ forking(54799658, async () => {
     comptroller = new ethers.Contract(liquidStakedETH_Comptroller, COMPTROLLER_ABI, provider);
 
     await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      bscmainnet.CHAINLINK_ORACLE,
       ETH,
       ethers.constants.AddressZero,
-      bscmainnet.NORMAL_TIMELOCK,
+      bscmainnet.FAST_TRACK_TIMELOCK,
     );
     await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      bscmainnet.CHAINLINK_ORACLE,
       weETH,
       ethers.constants.AddressZero,
-      bscmainnet.NORMAL_TIMELOCK,
+      bscmainnet.FAST_TRACK_TIMELOCK,
     );
-    await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
-      wstETH,
-      ethers.constants.AddressZero,
-      bscmainnet.NORMAL_TIMELOCK,
-    );
+
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, wstETH, WSTETH_REDSTONE_FEED, bscmainnet.FAST_TRACK_TIMELOCK);
   });
 
   describe("Pre-VIP behaviour", async () => {

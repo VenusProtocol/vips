@@ -65,6 +65,6 @@ Complete analysis and details of this recommendation are available in the above 
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.FAST_TRACK,
   );
 };
