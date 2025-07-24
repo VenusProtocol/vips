@@ -11,7 +11,7 @@ import {
   ETH_SUPPLY_CAP,
   liquidStakedETH_Comptroller,
   vETH_LiquidStakedETH,
-  vip533,
+  vip534,
   vweETH_LiquidStakedETH,
   vwstETH_LiquidStakedETH,
   weETH_BORROW_CAP,
@@ -101,7 +101,7 @@ forking(54799658, async () => {
     });
   });
 
-  testVip("vip-532", await vip533(), {
+  testVip("vip-534", await vip534(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

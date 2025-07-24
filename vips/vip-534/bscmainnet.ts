@@ -20,16 +20,29 @@ export const weETH_BORROW_CAP = parseUnits("0", 18);
 export const weETH_CF = parseUnits("0.05", 18);
 export const weETH_LIQUIDATION_THRESHOLD = parseUnits("0.93", 18);
 
-export const vip533 = async () => {
+export const vip534 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-533 [BNB Chain] Chaos labs recommendations (June 17th, 2025)",
+    title: "VIP-534 [BNB Chain] Risk Parameters Adjustments (Liquid Staked ETH assets on BNB Chain)",
     description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Isolated Instance Parameter Updates - 07/17/25](https://community.venus.io/t/chaos-labs-isolated-instance-parameter-updates-07-17-25/5226):
+
+- [ETH (Liquid Staked ETH)](https://app.venus.io/#/pools/pool/0xBE609449Eb4D76AD8545f957bBE04b596E8fC529/market/0xeCCACF760FEA7943C5b0285BD09F601505A29c05?chainId=56):
+    - reduce the supply cap, from 3,600 ETH to 18 ETH
+    - reduce the borrow cap, from 3,250 ETH to 10 ETH
+- [wstETH (Liquid Staked ETH)](https://app.venus.io/#/pools/pool/0xBE609449Eb4D76AD8545f957bBE04b596E8fC529/market/0x94180a3948296530024Ef7d60f60B85cfe0422c8?chainId=56):
+    - reduce the supply cap, from 3,200 wstETH to 10.75 wstETH
+    - reduce the borrow cap, from 320 wstETH to 0 wstETH
+    - increase the Collateral Factor, from 0% to 5%
+- [weETH (Liquid Staked ETH)](https://app.venus.io/#/pools/pool/0xBE609449Eb4D76AD8545f957bBE04b596E8fC529/market/0xc5b24f347254bD8cF8988913d1fd0F795274900F?chainId=56):
+    - reduce the supply cap, from 120 weETH to 4 weETH
+    - reduce the borrow cap, from 60 weETH to 0 weETH
+    - increase the Collateral Factor, from 0% to 5%
 
 Complete analysis and details of this recommendation are available in the above publication.
 
 #### References
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/)`,
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/595)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -68,3 +81,5 @@ Complete analysis and details of this recommendation are available in the above 
     ProposalType.FAST_TRACK,
   );
 };
+
+export default vip534;
