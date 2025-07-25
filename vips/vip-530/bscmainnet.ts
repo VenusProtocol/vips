@@ -13,10 +13,6 @@ export const vsUSDe_Ethena = "0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0";
 export const vPT_sUSDE_27MAR2025_Ethena = "0xCca202a95E8096315E3F19E46e19E1b326634889";
 export const vPT_USDe_27MAR2025_Ethena = "0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B";
 export const vUSDC_Ethena = "0xa8e7f9473635a5CB79646f14356a9Fc394CA111A";
-export const vyvUSDC_1_Core = "0xf87c0a64dc3a8622D6c63265FA29137788163879";
-export const vyvUSDT_1_Core = "0x475d0C68a8CD275c15D1F01F4f291804E445F677";
-export const vyvUSDS_1_Core = "0x520d67226Bc904aC122dcE66ed2f8f61AA1ED764";
-export const vyvWETH_1_Core = "0xba3916302cBA4aBcB51a01e706fC6051AaF272A0";
 export const vrsETH_LiquidStakedETH = "0xDB6C345f864883a8F4cae87852Ac342589E76D1B";
 
 export const Actions = {
@@ -110,49 +106,6 @@ export const vip530 = () => {
         target: ETHENA_POOL_COMPTROLLER_ETH,
         signature: "unlistMarket(address)",
         params: [vUSDC_Ethena],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "setActionsPaused(address[],uint8[],bool)",
-        params: [
-          [vyvUSDC_1_Core, vyvUSDT_1_Core, vyvUSDS_1_Core, vyvWETH_1_Core],
-          [Actions.REDEEM, Actions.REPAY, Actions.SEIZE, Actions.TRANSFER, Actions.LIQUIDATE, Actions.EXIT_MARKET],
-          true,
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          [vyvUSDC_1_Core, vyvUSDT_1_Core, vyvUSDS_1_Core, vyvWETH_1_Core],
-          [0, 0, 0, 0],
-        ],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "unlistMarket(address)",
-        params: [vyvUSDC_1_Core],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "unlistMarket(address)",
-        params: [vyvUSDT_1_Core],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "unlistMarket(address)",
-        params: [vyvUSDS_1_Core],
-        dstChainId: LzChainId.ethereum,
-      },
-      {
-        target: CORE_POOL_COMPTROLLER_ETH,
-        signature: "unlistMarket(address)",
-        params: [vyvWETH_1_Core],
         dstChainId: LzChainId.ethereum,
       },
       {

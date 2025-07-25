@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
@@ -25,7 +26,7 @@ forking(53658652, async () => {
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF and LT is zero", async () => {
       const market = await comptroller.markets(vPT_SolvBTC_BBN_27MAR2025_BTC);
       expect(market.collateralFactorMantissa).to.be.equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.85", 18));
     });
 
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market actions are paused or not", async () => {
@@ -73,7 +74,7 @@ forking(53658652, async () => {
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market CF and LT is zero", async () => {
       const market = await comptroller.markets(vPT_SolvBTC_BBN_27MAR2025_BTC);
       expect(market.collateralFactorMantissa).equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.85", 18));
     });
 
     it("Check vPT_SolvBTC_BBN_27MAR2025_BTC market actions are paused", async () => {

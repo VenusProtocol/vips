@@ -5,7 +5,6 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip529, {
   Actions,
-  CORE_POOL_COMPTROLLER_ETH,
   ETHENA_POOL_COMPTROLLER_ETH,
   LIQUID_STAKED_COMPTROLLER_ETH,
   vPT_USDe_27MAR2025_Ethena,
@@ -13,15 +12,10 @@ import vip529, {
   vUSDC_Ethena,
   vrsETH_LiquidStakedETH,
   vsUSDe_Ethena,
-  vyvUSDC_1_Core,
-  vyvUSDS_1_Core,
-  vyvUSDT_1_Core,
-  vyvWETH_1_Core,
 } from "../../vips/vip-530/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(22912233, async () => {
-  const corePoolComptroller = new ethers.Contract(CORE_POOL_COMPTROLLER_ETH, COMPTROLLER_ABI, ethers.provider);
   const ethenaPoolComptroller = new ethers.Contract(ETHENA_POOL_COMPTROLLER_ETH, COMPTROLLER_ABI, ethers.provider);
   const liquidStakedComptroller = new ethers.Contract(LIQUID_STAKED_COMPTROLLER_ETH, COMPTROLLER_ABI, ethers.provider);
 
@@ -165,36 +159,6 @@ forking(22912233, async () => {
       const market = await liquidStakedComptroller.markets(vrsETH_LiquidStakedETH);
       expect(market.isListed).to.be.true;
     });
-
-    for (const market of [vyvUSDC_1_Core, vyvUSDT_1_Core, vyvUSDS_1_Core, vyvWETH_1_Core]) {
-      it(`Check ${market} market actions are paused`, async () => {
-        for (const [actionName, actionId] of Object.entries(Actions)) {
-          const isPaused = await corePoolComptroller.actionPaused(market, actionId);
-          if (actionId === 0 || actionId === 2 || actionId === 7) {
-            expect(isPaused, `${actionName} should be paused`).to.be.true;
-          } else {
-            expect(isPaused, `${actionName} should be paused`).to.be.false;
-          }
-        }
-      });
-
-      it(`Check ${market} market CF is zero`, async () => {
-        const marketData = await corePoolComptroller.markets(market);
-        expect(marketData.collateralFactorMantissa).to.be.equal(0);
-      });
-
-      it(`check borrow and supply caps for ${market}`, async () => {
-        const borrowCap = await corePoolComptroller.borrowCaps(market);
-        const supplyCap = await corePoolComptroller.supplyCaps(market);
-        expect(borrowCap).to.be.equal(0);
-        expect(supplyCap).to.be.not.equal(0);
-      });
-
-      it(`Check ${market} market is listed`, async () => {
-        const marketData = await corePoolComptroller.markets(market);
-        expect(marketData.isListed).to.be.true;
-      });
-    }
   });
 
   testForkedNetworkVipCommands("VIP 529", await vip529(), {
@@ -210,7 +174,7 @@ forking(22912233, async () => {
           "NewLiquidationThreshold",
           "ActionPausedMarket",
         ],
-        [9, 2, 9, 1, 1, 56],
+        [5, 2, 5, 1, 1, 32],
       );
     },
   });
@@ -335,31 +299,5 @@ forking(22912233, async () => {
       const market = await liquidStakedComptroller.markets(vrsETH_LiquidStakedETH);
       expect(market.isListed).to.be.false;
     });
-
-    for (const market of [vyvUSDC_1_Core, vyvUSDT_1_Core, vyvUSDS_1_Core, vyvWETH_1_Core]) {
-      it(`Check ${market} market actions are paused`, async () => {
-        for (const [actionName, actionId] of Object.entries(Actions)) {
-          const isPaused = await corePoolComptroller.actionPaused(market, actionId);
-          expect(isPaused, `${actionName} should be paused`).to.be.true;
-        }
-      });
-
-      it(`Check ${market} market CF is zero`, async () => {
-        const marketData = await corePoolComptroller.markets(market);
-        expect(marketData.collateralFactorMantissa).to.be.equal(0);
-      });
-
-      it(`check borrow and supply caps for ${market}`, async () => {
-        const borrowCap = await corePoolComptroller.borrowCaps(market);
-        const supplyCap = await corePoolComptroller.supplyCaps(market);
-        expect(borrowCap).to.be.equal(0);
-        expect(supplyCap).to.be.equal(0);
-      });
-
-      it(`Check ${market} market is listed`, async () => {
-        const marketData = await corePoolComptroller.markets(market);
-        expect(marketData.isListed).to.be.false;
-      });
-    }
   });
 });
