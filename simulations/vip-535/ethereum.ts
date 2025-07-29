@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip529, {
+import vip535, {
   Actions,
   ETHENA_POOL_COMPTROLLER_ETH,
   LIQUID_STAKED_COMPTROLLER_ETH,
@@ -12,7 +12,7 @@ import vip529, {
   vUSDC_Ethena,
   vrsETH_LiquidStakedETH,
   vsUSDe_Ethena,
-} from "../../vips/vip-530/bscmainnet";
+} from "../../vips/vip-535/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 forking(22912233, async () => {
@@ -161,7 +161,7 @@ forking(22912233, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP 529", await vip529(), {
+  testForkedNetworkVipCommands("VIP 535", await vip535(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

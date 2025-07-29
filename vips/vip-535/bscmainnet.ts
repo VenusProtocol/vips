@@ -27,11 +27,32 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip530 = () => {
+export const vip535 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-530",
-    description: ``,
+    title: "VIP-535 [BNB Chain][Ethereum] Remove Low-Activity Markets",
+    description: `If this VIP passed, following the community post [Remove Low-Activity Markets](https://community.venus.io/t/remove-low-activity-markets/5240) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xb606db67b48f62c0795d1a269c66714cf4ba57bc03cbd4108a6fca7caa1948b4)), the following markets will be removed from the Venus Protocol:
+
+Ethereum
+
+- Ethena pool:
+    - [USDC](https://app.venus.io/#/pools/pool/0x562d2b6FF1dbf5f63E233662416782318cC081E4/market/0xa8e7f9473635a5CB79646f14356a9Fc394CA111A?chainId=1)
+    - [sUSDe](https://app.venus.io/#/pools/pool/0x562d2b6FF1dbf5f63E233662416782318cC081E4/market/0x0792b9c60C728C1D2Fd6665b3D7A08762a9b28e0?chainId=1)
+    - [PT-USDe-MAR25](https://app.venus.io/#/pools/pool/0x562d2b6FF1dbf5f63E233662416782318cC081E4/market/0x62D9E2010Cff87Bae05B91d5E04605ef864ABc3B?chainId=1)
+    - [PT-sUSDE-MAR25](https://app.venus.io/#/pools/pool/0x562d2b6FF1dbf5f63E233662416782318cC081E4/market/0xCca202a95E8096315E3F19E46e19E1b326634889?chainId=1)
+- [rsETH (Liquid Staked ETH pool)](https://app.venus.io/#/pools/pool/0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3/market/0xDB6C345f864883a8F4cae87852Ac342589E76D1B?chainId=1)
+
+BNB Chain
+
+- [PT-SolvBTC.BBN-MAR25 (BTC)](https://app.venus.io/#/pools/pool/0x9DF11376Cf28867E2B0741348044780FbB7cb1d6/market/0x02243F036897E3bE1cce1E540FA362fd58749149?chainId=56)
+
+In [VIP-510: Deprecation of Low-Activity Markets on BNB Chain and Ethereum](https://app.venus.io/#/governance/proposal/510?chainId=56), several markets were deprecated due to low user activity. This VIP aims to permanently remove some of these markets from the Venus Protocol based on the following criteria:
+
+- The markets have already been deprecated (supply and borrow functions are disabled, and the Max LTV is set to zero).
+- There are no outstanding borrowed assets, or the borrowed amounts are negligible.
+- The total USD value of supplied assets in the market is less than $20.
+
+Based on these conditions, the proposal seeks to remove the specified markets from the Venus Protocol. Once removed, these markets will no longer appear in the [official Venus app](https://app.venus.io/), and users will be unable to interact with them in any way—including supplying, borrowing, withdrawing, or repaying.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -157,4 +178,4 @@ export const vip530 = () => {
   );
 };
 
-export default vip530;
+export default vip535;

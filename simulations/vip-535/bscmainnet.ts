@@ -5,11 +5,11 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip530, {
+import vip535, {
   Actions,
   BTC_POOL_COMPTROLLER_BSC,
   vPT_SolvBTC_BBN_27MAR2025_BTC,
-} from "../../vips/vip-530/bscmainnet";
+} from "../../vips/vip-535/bscmainnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
@@ -53,7 +53,7 @@ forking(53658652, async () => {
     });
   });
 
-  testVip("VIP-530 bscmainnet", await vip530(), {
+  testVip("VIP-535 bscmainnet", await vip535(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
