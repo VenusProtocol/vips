@@ -10,11 +10,20 @@ export const SOL_BORROW_CAP = parseUnits("18000", 18);
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const vip536 = async () => {
+export const vip537 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-536",
-    description: ``,
+    title: "VIP-537 [BNB Chain] Risk Parameters Adjustments (asBNB, SOL)",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication [Chaos Labs - Risk Parameter Updates - 08/04/25](https://community.venus.io/t/chaos-labs-risk-parameter-updates-08-04-25/5263):
+
+- [asBNB (Core pool)](https://app.venus.io/#/pools/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0xCC1dB43a06d97f736C7B045AedD03C6707c09BDF?chainId=56): increase the Supply Cap, from 48,000 asBNB to 72,000 asBNB
+- [SOL (Core pool)](https://app.venus.io/#/pools/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0xBf515bA4D1b52FFdCeaBF20d31D705Ce789F2cEC?chainId=56): increase the Borrow Cap, from 9,000 SOL to 18,000 SOL
+
+Complete analysis and details of this recommendation are available in the above publication.
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/598)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -34,8 +43,8 @@ export const vip536 = async () => {
       },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.CRITICAL,
   );
 };
 
-export default vip536;
+export default vip537;

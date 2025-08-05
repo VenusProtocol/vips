@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { SOL_BORROW_CAP, asBNB_SUPPLY_CAP, vSOL, vasBNB, vip536 } from "../../vips/vip-536/bscmainnet";
+import { SOL_BORROW_CAP, asBNB_SUPPLY_CAP, vSOL, vasBNB, vip537 } from "../../vips/vip-537/bscmainnet";
 import COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -34,7 +34,7 @@ forking(56507618, async () => {
     });
   });
 
-  testVip("vip-536", await vip536(), {
+  testVip("vip-537", await vip537(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewSupplyCap", "NewBorrowCap"], [1, 1]);
     },
