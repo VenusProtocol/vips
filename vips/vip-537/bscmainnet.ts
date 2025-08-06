@@ -7,11 +7,12 @@ import { makeProposal } from "src/utils";
 const { bscmainnet, ethereum, arbitrumone, zksyncmainnet, unichainmainnet } = NETWORK_ADDRESSES;
 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
-const BRIDGE_FEES = parseUnits("0.5", 18);
 
+export const BRIDGE_FEES_BSC = parseUnits("0.5", 18);
 export const RELEASE_AMOUNT_BSC = parseUnits("1343.3735", 18);
 export const XVS_BRIDGE_BSC = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 
+export const BRIDGE_FEES_ETH = parseUnits("0.001", 18);
 export const XVS_BRIDGE_ETH = "0x888E317606b4c590BBAD88653863e8B345702633";
 export const REWARD_DISTRIBUTORS_ETH = [
   {
@@ -38,9 +39,13 @@ export const REWARD_DISTRIBUTORS_ETH = [
     address: "0x461de281c453f447200d67c9dd31b3046c8f49f8",
     excess: parseUnits("437.8750", 18),
   },
-]
-export const EXCESS_XVS_ETH = REWARD_DISTRIBUTORS_ETH.reduce((acc, distributor) => acc.add(distributor.excess), ethers.BigNumber.from(0));
+];
+export const EXCESS_XVS_ETH = REWARD_DISTRIBUTORS_ETH.reduce(
+  (acc, distributor) => acc.add(distributor.excess),
+  ethers.BigNumber.from(0),
+);
 
+export const BRIDGE_FEES_ARB = parseUnits("0.001", 18);
 export const XVS_BRIDGE_ARB = "0x20cEa49B5F7a6DBD78cAE772CA5973eF360AA1e6";
 export const REWARD_DISTRIBUTORS_ARB = [
   {
@@ -51,9 +56,13 @@ export const REWARD_DISTRIBUTORS_ARB = [
     address: "0x6204bae72de568384ca4da91735dc343a0c7bd6d",
     excess: parseUnits("1117.2790", 18),
   },
-]
-export const EXCESS_XVS_ARB = REWARD_DISTRIBUTORS_ARB.reduce((acc, distributor) => acc.add(distributor.excess), ethers.BigNumber.from(0));
+];
+export const EXCESS_XVS_ARB = REWARD_DISTRIBUTORS_ARB.reduce(
+  (acc, distributor) => acc.add(distributor.excess),
+  ethers.BigNumber.from(0),
+);
 
+export const BRIDGE_FEES_ZKSYNC = parseUnits("0.001", 18);
 export const XVS_BRIDGE_ZKSYNC = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 export const REWARD_DISTRIBUTORS_ZKSYNC = [
   {
@@ -61,7 +70,10 @@ export const REWARD_DISTRIBUTORS_ZKSYNC = [
     excess: parseUnits("2904.6815", 18),
   },
 ];
-export const EXCESS_XVS_ZKSYNC = REWARD_DISTRIBUTORS_ZKSYNC.reduce((acc, distributor) => acc.add(distributor.excess), ethers.BigNumber.from(0));
+export const EXCESS_XVS_ZKSYNC = REWARD_DISTRIBUTORS_ZKSYNC.reduce(
+  (acc, distributor) => acc.add(distributor.excess),
+  ethers.BigNumber.from(0),
+);
 
 export const XVS_BRIDGE_UNICHAIN = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 export const REWARD_DISTRIBUTOR_UNICHAIN = "0x4630b71c1bd27c99dd86abb2a18c50c3f75c88fb";
@@ -100,7 +112,7 @@ export const vip537 = async () => {
           XVS_SHORTAGE_UNICHAIN,
           [bscmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
-        value: BRIDGE_FEES.toString(),
+        value: BRIDGE_FEES_BSC.toString(),
       },
       {
         target: unichainmainnet.VTREASURY,
@@ -113,9 +125,9 @@ export const vip537 = async () => {
         signature: "approve(address,uint256)",
         params: [XVS_BRIDGE_BSC, 0],
       },
-      
+
       // Send XVS from ETH to BSC Treasury
-      ...REWARD_DISTRIBUTORS_ETH.map((distributor) => ({
+      ...REWARD_DISTRIBUTORS_ETH.map(distributor => ({
         target: distributor.address,
         signature: "grantRewardToken(address,uint256)",
         params: [ethereum.NORMAL_TIMELOCK, distributor.excess],
@@ -137,12 +149,12 @@ export const vip537 = async () => {
           EXCESS_XVS_ETH,
           [ethereum.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
-        value: BRIDGE_FEES.toString(),
+        value: BRIDGE_FEES_ETH.toString(),
         dstChainId: LzChainId.ethereum,
       },
 
       // Send XVS from ARB to BSC Treasury
-      ...REWARD_DISTRIBUTORS_ARB.map((distributor) => ({
+      ...REWARD_DISTRIBUTORS_ARB.map(distributor => ({
         target: distributor.address,
         signature: "grantRewardToken(address,uint256)",
         params: [arbitrumone.NORMAL_TIMELOCK, distributor.excess],
@@ -165,10 +177,11 @@ export const vip537 = async () => {
           [arbitrumone.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         dstChainId: LzChainId.arbitrumone,
+        value: BRIDGE_FEES_ARB.toString(),
       },
 
       // Send XVS from ZKSync to BSC Treasury
-      ...REWARD_DISTRIBUTORS_ZKSYNC.map((distributor) => ({
+      ...REWARD_DISTRIBUTORS_ZKSYNC.map(distributor => ({
         target: distributor.address,
         signature: "grantRewardToken(address,uint256)",
         params: [zksyncmainnet.NORMAL_TIMELOCK, distributor.excess],
@@ -191,6 +204,7 @@ export const vip537 = async () => {
           [zksyncmainnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, ADAPTER_PARAMS],
         ],
         dstChainId: LzChainId.zksyncmainnet,
+        value: BRIDGE_FEES_ZKSYNC.toString(),
       },
     ],
     meta,
