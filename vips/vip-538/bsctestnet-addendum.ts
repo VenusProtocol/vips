@@ -2,13 +2,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-xxx/utils/cur-params-bsctestnet.json";
+import { cutParams as params } from "../../simulations/vip-538/utils/cur-params-bsctestnet.json";
 
 export const cutParams = params;
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-export const vip599_Addendum = () => {
+export const vip538_Addendum = () => {
   const meta = {
     version: "v2",
     title: "Configure Remote Risk Stewards",
@@ -33,4 +33,4 @@ Configure Remote Risk Stewards
   );
 };
 
-export default vip599_Addendum;
+export default vip538_Addendum;

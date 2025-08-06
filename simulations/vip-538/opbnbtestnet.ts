@@ -7,38 +7,42 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vipxxx, {
-  ACCESS_CONTROL_MANAGER_SEPOLIA,
+import vip538, {
+  ACCESS_CONTROL_MANAGER_OPBNBTESTNET,
   ANY_TARGET_CONTRACT,
-  MARKET_CAP_RISK_STEWARD_SEPOLIA,
-} from "../../vips/vip-xxx/bsctestnet1";
+  MARKET_CAP_RISK_STEWARD_OPBNBTESTNET,
+} from "../../vips/vip-538/bsctestnet1";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import VENUS_RISK_STEWARD_RECEIVER_ABI from "./abi/VenusRiskStewardReceiver.json";
 
-const { sepolia } = NETWORK_ADDRESSES;
+const { opbnbtestnet } = NETWORK_ADDRESSES;
 
-forking(8043152, async () => {
+forking(56951686, async () => {
   const provider = ethers.provider;
   let executor: Contract;
   let lastProposalReceived: BigNumber;
-  const acm = new ethers.Contract(ACCESS_CONTROL_MANAGER_SEPOLIA, ACCESS_CONTROL_MANAGER_ABI, provider);
+  const acm = new ethers.Contract(ACCESS_CONTROL_MANAGER_OPBNBTESTNET, ACCESS_CONTROL_MANAGER_ABI, provider);
 
   const isolatedPoolComptroller = new ethers.Contract(
-    "0x7Aa39ab4BcA897F403425C9C6FDbd0f882Be0D70",
+    "0x2FCABb31E57F010D623D8d68e1E18Aed11d5A388",
     ISOLATED_POOL_COMPTROLLER_ABI,
     provider,
   );
 
   before(async () => {
-    executor = new ethers.Contract(sepolia.OMNICHAIN_GOVERNANCE_EXECUTOR, OMNICHAIN_GOVERNANCE_EXECUTOR_ABI, provider);
+    executor = new ethers.Contract(
+      opbnbtestnet.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
+      provider,
+    );
 
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vipxxx());
+    await pretendExecutingVip(await vip538());
   });
 
-  testForkedNetworkVipCommands("vipxxx Configuring Risk Stewards", await vipxxx(), {
+  testForkedNetworkVipCommands("vip538 Configuring Risk Stewards", await vip538(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -65,29 +69,29 @@ forking(8043152, async () => {
         [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
       );
       const supplyCapRoleHash = ethers.utils.keccak256(supplyCapRole);
-      expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_SEPOLIA)).to.be.true;
+      expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_OPBNBTESTNET)).to.be.true;
 
       const borrowCapRole = ethers.utils.solidityPack(
         ["address", "string"],
         [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
       );
       const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
-      expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_SEPOLIA)).to.be.true;
+      expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_OPBNBTESTNET)).to.be.true;
     });
 
     it("Market Cap Risk Steward should be able to set supply and borrow caps on markets", async () => {
-      await impersonateAccount(MARKET_CAP_RISK_STEWARD_SEPOLIA);
-      await setBalance(MARKET_CAP_RISK_STEWARD_SEPOLIA, parseUnits("1000000", 18));
+      await impersonateAccount(MARKET_CAP_RISK_STEWARD_OPBNBTESTNET);
+      await setBalance(MARKET_CAP_RISK_STEWARD_OPBNBTESTNET, parseUnits("1000000", 18));
 
       await expect(
         isolatedPoolComptroller
-          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_SEPOLIA))
-          .setMarketSupplyCaps(["0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff"], ["160000000000"]),
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_OPBNBTESTNET))
+          .setMarketSupplyCaps(["0xe3923805f6E117E51f5387421240a86EF1570abC"], ["15000000000000000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewSupplyCap");
       await expect(
         isolatedPoolComptroller
-          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_SEPOLIA))
-          .setMarketBorrowCaps(["0x19252AFD0B2F539C400aEab7d460CBFbf74c17ff"], ["150000000000"]),
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_OPBNBTESTNET))
+          .setMarketBorrowCaps(["0xe3923805f6E117E51f5387421240a86EF1570abC"], ["9500000000000000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewBorrowCap");
     });
   });

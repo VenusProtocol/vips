@@ -8,10 +8,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip599, {
+import vip538, {
   MARKET_CAP_RISK_STEWARD_BSCMAINNET,
   RISK_STEWARD_RECEIVER_BSCMAINNET,
-} from "../../vips/vip-xxx/bscmainnet";
+} from "../../vips/vip-538/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -32,7 +32,7 @@ const UNCHANGED_REWARD_FACET = "0xc2F6bDCEa4907E8CB7480d3d315bc01c125fb63C";
 
 const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-forking(54002305, async () => {
+forking(56676950, async () => {
   const provider = ethers.provider;
   let unitroller: Contract;
   let acm: Contract;
@@ -110,7 +110,7 @@ forking(54002305, async () => {
     });
   });
 
-  testVip("vip-599", await vip599(), {
+  testVip("vip-538", await vip538(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

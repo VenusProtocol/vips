@@ -7,42 +7,42 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vipxxx, {
-  ACCESS_CONTROL_MANAGER_ARBITRUMSEPOLIA,
-  ANY_TARGET_CONTRACT,
-  MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA,
-} from "../../vips/vip-xxx/bsctestnet1";
+import { ANY_TARGET_CONTRACT } from "../../vips/vip-538/bsctestnet1";
+import vip538, {
+  ACCESS_CONTROL_MANAGER_UNICHAINSEPOLIA,
+  MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA,
+} from "../../vips/vip-538/bsctestnet2";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
 import OMNICHAIN_GOVERNANCE_EXECUTOR_ABI from "./abi/OmnichainGovernanceExecutor.json";
 import VENUS_RISK_STEWARD_RECEIVER_ABI from "./abi/VenusRiskStewardReceiver.json";
 
-const { arbitrumsepolia } = NETWORK_ADDRESSES;
+const { unichainsepolia } = NETWORK_ADDRESSES;
 
-forking(138822251, async () => {
+forking(16844634, async () => {
   const provider = ethers.provider;
   let executor: Contract;
   let lastProposalReceived: BigNumber;
-  const acm = new ethers.Contract(ACCESS_CONTROL_MANAGER_ARBITRUMSEPOLIA, ACCESS_CONTROL_MANAGER_ABI, provider);
+  const acm = new ethers.Contract(ACCESS_CONTROL_MANAGER_UNICHAINSEPOLIA, ACCESS_CONTROL_MANAGER_ABI, provider);
 
   const isolatedPoolComptroller = new ethers.Contract(
-    "0x006D44b6f5927b3eD83bD0c1C36Fb1A3BaCaC208",
+    "0xFeD3eAA668a6179c9E5E1A84e3A7d6883F06f7c1",
     ISOLATED_POOL_COMPTROLLER_ABI,
     provider,
   );
 
   before(async () => {
     executor = new ethers.Contract(
-      arbitrumsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR,
+      unichainsepolia.OMNICHAIN_GOVERNANCE_EXECUTOR,
       OMNICHAIN_GOVERNANCE_EXECUTOR_ABI,
       provider,
     );
 
     lastProposalReceived = await executor.lastProposalReceived();
-    await pretendExecutingVip(await vipxxx());
+    await pretendExecutingVip(await vip538());
   });
 
-  testForkedNetworkVipCommands("vipxxx Configuring Risk Stewards", await vipxxx(), {
+  testForkedNetworkVipCommands("vip538 Configuring Risk Stewards", await vip538(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -69,29 +69,29 @@ forking(138822251, async () => {
         [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
       );
       const supplyCapRoleHash = ethers.utils.keccak256(supplyCapRole);
-      expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA)).to.be.true;
+      expect(await acm.hasRole(supplyCapRoleHash, MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA)).to.be.true;
 
       const borrowCapRole = ethers.utils.solidityPack(
         ["address", "string"],
         [ANY_TARGET_CONTRACT, "setMarketSupplyCaps(address[],uint256[])"],
       );
       const borrowCapRoleHash = ethers.utils.keccak256(borrowCapRole);
-      expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA)).to.be.true;
+      expect(await acm.hasRole(borrowCapRoleHash, MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA)).to.be.true;
     });
 
     it("Market Cap Risk Steward should be able to set supply and borrow caps on markets", async () => {
-      await impersonateAccount(MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA);
-      await setBalance(MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA, parseUnits("1000000", 18));
+      await impersonateAccount(MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA);
+      await setBalance(MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA, parseUnits("1000000", 18));
 
       await expect(
         isolatedPoolComptroller
-          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA))
-          .setMarketSupplyCaps(["0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052"], ["160000000000"]),
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA))
+          .setMarketSupplyCaps(["0x2d8814e1358D71B6B271295893F7409E3127CBBf"], ["25000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewSupplyCap");
       await expect(
         isolatedPoolComptroller
-          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_ARBITRUMSEPOLIA))
-          .setMarketBorrowCaps(["0xdEFbf0F9Ab6CdDd0a1FdDC894b358D0c0a39B052"], ["150000000000"]),
+          .connect(await ethers.getSigner(MARKET_CAP_RISK_STEWARD_UNICHAINSEPOLIA))
+          .setMarketBorrowCaps(["0x2d8814e1358D71B6B271295893F7409E3127CBBf"], ["19000000000000"]),
       ).to.emit(isolatedPoolComptroller, "NewBorrowCap");
     });
   });

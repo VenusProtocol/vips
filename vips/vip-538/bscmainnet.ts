@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-xxx/utils/cur-params-bscmainnet.json";
+import { cutParams as params } from "../../simulations/vip-538/utils/cur-params-bscmainnet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -14,10 +14,10 @@ export const ANY_TARGET_CONTRACT = ethers.constants.AddressZero;
 export const MORE_THAN_1_DAY = 86401; // 24 hours + 1 second
 export const cutParams = params;
 
-export const vip599 = () => {
+export const vip538 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-5XX [BNB Chain] Chaos Labs' Risk Oracle integration (1/2)",
+    title: "VIP-538 [BNB Chain] Chaos Labs' Risk Oracle integration (1/2)",
     description: `#### Summary
 
 If passed, following the community proposal “[Integrate Chaos Labs’ Risk Oracle to Venus Protocol](https://community.venus.io/t/integrate-chaos-labs-risk-oracle-to-venus-protocol/4569)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x6d84d48a17981a84e3eb320139552306f70fd006d7f3d9df131e20002e98620c)), this VIP will integrate the Chaos Labs’ Risk Oracle into Venus Protocol on BNB Chain, allowing the update of the supply and borrow caps of the Venus markets (on Isolated Pools) on this chain without VIP’s, considering Chaos Labs recommendations.
@@ -79,8 +79,7 @@ We applied the following security procedures for this upgrade:
 - [VIP simulation](https://github.com/VenusProtocol/vips/pull/520)
 - [Codebase of the new facets for the Core pool Comptroller on BNB Chain](https://github.com/VenusProtocol/venus-protocol/pull/548)
 - [Codebase of the Risk Steward contracts](https://github.com/VenusProtocol/governance-contracts/pull/115)
-- [Codebase of the RiskOracle contract, by Chaos Labs](https://github.com/ChaosLabsInc/risk-oracle)
-`,
+- [Codebase of the RiskOracle contract, by Chaos Labs](https://github.com/ChaosLabsInc/risk-oracle)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -213,4 +212,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip599;
+export default vip538;
