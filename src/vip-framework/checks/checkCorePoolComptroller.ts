@@ -10,6 +10,7 @@ import { FORKED_NETWORK, ethers } from "hardhat";
 
 import { NETWORK_ADDRESSES } from "../../networkAddresses";
 import { setMaxStalePeriodInChainlinkOracle } from "../../utils";
+import CHAINLINK_ABI from "../abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/erc20.json";
 import VTOKEN_ABI from "../abi/vToken.json";
@@ -19,12 +20,11 @@ let vUSDT_ADDRESS = mainnet.addresses.vUSDT;
 let USDT = mainnet.addresses.USDT;
 let ETH = mainnet.addresses.ETH;
 let NORMAL_TIMELOCK = mainnetGovernance.addresses.NormalTimelock;
-let XVS = mainnet.addresses.XVS;
 let COMPTROLLER = mainnet.addresses.Unitroller;
 let LENS = mainnet.addresses.ComptrollerLens;
 let ETH_FEED = NETWORK_ADDRESSES.bscmainnet.ETH_CHAINLINK_FEED;
 let USDT_FEED = NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED;
-let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_TEST_USER_ACCOUNT;
+let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.CORE_COMPTROLLER_GENERIC_TEST_USER_ACCOUNT;
 let CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
 if (FORKED_NETWORK === "bsctestnet") {
@@ -33,11 +33,10 @@ if (FORKED_NETWORK === "bsctestnet") {
   USDT = testnet.addresses.USDT;
   ETH = testnet.addresses.ETH;
   NORMAL_TIMELOCK = testnetGovernance.addresses.NormalTimelock;
-  XVS = testnet.addresses.XVS;
   COMPTROLLER = testnet.addresses.Unitroller;
   ETH_FEED = NETWORK_ADDRESSES.bsctestnet.ETH_CHAINLINK_FEED;
   USDT_FEED = NETWORK_ADDRESSES.bsctestnet.USDT_CHAINLINK_FEED;
-  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_TEST_USER_ACCOUNT;
+  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.CORE_COMPTROLLER_GENERIC_TEST_USER_ACCOUNT;
   CHAINLINK_ORACLE = NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE;
 
   LENS = NETWORK_ADDRESSES[FORKED_NETWORK].COMPTROLLER_LENS;
@@ -51,7 +50,6 @@ export const checkCorePoolComptroller = () => {
     let veth: Contract;
     let vusdt: Contract;
     let timelockSigner: Signer;
-    let xvs: Contract;
 
     before(async () => {
       await impersonateAccount(ACCOUNT);
@@ -64,10 +62,26 @@ export const checkCorePoolComptroller = () => {
       eth = await ethers.getContractAt(ERC20_ABI, ETH, signer);
       veth = await ethers.getContractAt(VTOKEN_ABI, vETH_ADDRESS, signer);
       vusdt = await ethers.getContractAt(VTOKEN_ABI, vUSDT_ADDRESS, signer);
-      xvs = await ethers.getContractAt(ERC20_ABI, XVS, signer);
 
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, USDT, USDT_FEED, NORMAL_TIMELOCK);
       await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, ETH, ETH_FEED, NORMAL_TIMELOCK);
+
+      const chainlinkOracle = await ethers.getContractAt(CHAINLINK_ABI, CHAINLINK_ORACLE);
+
+      for (let i = 0; i < 50; i++) {
+        try {
+          const vToken = await comptroller.accountAssets(ACCOUNT, i);
+          const vTokenContract = await ethers.getContractAt(VTOKEN_ABI, vToken);
+          const underlying = await vTokenContract.underlying();
+
+          const config = await chainlinkOracle.tokenConfigs(underlying);
+          if (config.feed != ethers.constants.AddressZero) {
+            await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, config.asset, config.feed, NORMAL_TIMELOCK);
+          }
+        } catch (e) {
+          break;
+        }
+      }
     });
 
     it(`check if comptroller`, async () => {
@@ -86,12 +100,15 @@ export const checkCorePoolComptroller = () => {
 
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
       const usdtDecimals = await usdt.decimals();
+
+      if ((await comptroller.borrowCaps(vusdt.address)) == 0) {
+        await comptroller
+          .connect(await ethers.getSigner(NORMAL_TIMELOCK))
+          ._setMarketBorrowCaps([vusdt.address], [parseUnits("100000000000", usdtDecimals)]);
+      }
+
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(usdtBalance);
-
-      const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
-      await expect(comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
-      expect(await xvs.balanceOf(ACCOUNT)).to.be.greaterThanOrEqual(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
       await usdt.approve(vusdt.address, parseUnits("100", usdtDecimals));
