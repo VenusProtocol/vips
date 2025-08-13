@@ -6,15 +6,18 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip536, {
-  ConversionAccessibility,
-  ETHEREUM_CONVERSION_INCENTIVE,
   NEW_SINGLE_TOKEN_CONVERTER_IMP_ETHEREUM,
   SINGLE_TOKEN_CONVERTER_BEACON_ETHEREUM,
+} from "../../vips/vip-536/bscmainnet";
+import {
+  ConversionAccessibility,
+  ETHEREUM_CONVERSION_INCENTIVE,
   TREASURY_CONVERTER,
   TREASURY_CONVERTER_ETHEREUM,
-} from "../../vips/vip-536/bscmainnet";
+} from "../../vips/vip-536/configuration";
 import ACCESS_CONTROLL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import BEACON_ABI from "./abi/Beacon.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import CONVERTER_ABI from "./abi/singletokenconverter.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -49,9 +52,16 @@ forking(23017363, async () => {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(
         txResponse,
-        [BEACON_ABI, CONVERTER_ABI],
-        ["Upgraded", "ConverterNetworkAddressUpdated", "OwnershipTransferred", "ConversionConfigUpdated"],
-        [1, 1, 2, 3],
+        [BEACON_ABI, CONVERTER_ABI, PSR_ABI],
+        [
+          "Upgraded",
+          "ConverterNetworkAddressUpdated",
+          "ConversionConfigUpdated",
+          "DistributionConfigAdded",
+          "DistributionConfigUpdated",
+          "DistributionConfigRemoved",
+        ],
+        [1, 1, TREASURY_CONVERTER.ethereum.tokensOut.length, 2, 2, 2],
       );
     },
   });
@@ -78,7 +88,7 @@ forking(23017363, async () => {
       });
 
       it("should have correct conversion configuration", async () => {
-        const { tokenIn, tokenOuts } = TREASURY_CONVERTER.ethereum;
+        const { tokenIn, whitelistedTokens: tokenOuts } = TREASURY_CONVERTER.ethereum;
 
         for (const tokenOut of tokenOuts) {
           const config = await treasuryConverter.conversionConfigurations(tokenIn, tokenOut);

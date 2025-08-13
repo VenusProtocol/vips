@@ -1,5 +1,7 @@
+import govArbitrumContracts from "@venusprotocol/governance-contracts/deployments/arbitrumone_addresses.json";
 import govBscmainnetContracts from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
 import govBsctestnetContracts from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
+import govEthereumContracts from "@venusprotocol/governance-contracts/deployments/ethereum_addresses.json";
 import ilBscmainnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bscmainnet_addresses.json";
 import ilBsctestnetDeployedContracts from "@venusprotocol/isolated-pools/deployments/bsctestnet_addresses.json";
 import ilEthereumDeployedContracts from "@venusprotocol/isolated-pools/deployments/ethereum_addresses.json";
@@ -27,6 +29,7 @@ export const NETWORK_ADDRESSES = {
   bscmainnet: {
     DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
     ACCESS_CONTROL_MANAGER: "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555",
+    ACM_AGGREGATOR: govBscmainnetContracts.addresses.ACMCommandsAggregator,
     GOVERNOR_PROXY: govBscmainnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBscmainnetContracts.addresses.NormalTimelock,
     FAST_TRACK_TIMELOCK: govBscmainnetContracts.addresses.FastTrackTimelock,
@@ -53,6 +56,7 @@ export const NETWORK_ADDRESSES = {
     DEFAULT_PROPOSER_ADDRESS: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     GUARDIAN: "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706",
     ACCESS_CONTROL_MANAGER: govBsctestnetContracts.addresses.AccessControlManager,
+    ACM_AGGREGATOR: govBsctestnetContracts.addresses.ACMCommandsAggregator,
     GOVERNOR_PROXY: govBsctestnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBsctestnetContracts.addresses.NormalTimelock,
     FAST_TRACK_TIMELOCK: govBsctestnetContracts.addresses.FastTrackTimelock,
@@ -76,6 +80,7 @@ export const NETWORK_ADDRESSES = {
   },
   ethereum: {
     ACCESS_CONTROL_MANAGER: "0x230058da2D23eb8836EC5DB7037ef7250c56E25E",
+    ACM_AGGREGATOR: govEthereumContracts.addresses.ACMCommandsAggregator,
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",
     FAST_TRACK_TIMELOCK: "0x8764F50616B62a99A997876C2DEAaa04554C5B2E",
     CRITICAL_TIMELOCK: "0xeB9b85342c34F65af734C7bd4a149c86c472bC00",
@@ -163,6 +168,7 @@ export const NETWORK_ADDRESSES = {
   },
   arbitrumone: {
     ACCESS_CONTROL_MANAGER: "0xD9dD18EB0cf10CbA837677f28A8F9Bda4bc2b157",
+    ACM_AGGREGATOR: govArbitrumContracts.addresses.ACMCommandsAggregator,
     NORMAL_TIMELOCK: "0x4b94589Cc23F618687790036726f744D602c4017",
     FAST_TRACK_TIMELOCK: "0x2286a9B2a5246218f2fC1F380383f45BDfCE3E04",
     CRITICAL_TIMELOCK: "0x181E4f8F21D087bF02Ea2F64D5e550849FBca674",

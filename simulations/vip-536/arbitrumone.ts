@@ -6,15 +6,18 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip536, {
-  ARBITRUM_CONVERSION_INCENTIVE,
-  ConversionAccessibility,
   NEW_SINGLE_TOKEN_CONVERTER_IMP_ARBITRUM,
   SINGLE_TOKEN_CONVERTER_BEACON_ARBITRUM,
+} from "../../vips/vip-536/bscmainnet";
+import {
+  ARBITRUM_CONVERSION_INCENTIVE,
+  ConversionAccessibility,
   TREASURY_CONVERTER,
   TREASURY_CONVERTER_ARBITRUM,
-} from "../../vips/vip-536/bscmainnet";
+} from "../../vips/vip-536/configuration";
 import ACCESS_CONTROLL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import BEACON_ABI from "./abi/Beacon.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import CONVERTER_ABI from "./abi/singletokenconverter.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
@@ -49,9 +52,15 @@ forking(362442798, async () => {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(
         txResponse,
-        [BEACON_ABI, CONVERTER_ABI],
-        ["Upgraded", "ConverterNetworkAddressUpdated", "OwnershipTransferred", "ConversionConfigUpdated"],
-        [1, 1, 2, 3],
+        [BEACON_ABI, CONVERTER_ABI, PSR_ABI],
+        [
+          "Upgraded",
+          "ConverterNetworkAddressUpdated",
+          "ConversionConfigUpdated",
+          "DistributionConfigAdded",
+          "DistributionConfigRemoved",
+        ],
+        [1, 1, TREASURY_CONVERTER.arbitrumone.tokensOut.length, 4, 2],
       );
     },
   });
@@ -78,7 +87,7 @@ forking(362442798, async () => {
       });
 
       it("should have correct conversion configuration", async () => {
-        const { tokenIn, tokenOuts } = TREASURY_CONVERTER.arbitrumone;
+        const { tokenIn, whitelistedTokens: tokenOuts } = TREASURY_CONVERTER.arbitrumone;
 
         for (const tokenOut of tokenOuts) {
           const config = await treasuryConverter.conversionConfigurations(tokenIn, tokenOut);

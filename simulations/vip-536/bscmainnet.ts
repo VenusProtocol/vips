@@ -6,22 +6,25 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip536, {
-  BSC_CONVERSION_INCENTIVE,
-  ConversionAccessibility,
   NEW_SINGLE_TOKEN_CONVERTER_IMP_BSC,
   SINGLE_TOKEN_CONVERTER_BEACON_BSC,
+} from "../../vips/vip-536/bscmainnet";
+import {
+  BSC_CONVERSION_INCENTIVE,
+  ConversionAccessibility,
   TREASURY_CONVERTER,
   TREASURY_CONVERTER_BSC,
-} from "../../vips/vip-536/bscmainnet";
+} from "../../vips/vip-536/configuration";
 import ACCESS_CONTROLL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import BEACON_ABI from "./abi/Beacon.json";
+import PSR_ABI from "./abi/ProtocolShareReserve.json";
 import CONVERTER_ABI from "./abi/singletokenconverter.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 const OLD_SINGLE_TOKEN_CONVERTER_IMP_BSC = "0x40ed28180Df01FdeB957224E4A5415704B9D5990";
 
-forking(55597156, async () => {
+forking(56542578, async () => {
   const provider = ethers.provider;
   let beacon: Contract;
   let treasuryConverter: Contract;
@@ -49,9 +52,16 @@ forking(55597156, async () => {
     callbackAfterExecution: async (txResponse: any) => {
       await expectEvents(
         txResponse,
-        [BEACON_ABI, CONVERTER_ABI],
-        ["Upgraded", "ConverterNetworkAddressUpdated", "OwnershipTransferred", "ConversionConfigUpdated"],
-        [1, 1, 2, 4],
+        [BEACON_ABI, CONVERTER_ABI, PSR_ABI],
+        [
+          "Upgraded",
+          "ConverterNetworkAddressUpdated",
+          "ConversionConfigUpdated",
+          "DistributionConfigAdded",
+          "DistributionConfigUpdated",
+          "DistributionConfigRemoved",
+        ],
+        [1, 1, TREASURY_CONVERTER.bscmainnet.whitelistedTokens.length, 2, 2, 2],
       );
     },
   });
@@ -79,7 +89,7 @@ forking(55597156, async () => {
       });
 
       it("should have correct conversion configuration", async () => {
-        const { tokenIn, tokenOuts } = TREASURY_CONVERTER.bscmainnet;
+        const { tokenIn, whitelistedTokens: tokenOuts } = TREASURY_CONVERTER.bscmainnet;
 
         for (const tokenOut of tokenOuts) {
           const config = await treasuryConverter.conversionConfigurations(tokenIn, tokenOut);
