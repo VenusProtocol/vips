@@ -83,7 +83,57 @@ export const vip537 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
     title: "VIP-537",
-    description: ``,
+    description: `### Summary
+
+Following [VIP-533: XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56), which paused XVS emissions across all chains, this VIP proposes to recover excess XVS tokens held in Rewards Distributors on multiple chains and bridge them back to the [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+Additionally, this VIP proposes to cover the shortage of XVS in the underfunded Unichain Rewards Distributor by bridging XVS from the [Core Pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384#asset-multichain).
+
+If passed, 46,827.5056 XVS will be returned to the Treasury.
+
+---
+
+### Actions
+
+If approved, this VIP will execute the following actions:
+
+**Arbitrum**
+
+- Bridge **333.6100 excess XVS** from [Arbitrum Reward Distributor 0x53b488baa4052094495b6de9e5505fe1ee3eac7a](https://arbiscan.io/address/0x53b488baa4052094495b6de9e5505fe1ee3eac7a) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **1,117.2790 excess XVS** from [Arbitrum Reward Distributor 0x6204bae72de568384ca4da91735dc343a0c7bd6d](https://arbiscan.io/address/0x6204bae72de568384ca4da91735dc343a0c7bd6d) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+**Ethereum**
+
+- Bridge **12,861.1488 excess XVS** from [Ethereum Reward Distributor 0x7a91bed36d96e4e644d3a181c287e0fcf9e9cc98](https://etherscan.io/address/0x7a91bed36d96e4e644d3a181c287e0fcf9e9cc98) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **8,032.6739 excess XVS** from [Ethereum Reward Distributor 0x1e25cf968f12850003db17e0dba32108509c4359](https://etherscan.io/address/0x1e25cf968f12850003db17e0dba32108509c4359) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **1,603.5498 excess XVS** from [Ethereum Reward Distributor 0x8473b767f68250f5309bae939337136a899e43f9](https://etherscan.io/address/0x8473b767f68250f5309bae939337136a899e43f9) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **9,641.8138 excess XVS** from [Ethereum Reward Distributor 0x886767b62c7acd601672607373048ffd96cf27b2](https://etherscan.io/address/0x886767b62c7acd601672607373048ffd96cf27b2) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **9,894.8738 excess XVS** from [Ethereum Reward Distributor 0x134bfdea7e68733921bc6a87159fb0d68abc6cf8](https://etherscan.io/address/0x134bfdea7e68733921bc6a87159fb0d68abc6cf8) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+- Bridge **437.8750 excess XVS** from [Ethereum Reward Distributor 0x461de281c453f447200d67c9dd31b3046c8f49f8](https://etherscan.io/address/0x461de281c453f447200d67c9dd31b3046c8f49f8) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+**zkSync**
+
+- Bridge **2,904.6815 excess XVS** from [zkSync Reward Distributor](https://explorer.zksync.io/address/0x7c7846a74ab38a8d554bc5f7652ecf8efb58c894) back to [BNB Treasury](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
+
+**Unichain**
+
+- Bridge **1,343.3735 XVS** from the [Core Pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384#asset-multichain) to the underfunded [Unichain Rewards Distributor](https://unichain.blockscout.com/address/0x4630b71c1bd27c99dd86abb2a18c50c3f75c88fb).
+
+---
+
+### References
+
+- [VIP-533: XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56)
+- [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9)
+- [Core Pool Comptroller (BNB)](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384#asset-multichain)
+
+- [VIP-533 XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56)
+- Community proposal [XVS Emissions Strategy Update](https://community.venus.io/t/xvs-emissions-strategy-update/5224), and the [associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x8dfb4ec02f6980535acf8235422ad1cefcc385eecab44f610882689a745aa26f)
+
+---
+
+[VIP simulation](https://github.com/VenusProtocol/vips/pull/599)
+    `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
