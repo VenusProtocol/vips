@@ -126,9 +126,8 @@ If approved, this VIP will execute the following actions:
 - [VIP-533: XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56)
 - [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9)
 - [Core Pool Comptroller (BNB)](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384#asset-multichain)
-
 - [VIP-533 XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56)
-- Community proposal [XVS Emissions Strategy Update](https://community.venus.io/t/xvs-emissions-strategy-update/5224), and the [associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x8dfb4ec02f6980535acf8235422ad1cefcc385eecab44f610882689a745aa26f)
+- Community proposal [XVS Emissions Strategy Update](https://community.venus.io/t/xvs-emissions-strategy-update/5224), and the [associated snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x8dfb4ec02f6980535acf8235422ad1cefcc385eecab44f610882689a745aa26f)
 
 ---
 
