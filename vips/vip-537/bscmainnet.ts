@@ -82,7 +82,7 @@ export const XVS_SHORTAGE_UNICHAIN = parseUnits("1343.3735", 18);
 export const vip537 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-537",
+    title: "VIP-539 Recover Excess XVS from Rewards Distributors",
     description: `### Summary
 
 Following [VIP-533: XVS Emissions Strategy Update](https://app.venus.io/#/governance/proposal/533?chainId=56), which paused XVS emissions across all chains, this VIP proposes to recover excess XVS tokens held in Rewards Distributors on multiple chains and bridge them back to the [Venus Treasury on BNB Chain](https://bscscan.com/address/0xf322942f644a996a617bd29c16bd7d231d9f35e9).
