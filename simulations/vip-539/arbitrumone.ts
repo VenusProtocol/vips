@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip537, { BRIDGE_FEES_ARB, REWARD_DISTRIBUTORS_ARB } from "../../vips/vip-537/bscmainnet";
+import vip539, { BRIDGE_FEES_ARB, REWARD_DISTRIBUTORS_ARB } from "../../vips/vip-539/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/rewardDistributor.json";
 
@@ -23,7 +23,7 @@ forking(365539179, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("VIP 537", await vip537(), {
+  testForkedNetworkVipCommands("VIP 539", await vip539(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [REWARD_DISTRIBUTOR_ABI], ["RewardTokenGranted"], [2]);
     },

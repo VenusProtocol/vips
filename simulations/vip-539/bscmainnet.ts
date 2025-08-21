@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip537, { RELEASE_AMOUNT_BSC } from "../../vips/vip-537/bscmainnet";
+import vip539, { RELEASE_AMOUNT_BSC } from "../../vips/vip-539/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -23,7 +23,7 @@ forking(56635892, async () => {
     comptrollerPreviousXVSBalance = await xvs.balanceOf(bscmainnet.UNITROLLER);
   });
 
-  testVip("vip-537", await vip537(), {
+  testVip("vip-539", await vip539(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,

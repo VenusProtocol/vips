@@ -79,7 +79,7 @@ export const XVS_BRIDGE_UNICHAIN = "0x9c95f8aa28fFEB7ECdC0c407B9F632419c5daAF8";
 export const REWARD_DISTRIBUTOR_UNICHAIN = "0x4630b71c1bd27c99dd86abb2a18c50c3f75c88fb";
 export const XVS_SHORTAGE_UNICHAIN = parseUnits("1343.3735", 18);
 
-export const vip537 = async () => {
+export const vip539 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
     title: "VIP-539 Recover Excess XVS from Rewards Distributors",
@@ -262,4 +262,4 @@ If approved, this VIP will execute the following actions:
   );
 };
 
-export default vip537;
+export default vip539;
