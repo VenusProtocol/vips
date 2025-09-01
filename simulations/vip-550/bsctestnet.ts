@@ -5,14 +5,22 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import {
+  expectEvents,
+  initMainnetUser,
+  setMaxStalePeriodInBinanceOracle,
+  setMaxStalePeriodInChainlinkOracle,
+} from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
   ACM,
   CORE_MARKETS,
+  CORE_MARKETS_WITHOUT_VBNB,
   CURRENT_LIQUIDATION_INCENTIVE,
   LIQUIDATOR,
+  LIQUIDATOR_PROXY_ADMIN,
+  MARKET_CONFIGURATION_AGGREGATOR,
   NEW_COMPTROLLER_LENS,
   NEW_COMPT_METHODS,
   NEW_DIAMOND,
@@ -23,15 +31,16 @@ import {
   OLD_DIAMOND,
   OLD_LIQUIDATOR_IMPL,
   OLD_VAI_CONTROLLER,
-  PROXY_ADMIN,
   UNITROLLER,
   VAI_UNITROLLER,
   vip550,
 } from "../../vips/vip-550/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import UNITROLLER_ABI from "./abi/Diamond.json";
+import DIAMOND_ABI from "./abi/Diamond.json";
+import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
+import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
 import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
@@ -49,7 +58,7 @@ const NEW_REWARD_FACET = "0x0CB4FdDA118Da048B9AAaC15f34662C6AB34F5dB";
 const NEW_MARKET_FACET = "0xfdFd4BEdc16339fE2dfa19Bab8bC9B8DA4149F75";
 const NEW_POLICY_FACET = "0x284d000665296515280a4fB066a887EFF6A3bD9E";
 
-forking(63158889, async () => {
+forking(63848748, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -58,12 +67,34 @@ forking(63158889, async () => {
   let proxyAdmin: SignerWithAddress;
 
   before(async () => {
-    unitroller = await ethers.getContractAt(UNITROLLER_ABI, UNITROLLER);
+    unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
     vaiUnitroller = await ethers.getContractAt(VAI_UNITROLLR_ABI, VAI_UNITROLLER);
     liquidator = await ethers.getContractAt(LIQUIDATOR_PROXY_ABI, LIQUIDATOR);
-    proxyAdmin = await initMainnetUser(PROXY_ADMIN, parseUnits("2", 18));
+    proxyAdmin = await initMainnetUser(LIQUIDATOR_PROXY_ADMIN, parseUnits("2", 18));
+    console.log(`Setting max stale period...`);
+    for (const market of CORE_MARKETS) {
+      // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
+      await setMaxStalePeriodInChainlinkOracle(
+        NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
+        market.asset,
+        ethers.constants.AddressZero,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+
+      await setMaxStalePeriodInChainlinkOracle(
+        NETWORK_ADDRESSES.bsctestnet.REDSTONE_ORACLE,
+        market.asset,
+        ethers.constants.AddressZero,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+    }
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "TWT", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "lisUSD", 315360000);
   });
 
   describe("Pre-VIP state", async () => {
@@ -87,13 +118,25 @@ forking(63158889, async () => {
 
   testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["DiamondCut"], [1]);
+      const totalMarkets = CORE_MARKETS_WITHOUT_VBNB.length;
+      const totalNewMethods = NEW_COMPT_METHODS.length;
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [4]);
+      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 2]); // +2 for unitroller and VAI
+      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted", "PermissionRevoked"], [totalNewMethods + 3, 5]);
+      await expectEvents(
+        txResponse,
+        [COMPTROLLER_ABI],
+        ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
+        [totalMarkets - 2, totalMarkets + 1, totalMarkets + 1], // +1 for vBNB, -3 for markets with 0 collateral factor
+      );
+      await expectEvents(txResponse, [LIQUIDATOR_ABI], ["NewLiquidationTreasuryPercent"], [1]);
     },
   });
 
   describe("Post-VIP state", async () => {
     it("unitroller should have new implementation", async () => {
-      expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(NEW_DIAMOND.toLowerCase());
+      expect(await unitroller.comptrollerImplementation()).equals(NEW_DIAMOND);
     });
 
     it("market facet function selectors should be replaced with new facet address", async () => {
@@ -160,11 +203,12 @@ forking(63158889, async () => {
     });
 
     it("markets should have new implemenation", async () => {
-      for (const market of CORE_MARKETS) {
+      for (const market of CORE_MARKETS_WITHOUT_VBNB) {
         const marketContract = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, market.address);
-        expect((await marketContract.implementation()).toLowerCase()).to.equal(NEW_VBEP20_DELEGATE.toLowerCase());
+        expect(await marketContract.implementation()).equals(NEW_VBEP20_DELEGATE);
       }
     });
+
     it("comptroller should have correct markets value", async () => {
       for (const market of CORE_MARKETS) {
         const data = await comptroller.markets(market.address);
@@ -175,12 +219,38 @@ forking(63158889, async () => {
         expect(data[6]).to.be.equal(true); // isBorrowAllowed
       }
     });
+
     it("VAI Controller should point to new impl", async () => {
       expect(await vaiUnitroller.vaiControllerImplementation()).to.equal(NEW_VAI_CONTROLLER);
     });
+
     it("Liquidator should point to new implementation", async () => {
       const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
       expect(impl.toLowerCase()).to.equal(NEW_LIQUIDATOR_IMPL.toLowerCase());
+    });
+
+    it("MarketConfigurationAggregator should not have ACM permissions", async () => {
+      expect(
+        await accessControlManager.hasPermission(
+          MARKET_CONFIGURATION_AGGREGATOR,
+          UNITROLLER,
+          "setCollateralFactor(address,uint256,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          MARKET_CONFIGURATION_AGGREGATOR,
+          UNITROLLER,
+          "setLiquidationIncentive(address,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          MARKET_CONFIGURATION_AGGREGATOR,
+          UNITROLLER,
+          "setIsBorrowAllowed(uint96,address,bool)",
+        ),
+      ).to.equal(false);
     });
   });
 });
