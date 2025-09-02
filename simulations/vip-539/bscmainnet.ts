@@ -13,7 +13,7 @@ import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const OLD_IRM = "0xa84189107aF59BF132F3e7dd45DD201C0bb25bF4"
 
-forking(59742907, async () => {
+forking(59745077, async () => {
   const provider = ethers.provider;
   const coreComptroller = new ethers.Contract(bscmainnet.UNITROLLER, CORE_COMPTROLLER_ABI, provider);
   const vToken = new ethers.Contract(vBTCB, VTOKEN_ABI, provider);
