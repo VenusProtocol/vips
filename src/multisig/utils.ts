@@ -19,13 +19,21 @@ export const getSafeAddress = (networkName: SUPPORTED_NETWORKS): string => {
 };
 
 export const buildMultiSigTx = async (proposal: Proposal): Promise<MetaTransactionData[]> => {
-  const { signatures, targets, params, values } = proposal;
+  const { signatures, targets, params, values, data } = proposal;
   const safeTransactionData: MetaTransactionData[] = [];
   for (let i = 0; i < signatures.length; ++i) {
-    const abi = new ethers.utils.Interface([`function ${signatures[i]}`]);
+    let callData;
+
+    if (data && data[i] != "") {
+      callData = data[i];
+    } else {
+      const abi = new ethers.utils.Interface([`function ${signatures[i]}`]);
+      callData = abi.encodeFunctionData(signatures[i], params[i]);
+    }
+
     const safeTxData: MetaTransactionData = {
       to: targets[i],
-      data: abi.encodeFunctionData(signatures[i], params[i]),
+      data: callData,
       value: values[i].toString(),
       operation: DEFAULT_OPERATION,
     };

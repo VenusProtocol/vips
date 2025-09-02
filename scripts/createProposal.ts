@@ -59,12 +59,16 @@ const processTxBuilder = async () => {
   return processJson(batchJson);
 };
 
-export const processGnosisTxBuilder = async () => {
-  const safeAddress = getSafeAddress(network.name as SUPPORTED_NETWORKS);
+const processGnosisTxBuilder = async () => {
+  // const safeAddress = getSafeAddress(network.name as SUPPORTED_NETWORKS);
 
+  // const GUARDIAN_TX_1 = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B"
+  const GUARDIAN_TX_2 = "0x3a3284dC0FaFfb0b5F0d074c4C704D14326C98cF"
   const multisigVipPath = readline.question(
     "Multisig VIP Path (located at ./multisig/proposals/<path>) to process => ",
   );
+
+  const safeAddress = GUARDIAN_TX_2
 
   const proposal = await loadMultisigTx(multisigVipPath);
   const multisigTx = await buildMultiSigTx(proposal);

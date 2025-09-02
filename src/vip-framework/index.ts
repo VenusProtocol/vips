@@ -79,10 +79,16 @@ const executeCommand = async (
     return iface.encodeFunctionData(signature, params);
   };
 
+  let calldata;
+  if (proposal.data && proposal.data[commandIdx] !== "") {
+    calldata = proposal.data[commandIdx];
+  } else {
+    calldata = encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]);
+  }
   const txnParams: TransactionRequest = {
     to: proposal.targets[commandIdx],
     value: proposal.values[commandIdx],
-    data: encodeMethodCall(proposal.signatures[commandIdx], proposal.params[commandIdx]),
+    data: calldata,
   };
 
   if (proposal.gasFeeMultiplicationFactor && proposal.gasFeeMultiplicationFactor[commandIdx]) {

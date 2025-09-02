@@ -201,6 +201,7 @@ export const makeProposal = async (
     gasLimitMultiplicationFactor: [],
     meta,
     type,
+    data: [],
   };
 
   const map = new Map<number, Command[]>();
@@ -224,6 +225,10 @@ export const makeProposal = async (
       ..._commands.map(cmd => (cmd.gasFeeMultiplicationFactor ?? network.zksync ? 2 : 1)),
     );
     proposal.gasLimitMultiplicationFactor?.push(..._commands.map(cmd => cmd.gasLimitMultiplicationFactor ?? 1));
+    if (!proposal.data) {
+      proposal.data = [];
+    }
+    proposal.data.push(..._commands.map(cmd => cmd.data ?? ""));
   }
   for (const key of map.keys()) {
     const chainCommands = map.get(key);

@@ -65,6 +65,7 @@ export interface Proposal {
   gasLimitMultiplicationFactor?: number[];
   meta?: ProposalMeta;
   type?: ProposalType;
+  data?: string[];
 }
 
 export interface Command {
@@ -77,6 +78,7 @@ export interface Command {
   gasFeeMultiplicationFactor?: number;
   // only matters for simulations. For some network forks, the gas limit estimation is not accurate. Should be a whole number.
   gasLimitMultiplicationFactor?: number;
+  data?: string;
 }
 
 export interface TokenConfig {
