@@ -146,21 +146,19 @@ forking(63848748, async () => {
     });
 
     it("policy facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = [...cutParams[2][2]];
+      const functionSelectors = cutParams[2][2];
       expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
     });
 
     it("reward facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = [...cutParams[3][2]];
-
+      const functionSelectors = cutParams[3][2];
       expect(await unitroller.facetFunctionSelectors(NEW_REWARD_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_REWARD_FACET)).to.deep.equal([]);
     });
 
     it("setter facet function selectors should be replaced with new facet address", async () => {
       const functionSelectors = [...cutParams[4][2], ...cutParams[5][2]];
-
       expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
     });
