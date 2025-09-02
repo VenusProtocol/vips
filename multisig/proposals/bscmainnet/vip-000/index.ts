@@ -10,6 +10,7 @@ export const TX_2_CALLDATA = "0xC4eF4229FEc74Ccfe17B2bdeF7715fAC740BA0ba" // TOD
 export const COMPTROLLER= "0xfd36e2c2a6789db23113685031d7f16329158384"
 
 export const Actions = {
+  BORROW: 2,
   SEIZE: 4,
   LIQUIDATE: 5,
   TRANSFER: 6,
@@ -20,7 +21,7 @@ const vip000 = () => {
     {
       target: COMPTROLLER,
       signature: "_setActionsPaused(address[],uint8[],bool)",
-      params: [[VBTC], [Actions.LIQUIDATE], false],
+      params: [[VBTC], [Actions.LIQUIDATE, Actions.BORROW], false],
     },
     {
       target: COMPTROLLER,
@@ -36,7 +37,7 @@ const vip000 = () => {
     {
       target: COMPTROLLER,
       signature: "_setActionsPaused(address[],uint8[],bool)",
-      params: [[VBTC], [Actions.LIQUIDATE], true],
+      params: [[VBTC], [Actions.LIQUIDATE, Actions.BORROW], true],
     },
     {
       target: COMPTROLLER,
