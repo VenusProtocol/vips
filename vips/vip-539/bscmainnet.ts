@@ -26,24 +26,17 @@ export const vip539 = async () => {
       {
         target: vBTCB,
         signature: "_setInterestRateModel(address)",
-        params: [
-          IRM,
-        ],
+        params: [IRM],
       },
       {
         target: vBTCB,
         signature: "_setReserveFactor(uint256)",
-        params: [
-          RESERVE_FACTOR,
-        ],
+        params: [RESERVE_FACTOR],
       },
       {
         target: bscmainnet.UNITROLLER,
         signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [
-          [vxSolvBTC],
-          [SUPPLY_CAP],
-        ],
+        params: [[vxSolvBTC], [SUPPLY_CAP]],
       },
     ],
     meta,

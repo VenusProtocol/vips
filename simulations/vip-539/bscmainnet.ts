@@ -4,14 +4,14 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
-
-import {vip539, vxSolvBTC, SUPPLY_CAP, vBTCB, RESERVE_FACTOR, IRM } from "../../vips/vip-539/bscmainnet";
-import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
-import VTOKEN_ABI from "./abi/vToken.json";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import { IRM, RESERVE_FACTOR, SUPPLY_CAP, vBTCB, vip539, vxSolvBTC } from "../../vips/vip-539/bscmainnet";
+import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
+import VTOKEN_ABI from "./abi/vToken.json";
+
 const { bscmainnet } = NETWORK_ADDRESSES;
-const OLD_IRM = "0xa84189107aF59BF132F3e7dd45DD201C0bb25bF4"
+const OLD_IRM = "0xa84189107aF59BF132F3e7dd45DD201C0bb25bF4";
 
 forking(59745077, async () => {
   const provider = ethers.provider;
@@ -60,10 +60,10 @@ forking(59745077, async () => {
     });
 
     checkInterestRate(IRM, "vBTCB", {
-      base: "0.25",
-      multiplier: "0.09",
+      base: "0.025",
+      multiplier: "0.0367",
       jump: "2",
-      kink: "0.03",
+      kink: "0.75",
     });
   });
 });
