@@ -70,7 +70,7 @@ const vip001 = () => {
       signature: "_setActionsPaused(address[],uint8[],bool)",
       params: [
         Object.values(allVTokens),
-        [Action.REDEEM, Action.BORROW, Action.TRANSFER, Action.ENTER_MARKET],
+        [Action.REDEEM, Action.BORROW, Action.TRANSFER, Action.ENTER_MARKET, Action.EXIT_MARKET],
         true
       ],
     },
