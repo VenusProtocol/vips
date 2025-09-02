@@ -4,7 +4,7 @@ import { makeProposal } from "src/utils";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const { UNITROLLER } = bscmainnet;
 
-const allVTokens = {
+export const allVTokens = {
   vUSDC: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
   vUSDT: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
   vBUSD: "0x95c78222B3D6e262426483D42CfA53685A67Ab9D",
@@ -46,7 +46,7 @@ const allVTokens = {
   vBNB: "0xA07c5b74C9B40447a954e1466938b865b6BBea36"
 };
 
-enum Action {
+export enum Action {
   MINT = 0,
   REDEEM = 1,
   BORROW = 2,
