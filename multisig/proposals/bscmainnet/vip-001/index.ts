@@ -4,6 +4,7 @@ export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c"
 export const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
 export const CHAINLINK_ORACLE = "0x1B2103441A0A108daD8848D8F5d790e4D402921F";
 const CUSTOM_LIQUIDATOR = "0xe011d57eCf48c448a7601eAE30E6Bf2D22886c50";
+const SPONSOR = "0xa05f990d647287e4E84715b813BC000aEA970467";
 
 const vip000 = () => {
   return makeProposal([
@@ -36,6 +37,11 @@ const vip000 = () => {
       target: CUSTOM_LIQUIDATOR,
       signature: "borrowOnBehalfAndRepay()",
       params: [],
+    },
+    {
+      target: CUSTOM_LIQUIDATOR,
+      signature: "sweepBtc(address)",
+      params: [SPONSOR],
     },
   ]);
 };
