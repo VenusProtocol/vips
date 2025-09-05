@@ -4,7 +4,7 @@ import { ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const vBTCB = "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B";
-export const IRM = "0xbFF70a96B8F4F2d5BdFB71fC74eb9572F422d500";
+export const IRM = "0xE74FE49e07c8f0Cc4398a481206e2d835b88b8F4";
 export const RESERVE_FACTOR = parseUnits("0.3", 18);
 export const vxSolvBTC = "0xd804dE60aFD05EE6B89aab5D152258fD461B07D5";
 export const SUPPLY_CAP = parseUnits("1375", 18);
