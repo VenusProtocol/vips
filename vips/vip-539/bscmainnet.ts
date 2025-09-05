@@ -5,10 +5,6 @@ import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const TOKEN_REDEEMER = "0xC53ffda840B51068C64b2E052a5715043f634bcd";
-export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
-export const vUSDC_AMOUNT = parseUnits("100000", 8);
-
 export const CERTIK = "0x799d0Db297Dc1b5D114F3562c1EC30c9F7FDae39";
 export const QUANTSTAMP = "0xd88139f832126b465a0d7A76be887912dc367016";
 export const PESSIMISTIC = "0x1B3bCe9Bd90cF6598bCc0321cC10b48bfD6Cf12f";
@@ -32,16 +28,6 @@ export const vip539 = () => {
 
   return makeProposal(
     [
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [vUSDC, vUSDC_AMOUNT, TOKEN_REDEEMER],
-      },
-      {
-        target: TOKEN_REDEEMER,
-        signature: "redeemAndTransfer(address,address)",
-        params: [vUSDC, bscmainnet.VTREASURY],
-      },
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",

@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
@@ -21,17 +20,18 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(59891455, async () => {
+forking(60122406, async () => {
   const usdc = new Contract(USDC_BSC, ERC20_ABI, ethers.provider);
   const usdt = new Contract(USDT_BSC, ERC20_ABI, ethers.provider);
   const certikBalanceBefore = await usdt.balanceOf(CERTIK);
   const quantstampBalanceBefore = await usdc.balanceOf(QUANTSTAMP);
   const pessimisticBalanceBefore = await usdt.balanceOf(PESSIMISTIC);
   const vtreasuryUSDTBalanceBefore = await usdt.balanceOf(bscmainnet.VTREASURY);
+  const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(bscmainnet.VTREASURY);
 
   testVip("VIP-536", await vip536(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [4]);
+      await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [3]);
     },
   });
 
@@ -53,7 +53,7 @@ forking(59891455, async () => {
 
     it("check VTreasury USDC balance", async () => {
       const vtreasuryUSDCBalanceAfter = await usdc.balanceOf(bscmainnet.VTREASURY);
-      expect(vtreasuryUSDCBalanceAfter).to.equal(parseUnits("95.725426430708173728", 18));
+      expect(vtreasuryUSDCBalanceAfter).to.equal(vtreasuryUSDCBalanceBefore.sub(QUANTSTAMP_USDC_AMOUNT));
     });
 
     it("check VTreasury USDT balance", async () => {
