@@ -3,13 +3,10 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import {
-  expectEvents,
-  setMaxStalePeriodInBinanceOracle,
-  setMaxStalePeriodInChainlinkOracle,
-} from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
+import { vip550 } from "../../vips/vip-550/bsctestnet";
 import {
   ACM,
   CORE_MARKETS,
@@ -18,9 +15,7 @@ import {
   UNITROLLER,
   vip555,
 } from "../../vips/vip-555/bsctestnet";
-import {vip550} from "../../vips/vip-550/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
@@ -39,22 +34,17 @@ const OLD_DIAMOND = "0xC1eCF5Ee6B2F43194359c02FB460B31e4494895d";
 
 const NEW_COMPT_METHODS = [
   "setWhiteListFlashLoanAccount(address,bool)",
-  "setDelegateAuthorizationFlashloan(address,address,bool)"
+  "setDelegateAuthorizationFlashloan(address,address,bool)",
 ];
 
-const NEW_VBEP20_DELEGATE_METHODS = [
-  "_toggleFlashLoan()",
-  "_setFlashLoanFeeMantissa(uint256,uint256)"
-];
+const NEW_VBEP20_DELEGATE_METHODS = ["_toggleFlashLoan()", "_setFlashLoanFeeMantissa(uint256,uint256)"];
 
 forking(64317975, async () => {
   let unitroller: Contract;
-  let comptroller: Contract;
   let accessControlManager: Contract;
 
   before(async () => {
     unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
     accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     console.log(`Setting max stale period...`);
@@ -92,9 +82,8 @@ forking(64317975, async () => {
   testVip("VIP-555", await vip555(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
-      const totalNewMethods = NEW_COMPT_METHODS.length + NEW_VBEP20_DELEGATE_METHODS.length;
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
-      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]); 
+      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [12]);
     },
@@ -126,7 +115,11 @@ forking(64317975, async () => {
 
       for (const method of NEW_VBEP20_DELEGATE_METHODS) {
         expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, ethers.constants.AddressZero, method),
+          await accessControlManager.hasPermission(
+            NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+            ethers.constants.AddressZero,
+            method,
+          ),
         ).to.equal(true);
       }
     });
