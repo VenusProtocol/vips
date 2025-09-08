@@ -26,9 +26,13 @@ const cutParams = params as unknown as CutParam[];
 
 const NEW_SETTER_FACET = "0x50f491cc0e943966cCf03c77931e55a2A0F29Bc0";
 const NEW_POLICY_FACET = "0x1b9E17a9E6f0239DeD067bFCA916c5628972083B";
+const NEW_REWARD_FACET = "0x86e39eEda6806C9B288e8Ac1cc7155B5B988f112";
+const NEW_MARKET_FACET = "0xE467374075adDd7738F7d1A991e87686FF4F43Fb";
 
 const OLD_SETTER_FACET = "0xe41Ab9b0ea3edD4cE3108650056641F1E361246c";
 const OLD_POLICY_FACET = "0x284d000665296515280a4fB066a887EFF6A3bD9E";
+const OLD_REWARD_FACET = "0x0CB4FdDA118Da048B9AAaC15f34662C6AB34F5dB";
+const OLD_MARKET_FACET = "0xfdFd4BEdc16339fE2dfa19Bab8bC9B8DA4149F75";
 
 const OLD_DIAMOND = "0xC1eCF5Ee6B2F43194359c02FB460B31e4494895d";
 
@@ -39,7 +43,7 @@ const NEW_COMPT_METHODS = [
 
 const NEW_VBEP20_DELEGATE_METHODS = ["_toggleFlashLoan()", "_setFlashLoanFeeMantissa(uint256,uint256)"];
 
-forking(64317975, async () => {
+forking(64643246, async () => {
   let unitroller: Contract;
   let accessControlManager: Contract;
 
@@ -104,6 +108,18 @@ forking(64317975, async () => {
       const functionSelectors = [...cutParams[2][2], ...cutParams[3][2]];
       expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
+    });
+
+    it("reward facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = cutParams[4][2];
+      expect(await unitroller.facetFunctionSelectors(NEW_REWARD_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_REWARD_FACET)).to.deep.equal([]);
+    });
+
+    it("market facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = cutParams[5][2]
+      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
     });
 
     it("Check new permission", async () => {
