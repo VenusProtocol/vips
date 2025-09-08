@@ -201,6 +201,12 @@ If approved, this VIP will execute the following actions:
         value: BRIDGE_FEES_ETH.toString(),
         dstChainId: LzChainId.ethereum,
       },
+      {
+        target: ethereum.XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_ETH, 0],
+        dstChainId: LzChainId.ethereum,
+      },
 
       // Send XVS from ARB to BSC Treasury
       ...REWARD_DISTRIBUTORS_ARB.map(distributor => ({
@@ -228,6 +234,12 @@ If approved, this VIP will execute the following actions:
         dstChainId: LzChainId.arbitrumone,
         value: BRIDGE_FEES_ARB.toString(),
       },
+      {
+        target: arbitrumone.XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_ARB, 0],
+        dstChainId: LzChainId.arbitrumone,
+      },
 
       // Send XVS from ZKSync to BSC Treasury
       ...REWARD_DISTRIBUTORS_ZKSYNC.map(distributor => ({
@@ -254,6 +266,12 @@ If approved, this VIP will execute the following actions:
         ],
         dstChainId: LzChainId.zksyncmainnet,
         value: BRIDGE_FEES_ZKSYNC.toString(),
+      },
+      {
+        target: zksyncmainnet.XVS,
+        signature: "approve(address,uint256)",
+        params: [XVS_BRIDGE_ZKSYNC, 0],
+        dstChainId: LzChainId.zksyncmainnet,
       },
     ],
     meta,
