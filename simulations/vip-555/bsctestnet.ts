@@ -117,7 +117,7 @@ forking(64643246, async () => {
     });
 
     it("market facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = cutParams[5][2]
+      const functionSelectors = cutParams[5][2];
       expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
     });
