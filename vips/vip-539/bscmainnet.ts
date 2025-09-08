@@ -21,7 +21,7 @@ export const REWARD_DISTRIBUTORS_ETH = [
   },
   {
     address: "0x1e25cf968f12850003db17e0dba32108509c4359",
-    excess: parseUnits("8032.6739", 18),
+    excess: parseUnits("7371.5776", 18),
   },
   {
     address: "0x8473b767f68250f5309bae939337136a899e43f9",
@@ -29,7 +29,7 @@ export const REWARD_DISTRIBUTORS_ETH = [
   },
   {
     address: "0x886767b62c7acd601672607373048ffd96cf27b2",
-    excess: parseUnits("9641.8138", 18),
+    excess: parseUnits("8567.5324", 18),
   },
   {
     address: "0x134bfdea7e68733921bc6a87159fb0d68abc6cf8",
