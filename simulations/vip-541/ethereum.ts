@@ -4,13 +4,13 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip539, { REWARD_DISTRIBUTORS_ETH } from "../../vips/vip-539/bscmainnet";
+import vip541, { REWARD_DISTRIBUTORS_ETH } from "../../vips/vip-541/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import REWARD_DISTRIBUTOR_ABI from "./abi/rewardDistributor.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-forking(23298307, async () => {
+forking(23327497, async () => {
   const xvs = new ethers.Contract(ethereum.XVS, XVS_ABI, ethers.provider);
   const previousBalanceRewardDistirbutors: any = {};
 
@@ -20,7 +20,7 @@ forking(23298307, async () => {
     }
   });
 
-  testForkedNetworkVipCommands("VIP 539", await vip539(), {
+  testForkedNetworkVipCommands("VIP 541", await vip541(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [REWARD_DISTRIBUTOR_ABI], ["RewardTokenGranted"], [6]);
     },

@@ -172,7 +172,7 @@ const config: HardhatUserConfig = {
     },
     zksynctestnode: {
       url: process.env.ZKSYNC_ERA_LOCAL_TEST_NODE || "http://localhost:8011",
-      chainId: 324, // change it to 324 for zksyncmainnet
+      chainId: 300, // change it to 324 for zksyncmainnet
       accounts: DEPLOYER_PRIVATE_KEY ? [`0x${DEPLOYER_PRIVATE_KEY}`] : [],
       blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK.zksyncsepolia,
       timeout: 2000000000,

@@ -21,10 +21,10 @@ export const EXCESS_XVS_ETH = REWARD_DISTRIBUTORS_ETH.reduce(
   ethers.BigNumber.from(0),
 );
 
-export const vip539 = async () => {
+export const vip541 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-539 Recover Excess XVS from Rewards Distributors",
+    title: "VIP-541 Recover Excess XVS from Rewards Distributors",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -65,4 +65,4 @@ export const vip539 = async () => {
   );
 };
 
-export default vip539;
+export default vip541;

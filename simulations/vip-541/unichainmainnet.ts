@@ -6,16 +6,16 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip539, {
+import vip541, {
   REWARD_DISTRIBUTOR_UNICHAIN,
   XVS_BRIDGE_UNICHAIN,
   XVS_SHORTAGE_UNICHAIN,
-} from "../../vips/vip-539/bscmainnet";
+} from "../../vips/vip-541/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 
 const { unichainmainnet } = NETWORK_ADDRESSES;
 
-forking(23727161, async () => {
+forking(26697459, async () => {
   const xvs = new ethers.Contract(unichainmainnet.XVS, XVS_ABI, ethers.provider);
   let previousBalanceRewardDistributor: BigNumber;
   let previousBalanceTreasury: BigNumber;
@@ -32,7 +32,7 @@ forking(23727161, async () => {
     previousBalanceRewardDistributor = await xvs.balanceOf(REWARD_DISTRIBUTOR_UNICHAIN);
   });
 
-  testForkedNetworkVipCommands("VIP 539", await vip539());
+  testForkedNetworkVipCommands("VIP 541", await vip541());
 
   describe("Post-VIP behaviour", async () => {
     it("check xvs balance", async () => {
