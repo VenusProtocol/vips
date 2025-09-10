@@ -37,7 +37,7 @@ if (FORKED_NETWORK === "bsctestnet") {
   COMPTROLLER = testnet.addresses.Unitroller;
   ETH_FEED = NETWORK_ADDRESSES.bsctestnet.ETH_CHAINLINK_FEED;
   USDT_FEED = NETWORK_ADDRESSES.bsctestnet.USDT_CHAINLINK_FEED;
-  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_TEST_USER_ACCOUNT;
+  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_ETH_ACCOUNT;
   CHAINLINK_ORACLE = NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE;
 
   LENS = NETWORK_ADDRESSES[FORKED_NETWORK].COMPTROLLER_LENS;
@@ -86,11 +86,16 @@ export const checkCorePoolComptroller = () => {
 
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
       const usdtDecimals = await usdt.decimals();
+      await comptroller
+        .connect(timelockSigner)
+        ._setMarketBorrowCaps([vusdt.address], [parseUnits("10000000000", usdtDecimals)]);
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(usdtBalance);
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
-      await expect(comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
+      await expect(
+        comptroller["claimVenus(address[],address[],bool,bool,bool)"]([ACCOUNT], [vusdt.address], true, true, true),
+      ).to.be.not.reverted;
       expect(await xvs.balanceOf(ACCOUNT)).to.be.greaterThanOrEqual(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);

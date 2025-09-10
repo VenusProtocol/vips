@@ -18,7 +18,7 @@ export const VAI_CONTROLLER = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
 export const VAI_CONTROLLER_IMPL = "0x5864e8BE0d4AD825feD65115a4f109f850A65aF7";
 export const VTOKEN_DELEGATE = "0x585C508aF088123d990182a19e655ebB0e540CA1";
 
-const vTokens = {
+export const vTokens = {
   vAAVE: "0x714db6c38A17883964B68a07d56cE331501d9eb6",
   vADA: "0x37C28DE42bA3d22217995D146FC684B2326Ede64",
   vasBNB: "0x73F506Aefd5e169D48Ea21A373B9B0a200E37585",
@@ -111,7 +111,7 @@ export const vip541 = () => {
         target: vToken,
         signature: "_setImplementation(address,bool,bytes)",
         params: [VTOKEN_DELEGATE, false, "0x"],
-      }))
+      })),
     ],
     meta,
     ProposalType.REGULAR,
