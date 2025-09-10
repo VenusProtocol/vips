@@ -37,6 +37,7 @@ export const NETWORK_ADDRESSES = {
     CHAINLINK_ORACLE: oracleBscmainnetContracts.addresses.ChainlinkOracle,
     COMPTROLLER_LENS: "0x9D228f57227839a9c514077c3909c9992F7900Af",
     GENERIC_TEST_USER_ACCOUNT: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    GENERIC_ETH_ACCOUNT: "0xF77055DBFAfdD56578Ace54E62e749d12802ce36",
     XVS_VAULT_PROXY: bscmainnetDeployedContracts.addresses.XVSVaultProxy,
     XVS: bscmainnetDeployedContracts.addresses.XVS,
     VAI_UNITROLLER: bscmainnetDeployedContracts.addresses.VaiUnitroller,

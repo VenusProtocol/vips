@@ -1,4 +1,4 @@
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import mainnetGovernance from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
 import testnetGovernance from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
 import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
@@ -24,7 +24,7 @@ let COMPTROLLER = mainnet.addresses.Unitroller;
 let LENS = NETWORK_ADDRESSES.bscmainnet.COMPTROLLER_LENS;
 let ETH_FEED = NETWORK_ADDRESSES.bscmainnet.ETH_CHAINLINK_FEED;
 let USDT_FEED = NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED;
-let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_TEST_USER_ACCOUNT;
+let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_ETH_ACCOUNT;
 let CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
 if (FORKED_NETWORK === "bsctestnet") {
@@ -56,6 +56,7 @@ export const checkCorePoolComptroller = () => {
     before(async () => {
       await impersonateAccount(ACCOUNT);
       await impersonateAccount(NORMAL_TIMELOCK);
+      await setBalance(ACCOUNT, parseUnits("1", 18));
       const signer = await ethers.getSigner(ACCOUNT);
       timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 

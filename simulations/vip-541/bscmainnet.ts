@@ -11,13 +11,13 @@ import vip541, {
   DIAMOND,
   LIQUIDATOR,
   LIQUIDATOR_IMPL,
+  LIQUIDATOR_PROXY_ADMIN,
   VAI_CONTROLLER,
   VAI_CONTROLLER_IMPL,
   VTOKEN_DELEGATE,
   vBNB_ADMIN,
   vBNB_ADMIN_IMPL,
   vTokens,
-  LIQUIDATOR_PROXY_ADMIN
 } from "../../vips/vip-541/bscmainnet";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import TRANSPARENT_PROXY_ABI from "./abi/TransparentUpgradeableProxy.json";
