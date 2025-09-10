@@ -12,7 +12,7 @@ import DIAMOND_ABI from "./abi/Diamond.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(64768829, async () => {
+forking(64855555, async () => {
   describe("Pre-VIP behavior", async () => {
     describe("generic tests", async () => {
       checkCorePoolComptroller();
