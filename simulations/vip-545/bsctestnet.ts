@@ -133,9 +133,9 @@ forking(64898582, async () => {
     });
 
     it("markets should have balance of underlying", async () => {
-      const usdfBalance = await wbnb.balanceOf(vWBNB.address);
+      const wbnbBalance = await wbnb.balanceOf(vWBNB.address);
 
-      expect(usdfBalance).to.equal(WBNBMarketSpec.initialSupply.amount);
+      expect(wbnbBalance).to.equal(WBNBMarketSpec.initialSupply.amount);
     });
 
     it("should burn vTokens (on testnet transfer to VTreasury) and transfer vTokens to receiver", async () => {

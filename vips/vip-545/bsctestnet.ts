@@ -3,7 +3,6 @@ import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NORMAL_TIMELOCK } from "src/vip-framework";
 
 const bsctestnet = NETWORK_ADDRESSES.bsctestnet;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
@@ -119,7 +118,11 @@ export const vip545 = () => {
       {
         target: bsctestnet.VTREASURY,
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [WBNBMarketSpec.vToken.underlying.address, WBNBMarketSpec.initialSupply.amount, NORMAL_TIMELOCK],
+        params: [
+          WBNBMarketSpec.vToken.underlying.address,
+          WBNBMarketSpec.initialSupply.amount,
+          bsctestnet.NORMAL_TIMELOCK,
+        ],
       },
       {
         target: WBNBMarketSpec.vToken.underlying.address,
