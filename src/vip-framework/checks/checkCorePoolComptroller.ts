@@ -1,4 +1,4 @@
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
+import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import mainnetGovernance from "@venusprotocol/governance-contracts/deployments/bscmainnet_addresses.json";
 import testnetGovernance from "@venusprotocol/governance-contracts/deployments/bsctestnet_addresses.json";
 import mainnet from "@venusprotocol/venus-protocol/deployments/bscmainnet_addresses.json";
@@ -21,10 +21,10 @@ let ETH = mainnet.addresses.ETH;
 let NORMAL_TIMELOCK = mainnetGovernance.addresses.NormalTimelock;
 let XVS = mainnet.addresses.XVS;
 let COMPTROLLER = mainnet.addresses.Unitroller;
-let LENS = mainnet.addresses.ComptrollerLens;
+let LENS = NETWORK_ADDRESSES.bscmainnet.COMPTROLLER_LENS;
 let ETH_FEED = NETWORK_ADDRESSES.bscmainnet.ETH_CHAINLINK_FEED;
 let USDT_FEED = NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED;
-let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_TEST_USER_ACCOUNT;
+let ACCOUNT = NETWORK_ADDRESSES.bscmainnet.GENERIC_ETH_ACCOUNT;
 let CHAINLINK_ORACLE = NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE;
 
 if (FORKED_NETWORK === "bsctestnet") {
@@ -37,7 +37,7 @@ if (FORKED_NETWORK === "bsctestnet") {
   COMPTROLLER = testnet.addresses.Unitroller;
   ETH_FEED = NETWORK_ADDRESSES.bsctestnet.ETH_CHAINLINK_FEED;
   USDT_FEED = NETWORK_ADDRESSES.bsctestnet.USDT_CHAINLINK_FEED;
-  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_TEST_USER_ACCOUNT;
+  ACCOUNT = NETWORK_ADDRESSES.bsctestnet.GENERIC_ETH_ACCOUNT;
   CHAINLINK_ORACLE = NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE;
 
   LENS = NETWORK_ADDRESSES[FORKED_NETWORK].COMPTROLLER_LENS;
@@ -56,6 +56,7 @@ export const checkCorePoolComptroller = () => {
     before(async () => {
       await impersonateAccount(ACCOUNT);
       await impersonateAccount(NORMAL_TIMELOCK);
+      await setBalance(ACCOUNT, parseUnits("1", 18));
       const signer = await ethers.getSigner(ACCOUNT);
       timelockSigner = await ethers.getSigner(NORMAL_TIMELOCK);
 
@@ -86,11 +87,16 @@ export const checkCorePoolComptroller = () => {
 
       let usdtBalance = await usdt.balanceOf(ACCOUNT);
       const usdtDecimals = await usdt.decimals();
+      await comptroller
+        .connect(timelockSigner)
+        ._setMarketBorrowCaps([vusdt.address], [parseUnits("10000000000", usdtDecimals)]);
       await vusdt.borrow(parseUnits("100", usdtDecimals));
       expect(await usdt.balanceOf(ACCOUNT)).to.gt(usdtBalance);
 
       const originalXVSBalance = await xvs.balanceOf(ACCOUNT);
-      await expect(comptroller["claimVenus(address)"](ACCOUNT)).to.be.not.reverted;
+      await expect(
+        comptroller["claimVenus(address[],address[],bool,bool,bool)"]([ACCOUNT], [vusdt.address], true, true, true),
+      ).to.be.not.reverted;
       expect(await xvs.balanceOf(ACCOUNT)).to.be.greaterThanOrEqual(originalXVSBalance);
 
       usdtBalance = await usdt.balanceOf(ACCOUNT);
