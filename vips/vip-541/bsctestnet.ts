@@ -45,6 +45,7 @@ export const vTokens = {
   vUNI: "0x171B468b52d7027F12cEF90cd065d6776a25E24e",
   vUSDC: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
   vUSDe: "0x86f8DfB7CA84455174EE9C3edd94867b51Da46BD",
+  vUSDF: "0x140d5Da2cE9fb9A8725cabdDB2Fe8ea831342C78",
   vUSDT: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
   vUSD1: "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf",
   vWBETH: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
@@ -56,8 +57,8 @@ export const vTokens = {
 export const vip541 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-541",
-    description: ``,
+    title: "VIP-541 Upgrade solidity on BNB Core pool (0.5 -> 0.8)",
+    description: `Upgrade solidity on BNB Core pool (0.5 -> 0.8)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

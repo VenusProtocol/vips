@@ -74,7 +74,7 @@ forking(64855555, async () => {
   testVip("VIP-541", await vip541(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [36]);
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewImplementation"], [35]);
     },
   });
 
