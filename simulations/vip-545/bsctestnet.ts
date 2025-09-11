@@ -24,7 +24,7 @@ import WBNB_ABI from "./abi/WBNB.json";
 const { bsctestnet } = NETWORK_ADDRESSES;
 const CHAINLINK_WBNB_FEED = "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526";
 
-forking(64970805, async () => {
+forking(64997181, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let wbnb: Contract;
@@ -100,7 +100,7 @@ forking(64970805, async () => {
     checkRiskParameters(WBNBMarketSpec.vToken.address, WBNBMarketSpec.vToken, WBNBMarketSpec.riskParameters);
 
     it("check price WBNB", async () => {
-      const expectedPrice = "894924218500000000000";
+      const expectedPrice = "900848177960000000000";
       expect(await resilientOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(WBNBMarketSpec.vToken.address)).to.equal(expectedPrice);
     });

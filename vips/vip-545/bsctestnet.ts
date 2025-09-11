@@ -7,8 +7,8 @@ import { makeProposal } from "src/utils";
 const bsctestnet = NETWORK_ADDRESSES.bsctestnet;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
-export const vWBNB = "0x4dC902aA17230fE980A0F12e3F73f29fE0d422f9";
-export const RATE_MODEL = "0x0CC5a4415d99e48af3aBA94f4E392601CabE5b70";
+export const vWBNB = "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C";
+export const RATE_MODEL = "0xa84848Bd2E24a829D97c882Fb86AF90F811540F3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
 export const WBNBMarketSpec = {
