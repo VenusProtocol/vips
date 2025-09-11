@@ -9,6 +9,7 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
+  NATIVE_TOKEN_GATEWAY_VWBNB_CORE,
   PROTOCOL_SHARE_RESERVE,
   RATE_MODEL,
   WBNBMarketSpec,
@@ -16,6 +17,7 @@ import {
   vip545,
 } from "../../vips/vip-545/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -24,8 +26,9 @@ import WBNB_ABI from "./abi/WBNB.json";
 const { bsctestnet } = NETWORK_ADDRESSES;
 const CHAINLINK_WBNB_FEED = "0x2514895c72f50D8bd4B4F9b1110F0D6bD2c97526";
 
-forking(64997181, async () => {
+forking(65021084, async () => {
   let comptroller: Contract;
+  let nativeTokenGateway: Contract;
   let resilientOracle: Contract;
   let wbnb: Contract;
   let vWBNB: Contract;
@@ -33,9 +36,11 @@ forking(64997181, async () => {
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(WBNBMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
+    nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY_VWBNB_CORE, NATIVE_TOKEN_GATEWAY_ABI, provider);
     wbnb = new ethers.Contract(WBNBMarketSpec.vToken.underlying.address, WBNB_ABI, provider);
     vWBNB = new ethers.Contract(WBNBMarketSpec.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+
     await setMaxStalePeriodInChainlinkOracle(
       NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
       WBNBMarketSpec.vToken.underlying.address,
@@ -100,7 +105,7 @@ forking(64997181, async () => {
     checkRiskParameters(WBNBMarketSpec.vToken.address, WBNBMarketSpec.vToken, WBNBMarketSpec.riskParameters);
 
     it("check price WBNB", async () => {
-      const expectedPrice = "900848177960000000000";
+      const expectedPrice = "894854783350000000000";
       expect(await resilientOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(WBNBMarketSpec.vToken.address)).to.equal(expectedPrice);
     });
@@ -143,6 +148,10 @@ forking(64997181, async () => {
       const vWBNBTimelockBalance = await vWBNB.balanceOf(bsctestnet.NORMAL_TIMELOCK);
 
       expect(vWBNBTimelockBalance).to.equal(0);
+    });
+
+    it("should transfer the ownership of the NativeTokenGateway", async () => {
+      expect(await nativeTokenGateway.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
   });
 });

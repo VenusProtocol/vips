@@ -10,6 +10,7 @@ export const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 export const vWBNB = "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C";
 export const RATE_MODEL = "0xa84848Bd2E24a829D97c882Fb86AF90F811540F3";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const NATIVE_TOKEN_GATEWAY_VWBNB_CORE = "0xF34AAfc540Adc827A84736553BD29DE87a117558";
 
 export const WBNBMarketSpec = {
   vToken: {
@@ -145,6 +146,12 @@ export const vip545 = () => {
         target: WBNBMarketSpec.vToken.address,
         signature: "transfer(address,uint256)",
         params: [WBNBMarketSpec.initialSupply.vTokenReceiver, vTokensRemaining],
+      },
+      // Native Token Gateway
+      {
+        target: NATIVE_TOKEN_GATEWAY_VWBNB_CORE,
+        signature: "acceptOwnership()",
+        params: [],
       },
     ],
     meta,
