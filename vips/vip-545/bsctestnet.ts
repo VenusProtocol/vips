@@ -7,14 +7,9 @@ import { makeProposal } from "src/utils";
 const bsctestnet = NETWORK_ADDRESSES.bsctestnet;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
-export const vWBNB = "0xD818D2Ea1aD36ba1A9b645ED6EC37a2Df6066109";
+export const vWBNB = "0x4dC902aA17230fE980A0F12e3F73f29fE0d422f9";
+export const RATE_MODEL = "0x0CC5a4415d99e48af3aBA94f4E392601CabE5b70";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
-
-export const Actions = {
-  MINT: 0,
-  BORROW: 2,
-  ENTER_MARKET: 7,
-};
 
 export const WBNBMarketSpec = {
   vToken: {
@@ -34,11 +29,11 @@ export const WBNBMarketSpec = {
   interestRateModel: {
     model: "two-kinks",
     baseRatePerYear: "0",
-    multiplierPerYear: "0.035",
-    kink: "0.8",
+    multiplierPerYear: "0.045",
+    kink: "0.7",
     baseRatePerYear2: "0",
-    multiplierPerYear2: "1.75",
-    kink2: "0.9",
+    multiplierPerYear2: "1.4",
+    kink2: "0.8",
     jumpMultiplierPerYear: "3",
   },
   riskParameters: {
