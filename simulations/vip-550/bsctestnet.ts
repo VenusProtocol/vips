@@ -129,7 +129,6 @@ forking(64979496, async () => {
   testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS_WITHOUT_VBNB.length;
-      const totalNewMethods = NEW_COMPT_METHODS.length;
       await expectEvents(
         txResponse,
         [UNITROLLER_ABI, DIAMOND_ABI, LIQUIDATOR_ABI, ACM_ABI],
