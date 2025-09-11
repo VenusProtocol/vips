@@ -11,17 +11,17 @@ export const LIQUIDATOR = "0x55AEABa76ecf144031Ef64E222166eb28Cb4865F";
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const LIQUIDATOR_PROXY_ADMIN = "0x1469AeB2768931f979a1c957692e32Aa802dd55a";
 
-export const NEW_VAI_CONTROLLER = "0x5361EeCB35Dbbf239F0AB3600e460bFdBa14c592";
-export const NEW_DIAMOND = "0xC1eCF5Ee6B2F43194359c02FB460B31e4494895d";
-export const NEW_COMPTROLLER_LENS = "0x5675112bf79C66d8CEbe48C40f25e9Dd6576c4e6";
-export const NEW_VBEP20_DELEGATE = "0xf292c8F321fF1BC49A3FeADf4D0971E519485e19";
-export const NEW_LIQUIDATOR_IMPL = "0x0F30B2a844339b7bD2Be0D82298e82f44286A0cA";
+export const NEW_VAI_CONTROLLER = "0xECAd2AF0119Cce245817B61d4186d4708703d1a0";
+export const NEW_DIAMOND = "0x1d100DAD71E56776bA3BdA3ec36D776BCE512B84";
+export const NEW_COMPTROLLER_LENS = "0x5715933d62852C15eF97b6B4BB498CF45c40C244";
+export const NEW_VBEP20_DELEGATE = "0xD922a9d900C25beE548586948cCf831e09FB2130";
+export const NEW_LIQUIDATOR_IMPL = "0x28Be3ef68AFa00b1151669F2e6dA2DE8d1bb1Abc";
 
-export const OLD_VAI_CONTROLLER = "0xDFcbfb82a416B5CEbB80FECFbBF4E055299931FF";
-export const OLD_DIAMOND = "0x1D5F9752bA40cF7047db2E24Cb6Aa196E3c334DA";
-export const OLD_COMPTROLLER_LENS = "0x350d56985A269C148648207E4Cea9f87656E762a";
-export const OLD_VBEP20_DELEGATE = "0xad6aa8Bb4829560412A94AA930745f407BF8000B";
-export const OLD_LIQUIDATOR_IMPL = "0x83372155dd4a4306af82795d5a27d40188ed1f3b";
+export const OLD_VAI_CONTROLLER = "0x5864e8BE0d4AD825feD65115a4f109f850A65aF7";
+export const OLD_DIAMOND = "0x649616739bab52E2A98BC74d93c896Ca45944359";
+export const OLD_COMPTROLLER_LENS = "0x3ec96D6a9a14ee57aB83F81BB7386EBE515936D1";
+export const OLD_VBEP20_DELEGATE = "0x585C508aF088123d990182a19e655ebB0e540CA1";
+export const OLD_LIQUIDATOR_IMPL = "0xe442A62E3B1956EC5B42e06aA0E293A0cB300406";
 export const MARKET_CONFIGURATION_AGGREGATOR = "0x091bF95157928D8008C5c1D605b483B5F46F6305";
 
 export const CURRENT_LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
@@ -31,10 +31,11 @@ export const NEW_COMPT_METHODS = [
   "setLiquidationIncentive(address,uint256)",
   "setIsBorrowAllowed(uint96,address,bool)",
   "createPool(string)",
-  "addPoolMarket(uint96,address)",
+  "addPoolMarkets(uint96[],address[])",
   "removePoolMarket(uint96,address)",
   "setCollateralFactor(uint96,address,uint256,uint256)",
   "setLiquidationIncentive(uint96,address,uint256)",
+  "setPoolActive(uint96,bool)",
 ];
 
 export const CORE_MARKETS = [
@@ -248,15 +249,12 @@ export const CORE_MARKETS = [
 ];
 
 export const CORE_MARKETS_WITHOUT_VBNB = CORE_MARKETS.filter(market => market.symbol != "vBNB");
-
 export const MARKETS_CF_LT = CORE_MARKETS.map(market => [
   market.address,
   market.collateralFactor,
   market.collateralFactor,
 ]);
-
 export const MARKETS_LI = CORE_MARKETS.map(market => [market.address, CURRENT_LIQUIDATION_INCENTIVE]);
-
 export const MARKETS_BA = CORE_MARKETS.map(market => [0, market.address, true]);
 
 export const vip550 = () => {
@@ -307,6 +305,20 @@ export const vip550 = () => {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
           params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
+        };
+      }),
+      ...NEW_COMPT_METHODS.map(method => {
+        return {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK],
+        };
+      }),
+      ...NEW_COMPT_METHODS.map(method => {
+        return {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK],
         };
       }),
 

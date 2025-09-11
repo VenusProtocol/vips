@@ -40,6 +40,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
+import OLD_ABI from "./abi/OldComptroller.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
@@ -48,17 +49,17 @@ import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
-const OLD_SETTER_FACET = "0xb619F7ce96c0a6E3F0b44e993f663522F79f294A";
-const OLD_REWARD_FACET = "0x905006DCD5DbAa9B67359bcB341a0C49AfC8d0A6";
-const OLD_MARKET_FACET = "0x377c2E7CE08B4cc7033EDF678EE1224A290075Fd";
-const OLD_POLICY_FACET = "0x671B787AEDB6769972f081C6ee4978146F7D92E6";
+const OLD_SETTER_FACET = "0xeD1fd1D134b10dF8F84BbC3C89881A929B0c6F47";
+const OLD_REWARD_FACET = "0x1C10F03827530f514Ba14065ec3D5f1496f35418";
+const OLD_MARKET_FACET = "0x1c7B1e28A43619123F0bF9DB8aeEc64aA535b9EC";
+const OLD_POLICY_FACET = "0x642EE02aFBE47C69c0980Ea61131cD97884058a7";
 
-const NEW_SETTER_FACET = "0xe41Ab9b0ea3edD4cE3108650056641F1E361246c";
-const NEW_REWARD_FACET = "0x0CB4FdDA118Da048B9AAaC15f34662C6AB34F5dB";
-const NEW_MARKET_FACET = "0xfdFd4BEdc16339fE2dfa19Bab8bC9B8DA4149F75";
-const NEW_POLICY_FACET = "0x284d000665296515280a4fB066a887EFF6A3bD9E";
+const NEW_SETTER_FACET = "0x675d55BE8Ac03400dEE081076E16A00d3Fb2b40B";
+const NEW_REWARD_FACET = "0xcD598bDcfF0433395918512359745f83F5730C49";
+const NEW_MARKET_FACET = "0x679cd0443207C1Fb411d59B1E10E23b3850d1337";
+const NEW_POLICY_FACET = "0xFc6A44E5B5960444a6D25D6F85e3d7D79d26D8Ef";
 
-forking(63848748, async () => {
+forking(64979496, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -98,6 +99,15 @@ forking(63848748, async () => {
   });
 
   describe("Pre-VIP state", async () => {
+    it("check current risk factors", async () => {
+      const oldComptoller = await ethers.getContractAt(OLD_ABI, UNITROLLER);
+      for (const market of CORE_MARKETS) {
+        const data = await oldComptoller.markets(market.address);
+        expect(data[0]).to.equal(true); // isListed
+        expect(data[1]).to.equal(market.collateralFactor);
+      }
+      expect(await oldComptoller.liquidationIncentiveMantissa()).to.equal(CURRENT_LIQUIDATION_INCENTIVE);
+    });
     it("unitroller should have old implementation", async () => {
       expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(OLD_DIAMOND.toLowerCase());
     });
@@ -120,17 +130,25 @@ forking(63848748, async () => {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS_WITHOUT_VBNB.length;
       const totalNewMethods = NEW_COMPT_METHODS.length;
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [4]);
+      await expectEvents(
+        txResponse,
+        [UNITROLLER_ABI, DIAMOND_ABI, LIQUIDATOR_ABI, ACM_ABI],
+        [
+          "NewPendingImplementation",
+          "DiamondCut",
+          "NewLiquidationTreasuryPercent",
+          "PermissionGranted",
+          "PermissionRevoked",
+        ],
+        [4, 1, 1, 27, 5],
+      );
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 2]); // +2 for unitroller and VAI
-      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted", "PermissionRevoked"], [totalNewMethods + 3, 5]);
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI],
         ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
         [totalMarkets - 2, totalMarkets + 1, totalMarkets + 1], // +1 for vBNB, -3 for markets with 0 collateral factor
       );
-      await expectEvents(txResponse, [LIQUIDATOR_ABI], ["NewLiquidationTreasuryPercent"], [1]);
     },
   });
 
@@ -193,11 +211,21 @@ forking(63848748, async () => {
         expect(
           await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
         ).to.equal(true);
+        expect(
+          await accessControlManager.hasPermission(
+            NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
+            UNITROLLER,
+            method,
+          ),
+        ).to.equal(true);
+        expect(
+          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK, UNITROLLER, method),
+        ).to.equal(true);
       }
     });
 
     it("comptroller should have new comptrollerLens", async () => {
-      expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(NEW_COMPTROLLER_LENS.toLowerCase());
+      expect(await comptroller.comptrollerLens()).to.equal(NEW_COMPTROLLER_LENS);
     });
 
     it("markets should have new implemenation", async () => {
@@ -210,11 +238,11 @@ forking(63848748, async () => {
     it("comptroller should have correct markets value", async () => {
       for (const market of CORE_MARKETS) {
         const data = await comptroller.markets(market.address);
-        expect(data[1]).to.be.equal(market.collateralFactor);
-        expect(data[3]).to.be.equal(market.collateralFactor); // same LT
-        expect(data[4]).to.be.equal(CURRENT_LIQUIDATION_INCENTIVE);
-        expect(data[5]).to.be.equal(0); // corePool
-        expect(data[6]).to.be.equal(true); // isBorrowAllowed
+        expect(data[1]).to.equal(market.collateralFactor);
+        expect(data[3]).to.equal(market.collateralFactor); // same LT
+        expect(data[4]).to.equal(CURRENT_LIQUIDATION_INCENTIVE);
+        expect(data[5]).to.equal(0); // corePool
+        expect(data[6]).to.equal(true); // isBorrowAllowed
       }
     });
 
@@ -224,7 +252,7 @@ forking(63848748, async () => {
 
     it("Liquidator should point to new implementation", async () => {
       const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
-      expect(impl.toLowerCase()).to.equal(NEW_LIQUIDATOR_IMPL.toLowerCase());
+      expect(impl).to.equal(NEW_LIQUIDATOR_IMPL);
     });
 
     it("MarketConfigurationAggregator should not have ACM permissions", async () => {

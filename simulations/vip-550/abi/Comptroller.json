@@ -1,11 +1,6 @@
 [
   {
     "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
     "name": "AlreadyInSelectedPool",
     "type": "error"
   },
@@ -21,17 +16,28 @@
   },
   {
     "inputs": [],
-    "name": "CorePoolModificationNotAllowed",
+    "name": "EmptyPoolLabel",
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "EmptyPoolLabel",
+    "inputs": [
+      {
+        "internalType": "uint96",
+        "name": "poolId",
+        "type": "uint96"
+      }
+    ],
+    "name": "InactivePool",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "IncompatibleBorrowedAssets",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidOperationForCorePool",
     "type": "error"
   },
   {
@@ -170,7 +176,13 @@
       {
         "indexed": false,
         "internalType": "bool",
-        "name": "isAllowed",
+        "name": "oldStatus",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "newStatus",
         "type": "bool"
       }
     ],
@@ -200,6 +212,36 @@
       }
     ],
     "name": "DelegateUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IDiamondCut.FacetCutAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IDiamondCut.FacetCut[]",
+        "name": "_diamondCut",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "DiamondCut",
     "type": "event"
   },
   {
@@ -525,6 +567,12 @@
         "internalType": "uint96",
         "name": "poolId",
         "type": "uint96"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -856,6 +904,31 @@
       },
       {
         "indexed": false,
+        "internalType": "bool",
+        "name": "oldStatus",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "newStatus",
+        "type": "bool"
+      }
+    ],
+    "name": "PoolActiveStatusUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint96",
+        "name": "poolId",
+        "type": "uint96"
+      },
+      {
+        "indexed": false,
         "internalType": "string",
         "name": "label",
         "type": "string"
@@ -1002,6 +1075,10 @@
     ],
     "name": "VenusSupplySpeedUpdated",
     "type": "event"
+  },
+  {
+    "stateMutability": "nonpayable",
+    "type": "fallback"
   },
   {
     "inputs": [
@@ -1860,6 +1937,36 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IDiamondCut.FacetCutAction",
+            "name": "action",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "internalType": "struct IDiamondCut.FacetCut[]",
+        "name": "diamondCut_",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "diamondCut",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address[]",
         "name": "vTokens",
         "type": "address[]"
@@ -1906,6 +2013,113 @@
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "functionSelector",
+        "type": "bytes4"
+      }
+    ],
+    "name": "facetAddress",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint96",
+            "name": "functionSelectorPosition",
+            "type": "uint96"
+          }
+        ],
+        "internalType": "struct ComptrollerV13Storage.FacetAddressAndPosition",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "facetAddresses",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "facet",
+        "type": "address"
+      }
+    ],
+    "name": "facetFunctionSelectors",
+    "outputs": [
+      {
+        "internalType": "bytes4[]",
+        "name": "",
+        "type": "bytes4[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "facet",
+        "type": "address"
+      }
+    ],
+    "name": "facetPosition",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "facets",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "facetAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes4[]",
+            "name": "functionSelectors",
+            "type": "bytes4[]"
+          }
+        ],
+        "internalType": "struct Diamond.Facet[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -2791,7 +3005,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "maxLiquidationIncentiveMantissa",
+        "name": "liquidationIncentiveMantissa",
         "type": "uint256"
       },
       {
@@ -2822,6 +3036,11 @@
         "internalType": "string",
         "name": "label",
         "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "isActive",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -3373,6 +3592,24 @@
         "type": "uint256"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint96",
+        "name": "poolId",
+        "type": "uint96"
+      },
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      }
+    ],
+    "name": "setPoolActive",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
