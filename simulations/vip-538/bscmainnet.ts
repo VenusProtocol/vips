@@ -264,5 +264,14 @@ forking(56676950, async () => {
       );
       expect(await marketCapRiskSteward.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
+
+    it("Risk Steward Receiver should be paused", async () => {
+      const riskStewardReceiver = new ethers.Contract(
+        RISK_STEWARD_RECEIVER_BSCMAINNET,
+        VENUS_RISK_STEWARD_RECEIVER_ABI,
+        provider,
+      );
+      expect(await riskStewardReceiver.paused()).to.be.true;
+    });
   });
 });

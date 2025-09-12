@@ -206,6 +206,12 @@ We applied the following security procedures for this upgrade:
         signature: "acceptOwnership()",
         params: [],
       },
+      // Pause Risk Steward Receiver
+      {
+        target: RISK_STEWARD_RECEIVER_BSCMAINNET,
+        signature: "pause()",
+        params: [],
+      },
     ],
     meta,
     ProposalType.REGULAR,
