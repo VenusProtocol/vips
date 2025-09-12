@@ -9,12 +9,14 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
+  NATIVE_TOKEN_GATEWAY_VWBNB_CORE,
   PROTOCOL_SHARE_RESERVE,
   RATE_MODEL,
   WBNBMarketSpec,
   convertAmountToVTokens,
   vip545,
 } from "../../vips/vip-545/bscmainnet";
+import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import COMPTROLLER_ABI from "./abi/OldComptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -24,11 +26,12 @@ import WBNB_ABI from "./abi/WBNB.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const CHAINLINK_WBNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
 
-forking(60896165, async () => {
+forking(60902107, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let wbnb: Contract;
   let vWBNB: Contract;
+  let nativeTokenGateway: Contract;
 
   before(async () => {
     const provider = ethers.provider;
@@ -36,6 +39,8 @@ forking(60896165, async () => {
     wbnb = new ethers.Contract(WBNBMarketSpec.vToken.underlying.address, WBNB_ABI, provider);
     vWBNB = new ethers.Contract(WBNBMarketSpec.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+    nativeTokenGateway = new ethers.Contract(NATIVE_TOKEN_GATEWAY_VWBNB_CORE, NATIVE_TOKEN_GATEWAY_ABI, provider);
+
     await setMaxStalePeriodInChainlinkOracle(
       NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
       WBNBMarketSpec.vToken.underlying.address,
@@ -100,7 +105,7 @@ forking(60896165, async () => {
     checkRiskParameters(WBNBMarketSpec.vToken.address, WBNBMarketSpec.vToken, WBNBMarketSpec.riskParameters);
 
     it("check price WBNB", async () => {
-      const expectedPrice = "906923602290000000000";
+      const expectedPrice = "906618341540000000000";
       expect(await resilientOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(WBNBMarketSpec.vToken.address)).to.equal(expectedPrice);
     });
@@ -151,6 +156,10 @@ forking(60896165, async () => {
       const vWBNBTimelockBalance = await vWBNB.balanceOf(bscmainnet.NORMAL_TIMELOCK);
 
       expect(vWBNBTimelockBalance).to.equal(0);
+    });
+
+    it("should transfer the ownership of the NativeTokenGateway", async () => {
+      expect(await nativeTokenGateway.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
   });
 });
