@@ -14,8 +14,8 @@ import {
   RATE_MODEL,
   WBNBMarketSpec,
   convertAmountToVTokens,
-  vip545,
-} from "../../vips/vip-545/bsctestnet";
+  vip543,
+} from "../../vips/vip-543/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -57,7 +57,7 @@ forking(65021084, async () => {
     });
   });
 
-  testVip("VIP-545", await vip545(), {
+  testVip("VIP-543", await vip543(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

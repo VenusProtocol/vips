@@ -64,10 +64,10 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vTokensMinted = convertAmountToVTokens(WBNBMarketSpec.initialSupply.amount, WBNBMarketSpec.vToken.exchangeRate);
 const vTokensRemaining = vTokensMinted.sub(WBNBMarketSpec.initialSupply.vTokensToBurn);
 
-export const vip545 = () => {
+export const vip543 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-545 [BNB Chain] New WBNB market in the Core pool",
+    title: "VIP-543 [BNB Chain] New WBNB market in the Core pool",
     description: `#### Summary
 
 If passed, this VIP will add a [WBNB](https://bscscan.com/token/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c) market to the [Core pool on BNB Chain](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384). It will also update the oracle configuration for the WBNB token, using the same oracles as the BNB asset.
@@ -250,4 +250,4 @@ BNB Chain testnet
   );
 };
 
-export default vip545;
+export default vip543;

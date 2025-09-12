@@ -58,11 +58,11 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vTokensMinted = convertAmountToVTokens(WBNBMarketSpec.initialSupply.amount, WBNBMarketSpec.vToken.exchangeRate);
 const vTokensRemaining = vTokensMinted.sub(WBNBMarketSpec.initialSupply.vTokensToBurn);
 
-export const vip545 = () => {
+export const vip543 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-545 [BNB Chain] Add WBNB markets to the Core pool",
-    description: "VIP-545 [BNB Chain] Add WBNB markets to the Core pool",
+    title: "VIP-543 [BNB Chain] Add WBNB markets to the Core pool",
+    description: "VIP-543 [BNB Chain] Add WBNB markets to the Core pool",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -159,4 +159,4 @@ export const vip545 = () => {
   );
 };
 
-export default vip545;
+export default vip543;

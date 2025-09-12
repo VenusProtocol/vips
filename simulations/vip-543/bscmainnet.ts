@@ -15,8 +15,8 @@ import {
   RATE_MODEL,
   WBNBMarketSpec,
   convertAmountToVTokens,
-  vip545,
-} from "../../vips/vip-545/bscmainnet";
+  vip543,
+} from "../../vips/vip-543/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
@@ -61,14 +61,9 @@ forking(60902107, async () => {
     });
   });
 
-  testVip("VIP-545", await vip545(), {
+  testVip("VIP-543", await vip543(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [RESILIENT_ORACLE_ABI],
-        ["TokenConfigAdded"],
-        [1]
-      );
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI, VTOKEN_ABI, VTREASURY_ABI],
