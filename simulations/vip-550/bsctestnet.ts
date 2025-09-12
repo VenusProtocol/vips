@@ -59,7 +59,7 @@ const NEW_REWARD_FACET = "0xcD598bDcfF0433395918512359745f83F5730C49";
 const NEW_MARKET_FACET = "0x679cd0443207C1Fb411d59B1E10E23b3850d1337";
 const NEW_POLICY_FACET = "0xFc6A44E5B5960444a6D25D6F85e3d7D79d26D8Ef";
 
-forking(64979496, async () => {
+forking(65085599, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -139,7 +139,7 @@ forking(64979496, async () => {
           "PermissionGranted",
           "PermissionRevoked",
         ],
-        [4, 1, 1, 27, 5],
+        [4, 1, 1, 30, 5],
       );
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 2]); // +2 for unitroller and VAI
       await expectEvents(

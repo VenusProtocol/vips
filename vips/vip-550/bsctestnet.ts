@@ -22,12 +22,13 @@ export const OLD_DIAMOND = "0x649616739bab52E2A98BC74d93c896Ca45944359";
 export const OLD_COMPTROLLER_LENS = "0x3ec96D6a9a14ee57aB83F81BB7386EBE515936D1";
 export const OLD_VBEP20_DELEGATE = "0x585C508aF088123d990182a19e655ebB0e540CA1";
 export const OLD_LIQUIDATOR_IMPL = "0xe442A62E3B1956EC5B42e06aA0E293A0cB300406";
-export const MARKET_CONFIGURATION_AGGREGATOR = "0x091bF95157928D8008C5c1D605b483B5F46F6305";
+export const MARKET_CONFIGURATION_AGGREGATOR = "0x7bbC692907f23E4b7170de0e1483323ea322BDbF";
 
 export const CURRENT_LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 export const LIQUIDATOR_TREASURTY_PERCENT = parseUnits("0.5", 18);
 
 export const NEW_COMPT_METHODS = [
+  "setCollateralFactor(address,uint256,uint256)",
   "setLiquidationIncentive(address,uint256)",
   "setIsBorrowAllowed(uint96,address,bool)",
   "createPool(string)",
@@ -245,6 +246,12 @@ export const CORE_MARKETS = [
     address: "0x140d5Da2cE9fb9A8725cabdDB2Fe8ea831342C78",
     asset: "0xC7a2b79432Fd3e3d5bd2d96A456c734AB93A0484",
     collateralFactor: 600000000000000000n,
+  },
+  {
+    symbol: "vWBNB",
+    address: "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C",
+    asset: "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd",
+    collateralFactor: 800000000000000000n,
   },
 ];
 
