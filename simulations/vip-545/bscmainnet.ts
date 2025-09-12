@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -16,6 +17,8 @@ import {
   convertAmountToVTokens,
   vip545,
 } from "../../vips/vip-545/bscmainnet";
+import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
+import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import NATIVE_TOKEN_GATEWAY_ABI from "./abi/NativeTokenGateway.json";
 import COMPTROLLER_ABI from "./abi/OldComptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -48,6 +51,7 @@ forking(60902107, async () => {
       NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
       315360000,
     );
+    await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "BNB");
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -59,6 +63,12 @@ forking(60902107, async () => {
 
   testVip("VIP-545", await vip545(), {
     callbackAfterExecution: async txResponse => {
+      await expectEvents(
+        txResponse,
+        [RESILIENT_ORACLE_ABI],
+        ["TokenConfigAdded"],
+        [1]
+      );
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI, VTOKEN_ABI, VTREASURY_ABI],
@@ -79,6 +89,22 @@ forking(60902107, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    it("has expected prices", async () => {
+      const redStoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+      const chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+      const binanceOracle = new ethers.Contract(bscmainnet.BINANCE_ORACLE, BINANCE_ORACLE_ABI, ethers.provider);
+      expect(await chainlinkOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(
+        parseUnits("906.61834154", 18),
+      );
+      expect(await binanceOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(
+        parseUnits("906.49926626", 18),
+      );
+      await expect(redStoneOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.be.reverted; // built-in staleness checks
+      expect(await resilientOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(
+        parseUnits("906.49926626", 18),
+      );
+    });
+
     it("check new IRM", async () => {
       expect(await vWBNB.interestRateModel()).to.equal(RATE_MODEL);
     });
@@ -105,7 +131,7 @@ forking(60902107, async () => {
     checkRiskParameters(WBNBMarketSpec.vToken.address, WBNBMarketSpec.vToken, WBNBMarketSpec.riskParameters);
 
     it("check price WBNB", async () => {
-      const expectedPrice = "906618341540000000000";
+      const expectedPrice = parseUnits("906.49926626", 18);
       expect(await resilientOracle.getPrice(WBNBMarketSpec.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(WBNBMarketSpec.vToken.address)).to.equal(expectedPrice);
     });

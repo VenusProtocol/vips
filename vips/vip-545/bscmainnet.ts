@@ -12,6 +12,11 @@ export const vWBNB = "0x6bCa74586218dB34cdB402295796b79663d816e9";
 export const RATE_MODEL = "0xE82B36f4CE8A9B769036B74354588D427a724763";
 export const NATIVE_TOKEN_GATEWAY_VWBNB_CORE = "0x5143eb18aA057Cd8BC9734cCfD2651823e71585f";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const REDSTONE_BNB_FEED = "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e";
+export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
+export const UPPER_BOUND_RATIO = parseUnits("1.01", 18);
+export const LOWER_BOUND_RATIO = parseUnits("0.99", 18);
+export const MAX_STALE_PERIOD = 100;
 
 export const WBNBMarketSpec = {
   vToken: {
@@ -134,6 +139,28 @@ BNB Chain testnet
 
   return makeProposal(
     [
+      {
+        target: bscmainnet.REDSTONE_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[WBNB, REDSTONE_BNB_FEED, MAX_STALE_PERIOD]],
+      },
+      {
+        target: BOUND_VALIDATOR,
+        signature: "setValidateConfig((address,uint256,uint256))",
+        params: [[WBNB, UPPER_BOUND_RATIO, LOWER_BOUND_RATIO]],
+      },
+      {
+        target: bscmainnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            WBNB,
+            [bscmainnet.REDSTONE_ORACLE, bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE],
+            [true, true, true],
+            false,
+          ],
+        ],
+      },
       // Add Market
       {
         target: WBNBMarketSpec.vToken.comptroller,
