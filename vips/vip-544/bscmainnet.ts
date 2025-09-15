@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-538/utils/cur-params-bscmainnet.json";
+import { cutParams as params } from "../../simulations/vip-544/utils/cur-params-bscmainnet.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -14,10 +14,10 @@ export const ANY_TARGET_CONTRACT = ethers.constants.AddressZero;
 export const MORE_THAN_1_DAY = 86401; // 24 hours + 1 second
 export const cutParams = params;
 
-export const vip538 = () => {
+export const vip544 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-538 [BNB Chain] Chaos Labs' Risk Oracle integration (1/2)",
+    title: "VIP-544 [BNB Chain] Chaos Labs' Risk Oracle integration (1/2)",
     description: `#### Summary
 
 If passed, following the community proposal “[Integrate Chaos Labs’ Risk Oracle to Venus Protocol](https://community.venus.io/t/integrate-chaos-labs-risk-oracle-to-venus-protocol/4569)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x6d84d48a17981a84e3eb320139552306f70fd006d7f3d9df131e20002e98620c)), this VIP will integrate the Chaos Labs’ Risk Oracle into Venus Protocol on BNB Chain, allowing the update of the supply and borrow caps of the Venus markets (on Isolated Pools) on this chain without VIP’s, considering Chaos Labs recommendations.
@@ -31,15 +31,13 @@ Moreover, this VIP would upgrade the implementation of the [Comptroller contract
 Main characteristics of the Risk Stewards enabled in this VIP:
 
 - Only the supply and borrow caps can be adjusted—either increased or decreased. All other risk parameters cannot be updated
-- The new caps cannot be greater or lower than 50% of the current caps. For example, given the current supply cap of the market [WBNB on the Liquid Staked BNB pool](https://app.venus.io/#/isolated-pools/pool/0xd933909A4a2b7A4638903028f44D1d38ce27c352/market/0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2?chainId=56) is 15K WBNB, Risk Stewards will be only able to set a new supply cap between 7.5K and 22.5K WBNB in one transaction. This limit can be modified with a VIP.
+- The new caps cannot be greater or lower than 50% of the current caps. For example, given the current supply cap of the market [WBNB on the Liquid Staked BNB pool](https://app.venus.io/#/pool/0xd933909A4a2b7A4638903028f44D1d38ce27c352/market/0xe10E80B7FD3a29fE46E16C30CC8F4dd938B742e2?chainId=56&tab=supply) is 15K WBNB, Risk Stewards will be only able to set a new supply cap between 7.5K and 22.5K WBNB in one transaction. This limit can be modified with a VIP.
 - Risk Stewards can only update the supply cap for a specific market once every 24 hours. The same rule applies to borrow cap updates. This constraint can be modified with a VIP.
 - Risk Stewards will initially only be allowed to update markets in the Isolated Pools. In a separate VIP, they’ll also be granted permission to update markets in the Core Pool. This phased rollout is part of the overall security strategy.
 
 #### Next steps
 
 A new VIP will be proposed in the coming days to enable this integration for the markets in the Core pool on BNB Chain. Markets on other supported networks will be integrated at a later stage.
-
-The second version of the Risk Stewards framework will allow Chaos Labs to propose VIPs and update a broader set of risk parameters, following the established governance process.
 
 #### Security and additional considerations
 
@@ -218,4 +216,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip538;
+export default vip544;

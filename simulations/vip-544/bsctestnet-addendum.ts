@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { vip538_Addendum } from "./../../vips/vip-538/bsctestnet-addendum";
+import { vip544_Addendum } from "./../../vips/vip-544/bsctestnet-addendum";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 
@@ -72,7 +72,7 @@ forking(56931937, async () => {
     });
   });
 
-  testVip("vip-538-addendum", await vip538_Addendum(), {
+  testVip("vip-544-addendum", await vip544_Addendum(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
     },

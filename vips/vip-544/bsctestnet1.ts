@@ -141,7 +141,7 @@ export const permissions = (
   ];
 };
 
-const vip538 = () => {
+const vip544 = () => {
   const meta = {
     version: "v2",
     title: "Configure Remote Risk Stewards",
@@ -268,4 +268,4 @@ Configure Remote Risk Stewards
   );
 };
 
-export default vip538;
+export default vip544;

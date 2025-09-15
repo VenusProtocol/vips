@@ -31,7 +31,7 @@ export const NORMAL_TIMELOCK_ZKSYNCSEPOLIA = "0x1730527a0f0930269313D77A317361b4
 export const CRITIAL_TIMELOCK_ZKSYNCSEPOLIA = "0x0E6138bE0FA1915efC73670a20A10EFd720a6Cc8";
 export const FAST_TRACK_TIMELOCK_ZKSYNCSEPOLIA = "0xb055e028b27d53a455a6c040a6952e44E9E615c4";
 
-const vip538 = () => {
+const vip544 = () => {
   const meta = {
     version: "v2",
     title: "Configure Remote Risk Stewards",
@@ -142,4 +142,4 @@ Configure Remote Risk Stewards
   );
 };
 
-export default vip538;
+export default vip544;

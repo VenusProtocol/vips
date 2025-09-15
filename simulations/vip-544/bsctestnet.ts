@@ -5,13 +5,13 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip538, {
+import vip544, {
   ACCESS_CONTROL_MANAGER_BSC_TESTNET,
   ANY_TARGET_CONTRACT,
   BSC_TESTNET_CORE_COMPTROLLER,
   MARKET_CAP_RISK_STEWARD_BSC_TESTNET,
   NORMAL_TIMELOCK_BSC_TESTNET,
-} from "../../vips/vip-538/bsctestnet1";
+} from "../../vips/vip-544/bsctestnet1";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import ISOLATED_POOL_COMPTROLLER_ABI from "./abi/IsolatedPoolComptroller.json";
@@ -33,7 +33,7 @@ forking(48650752, async () => {
     await setBalance("0xCfD34AEB46b1CB4779c945854d405E91D27A1899", parseUnits("1000000", 18));
   });
 
-  testVip("vip538 Configuring Risk Stewards", await vip538(), {
+  testVip("vip544 Configuring Risk Stewards", await vip544(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
