@@ -27,17 +27,28 @@ export const MARKET_CONFIGURATION_AGGREGATOR = "0x7bbC692907f23E4b7170de0e148332
 export const CURRENT_LIQUIDATION_INCENTIVE = parseUnits("1.1", 18);
 export const LIQUIDATOR_TREASURTY_PERCENT = parseUnits("0.5", 18);
 
-export const NEW_COMPT_METHODS = [
-  "setCollateralFactor(address,uint256,uint256)",
-  "setLiquidationIncentive(address,uint256)",
-  "setIsBorrowAllowed(uint96,address,bool)",
+export const NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK = [
   "createPool(string)",
   "addPoolMarkets(uint96[],address[])",
   "removePoolMarket(uint96,address)",
-  "setCollateralFactor(uint96,address,uint256,uint256)",
-  "setLiquidationIncentive(uint96,address,uint256)",
   "setPoolActive(uint96,bool)",
+  "setCollateralFactor(address,uint256,uint256)",
+  "setCollateralFactor(uint96,address,uint256,uint256)",
+  "setIsBorrowAllowed(uint96,address,bool)",
 ];
+
+export const NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK = [
+  "setLiquidationIncentive(address,uint256)",
+  "setLiquidationIncentive(uint96,address,uint256)",
+];
+
+export const NEW_COMPT_METHODS_FOR_GUARDIAN = [
+  "setCollateralFactor(address,uint256,uint256)",
+  "setCollateralFactor(uint96,address,uint256,uint256)",
+  "setIsBorrowAllowed(uint96,address,bool)", // on testnet there is only 1 Guardian
+];
+
+export const REMOVED_COMPT_METHODS = ["_setCollateralFactor(address,uint256)", "_setLiquidationIncentive(uint256)"];
 
 export const CORE_MARKETS = [
   {
@@ -294,41 +305,59 @@ export const vip550 = () => {
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [params],
       },
-      {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [UNITROLLER, "_setCollateralFactor(address,uint256)", NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
-      },
-      {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [UNITROLLER, "_setLiquidationIncentive(uint256)", NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
-      },
+      ...REMOVED_COMPT_METHODS.map(method => {
+        return {
+          target: ACM,
+          signature: "revokeCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
+        };
+      }),
+      ...REMOVED_COMPT_METHODS.map(method => {
+        return {
+          target: ACM,
+          signature: "revokeCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK],
+        };
+      }),
+      ...REMOVED_COMPT_METHODS.map(method => {
+        return {
+          target: ACM,
+          signature: "revokeCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK],
+        };
+      }),
       {
         target: UNITROLLER,
         signature: "_setComptrollerLens(address)",
         params: [NEW_COMPTROLLER_LENS],
       },
 
-      ...NEW_COMPT_METHODS.map(method => {
+      ...[...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK, ...NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK].map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
           params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
         };
       }),
-      ...NEW_COMPT_METHODS.map(method => {
+      ...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK.map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
           params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK],
         };
       }),
-      ...NEW_COMPT_METHODS.map(method => {
+      ...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK.map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
           params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK],
+        };
+      }),
+      ...NEW_COMPT_METHODS_FOR_GUARDIAN.map(method => {
+        return {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [UNITROLLER, method, NETWORK_ADDRESSES.bsctestnet.GUARDIAN],
         };
       }),
 

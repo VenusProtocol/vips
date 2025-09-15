@@ -24,7 +24,9 @@ import {
   MARKETS_BA,
   MARKET_CONFIGURATION_AGGREGATOR,
   NEW_COMPTROLLER_LENS,
-  NEW_COMPT_METHODS,
+  NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK,
+  NEW_COMPT_METHODS_FOR_GUARDIAN,
+  NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK,
   NEW_DIAMOND,
   NEW_LIQUIDATOR_IMPL,
   NEW_VAI_CONTROLLER,
@@ -142,7 +144,7 @@ forking(65431005, async () => {
           "PermissionGranted",
           "PermissionRevoked",
         ],
-        [4, 1, 1, 30, 5],
+        [4, 1, 1, 29, 9],
       );
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]); // +2 for unitroller and VAI, -1 for vBNB
       await expectEvents(
@@ -192,24 +194,23 @@ forking(65431005, async () => {
     });
 
     it("Check removed permission", async () => {
-      expect(
-        await accessControlManager.hasPermission(
-          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "_setCollateralFactor(address,uint256)",
-        ),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(
-          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "_setLiquidationIncentive(uint256)",
-        ),
-      ).to.equal(false);
+      for (const timelock of [
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
+        NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
+        NETWORK_ADDRESSES.bsctestnet.GUARDIAN,
+      ]) {
+        expect(
+          await accessControlManager.hasPermission(timelock, UNITROLLER, "_setCollateralFactor(address,uint256)"),
+        ).to.equal(false);
+        expect(
+          await accessControlManager.hasPermission(timelock, UNITROLLER, "_setLiquidationIncentive(uint256)"),
+        ).to.equal(false);
+      }
     });
 
     it("Check new permission", async () => {
-      for (const method of NEW_COMPT_METHODS) {
+      for (const method of NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK) {
         expect(
           await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
         ).to.equal(true);
@@ -222,6 +223,16 @@ forking(65431005, async () => {
         ).to.equal(true);
         expect(
           await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK, UNITROLLER, method),
+        ).to.equal(true);
+      }
+      for (const method of NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK) {
+        expect(
+          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
+        ).to.equal(true);
+      }
+      for (const method of NEW_COMPT_METHODS_FOR_GUARDIAN) {
+        expect(
+          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.GUARDIAN, UNITROLLER, method),
         ).to.equal(true);
       }
     });
