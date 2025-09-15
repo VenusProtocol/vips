@@ -15,11 +15,13 @@ import { forking, testVip } from "src/vip-framework";
 
 import {
   ACM,
+  BORROW_PAUSED_MARKETS,
   CORE_MARKETS,
   CORE_MARKETS_WITHOUT_VBNB,
   CURRENT_LIQUIDATION_INCENTIVE,
   LIQUIDATOR,
   LIQUIDATOR_PROXY_ADMIN,
+  MARKETS_BA,
   MARKET_CONFIGURATION_AGGREGATOR,
   NEW_COMPTROLLER_LENS,
   NEW_COMPT_METHODS,
@@ -54,12 +56,12 @@ const OLD_REWARD_FACET = "0x1C10F03827530f514Ba14065ec3D5f1496f35418";
 const OLD_MARKET_FACET = "0x1c7B1e28A43619123F0bF9DB8aeEc64aA535b9EC";
 const OLD_POLICY_FACET = "0x642EE02aFBE47C69c0980Ea61131cD97884058a7";
 
-const NEW_SETTER_FACET = "0x675d55BE8Ac03400dEE081076E16A00d3Fb2b40B";
-const NEW_REWARD_FACET = "0xcD598bDcfF0433395918512359745f83F5730C49";
-const NEW_MARKET_FACET = "0x679cd0443207C1Fb411d59B1E10E23b3850d1337";
-const NEW_POLICY_FACET = "0xFc6A44E5B5960444a6D25D6F85e3d7D79d26D8Ef";
+const NEW_SETTER_FACET = "0xF1844c6d56314a10C28175db638B51b4Ee14C402";
+const NEW_REWARD_FACET = "0x2B1b7FA16FE9B9ED5571663396bC16EBC079193B";
+const NEW_MARKET_FACET = "0x92B9CE322B0A4a3701fd3dC609740c7Df80f479D";
+const NEW_POLICY_FACET = "0xb94933Cf3cdAe7c98dbBd86d4649766b529Ca847";
 
-forking(65085599, async () => {
+forking(65431005, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -128,7 +130,8 @@ forking(65085599, async () => {
 
   testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      const totalMarkets = CORE_MARKETS_WITHOUT_VBNB.length;
+      const totalMarkets = CORE_MARKETS.length;
+      const toatlBAMarkets = MARKETS_BA.length;
       await expectEvents(
         txResponse,
         [UNITROLLER_ABI, DIAMOND_ABI, LIQUIDATOR_ABI, ACM_ABI],
@@ -141,12 +144,12 @@ forking(65085599, async () => {
         ],
         [4, 1, 1, 30, 5],
       );
-      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 2]); // +2 for unitroller and VAI
+      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]); // +2 for unitroller and VAI, -1 for vBNB
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI],
         ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
-        [totalMarkets - 2, totalMarkets + 1, totalMarkets + 1], // +1 for vBNB, -3 for markets with 0 collateral factor
+        [totalMarkets - 3, totalMarkets, toatlBAMarkets], // -3 for markets with 0 collateral factor
       );
     },
   });
@@ -241,7 +244,11 @@ forking(65085599, async () => {
         expect(data[3]).to.equal(market.collateralFactor); // same LT
         expect(data[4]).to.equal(CURRENT_LIQUIDATION_INCENTIVE);
         expect(data[5]).to.equal(0); // corePool
-        expect(data[6]).to.equal(true); // isBorrowAllowed
+        if (BORROW_PAUSED_MARKETS.includes(market.symbol)) {
+          expect(data[6]).to.equal(false); // isBorrowAllowed
+        } else {
+          expect(data[6]).to.equal(true);
+        }
       }
     });
 

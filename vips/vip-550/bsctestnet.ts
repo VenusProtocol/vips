@@ -11,11 +11,11 @@ export const LIQUIDATOR = "0x55AEABa76ecf144031Ef64E222166eb28Cb4865F";
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const LIQUIDATOR_PROXY_ADMIN = "0x1469AeB2768931f979a1c957692e32Aa802dd55a";
 
-export const NEW_VAI_CONTROLLER = "0xECAd2AF0119Cce245817B61d4186d4708703d1a0";
-export const NEW_DIAMOND = "0x1d100DAD71E56776bA3BdA3ec36D776BCE512B84";
-export const NEW_COMPTROLLER_LENS = "0x5715933d62852C15eF97b6B4BB498CF45c40C244";
-export const NEW_VBEP20_DELEGATE = "0xD922a9d900C25beE548586948cCf831e09FB2130";
-export const NEW_LIQUIDATOR_IMPL = "0x28Be3ef68AFa00b1151669F2e6dA2DE8d1bb1Abc";
+export const NEW_VAI_CONTROLLER = "0x1eA874d53Dad10711Ff69C145bb59d2DFCCD7322";
+export const NEW_DIAMOND = "0x11Aa7fF5990E0A341eCeEeE9ddFdF8cE570DD5FD";
+export const NEW_COMPTROLLER_LENS = "0xACbc75C2D0438722c75D9BD20844b5aFda4155ea";
+export const NEW_VBEP20_DELEGATE = "0x9c824EDa64aF04D160F9cB835C6AC95606077db0";
+export const NEW_LIQUIDATOR_IMPL = "0x91070E5b5Ff60a6c122740EB326D1f80E9f470e7";
 
 export const OLD_VAI_CONTROLLER = "0x5864e8BE0d4AD825feD65115a4f109f850A65aF7";
 export const OLD_DIAMOND = "0x649616739bab52E2A98BC74d93c896Ca45944359";
@@ -179,7 +179,6 @@ export const CORE_MARKETS = [
     collateralFactor: 750000000000000000n,
   },
   {
-    // Binance
     symbol: "vTWT",
     address: "0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF",
     asset: "0xb99c6b26fdf3678c6e2aff8466e3625a0e7182f8",
@@ -198,7 +197,6 @@ export const CORE_MARKETS = [
     collateralFactor: 720000000000000000n,
   },
   {
-    // BINANCE
     symbol: "vlisUSD",
     address: "0x9447b1D4Bd192f25416B6aCc3B7f06be2f7D6309",
     asset: "0xe73774DfCD551BF75650772dC2cC56a2B6323453",
@@ -262,7 +260,12 @@ export const MARKETS_CF_LT = CORE_MARKETS.map(market => [
   market.collateralFactor,
 ]);
 export const MARKETS_LI = CORE_MARKETS.map(market => [market.address, CURRENT_LIQUIDATION_INCENTIVE]);
-export const MARKETS_BA = CORE_MARKETS.map(market => [0, market.address, true]);
+export const BORROW_PAUSED_MARKETS = ["vasBNB", "vsUSDe", "vxSolvBTC", "vPT-sUSDE-26JUN2025"];
+export const MARKETS_BA = CORE_MARKETS.filter(market => !BORROW_PAUSED_MARKETS.includes(market.symbol)).map(market => [
+  0,
+  market.address,
+  true,
+]);
 
 export const vip550 = () => {
   const meta = {
