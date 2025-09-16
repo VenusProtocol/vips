@@ -63,8 +63,72 @@ export const vTokens = {
 export const vip545 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-545",
-    description: ``,
+    title: "VIP-545 [BNB Chain] Upgrade Solidity Version for Venus Core Pool Smart Contracts",
+    description: `#### Summary
+
+If passed, following the community proposal “[Proposal: Upgrade Solidity Version for Venus Core Pool Smart Contracts on BNB Chain](https://community.venus.io/t/proposal-upgrade-solidity-version-for-venus-core-pool-smart-contracts-on-bnb-chain/5272) ”, this VIP will upgrade the implementation of the following contracts on BNB Chain:
+
+- [Core Pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+- [VBNBAdmin](https://bscscan.com/address/0x9A7890534d9d91d473F28cB97962d176e2B65f1d)
+- [Liquidator](https://bscscan.com/address/0x0870793286aada55d39ce7f82fb2766e8004cf43)
+- [VAIController](http://bscscan.com/address/0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE)
+- Every VToken in the BNB Chain Core pool
+
+No new features are included. The only changes are those required after updating the Solidity version from 0.5.16 to 0.8.25.
+
+#### Description
+
+Why this upgrade:
+
+- **Modern, Secure Language Version**: Solidity 0.8.25 includes many improvements in **safety**, **performance**, and **readability**, and comes with **built-in overflow checks**, which remove the need for third-party libraries like 'SafeMath'.
+- **Proven Stability**: This version has been **battle-tested** across the Ethereum ecosystem since its release in [2024](https://soliditylang.org/blog/2024/03/14/solidity-0.8.25-release-announcement/). It’s already in use across multiple parts of Venus, including the **Oracles**.
+- **Developer Efficiency**: Standardizing on a modern version of Solidity will make it easier for developers to maintain, audit, and extend the protocol going forward.
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits**: [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [HashDit](https://www.hashdit.io/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating the new implementations and the usual behaviour of the protocol
+- **Deployment on testnet**: the same upgrades have been performed on BNB Chain testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit report](https://github.com/VenusProtocol/venus-protocol/blob/develop/audits/142_upgradeSolidity8_certik_20250824.pdf) (2025/08/24)
+- [Quantstamp audit report](https://github.com/VenusProtocol/venus-protocol/blob/develop/audits/143_upgradeSolidity8_quantstamp_20250829.pdf) (2025/08/29)
+
+#### Deployed contracts
+
+BNB Chain new implementations:
+
+- [vBNBAdmin](http://bscscan.com/address/0xae2713FbdF95d914182f7055ec1Ff6C64F41c275)
+- [Diamond](https://bscscan.com/address/0xb61a58aCA9F39dEA8C22F4c9a377C68a1Ea3723C) (Unitroller implementation)
+- [Liquidator](https://bscscan.com/address/0x1da2Fe628F50C14bc2A873A96B6D10392830621f)
+- [VAIController](https://bscscan.com/address/0xE4109433CEE11172dcCaE80d9c3bcDDFF4A7Cf57)
+- [VTokenDelegate](https://bscscan.com/address/0xA674296091B703e38dB2f3a937f02334627dCdaD)
+- Facets:
+    - [Market facet](https://bscscan.com/address/0xd47c074c219E6947BB350D9aD220eE20fCCC6549)
+    - [Setter facet](https://bscscan.com/address/0x92B26cb819335DA336f59480F0ca30F9a3f18E0a)
+    - [Policy facet](https://bscscan.com/address/0xF2095BeCa3030D43976ED46D5ca488D58354E8c9)
+    - [Reward facet](https://bscscan.com/address/0x05e4C8f3dbb6c2eaD4eB1f28611FA7180e79f428)
+
+BNB Chain testnet new implementations:
+
+- [vBNBAdmin](https://testnet.bscscan.com/address/0x04109575c1dbB4ac2e59e60c783800ea10441BBe)
+- [Diamond](https://testnet.bscscan.com/address/0x649616739bab52E2A98BC74d93c896Ca45944359) (Unitroller implementation)
+- [Liquidator](https://testnet.bscscan.com/address/0xe442A62E3B1956EC5B42e06aA0E293A0cB300406)
+- [VAIController](https://testnet.bscscan.com/address/0x5864e8BE0d4AD825feD65115a4f109f850A65aF7)
+- [VTokenDelegate](https://testnet.bscscan.com/address/0x585C508aF088123d990182a19e655ebB0e540CA1)
+- Facets:
+    - [Market facet](https://testnet.bscscan.com/address/0x1c7B1e28A43619123F0bF9DB8aeEc64aA535b9EC)
+    - [Setter facet](https://testnet.bscscan.com/address/0xeD1fd1D134b10dF8F84BbC3C89881A929B0c6F47)
+    - [Policy facet](https://testnet.bscscan.com/address/0x642EE02aFBE47C69c0980Ea61131cD97884058a7)
+    - [Reward facet](https://testnet.bscscan.com/address/0x1C10F03827530f514Ba14065ec3D5f1496f35418)
+
+#### References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/610)
+- [Solidity 0.8 codebase](https://github.com/VenusProtocol/venus-protocol/pull/607)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
