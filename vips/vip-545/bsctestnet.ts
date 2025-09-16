@@ -13,8 +13,8 @@ export const POOL_SPECS = {
   marketsConfig: [
     {
       address: vUSDE,
-      collateralFactor: parseUnits("0.75", 18),
-      liquidationThreshold: parseUnits("0.75", 18),
+      collateralFactor: parseUnits("0", 18),
+      liquidationThreshold: parseUnits("0", 18),
       liquidationIncentive: parseUnits("1.04", 18),
       borrowAllowed: true,
     },
