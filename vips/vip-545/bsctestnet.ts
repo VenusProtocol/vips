@@ -54,10 +54,10 @@ export const vTokens = {
   vXVS: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E",
 };
 
-export const vip541 = () => {
+export const vip545 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-541 Upgrade solidity on BNB Core pool (0.5 -> 0.8)",
+    title: "VIP-545 Upgrade solidity on BNB Core pool (0.5 -> 0.8)",
     description: `Upgrade solidity on BNB Core pool (0.5 -> 0.8)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -117,4 +117,4 @@ export const vip541 = () => {
   );
 };
 
-export default vip541;
+export default vip545;

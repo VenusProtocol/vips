@@ -59,10 +59,10 @@ export const vTokens = {
   vXVS: "0x151B1e2635A717bcDc836ECd6FbB62B674FE3E1D",
 };
 
-export const vip541 = () => {
+export const vip545 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-541",
+    title: "VIP-545",
     description: ``,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -122,4 +122,4 @@ export const vip541 = () => {
   );
 };
 
-export default vip541;
+export default vip545;
