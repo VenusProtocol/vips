@@ -2,10 +2,12 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
+import { WBNBMarketSpec, vip543 } from "../../vips/vip-543/bscmainnet";
+import vip544 from "../../vips/vip-544/bscmainnet";
 import vip545, {
   DEFAULT_PROXY_ADMIN,
   DIAMOND,
@@ -26,8 +28,22 @@ import VAI_CONTROLLER_ABI from "./abi/VAIContoller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
+const CHAINLINK_WBNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
 
-forking(60676242, async () => {
+forking(60902107, async () => {
+  before(async () => {
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      WBNBMarketSpec.vToken.underlying.address,
+      CHAINLINK_WBNB_FEED,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+    await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "BNB");
+  });
+
+  testVip("vip-543", await vip543());
+  testVip("vip-544", await vip544());
   const defaultProxyAdmin = await ethers.provider.getSigner(DEFAULT_PROXY_ADMIN);
 
   describe("Pre-VIP behavior", async () => {
