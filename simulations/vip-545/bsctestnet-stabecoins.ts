@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet";
+import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-stablecoins";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 forking(65570708, async () => {

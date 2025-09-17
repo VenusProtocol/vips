@@ -31,8 +31,8 @@ export const POOL_SPECS = {
 export const vip545 = () => {
   const meta = {
     version: "v2",
-    title: "USDe Stable Emode Pool",
-    description: `USDe Stable Emode Pool`,
+    title: "Stablecoins Emode Pool",
+    description: `Stablecoins Emode Pool`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
