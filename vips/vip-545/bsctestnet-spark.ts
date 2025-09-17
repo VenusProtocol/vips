@@ -9,7 +9,7 @@ export const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
 export const POOL_SPECS = {
   label: "Spark",
-  id: 2, // assuming this VIP to be exicuted after stablecoins vip
+  id: 2,
   markets: [vBTC, vUSDC, vUSDT],
   marketsConfig: [
     {

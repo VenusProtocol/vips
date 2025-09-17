@@ -4,10 +4,9 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
 import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-spark";
-import { vip545 as stablecoinVip } from "../../vips/vip-545/bsctestnet-stablecoins";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
@@ -15,7 +14,7 @@ const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 const assets = [BTCB, USDC, USDT];
 
-forking(65570708, async () => {
+forking(65686652, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -29,7 +28,6 @@ forking(65570708, async () => {
         315360000,
       );
     }
-    await pretendExecutingVip(await stablecoinVip(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", async () => {

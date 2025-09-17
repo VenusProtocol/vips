@@ -8,10 +8,9 @@ import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-remove-spark";
 import { vip545 as addSparkEmode } from "../../vips/vip-545/bsctestnet-spark";
-import { vip545 as addStableCoinsEmode } from "../../vips/vip-545/bsctestnet-stablecoins";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
-forking(65570708, async () => {
+forking(65686652, async () => {
   let comptroller: Contract;
 
   before(async () => {
@@ -24,7 +23,6 @@ forking(65570708, async () => {
       NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
       315360000,
     );
-    await pretendExecutingVip(await addStableCoinsEmode(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
     await pretendExecutingVip(await addSparkEmode(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
   });
 
