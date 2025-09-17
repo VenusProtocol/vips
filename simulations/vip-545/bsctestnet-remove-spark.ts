@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-remove-spark";
 import { vip545 as addSparkEmode } from "../../vips/vip-545/bsctestnet-spark";
@@ -24,11 +24,9 @@ forking(65570708, async () => {
       NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
       315360000,
     );
+    await pretendExecutingVip(await addStableCoinsEmode(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
+    await pretendExecutingVip(await addSparkEmode(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
   });
-
-  // These can be removed once the stablecoin and spark VIP has been executed
-  testVip("add-stablecoins-emode-VIP", await addStableCoinsEmode(), {});
-  testVip("add-spark-emode-VIP", await addSparkEmode(), {});
 
   describe("Pre-VIP state", async () => {
     it("check the current pool status to be active", async () => {

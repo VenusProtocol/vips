@@ -2,8 +2,9 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-remove-stablecoins";
 import { vip545 as addEmode } from "../../vips/vip-545/bsctestnet-stablecoins";
@@ -14,10 +15,8 @@ forking(65570708, async () => {
 
   before(async () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
+    await pretendExecutingVip(await addEmode(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
   });
-
-  // This can be removed once the stablecoin VIP has been executed
-  testVip("add-stablecoins-emdoe-VIP", await addEmode(), {});
 
   describe("Pre-VIP state", async () => {
     it("check the current pool status to be active", async () => {

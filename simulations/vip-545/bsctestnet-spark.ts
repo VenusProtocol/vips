@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { POOL_SPECS, UNITROLLER, vip545 } from "../../vips/vip-545/bsctestnet-spark";
 import { vip545 as stablecoinVip } from "../../vips/vip-545/bsctestnet-stablecoins";
@@ -29,6 +29,7 @@ forking(65570708, async () => {
         315360000,
       );
     }
+    await pretendExecutingVip(await stablecoinVip(), NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", async () => {
@@ -36,9 +37,6 @@ forking(65570708, async () => {
       expect(await comptroller.lastPoolId()).to.be.lessThan(POOL_SPECS.id);
     });
   });
-
-  // first execute stablecoins VIP to match the the lastPoolId, or change the poolID to 1 in VIP commands
-  testVip("stablecoins-vip", await stablecoinVip(), {});
 
   testVip("VIP-545", await vip545(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
