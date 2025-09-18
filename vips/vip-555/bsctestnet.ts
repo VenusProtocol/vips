@@ -5,8 +5,8 @@ import { makeProposal } from "src/utils";
 import { cutParams as params } from "../../simulations/vip-555/utils/bsctestnet-cut-params.json";
 
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
-export const NEW_VBEP20_DELEGATE_IMPL = "0x36E8686c45203BaBAD78013Bdbd96CcA8450296F";
-export const NEW_DIAMOND_IMPLEMENTATION = "0x4DE9a5ad089bDe2F3dA2Ff9F6CFa0c9e953311d4";
+export const NEW_VBEP20_DELEGATE_IMPL = "0xf4f8049c5d6d2cFC968E18DF74188B8Cc875B840";
+export const NEW_DIAMOND_IMPLEMENTATION = "0x18D1697c7a0eDFAdFB6A51e97A53Cf48B7407922";
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 export const NORMAL_TIMELOCK = "0xce10739590001705F7FF231611ba4A48B2820327";
@@ -150,17 +150,12 @@ export const vip555 = () => {
       ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [UNITROLLER, "setDelegateAuthorizationFlashloan(address,address,bool)", timelock],
+        params: [ethers.constants.AddressZero, "toggleFlashLoan()", timelock],
       })),
       ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "_toggleFlashLoan()", timelock],
-      })),
-      ...[NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].map((timelock: string) => ({
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "_setFlashLoanFeeMantissa(uint256,uint256)", timelock],
+        params: [ethers.constants.AddressZero, "setFlashLoanFeeMantissa(uint256,uint256)", timelock],
       })),
     ],
     meta,
