@@ -11,6 +11,7 @@ import {
   NEW_VAI_CONTROLLER,
   OLD_DIAMOND,
   OLD_VAI_CONTROLLER,
+  POOL_SPECS,
   UNITROLLER,
   VAI_UNITROLLER,
   vip550,
@@ -18,6 +19,7 @@ import {
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
+import COMPTROLLER_ABI from "./abi/comptroller-addendum.json";
 import { cutParams as params } from "./utils/bsctestnet-addendum-cut-params.json";
 
 const bsctestnet = NETWORK_ADDRESSES.bsctestnet;
@@ -38,11 +40,13 @@ forking(65806620, async () => {
   let unitroller: Contract;
   let vaiUnitroller: Contract;
   let accessControlManager: Contract;
+  let comptroller: Contract;
 
   before(async () => {
     unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
     vaiUnitroller = await ethers.getContractAt(VAI_UNITROLLR_ABI, VAI_UNITROLLER);
     accessControlManager = await ethers.getContractAt(ACM_ABI, bsctestnet.ACCESS_CONTROL_MANAGER);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
   });
 
   describe("Pre-VIP state", async () => {
@@ -60,7 +64,12 @@ forking(65806620, async () => {
 
   testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [DIAMOND_ABI, ACM_ABI], ["DiamondCut", "PermissionGranted"], [1, 6]);
+      await expectEvents(
+        txResponse,
+        [VAI_UNITROLLR_ABI, ACM_ABI, COMPTROLLER_ABI],
+        ["NewImplementation", "DiamondCut", "PermissionGranted", "PoolFallbackStatusUpdated"],
+        [2, 1, 6, 1],
+      );
     },
   });
 
@@ -105,7 +114,7 @@ forking(65806620, async () => {
       expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
     });
 
-    it("Check new permission", async () => {
+    it("check new permissions", async () => {
       for (const method of ["setPoolLabel(uint96,string)", "setAllowCorePoolFallback(uint96,bool)"]) {
         expect(await accessControlManager.hasPermission(bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method)).to.equal(true);
         expect(await accessControlManager.hasPermission(bsctestnet.FAST_TRACK_TIMELOCK, UNITROLLER, method)).to.equal(
@@ -115,6 +124,12 @@ forking(65806620, async () => {
           true,
         );
       }
+    });
+
+    it("should set the AllowCorePoolFallback to true for Stablecoins emode group", async () => {
+      const pool = await comptroller.pools(POOL_SPECS.id);
+      expect(pool.label).to.equal(POOL_SPECS.label);
+      expect(pool.allowCorePoolFallback).to.equal(POOL_SPECS.allowCorePoolFallback);
     });
   });
 });

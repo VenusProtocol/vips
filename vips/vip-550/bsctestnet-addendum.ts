@@ -14,6 +14,12 @@ export const NEW_VAI_CONTROLLER = "0xA8122Fe0F9db39E266DE7A5BF953Cd72a87fe345";
 export const OLD_DIAMOND = "0x11Aa7fF5990E0A341eCeEeE9ddFdF8cE570DD5FD";
 export const OLD_VAI_CONTROLLER = "0x1eA874d53Dad10711Ff69C145bb59d2DFCCD7322";
 
+export const POOL_SPECS = {
+  label: "Stablecoins",
+  id: 1,
+  allowCorePoolFallback: true, // set to true
+};
+
 export const vip550 = () => {
   const meta = {
     version: "v2",
@@ -80,6 +86,11 @@ export const vip550 = () => {
         target: bsctestnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [UNITROLLER, "setAllowCorePoolFallback(uint96,bool)", bsctestnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: UNITROLLER,
+        signature: "setAllowCorePoolFallback(uint96,bool)",
+        params: [POOL_SPECS.id, POOL_SPECS.allowCorePoolFallback],
       },
     ],
     meta,
