@@ -34,8 +34,8 @@ type JsonObject = { [key: string]: any };
 const processJson = async (data: JsonObject) => {
   const convertBigNumberToString = (obj: JsonObject) => {
     for (const key in obj) {
-      if (obj[key] instanceof BigNumber) {
-        obj[key] = obj[key].toString(10); // Convert BigNumber to decimal representation
+      if (obj[key] instanceof BigNumber || typeof obj[key] === "bigint") {
+        obj[key] = obj[key].toString(); // Convert BigNumber and bigint to decimal representation
       } else if (typeof obj[key] === "object" && obj[key] !== null) {
         convertBigNumberToString(obj[key]); // Recursively convert nested objects
       }
