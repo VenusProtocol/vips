@@ -55,6 +55,8 @@ import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
 import COMPTROLLER_ABI from "./abi/comptroller-addendum-2.json";
 import { cutParams as params } from "./utils/bscmainnet-cut-params.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
+
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
@@ -90,44 +92,30 @@ forking(62056649, async () => {
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
       await setMaxStalePeriodInChainlinkOracle(
-        NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+        bscmainnet.CHAINLINK_ORACLE,
         market.underlying,
         ethers.constants.AddressZero,
-        NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.NORMAL_TIMELOCK,
         315360000,
       );
 
       await setMaxStalePeriodInChainlinkOracle(
-        NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
+        bscmainnet.REDSTONE_ORACLE,
         market.underlying,
         ethers.constants.AddressZero,
-        NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.NORMAL_TIMELOCK,
         315360000,
       );
-      await setMaxStalePeriodInBinanceOracle(
-        NETWORK_ADDRESSES.bscmainnet.BINANCE_ORACLE,
-        market.symbol.slice(1),
-        315360000,
-      );
+      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, market.symbol.slice(1), 315360000);
     }
 
     const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
     const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
-    await setRedstonePrice(
-      NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
-      xSolvBTC,
-      xSolvBTC_RedStone_Feed,
-      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
-    );
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
 
     const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
     const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
-    await setRedstonePrice(
-      NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
-      THE,
-      THE_REDSTONE_FEED,
-      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
-    );
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", async () => {
@@ -155,6 +143,11 @@ forking(62056649, async () => {
     it("Liquidator should point to old implementation", async () => {
       const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
       expect(impl.toLowerCase()).to.equal(OLD_LIQUIDATOR_IMPL.toLowerCase());
+    });
+
+    it("unitroller should have old Facets", async () => {
+      expect(await unitroller.facetAddresses()).to.include(OLD_SETTER_FACET, OLD_REWARD_FACET);
+      expect(await unitroller.facetAddresses()).to.include(OLD_MARKET_FACET, OLD_POLICY_FACET);
     });
   });
 
@@ -217,10 +210,10 @@ forking(62056649, async () => {
 
     it("Check removed permission", async () => {
       for (const timelock of [
-        NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
-        NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK,
-        NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
-        NETWORK_ADDRESSES.bscmainnet.GUARDIAN,
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
       ]) {
         expect(
           await accessControlManager
@@ -239,28 +232,20 @@ forking(62056649, async () => {
       // All Timelocks
       for (const method of NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK) {
         expect(
-          await accessControlManager
-            .connect(impUnitroller)
-            .isAllowedToCall(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          await accessControlManager
-            .connect(impUnitroller)
-            .isAllowedToCall(NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          await accessControlManager
-            .connect(impUnitroller)
-            .isAllowedToCall(NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
         ).to.equal(true);
       }
 
       // Only Normal Timelock
       for (const method of NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK) {
         expect(
-          await accessControlManager
-            .connect(impUnitroller)
-            .isAllowedToCall(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
       }
 
@@ -338,6 +323,7 @@ forking(62056649, async () => {
       const newPool = await comptroller.pools(POOL_SPECS.id);
       expect(newPool.label).to.equals(POOL_SPECS.label);
       expect(newPool.isActive).to.equals(true);
+      expect(newPool.allowCorePoolFallback).to.equal(POOL_SPECS.allowCorePoolFallback);
     });
 
     it("should set the correct risk parameters to all pool markets", async () => {

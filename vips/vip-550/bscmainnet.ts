@@ -5,6 +5,8 @@ import { makeProposal } from "src/utils";
 
 import { cutParams as params } from "../../simulations/vip-550/utils/bscmainnet-cut-params.json";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
+
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const VAI_UNITROLLER = "0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE";
 export const LIQUIDATOR = "0x0870793286aaDA55D39CE7f82fb2766e8004cF43";
@@ -52,8 +54,6 @@ export const NEW_COMPT_METHODS_FOR_GUARDIAN_1 = [
 ];
 
 export const NEW_COMPT_METHODS_FOR_GUARDIAN_2 = "setIsBorrowAllowed(uint96,address,bool)";
-
-export const REMOVED_COMPT_METHODS = ["_setCollateralFactor(address,uint256)", "_setLiquidationIncentive(uint256)"];
 
 export const CORE_MARKETS = [
   {
@@ -329,6 +329,7 @@ export const vsUSDE = "0x699658323d58eE25c69F1a29d476946ab011bD18";
 export const POOL_SPECS = {
   label: "Stablecoins",
   id: 1,
+  allowCorePoolFallback: true,
   markets: [vUSDE, vsUSDE],
   marketsConfig: [
     {
@@ -375,52 +376,47 @@ export const vip550 = () => {
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [params],
       },
-      ...REMOVED_COMPT_METHODS.map(method => {
+
+      // revoke permissions for removed methods
+      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(timelock => {
         return {
           target: ACM,
           signature: "revokeCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK],
+          params: [UNITROLLER, "_setCollateralFactor(address,uint256)", timelock],
         };
       }),
-      ...REMOVED_COMPT_METHODS.map(method => {
-        return {
-          target: ACM,
-          signature: "revokeCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK],
-        };
-      }),
-      ...REMOVED_COMPT_METHODS.map(method => {
-        return {
-          target: ACM,
-          signature: "revokeCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK],
-        };
-      }),
+      {
+        target: ACM,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [UNITROLLER, "_setLiquidationIncentive(uint256)", bscmainnet.NORMAL_TIMELOCK],
+      },
+
       {
         target: UNITROLLER,
         signature: "_setComptrollerLens(address)",
         params: [NEW_COMPTROLLER_LENS],
       },
 
+      // Give permission for new methods
       ...[...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK, ...NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK].map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK],
+          params: [UNITROLLER, method, bscmainnet.NORMAL_TIMELOCK],
         };
       }),
       ...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK.map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK],
+          params: [UNITROLLER, method, bscmainnet.FAST_TRACK_TIMELOCK],
         };
       }),
       ...NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK.map(method => {
         return {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
-          params: [UNITROLLER, method, NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK],
+          params: [UNITROLLER, method, bscmainnet.CRITICAL_TIMELOCK],
         };
       }),
       ...NEW_COMPT_METHODS_FOR_GUARDIAN_1.map(method => {
@@ -494,6 +490,7 @@ export const vip550 = () => {
         params: [UNITROLLER, "setIsBorrowAllowed(uint96,address,bool)", MARKET_CONFIGURATION_AGGREGATOR],
       },
 
+      // update IMPL
       {
         target: VAI_UNITROLLER,
         signature: "_setPendingImplementation(address)",
@@ -515,7 +512,7 @@ export const vip550 = () => {
         params: [LIQUIDATOR_TREASURTY_PERCENT],
       },
 
-      // stablecoin emode
+      // Stablecoins emode
       {
         target: UNITROLLER,
         signature: "createPool(string)",
@@ -547,6 +544,11 @@ export const vip550 = () => {
           params: [POOL_SPECS.id, market.address, market.borrowAllowed],
         };
       }),
+      {
+        target: UNITROLLER,
+        signature: "setAllowCorePoolFallback(uint96,bool)",
+        params: [POOL_SPECS.id, POOL_SPECS.allowCorePoolFallback],
+      },
     ],
     meta,
     ProposalType.REGULAR,
