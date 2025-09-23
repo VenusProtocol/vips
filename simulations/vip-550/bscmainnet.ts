@@ -50,6 +50,7 @@ import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
 import OLD_ABI from "./abi/OldComptroller.json";
 import REDSTONE_ABI from "./abi/RedstoneOracle.json";
+import RESILIENT_ABI from "./abi/ResilientOracle.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
@@ -129,6 +130,16 @@ forking(62056649, async () => {
 
     const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
     const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
+    const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ABI, ethers.provider);
+
+    await resilientOracle
+      .connect(impersonatedTimelock)
+      .setTokenConfig([
+        PTsUSDE_26JUN2025,
+        [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+        [true, false, false],
+        false,
+      ]);
     await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
   });
 
