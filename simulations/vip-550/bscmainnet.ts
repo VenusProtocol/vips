@@ -117,6 +117,12 @@ forking(62056649, async () => {
     const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
     await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
 
+    const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
+    const TRX_REDSTONE_FEED = "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916";
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, TRX, TRX_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK, 3153600000, {
+      tokenDecimals: 6,
+    });
+
     const SUSDE = "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2";
     const USDE = "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34";
     await setRedstonePrice(

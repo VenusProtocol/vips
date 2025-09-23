@@ -194,12 +194,12 @@ export const CORE_MARKETS = [
     address: "0x61eDcFe8Dd6bA3c891CB9bEc2dc7657B3B422E93",
     collateralFactor: 0n,
   },
-  //   {
-  //     symbol: "vTRX",
-  //     underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
-  //     address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
-  //     collateralFactor: 525000000000000000n,
-  //   },
+  {
+    symbol: "vTRX",
+    underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3",
+    address: "0xC5D3466aA484B040eE977073fcF337f2c00071c1",
+    collateralFactor: 525000000000000000n,
+  },
   {
     symbol: "vWBETH",
     underlying: "0xa2E3356610840701BDf5611a53974510Ae27E2e1",
@@ -537,13 +537,11 @@ export const vip550 = () => {
           params: [POOL_SPECS.id, market.address, market.liquidationIncentive],
         };
       }),
-      ...POOL_SPECS.marketsConfig.map(market => {
-        return {
-          target: UNITROLLER,
-          signature: "setIsBorrowAllowed(uint96,address,bool)",
-          params: [POOL_SPECS.id, market.address, market.borrowAllowed],
-        };
-      }),
+      {
+        target: UNITROLLER,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [POOL_SPECS.id, vUSDE, true],
+      },
       {
         target: UNITROLLER,
         signature: "setAllowCorePoolFallback(uint96,bool)",
