@@ -10,6 +10,7 @@ import {
   initMainnetUser,
   setMaxStalePeriodInBinanceOracle,
   setMaxStalePeriodInChainlinkOracle,
+  setRedstonePrice,
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
@@ -19,13 +20,16 @@ import {
   CORE_MARKETS,
   CORE_MARKETS_WITHOUT_VBNB,
   CURRENT_LIQUIDATION_INCENTIVE,
+  GUARDIAN_1,
+  GUARDIAN_2,
   LIQUIDATOR,
   LIQUIDATOR_PROXY_ADMIN,
   MARKETS_BA,
   MARKET_CONFIGURATION_AGGREGATOR,
   NEW_COMPTROLLER_LENS,
   NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK,
-  NEW_COMPT_METHODS_FOR_GUARDIAN,
+  NEW_COMPT_METHODS_FOR_GUARDIAN_1,
+  NEW_COMPT_METHODS_FOR_GUARDIAN_2,
   NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK,
   NEW_DIAMOND,
   NEW_LIQUIDATOR_IMPL,
@@ -35,41 +39,47 @@ import {
   OLD_DIAMOND,
   OLD_LIQUIDATOR_IMPL,
   OLD_VAI_CONTROLLER,
+  POOL_SPECS,
   UNITROLLER,
   VAI_UNITROLLER,
-  vip550,
-} from "../../vips/vip-550/bsctestnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
+  vip547,
+} from "../../vips/vip-547/bscmainnet";
+import ACM_ABI from "./abi/ACMMainnet.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
 import OLD_ABI from "./abi/OldComptroller.json";
+import REDSTONE_ABI from "./abi/RedstoneOracle.json";
+import RESILIENT_ABI from "./abi/ResilientOracle.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
-import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
+import COMPTROLLER_ABI from "./abi/comptroller-addendum-2.json";
+import { cutParams as params } from "./utils/bscmainnet-cut-params.json";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
-const OLD_SETTER_FACET = "0xeD1fd1D134b10dF8F84BbC3C89881A929B0c6F47";
-const OLD_REWARD_FACET = "0x1C10F03827530f514Ba14065ec3D5f1496f35418";
-const OLD_MARKET_FACET = "0x1c7B1e28A43619123F0bF9DB8aeEc64aA535b9EC";
-const OLD_POLICY_FACET = "0x642EE02aFBE47C69c0980Ea61131cD97884058a7";
+const OLD_MARKET_FACET = "0xd47c074c219E6947BB350D9aD220eE20fCCC6549";
+const OLD_POLICY_FACET = "0xF2095BeCa3030D43976ED46D5ca488D58354E8c9";
+const OLD_REWARD_FACET = "0x05e4C8f3dbb6c2eaD4eB1f28611FA7180e79f428";
+const OLD_SETTER_FACET = "0x92B26cb819335DA336f59480F0ca30F9a3f18E0a";
 
-const NEW_SETTER_FACET = "0xF1844c6d56314a10C28175db638B51b4Ee14C402";
-const NEW_REWARD_FACET = "0x2B1b7FA16FE9B9ED5571663396bC16EBC079193B";
-const NEW_MARKET_FACET = "0x92B9CE322B0A4a3701fd3dC609740c7Df80f479D";
-const NEW_POLICY_FACET = "0xBDd1F07F4eF1748657FDA0d29CF4D7361120c187";
+const NEW_MARKET_FACET = "0x6e9bD95830bb775fb9F24b9559f8894d92143CA1";
+const NEW_POLICY_FACET = "0x7155227C2763228F236a0D858dccDB32740a2893";
+const NEW_REWARD_FACET = "0x1d903eEa9d98a6Ac071a1f4531dc6958B4629cBE";
+const NEW_SETTER_FACET = "0x4Fd17b7df6004E04A6298EdE065dE431D408fD9b";
 
-forking(65463763, async () => {
+forking(62056649, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
   let vaiUnitroller: Contract;
   let liquidator: Contract;
   let proxyAdmin: SignerWithAddress;
+  let impUnitroller: SignerWithAddress;
 
   before(async () => {
     unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
@@ -78,28 +88,59 @@ forking(65463763, async () => {
     vaiUnitroller = await ethers.getContractAt(VAI_UNITROLLR_ABI, VAI_UNITROLLER);
     liquidator = await ethers.getContractAt(LIQUIDATOR_PROXY_ABI, LIQUIDATOR);
     proxyAdmin = await initMainnetUser(LIQUIDATOR_PROXY_ADMIN, parseUnits("2", 18));
+    impUnitroller = await initMainnetUser(UNITROLLER, parseUnits("2", 18));
+
     console.log(`Setting max stale period...`);
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
       await setMaxStalePeriodInChainlinkOracle(
-        NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
-        market.asset,
+        bscmainnet.CHAINLINK_ORACLE,
+        market.underlying,
         ethers.constants.AddressZero,
-        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        bscmainnet.NORMAL_TIMELOCK,
         315360000,
       );
 
       await setMaxStalePeriodInChainlinkOracle(
-        NETWORK_ADDRESSES.bsctestnet.REDSTONE_ORACLE,
-        market.asset,
+        bscmainnet.REDSTONE_ORACLE,
+        market.underlying,
         ethers.constants.AddressZero,
-        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        bscmainnet.NORMAL_TIMELOCK,
         315360000,
       );
+      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, market.symbol.slice(1), 315360000);
     }
-    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
-    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "TWT", 315360000);
-    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "lisUSD", 315360000);
+
+    const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+    const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
+
+    const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
+    const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
+
+    const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
+    const TRX_REDSTONE_FEED = "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916";
+    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, TRX, TRX_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK, 3153600000, {
+      tokenDecimals: 6,
+    });
+
+    const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
+    const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
+
+    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
+    const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
+    const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ABI, ethers.provider);
+
+    await resilientOracle
+      .connect(impersonatedTimelock)
+      .setTokenConfig([
+        PTsUSDE_26JUN2025,
+        [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+        [true, false, false],
+        false,
+      ]);
+    await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
   });
 
   describe("Pre-VIP state", async () => {
@@ -128,35 +169,34 @@ forking(65463763, async () => {
       const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
       expect(impl.toLowerCase()).to.equal(OLD_LIQUIDATOR_IMPL.toLowerCase());
     });
+
+    it("unitroller should have old Facets", async () => {
+      expect(await unitroller.facetAddresses()).to.include(OLD_SETTER_FACET, OLD_REWARD_FACET);
+      expect(await unitroller.facetAddresses()).to.include(OLD_MARKET_FACET, OLD_POLICY_FACET);
+    });
   });
 
-  testVip("VIP-550", await vip550(), {
+  testVip("VIP-547", await vip547(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
-      const toatlBAMarkets = MARKETS_BA.length;
+      const totalBAMarkets = MARKETS_BA.length;
       await expectEvents(
         txResponse,
         [UNITROLLER_ABI, DIAMOND_ABI, LIQUIDATOR_ABI, ACM_ABI],
-        [
-          "NewPendingImplementation",
-          "DiamondCut",
-          "NewLiquidationTreasuryPercent",
-          "PermissionGranted",
-          "PermissionRevoked",
-        ],
-        [4, 1, 1, 29, 9],
+        ["NewPendingImplementation", "DiamondCut", "NewLiquidationTreasuryPercent", "RoleGranted", "RoleRevoked"],
+        [4, 1, 1, 35, 7],
       );
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]); // +2 for unitroller and VAI, -1 for vBNB
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI],
-        ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
-        [totalMarkets - 3, totalMarkets, toatlBAMarkets], // -3 for markets with 0 collateral factor
+        ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated", "NewCollateralFactor"],
+        [totalMarkets - 2, totalMarkets + 2, totalBAMarkets + 1, 2], // -4 for markets with 0 collateral factor +2 for emode
       );
     },
   });
 
-  describe("Post-VIP state", async () => {
+  describe("Post-VIP state (emode upgrade)", async () => {
     it("unitroller should have new implementation", async () => {
       expect(await unitroller.comptrollerImplementation()).equals(NEW_DIAMOND);
     });
@@ -195,46 +235,54 @@ forking(65463763, async () => {
 
     it("Check removed permission", async () => {
       for (const timelock of [
-        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-        NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
-        NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
-        NETWORK_ADDRESSES.bsctestnet.GUARDIAN,
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
       ]) {
         expect(
-          await accessControlManager.hasPermission(timelock, UNITROLLER, "_setCollateralFactor(address,uint256)"),
+          await accessControlManager
+            .connect(impUnitroller)
+            .isAllowedToCall(timelock, "_setCollateralFactor(address,uint256)"),
         ).to.equal(false);
         expect(
-          await accessControlManager.hasPermission(timelock, UNITROLLER, "_setLiquidationIncentive(uint256)"),
+          await accessControlManager
+            .connect(impUnitroller)
+            .isAllowedToCall(timelock, "_setLiquidationIncentive(uint256)"),
         ).to.equal(false);
       }
     });
 
     it("Check new permission", async () => {
+      // All Timelocks
       for (const method of NEW_COMPT_METHODS_FOR_EVERY_TIMELOCK) {
         expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          await accessControlManager.hasPermission(
-            NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
-            UNITROLLER,
-            method,
-          ),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK, UNITROLLER, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
         ).to.equal(true);
       }
+
+      // Only Normal Timelock
       for (const method of NEW_COMPT_METHODS_FOR_NORMAL_TIMELOCK) {
         expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
       }
-      for (const method of NEW_COMPT_METHODS_FOR_GUARDIAN) {
-        expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.GUARDIAN, UNITROLLER, method),
-        ).to.equal(true);
+
+      // Guardian-1
+      for (const method of NEW_COMPT_METHODS_FOR_GUARDIAN_1) {
+        expect(await accessControlManager.connect(impUnitroller).isAllowedToCall(GUARDIAN_1, method)).to.equal(true);
       }
+
+      // Guardian-2
+      expect(
+        await accessControlManager.connect(impUnitroller).isAllowedToCall(GUARDIAN_2, NEW_COMPT_METHODS_FOR_GUARDIAN_2),
+      ).to.equal(true);
     });
 
     it("comptroller should have new comptrollerLens", async () => {
@@ -274,26 +322,45 @@ forking(65463763, async () => {
 
     it("MarketConfigurationAggregator should not have ACM permissions", async () => {
       expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setCollateralFactor(address,uint256,uint256)",
-        ),
+        await accessControlManager
+          .connect(impUnitroller)
+          .isAllowedToCall(MARKET_CONFIGURATION_AGGREGATOR, "setCollateralFactor(address,uint256,uint256)"),
       ).to.equal(false);
       expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setLiquidationIncentive(address,uint256)",
-        ),
+        await accessControlManager
+          .connect(impUnitroller)
+          .isAllowedToCall(MARKET_CONFIGURATION_AGGREGATOR, "setLiquidationIncentive(address,uint256)"),
       ).to.equal(false);
       expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setIsBorrowAllowed(uint96,address,bool)",
-        ),
+        await accessControlManager
+          .connect(impUnitroller)
+          .isAllowedToCall(MARKET_CONFIGURATION_AGGREGATOR, "setIsBorrowAllowed(uint96,address,bool)"),
       ).to.equal(false);
+    });
+  });
+
+  describe("Post-VIP state (Stablecoin emode group)", async () => {
+    it("should update lastPoolId to the new pool", async () => {
+      expect(await comptroller.lastPoolId()).to.equals(POOL_SPECS.id);
+    });
+
+    it("should set the newly created pool as active with correct label", async () => {
+      const newPool = await comptroller.pools(POOL_SPECS.id);
+      expect(newPool.label).to.equals(POOL_SPECS.label);
+      expect(newPool.isActive).to.equals(true);
+      expect(newPool.allowCorePoolFallback).to.equal(POOL_SPECS.allowCorePoolFallback);
+    });
+
+    it("should set the correct risk parameters to all pool markets", async () => {
+      for (const market of POOL_SPECS.marketsConfig) {
+        const marketData = await comptroller.poolMarkets(POOL_SPECS.id, market.address);
+        expect(marketData.marketPoolId).to.be.equal(POOL_SPECS.id);
+        expect(marketData.isListed).to.be.equal(true);
+        expect(marketData.collateralFactorMantissa).to.be.equal(market.collateralFactor);
+        expect(marketData.liquidationThresholdMantissa).to.be.equal(market.liquidationThreshold);
+        expect(marketData.liquidationIncentiveMantissa).to.be.equal(market.liquidationIncentive);
+        expect(marketData.isBorrowAllowed).to.be.equal(market.borrowAllowed);
+      }
     });
   });
 });

@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-550/utils/bscmainnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-547/utils/bscmainnet-cut-params.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -349,11 +349,120 @@ export const POOL_SPECS = {
   ],
 };
 
-export const vip550 = () => {
+export const vip547 = () => {
   const meta = {
     version: "v2",
-    title: "Emode in the BNB Core Pool",
-    description: `Emode in the BNB Core Pool`,
+    title: "[BNB Chain] Enable E-Mode in the Core pool (1/2)",
+    description: `#### Summary
+
+If passed, following the community proposal “[E-Mode and Liquidation Threshold in the BNB Chain Core pool](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xf2cc2ca902a340d7409de18ee3cd50dc8f1465b52bcf91b28dea1c9fe943a01b)), this VIP will upgrade the implementations of the following contracts on BNB Chain, including support for [E-Mode](https://docs-v4.venus.io/whats-new/emode):
+
+- [Unitroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+- [Liquidator](https://bscscan.com/address/0x0870793286aaDA55D39CE7f82fb2766e8004cF43)
+- [VAIController](https://bscscan.com/address/0x004065D34C6b18cE4370ced1CeBDE94865DbFAFE)
+- VTokens. Every current market on BNB Chain Core Pool, other than vBNB
+
+Additionally, following the [Chaos Labs recommendations](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/8), this VIP will enable a "Stablecoins" E-Mode group with the [USDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x74ca6930108F775CC667894EEa33843e691680d7?chainId=56&tab=supply) and [sUSDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x699658323d58eE25c69F1a29d476946ab011bD18?chainId=56&tab=supply) markets. This is intended as a soft launch of the feature. Additional VIPs will be proposed in the coming days to add more E-Mode groups, as outlined in [this community proposal](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/7) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x0fe626f2a7979d6ff63333523e77c12187ad987485b1bd609c45fb0a1fc090b6)).
+
+#### Description
+
+The details of the new “Stablecoins” E-Mode group are:
+
+- Label: Stablecoins (it can be updated in the future, with a VIP)
+- Markets:
+    - [sUSDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x74ca6930108F775CC667894EEa33843e691680d7?chainId=56&tab=supply)
+        - Collateral Factor: 89%
+        - Liquidation Threshold: 91%
+        - Liquidation Incentive: 8%
+        - It cannot be borrowed but it can be used as collateral
+    - [USDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x74ca6930108F775CC667894EEa33843e691680d7?chainId=56&tab=supply)
+        - Collateral Factor: 90%
+        - Liquidation Threshold: 92%
+        - Liquidation Incentive: 6%
+        - It can be borrowed and used as collateral
+
+Currently, the Liquidation Threshold for all markets in the Core pool matches their respective Collateral Factors. Chaos Labs will review and recommend appropriate adjustments to these Liquidation Threshold parameters soon.
+
+The Liquidation Incentive remains at 10% for all markets in the Core pool, consistent with previous settings. This risk parameter may be adjusted on a per-market basis in the future, pending review and recommendations from Chaos Labs.
+
+**Granted permissions**
+
+- Normal, Fast-track and Critical timelocks are authorized to execute the following functions:
+    - "createPool(string)"
+    - "addPoolMarkets(uint96[],address[])"
+    - "removePoolMarket(uint96,address)"
+    - "setPoolActive(uint96,bool)"
+    - "setCollateralFactor(address,uint256,uint256)"
+    - "setCollateralFactor(uint96,address,uint256,uint256)"
+    - "setIsBorrowAllowed(uint96,address,bool)"
+    - "setAllowCorePoolFallback(uint96,bool)"
+    - "setPoolLabel(uint96,string)"
+- Normal Timelock can also execute the following functions:
+    - "setLiquidationIncentive(address,uint256)"
+    - "setLiquidationIncentive(uint96,address,uint256)"
+- And Guardian can execute the following functions:
+    - "setCollateralFactor(address,uint256,uint256)"
+    - "setCollateralFactor(uint96,address,uint256,uint256)"
+    - "setIsBorrowAllowed(uint96,address,bool)"
+
+**Revoked permissions**
+
+- “_setCollateralFactor(address,uint256)”, removed from every Timelock contract, because that function doesn’t exist anymore. Replaced by “setCollateralFactor(address,uint256,uint256)” and “setCollateralFactor(uint96,address,uint256,uint256)”
+- “_setLiquidationIncentive(uint256)”, removed from the Normal Timelock, because that function doesn’t exist anymore. Replaced by "setLiquidationIncentive(address,uint256)" and "setLiquidationIncentive(uint96,address,uint256)"
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits:** [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [HashDit](https://www.hashdit.io/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating that the new implementations (including the Comptroller facets), the updated permissions and the risk parameters are properly set on BNB Chain
+- **Deployment on testnet**: the same upgrade has been performed on BNB Chain testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit audit report (2025/09/19)](https://github.com/VenusProtocol/venus-protocol/blob/73fa9f21c321f9e1821a7b187aeca46033ca5484/audits/149_emode_certik_20250919.pdf)
+- [Quantstamp (2025/09/03)](https://github.com/VenusProtocol/venus-protocol/blob/73fa9f21c321f9e1821a7b187aeca46033ca5484/audits/150_emode_quantstamp_20250903.pdf)
+
+#### Deployed contracts
+
+BNB Chain
+
+- [Unitroller implementation (Diamond)](https://bscscan.com/address/0x6c151A4134006395D41319d713349660259DAB4e)
+- Facets:
+    - [MarketFacet](https://bscscan.com/address/0x6e9bD95830bb775fb9F24b9559f8894d92143CA1)
+    - [PolicyFacet](https://bscscan.com/address/0x7155227C2763228F236a0D858dccDB32740a2893)
+    - [RewardFacet](https://bscscan.com/address/0x1d903eEa9d98a6Ac071a1f4531dc6958B4629cBE)
+    - [SetterFacet](https://bscscan.com/address/0x4Fd17b7df6004E04A6298EdE065dE431D408fD9b)
+- [VAIController](https://bscscan.com/address/0x5134C9D11c397efdF36F828eEf23B14F3F399da4)
+- [VBep20 (VToken implementation)](https://bscscan.com/address/0xAF658DF443a937C88c955c737532E9a601ccEF8c)
+- [Liquidator](https://bscscan.com/address/0xD65297007411694aA18c2941a5EB2b6ed4E0b819)
+- [MarketConfigurationAggregator](https://bscscan.com/address/0x16bb2CEc0B286ceECca3aE195e378FDe264b43b4) (auxiliary contract only used in this VIP to set the risk parameters)
+- [ComptrollerLens](https://bscscan.com/address/0xd701C1fDAE34f9Cf242a4de19a2e7288f924EA1C)
+- [VenusLens](https://bscscan.com/address/0xf15A9c5aaDc327B383945D5821C7aC08Cdac7430)
+- [SnapshotLens](http://bscscan.com/address/0xDE876091531c92BFED078af29CAaD3dbd4157f7a)
+
+BNB Chain testnet
+
+- [Unitroller implementation (Diamond)](http://testnet.bscscan.com/address/0xCe314cA8be79435FB0E4ffc102DAcA172B676a47)
+- Facets:
+    - [MarketFacet](https://testnet.bscscan.com/address/0xD3D5f6c68677051e6855Fa38dca0cD6D56ED0c4f)
+    - [PolicyFacet](https://testnet.bscscan.com/address/0x4211061Bd8a648e62673681884C9D97B4A1aBB02)
+    - [RewardFacet](https://testnet.bscscan.com/address/0xDD150De13849fB0776B466114b95770714c8Cc9d)
+    - [SetterFacet](https://testnet.bscscan.com/address/0x3CCC9fC2fDA021ADb9C9FB0493C1a4a9357f4064)
+- [VAIController](https://testnet.bscscan.com/address/0xA8122Fe0F9db39E266DE7A5BF953Cd72a87fe345)
+- [VBep20 (VToken implementation)](https://testnet.bscscan.com/address/0x9c824EDa64aF04D160F9cB835C6AC95606077db0)
+- [Liquidator](https://testnet.bscscan.com/address/0x91070E5b5Ff60a6c122740EB326D1f80E9f470e7)
+- [MarketConfigurationAggregator](https://testnet.bscscan.com/address/0x7bbC692907f23E4b7170de0e1483323ea322BDbF) (auxiliary contract only used in this VIP to set the risk parameters)
+- [ComptrollerLens](https://testnet.bscscan.com/address/0xACbc75C2D0438722c75D9BD20844b5aFda4155ea)
+- [VenusLens](https://testnet.bscscan.com/address/0x01c4Ef2dD3327eee5F8dd29D825aDe730f225680)
+- [SnapshotLens](https://testnet.bscscan.com/address/0xBe9174A13577B016280aEc20a3b369C5BA272241)
+
+#### References
+
+- [E-Mode feature](https://github.com/VenusProtocol/venus-protocol/pull/614)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/601)
+- [Upgrade on BNB Chain testnet](https://testnet.bscscan.com/tx/0x7aba31bf8b75a857bccbb0b6941814588196555e3184db5726115de508ece5a1)
+- [Technical article about E-Mode](https://docs-v4.venus.io/technical-reference/reference-technical-articles/emode)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -553,4 +662,4 @@ export const vip550 = () => {
   );
 };
 
-export default vip550;
+export default vip547;

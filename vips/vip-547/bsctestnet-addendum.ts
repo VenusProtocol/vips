@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-550/utils/bsctestnet-addendum-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-547/utils/bsctestnet-addendum-cut-params.json";
 
 const bsctestnet = NETWORK_ADDRESSES.bsctestnet;
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
@@ -20,7 +20,7 @@ export const POOL_SPECS = {
   allowCorePoolFallback: true, // set to true
 };
 
-export const vip550 = () => {
+export const vip547 = () => {
   const meta = {
     version: "v2",
     title: "Emode in the BNB Core Pool",
@@ -98,4 +98,4 @@ export const vip550 = () => {
   );
 };
 
-export default vip550;
+export default vip547;

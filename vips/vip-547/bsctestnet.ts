@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-550/utils/bsctestnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-547/utils/bsctestnet-cut-params.json";
 
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const VAI_UNITROLLER = "0xf70C3C6b749BbAb89C081737334E74C9aFD4BE16";
@@ -278,7 +278,7 @@ export const MARKETS_BA = CORE_MARKETS.filter(market => !BORROW_PAUSED_MARKETS.i
   true,
 ]);
 
-export const vip550 = () => {
+export const vip547 = () => {
   const meta = {
     version: "v2",
     title: "Emode in the BNB Core Pool",
@@ -446,4 +446,4 @@ export const vip550 = () => {
   );
 };
 
-export default vip550;
+export default vip547;

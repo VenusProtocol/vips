@@ -14,8 +14,8 @@ import {
   POOL_SPECS,
   UNITROLLER,
   VAI_UNITROLLER,
-  vip550,
-} from "../../vips/vip-550/bsctestnet-addendum";
+  vip547,
+} from "../../vips/vip-547/bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
@@ -62,7 +62,7 @@ forking(65806620, async () => {
     });
   });
 
-  testVip("VIP-550", await vip550(), {
+  testVip("VIP-547", await vip547(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
