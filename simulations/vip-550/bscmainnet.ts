@@ -116,6 +116,37 @@ forking(62056649, async () => {
     const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
     const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
     await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
+
+    const SUSDE = "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2";
+    const USDE = "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34";
+    await setRedstonePrice(
+      bscmainnet.REDSTONE_ORACLE,
+      SUSDE,
+      "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0", // RedStone price feed for sUSDe/USDe
+      bscmainnet.NORMAL_TIMELOCK,
+      3153600000,
+    );
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      SUSDE, // sUSDe
+      "0x1a269eA1b209DA2c12bDCDab22635C9e6C5028B2", // SUSDE / USDE Exchange Rate
+      bscmainnet.NORMAL_TIMELOCK,
+      3153600000,
+    );
+    await setRedstonePrice(
+      bscmainnet.REDSTONE_ORACLE,
+      USDE,
+      "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb",
+      bscmainnet.NORMAL_TIMELOCK,
+      3153600000,
+    ); // RedStone Price Feed for USDe
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      USDE, // USDe
+      "0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC", // USDE / USD  Exchange Rate
+      bscmainnet.NORMAL_TIMELOCK,
+      3153600000,
+    );
   });
 
   describe("Pre-VIP state", async () => {
