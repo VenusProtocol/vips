@@ -254,12 +254,12 @@ export const CORE_MARKETS = [
     address: "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab",
     collateralFactor: 550000000000000000n,
   },
-  //   {
-  //     symbol: "vPT-sUSDE-26JUN2025",
-  //     underlying: "0xDD809435ba6c9d6903730f923038801781cA66ce",
-  //     address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
-  //     collateralFactor: 700000000000000000n,
-  //   },
+  {
+    symbol: "vPT-sUSDE-26JUN2025",
+    underlying: "0xDD809435ba6c9d6903730f923038801781cA66ce",
+    address: "0x9e4E5fed5Ac5B9F732d0D850A615206330Bf1866",
+    collateralFactor: 700000000000000000n,
+  },
   {
     symbol: "vsUSDe",
     underlying: "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2",

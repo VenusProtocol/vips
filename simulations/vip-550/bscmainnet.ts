@@ -49,6 +49,7 @@ import DIAMOND_ABI from "./abi/Diamond.json";
 import LIQUIDATOR_ABI from "./abi/Liquidator.json";
 import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
 import OLD_ABI from "./abi/OldComptroller.json";
+import REDSTONE_ABI from "./abi/RedstoneOracle.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
@@ -123,36 +124,12 @@ forking(62056649, async () => {
       tokenDecimals: 6,
     });
 
-    const SUSDE = "0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2";
-    const USDE = "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34";
-    await setRedstonePrice(
-      bscmainnet.REDSTONE_ORACLE,
-      SUSDE,
-      "0x5ED849a45B4608952161f45483F4B95BCEa7f8f0", // RedStone price feed for sUSDe/USDe
-      bscmainnet.NORMAL_TIMELOCK,
-      3153600000,
-    );
-    await setMaxStalePeriodInChainlinkOracle(
-      bscmainnet.CHAINLINK_ORACLE,
-      SUSDE, // sUSDe
-      "0x1a269eA1b209DA2c12bDCDab22635C9e6C5028B2", // SUSDE / USDE Exchange Rate
-      bscmainnet.NORMAL_TIMELOCK,
-      3153600000,
-    );
-    await setRedstonePrice(
-      bscmainnet.REDSTONE_ORACLE,
-      USDE,
-      "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb",
-      bscmainnet.NORMAL_TIMELOCK,
-      3153600000,
-    ); // RedStone Price Feed for USDe
-    await setMaxStalePeriodInChainlinkOracle(
-      bscmainnet.CHAINLINK_ORACLE,
-      USDE, // USDe
-      "0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC", // USDE / USD  Exchange Rate
-      bscmainnet.NORMAL_TIMELOCK,
-      3153600000,
-    );
+    const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
+    const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
+
+    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
+    const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
+    await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
   });
 
   describe("Pre-VIP state", async () => {
