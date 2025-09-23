@@ -430,7 +430,7 @@ BNB Chain
 - [Unitroller implementation (Diamond)](https://bscscan.com/address/0x6c151A4134006395D41319d713349660259DAB4e)
 - Facets:
     - [MarketFacet](https://bscscan.com/address/0x6e9bD95830bb775fb9F24b9559f8894d92143CA1)
-    - [PolicyFacet](https://bscscan.com/address/0x7155227C2763228F236a0D858dccDB32740a2893)
+    - [PolicyFacet](https://bscscan.com/address/0x529aE2E71E0836bE7378a8D47657E805829c6b3C)
     - [RewardFacet](https://bscscan.com/address/0x1d903eEa9d98a6Ac071a1f4531dc6958B4629cBE)
     - [SetterFacet](https://bscscan.com/address/0x4Fd17b7df6004E04A6298EdE065dE431D408fD9b)
 - [VAIController](https://bscscan.com/address/0x5134C9D11c397efdF36F828eEf23B14F3F399da4)
