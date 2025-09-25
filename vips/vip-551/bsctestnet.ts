@@ -7,8 +7,8 @@ import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const PT_sUSDe_30Oct2025 = "0x3099fc25fCdE347D42a22329147d47aB0b0eb6Dd";
-export const vPT_sUSDe_30Oct2025 = "0x353B95109F6CB13b8C601f9527DFd8A0beE750ae";
+export const PT_USDe_30Oct2025 = "0x3099fc25fCdE347D42a22329147d47aB0b0eb6Dd";
+export const vPT_USDe_30Oct2025 = "0x353B95109F6CB13b8C601f9527DFd8A0beE750ae";
 export const RATE_MODEL = "0x0acdc336EA232E4C31D91FCb9B93b10921A3fCEF";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
@@ -40,11 +40,11 @@ export const converterBaseAssets = {
 
 export const marketSpecs = {
   vToken: {
-    address: vPT_sUSDe_30Oct2025,
+    address: vPT_USDe_30Oct2025,
     name: "Venus PT-USDe-30Oct2025",
     symbol: "vPT-USDe-30Oct2025",
     underlying: {
-      address: PT_sUSDe_30Oct2025,
+      address: PT_USDe_30Oct2025,
       decimals: 18,
       symbol: "PT-USDe-30Oct2025",
     },
@@ -80,7 +80,7 @@ export const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
 export const EMODE_POOL_SPECS = {
   label: "Stablecoins",
   id: 1,
-  markets: [vUSDT, vUSDC, vPT_sUSDe_30Oct2025],
+  markets: [vUSDT, vUSDC, vPT_USDe_30Oct2025],
   marketsConfig: [
     {
       address: vUSDT,
@@ -97,7 +97,7 @@ export const EMODE_POOL_SPECS = {
       borrowAllowed: true,
     },
     {
-      address: vPT_sUSDe_30Oct2025,
+      address: vPT_USDe_30Oct2025,
       collateralFactor: parseUnits("0.75", 18),
       liquidationThreshold: parseUnits("0.8", 18),
       liquidationIncentive: parseUnits("1.04", 18),
@@ -154,7 +154,7 @@ export const vip551 = () => {
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
           [
-            PT_sUSDe_30Oct2025,
+            PT_USDe_30Oct2025,
             [PT_SUSDE_PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
             false,
@@ -208,7 +208,7 @@ export const vip551 = () => {
         ],
       },
       {
-        target: PT_sUSDe_30Oct2025,
+        target: PT_USDe_30Oct2025,
         signature: "faucet(uint256)",
         params: [marketSpecs.initialSupply.amount],
       },
@@ -248,7 +248,7 @@ export const vip551 = () => {
       },
 
       // Configure convertersp
-      ...configureConverters([PT_sUSDe_30Oct2025]),
+      ...configureConverters([PT_USDe_30Oct2025]),
 
       // Add markets to Stablecoins emode
       {
