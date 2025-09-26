@@ -109,14 +109,14 @@ export const EMODE_POOL_SPECS = {
       address: vUSDT,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("0", 18),
+      liquidationIncentive: parseUnits("1", 18),
       borrowAllowed: true,
     },
     vUSDC: {
       address: vUSDC,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("0", 18),
+      liquidationIncentive: parseUnits("1", 18),
       borrowAllowed: true,
     },
     vPT_USDe: {
@@ -315,6 +315,24 @@ export const vip551 = () => {
           EMODE_POOL_SPECS.id,
           EMODE_POOL_SPECS.marketsConfig.vPT_USDe.address,
           EMODE_POOL_SPECS.marketsConfig.vPT_USDe.liquidationIncentive,
+        ],
+      },
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "setLiquidationIncentive(uint96,address,uint256)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vUSDT.address,
+          EMODE_POOL_SPECS.marketsConfig.vUSDT.liquidationIncentive,
+        ],
+      },
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "setLiquidationIncentive(uint96,address,uint256)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vUSDC.address,
+          EMODE_POOL_SPECS.marketsConfig.vUSDC.liquidationIncentive,
         ],
       },
       {

@@ -169,7 +169,7 @@ forking(62523198, async () => {
           "BorrowAllowedUpdated",
           "WithdrawTreasuryBEP20",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 2, 1],
       );
 
       await expectEvents(
@@ -212,7 +212,7 @@ forking(62523198, async () => {
     checkRiskParameters(marketSpecs.vToken.address, marketSpecs.vToken, marketSpecs.riskParameters);
 
     it("check price PT-USDe-30Oct2025", async () => {
-      const expectedPrice = "992487656038106897"; 
+      const expectedPrice = "992487656038106897";
       expect(await resilientOracle.getPrice(marketSpecs.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address)).to.equal(expectedPrice);
     });
