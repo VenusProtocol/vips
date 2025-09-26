@@ -18,6 +18,7 @@ import {
   marketSpecs,
   vip551,
 } from "../../vips/vip-551/bsctestnet";
+import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -94,10 +95,19 @@ forking(66718922, async () => {
         ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
         [1, 1, 1],
       );
+
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
+    it("Fast-track timelock is allowed to add new markets to the Core pool", async () => {
+      const role = ethers.utils.solidityPack(["address", "string"], [bsctestnet.UNITROLLER, "_supportMarket(address)"]);
+      const roleHash = ethers.utils.keccak256(role);
+      const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+      expect(await acm.hasRole(roleHash, bsctestnet.FAST_TRACK_TIMELOCK)).to.be.true;
+    });
+
     it("check new IRM", async () => {
       expect(await vPTUSDe.interestRateModel()).to.equal(RATE_MODEL);
     });

@@ -15,6 +15,8 @@ export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD
 export const PT_USDe_PENDLE_ORACLE = "0x9d223177a0Ea5505EbF3665f950093091f04739b";
 const TWAP_DURATION = 1800;
 
+export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
+
 // Converters
 const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
@@ -349,6 +351,11 @@ export const vip551 = () => {
           EMODE_POOL_SPECS.marketsConfig.vUSDC.address,
           EMODE_POOL_SPECS.marketsConfig.vUSDC.borrowAllowed,
         ],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [bsctestnet.UNITROLLER, "_supportMarket(address)", bsctestnet.FAST_TRACK_TIMELOCK],
       },
     ],
     meta,
