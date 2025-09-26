@@ -1,64 +1,146 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
-import { forking, testVip } from "src/vip-framework";
+import {
+  expectEvents,
+  initMainnetUser,
+  setMaxStalePeriodInBinanceOracle,
+  setMaxStalePeriodInChainlinkOracle,
+  setRedstonePrice,
+} from "src/utils";
+import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
+import vip547 from "../../vips/vip-547/bscmainnet";
+import { CORE_MARKETS } from "../../vips/vip-547/bscmainnet";
 import {
   CONVERSION_INCENTIVE,
   EMODE_POOL_SPECS,
   PROTOCOL_SHARE_RESERVE,
+  PT_USDe_30OCT2025,
   RATE_MODEL,
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
-  vip551,
-} from "../../vips/vip-551/bsctestnet";
+  vip548,
+} from "../../vips/vip-548/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
 import VTOKEN_ABI from "./abi/VToken.json";
+import VTREASURY_ABI from "./abi/VTreasury.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(66718922, async () => {
+const setStalePeriodForVip547 = async () => {
+  for (const market of CORE_MARKETS) {
+    // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.CHAINLINK_ORACLE,
+      market.underlying,
+      ethers.constants.AddressZero,
+      bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+
+    await setMaxStalePeriodInChainlinkOracle(
+      bscmainnet.REDSTONE_ORACLE,
+      market.underlying,
+      ethers.constants.AddressZero,
+      bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+    await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, market.symbol.slice(1), 315360000);
+  }
+
+  const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+  const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
+  await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
+
+  const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
+  const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
+  await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
+
+  const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
+  const TRX_REDSTONE_FEED = "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916";
+  await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, TRX, TRX_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK, 3153600000, {
+    tokenDecimals: 6,
+  });
+
+  const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
+  const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
+
+  const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
+  const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, ethers.provider);
+  const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+
+  await resilientOracle
+    .connect(impersonatedTimelock)
+    .setTokenConfig([
+      PTsUSDE_26JUN2025,
+      [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+      [true, false, false],
+      false,
+    ]);
+  await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
+};
+
+forking(62523198, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let PTUSDe: Contract;
   let vPTUSDe: Contract;
 
   before(async () => {
+    await setStalePeriodForVip547();
+    await pretendExecutingVip(await vip547(), NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
     const provider = ethers.provider;
     comptroller = new ethers.Contract(marketSpecs.vToken.comptroller, COMPTROLLER_ABI, provider);
     PTUSDe = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
     vPTUSDe = new ethers.Contract(marketSpecs.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+    resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
     // set maxStalePeriod
-    const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
-    const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+    const USDT = "0x55d398326f99059fF775485246999027B3197955";
+    const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 
     await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
       USDT,
       ethers.constants.AddressZero,
-      NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
       315360000,
     );
     await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
       USDC,
       ethers.constants.AddressZero,
-      NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
       315360000,
     );
+
+    const redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, ethers.provider);
+    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
+    const PT_USDe_FIXED_PRICE = parseUnits("992132780932187177", 18);
+
+    await resilientOracle
+      .connect(impersonatedTimelock)
+      .setTokenConfig([
+        PT_USDe_30OCT2025,
+        [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+        [true, false, false],
+        false,
+      ]);
+
+    await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(PT_USDe_30OCT2025, PT_USDe_FIXED_PRICE);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -68,11 +150,11 @@ forking(66718922, async () => {
     });
   });
 
-  testVip("VIP-551", await vip551(), {
+  testVip("VIP-548", await vip548(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, VTOKEN_ABI],
+        [COMPTROLLER_ABI, VTOKEN_ABI, VTREASURY_ABI],
         [
           "MarketListed",
           "NewSupplyCap",
@@ -85,8 +167,9 @@ forking(66718922, async () => {
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
+          "WithdrawTreasuryBEP20",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 2, 1],
       );
 
       await expectEvents(
@@ -95,17 +178,15 @@ forking(66718922, async () => {
         ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
         [1, 1, 1],
       );
-
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
     it("Fast-track timelock is allowed to add new markets to the Core pool", async () => {
-      const role = ethers.utils.solidityPack(["address", "string"], [bsctestnet.UNITROLLER, "_supportMarket(address)"]);
+      const role = ethers.utils.solidityPack(["address", "string"], [bscmainnet.UNITROLLER, "_supportMarket(address)"]);
       const roleHash = ethers.utils.keccak256(role);
-      const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-      expect(await acm.hasRole(roleHash, bsctestnet.FAST_TRACK_TIMELOCK)).to.be.true;
+      const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+      expect(await acm.hasRole(roleHash, bscmainnet.FAST_TRACK_TIMELOCK)).to.be.true;
     });
 
     it("check new IRM", async () => {
@@ -131,17 +212,17 @@ forking(66718922, async () => {
     checkRiskParameters(marketSpecs.vToken.address, marketSpecs.vToken, marketSpecs.riskParameters);
 
     it("check price PT-USDe-30Oct2025", async () => {
-      const expectedPrice = "992132780932187177"; // $0.992...
+      const expectedPrice = "992487656038106897";
       expect(await resilientOracle.getPrice(marketSpecs.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address)).to.equal(expectedPrice);
     });
 
     it("market have correct owner", async () => {
-      expect(await vPTUSDe.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await vPTUSDe.admin()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("market have correct ACM", async () => {
-      expect(await vPTUSDe.accessControlManager()).to.equal(bsctestnet.ACCESS_CONTROL_MANAGER);
+      expect(await vPTUSDe.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
     });
 
     it("market should have correct protocol share reserve", async () => {
@@ -177,7 +258,7 @@ forking(66718922, async () => {
     });
 
     it("should not leave any vTokens in the timelock", async () => {
-      const vPTUSDeTimelockBalance = await vPTUSDe.balanceOf(bsctestnet.NORMAL_TIMELOCK);
+      const vPTUSDeTimelockBalance = await vPTUSDe.balanceOf(bscmainnet.NORMAL_TIMELOCK);
       expect(vPTUSDeTimelockBalance).to.equal(0);
     });
 

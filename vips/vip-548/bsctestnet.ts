@@ -5,29 +5,30 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
-export const PT_USDe_30OCT2025 = "0x607C834cfb7FCBbb341Cbe23f77A6E83bCf3F55c";
-export const vPT_USDe_30OCT2025 = "0x6D0cDb3355c93A0cD20071aBbb3622731a95c73E";
-export const RATE_MODEL = "0x6D7c746D4A9170F1731F89580414235dA47787fc";
+const { bsctestnet } = NETWORK_ADDRESSES;
+export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
+export const PT_USDe_30Oct2025 = "0x0c98334aCF440b9936D9cc1d99dc1A77bf26a93B";
+export const vPT_USDe_30Oct2025 = "0x86a94290f2B8295daA3e53bA1286f2Ff21199143";
+export const RATE_MODEL = "0x0acdc336EA232E4C31D91FCb9B93b10921A3fCEF";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
-export const PT_USDe_PENDLE_ORACLE = "0xAa5138e86c078fd2859a929173B3870b5003EC30";
-export const ACM = "0x4788629abc6cfca10f9f969efdeaa1cf70c23555";
+export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
+export const PT_USDe_PENDLE_ORACLE = "0x9d223177a0Ea5505EbF3665f950093091f04739b";
+const TWAP_DURATION = 1800;
+
+export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 // Converters
-const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
-const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
-const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
-const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
-const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
-const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
-const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
-const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
-const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
-const WBNB_BURN_CONVERTER = "0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE";
+const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
+const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
+const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
+const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
+const XVS = "0xB9e0E753630434d7863528cc73CB7AC638a7c8ff";
+const RISK_FUND_CONVERTER = "0x32Fbf7bBbd79355B86741E3181ef8c1D9bD309Bb";
+const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
+const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13";
+const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
+const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
+const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
 export const CONVERSION_INCENTIVE = 1e14;
 
 // Capped oracles
@@ -60,22 +61,21 @@ export const converterBaseAssets = {
   [BTCB_PRIME_CONVERTER]: BTCB,
   [ETH_PRIME_CONVERTER]: ETH,
   [XVS_VAULT_CONVERTER]: XVS,
-  [WBNB_BURN_CONVERTER]: WBNB,
 };
 
 export const marketSpecs = {
   vToken: {
-    address: vPT_USDe_30OCT2025,
+    address: vPT_USDe_30Oct2025,
     name: "Venus PT-USDe-30OCT2025",
     symbol: "vPT-USDe-30OCT2025",
     underlying: {
-      address: PT_USDe_30OCT2025,
+      address: PT_USDe_30Oct2025,
       decimals: 18,
-      symbol: "PT-USDe-30OCT2025",
+      symbol: "PT-USDe-30Oct2025",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
-    comptroller: bscmainnet.UNITROLLER,
+    comptroller: bsctestnet.UNITROLLER,
     isLegacyPool: true,
   },
   interestRateModel: {
@@ -94,36 +94,36 @@ export const marketSpecs = {
     borrowCap: parseUnits("0", 18),
   },
   initialSupply: {
-    amount: parseUnits("100", 18),
-    vTokenReceiver: bscmainnet.VTREASURY,
+    amount: parseUnits("300", 18),
+    vTokenReceiver: bsctestnet.VTREASURY,
     vTokensToBurn: parseUnits("100", 8),
   },
 };
 
 // stablecoin emode group
-export const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+export const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
+export const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
 export const EMODE_POOL_SPECS = {
   label: "Stablecoins",
   id: 1,
-  markets: [vUSDT, vUSDC, vPT_USDe_30OCT2025],
+  markets: [vUSDT, vUSDC, vPT_USDe_30Oct2025],
   marketsConfig: {
     vUSDT: {
       address: vUSDT,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1", 18),
+      liquidationIncentive: parseUnits("0", 18),
       borrowAllowed: true,
     },
     vUSDC: {
       address: vUSDC,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1", 18),
+      liquidationIncentive: parseUnits("0", 18),
       borrowAllowed: true,
     },
     vPT_USDe: {
-      address: vPT_USDe_30OCT2025,
+      address: vPT_USDe_30Oct2025,
       collateralFactor: parseUnits("0.90", 18),
       liquidationThreshold: parseUnits("0.92", 18),
       liquidationIncentive: parseUnits("1.08", 18),
@@ -158,11 +158,11 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip551 = () => {
+export const vip548 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-551 [BNB Chain] Add PT-USDe-30Oct2025 markets to the Core pool",
-    description: "VIP-551 [BNB Chain] Add PT-USDe-30Oct2025 markets to the Core pool",
+    title: "VIP-548 [BNB Chain] Add PT-USDe-30Oct2025 markets to the Core pool",
+    description: "VIP-548 [BNB Chain] Add PT-USDe-30Oct2025 markets to the Core pool",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -171,11 +171,16 @@ export const vip551 = () => {
   return makeProposal(
     [
       {
-        target: bscmainnet.RESILIENT_ORACLE,
+        target: MOCK_PENDLE_PT_ORACLE,
+        signature: "setPtToSyRate(address,uint32,uint256)",
+        params: ["0x0000000000000000000000000000000000000004", TWAP_DURATION, parseUnits("0.992132780932187177", 18)],
+      },
+      {
+        target: bsctestnet.RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
         params: [
           [
-            PT_USDe_30OCT2025,
+            PT_USDe_30Oct2025,
             [PT_USDe_PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
             false,
@@ -223,7 +228,7 @@ export const vip551 = () => {
       {
         target: marketSpecs.vToken.address,
         signature: "setAccessControlManager(address)",
-        params: [bscmainnet.ACCESS_CONTROL_MANAGER],
+        params: [bsctestnet.ACCESS_CONTROL_MANAGER],
       },
       {
         target: marketSpecs.vToken.address,
@@ -255,9 +260,9 @@ export const vip551 = () => {
         params: [marketSpecs.vToken.address, marketSpecs.riskParameters.liquidationIncentive],
       },
       {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpecs.vToken.underlying.address, marketSpecs.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+        target: PT_USDe_30Oct2025,
+        signature: "faucet(uint256)",
+        params: [marketSpecs.initialSupply.amount],
       },
       {
         target: marketSpecs.vToken.underlying.address,
@@ -286,6 +291,15 @@ export const vip551 = () => {
         signature: "transfer(address,uint256)",
         params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
       },
+      {
+        target: marketSpecs.vToken.comptroller,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [
+          0, // corePoolId
+          marketSpecs.vToken.address,
+          false,
+        ],
+      },
       // Pause Borrow actions
       {
         target: marketSpecs.vToken.comptroller,
@@ -293,16 +307,16 @@ export const vip551 = () => {
         params: [[marketSpecs.vToken.address], [2], true],
       },
       // Configure converters
-      ...configureConverters([PT_USDe_30OCT2025]),
+      ...configureConverters([PT_USDe_30Oct2025]),
 
       // Add markets to Stablecoins emode
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL_SPECS.markets.length).fill(EMODE_POOL_SPECS.id), EMODE_POOL_SPECS.markets],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setCollateralFactor(uint96,address,uint256,uint256)",
         params: [
           EMODE_POOL_SPECS.id,
@@ -312,7 +326,7 @@ export const vip551 = () => {
         ],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setLiquidationIncentive(uint96,address,uint256)",
         params: [
           EMODE_POOL_SPECS.id,
@@ -321,25 +335,7 @@ export const vip551 = () => {
         ],
       },
       {
-        target: bscmainnet.UNITROLLER,
-        signature: "setLiquidationIncentive(uint96,address,uint256)",
-        params: [
-          EMODE_POOL_SPECS.id,
-          EMODE_POOL_SPECS.marketsConfig.vUSDT.address,
-          EMODE_POOL_SPECS.marketsConfig.vUSDT.liquidationIncentive,
-        ],
-      },
-      {
-        target: bscmainnet.UNITROLLER,
-        signature: "setLiquidationIncentive(uint96,address,uint256)",
-        params: [
-          EMODE_POOL_SPECS.id,
-          EMODE_POOL_SPECS.marketsConfig.vUSDC.address,
-          EMODE_POOL_SPECS.marketsConfig.vUSDC.liquidationIncentive,
-        ],
-      },
-      {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [
           EMODE_POOL_SPECS.id,
@@ -348,7 +344,7 @@ export const vip551 = () => {
         ],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [
           EMODE_POOL_SPECS.id,
@@ -359,7 +355,7 @@ export const vip551 = () => {
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [bscmainnet.UNITROLLER, "_supportMarket(address)", bscmainnet.FAST_TRACK_TIMELOCK],
+        params: [bsctestnet.UNITROLLER, "_supportMarket(address)", bsctestnet.FAST_TRACK_TIMELOCK],
       },
     ],
     meta,
@@ -367,4 +363,4 @@ export const vip551 = () => {
   );
 };
 
-export default vip551;
+export default vip548;
