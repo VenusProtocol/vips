@@ -171,6 +171,15 @@ forking(66718922, async () => {
       expect(vPTUSDeTimelockBalance).to.equal(0);
     });
 
+    it("should pause vPTUSDe market", async () => {
+      expect(await comptroller.actionPaused(marketSpecs.vToken.address, 2)).to.equal(true);
+    });
+
+    it("should set borrowAllowed to False for vPTUSDe market", async () => {
+      const vPTUSDeMarket = await comptroller.markets(marketSpecs.vToken.address);
+      expect(vPTUSDeMarket.isBorrowAllowed).to.equal(false);
+    });
+
     describe("Converters", () => {
       for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
         const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);

@@ -289,7 +289,21 @@ export const vip551 = () => {
         signature: "transfer(address,uint256)",
         params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
       },
-
+      {
+        target: marketSpecs.vToken.comptroller,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [
+          0, // corePoolId
+          marketSpecs.vToken.address,
+          false,
+        ],
+      },
+      // Pause Borrow actions
+      {
+        target: marketSpecs.vToken.comptroller,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[marketSpecs.vToken.address], [2], true],
+      },
       // Configure converters
       ...configureConverters([PT_USDe_30Oct2025]),
 
