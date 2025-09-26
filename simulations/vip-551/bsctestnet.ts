@@ -18,6 +18,7 @@ import {
   marketSpecs,
   vip551,
 } from "../../vips/vip-551/bsctestnet";
+import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -60,7 +61,7 @@ forking(66694352, async () => {
   });
 
   describe("Pre-VIP behavior", async () => {
-    it("check PT-sUSDe-30Oct2025 market not listed", async () => {
+    it("check PT-USDe-30Oct2025 market not listed", async () => {
       const market = await comptroller.markets(marketSpecs.vToken.underlying.address);
       expect(market.isListed).to.equal(false);
     });
@@ -85,6 +86,13 @@ forking(66694352, async () => {
           "BorrowAllowedUpdated",
         ],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 2],
+      );
+
+      await expectEvents(
+        txResponse,
+        [CAPPED_ORACLE_ABI],
+        ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
+        [1, 1, 1],
       );
     },
   });
@@ -112,8 +120,8 @@ forking(66694352, async () => {
 
     checkRiskParameters(marketSpecs.vToken.address, marketSpecs.vToken, marketSpecs.riskParameters);
 
-    it("check price PT-sUSDe-30Oct2025", async () => {
-      const expectedPrice = "1000000000000000000";
+    it("check price PT-USDe-30Oct2025", async () => {
+      const expectedPrice = "992132780932187177"; // $0.992...
       expect(await resilientOracle.getPrice(marketSpecs.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address)).to.equal(expectedPrice);
     });
