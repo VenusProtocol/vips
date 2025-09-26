@@ -7,12 +7,12 @@ import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const PT_USDe_30Oct2025 = "0x3099fc25fCdE347D42a22329147d47aB0b0eb6Dd";
-export const vPT_USDe_30Oct2025 = "0x353B95109F6CB13b8C601f9527DFd8A0beE750ae";
+export const PT_USDe_30Oct2025 = "0x0c98334aCF440b9936D9cc1d99dc1A77bf26a93B";
+export const vPT_USDe_30Oct2025 = "0x86a94290f2B8295daA3e53bA1286f2Ff21199143";
 export const RATE_MODEL = "0x0acdc336EA232E4C31D91FCb9B93b10921A3fCEF";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
-export const PT_USDe_PENDLE_ORACLE = "0x6c41e88f4ac0BD30e57cE4094CFE7524661F5Ef3";
+export const PT_USDe_PENDLE_ORACLE = "0x9d223177a0Ea5505EbF3665f950093091f04739b";
 const TWAP_DURATION = 1800;
 
 // Converters
@@ -64,8 +64,8 @@ export const converterBaseAssets = {
 export const marketSpecs = {
   vToken: {
     address: vPT_USDe_30Oct2025,
-    name: "Venus PT-USDe-30Oct2025",
-    symbol: "vPT-USDe-30Oct2025",
+    name: "Venus PT-USDe-30OCT2025",
+    symbol: "vPT-USDe-30OCT2025",
     underlying: {
       address: PT_USDe_30Oct2025,
       decimals: 18,
@@ -105,29 +105,29 @@ export const EMODE_POOL_SPECS = {
   label: "Stablecoins",
   id: 1,
   markets: [vUSDT, vUSDC, vPT_USDe_30Oct2025],
-  marketsConfig: [
-    {
+  marketsConfig: {
+    vUSDT: {
       address: vUSDT,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1.08", 18),
+      liquidationIncentive: parseUnits("0", 18),
       borrowAllowed: true,
     },
-    {
+    vUSDC: {
       address: vUSDC,
-      collateralFactor: parseUnits("0.", 18),
+      collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1.08", 18),
+      liquidationIncentive: parseUnits("0", 18),
       borrowAllowed: true,
     },
-    {
+    vPT_USDe: {
       address: vPT_USDe_30Oct2025,
       collateralFactor: parseUnits("0.90", 18),
       liquidationThreshold: parseUnits("0.92", 18),
       liquidationIncentive: parseUnits("1.08", 18),
       borrowAllowed: false,
     },
-  ],
+  },
 };
 
 export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumber) => {
@@ -290,7 +290,7 @@ export const vip551 = () => {
         params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
       },
 
-      // Configure convertersp
+      // Configure converters
       ...configureConverters([PT_USDe_30Oct2025]),
 
       // Add markets to Stablecoins emode
@@ -299,28 +299,43 @@ export const vip551 = () => {
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL_SPECS.markets.length).fill(EMODE_POOL_SPECS.id), EMODE_POOL_SPECS.markets],
       },
-
-      ...EMODE_POOL_SPECS.marketsConfig.map(market => {
-        return {
-          target: bsctestnet.UNITROLLER,
-          signature: "setCollateralFactor(uint96,address,uint256,uint256)",
-          params: [EMODE_POOL_SPECS.id, market.address, market.collateralFactor, market.liquidationThreshold],
-        };
-      }),
-      ...EMODE_POOL_SPECS.marketsConfig.map(market => {
-        return {
-          target: bsctestnet.UNITROLLER,
-          signature: "setLiquidationIncentive(uint96,address,uint256)",
-          params: [EMODE_POOL_SPECS.id, market.address, market.liquidationIncentive],
-        };
-      }),
-      ...EMODE_POOL_SPECS.marketsConfig.map(market => {
-        return {
-          target: bsctestnet.UNITROLLER,
-          signature: "setIsBorrowAllowed(uint96,address,bool)",
-          params: [EMODE_POOL_SPECS.id, market.address, market.borrowAllowed],
-        };
-      }),
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vPT_USDe.address,
+          EMODE_POOL_SPECS.marketsConfig.vPT_USDe.collateralFactor,
+          EMODE_POOL_SPECS.marketsConfig.vPT_USDe.liquidationThreshold,
+        ],
+      },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setLiquidationIncentive(uint96,address,uint256)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vPT_USDe.address,
+          EMODE_POOL_SPECS.marketsConfig.vPT_USDe.liquidationIncentive,
+        ],
+      },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vUSDT.address,
+          EMODE_POOL_SPECS.marketsConfig.vUSDT.borrowAllowed,
+        ],
+      },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vUSDC.address,
+          EMODE_POOL_SPECS.marketsConfig.vUSDC.borrowAllowed,
+        ],
+      },
     ],
     meta,
     ProposalType.REGULAR,

@@ -27,7 +27,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(66694352, async () => {
+forking(66718922, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let PTUSDe: Contract;
@@ -85,7 +85,7 @@ forking(66694352, async () => {
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 2],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2],
       );
 
       await expectEvents(
@@ -187,14 +187,14 @@ forking(66694352, async () => {
 
     describe("emode", () => {
       it("should set the correct risk parameters to all pool markets", async () => {
-        for (const market of EMODE_POOL_SPECS.marketsConfig) {
-          const marketData = await comptroller.poolMarkets(EMODE_POOL_SPECS.id, market.address);
+        for (const [market, config] of Object.entries(EMODE_POOL_SPECS.marketsConfig)) {
+          const marketData = await comptroller.poolMarkets(EMODE_POOL_SPECS.id, config.address);
           expect(marketData.marketPoolId).to.be.equal(EMODE_POOL_SPECS.id);
           expect(marketData.isListed).to.be.equal(true);
-          expect(marketData.collateralFactorMantissa).to.be.equal(market.collateralFactor);
-          expect(marketData.liquidationThresholdMantissa).to.be.equal(market.liquidationThreshold);
-          expect(marketData.liquidationIncentiveMantissa).to.be.equal(market.liquidationIncentive);
-          expect(marketData.isBorrowAllowed).to.be.equal(market.borrowAllowed);
+          expect(marketData.collateralFactorMantissa).to.be.equal(config.collateralFactor);
+          expect(marketData.liquidationThresholdMantissa).to.be.equal(config.liquidationThreshold);
+          expect(marketData.liquidationIncentiveMantissa).to.be.equal(config.liquidationIncentive);
+          expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
         }
       });
     });
