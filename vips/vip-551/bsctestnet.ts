@@ -12,7 +12,7 @@ export const vPT_USDe_30Oct2025 = "0x353B95109F6CB13b8C601f9527DFd8A0beE750ae";
 export const RATE_MODEL = "0x0acdc336EA232E4C31D91FCb9B93b10921A3fCEF";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
-export const PT_SUSDE_PENDLE_ORACLE = "0x1260A519BF006C5eabc6Ac7c88504eE7C587569B";
+export const PT_USDe_PENDLE_ORACLE = "0x6c41e88f4ac0BD30e57cE4094CFE7524661F5Ef3";
 const TWAP_DURATION = 1800;
 
 // Converters
@@ -61,10 +61,11 @@ export const marketSpecs = {
     kink: "0.8",
   },
   riskParameters: {
-    collateralFactor: parseUnits("0.7", 18),
-    liquidationThreshold: parseUnits("0.75", 18),
+    collateralFactor: parseUnits("0", 18),
+    liquidationThreshold: parseUnits("0", 18),
+    liquidationIncentive: parseUnits("1", 18),
     reserveFactor: parseUnits("0", 18),
-    supplyCap: parseUnits("2000000", 18),
+    supplyCap: parseUnits("1000000", 18),
     borrowCap: parseUnits("0", 18),
   },
   initialSupply: {
@@ -86,21 +87,21 @@ export const EMODE_POOL_SPECS = {
       address: vUSDT,
       collateralFactor: parseUnits("0", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1.04", 18),
+      liquidationIncentive: parseUnits("1.08", 18),
       borrowAllowed: true,
     },
     {
       address: vUSDC,
       collateralFactor: parseUnits("0.", 18),
       liquidationThreshold: parseUnits("0", 18),
-      liquidationIncentive: parseUnits("1.04", 18),
+      liquidationIncentive: parseUnits("1.08", 18),
       borrowAllowed: true,
     },
     {
       address: vPT_USDe_30Oct2025,
-      collateralFactor: parseUnits("0.75", 18),
-      liquidationThreshold: parseUnits("0.8", 18),
-      liquidationIncentive: parseUnits("1.04", 18),
+      collateralFactor: parseUnits("0.90", 18),
+      liquidationThreshold: parseUnits("0.92", 18),
+      liquidationIncentive: parseUnits("1.08", 18),
       borrowAllowed: false,
     },
   ],
@@ -147,7 +148,7 @@ export const vip551 = () => {
       {
         target: MOCK_PENDLE_PT_ORACLE,
         signature: "setPtToSyRate(address,uint32,uint256)",
-        params: ["0x0000000000000000000000000000000000000003", TWAP_DURATION, parseUnits("0.85", 18)],
+        params: ["0x0000000000000000000000000000000000000003", TWAP_DURATION, parseUnits("1", 18)],
       },
       {
         target: bsctestnet.RESILIENT_ORACLE,
@@ -155,7 +156,7 @@ export const vip551 = () => {
         params: [
           [
             PT_USDe_30Oct2025,
-            [PT_SUSDE_PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [PT_USDe_PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
             [true, false, false],
             false,
           ],
@@ -208,6 +209,11 @@ export const vip551 = () => {
         ],
       },
       {
+        target: marketSpecs.vToken.comptroller,
+        signature: "setLiquidationIncentive(address,uint256)",
+        params: [marketSpecs.vToken.address, marketSpecs.riskParameters.liquidationIncentive],
+      },
+      {
         target: PT_USDe_30Oct2025,
         signature: "faucet(uint256)",
         params: [marketSpecs.initialSupply.amount],
@@ -227,24 +233,17 @@ export const vip551 = () => {
         signature: "approve(address,uint256)",
         params: [marketSpecs.vToken.address, 0],
       },
-      // Burn some vTokens (on testnet transfer to VTreasury)
+      // Burn some vTokens
       {
         target: marketSpecs.vToken.address,
         signature: "transfer(address,uint256)",
-        params: [bsctestnet.VTREASURY, marketSpecs.initialSupply.vTokensToBurn],
+        params: [ethers.constants.AddressZero, marketSpecs.initialSupply.vTokensToBurn],
       },
       // Transfer leftover vTokens to receiver
       {
         target: marketSpecs.vToken.address,
         signature: "transfer(address,uint256)",
         params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
-      },
-
-      // Pause actions
-      {
-        target: bsctestnet.UNITROLLER,
-        signature: "_setActionsPaused(address[],uint8[],bool)",
-        params: [[marketSpecs.vToken.address], [2], true],
       },
 
       // Configure convertersp

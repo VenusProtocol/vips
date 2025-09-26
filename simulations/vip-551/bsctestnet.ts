@@ -26,7 +26,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(66611487, async () => {
+forking(66694352, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let PTUSDe: Contract;
@@ -84,7 +84,7 @@ forking(66611487, async () => {
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 2, 2, 3, 2],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 2],
       );
     },
   });
@@ -113,7 +113,7 @@ forking(66611487, async () => {
     checkRiskParameters(marketSpecs.vToken.address, marketSpecs.vToken, marketSpecs.riskParameters);
 
     it("check price PT-sUSDe-30Oct2025", async () => {
-      const expectedPrice = "935000000000000000";
+      const expectedPrice = "1000000000000000000";
       expect(await resilientOracle.getPrice(marketSpecs.vToken.underlying.address)).to.equal(expectedPrice);
       expect(await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address)).to.equal(expectedPrice);
     });
@@ -142,10 +142,19 @@ forking(66611487, async () => {
       expect(PTUSDeBalance).to.equal(marketSpecs.initialSupply.amount);
     });
 
-    it("should burn vTokens (on testnet transfer to VTreasury) and transfer vTokens to receiver", async () => {
-      const vPTUSDeReceiverBalance = await vPTUSDe.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
-      expect(vPTUSDeReceiverBalance).to.equal(
-        convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate),
+    it("should burn vTokens", async () => {
+      const vPTUSDeBalanceBurned = await vPTUSDe.balanceOf(ethers.constants.AddressZero);
+
+      expect(vPTUSDeBalanceBurned).to.equal(marketSpecs.initialSupply.vTokensToBurn);
+    });
+
+    it("should transfer remaining vTokens to receiver", async () => {
+      const vPTUSDReceiverBalance = await vPTUSDe.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
+
+      expect(vPTUSDReceiverBalance).to.equal(
+        convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate).sub(
+          marketSpecs.initialSupply.vTokensToBurn,
+        ),
       );
     });
 
