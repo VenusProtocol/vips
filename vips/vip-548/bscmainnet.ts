@@ -164,7 +164,7 @@ export const vip548 = () => {
     title: "VIP-548 [BNB Chain] Enable E-Mode in the Core pool (2/2)",
     description: `#### Summary
 
-If passed, following the Chaos Labs recommendations, this VIP will add a new market to the BNB Chain Core pool for the underlying asset [PT-USDe-30OCT2025](https://bscscan.com/address/0x607c834cfb7fcbbb341cbe23f77a6e83bcf3f55c). Additionally, this VIP would add the following markets to the "Stablecoins" E-Mode group on the BNB Chain Core pool, following [this community proposal](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/7) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x0fe626f2a7979d6ff63333523e77c12187ad987485b1bd609c45fb0a1fc090b6)), and the Chaos Labs recommendations:
+If passed, following the [Chaos Labs recommendations](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/10), this VIP will add a new market to the BNB Chain Core pool for the underlying asset [PT-USDe-30OCT2025](https://bscscan.com/address/0x607c834cfb7fcbbb341cbe23f77a6e83bcf3f55c). Additionally, this VIP would add the following markets to the "Stablecoins" E-Mode group on the BNB Chain Core pool, following [this community proposal](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/7) ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0x0fe626f2a7979d6ff63333523e77c12187ad987485b1bd609c45fb0a1fc090b6)), and the [Chaos Labs recommendations](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/10):
 
 - USDT
 - USDC

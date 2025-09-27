@@ -352,7 +352,7 @@ export const POOL_SPECS = {
 export const vip547 = () => {
   const meta = {
     version: "v2",
-    title: "[BNB Chain] Enable E-Mode in the Core pool (1/2)",
+    title: "VIP-547 [BNB Chain] Enable E-Mode in the Core pool (1/2)",
     description: `#### Summary
 
 If passed, following the community proposal “[E-Mode and Liquidation Threshold in the BNB Chain Core pool](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339)” ([snapshot](https://snapshot.box/#/s:venus-xvs.eth/proposal/0xf2cc2ca902a340d7409de18ee3cd50dc8f1465b52bcf91b28dea1c9fe943a01b)), this VIP will upgrade the implementations of the following contracts on BNB Chain, including support for [E-Mode](https://docs-v4.venus.io/whats-new/emode):
