@@ -25,24 +25,25 @@ import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
-const NEW_SETTER_FACET = "0x3EE3477f38624C34E07fb7C0B017B6B14255B3F6";
-const NEW_POLICY_FACET = "0x440B18242a664194db9895a19c486a165a0662E2";
-const NEW_REWARD_FACET = "0x05674b31d8e07F0F17B73aC009332db26C5fE2ca";
-const NEW_MARKET_FACET = "0xf04813ecEd7855a1f4255427e1a9E6c134d17732";
+const NEW_SETTER_FACET = "0xa6624EcbcA3328Dc7b5741db0Cd0c2f2653f2608";
+const NEW_POLICY_FACET = "0x22CaBF6638458D9460304900868B5e5006134885";
+const NEW_REWARD_FACET = "0x60952A607B00090e79683c51654B5B0BB4553684";
+const NEW_MARKET_FACET = "0x3B6129250Ec0706FfF99E4909554F16b71A4bdaf";
+const NEW_FLASHLOAN_FACET = "0x8eaeC2e491255335b638A94A2F62E30B334a7e7C";
 
-const OLD_SETTER_FACET = "0xe41Ab9b0ea3edD4cE3108650056641F1E361246c";
-const OLD_POLICY_FACET = "0x284d000665296515280a4fB066a887EFF6A3bD9E";
-const OLD_REWARD_FACET = "0x0CB4FdDA118Da048B9AAaC15f34662C6AB34F5dB";
-const OLD_MARKET_FACET = "0xfdFd4BEdc16339fE2dfa19Bab8bC9B8DA4149F75";
+const OLD_SETTER_FACET = "0xF1844c6d56314a10C28175db638B51b4Ee14C402";
+const OLD_POLICY_FACET = "0xBDd1F07F4eF1748657FDA0d29CF4D7361120c187";
+const OLD_REWARD_FACET = "0x2B1b7FA16FE9B9ED5571663396bC16EBC079193B";
+const OLD_MARKET_FACET = "0x92B9CE322B0A4a3701fd3dC609740c7Df80f479D";
 
-const OLD_DIAMOND = "0xce314ca8be79435fb0e4ffc102daca172b676a47";
+const OLD_DIAMOND = "0xCe314cA8be79435FB0E4ffc102DAcA172B676a47";
 const OLD_COMPTROLLER_LENS = "0xACbc75C2D0438722c75D9BD20844b5aFda4155ea";
 
 const NEW_COMPT_METHODS = ["setWhiteListFlashLoanAccount(address,bool)"];
 
-const NEW_VBEP20_DELEGATE_METHODS = ["toggleFlashLoan()", "setFlashLoanFeeMantissa(uint256,uint256)"];
+const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanFeeMantissa(uint256,uint256)"];
 
-forking(66268102, async () => {
+forking(67070714, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -101,8 +102,13 @@ forking(66268102, async () => {
       expect(await unitroller.comptrollerImplementation()).equals(NEW_DIAMOND_IMPLEMENTATION);
     });
 
+    it("flashLoan facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = [...cutParams[1][2]];
+      expect(await unitroller.facetFunctionSelectors(NEW_FLASHLOAN_FACET)).to.deep.equal(functionSelectors);
+    });
+
     it("policy facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = [...cutParams[0][2], ...cutParams[1][2]];
+      const functionSelectors = [...cutParams[0][2]];
       expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(functionSelectors);
       expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
     });
