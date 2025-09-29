@@ -9,6 +9,9 @@ import PSR_ABI from "./abi/protocolShareReserve.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PRIME_ABI from "./abi/Prime.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { CORE_MARKETS } from "../../vips/vip-555/bsctestnet";
 
 
 forking(67025822, async () => {
@@ -24,6 +27,29 @@ forking(67025822, async () => {
     prime = await ethers.getContractAt(PRIME_ABI, PRIME);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     eth = await ethers.getContractAt(ERC20_ABI, ETH);
+
+    for (const market of CORE_MARKETS) {
+      // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
+      await setMaxStalePeriodInChainlinkOracle(
+        NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
+        market.asset,
+        ethers.constants.AddressZero,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+
+      await setMaxStalePeriodInChainlinkOracle(
+        NETWORK_ADDRESSES.bsctestnet.REDSTONE_ORACLE,
+        market.asset,
+        ethers.constants.AddressZero,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+    }
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "TWT", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "lisUSD", 315360000);
+
   });
 
   describe("Pre-VIP state", async () => {
@@ -64,47 +90,29 @@ forking(67025822, async () => {
   testVip("VIP-555", await vip555(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // expect events etc...
-      // const totalMarkets = CORE_MARKETS.length;
-      // const toatlBAMarkets = MARKETS_BA.length;
-      // await expectEvents(
-      //   txResponse,
-      //   [UNITROLLER_ABI, DIAMOND_ABI, LIQUIDATOR_ABI, ACM_ABI],
-      //   [
-      //     "NewPendingImplementation",
-      //     "DiamondCut",
-      //     "NewLiquidationTreasuryPercent",
-      //     "PermissionGranted",
-      //     "PermissionRevoked",
-      //   ],
-      //   [4, 1, 1, 29, 9],
-      // );
-      // await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]); // +2 for unitroller and VAI, -1 for vBNB
-      // await expectEvents(
-      //   txResponse,
-      //   [COMPTROLLER_ABI],
-      //   ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
-      //   [totalMarkets - 3, totalMarkets, toatlBAMarkets], // -3 for markets with 0 collateral factor
-      // );
     },
   });
 
   describe("Post-VIP state", async () => {
     it("check current distribution configs", async () => {
+      // it should be 10%, 10%, 0%, 0%
       expect(await psr.getPercentageDistribution(USDC_PRIME_CONVERTER, 0)).to.equal(1000);
-      // USDT has been updated
       expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 0)).to.equal(1000);
       expect(await psr.getPercentageDistribution(BTCB_PRIME_CONVERTER, 0)).to.equal(0);
       expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(0);
     });
 
     it("check current prime reward distribution speeds", async () => {
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(9220);
+      /// @dev since USDT is the only asset that has been updated, USDC, BTCB, ETH should remain the same
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(7000);
+
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(9220);
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(BTCB)).to.equal(315393518518);
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(ETH)).to.equal(6109664351851);
     });
 
     it("check Prime multipliers", async () => {
+      /// @dev ignore vUSDC on testnet
       // const usdcMarket = await prime.markets(vUSDC);
       // expect(usdcMarket.supplyMultiplier).to.equal(2000000000000000000);
       // expect(usdcMarket.borrowMultiplier).to.equal(0);

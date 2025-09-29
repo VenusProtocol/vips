@@ -23,6 +23,33 @@ export const PRIME = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 export const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
 export const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
+export const CORE_MARKETS = [
+  {
+    symbol: "vUSDC",
+    address: "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7",
+    asset: "0x16227D60f7a0e586C66B005219dfc887D13C9531",
+    collateralFactor: 810000000000000000n,
+  },
+  {
+    symbol: "vUSDT",
+    address: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A",
+    asset: "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c",
+    collateralFactor: 800000000000000000n,
+  },
+  {
+    symbol: "vETH",
+    address: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab",
+    asset: "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7",
+    collateralFactor: 800000000000000000n,
+  },
+  {
+    symbol: "vBTC",
+    address: "0xb6e9322C49FD75a367Fcb17B0Fcd62C5070EbCBe",
+    asset: "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4",
+    collateralFactor: 800000000000000000n,
+  },
+];
+
 
 
 
@@ -54,32 +81,28 @@ export const vip555 = () => {
         signature: "sweepToken(address,address,uint256)",
         params: [USDC, USDT_PRIME_CONVERTER, parseUnits("1000", 6)],
       },
+      /// @dev there is no ETH in this contract on bsctestnet
       // {
       //   target: PRIME_LIQUIDITY_PROVIDER,
       //   signature: "sweepToken(address,address,uint256)",
       //   params: [ETH, USDT_PRIME_CONVERTER, parseUnits("2", 18)],
       // },
-      // @dev seems this would fail due to insufficient balance
-      // {
-      //   target: USDT_PRIME_CONVERTER,
-      //   signature: "updateAssetsState(address,address)",
-      //   params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, USDC],
-      // },
-      // {
-      //   target: USDT_PRIME_CONVERTER,
-      //   signature: "updateAssetsState(address,address)",
-      //   params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, ETH],
-      // },
-      // {
-      //   target: PRIME_LIQUIDITY_PROVIDER,
-      //   signature: "setTokensDistributionSpeed(address[],uint256[])",
-      //   params: [[USDC, USDT], [7000n, 7000n]],
-      // },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "updateAssetsState(address,address)",
+        params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, USDC],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "updateAssetsState(address,address)",
+        params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, ETH],
+      },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
         params: [[USDT], [7000n]],
       },
+      /// @dev there is some issue for vUSDC prime system on bsctestnet
       // {
       //   target: PRIME,
       //   signature: "updateMultipliers(address,uint256,uint256)",
