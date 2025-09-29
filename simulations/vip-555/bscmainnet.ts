@@ -3,16 +3,31 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { forking, testVip } from "src/vip-framework";
-import { PSR, USDC_PRIME_CONVERTER, USDT_PRIME_CONVERTER, BTCB_PRIME_CONVERTER, ETH_PRIME_CONVERTER, PRIME_LIQUIDITY_PROVIDER, USDC, ETH, PRIME, USDT, BTCB, vUSDC, vUSDT, vip555 } from "../../vips/vip-555/bscmainnet";
-import PSR_ABI from "./abi/protocolShareReserve.json";
-import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
-import PRIME_ABI from "./abi/Prime.json";
-import ERC20_ABI from "./abi/ERC20.json";
-import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { CORE_MARKETS } from "../../vips/vip-555/bscmainnet";
+import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { forking, testVip } from "src/vip-framework";
 
+import {
+  BTCB,
+  BTCB_PRIME_CONVERTER,
+  ETH,
+  ETH_PRIME_CONVERTER,
+  PRIME,
+  PRIME_LIQUIDITY_PROVIDER,
+  PSR,
+  USDC,
+  USDC_PRIME_CONVERTER,
+  USDT,
+  USDT_PRIME_CONVERTER,
+  vUSDC,
+  vUSDT,
+  vip555,
+} from "../../vips/vip-555/bscmainnet";
+import { CORE_MARKETS } from "../../vips/vip-555/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import PSR_ABI from "./abi/protocolShareReserve.json";
 
 forking(62885653, async () => {
   let psr: Contract;
@@ -49,7 +64,6 @@ forking(62885653, async () => {
     await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bscmainnet.BINANCE_ORACLE, "WBETH", 315360000);
     await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bscmainnet.BINANCE_ORACLE, "TWT", 315360000);
     await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bscmainnet.BINANCE_ORACLE, "lisUSD", 315360000);
-
   });
 
   describe("Pre-VIP state", async () => {
@@ -60,12 +74,10 @@ forking(62885653, async () => {
       expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(200);
     });
 
-
     it("check balance of USDC, ETH from PrimeLiquidityProvider", async () => {
       expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("13000", 18));
       expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("2", 18));
     });
-
 
     it("check current prime reward distribution speeds", async () => {
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(18835616438356164n);
@@ -85,7 +97,7 @@ forking(62885653, async () => {
   });
 
   testVip("VIP-555", await vip555(), {
-    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+    callbackAfterExecution: async (_txResponse: TransactionResponse) => {
       // expect events etc...
     },
   });
@@ -115,6 +127,5 @@ forking(62885653, async () => {
       expect(usdtMarket.supplyMultiplier).to.equal(2000000000000000000n);
       expect(usdtMarket.borrowMultiplier).to.equal(0);
     });
-
   });
 });

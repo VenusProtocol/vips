@@ -3,7 +3,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-
 /// @dev cant find NETWORK_ADDRESSES.bsctestnet.PROTOCOL_SHARE_RESERVE,
 export const PSR = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
 export const USDT_PRIME_CONVERTER = "0xf1FA230D25fC5D6CAfe87C5A6F9e1B17Bc6F194E";
@@ -11,9 +10,8 @@ export const USDC_PRIME_CONVERTER = "0x2ecEdE6989d8646c992344fF6C97c72a3f811A13"
 export const BTCB_PRIME_CONVERTER = "0x989A1993C023a45DA141928921C0dE8fD123b7d1";
 export const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
 
-
 export const USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
-export const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7"
+export const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 export const USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 export const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
 
@@ -50,9 +48,6 @@ export const CORE_MARKETS = [
   },
 ];
 
-
-
-
 export const vip555 = () => {
   const meta = {
     version: "v2",
@@ -70,11 +65,14 @@ export const vip555 = () => {
         signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
         /// @dev PRIME benefits 20% of the total normal income
         // 0 (PROTOCOL_RESERVES), 1000 (i.e. 10%), ...
-        params: [[
-          [0, 1000, USDT_PRIME_CONVERTER],
-          [0, 1000, USDC_PRIME_CONVERTER],
-          [0, 0, BTCB_PRIME_CONVERTER],
-          [0, 0, ETH_PRIME_CONVERTER]]],
+        params: [
+          [
+            [0, 1000, USDT_PRIME_CONVERTER],
+            [0, 1000, USDC_PRIME_CONVERTER],
+            [0, 0, BTCB_PRIME_CONVERTER],
+            [0, 0, ETH_PRIME_CONVERTER],
+          ],
+        ],
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,

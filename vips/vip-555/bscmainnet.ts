@@ -3,7 +3,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-
 /// @dev cant find NETWORK_ADDRESSES.bsctestnet.PROTOCOL_SHARE_RESERVE,
 export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
@@ -11,9 +10,8 @@ export const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b"
 export const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
 export const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
 
-
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"
+export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
 
@@ -50,8 +48,6 @@ export const CORE_MARKETS = [
   },
 ];
 
-
-
 export const vip555 = () => {
   const meta = {
     version: "v2",
@@ -69,11 +65,14 @@ export const vip555 = () => {
         signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
         /// @dev PRIME benefits 20% of the total normal income
         // 0 (PROTOCOL_RESERVES), 1000 (i.e. 10%), ...
-        params: [[
-          [0, 1000, USDT_PRIME_CONVERTER],
-          [0, 1000, USDC_PRIME_CONVERTER],
-          [0, 0, BTCB_PRIME_CONVERTER],
-          [0, 0, ETH_PRIME_CONVERTER]]],
+        params: [
+          [
+            [0, 1000, USDT_PRIME_CONVERTER],
+            [0, 1000, USDC_PRIME_CONVERTER],
+            [0, 0, BTCB_PRIME_CONVERTER],
+            [0, 0, ETH_PRIME_CONVERTER],
+          ],
+        ],
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
@@ -98,7 +97,10 @@ export const vip555 = () => {
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [[USDC, USDT], [parseUnits("0.007", 18), parseUnits("0.007", 18)]],
+        params: [
+          [USDC, USDT],
+          [parseUnits("0.007", 18), parseUnits("0.007", 18)],
+        ],
       },
       {
         target: PRIME,
