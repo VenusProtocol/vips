@@ -74,12 +74,11 @@ export const vip555 = () => {
         signature: "sweepToken(address,address,uint256)",
         params: [USDC, USDT_PRIME_CONVERTER, parseUnits("1000", 6)],
       },
-      /// @dev there is no ETH in this contract on bsctestnet
-      // {
-      //   target: PRIME_LIQUIDITY_PROVIDER,
-      //   signature: "sweepToken(address,address,uint256)",
-      //   params: [ETH, USDT_PRIME_CONVERTER, parseUnits("2", 18)],
-      // },
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [ETH, USDT_PRIME_CONVERTER, parseUnits("0", 18)],
+      },
       {
         target: USDT_PRIME_CONVERTER,
         signature: "updateAssetsState(address,address)",
@@ -95,7 +94,7 @@ export const vip555 = () => {
         signature: "setTokensDistributionSpeed(address[],uint256[])",
         params: [[USDT], [7000n]],
       },
-      /// @dev there is some issue for vUSDC prime system on bsctestnet
+      /// @interim there is some issue for vUSDC prime system on bsctestnet
       // {
       //   target: PRIME,
       //   signature: "updateMultipliers(address,uint256,uint256)",

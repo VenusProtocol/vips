@@ -103,7 +103,7 @@ forking(67025822, async () => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
 
       // sweep token for USDC
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [1]);
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [2]);
 
       // setTokensDistributionSpeed for USDT
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
