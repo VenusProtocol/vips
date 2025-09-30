@@ -29,7 +29,7 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import ERC20_ABI from "./abi/erc20.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
-forking(67025822, async () => {
+forking(67179812, async () => {
   let psr: Contract;
   let primeLiquidityProvider: Contract;
   let prime: Contract;
@@ -102,14 +102,14 @@ forking(67025822, async () => {
       // percentage distribution updates for those four assets
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
 
-      // sweep token for USDC
+      // sweep token for USDC and ETH
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [2]);
 
-      // setTokensDistributionSpeed for USDT
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
+      // setTokensDistributionSpeed for USDT and USDC
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
 
-      // updateMultipliers for vUSDT
-      await expectEvents(txResponse, [PRIME_ABI], ["MultiplierUpdated"], [1]);
+      // updateMultipliers for vUSDT and vUSDC
+      await expectEvents(txResponse, [PRIME_ABI], ["MultiplierUpdated"], [2]);
     },
   });
 
@@ -134,17 +134,16 @@ forking(67025822, async () => {
     it("check current prime reward distribution speeds", async () => {
       /// @dev since USDT is the only asset that has been updated, USDC, BTCB, ETH should remain the same
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(7000);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(7000);
 
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(9220);
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(BTCB)).to.equal(315393518518);
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(ETH)).to.equal(6109664351851);
     });
 
     it("check Prime multipliers", async () => {
-      /// @dev ignore vUSDC on testnet
-      // const usdcMarket = await prime.markets(vUSDC);
-      // expect(usdcMarket.supplyMultiplier).to.equal(2000000000000000000);
-      // expect(usdcMarket.borrowMultiplier).to.equal(0);
+      const usdcMarket = await prime.markets(vUSDC);
+      expect(usdcMarket.supplyMultiplier).to.equal(2000000000000000000n);
+      expect(usdcMarket.borrowMultiplier).to.equal(0);
       const usdtMarket = await prime.markets(vUSDT);
       expect(usdtMarket.supplyMultiplier).to.equal(2000000000000000000n);
       expect(usdtMarket.borrowMultiplier).to.equal(0);

@@ -92,14 +92,16 @@ export const vip555 = () => {
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [[USDT], [7000n]],
+        params: [
+          [USDT, USDC],
+          [7000n, 7000n],
+        ],
       },
-      /// @interim there is some issue for vUSDC prime system on bsctestnet
-      // {
-      //   target: PRIME,
-      //   signature: "updateMultipliers(address,uint256,uint256)",
-      //   params: [vUSDC, 2000000000000000000n, 0],
-      // },
+      {
+        target: PRIME,
+        signature: "updateMultipliers(address,uint256,uint256)",
+        params: [vUSDC, 2000000000000000000n, 0],
+      },
       {
         target: PRIME,
         signature: "updateMultipliers(address,uint256,uint256)",
