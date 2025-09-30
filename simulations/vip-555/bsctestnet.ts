@@ -105,9 +105,6 @@ forking(67025822, async () => {
       // sweep token for USDC
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [1]);
 
-      // update assets state for USDC
-      // TODO
-
       // setTokensDistributionSpeed for USDT
       await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
 
@@ -123,6 +120,15 @@ forking(67025822, async () => {
       expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 0)).to.equal(1000);
       expect(await psr.getPercentageDistribution(BTCB_PRIME_CONVERTER, 0)).to.equal(0);
       expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(0);
+    });
+
+    it("check sweep and token conversion status", async () => {
+      /// @dev for USDC/ETH->USDT conversion, there are several cases
+      /// case 1: USDC/ETH is sweeped but none has been converted to USDT
+      /// case 2: USDC/ETH is sweeped but only partially gets converted to USDT
+      /// case 3: USDC/ETH is sweeped and gets converted to USDT fully
+      /// Hence what do we here is try to calculate the expected amount of USDT received based on the converted amounts of USDC and ETH
+      /// won't get tested on bsctestnet as no token is converted to USDT also the exchange rate is inaccurate
     });
 
     it("check current prime reward distribution speeds", async () => {
