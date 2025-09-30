@@ -4,7 +4,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -24,9 +24,9 @@ import {
   vip555,
 } from "../../vips/vip-555/bscmainnet";
 import { CORE_MARKETS } from "../../vips/vip-555/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import ERC20_ABI from "./abi/erc20.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
 forking(62885653, async () => {
@@ -97,8 +97,21 @@ forking(62885653, async () => {
   });
 
   testVip("VIP-555", await vip555(), {
-    callbackAfterExecution: async (_txResponse: TransactionResponse) => {
-      // expect events etc...
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      // percentage distribution updates for those four assets
+      await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
+
+      // sweep token for USDC and ETH
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [2]);
+
+      // update assets state for USDC and ETH
+      // TODO
+
+      // setTokensDistributionSpeed for both USDC and USDT
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
+
+      // updateMultipliers for vUSDC and vUSDT
+      await expectEvents(txResponse, [PRIME_ABI], ["MultiplierUpdated"], [2]);
     },
   });
 

@@ -3,7 +3,6 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-/// @dev cant find NETWORK_ADDRESSES.bsctestnet.PROTOCOL_SHARE_RESERVE,
 export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
 export const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
@@ -26,25 +25,21 @@ export const CORE_MARKETS = [
     symbol: "vUSDC",
     asset: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
     address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
-    collateralFactor: 825000000000000000n,
   },
   {
     symbol: "vUSDT",
     asset: "0x55d398326f99059fF775485246999027B3197955",
     address: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
-    collateralFactor: 800000000000000000n,
   },
   {
     symbol: "vBTC",
     asset: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
     address: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
-    collateralFactor: 800000000000000000n,
   },
   {
     symbol: "vETH",
     asset: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
     address: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
-    collateralFactor: 800000000000000000n,
   },
 ];
 
