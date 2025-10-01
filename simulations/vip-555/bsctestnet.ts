@@ -34,12 +34,16 @@ forking(67179812, async () => {
   let primeLiquidityProvider: Contract;
   let prime: Contract;
   let usdc: Contract;
+  let eth: Contract;
+  let usdt: Contract;
 
   before(async () => {
     psr = await ethers.getContractAt(PSR_ABI, PSR);
     primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
     prime = await ethers.getContractAt(PRIME_ABI, PRIME);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
+    eth = await ethers.getContractAt(ERC20_ABI, ETH);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
 
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
@@ -72,11 +76,14 @@ forking(67179812, async () => {
       expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(200);
     });
 
-    it("check balance of USDC, ETH from PrimeLiquidityProvider", async () => {
-      // USDC on bsctestnet is 6 decimals and only 1800 USDC is available
-      // also there is no ETH hence we skip it
-      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("1000", 6));
-      // expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("2", 18));
+    it("check balance of USDT, USDC, ETH from PrimeLiquidityProvider and USDTPrimeConverter", async () => {
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433465835078n);
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6800150420); 
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
+
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(10000000);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0); 
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
     it("check current prime reward distribution speeds", async () => {
@@ -123,12 +130,15 @@ forking(67179812, async () => {
     });
 
     it("check sweep and token conversion status", async () => {
-      /// @dev for USDC/ETH->USDT conversion, there are several cases
-      /// case 1: USDC/ETH is sweeped but none has been converted to USDT
-      /// case 2: USDC/ETH is sweeped but only partially gets converted to USDT
-      /// case 3: USDC/ETH is sweeped and gets converted to USDT fully
-      /// Hence what do we here is try to calculate the expected amount of USDT received based on the converted amounts of USDC and ETH
-      /// won't get tested on bsctestnet as no token is converted to USDT also the exchange rate is inaccurate
+      // usdt amount increased on PLP as some usdc got converted to usdt
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433690317587n);
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6024830549); 
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
+
+      // some usdc remains as converter network does not enough usdt to swap
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(785319871); 
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
     it("check current prime reward distribution speeds", async () => {

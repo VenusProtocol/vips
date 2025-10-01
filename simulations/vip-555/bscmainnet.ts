@@ -37,10 +37,6 @@ forking(62885653, async () => {
   let eth: Contract;
   let usdt: Contract;
 
-  let usdcBalanceInPLP: bigint;
-  let ethBalanceInPLP: bigint;
-  let usdtBalanceInPLP: bigint;
-
   before(async () => {
     psr = await ethers.getContractAt(PSR_ABI, PSR);
     primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
@@ -48,10 +44,6 @@ forking(62885653, async () => {
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     eth = await ethers.getContractAt(ERC20_ABI, ETH);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
-
-    usdcBalanceInPLP = (await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
-    ethBalanceInPLP = (await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
-    usdtBalanceInPLP = (await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
 
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
@@ -84,9 +76,14 @@ forking(62885653, async () => {
       expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(200);
     });
 
-    it("check balance of USDC, ETH from PrimeLiquidityProvider", async () => {
-      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("13000", 18));
-      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.gte(parseUnits("2", 18));
+    it("check balance of USDT, USDC, ETH from PrimeLiquidityProvider and USDTPrimeConverter", async () => {
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(9901154409855012291821); // 9901 
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(64277782048140856587561); // 64,277
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(11279014119447979806); // 11.279
+
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0); 
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
     it("check current prime reward distribution speeds", async () => {
@@ -132,29 +129,19 @@ forking(62885653, async () => {
     });
 
     it("check sweep and token conversion status", async () => {
-      const usdcBalanceInPLPAfter = (await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
-      const ethBalanceInPLPAfter = (await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
-      const usdtBalanceInPLPAfter = (await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).toBigInt();
-
-      const usdcConvertedAmt = parseUnits("13000", 18).toBigInt() - (usdcBalanceInPLP - usdcBalanceInPLPAfter);
-      const ethConvertedAmt = parseUnits("2", 18).toBigInt() - (ethBalanceInPLP - ethBalanceInPLPAfter);
-
-      const usdtReceivedAmt = usdtBalanceInPLPAfter - usdtBalanceInPLP;
-
-      /// @dev for USDC/ETH->USDT conversion, there are several cases
-      /// case 1: USDC/ETH is sweeped but none has been converted to USDT
-      /// case 2: USDC/ETH is sweeped but only partially gets converted to USDT
-      /// case 3: USDC/ETH is sweeped and gets converted to USDT fully
-
-      /// Hence what do we here is try to calculate the expected amount of USDT received based on the converted amounts of USDC and ETH
-      /// The exchange rate is the USDC/ETH price at block 62885653
-      expect(usdtReceivedAmt).to.be.closeTo(usdcConvertedAmt + ethConvertedAmt * 4180n, 1000000000000000000n);
-
-      /// @dev Try to share more context
-      /// Some might be curious what happens next if no conversion happens due to insufficient balance in converter
-      /// They will get converted over time by 3rd integrator
-      /// ref: https://www.notion.so/TD-81-Incorporate-Token-converters-into-agregators-13cb4e5771bb8094a887fb866e84a47d#13cb4e5771bb8094a887fb866e84a47d
+      /// an increase of ~40 usdt, from the ~0.01 eth that was swapped to usdt 
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(9946351592517666000538); // 9946 (an increase) 
+      /// decrease of 13,000 usdc due to the sweep 
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(51277782048140856587561); // 51,277
+      /// decrease of 1.98 eth instead of 2 eth due to (-2 eth from sweep, ~0.01 eth from conversion)
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(9289873623620022598); // 9.289
+      
+      // haven token balance is fine, aggregrator or bot will swap 
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(13000000000000000000000); // 13,000 usdc 
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(1989140495827957208); // 1.98 eth  
     });
+
 
     it("check current prime reward distribution speeds", async () => {
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(parseUnits("0.007", 18));
