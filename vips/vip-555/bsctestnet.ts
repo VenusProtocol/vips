@@ -80,11 +80,13 @@ export const vip555 = () => {
         params: [ETH, USDT_PRIME_CONVERTER, parseUnits("0", 18)],
       },
       {
+        /// @dev if the converters have sufficient usdc, this method will swap usdc for usdt
         target: USDT_PRIME_CONVERTER,
         signature: "updateAssetsState(address,address)",
         params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, USDC],
       },
       {
+        /// @dev if the converters have sufficient eth, this method will swap eth for usdt
         target: USDT_PRIME_CONVERTER,
         signature: "updateAssetsState(address,address)",
         params: [NETWORK_ADDRESSES.bsctestnet.UNITROLLER, ETH],
