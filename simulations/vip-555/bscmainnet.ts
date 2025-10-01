@@ -143,8 +143,8 @@ forking(62885653, async () => {
     });
 
     it("check current prime reward distribution speeds", async () => {
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(parseUnits("0.007", 18));
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(parseUnits("0.007", 18));
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(7000448028673835);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(7000448028673835);
       /// @dev BTCB, ETH should remain the same
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(BTCB)).to.equal(38051750380n);
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(ETH)).to.equal(3339992389649n);
