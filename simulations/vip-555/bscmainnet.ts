@@ -142,7 +142,6 @@ forking(62885653, async () => {
       expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(1989140495827957208); // 1.98 eth  
     });
 
-
     it("check current prime reward distribution speeds", async () => {
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(parseUnits("0.007", 18));
       expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(parseUnits("0.007", 18));
