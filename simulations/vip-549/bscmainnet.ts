@@ -5,7 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip549, { ZKSYNC_XVS_BRIDGE_AMOUNT, UNICHAIN_XVS_BRIDGE_AMOUNT, BSC_XVS_VAULT_TREASURY, BSC_XVS_STORE, BSC_XVS_AMOUNT, BSC_SPEED } from "../../vips/vip-549/bscmainnet";
+import vip549, {
+  BSC_SPEED,
+  BSC_XVS_AMOUNT,
+  BSC_XVS_STORE,
+  BSC_XVS_VAULT_TREASURY,
+  UNICHAIN_XVS_BRIDGE_AMOUNT,
+  ZKSYNC_XVS_BRIDGE_AMOUNT,
+} from "../../vips/vip-549/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -46,7 +53,9 @@ forking(63093506, async () => {
   describe("Post-VIP behavior", async () => {
     it("should transfer XVS from the Comptroller", async () => {
       const comptrollerXVSBalanceAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
-      expect(comptrollerXVSBalanceAfter).to.equal(comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT.add(UNICHAIN_XVS_BRIDGE_AMOUNT)));
+      expect(comptrollerXVSBalanceAfter).to.equal(
+        comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT.add(UNICHAIN_XVS_BRIDGE_AMOUNT)),
+      );
     });
 
     it("should transfer XVS from the XVS Vault Treasury to the XVS Store", async () => {
@@ -60,6 +69,6 @@ forking(63093506, async () => {
     it("should update the XVS distribution speed", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(bscmainnet.XVS);
       expect(speed).to.equal(BSC_SPEED);
-    })
+    });
   });
 });

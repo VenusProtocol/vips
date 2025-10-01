@@ -1,16 +1,12 @@
-import { impersonateAccount, setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip549, {
-  ZKSYNC_SPEED,
-  ZKSYNC_XVS_BRIDGE_AMOUNT,
-  ZKSYNC_XVS_STORE
-} from "../../vips/vip-549/bscmainnet";
+import vip549, { ZKSYNC_SPEED, ZKSYNC_XVS_BRIDGE_AMOUNT, ZKSYNC_XVS_STORE } from "../../vips/vip-549/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -25,11 +21,8 @@ forking(64989498, async () => {
   before(async () => {
     previousBalanceXVSStore = await xvs.balanceOf(ZKSYNC_XVS_STORE);
 
-    await impersonateAccount(XVS_BRIDGE_ZKSYNC);
-    await setBalance(XVS_BRIDGE_ZKSYNC, parseUnits("10", 18));
-    await xvs
-      .connect(await ethers.getSigner(XVS_BRIDGE_ZKSYNC))
-      .mint(ZKSYNC_XVS_STORE, ZKSYNC_XVS_BRIDGE_AMOUNT);
+    const signer = await initMainnetUser("0x16a62b534e09a7534cd5847cfe5bf6a4b0c1b116", parseUnits("10", 18));
+    await xvs.connect(signer).mint(ZKSYNC_XVS_STORE, ZKSYNC_XVS_BRIDGE_AMOUNT);
   });
 
   testForkedNetworkVipCommands("VIP 549", await vip549());
@@ -43,6 +36,6 @@ forking(64989498, async () => {
     it("should update the XVS distribution speed", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(zksyncmainnet.XVS);
       expect(speed).to.equal(ZKSYNC_SPEED);
-    })
+    });
   });
 });

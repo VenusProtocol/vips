@@ -1,11 +1,14 @@
-import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
-import { forking, testForkedNetworkVipCommands, testVip } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip549, { ETH_XVS_VAULT_TREASURY, ETH_XVS_STORE, ETH_XVS_AMOUNT, ETH_SPEED } from "../../vips/vip-549/bscmainnet";
+import vip549, {
+  ETH_SPEED,
+  ETH_XVS_AMOUNT,
+  ETH_XVS_STORE,
+  ETH_XVS_VAULT_TREASURY,
+} from "../../vips/vip-549/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -40,6 +43,6 @@ forking(23482886, async () => {
     it("should update the XVS distribution speed", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(ethereum.XVS);
       expect(speed).to.equal(ETH_SPEED);
-    })
+    });
   });
 });

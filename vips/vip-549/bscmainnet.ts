@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, ethereum, unichainmainnet, zksyncmainnet, arbitrumone} = NETWORK_ADDRESSES;
+const { bscmainnet, ethereum, unichainmainnet, zksyncmainnet, arbitrumone } = NETWORK_ADDRESSES;
 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const BRIDGE_FEES_BSC = parseUnits("0.5", 18);

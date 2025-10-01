@@ -6,11 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip549, {
-  UNICHAIN_SPEED,
-  UNICHAIN_XVS_BRIDGE_AMOUNT,
-  UNICHAIN_XVS_STORE
-} from "../../vips/vip-549/bscmainnet";
+import vip549, { UNICHAIN_SPEED, UNICHAIN_XVS_BRIDGE_AMOUNT, UNICHAIN_XVS_STORE } from "../../vips/vip-549/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -27,11 +23,7 @@ forking(28572871, async () => {
 
     await impersonateAccount(XVS_BRIDGE_UNICHAIN);
     await setBalance(XVS_BRIDGE_UNICHAIN, parseUnits("10", 18));
-    await xvs
-      .connect(await ethers.getSigner(XVS_BRIDGE_UNICHAIN))
-      .mint(UNICHAIN_XVS_STORE, UNICHAIN_XVS_BRIDGE_AMOUNT);
-
-    
+    await xvs.connect(await ethers.getSigner(XVS_BRIDGE_UNICHAIN)).mint(UNICHAIN_XVS_STORE, UNICHAIN_XVS_BRIDGE_AMOUNT);
   });
 
   testForkedNetworkVipCommands("VIP 549", await vip549());
@@ -45,6 +37,6 @@ forking(28572871, async () => {
     it("should update the XVS distribution speed", async () => {
       const speed = await xvsVault.rewardTokenAmountsPerBlockOrSecond(unichainmainnet.XVS);
       expect(speed).to.equal(UNICHAIN_SPEED);
-    })
+    });
   });
 });
