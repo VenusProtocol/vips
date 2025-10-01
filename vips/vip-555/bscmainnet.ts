@@ -90,7 +90,7 @@ export const vip555 = () => {
         params: [NETWORK_ADDRESSES.bscmainnet.UNITROLLER, ETH],
       },
       {
-        /// @dev assume 80 blocks per minute and 31 days for the month 
+        /// @dev assume 80 blocks per minute and 31 days for the month
         /// 7000448028673835 * (80 * 60 minute * 24 hour * 31 days) / 1e18 = 25,000 usd
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",

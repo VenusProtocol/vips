@@ -77,11 +77,11 @@ forking(67179812, async () => {
 
     it("check balance of USDT, USDC, ETH from PrimeLiquidityProvider and USDTPrimeConverter", async () => {
       expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433465835078n);
-      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6800150420); 
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6800150420);
       expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
 
       expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(10000000);
-      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0); 
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
       expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
@@ -131,12 +131,12 @@ forking(67179812, async () => {
     it("check sweep and token conversion status", async () => {
       // usdt amount increased on PLP as some usdc got converted to usdt
       expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433690317587n);
-      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6024830549); 
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6024830549);
       expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
 
       // some usdc remains as converter network does not enough usdt to swap
       expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
-      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(785319871); 
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(785319871);
       expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
