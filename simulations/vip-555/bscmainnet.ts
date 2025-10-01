@@ -1,7 +1,6 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
@@ -29,7 +28,7 @@ import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import ERC20_ABI from "./abi/erc20.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
-forking(62885653, async () => {
+forking(62885655, async () => {
   let psr: Contract;
   let primeLiquidityProvider: Contract;
   let prime: Contract;
