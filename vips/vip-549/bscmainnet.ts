@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalMeta, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, ethereum, unichainmainnet, zksyncmainnet} = NETWORK_ADDRESSES;
+const { bscmainnet, ethereum, unichainmainnet, zksyncmainnet, arbitrumone} = NETWORK_ADDRESSES;
 
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const BRIDGE_FEES_BSC = parseUnits("0.5", 18);
@@ -25,12 +25,12 @@ export const BSC_SPEED = parseUnits("0.1", 18); // TBD
 
 export const ETH_XVS_VAULT_TREASURY = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
 export const ETH_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
-export const ETH_XVS_AMOUNT = parseUnits("1", 18); // TBD
+export const ETH_XVS_AMOUNT = parseUnits("0.1", 18); // TBD
 export const ETH_SPEED = parseUnits("0.1", 18); // TBD
 
 export const ARB_XVS_VAULT_TREASURY = "0xb076D4f15c08D7A7B89466327Ba71bc7e1311b58";
 export const ARB_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
-export const ARB_XVS_AMOUNT = parseUnits("1", 18); // TBD
+export const ARB_XVS_AMOUNT = parseUnits("0.1", 18); // TBD
 export const ARB_SPEED = parseUnits("0.1", 18); // TBD
 
 export const vip549 = async () => {
@@ -105,22 +105,24 @@ export const vip549 = async () => {
         target: ETH_XVS_VAULT_TREASURY,
         signature: "sweepToken(address,address,uint256)",
         params: [ethereum.XVS, ETH_XVS_STORE, ETH_XVS_AMOUNT],
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ethereum.XVS_VAULT_PROXY,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
         params: [ethereum.XVS, ETH_SPEED],
+        dstChainId: LzChainId.ethereum,
       },
       {
         target: ARB_XVS_VAULT_TREASURY,
         signature: "sweepToken(address,address,uint256)",
-        params: [ethereum.XVS, ARB_XVS_STORE, ARB_XVS_AMOUNT],
+        params: [arbitrumone.XVS, ARB_XVS_STORE, ARB_XVS_AMOUNT],
         dstChainId: LzChainId.arbitrumone,
       },
       {
-        target: ethereum.XVS_VAULT_PROXY,
+        target: arbitrumone.XVS_VAULT_PROXY,
         signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
-        params: [ethereum.XVS, ARB_SPEED],
+        params: [arbitrumone.XVS, ARB_SPEED],
         dstChainId: LzChainId.arbitrumone,
       },
     ],
