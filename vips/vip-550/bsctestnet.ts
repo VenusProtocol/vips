@@ -43,7 +43,7 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip555 = () => {
+export const vip550 = () => {
   const meta = {
     version: "v2",
     title: "Adjust Prime rewards for October 2025",
@@ -115,4 +115,4 @@ export const vip555 = () => {
   );
 };
 
-export default vip555;
+export default vip550;

@@ -43,14 +43,32 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip555 = () => {
+export const vip550 = () => {
   const meta = {
     version: "v2",
     title: "[BNB Chain] Adjust Prime Rewards Allocation for October 2025",
-    description: `#### Summary
-    
-    <WIP>
-    `,
+    description: `Following the community proposal [“Proposal: Adjust Prime Rewards Allocation for October 2025”](https://community.venus.io/t/proposal-adjust-prime-rewards-allocation-for-october-2025/5368/1), if passed, this VIP will implement the following changes on BNB Chain:
+
+- **Adjust Prime income distribution**
+    - 50% to [USDCPrimeConverter](https://bscscan.com/address/0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b) (+20pp)
+    - 50% to [USDTPrimeConverter](https://bscscan.com/address/0xD9f101AA67F3D72662609a2703387242452078C3) (-5pp)
+    - 0% to [BTCBPrimeConverter](https://bscscan.com/address/0xE8CeAa79f082768f99266dFd208d665d2Dd18f53) (-5pp)
+    - 0% to [ETHPrimeConverter](https://bscscan.com/address/0xca430B8A97Ea918fF634162acb0b731445B8195E) (-10pp)
+- **Withdraw and transfer funds**. Withdraw 11,000 USDC and 2.6 ETH from the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) and transfer them to the [USDTPrimeConverter](https://bscscan.com/address/0xD9f101AA67F3D72662609a2703387242452078C3). The goal is to repurpose part of the USDC and ETH funds and make them available for USDT Prime users.
+- **Update distribution speeds in the Prime markets**
+    - USDT: 25,000 USDT/month
+    - USDC: 25,000 USDC/month
+    - BTCB and ETH: no changes (the effective speeds will be zero once no funds remain in the PrimeLiquidityProvider contract).
+- **Update Prime multipliers for USDT and USDC**, allocating 100% of rewards to suppliers:
+    - Supply multiplier: 2e18 (no changes)
+    - Borrow multiplier: 0 (down from 4e18)
+
+# References
+
+- Community post: [Proposal: Adjust Prime Rewards Allocation for October 2025](https://community.venus.io/t/proposal-adjust-prime-rewards-allocation-for-october-2025/5368/1)
+- Previous Prime adjustments on BNB Chain: “[Prime Adjustment Proposal - Q2 2025 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q2-2025-bnb-chain/4996)” ([VIP-491](https://app.venus.io/#/governance/proposal/491?chainId=56))
+- [Venus Prime documentation](https://docs-v4.venus.io/whats-new/prime-yield)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/617)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -118,4 +136,4 @@ export const vip555 = () => {
   );
 };
 
-export default vip555;
+export default vip550;

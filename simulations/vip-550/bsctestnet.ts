@@ -20,9 +20,9 @@ import {
   USDT_PRIME_CONVERTER,
   vUSDC,
   vUSDT,
-  vip555,
-} from "../../vips/vip-555/bsctestnet";
-import { CORE_MARKETS } from "../../vips/vip-555/bsctestnet";
+  vip550,
+} from "../../vips/vip-550/bsctestnet";
+import { CORE_MARKETS } from "../../vips/vip-550/bsctestnet";
 import PRIME_ABI from "./abi/Prime.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import ERC20_ABI from "./abi/erc20.json";
@@ -103,7 +103,7 @@ forking(67179812, async () => {
     });
   });
 
-  testVip("VIP-555", await vip555(), {
+  testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // percentage distribution updates for those four assets
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
