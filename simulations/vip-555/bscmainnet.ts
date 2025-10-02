@@ -130,15 +130,15 @@ forking(62885655, async () => {
     it("check sweep and token conversion status", async () => {
       /// an increase of ~40 usdt, from the ~0.01 eth that was swapped to usdt
       expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(9946351592517666000538n); // 9946 (an increase)
-      /// decrease of 13,000 usdc due to the sweep
-      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(51277782048140856587561n); // 51,277
-      /// decrease of 1.98 eth instead of 2 eth due to (-2 eth from sweep, ~0.01 eth from conversion)
-      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(9289873623620022598n); // 9.289
+      /// decrease of 11,000 usdc due to the sweep
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(53277782048140856587561n); // 53,277
+      /// decrease of 2.589 eth instead of 2.6 eth due to (-2.6 eth from sweep, +0.011 eth from conversion)
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(8689873623620022598n); // 8.69
 
-      // haven token balance is fine, aggregrator or bot will swap
+      // having usdc/eth token balance on usdtPrimeConverter is fine, aggregrator or bot will swap 
       expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
-      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(13000000000000000000000n); // 13,000 usdc
-      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(1989140495827957208n); // 1.98 eth
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(11000000000000000000000n); // 11,000 usdc
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(2589140495827957208n); // 2.589 eth
     });
 
     it("check current prime reward distribution speeds", async () => {

@@ -72,12 +72,12 @@ export const vip555 = () => {
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "sweepToken(address,address,uint256)",
-        params: [USDC, USDT_PRIME_CONVERTER, parseUnits("13000", 18)],
+        params: [USDC, USDT_PRIME_CONVERTER, parseUnits("11000", 18)],
       },
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "sweepToken(address,address,uint256)",
-        params: [ETH, USDT_PRIME_CONVERTER, parseUnits("2", 18)],
+        params: [ETH, USDT_PRIME_CONVERTER, parseUnits("2.6", 18)],
       },
       {
         target: USDT_PRIME_CONVERTER,
