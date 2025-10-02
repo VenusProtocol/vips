@@ -46,8 +46,11 @@ export const CORE_MARKETS = [
 export const vip555 = () => {
   const meta = {
     version: "v2",
-    title: "Adjust Prime rewards for October 2025",
-    description: `Adjust Prime rewards for October 2025`,
+    title: "[BNB Chain] Adjust Prime Rewards Allocation for October 2025",
+    description: `#### Summary
+    
+    <WIP>
+    `,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
