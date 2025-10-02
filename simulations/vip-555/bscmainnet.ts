@@ -135,7 +135,7 @@ forking(62885655, async () => {
       /// decrease of 2.589 eth instead of 2.6 eth due to (-2.6 eth from sweep, +0.011 eth from conversion)
       expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(8689873623620022598n); // 8.69
 
-      // having usdc/eth token balance on usdtPrimeConverter is fine, aggregrator or bot will swap 
+      // having usdc/eth token balance on usdtPrimeConverter is fine, aggregrator or bot will swap
       expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
       expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(11000000000000000000000n); // 11,000 usdc
       expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(2589140495827957208n); // 2.589 eth
