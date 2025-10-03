@@ -41,11 +41,11 @@ export const EMODE_POOL = {
   },
 };
 
-export const vip553 = () => {
+export const vip551 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-553 [BNB Chain] BTC emode group",
-    description: "VIP-553 [BNB Chain] BTC emode group",
+    title: "VIP-551 [BNB Chain] BTC emode group",
+    description: "VIP-551 [BNB Chain] BTC emode group",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -132,4 +132,4 @@ export const vip553 = () => {
   );
 };
 
-export default vip553;
+export default vip551;

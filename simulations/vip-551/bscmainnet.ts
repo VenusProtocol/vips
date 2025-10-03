@@ -2,36 +2,42 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { EMODE_POOL, vip553 } from "../../vips/vip-553/bsctestnet";
+import { EMODE_POOL, vip551 } from "../../vips/vip-551/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(67529861, async () => {
+const setStalePeriod = async () => {
+  const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+  const SolvBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
+  const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
+  const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
+
+  await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
+
+  for (const asset of [BTCB, SolvBTC]) {
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      asset,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+  }
+};
+
+forking(63324983, async () => {
   let comptroller: Contract;
 
   before(async () => {
     const provider = ethers.provider;
-    comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, provider);
-
-    // set maxStalePeriod
-    const BTCB = "0xA808e341e8e723DC6BA0Bb5204Bafc2330d7B8e4";
-    const SolvBTC = "0x6855E14A6df91b8E4D55163d068E9ef2530fd4CE";
-    const xSolvBTC = "0x3ea87323806586A0282b50377e0FEa76070F532B";
-    for (const asset of [BTCB, SolvBTC, xSolvBTC]) {
-      await setMaxStalePeriodInChainlinkOracle(
-        NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
-        asset,
-        ethers.constants.AddressZero,
-        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-        315360000,
-      );
-    }
+    await setStalePeriod();
+    comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -40,7 +46,7 @@ forking(67529861, async () => {
     });
   });
 
-  testVip("VIP-553", await vip553(), {
+  testVip("VIP-551", await vip551(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -56,16 +62,16 @@ forking(67529861, async () => {
         [2, 2, 3, 1, 1, 3],
       );
 
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [1]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleRevoked"], [1]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
     it("Fast-track timelock is not allowed to add new markets to the Core pool", async () => {
-      const role = ethers.utils.solidityPack(["address", "string"], [bsctestnet.UNITROLLER, "_supportMarket(address)"]);
+      const role = ethers.utils.solidityPack(["address", "string"], [bscmainnet.UNITROLLER, "_supportMarket(address)"]);
       const roleHash = ethers.utils.keccak256(role);
-      const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
-      expect(await acm.hasRole(roleHash, bsctestnet.FAST_TRACK_TIMELOCK)).to.be.false;
+      const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
+      expect(await acm.hasRole(roleHash, bscmainnet.FAST_TRACK_TIMELOCK)).to.be.false;
     });
 
     describe("emode", () => {
