@@ -1,0 +1,139 @@
+import { parseUnits } from "ethers/lib/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
+export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
+export const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
+export const BTCB_PRIME_CONVERTER = "0xE8CeAa79f082768f99266dFd208d665d2Dd18f53";
+export const ETH_PRIME_CONVERTER = "0xca430B8A97Ea918fF634162acb0b731445B8195E";
+
+export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
+export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+
+export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
+export const PRIME = "0xBbCD063efE506c3D42a0Fa2dB5C08430288C71FC";
+
+export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+export const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+
+export const CORE_MARKETS = [
+  {
+    symbol: "vUSDC",
+    asset: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    address: "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8",
+  },
+  {
+    symbol: "vUSDT",
+    asset: "0x55d398326f99059fF775485246999027B3197955",
+    address: "0xfD5840Cd36d94D7229439859C0112a4185BC0255",
+  },
+  {
+    symbol: "vBTC",
+    asset: "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+    address: "0x882C173bC7Ff3b7786CA16dfeD3DFFfb9Ee7847B",
+  },
+  {
+    symbol: "vETH",
+    asset: "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    address: "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8",
+  },
+];
+
+export const vip550 = () => {
+  const meta = {
+    version: "v2",
+    title: "[BNB Chain] Adjust Prime Rewards Allocation for October 2025",
+    description: `Following the community proposal [“Proposal: Adjust Prime Rewards Allocation for October 2025”](https://community.venus.io/t/proposal-adjust-prime-rewards-allocation-for-october-2025/5368/1), if passed, this VIP will implement the following changes on BNB Chain:
+
+- **Adjust Prime income distribution**
+    - 50% to [USDCPrimeConverter](https://bscscan.com/address/0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b) (+20pp)
+    - 50% to [USDTPrimeConverter](https://bscscan.com/address/0xD9f101AA67F3D72662609a2703387242452078C3) (-5pp)
+    - 0% to [BTCBPrimeConverter](https://bscscan.com/address/0xE8CeAa79f082768f99266dFd208d665d2Dd18f53) (-5pp)
+    - 0% to [ETHPrimeConverter](https://bscscan.com/address/0xca430B8A97Ea918fF634162acb0b731445B8195E) (-10pp)
+- **Withdraw and transfer funds**. Withdraw 11,000 USDC and 2.6 ETH from the [PrimeLiquidityProvider](https://bscscan.com/address/0x23c4F844ffDdC6161174eB32c770D4D8C07833F2) and transfer them to the [USDTPrimeConverter](https://bscscan.com/address/0xD9f101AA67F3D72662609a2703387242452078C3). The goal is to repurpose part of the USDC and ETH funds and make them available for USDT Prime users.
+- **Update distribution speeds in the Prime markets**
+    - USDT: 25,000 USDT/month
+    - USDC: 25,000 USDC/month
+    - BTCB and ETH: no changes (the effective speeds will be zero once no funds remain in the PrimeLiquidityProvider contract).
+- **Update Prime multipliers for USDT and USDC**, allocating 100% of rewards to suppliers:
+    - Supply multiplier: 2e18 (no changes)
+    - Borrow multiplier: 0 (down from 4e18)
+
+# References
+
+- Community post: [Proposal: Adjust Prime Rewards Allocation for October 2025](https://community.venus.io/t/proposal-adjust-prime-rewards-allocation-for-october-2025/5368/1)
+- Previous Prime adjustments on BNB Chain: “[Prime Adjustment Proposal - Q2 2025 [BNB Chain]](https://community.venus.io/t/prime-adjustment-proposal-q2-2025-bnb-chain/4996)” ([VIP-491](https://app.venus.io/#/governance/proposal/491?chainId=56))
+- [Venus Prime documentation](https://docs-v4.venus.io/whats-new/prime-yield)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/617)`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
+  };
+
+  return makeProposal(
+    [
+      {
+        target: PSR,
+        signature: "addOrUpdateDistributionConfigs((uint8,uint16,address)[])",
+        /// @dev PRIME benefits 20% of the total normal income
+        // 0 (PROTOCOL_RESERVES), 1000 (i.e. 10%), ...
+        params: [
+          [
+            [0, 1000, USDT_PRIME_CONVERTER],
+            [0, 1000, USDC_PRIME_CONVERTER],
+            [0, 0, BTCB_PRIME_CONVERTER],
+            [0, 0, ETH_PRIME_CONVERTER],
+          ],
+        ],
+      },
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [USDC, USDT_PRIME_CONVERTER, parseUnits("11000", 18)],
+      },
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [ETH, USDT_PRIME_CONVERTER, parseUnits("2.6", 18)],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "updateAssetsState(address,address)",
+        params: [NETWORK_ADDRESSES.bscmainnet.UNITROLLER, USDC],
+      },
+      {
+        target: USDT_PRIME_CONVERTER,
+        signature: "updateAssetsState(address,address)",
+        params: [NETWORK_ADDRESSES.bscmainnet.UNITROLLER, ETH],
+      },
+      {
+        /// @dev assume 80 blocks per minute and 31 days for the month
+        /// 7000448028673835 * (80 * 60 minute * 24 hour * 31 days) / 1e18 = 25,000 usd
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "setTokensDistributionSpeed(address[],uint256[])",
+        params: [
+          [USDC, USDT],
+          [7000448028673835, 7000448028673835],
+        ],
+      },
+      {
+        target: PRIME,
+        signature: "updateMultipliers(address,uint256,uint256)",
+        params: [vUSDC, 2000000000000000000n, 0],
+      },
+      {
+        target: PRIME,
+        signature: "updateMultipliers(address,uint256,uint256)",
+        params: [vUSDT, 2000000000000000000n, 0],
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip550;
