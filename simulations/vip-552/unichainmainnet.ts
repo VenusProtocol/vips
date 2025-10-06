@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip549, { UNICHAIN_SPEED, UNICHAIN_XVS_BRIDGE_AMOUNT, UNICHAIN_XVS_STORE } from "../../vips/vip-549/bscmainnet";
+import vip552, { UNICHAIN_SPEED, UNICHAIN_XVS_BRIDGE_AMOUNT, UNICHAIN_XVS_STORE } from "../../vips/vip-552/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -26,7 +26,7 @@ forking(28572871, async () => {
     await xvs.connect(await ethers.getSigner(XVS_BRIDGE_UNICHAIN)).mint(UNICHAIN_XVS_STORE, UNICHAIN_XVS_BRIDGE_AMOUNT);
   });
 
-  testForkedNetworkVipCommands("VIP 549", await vip549());
+  testForkedNetworkVipCommands("VIP 552", await vip552());
 
   describe("Post-VIP behaviour", async () => {
     it("check xvs balance", async () => {

@@ -5,14 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip549, {
+import vip552, {
   BSC_SPEED,
   BSC_XVS_AMOUNT,
   BSC_XVS_STORE,
   BSC_XVS_VAULT_TREASURY,
   UNICHAIN_XVS_BRIDGE_AMOUNT,
   ZKSYNC_XVS_BRIDGE_AMOUNT,
-} from "../../vips/vip-549/bscmainnet";
+} from "../../vips/vip-552/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -37,7 +37,7 @@ forking(63648367, async () => {
     xvsVault = new ethers.Contract(bscmainnet.XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
   });
 
-  testVip("vip-549", await vip549(), {
+  testVip("vip-552", await vip552(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
