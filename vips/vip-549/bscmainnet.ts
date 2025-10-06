@@ -11,27 +11,27 @@ export const BRIDGE_FEES_BSC = parseUnits("0.5", 18);
 
 export const ZKSYNC_XVS_BRIDGE_AMOUNT = parseUnits("146", 18);
 export const ZKSYNC_XVS_STORE = "0x84266F552756cBed893b1FFA85248cD99501e3ce";
-export const ZKSYNC_SPEED = parseUnits("0.000128", 18); // 11.08 XVS/day
+export const ZKSYNC_SPEED = parseUnits("0.00012824", 18); // 11.08 XVS/day
 
 export const UNICHAIN_XVS_BRIDGE_AMOUNT = parseUnits("237", 18);
 export const UNICHAIN_XVS_STORE = "0x0ee4b35c2cEAb19856Bf35505F81608d12B2a7Bb";
-export const UNICHAIN_SPEED = parseUnits("0.000112", 18); // 3.11 XVS/day
+export const UNICHAIN_SPEED = parseUnits("0.00003588", 18); // 3.11 XVS/day
 
 export const BSC_XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const BSC_XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 export const BSC_XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
-export const BSC_XVS_AMOUNT = parseUnits("1", 18); // TBD
-export const BSC_SPEED = parseUnits("0.1", 18); // TBD
+export const BSC_XVS_AMOUNT = parseUnits("85169", 18);
+export const BSC_SPEED = parseUnits("0.01116319444", 18); // 1,286 XVS/day
 
 export const ETH_XVS_VAULT_TREASURY = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
 export const ETH_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
-export const ETH_XVS_AMOUNT = parseUnits("0.1", 18); // TBD
-export const ETH_SPEED = parseUnits("0.1", 18); // TBD
+export const ETH_XVS_AMOUNT = parseUnits("2122", 18);
+export const ETH_SPEED = parseUnits("0.004048611111", 18); // 29.15 XVS/day
 
 export const ARB_XVS_VAULT_TREASURY = "0xb076D4f15c08D7A7B89466327Ba71bc7e1311b58";
 export const ARB_XVS_STORE = "0x507D9923c954AAD8eC530ed8Dedb75bFc893Ec5e";
-export const ARB_XVS_AMOUNT = parseUnits("0.1", 18); // TBD
-export const ARB_SPEED = parseUnits("0.1", 18); // TBD
+export const ARB_XVS_AMOUNT = parseUnits("385", 18);
+export const ARB_SPEED = parseUnits("0.000041088", 18); // 3.55 XVS/day
 
 export const vip549 = async () => {
   const meta: ProposalMeta = {
@@ -93,8 +93,8 @@ export const vip549 = async () => {
       },
       {
         target: BSC_XVS_VAULT_TREASURY,
-        signature: "sweepToken(address,address,uint256)",
-        params: [bscmainnet.XVS, BSC_XVS_STORE, BSC_XVS_AMOUNT],
+        signature: "fundXVSVault(uint256)",
+        params: [BSC_XVS_AMOUNT],
       },
       {
         target: bscmainnet.XVS_VAULT_PROXY,
@@ -103,8 +103,8 @@ export const vip549 = async () => {
       },
       {
         target: ETH_XVS_VAULT_TREASURY,
-        signature: "sweepToken(address,address,uint256)",
-        params: [ethereum.XVS, ETH_XVS_STORE, ETH_XVS_AMOUNT],
+        signature: "fundXVSVault(uint256)",
+        params: [ETH_XVS_AMOUNT],
         dstChainId: LzChainId.ethereum,
       },
       {
@@ -115,8 +115,8 @@ export const vip549 = async () => {
       },
       {
         target: ARB_XVS_VAULT_TREASURY,
-        signature: "sweepToken(address,address,uint256)",
-        params: [arbitrumone.XVS, ARB_XVS_STORE, ARB_XVS_AMOUNT],
+        signature: "fundXVSVault(uint256)",
+        params: [ARB_XVS_AMOUNT],
         dstChainId: LzChainId.arbitrumone,
       },
       {

@@ -14,7 +14,7 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
 
-forking(384936750, async () => {
+forking(386568145, async () => {
   let provider: any;
   let xvs: any;
   let xvsVaultTreasuryPreviousXVSBalance: any;
