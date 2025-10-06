@@ -13,7 +13,7 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 const { zksyncmainnet } = NETWORK_ADDRESSES;
 export const XVS_BRIDGE_ZKSYNC = "0x16a62B534e09A7534CD5847CFE5Bf6a4b0c1B116";
 
-forking(64989498, async () => {
+forking(65079703, async () => {
   const xvs = new ethers.Contract(zksyncmainnet.XVS, XVS_ABI, ethers.provider);
   const xvsVault = new ethers.Contract(zksyncmainnet.XVS_VAULT_PROXY, XVS_VAULT_ABI, ethers.provider);
   let previousBalanceXVSStore: BigNumber;

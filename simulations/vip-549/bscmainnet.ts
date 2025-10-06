@@ -20,7 +20,7 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(63093506, async () => {
+forking(63648367, async () => {
   let provider: any;
   let xvs: any;
   let comptrollerPreviousXVSBalance: any;
