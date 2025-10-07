@@ -77,7 +77,7 @@ forking(67997171, async () => {
     });
   });
 
-  testVip("VIP-548", await vip555(), {
+  testVip("VIP-555", await vip555(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
