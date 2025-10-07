@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { TWT_SUPPLY_CAP, asBNB_SUPPLY_CAP, vTWT, vasBNB, vip551 } from "../../vips/vip-551/bscmainnet";
+import { TWT_SUPPLY_CAP, asBNB_SUPPLY_CAP, vTWT, vasBNB, vip553 } from "../../vips/vip-553/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/coreComptroller.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
@@ -30,7 +30,7 @@ forking(63757326, async () => {
     });
   });
 
-  testVip("VIP-551", await vip551(), {
+  testVip("VIP-553", await vip553(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap"], [2]);
     },
