@@ -75,7 +75,7 @@ forking(63797797, async () => {
 
   describe("Pre-VIP behavior", async () => {
     it("check slisBNB market not listed", async () => {
-      const market = await comptroller.markets(marketSpecs.vToken.underlying.address);
+      const market = await comptroller.markets(marketSpecs.vToken.address);
       expect(market.isListed).to.equal(false);
     });
 
