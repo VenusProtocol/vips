@@ -9,7 +9,6 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import vip551 from "../../vips/vip-551/bscmainnet";
 import {
   CONVERSION_INCENTIVE,
   EMODE_POOL,
@@ -54,7 +53,7 @@ const setStalePeriod = async (resilientOracle: Contract, redstoneOracle: Contrac
   await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(slisbnb, parseUnits("1", 18));
 };
 
-forking(63797797, async () => {
+forking(63985571, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
@@ -62,8 +61,6 @@ forking(63797797, async () => {
   let vslisBNB: Contract;
 
   before(async () => {
-    await pretendExecutingVip(await vip551(), bscmainnet.NORMAL_TIMELOCK);
-
     const provider = ethers.provider;
     comptroller = new ethers.Contract(marketSpecs.vToken.comptroller, COMPTROLLER_ABI, provider);
     slisBNB = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
@@ -81,6 +78,20 @@ forking(63797797, async () => {
 
     it("check new BNB Emode PoolId does not exist", async () => {
       expect(await comptroller.lastPoolId()).to.be.lessThan(EMODE_POOL.id);
+    });
+
+    describe("Converters", () => {
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+
+        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset vslisBNB`, async () => {
+          const result = await converterContract.conversionConfigurations(
+            baseAsset,
+            marketSpecs.vToken.underlying.address,
+          );
+          expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+        });
+      }
     });
   });
 
@@ -192,20 +203,6 @@ forking(63797797, async () => {
     it("should set borrowAllowed to False for vslisBNB market", async () => {
       const vslisBNBMarket = await comptroller.markets(marketSpecs.vToken.address);
       expect(vslisBNBMarket.isBorrowAllowed).to.equal(false);
-    });
-
-    describe("Converters", () => {
-      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
-        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
-
-        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset vslisBNB`, async () => {
-          const result = await converterContract.conversionConfigurations(
-            baseAsset,
-            marketSpecs.vToken.underlying.address,
-          );
-          expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
-        });
-      }
     });
 
     describe("emode", () => {

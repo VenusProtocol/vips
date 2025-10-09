@@ -117,24 +117,6 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vTokensMinted = convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate);
 const vTokensRemaining = vTokensMinted.sub(marketSpecs.initialSupply.vTokensToBurn);
 
-const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
-  enum ConversionAccessibility {
-    NONE = 0,
-    ALL = 1,
-    ONLY_FOR_CONVERTERS = 2,
-    ONLY_FOR_USERS = 3,
-  }
-
-  return Object.entries(converterBaseAssets).map(([converter, baseAsset]: [string, string]) => {
-    const conversionConfigs = fromAssets.map(() => [incentive, ConversionAccessibility.ALL]);
-    return {
-      target: converter,
-      signature: "setConversionConfigs(address,address[],(uint256,uint8)[])",
-      params: [baseAsset, fromAssets, conversionConfigs],
-    };
-  });
-};
-
 export const vip555 = () => {
   const meta = {
     version: "v2",
@@ -234,9 +216,6 @@ export const vip555 = () => {
         signature: "_setActionsPaused(address[],uint8[],bool)",
         params: [[marketSpecs.vToken.address], [2], true], // Pause Borrow actions
       },
-
-      // Configure converters
-      ...configureConverters([slisBNB]),
 
       // BNB Emode Group
       {

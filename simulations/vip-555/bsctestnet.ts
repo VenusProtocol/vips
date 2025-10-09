@@ -28,7 +28,7 @@ import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(67997171, async () => {
+forking(68190798, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let slisBNB: Contract;
@@ -74,6 +74,20 @@ forking(67997171, async () => {
 
     it("check new BNB Emode PoolId does not exist", async () => {
       expect(await comptroller.lastPoolId()).to.be.lessThan(EMODE_POOL.id);
+    });
+
+    describe("Converters", () => {
+      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
+        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
+
+        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset vslisBNB`, async () => {
+          const result = await converterContract.conversionConfigurations(
+            baseAsset,
+            marketSpecs.vToken.underlying.address,
+          );
+          expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
+        });
+      }
     });
   });
 
@@ -184,20 +198,6 @@ forking(67997171, async () => {
     it("should set borrowAllowed to False for vslisBNB market", async () => {
       const vslisBNBMarket = await comptroller.markets(marketSpecs.vToken.address);
       expect(vslisBNBMarket.isBorrowAllowed).to.equal(false);
-    });
-
-    describe("Converters", () => {
-      for (const [converterAddress, baseAsset] of Object.entries(converterBaseAssets)) {
-        const converterContract = new ethers.Contract(converterAddress, SINGLE_TOKEN_CONVERTER_ABI, ethers.provider);
-
-        it(`should set ${CONVERSION_INCENTIVE} as incentive in converter ${converterAddress}, for asset vslisBNB`, async () => {
-          const result = await converterContract.conversionConfigurations(
-            baseAsset,
-            marketSpecs.vToken.underlying.address,
-          );
-          expect(result.incentive).to.equal(CONVERSION_INCENTIVE);
-        });
-      }
     });
 
     describe("emode", () => {
