@@ -53,7 +53,7 @@ const setStalePeriod = async (resilientOracle: Contract, redstoneOracle: Contrac
   await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(slisbnb, parseUnits("1", 18));
 };
 
-forking(63985571, async () => {
+forking(64118553, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let redstoneOracle: Contract;
