@@ -17,8 +17,8 @@ import {
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
-  vip555,
-} from "../../vips/vip-555/bscmainnet";
+  vip554,
+} from "../../vips/vip-554/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
@@ -95,7 +95,7 @@ forking(64118553, async () => {
     });
   });
 
-  testVip("VIP-555", await vip555(), {
+  testVip("VIP-554", await vip554(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
