@@ -79,7 +79,7 @@ export const vip530 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 
