@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip554, { WBETH } from "../../vips/vip-554/bscmainnet";
+import vip554, { WBETH, WBETHOracle } from "../../vips/vip-554/bscmainnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -30,6 +30,7 @@ forking(64203506, async () => {
         ["SnapshotUpdated", "GrowthRateUpdated", "SnapshotGapUpdated"],
         [1, 1, 1],
       );
+      await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded"], [1]);
     },
   });
 
@@ -42,8 +43,19 @@ forking(64203506, async () => {
         bscmainnet.NORMAL_TIMELOCK,
       );
     });
-    it("check WBETH price", async () => {
+    it("check ETH price", async () => {
       expect(await resilientOracle.getPrice(ETH)).to.equal(parseUnits("3814.78091719", 18));
+    });
+
+    it("check WBETH price", async () => {
+      // around ETH price * 1.0808
+      expect(await resilientOracle.getPrice(WBETH)).to.equal(parseUnits("4123.023634772211778864", 18));
+    });
+
+    it("Validate main oracle is set for WBETH", async () => {
+      const tokenConfig = await resilientOracle.getTokenConfig(WBETH);
+      expect(tokenConfig.oracles[0]).to.equal(WBETHOracle);
+      expect(tokenConfig.enableFlagsForOracles[0]).to.equal(true);
     });
   });
 });
