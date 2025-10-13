@@ -3,18 +3,36 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
+import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { vip666, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, RESILIENT_ORACLE, BOUND_VALIDATOR, ACM, USDe, EXISTING_USDE_MAIN_ORACLE, USDT_CHAINLINK_ORACLE, EXISTING_USDE_FALLBACK_ORACLE, CHAINLINK_USDT_FEED, MAX_STALE_PERIOD, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND, UNITROLLER, vsUSDe, vUSDe, vPT_USDe_30Oct2025 } from "../../../vips/vip-666/vip-666";
-import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
-import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
-import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
+import {
+  ACM,
+  BOUND_VALIDATOR,
+  CHAINLINK_USDT_FEED,
+  CRITICAL_TIMELOCK,
+  EXISTING_USDE_FALLBACK_ORACLE,
+  EXISTING_USDE_MAIN_ORACLE,
+  FAST_TRACK_TIMELOCK,
+  MAX_STALE_PERIOD,
+  NORMAL_TIMELOCK,
+  PRICE_LOWER_BOUND,
+  PRICE_UPPER_BOUND,
+  RESILIENT_ORACLE,
+  UNITROLLER,
+  USDT_CHAINLINK_ORACLE,
+  USDe,
+  vPT_USDe_30Oct2025,
+  vUSDe,
+  vip666,
+  vsUSDe,
+} from "../../../vips/vip-666/vip-666";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
+import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
+import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import UNITROLLER_ABI from "./abi/comptroller.json";
-import { ZERO_ADDRESS } from "src/networkAddresses";
-
-
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 forking(64434801, async () => {
   let accessControlManager: Contract;
@@ -28,7 +46,6 @@ forking(64434801, async () => {
     await impersonateAccount(NORMAL_TIMELOCK);
     const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
 
-
     accessControlManager = new ethers.Contract(ACM, ACCESS_CONTROL_MANAGER_ABI, timelock);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, timelock);
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
@@ -40,12 +57,44 @@ forking(64434801, async () => {
   describe("Pre-VIP behavior", () => {
     it("USDT Chainlink Oracle shouldn't have permission set before the VIP", async () => {
       // permissions check
-      expect(await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(false);
-      expect(await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(false);
-      expect(await accessControlManager.hasPermission(CRITICAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(false);
-      expect(await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(false);
-      expect(await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(false);
-      expect(await accessControlManager.hasPermission(CRITICAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          NORMAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          FAST_TRACK_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          CRITICAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          FAST_TRACK_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          CRITICAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
+      ).to.equal(false);
     });
 
     it("USDT Chainlink Oracle should have correct pending owner and empty config", async () => {
@@ -66,7 +115,11 @@ forking(64434801, async () => {
       // token config check
       const tokenConfigs = await resilientOracle.getTokenConfig(USDe);
       expect(tokenConfigs[0]).to.equal(USDe);
-      expect(tokenConfigs[1]).to.have.same.members([EXISTING_USDE_MAIN_ORACLE, EXISTING_USDE_FALLBACK_ORACLE, EXISTING_USDE_FALLBACK_ORACLE]);
+      expect(tokenConfigs[1]).to.have.same.members([
+        EXISTING_USDE_MAIN_ORACLE,
+        EXISTING_USDE_FALLBACK_ORACLE,
+        EXISTING_USDE_FALLBACK_ORACLE,
+      ]);
       expect(tokenConfigs[2]).to.have.same.members([true, true, true]);
       expect(tokenConfigs[3]).to.equal(false);
     });
@@ -102,12 +155,44 @@ forking(64434801, async () => {
   describe("Post-VIP behavior", () => {
     it("USDT Chainlink Oracle shouldn already have permission set properly", async () => {
       // permissions check
-      expect(await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(true);
-      expect(await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(true);
-      expect(await accessControlManager.hasPermission(CRITICAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)")).to.equal(true);
-      expect(await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(true);
-      expect(await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(true);
-      expect(await accessControlManager.hasPermission(CRITICAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)")).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          NORMAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          FAST_TRACK_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          CRITICAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          FAST_TRACK_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          CRITICAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
+      ).to.equal(true);
     });
 
     it("Check the updated owner and tokenConfig", async () => {
@@ -128,7 +213,11 @@ forking(64434801, async () => {
       // token config check
       const tokenConfigs = await resilientOracle.getTokenConfig(USDe);
       expect(tokenConfigs[0]).to.equal(USDe);
-      expect(tokenConfigs[1]).to.have.same.members([USDT_CHAINLINK_ORACLE, EXISTING_USDE_MAIN_ORACLE, EXISTING_USDE_MAIN_ORACLE]);
+      expect(tokenConfigs[1]).to.have.same.members([
+        USDT_CHAINLINK_ORACLE,
+        EXISTING_USDE_MAIN_ORACLE,
+        EXISTING_USDE_MAIN_ORACLE,
+      ]);
       expect(tokenConfigs[2]).to.have.same.members([true, true, true]);
       expect(tokenConfigs[3]).to.equal(false);
     });
@@ -141,11 +230,9 @@ forking(64434801, async () => {
       });
 
       it("Outside the limits", async () => {
-
         // fallback to existing main oracle
         await usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("1.07", 18));
         expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
-
 
         usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("0.9", 18));
         expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
