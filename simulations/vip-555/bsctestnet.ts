@@ -25,11 +25,11 @@ import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
-const NEW_SETTER_FACET = "0xa6624EcbcA3328Dc7b5741db0Cd0c2f2653f2608";
-const NEW_POLICY_FACET = "0x22CaBF6638458D9460304900868B5e5006134885";
-const NEW_REWARD_FACET = "0x60952A607B00090e79683c51654B5B0BB4553684";
-const NEW_MARKET_FACET = "0x3B6129250Ec0706FfF99E4909554F16b71A4bdaf";
-const NEW_FLASHLOAN_FACET = "0x8eaeC2e491255335b638A94A2F62E30B334a7e7C";
+const NEW_SETTER_FACET = "0x98DCde088ED0208e4521867344532565657e0a91";
+const NEW_POLICY_FACET = "0xB15620d400B12B1d9431910B770Eb1E0179432B1";
+const NEW_REWARD_FACET = "0x771d07CE1FE51d261a9c3e00A42684Ed45e0c50b";
+const NEW_MARKET_FACET = "0x3cAe1E59cdE3E3258348375cf301b469FB40A092";
+const NEW_FLASHLOAN_FACET = "0x957BE05daF560bd56D9Adb8D7A52CfbCD828163B";
 
 const OLD_SETTER_FACET = "0xF1844c6d56314a10C28175db638B51b4Ee14C402";
 const OLD_POLICY_FACET = "0xBDd1F07F4eF1748657FDA0d29CF4D7361120c187";
@@ -43,7 +43,7 @@ const NEW_COMPT_METHODS = ["setWhiteListFlashLoanAccount(address,bool)"];
 
 const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanFeeMantissa(uint256,uint256)"];
 
-forking(67070714, async () => {
+forking(68683541, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
