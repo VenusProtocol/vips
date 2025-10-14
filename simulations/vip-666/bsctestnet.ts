@@ -3,31 +3,24 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  ACM,
   BOUND_VALIDATOR,
-  CHAINLINK_USDT_FEED,
-  CRITICAL_TIMELOCK,
   EXISTING_USDE_FALLBACK_ORACLE,
   EXISTING_USDE_MAIN_ORACLE,
-  FAST_TRACK_TIMELOCK,
   MAX_STALE_PERIOD,
-  NORMAL_TIMELOCK,
   PRICE_LOWER_BOUND,
   PRICE_UPPER_BOUND,
-  RESILIENT_ORACLE,
-  UNITROLLER,
   USDT_CHAINLINK_ORACLE,
   USDe,
   vPT_USDe_30Oct2025,
   vUSDe,
   vip666,
   vsUSDe,
-} from "../../../vips/vip-666/vip-666-testnet";
+} from "../../vips/vip-666/vip-666-testnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -43,15 +36,15 @@ forking(68436663, async () => {
   let unitroller: Contract;
 
   before(async () => {
-    await impersonateAccount(NORMAL_TIMELOCK);
-    const timelock = await ethers.getSigner(NORMAL_TIMELOCK);
+    await impersonateAccount(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
+    const timelock = await ethers.getSigner(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
 
-    accessControlManager = new ethers.Contract(ACM, ACCESS_CONTROL_MANAGER_ABI, timelock);
-    resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, timelock);
+    accessControlManager = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, timelock);
+    resilientOracle = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, timelock);
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, timelock);
     existingUSDeMainOracle = new ethers.Contract(EXISTING_USDE_MAIN_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
-    unitroller = new ethers.Contract(UNITROLLER, UNITROLLER_ABI, timelock);
+    unitroller = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.UNITROLLER, UNITROLLER_ABI, timelock);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -59,38 +52,38 @@ forking(68436663, async () => {
       // permissions check
       expect(
         await accessControlManager.hasPermission(
-          NORMAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(false);
       expect(
         await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(false);
       expect(
         await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(false);
       expect(
-        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+        await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
       ).to.equal(false);
       expect(
         await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setTokenConfig(TokenConfig)",
         ),
       ).to.equal(false);
       expect(
         await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setTokenConfig(TokenConfig)",
         ),
@@ -98,7 +91,7 @@ forking(68436663, async () => {
     });
 
     it("USDT Chainlink Oracle should have correct pending owner and empty config", async () => {
-      expect(await usdtChainlinkOracle.pendingOwner()).to.equal(NORMAL_TIMELOCK);
+      expect(await usdtChainlinkOracle.pendingOwner()).to.equal(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
       const tokenConfigs = await usdtChainlinkOracle.tokenConfigs(USDe);
       expect(tokenConfigs[0]).to.equal(ZERO_ADDRESS);
       expect(tokenConfigs[1]).to.equal(ZERO_ADDRESS);
@@ -157,38 +150,38 @@ forking(68436663, async () => {
       // permissions check
       expect(
         await accessControlManager.hasPermission(
-          NORMAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setDirectPrice(address,uint256)",
         ),
       ).to.equal(true);
       expect(
-        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+        await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setTokenConfig(TokenConfig)",
         ),
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
+          NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
           USDT_CHAINLINK_ORACLE,
           "setTokenConfig(TokenConfig)",
         ),
@@ -196,10 +189,10 @@ forking(68436663, async () => {
     });
 
     it("Check the updated owner and tokenConfig", async () => {
-      expect(await usdtChainlinkOracle.owner()).to.equal(NORMAL_TIMELOCK);
+      expect(await usdtChainlinkOracle.owner()).to.equal(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
       const tokenConfigs = await usdtChainlinkOracle.tokenConfigs(USDe);
       expect(tokenConfigs[0]).to.equal(USDe);
-      expect(tokenConfigs[1]).to.equal(CHAINLINK_USDT_FEED);
+      expect(tokenConfigs[1]).to.equal(NETWORK_ADDRESSES.bsctestnet.USDT_CHAINLINK_FEED);
       expect(tokenConfigs[2]).to.equal(MAX_STALE_PERIOD);
     });
 
