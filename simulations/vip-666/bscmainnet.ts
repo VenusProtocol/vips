@@ -56,14 +56,6 @@ forking(64569840, async () => {
     unitroller = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.UNITROLLER, UNITROLLER_ABI, timelock);
 
     // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
-    await setMaxStalePeriodInChainlinkOracle(
-      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
-      USDe,
-      ethers.constants.AddressZero,
-      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
-      315360000,
-    );
-
     await setRedstonePrice(
       NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
       USDe,
@@ -344,6 +336,17 @@ forking(64569840, async () => {
       ]);
       expect(tokenConfigs[2]).to.have.same.members([true, true, true]);
       expect(tokenConfigs[3]).to.equal(false);
+    });
+
+    it("ResilientOracle should return a valid price for USDe", async () => {
+      await setMaxStalePeriodInChainlinkOracle(
+        USDT_CHAINLINK_ORACLE,
+        USDe,
+        ethers.constants.AddressZero,
+        NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+      expect(await usdtChainlinkOracle.getPrice(USDe)).to.closeTo(parseUnits("1", 18), parseUnits("0.001", 18));
     });
 
     describe("BoundValidator behavior", () => {
