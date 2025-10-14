@@ -3,8 +3,8 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { ZERO_ADDRESS } from "src/networkAddresses";
-import { expectEvents } from "src/utils";
+import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { expectEvents, setMaxStalePeriodInChainlinkOracle, setRedstonePrice } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -23,6 +23,7 @@ import {
   UNITROLLER,
   USDT_CHAINLINK_ORACLE,
   USDe,
+  sUSDe,
   vPT_USDe_30Oct2025,
   vUSDe,
   vip666,
@@ -34,7 +35,7 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import UNITROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
-forking(64434801, async () => {
+forking(64569840, async () => {
   let accessControlManager: Contract;
   let resilientOracle: Contract;
   let usdtChainlinkOracle: Contract;
@@ -52,47 +53,86 @@ forking(64434801, async () => {
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, timelock);
     existingUSDeMainOracle = new ethers.Contract(EXISTING_USDE_MAIN_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     unitroller = new ethers.Contract(UNITROLLER, UNITROLLER_ABI, timelock);
+
+    // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      USDe,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+
+
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
+      USDe,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      31536000,
+    );
+
+    // setRedstonePrice(NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE, USDe,
+    //   ethers.constants.AddressZero, NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
+
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
+      sUSDe,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
+
+    await setMaxStalePeriodInChainlinkOracle(
+      NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
+      sUSDe,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+      315360000,
+    );
   });
 
   describe("Pre-VIP behavior", () => {
     it("USDT Chainlink Oracle shouldn't have permission set before the VIP", async () => {
-      // permissions check
       expect(
-        await accessControlManager.hasPermission(
-          NORMAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          NORMAL_TIMELOCK
         ),
       ).to.equal(false);
+
       expect(
-        await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          FAST_TRACK_TIMELOCK
         ),
       ).to.equal(false);
+
       expect(
-        await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          CRITICAL_TIMELOCK
         ),
       ).to.equal(false);
+
       expect(
-        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setTokenConfig(TokenConfig)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          NORMAL_TIMELOCK
         ),
       ).to.equal(false);
+
       expect(
-        await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setTokenConfig(TokenConfig)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          FAST_TRACK_TIMELOCK
+        ),
+      ).to.equal(false);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          CRITICAL_TIMELOCK
         ),
       ).to.equal(false);
     });
@@ -141,56 +181,59 @@ forking(64434801, async () => {
 
   testVip("vip666Testnet", await vip666(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [6]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [6]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [1]);
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["OracleSet"], [3]);
 
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewCollateralFactor"], [3]);
+      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewCollateralFactor"], [2]);
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewLiquidationThreshold"], [3]);
     },
   });
 
   describe("Post-VIP behavior", () => {
     it("USDT Chainlink Oracle shouldn already have permission set properly", async () => {
-      // permissions check
       expect(
-        await accessControlManager.hasPermission(
-          NORMAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          NORMAL_TIMELOCK
         ),
       ).to.equal(true);
+
       expect(
-        await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          FAST_TRACK_TIMELOCK
         ),
       ).to.equal(true);
+
+
       expect(
-        await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
+          CRITICAL_TIMELOCK
         ),
       ).to.equal(true);
+
       expect(
-        await accessControlManager.hasPermission(NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
-      ).to.equal(true);
-      expect(
-        await accessControlManager.hasPermission(
-          FAST_TRACK_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setTokenConfig(TokenConfig)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          NORMAL_TIMELOCK
         ),
       ).to.equal(true);
+
       expect(
-        await accessControlManager.hasPermission(
-          CRITICAL_TIMELOCK,
-          USDT_CHAINLINK_ORACLE,
-          "setTokenConfig(TokenConfig)",
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          FAST_TRACK_TIMELOCK
+        ),
+      ).to.equal(true);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
+          CRITICAL_TIMELOCK
         ),
       ).to.equal(true);
     });

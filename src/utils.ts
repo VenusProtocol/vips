@@ -348,14 +348,21 @@ export const setRedstonePrice = async (
   });
   const price = await rsOracle.getPrice(asset);
 
+  console.log("price", price);
+
   // Since our oracle adjusts the configured price for token decimals internally,
-  // we need to do the reverse operation here so that the result of the getPrice()
+  //   we need to do the reverse operation here so that the result of the getPrice()
   // call before setting the direct value is equal to the result of the same call
   // after we set the price
   const decimalDelta = 18 - (tokenDecimals ?? 18);
   const adjustedPrice = price.div(parseUnits("1", decimalDelta));
+
+  console.log("adjustedPrice", adjustedPrice);
+
   await rsOracle.connect(oracleAdmin).setDirectPrice(asset, adjustedPrice);
   const priceAfter = await rsOracle.getPrice(asset);
+
+  console.log("priceAfter", priceAfter);
 
   if (!price.eq(priceAfter)) {
     throw new Error("Price is not correctly configured, try setting token decimals");
@@ -399,19 +406,19 @@ export const setMaxStalePeriod = async (
 
   const normalTimelock =
     FORKED_NETWORK == "bscmainnet" ||
-    FORKED_NETWORK == "bsctestnet" ||
-    FORKED_NETWORK == "arbitrumone" ||
-    FORKED_NETWORK == "arbitrumsepolia" ||
-    FORKED_NETWORK == "ethereum" ||
-    FORKED_NETWORK == "sepolia" ||
-    FORKED_NETWORK == "opbnbmainnet" ||
-    FORKED_NETWORK == "opbnbtestnet" ||
-    FORKED_NETWORK == "opmainnet" ||
-    FORKED_NETWORK == "opsepolia" ||
-    FORKED_NETWORK == "zksyncmainnet" ||
-    FORKED_NETWORK == "zksyncsepolia" ||
-    FORKED_NETWORK == "basemainnet" ||
-    FORKED_NETWORK == "basesepolia"
+      FORKED_NETWORK == "bsctestnet" ||
+      FORKED_NETWORK == "arbitrumone" ||
+      FORKED_NETWORK == "arbitrumsepolia" ||
+      FORKED_NETWORK == "ethereum" ||
+      FORKED_NETWORK == "sepolia" ||
+      FORKED_NETWORK == "opbnbmainnet" ||
+      FORKED_NETWORK == "opbnbtestnet" ||
+      FORKED_NETWORK == "opmainnet" ||
+      FORKED_NETWORK == "opsepolia" ||
+      FORKED_NETWORK == "zksyncmainnet" ||
+      FORKED_NETWORK == "zksyncsepolia" ||
+      FORKED_NETWORK == "basemainnet" ||
+      FORKED_NETWORK == "basesepolia"
       ? getForkedNetworkAddress("NORMAL_TIMELOCK")
       : getForkedNetworkAddress("GUARDIAN");
   const tokenConfig: TokenConfig = await resilientOracle.getTokenConfig(underlyingAsset.address);

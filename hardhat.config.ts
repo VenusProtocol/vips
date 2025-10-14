@@ -7,6 +7,9 @@ import { ethers } from "ethers";
 import { HardhatUserConfig, task } from "hardhat/config";
 import { ChainId } from "src/chains";
 
+import "hardhat-tracer";
+
+
 import "./type-extensions";
 
 dotenv.config();
@@ -91,19 +94,19 @@ task("test", "Update fork config")
     const { fork } = taskArguments;
     const hardhatConfig = fork
       ? {
-          allowUnlimitedContractSize: false,
-          loggingEnabled: false,
-          forking: {
-            enabled: true,
-            url: process.env[`ARCHIVE_NODE_${fork}`] as string,
-          },
-          gas: "auto" as const,
-          blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
-        }
+        allowUnlimitedContractSize: false,
+        loggingEnabled: false,
+        forking: {
+          enabled: true,
+          url: process.env[`ARCHIVE_NODE_${fork}`] as string,
+        },
+        gas: "auto" as const,
+        blockGasLimit: BLOCK_GAS_LIMIT_PER_NETWORK[fork as keyof typeof BLOCK_GAS_LIMIT_PER_NETWORK],
+      }
       : {
-          allowUnlimitedContractSize: true,
-          loggingEnabled: false,
-        };
+        allowUnlimitedContractSize: true,
+        loggingEnabled: false,
+      };
     hre.config.networks.hardhat = { ...hre.config.networks.hardhat, ...hardhatConfig };
     hre.FORKED_NETWORK = fork;
 
