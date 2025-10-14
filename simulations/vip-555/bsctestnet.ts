@@ -20,6 +20,7 @@ import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
 
 type CutParam = [string, number, string[]];
@@ -94,6 +95,12 @@ forking(68683541, async () => {
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
+      await expectEvents(
+        txResponse,
+        [VTOKEN_ABI],
+        ["FlashLoanStatusChanged", "FlashLoanFeeUpdated"],
+        [totalMarkets, totalMarkets],
+      );
     },
   });
 
@@ -153,6 +160,27 @@ forking(68683541, async () => {
       for (const market of CORE_MARKETS) {
         const marketContract = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, market.address);
         expect(await marketContract.implementation()).equals(NEW_VBEP20_DELEGATE_IMPL);
+      }
+    });
+
+    it("flash loans should be enabled for all core markets", async () => {
+      for (const market of CORE_MARKETS) {
+        const marketContract = await ethers.getContractAt(VTOKEN_ABI, market.address);
+        expect(await marketContract.isFlashLoanEnabled()).to.equal(true);
+      }
+    });
+
+    it("flash loan fee should be set to 0.3% with 30% protocol share", async () => {
+      const expectedFee = ethers.utils.parseUnits("0.003", 18); // 0.3%
+      const expectedProtocolShare = ethers.utils.parseUnits("0.3", 18); // 30%
+
+      for (const market of CORE_MARKETS) {
+        const marketContract = await ethers.getContractAt(VTOKEN_ABI, market.address);
+        const flashLoanFee = await marketContract.flashLoanFeeMantissa();
+        const protocolShareMantissa = await marketContract.flashLoanProtocolShareMantissa();
+
+        expect(flashLoanFee).to.equal(expectedFee);
+        expect(protocolShareMantissa).to.equal(expectedProtocolShare);
       }
     });
 

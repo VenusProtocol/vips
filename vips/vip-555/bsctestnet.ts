@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -163,6 +164,18 @@ export const vip555 = () => {
         signature: "_setComptrollerLens(address)",
         params: [NEW_COMPTROLLER_LENS],
       },
+      // Enable flash loans for all core markets
+      ...CORE_MARKETS.map(vToken => ({
+        target: vToken.address,
+        signature: "setFlashLoanEnabled(bool)",
+        params: [true],
+      })),
+      // Set flash loan fee to 0.3% and protocol share to 30%
+      ...CORE_MARKETS.map(vToken => ({
+        target: vToken.address,
+        signature: "setFlashLoanFeeMantissa(uint256,uint256)",
+        params: [parseUnits("0.003", 18), parseUnits("0.3", 18)], // 0.3% fee, 30% protocol share
+      })),
     ],
     meta,
     ProposalType.REGULAR,
