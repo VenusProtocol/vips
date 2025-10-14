@@ -40,8 +40,16 @@ forking(64569840, async () => {
     await impersonateAccount(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
     const timelock = await ethers.getSigner(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
 
-    accessControlManager = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, timelock);
-    resilientOracle = new ethers.Contract(NETWORK_ADDRESSES.bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, timelock);
+    accessControlManager = new ethers.Contract(
+      NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
+      ACCESS_CONTROL_MANAGER_ABI,
+      timelock,
+    );
+    resilientOracle = new ethers.Contract(
+      NETWORK_ADDRESSES.bscmainnet.RESILIENT_ORACLE,
+      RESILIENT_ORACLE_ABI,
+      timelock,
+    );
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, timelock);
     existingUSDeMainOracle = new ethers.Contract(EXISTING_USDE_MAIN_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
@@ -56,8 +64,12 @@ forking(64569840, async () => {
       315360000,
     );
 
-    await setRedstonePrice(NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE, USDe,
-      ethers.constants.AddressZero, NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
+    await setRedstonePrice(
+      NETWORK_ADDRESSES.bscmainnet.REDSTONE_ORACLE,
+      USDe,
+      ethers.constants.AddressZero,
+      NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+    );
 
     await setMaxStalePeriodInChainlinkOracle(
       NETWORK_ADDRESSES.bscmainnet.CHAINLINK_ORACLE,
@@ -80,43 +92,64 @@ forking(64569840, async () => {
     it("USDT Chainlink Oracle shouldn't have permission set before the VIP", async () => {
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
         ),
       ).to.equal(false);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK,
         ),
       ).to.equal(false);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
         ),
       ).to.equal(false);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
         ),
       ).to.equal(false);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK,
         ),
       ).to.equal(false);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
         ),
       ).to.equal(false);
     });
@@ -180,44 +213,64 @@ forking(64569840, async () => {
     it("USDT Chainlink Oracle shouldn already have permission set properly", async () => {
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
         ),
       ).to.equal(true);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK
-        ),
-      ).to.equal(true);
-
-
-      expect(
-        await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"])),
-          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK
-        ),
-      ).to.equal(true);
-
-      expect(
-        await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK,
         ),
       ).to.equal(true);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
         ),
       ).to.equal(true);
 
       expect(
         await accessControlManager.hasRole(
-          ethers.utils.keccak256(ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"])),
-          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
+        ),
+      ).to.equal(true);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.FAST_TRACK_TIMELOCK,
+        ),
+      ).to.equal(true);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
         ),
       ).to.equal(true);
     });

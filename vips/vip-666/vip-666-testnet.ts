@@ -20,7 +20,6 @@ export const PIVOT_ORACLE_ROLE = 1;
 export const FALLBACK_ORACLE_ROLE = 2;
 export const MAX_STALE_PERIOD = 86400n;
 
-
 export const vip666 = () => {
   const meta = {
     version: "v2",
@@ -36,17 +35,29 @@ export const vip666 = () => {
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK],
+        params: [
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+        ],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK],
+        params: [
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
+        ],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK],
+        params: [
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+          NETWORK_ADDRESSES.bsctestnet.CRITICAL_TIMELOCK,
+        ],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
@@ -56,7 +67,11 @@ export const vip666 = () => {
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK],
+        params: [
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+          NETWORK_ADDRESSES.bsctestnet.FAST_TRACK_TIMELOCK,
+        ],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,

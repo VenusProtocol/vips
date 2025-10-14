@@ -39,8 +39,16 @@ forking(68436663, async () => {
     await impersonateAccount(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
     const timelock = await ethers.getSigner(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK);
 
-    accessControlManager = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, timelock);
-    resilientOracle = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, timelock);
+    accessControlManager = new ethers.Contract(
+      NETWORK_ADDRESSES.bsctestnet.ACCESS_CONTROL_MANAGER,
+      ACCESS_CONTROL_MANAGER_ABI,
+      timelock,
+    );
+    resilientOracle = new ethers.Contract(
+      NETWORK_ADDRESSES.bsctestnet.RESILIENT_ORACLE,
+      RESILIENT_ORACLE_ABI,
+      timelock,
+    );
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, timelock);
     existingUSDeMainOracle = new ethers.Contract(EXISTING_USDE_MAIN_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
@@ -72,7 +80,11 @@ forking(68436663, async () => {
         ),
       ).to.equal(false);
       expect(
-        await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+        await accessControlManager.hasPermission(
+          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
       ).to.equal(false);
       expect(
         await accessControlManager.hasPermission(
@@ -170,7 +182,11 @@ forking(68436663, async () => {
         ),
       ).to.equal(true);
       expect(
-        await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"),
+        await accessControlManager.hasPermission(
+          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+          USDT_CHAINLINK_ORACLE,
+          "setTokenConfig(TokenConfig)",
+        ),
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(
