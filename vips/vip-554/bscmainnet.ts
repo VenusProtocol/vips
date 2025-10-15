@@ -30,8 +30,8 @@ export const getSnapshotGap = (
 export const SECONDS_PER_YEAR = 31536000;
 export const WBETH_InitialExchangeRate = parseUnits("1.080802207066000000", 18);
 export const WBETH_Timestamp = 1760151751;
-export const WBETH_GrowthRate = parseUnits("0.08", 18); // 8% per year
-export const WBETH_SnapshotGap = 50; // 0.5%
+export const WBETH_GrowthRate = parseUnits("0.0464", 18); // 4.64% per year
+export const WBETH_SnapshotGap = 39; // 0.39%
 
 export const vip530 = () => {
   const meta = {
