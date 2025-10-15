@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-555/utils/bsctestnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-557/utils/bsctestnet-cut-params.json";
 
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const NEW_VBEP20_DELEGATE_IMPL = "0xb941C5D148c65Ce49115D12B5148247AaCeFF375";
@@ -169,14 +169,14 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip555 = () => {
+export const vip557Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-555",
-    description: ``,
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-557: Flash loan feature for all markets on BSC Testnet",
+    description: "Upgrade contracts and enable flash loans on BSC Testnet.",
+    forDescription: "Execute",
+    againstDescription: "Do not execute",
+    abstainDescription: "Abstain",
   };
   return makeProposal(
     [
@@ -234,4 +234,4 @@ export const vip555 = () => {
   );
 };
 
-export default vip555;
+export default vip557Testnet;

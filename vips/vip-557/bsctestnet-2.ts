@@ -2,13 +2,13 @@ import { parseUnits } from "ethers/lib/utils";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { CORE_MARKETS } from "../vip-555/bsctestnet";
+import { CORE_MARKETS } from "./bsctestnet";
 
-export const vip556 = () => {
+export const vip557Testnet2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-556",
-    description: ``,
+    title: "VIP-557 flash loan fee update",
+    description: "Update flash loan fee and protocol share for all core markets on BSC Testnet.",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -27,4 +27,4 @@ export const vip556 = () => {
   );
 };
 
-export default vip556;
+export default vip557Testnet2;

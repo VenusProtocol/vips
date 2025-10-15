@@ -14,9 +14,9 @@ import {
   NEW_DIAMOND_IMPLEMENTATION,
   NEW_VBEP20_DELEGATE_IMPL,
   UNITROLLER,
-  vip555,
-} from "../../vips/vip-555/bsctestnet";
-import { vip556 } from "../../vips/vip-556/bsctestnet";
+  vip557Testnet,
+} from "../../vips/vip-557/bsctestnet";
+import { vip557Testnet2 } from "../../vips/vip-557/bsctestnet-2";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -45,6 +45,8 @@ const OLD_COMPTROLLER_LENS = "0xACbc75C2D0438722c75D9BD20844b5aFda4155ea";
 const NEW_COMPT_METHODS = ["setWhiteListFlashLoanAccount(address,bool)"];
 
 const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanFeeMantissa(uint256,uint256)"];
+
+const GENERIC_ETH_ACCOUNT = "0x804512132AA9E0c81Aab9Ef2113E05EC380d3cfc";
 
 forking(68683541, async () => {
   let unitroller: Contract;
@@ -90,7 +92,7 @@ forking(68683541, async () => {
     });
   });
 
-  testVip("VIP-555", await vip555(), {
+  testVip("VIP-557 testnet", await vip557Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
@@ -100,7 +102,7 @@ forking(68683541, async () => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);
     },
   });
-  testVip("VIP-556", await vip556(), {
+  testVip("VIP-557 testnet 2", await vip557Testnet2(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanFeeUpdated"], [totalMarkets]);
@@ -193,6 +195,9 @@ forking(68683541, async () => {
   });
 
   describe("generic tests", async () => {
-    checkCorePoolComptroller();
+    checkCorePoolComptroller({
+      account: GENERIC_ETH_ACCOUNT, // GENERIC_ETH_ACCOUNT
+      lens: NEW_COMPTROLLER_LENS, // NEW_COMPTROLLER_LENS
+    });
   });
 });
