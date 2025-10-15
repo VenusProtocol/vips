@@ -1,4 +1,3 @@
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -108,6 +107,66 @@ export const CORE_MARKETS = [
     name: "vXVS",
     address: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E",
   },
+  {
+    name: "vasBNB",
+    address: "0x73F506Aefd5e169D48Ea21A373B9B0a200E37585",
+  },
+  {
+    name: "vlisUSD",
+    address: "0x9447b1D4Bd192f25416B6aCc3B7f06be2f7D6309",
+  },
+  {
+    name: "vPT-sUSDE-26JUN2025",
+    address: "0x90535B06ddB00453a5e5f2bC094d498F1cc86032",
+  },
+  {
+    name: "vPT-USDe-30OCT2025",
+    address: "0x86a94290f2B8295daA3e53bA1286f2Ff21199143",
+  },
+  {
+    name: "vslisBNB",
+    address: "0xaB5504A3cde0d8253E8F981D663c7Ff7128B3e56",
+  },
+  {
+    name: "vSOL",
+    address: "0xbd9EB061444665Df7282Ec0888b72D60aC41Eb8C",
+  },
+  {
+    name: "vSolvBTC",
+    address: "0xA38110ae4451A86ab754695057d5B5a9BEAd0387",
+  },
+  {
+    name: "vsUSDe",
+    address: "0x8c8A1a0b6e1cb8058037F7bF24de6b79Aca5B7B0",
+  },
+  {
+    name: "vTHE",
+    address: "0x39A239F5117BFaC7a1b0b3A517c454113323451d",
+  },
+  {
+    name: "vTWT",
+    address: "0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF",
+  },
+  {
+    name: "vUSD1",
+    address: "0x519e61D2CDA04184FB086bbD2322C1bfEa0917Cf",
+  },
+  {
+    name: "vUSDe",
+    address: "0x86f8DfB7CA84455174EE9C3edd94867b51Da46BD",
+  },
+  {
+    name: "vUSDF",
+    address: "0x140d5Da2cE9fb9A8725cabdDB2Fe8ea831342C78",
+  },
+  {
+    name: "vWBNB",
+    address: "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C",
+  },
+  {
+    name: "vxSolvBTC",
+    address: "0x97cB97B05697c377C0bd09feDce67DBd86B7aB1e",
+  },
 ];
 
 export const vip555 = () => {
@@ -132,7 +191,6 @@ export const vip555 = () => {
         params: [UNITROLLER],
       },
       {
-        // Note that mainnet cuts should be updated after Prime VIP is executed
         target: UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [params],
@@ -169,12 +227,6 @@ export const vip555 = () => {
         target: vToken.address,
         signature: "setFlashLoanEnabled(bool)",
         params: [true],
-      })),
-      // Set flash loan fee to 0.3% and protocol share to 30%
-      ...CORE_MARKETS.map(vToken => ({
-        target: vToken.address,
-        signature: "setFlashLoanFeeMantissa(uint256,uint256)",
-        params: [parseUnits("0.003", 18), parseUnits("0.3", 18)], // 0.3% fee, 30% protocol share
       })),
     ],
     meta,
