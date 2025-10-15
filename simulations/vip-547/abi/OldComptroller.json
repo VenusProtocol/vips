@@ -1,0 +1,4 @@
+[
+  "function markets(address vToken) external view returns (bool isListed, uint256 CF)",
+  "function liquidationIncentiveMantissa() external view returns (uint256)"
+]

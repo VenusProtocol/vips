@@ -1,79 +1,49 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import {
-  expectEvents,
-  initMainnetUser,
-  setMaxStalePeriodInBinanceOracle,
-  setMaxStalePeriodInChainlinkOracle,
-} from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  ACM,
-  CORE_MARKETS,
-  CORE_MARKETS_WITHOUT_VBNB,
-  CURRENT_LIQUIDATION_INCENTIVE,
-  LIQUIDATOR,
-  LIQUIDATOR_PROXY_ADMIN,
-  MARKET_CONFIGURATION_AGGREGATOR,
-  NEW_COMPTROLLER_LENS,
-  NEW_COMPT_METHODS,
-  NEW_DIAMOND,
-  NEW_LIQUIDATOR_IMPL,
-  NEW_VAI_CONTROLLER,
-  NEW_VBEP20_DELEGATE,
-  OLD_COMPTROLLER_LENS,
-  OLD_DIAMOND,
-  OLD_LIQUIDATOR_IMPL,
-  OLD_VAI_CONTROLLER,
-  UNITROLLER,
-  VAI_UNITROLLER,
+  BTCB,
+  BTCB_PRIME_CONVERTER,
+  ETH,
+  ETH_PRIME_CONVERTER,
+  PRIME,
+  PRIME_LIQUIDITY_PROVIDER,
+  PSR,
+  USDC,
+  USDC_PRIME_CONVERTER,
+  USDT,
+  USDT_PRIME_CONVERTER,
+  vUSDC,
+  vUSDT,
   vip550,
 } from "../../vips/vip-550/bsctestnet";
-import ACM_ABI from "./abi/AccessControlManager.json";
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
-import DIAMOND_ABI from "./abi/Diamond.json";
-import LIQUIDATOR_ABI from "./abi/Liquidator.json";
-import LIQUIDATOR_PROXY_ABI from "./abi/LiquidatorProxy.json";
-import UNITROLLER_ABI from "./abi/Unitroller.json";
-import VAI_UNITROLLR_ABI from "./abi/VAIUnitroller.json";
-import VBEP20_DELEGATOR_ABI from "./abi/VBEP20Delegator.json";
-import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
+import { CORE_MARKETS } from "../../vips/vip-550/bsctestnet";
+import PRIME_ABI from "./abi/Prime.json";
+import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
+import ERC20_ABI from "./abi/erc20.json";
+import PSR_ABI from "./abi/protocolShareReserve.json";
 
-type CutParam = [string, number, string[]];
-const cutParams = params as unknown as CutParam[];
-
-const OLD_SETTER_FACET = "0xb619F7ce96c0a6E3F0b44e993f663522F79f294A";
-const OLD_REWARD_FACET = "0x905006DCD5DbAa9B67359bcB341a0C49AfC8d0A6";
-const OLD_MARKET_FACET = "0x377c2E7CE08B4cc7033EDF678EE1224A290075Fd";
-const OLD_POLICY_FACET = "0x671B787AEDB6769972f081C6ee4978146F7D92E6";
-
-const NEW_SETTER_FACET = "0xe41Ab9b0ea3edD4cE3108650056641F1E361246c";
-const NEW_REWARD_FACET = "0x0CB4FdDA118Da048B9AAaC15f34662C6AB34F5dB";
-const NEW_MARKET_FACET = "0xfdFd4BEdc16339fE2dfa19Bab8bC9B8DA4149F75";
-const NEW_POLICY_FACET = "0x284d000665296515280a4fB066a887EFF6A3bD9E";
-
-forking(63848748, async () => {
-  let unitroller: Contract;
-  let comptroller: Contract;
-  let accessControlManager: Contract;
-  let vaiUnitroller: Contract;
-  let liquidator: Contract;
-  let proxyAdmin: SignerWithAddress;
+forking(67179812, async () => {
+  let psr: Contract;
+  let primeLiquidityProvider: Contract;
+  let prime: Contract;
+  let usdc: Contract;
+  let eth: Contract;
+  let usdt: Contract;
 
   before(async () => {
-    unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
-    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
-    vaiUnitroller = await ethers.getContractAt(VAI_UNITROLLR_ABI, VAI_UNITROLLER);
-    liquidator = await ethers.getContractAt(LIQUIDATOR_PROXY_ABI, LIQUIDATOR);
-    proxyAdmin = await initMainnetUser(LIQUIDATOR_PROXY_ADMIN, parseUnits("2", 18));
-    console.log(`Setting max stale period...`);
+    psr = await ethers.getContractAt(PSR_ABI, PSR);
+    primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+    prime = await ethers.getContractAt(PRIME_ABI, PRIME);
+    usdc = await ethers.getContractAt(ERC20_ABI, USDC);
+    eth = await ethers.getContractAt(ERC20_ABI, ETH);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
+
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
       await setMaxStalePeriodInChainlinkOracle(
@@ -98,157 +68,94 @@ forking(63848748, async () => {
   });
 
   describe("Pre-VIP state", async () => {
-    it("unitroller should have old implementation", async () => {
-      expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(OLD_DIAMOND.toLowerCase());
+    it("check current distribution configs", async () => {
+      expect(await psr.getPercentageDistribution(USDC_PRIME_CONVERTER, 0)).to.equal(600);
+      expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 0)).to.equal(1100);
+      expect(await psr.getPercentageDistribution(BTCB_PRIME_CONVERTER, 0)).to.equal(100);
+      expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(200);
     });
 
-    it("comptroller should have old comptrollerLens", async () => {
-      expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(OLD_COMPTROLLER_LENS.toLowerCase());
+    it("check balance of USDT, USDC, ETH from PrimeLiquidityProvider and USDTPrimeConverter", async () => {
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433465835078n);
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6800150420);
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
+
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(10000000);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
-    it("VAI Unitroller should point to old VAI Controller", async () => {
-      expect(await vaiUnitroller.vaiControllerImplementation()).to.equal(OLD_VAI_CONTROLLER);
+    it("check current prime reward distribution speeds", async () => {
+      // USDC and USDT are 6 decimals on bsctestnet
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(9220);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(21797);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(BTCB)).to.equal(315393518518);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(ETH)).to.equal(6109664351851);
     });
 
-    it("Liquidator should point to old implementation", async () => {
-      const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
-      expect(impl.toLowerCase()).to.equal(OLD_LIQUIDATOR_IMPL.toLowerCase());
+    it("check Prime multipliers", async () => {
+      const usdcMarket = await prime.markets(vUSDC);
+      expect(usdcMarket.supplyMultiplier).to.equal(2000000000000000000n);
+      expect(usdcMarket.borrowMultiplier).to.equal(4000000000000000000n);
+      const usdtMarket = await prime.markets(vUSDT);
+      expect(usdtMarket.supplyMultiplier).to.equal(2000000000000000000n);
+      expect(usdtMarket.borrowMultiplier).to.equal(4000000000000000000n);
     });
   });
 
   testVip("VIP-550", await vip550(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      const totalMarkets = CORE_MARKETS_WITHOUT_VBNB.length;
-      const totalNewMethods = NEW_COMPT_METHODS.length;
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [4]);
-      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 2]); // +2 for unitroller and VAI
-      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted", "PermissionRevoked"], [totalNewMethods + 3, 5]);
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        ["NewLiquidationThreshold", "NewLiquidationIncentive", "BorrowAllowedUpdated"],
-        [totalMarkets - 2, totalMarkets + 1, totalMarkets + 1], // +1 for vBNB, -3 for markets with 0 collateral factor
-      );
-      await expectEvents(txResponse, [LIQUIDATOR_ABI], ["NewLiquidationTreasuryPercent"], [1]);
+      // percentage distribution updates for those four assets
+      await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [4]);
+
+      // sweep token for USDC and ETH
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["SweepToken"], [2]);
+
+      // setTokensDistributionSpeed for USDT and USDC
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
+
+      // updateMultipliers for vUSDT and vUSDC
+      await expectEvents(txResponse, [PRIME_ABI], ["MultiplierUpdated"], [2]);
     },
   });
 
   describe("Post-VIP state", async () => {
-    it("unitroller should have new implementation", async () => {
-      expect(await unitroller.comptrollerImplementation()).equals(NEW_DIAMOND);
+    it("check current distribution configs", async () => {
+      // it should be 10%, 10%, 0%, 0%
+      expect(await psr.getPercentageDistribution(USDC_PRIME_CONVERTER, 0)).to.equal(1000);
+      expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 0)).to.equal(1000);
+      expect(await psr.getPercentageDistribution(BTCB_PRIME_CONVERTER, 0)).to.equal(0);
+      expect(await psr.getPercentageDistribution(ETH_PRIME_CONVERTER, 0)).to.equal(0);
     });
 
-    it("market facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = [...cutParams[0][2], ...cutParams[1][2]];
-      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(functionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
+    it("check sweep and token conversion status", async () => {
+      // usdt amount increased on PLP as some usdc got converted to usdt
+      expect(await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(148146149392433690317587n);
+      expect(await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(6024830549);
+      expect(await eth.balanceOf(PRIME_LIQUIDITY_PROVIDER)).to.eq(0);
+
+      // some usdc remains as converter network does not enough usdt to swap
+      expect(await usdt.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
+      expect(await usdc.balanceOf(USDT_PRIME_CONVERTER)).to.eq(785319871);
+      expect(await eth.balanceOf(USDT_PRIME_CONVERTER)).to.eq(0);
     });
 
-    it("policy facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = cutParams[2][2];
-      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(functionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
+    it("check current prime reward distribution speeds", async () => {
+      /// @dev since USDT is the only asset that has been updated, USDC, BTCB, ETH should remain the same
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(7000);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(7000);
+
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(BTCB)).to.equal(315393518518);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(ETH)).to.equal(6109664351851);
     });
 
-    it("reward facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = cutParams[3][2];
-      expect(await unitroller.facetFunctionSelectors(NEW_REWARD_FACET)).to.deep.equal(functionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_REWARD_FACET)).to.deep.equal([]);
-    });
-
-    it("setter facet function selectors should be replaced with new facet address", async () => {
-      const functionSelectors = [...cutParams[4][2], ...cutParams[5][2]];
-      expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(functionSelectors);
-      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
-    });
-
-    it("unitroller should contain the new facet addresses", async () => {
-      expect(await unitroller.facetAddresses()).to.include(NEW_SETTER_FACET, NEW_REWARD_FACET);
-      expect(await unitroller.facetAddresses()).to.include(NEW_MARKET_FACET, NEW_POLICY_FACET);
-
-      expect(await unitroller.facetAddresses()).to.not.include(OLD_SETTER_FACET, OLD_REWARD_FACET);
-      expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET, OLD_POLICY_FACET);
-    });
-
-    it("Check removed permission", async () => {
-      expect(
-        await accessControlManager.hasPermission(
-          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "_setCollateralFactor(address,uint256)",
-        ),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(
-          NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "_setLiquidationIncentive(uint256)",
-        ),
-      ).to.equal(false);
-    });
-
-    it("Check new permission", async () => {
-      for (const method of NEW_COMPT_METHODS) {
-        expect(
-          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
-        ).to.equal(true);
-      }
-    });
-
-    it("comptroller should have new comptrollerLens", async () => {
-      expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(NEW_COMPTROLLER_LENS.toLowerCase());
-    });
-
-    it("markets should have new implemenation", async () => {
-      for (const market of CORE_MARKETS_WITHOUT_VBNB) {
-        const marketContract = await ethers.getContractAt(VBEP20_DELEGATOR_ABI, market.address);
-        expect(await marketContract.implementation()).equals(NEW_VBEP20_DELEGATE);
-      }
-    });
-
-    it("comptroller should have correct markets value", async () => {
-      for (const market of CORE_MARKETS) {
-        const data = await comptroller.markets(market.address);
-        expect(data[1]).to.be.equal(market.collateralFactor);
-        expect(data[3]).to.be.equal(market.collateralFactor); // same LT
-        expect(data[4]).to.be.equal(CURRENT_LIQUIDATION_INCENTIVE);
-        expect(data[5]).to.be.equal(0); // corePool
-        expect(data[6]).to.be.equal(true); // isBorrowAllowed
-      }
-    });
-
-    it("VAI Controller should point to new impl", async () => {
-      expect(await vaiUnitroller.vaiControllerImplementation()).to.equal(NEW_VAI_CONTROLLER);
-    });
-
-    it("Liquidator should point to new implementation", async () => {
-      const impl = await liquidator.connect(proxyAdmin).callStatic.implementation();
-      expect(impl.toLowerCase()).to.equal(NEW_LIQUIDATOR_IMPL.toLowerCase());
-    });
-
-    it("MarketConfigurationAggregator should not have ACM permissions", async () => {
-      expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setCollateralFactor(address,uint256,uint256)",
-        ),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setLiquidationIncentive(address,uint256)",
-        ),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(
-          MARKET_CONFIGURATION_AGGREGATOR,
-          UNITROLLER,
-          "setIsBorrowAllowed(uint96,address,bool)",
-        ),
-      ).to.equal(false);
+    it("check Prime multipliers", async () => {
+      const usdcMarket = await prime.markets(vUSDC);
+      expect(usdcMarket.supplyMultiplier).to.equal(2000000000000000000n);
+      expect(usdcMarket.borrowMultiplier).to.equal(0);
+      const usdtMarket = await prime.markets(vUSDT);
+      expect(usdtMarket.supplyMultiplier).to.equal(2000000000000000000n);
+      expect(usdtMarket.borrowMultiplier).to.equal(0);
     });
   });
 });

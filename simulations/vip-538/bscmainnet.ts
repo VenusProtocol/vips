@@ -32,7 +32,7 @@ forking(56888647, async () => {
 
   testVip("VIP-538", await vip538(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap"], [2]);
+      await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["NewSupplyCap"], [1]);
     },
   });
 
