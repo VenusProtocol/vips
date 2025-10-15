@@ -5,6 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
+import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
 import {
   ACM,
@@ -15,6 +16,7 @@ import {
   UNITROLLER,
   vip555,
 } from "../../vips/vip-555/bsctestnet";
+import { vip556 } from "../../vips/vip-556/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -95,12 +97,13 @@ forking(68683541, async () => {
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
       await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
-      await expectEvents(
-        txResponse,
-        [VTOKEN_ABI],
-        ["FlashLoanStatusChanged", "FlashLoanFeeUpdated"],
-        [totalMarkets, totalMarkets],
-      );
+      await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);
+    },
+  });
+  testVip("VIP-556", await vip556(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      const totalMarkets = CORE_MARKETS.length;
+      await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanFeeUpdated"], [totalMarkets]);
     },
   });
 
@@ -187,5 +190,9 @@ forking(68683541, async () => {
     it("comptroller should have new comptrollerLens", async () => {
       expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(NEW_COMPTROLLER_LENS.toLowerCase());
     });
+  });
+
+  describe("generic tests", async () => {
+    checkCorePoolComptroller();
   });
 });
