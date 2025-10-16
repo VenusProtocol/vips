@@ -11,6 +11,7 @@ import {
   BOUND_VALIDATOR,
   EXISTING_USDE_FALLBACK_ORACLE,
   EXISTING_USDE_MAIN_ORACLE,
+  GUARDIAN3,
   MAX_STALE_PERIOD,
   PRICE_LOWER_BOUND,
   PRICE_UPPER_BOUND,
@@ -21,7 +22,6 @@ import {
   vUSDe,
   vip666,
   vsUSDe,
-  GUARDIAN3,
 } from "../../vips/vip-666/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";

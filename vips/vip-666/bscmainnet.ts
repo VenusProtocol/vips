@@ -66,11 +66,7 @@ export const vip666 = () => {
       {
         target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          USDT_CHAINLINK_ORACLE,
-          "setDirectPrice(address,uint256)",
-          GUARDIAN3,
-        ],
+        params: [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)", GUARDIAN3],
       },
       {
         target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
@@ -146,3 +142,5 @@ export const vip666 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip666;
