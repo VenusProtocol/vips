@@ -32,7 +32,7 @@ forking(68436663, async () => {
   let resilientOracle: Contract;
   let usdtChainlinkOracle: Contract;
   let boundValidator: Contract;
-  let existingUSDeMainOracle: Contract;
+  let existingUSDeFallbackOracle: Contract;
   let unitroller: Contract;
 
   before(async () => {
@@ -51,7 +51,7 @@ forking(68436663, async () => {
     );
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     boundValidator = new ethers.Contract(BOUND_VALIDATOR, BOUND_VALIDATOR_ABI, timelock);
-    existingUSDeMainOracle = new ethers.Contract(EXISTING_USDE_MAIN_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
+    existingUSDeFallbackOracle = new ethers.Contract(EXISTING_USDE_FALLBACK_ORACLE, CHAINLINK_ORACLE_ABI, timelock);
     unitroller = new ethers.Contract(NETWORK_ADDRESSES.bsctestnet.UNITROLLER, UNITROLLER_ABI, timelock);
   });
 
@@ -224,8 +224,8 @@ forking(68436663, async () => {
       expect(tokenConfigs[0]).to.equal(USDe);
       expect(tokenConfigs[1]).to.have.same.members([
         USDT_CHAINLINK_ORACLE,
-        EXISTING_USDE_MAIN_ORACLE,
-        EXISTING_USDE_MAIN_ORACLE,
+        EXISTING_USDE_FALLBACK_ORACLE,
+        EXISTING_USDE_FALLBACK_ORACLE,
       ]);
       expect(tokenConfigs[2]).to.have.same.members([true, true, true]);
       expect(tokenConfigs[3]).to.equal(false);
@@ -239,12 +239,12 @@ forking(68436663, async () => {
       });
 
       it("Outside the limits", async () => {
-        // fallback to existing main oracle
+        // fallback to existing fallback oracle
         await usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("1.07", 18));
-        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
+        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeFallbackOracle.getPrice(USDe));
 
         usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("0.9", 18));
-        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
+        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeFallbackOracle.getPrice(USDe));
       });
     });
 

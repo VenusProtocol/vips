@@ -101,12 +101,12 @@ export const vip666 = () => {
       {
         target: NETWORK_ADDRESSES.bsctestnet.RESILIENT_ORACLE,
         signature: "setOracle(address,address,uint8)",
-        params: [USDe, EXISTING_USDE_MAIN_ORACLE, PIVOT_ORACLE_ROLE],
+        params: [USDe, EXISTING_USDE_FALLBACK_ORACLE, PIVOT_ORACLE_ROLE],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.RESILIENT_ORACLE,
         signature: "setOracle(address,address,uint8)",
-        params: [USDe, EXISTING_USDE_MAIN_ORACLE, FALLBACK_ORACLE_ROLE],
+        params: [USDe, EXISTING_USDE_FALLBACK_ORACLE, FALLBACK_ORACLE_ROLE],
       },
       {
         target: NETWORK_ADDRESSES.bsctestnet.UNITROLLER,
