@@ -15,6 +15,8 @@ export const vsUSDe = "0x699658323d58eE25c69F1a29d476946ab011bD18";
 export const vUSDe = "0x74ca6930108F775CC667894EEa33843e691680d7";
 export const vPT_USDe_30Oct2025 = "0x6D0cDb3355c93A0cD20071aBbb3622731a95c73E";
 
+export const GUARDIAN3 = "0x3a3284dc0faffb0b5f0d074c4c704d14326c98cf";
+
 export const PRICE_LOWER_BOUND = parseUnits("0.94", 18);
 export const PRICE_UPPER_BOUND = parseUnits("1.06", 18);
 export const MAIN_ORACLE_ROLE = 0;
@@ -64,6 +66,15 @@ export const vip666 = () => {
       {
         target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
+        params: [
+          USDT_CHAINLINK_ORACLE,
+          "setDirectPrice(address,uint256)",
+          GUARDIAN3,
+        ],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
         params: [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK],
       },
       {
@@ -79,6 +90,11 @@ export const vip666 = () => {
         target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
         params: [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK],
+      },
+      {
+        target: NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)", GUARDIAN3],
       },
       {
         target: USDT_CHAINLINK_ORACLE,

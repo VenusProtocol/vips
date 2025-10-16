@@ -21,7 +21,8 @@ import {
   vUSDe,
   vip666,
   vsUSDe,
-} from "../../vips/vip-666/vip-666";
+  GUARDIAN3,
+} from "../../vips/vip-666/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -121,6 +122,18 @@ forking(64569840, async () => {
       expect(
         await accessControlManager.hasRole(
           ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          GUARDIAN3,
+        ),
+      ).to.equal(false);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
             ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
           ),
           NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
@@ -142,6 +155,15 @@ forking(64569840, async () => {
             ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
           ),
           NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
+        ),
+      ).to.equal(false);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          GUARDIAN3,
         ),
       ).to.equal(false);
     });
@@ -190,7 +212,7 @@ forking(64569840, async () => {
 
   testVip("vip666Testnet", await vip666(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [6]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [8]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["TokenConfigAdded"], [1]);
       await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [1]);
@@ -202,7 +224,7 @@ forking(64569840, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("USDT Chainlink Oracle shouldn already have permission set properly", async () => {
+    it("USDT Chainlink Oracle should already have permission set properly", async () => {
       expect(
         await accessControlManager.hasRole(
           ethers.utils.keccak256(
@@ -242,6 +264,18 @@ forking(64569840, async () => {
       expect(
         await accessControlManager.hasRole(
           ethers.utils.keccak256(
+            ethers.utils.solidityPack(
+              ["address", "string"],
+              [USDT_CHAINLINK_ORACLE, "setDirectPrice(address,uint256)"],
+            ),
+          ),
+          GUARDIAN3,
+        ),
+      ).to.equal(true);
+
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
             ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
           ),
           NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK,
@@ -265,50 +299,15 @@ forking(64569840, async () => {
           NETWORK_ADDRESSES.bscmainnet.CRITICAL_TIMELOCK,
         ),
       ).to.equal(true);
-    });
 
-    it("Check the updated owner and tokenConfig", async () => {
-      expect(await usdtChainlinkOracle.owner()).to.equal(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
-      const tokenConfigs = await usdtChainlinkOracle.tokenConfigs(USDe);
-      expect(tokenConfigs[0]).to.equal(USDe);
-      expect(tokenConfigs[1]).to.equal(NETWORK_ADDRESSES.bscmainnet.USDT_CHAINLINK_FEED);
-      expect(tokenConfigs[2]).to.equal(MAX_STALE_PERIOD);
-    });
-
-    it("Check the after state of the ResilientOracle for USDe", async () => {
-      // existing validate config check
-      const validateConfigs = await boundValidator.validateConfigs(USDe);
-      expect(validateConfigs[0]).to.equal(USDe);
-      expect(validateConfigs[1]).to.equal(PRICE_UPPER_BOUND);
-      expect(validateConfigs[2]).to.equal(PRICE_LOWER_BOUND);
-
-      // token config check
-      const tokenConfigs = await resilientOracle.getTokenConfig(USDe);
-      expect(tokenConfigs[0]).to.equal(USDe);
-      expect(tokenConfigs[1]).to.have.same.members([
-        USDT_CHAINLINK_ORACLE,
-        EXISTING_USDE_MAIN_ORACLE,
-        EXISTING_USDE_MAIN_ORACLE,
-      ]);
-      expect(tokenConfigs[2]).to.have.same.members([true, true, true]);
-      expect(tokenConfigs[3]).to.equal(false);
-    });
-
-    describe("BoundValidator behavior", () => {
-      it("Inside the limits", async () => {
-        expect(await resilientOracle.getPrice(USDe)).to.not.equal(0);
-        await usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("1.05", 18));
-        expect(await resilientOracle.getPrice(USDe)).to.equal(parseUnits("1.05", 18));
-      });
-
-      it("Outside the limits", async () => {
-        // fallback to existing main oracle
-        await usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("1.07", 18));
-        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
-
-        usdtChainlinkOracle.setDirectPrice(USDe, parseUnits("0.9", 18));
-        expect(await resilientOracle.getPrice(USDe)).to.be.equal(await existingUSDeMainOracle.getPrice(USDe));
-      });
+      expect(
+        await accessControlManager.hasRole(
+          ethers.utils.keccak256(
+            ethers.utils.solidityPack(["address", "string"], [USDT_CHAINLINK_ORACLE, "setTokenConfig(TokenConfig)"]),
+          ),
+          GUARDIAN3,
+        ),
+      ).to.equal(true);
     });
 
     it("Check the updated owner and tokenConfig", async () => {

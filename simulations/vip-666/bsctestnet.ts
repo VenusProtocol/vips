@@ -20,7 +20,7 @@ import {
   vUSDe,
   vip666,
   vsUSDe,
-} from "../../vips/vip-666/vip-666-testnet";
+} from "../../vips/vip-666/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -158,7 +158,7 @@ forking(68436663, async () => {
   });
 
   describe("Post-VIP behavior", () => {
-    it("USDT Chainlink Oracle shouldn already have permission set properly", async () => {
+    it("USDT Chainlink Oracle should already have permission set properly", async () => {
       // permissions check
       expect(
         await accessControlManager.hasPermission(
