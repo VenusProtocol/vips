@@ -25,7 +25,7 @@ export const ORACLE_BNB = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 
 export const NETWORK_ADDRESSES = {
   bscmainnet: {
-    DEFAULT_PROPOSER_ADDRESS: "0x97a32D4506F6A35De68e0680859cDF41D077a9a9",
+    DEFAULT_PROPOSER_ADDRESS: "0x34221485302f6f2029660a000908b5fcabb9bc6e",
     ACCESS_CONTROL_MANAGER: "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555",
     GOVERNOR_PROXY: govBscmainnetContracts.addresses.GovernorBravoDelegator,
     NORMAL_TIMELOCK: govBscmainnetContracts.addresses.NormalTimelock,
