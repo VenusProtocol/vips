@@ -24,11 +24,26 @@ export const PIVOT_ORACLE_ROLE = 1;
 export const FALLBACK_ORACLE_ROLE = 2;
 export const MAX_STALE_PERIOD = 86400;
 
-export const vip666 = () => {
+export const vip556 = () => {
   const meta = {
     version: "v2",
-    title: "Update the USDe oracle configuration",
-    description: `#### Summary`,
+    title: "[BNB Chain] USDe oracle configuration and Stablecoins E-Mode parameters",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in [this Venus community forum publication](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/10):
+
+- Resilient Oracle configuration for [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
+    - MAIN oracle: use the [USDT/USD Chainlink price feed](https://bscscan.com/address/0xB97Ad0E74fa7d920791E90258A6E2085088b4320#code)
+    - PIVOT and FALLBACK: use the [USDe/USD Chainlink price feed](https://bscscan.com/address/0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC)
+    - Set the validation bounds between the main and pivot/fallback oracles at 0.94–1.06
+- Risk parameters on the Stablecoins E-Mode group:
+    - [USDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x74ca6930108F775CC667894EEa33843e691680d7?chainId=56&tab=supply): increase the Liquidation Threshold, from 92% to 92.5%
+    - [sUSDe](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x699658323d58eE25c69F1a29d476946ab011bD18?chainId=56&tab=supply):
+        - increase the Collateral Factor, from 89% to 89.5%
+        - increase the Liquidation Threshold, from 91% to 91.5%
+    - [PT-sUSDe-30OCT2025](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x6D0cDb3355c93A0cD20071aBbb3622731a95c73E?chainId=56&tab=supply):
+        - increase the Collateral Factor, from 90% to 90.5%
+        - increase the Liquidation Threshold, from 92% to 92.5%
+
+Complete analysis and details of these recommendations are available in the above publication.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -143,4 +158,4 @@ export const vip666 = () => {
   );
 };
 
-export default vip666;
+export default vip556;

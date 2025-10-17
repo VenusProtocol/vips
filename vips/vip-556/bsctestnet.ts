@@ -20,7 +20,7 @@ export const PIVOT_ORACLE_ROLE = 1;
 export const FALLBACK_ORACLE_ROLE = 2;
 export const MAX_STALE_PERIOD = 86400n;
 
-export const vip666 = () => {
+export const vip556 = () => {
   const meta = {
     version: "v2",
     title: "Update the USDe oracle configuration",
@@ -129,4 +129,4 @@ export const vip666 = () => {
   );
 };
 
-export default vip666;
+export default vip556;

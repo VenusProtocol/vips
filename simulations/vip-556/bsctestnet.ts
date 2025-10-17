@@ -18,9 +18,9 @@ import {
   USDe,
   vPT_USDe_30Oct2025,
   vUSDe,
-  vip666,
+  vip556,
   vsUSDe,
-} from "../../vips/vip-666/bsctestnet";
+} from "../../vips/vip-556/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/accessControlManager.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -144,7 +144,7 @@ forking(68436663, async () => {
     });
   });
 
-  testVip("vip666Testnet", await vip666(), {
+  testVip("vip556Testnet", await vip556(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [6]);
       await expectEvents(txResponse, [CHAINLINK_ORACLE_ABI], ["OwnershipTransferred"], [1]);
