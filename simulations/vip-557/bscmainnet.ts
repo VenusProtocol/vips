@@ -19,6 +19,7 @@ import {
   NEW_COMPTROLLER_LENS,
   NEW_DIAMOND_IMPLEMENTATION,
   NEW_VBEP20_DELEGATE_IMPL,
+  UNITROLLER,
   vip557,
 } from "../../vips/vip-557/bscmainnet";
 import ACM_ABI from "./abi/ACMMainnet.json";
@@ -62,9 +63,9 @@ forking(64916100, async () => {
   let accessControlManager: Contract;
 
   before(async () => {
-    unitroller = await ethers.getContractAt(DIAMOND_ABI, bscmainnet.UNITROLLER);
-    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, bscmainnet.UNITROLLER);
-    accessControlManager = await ethers.getContractAt(ACM_ABI, NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER);
+    unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
+    comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
+    accessControlManager = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
 
     console.log(`Setting max stale period...`);
     for (const market of CORE_MARKETS) {
@@ -127,22 +128,6 @@ forking(64916100, async () => {
     it("comptroller should have old comptrollerLens", async () => {
       expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(OLD_COMPTROLLER_LENS.toLowerCase());
     });
-
-    //   const comptroller = await ethers.getContractAt(COMPTROLLER_ABI, bscmainnet.UNITROLLER);
-    //   const allMarkets = await comptroller.getAllMarkets();
-    //   console.log(`Total markets in Core Pool: ${allMarkets.length}`);
-    //   console.log("Registered markets:");
-    //   allMarkets.forEach((marketAddress: string, index: number) => {
-    //     console.log(`${index + 1}. ${marketAddress}`);
-    //   });
-    //   // Check that we have the expected number of markets (should be 38 based on CORE_MARKETS)
-    //   expect(allMarkets.length - 1).to.equal(CORE_MARKETS.length); // vBNB is not upgraded
-    //   // Verify that all CORE_MARKETS are included in the comptroller's market list
-    //   for (const market of CORE_MARKETS) {
-    //     expect(allMarkets).to.include(market.address, `Market (${market.address}) should be registered in comptroller`);
-    //   }
-    //   console.log(`:white_tick: All ${CORE_MARKETS.length} core markets are properly registered in the comptroller`);
-    // });
   });
 
   testVip("VIP-557 Mainnet", await vip557(), {
