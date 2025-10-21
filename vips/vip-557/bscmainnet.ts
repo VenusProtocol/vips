@@ -257,7 +257,7 @@ export const vip557 = () => {
         (timelock: string) => ({
           target: bscmainnet.ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
-          params: [ethers.constants.AddressZero, "setWhiteListFlashLoanAccount(address,bool)", timelock],
+          params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
         }),
       ),
       ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(

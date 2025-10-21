@@ -1,4 +1,5 @@
 import { TransactionResponse } from "@ethersproject/providers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -61,11 +62,13 @@ forking(64916100, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
+  let impUnitroller: SignerWithAddress;
 
   before(async () => {
     unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
     accessControlManager = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
+    impUnitroller = await initMainnetUser(bscmainnet.UNITROLLER, parseUnits("2", 18));
 
     console.log(`Setting max stale period...`);
     for (const market of CORE_MARKETS) {
@@ -176,7 +179,9 @@ forking(64916100, async () => {
 
     it("Check new permission", async () => {
       for (const method of NEW_COMPT_METHODS) {
-        expect(await accessControlManager.isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method)).to.equal(true);
+        expect(
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
+        ).to.equal(true);
       }
 
       for (const method of NEW_VBEP20_DELEGATE_METHODS) {
