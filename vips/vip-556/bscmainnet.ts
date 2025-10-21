@@ -27,7 +27,7 @@ export const MAX_STALE_PERIOD = 86400;
 export const vip556 = () => {
   const meta = {
     version: "v2",
-    title: "[BNB Chain] USDe oracle configuration and Stablecoins E-Mode parameters",
+    title: "VIP-556 [BNB Chain] USDe oracle configuration and Stablecoins E-Mode parameters",
     description: `If passed, this VIP will perform the changes recommended by Chaos Labs in [this Venus community forum publication](https://community.venus.io/t/e-mode-and-liquidation-threshold-in-the-bnb-chain-core-pool/5339/10):
 
 - Resilient Oracle configuration for [USDe](https://bscscan.com/address/0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34)
