@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip554, { WBETH, WBETHOracle } from "../../vips/vip-554/bscmainnet";
+import vip557, { WBETH, WBETHOracle } from "../../vips/vip-557/bscmainnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 
@@ -22,7 +22,7 @@ forking(64203506, async () => {
     });
   });
 
-  testVip("VIP-554", await vip554(), {
+  testVip("VIP-557", await vip557(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

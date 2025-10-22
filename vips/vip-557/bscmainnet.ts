@@ -33,10 +33,10 @@ export const WBETH_Timestamp = 1760151751;
 export const WBETH_GrowthRate = parseUnits("0.0464", 18); // 4.64% per year
 export const WBETH_SnapshotGap = 39; // 0.39%
 
-export const vip530 = () => {
+export const vip557 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-530",
+    title: "VIP-557 [BNB Chain] Enable the WBETHOracle for WBETH on BNB Chain ",
     description: "",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -79,8 +79,8 @@ export const vip530 = () => {
       },
     ],
     meta,
-    ProposalType.CRITICAL,
+    ProposalType.FAST_TRACK,
   );
 };
 
-export default vip530;
+export default vip557;
