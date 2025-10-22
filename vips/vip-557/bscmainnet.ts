@@ -96,7 +96,7 @@ Complete analysis and details of these recommendations are available in [Chaosâ€
       },
     ],
     meta,
-    ProposalType.FAST_TRACK,
+    ProposalType.CRITICAL,
   );
 };
 
