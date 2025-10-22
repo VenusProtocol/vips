@@ -37,7 +37,24 @@ export const vip557 = () => {
   const meta = {
     version: "v2",
     title: "VIP-557 [BNB Chain] Enable the WBETHOracle for WBETH on BNB Chain ",
-    description: "",
+    description: `If passed, this VIP will perform the changes recommended by [Chaos Labs](https://community.venus.io/t/chaos-labs-wbeth-oracle-update/5463) to update the WBETH oracle configuration and introduce a capped pricing mechanism.
+
+**Oracle configuration for WBETH**
+
+- Replace the current [Binance oracle](https://bscscan.com/address/0x594810b741d136f1960141C0d8Fb4a91bE78A820#readProxyContract).
+- Use the [exchangeRate()](https://bscscan.com/token/0xa2e3356610840701bdf5611a53974510ae27e2e1#readProxyContract) function from the [WBETH contract](https://bscscan.com/token/0xa2e3356610840701bdf5611a53974510ae27e2e1) to calculate the WBETH/ETH conversion rate.
+- Apply Venus’ [Resilient Price Oracle](https://docs-v4.venus.io/risk/resilient-price-oracle) to determine the ETH/USD price.
+- Combine both to produce the WBETH/USD price feed.
+
+**Capped Price Oracle (CAPO) configuration**
+
+- Introduce a CAPO layer to limit WBETH price growth and reduce overpricing risk.
+- Parameters:
+    - Annual Growth Rate: **4.64%**
+    - Snapshot Interval: **30 days**
+    - Snapshot Gap: **0.39%**
+
+Complete analysis and details of these recommendations are available in [Chaos’ Labs post](https://community.venus.io/t/chaos-labs-wbeth-oracle-update/5463).`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
