@@ -8,10 +8,6 @@ export const BSCMAINNET_USDT = "0x55d398326f99059ff775485246999027b3197955";
 
 export const REPAYMENTS = [
   {
-    user: "0x563617b87d8bb3f2f14bb5a581f2e19f80b52008",
-    amount: parseUnits("2022088.53", 18),
-  },
-  {
     user: "0x448ca4Bc5e3407Ce67bC9D7185cEf5B34C3ADEf8",
     amount: parseUnits("283762.92", 18),
   },
@@ -87,7 +83,6 @@ Eligibility criteria, calculation methodology, and complete details are outlined
 
 **Addresses and compensation amounts**
 
-- 0x563617b87d8bb3f2f14bb5a581f2e19f80b52008: 2,022,088.53 USDT
 - 0xf5eC92db4882b44865408A27364d0d330CF7B4E1: 526,906.43 USDT
 - 0x448ca4Bc5e3407Ce67bC9D7185cEf5B34C3ADEf8: 283,762.92 USDT
 - 0x3577385c7b5a52d8FbA230AC88C416cd97fA3ccc: 253,666.52 USDT

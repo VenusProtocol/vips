@@ -25,7 +25,7 @@ forking(64569840, async () => {
 
   testVip("VIP-558", await vip558(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      await expectEvents(txResponse, [RISK_FUND_ABI], ["SweepTokenFromPool"], [17]);
+      await expectEvents(txResponse, [RISK_FUND_ABI], ["SweepTokenFromPool"], [16]);
     },
   });
 
