@@ -5,14 +5,14 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { BSCMAINNET_USDT, RISK_FUND, REPAYMENTS, vip557 } from "../../vips/vip-557/bscmainnet";
+import { BSCMAINNET_USDT, REPAYMENTS, RISK_FUND, vip557 } from "../../vips/vip-557/bscmainnet";
 import RISK_FUND_ABI from "./abi/riskFund.json";
 import USDT_ABI from "./abi/usdt.json";
 
 forking(64569840, async () => {
   const provider = ethers.provider;
   let usdt: Contract;
-  let usersWalletBalanceBefore = {} as Record<string, BigNumber>;
+  const usersWalletBalanceBefore = {} as Record<string, BigNumber>;
   let riskFundBalanceBefore: BigNumber;
 
   before(async () => {
