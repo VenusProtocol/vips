@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { BSCMAINNET_USDT, REPAYMENTS, RISK_FUND, vip557 } from "../../vips/vip-557/bscmainnet";
+import { BSCMAINNET_USDT, REPAYMENTS, RISK_FUND, vip558 } from "../../vips/vip-558/bscmainnet";
 import RISK_FUND_ABI from "./abi/riskFund.json";
 import USDT_ABI from "./abi/usdt.json";
 
@@ -23,7 +23,7 @@ forking(64569840, async () => {
     riskFundBalanceBefore = await usdt.balanceOf(RISK_FUND);
   });
 
-  testVip("VIP-557", await vip557(), {
+  testVip("VIP-558", await vip558(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [RISK_FUND_ABI], ["SweepTokenFromPool"], [17]);
     },

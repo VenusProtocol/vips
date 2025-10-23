@@ -77,10 +77,10 @@ export const REPAYMENTS = [
   },
 ];
 
-export const vip557 = () => {
+export const vip558 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-557",
+    title: "VIP-558",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -100,4 +100,4 @@ export const vip557 = () => {
   );
 };
 
-export default vip557;
+export default vip558;
