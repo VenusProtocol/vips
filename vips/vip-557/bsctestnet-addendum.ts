@@ -16,7 +16,8 @@ export const vip557Testnet = () => {
   const meta = {
     version: "v2",
     title: "VIP-557: Flash loan feature for all markets on BSC Testnet",
-    description: "Upgrade contracts on BSC Testnet.",
+    description:
+      "Upgrade diamond, facets, comptrollerLens and grants permission to the new flash loan system wide pause function on BSC Testnet.",
     forDescription: "Execute",
     againstDescription: "Do not execute",
     abstainDescription: "Abstain",
