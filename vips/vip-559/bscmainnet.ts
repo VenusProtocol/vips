@@ -52,7 +52,7 @@ export const REPAYMENTS = [
 export const vip559 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-559 [BNB Chain] Wave 1 Compensation for Users Affected by the WBETH Depeg",
+    title: "VIP-559 [BNB Chain] Wave 2 Compensation for Users Affected by the WBETH Depeg",
     description: `If passed, this VIP will transfer compensation from the [Risk Fund](https://bscscan.com/address/0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42) to users who were liquidated during the WBETH price oracle depeg on October 10, 2025. This proposal covers the first wave of affected users identified by the Venus Labs analysis.
 
 Eligibility criteria, calculation methodology, and complete details are outlined in the [Venus Labs Community Post](https://community.venus.io/).
