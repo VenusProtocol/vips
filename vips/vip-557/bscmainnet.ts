@@ -9,8 +9,8 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 export const NEW_VBEP20_DELEGATE_IMPL = "0x33D17F1E6107CD4d711b56eB0094bf39a471a8B5";
-export const NEW_DIAMOND_IMPLEMENTATION = "0x698feb2459ed11f87DCECb6Dd5ebc374e3bbC104";
-export const NEW_COMPTROLLER_LENS = "0x35757B0967aCfE667D3B107493458A2360c51Fa2";
+export const NEW_DIAMOND_IMPLEMENTATION = "0xB2243Da976F2cbAAa4dd1a76BF7F6EFbe22c4CFc";
+export const NEW_COMPTROLLER_LENS = "0x732138e18fa6f8f8E456ad829DB429A450a79758";
 
 export const CORE_MARKETS = [
   {
@@ -258,6 +258,13 @@ export const vip557 = () => {
           target: bscmainnet.ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
           params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
+        }),
+      ),
+      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
+        (timelock: string) => ({
+          target: bscmainnet.ACCESS_CONTROL_MANAGER,
+          signature: "giveCallPermission(address,string,address)",
+          params: [UNITROLLER, "setFlashLoanPaused(bool)", timelock],
         }),
       ),
       ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
