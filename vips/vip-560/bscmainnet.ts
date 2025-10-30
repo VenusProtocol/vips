@@ -44,7 +44,7 @@ If passed, this VIP will perform the following actions:
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/608)`,
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/630)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
