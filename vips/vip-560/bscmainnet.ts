@@ -77,7 +77,7 @@ If passed, this VIP will perform the following actions:
           [
             USDT_ETH,
             USDC_ETH,
-            500,
+            100,
             ethereum.NORMAL_TIMELOCK,
             Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days from now
             USDT_TO_SWAP,
