@@ -6,13 +6,13 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { IRM, RESERVE_FACTOR, vBNB, vWBNB, vip559 } from "../../vips/vip-559/bscmainnet";
+import { RESERVE_FACTOR, vBNB, vBNB_IRM, vWBNB, vWBNB_IRM, vip559 } from "../../vips/vip-559/bscmainnet";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const OLD_vBNB_IRM = "0xF78db86E58dc1b76569a0b3105EF5186033911A1";
 const OLD_vWBNB_IRM = "0xE82B36f4CE8A9B769036B74354588D427a724763";
 
-forking(66303936, async () => {
+forking(66542622, async () => {
   const vBNBContract = new ethers.Contract(vBNB, VTOKEN_ABI, ethers.provider);
   const vWBNBContract = new ethers.Contract(vWBNB, VTOKEN_ABI, ethers.provider);
 
@@ -61,18 +61,28 @@ forking(66303936, async () => {
       const vBNB_irm = await vBNBContract.interestRateModel();
       const vWBNB_irm = await vWBNBContract.interestRateModel();
 
-      expect(vBNB_irm).to.equal(IRM);
-      expect(vWBNB_irm).to.equal(IRM);
+      expect(vBNB_irm).to.equal(vBNB_IRM);
+      expect(vWBNB_irm).to.equal(vWBNB_IRM);
     });
 
-    checkTwoKinksInterestRate(IRM, "vBNB", {
+    checkTwoKinksInterestRate(vBNB_IRM, "vBNB", {
       base: "0",
-      multiplier: "0.045",
+      multiplier: "0.03124999993",
       kink1: "0.8",
-      multiplier2: "1.4",
+      multiplier2: "0.8499999996",
       base2: "0",
       kink2: "0.9",
-      jump: "3",
+      jump: "3.400000001",
+    });
+
+    checkTwoKinksInterestRate(vWBNB_IRM, "vWBNB", {
+      base: "0",
+      multiplier: "0.06249999995",
+      kink1: "0.8",
+      multiplier2: "0.6001662413",
+      base2: "0",
+      kink2: "0.9",
+      jump: "3.400000001",
     });
 
     it("check reserve factor of vWBNB", async () => {

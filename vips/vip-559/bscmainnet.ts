@@ -5,7 +5,8 @@ import { makeProposal } from "src/utils";
 export const vBNB_ADMIN = "0x9A7890534d9d91d473F28cB97962d176e2B65f1d";
 export const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 export const vWBNB = "0x6bCa74586218dB34cdB402295796b79663d816e9";
-export const IRM = "0xBDb25F4D7c11979C98d830c4c2C6e9FbA0c2cBC9";
+export const vBNB_IRM = "0x5dff09a6D241eac6ccc63A7665CaC6eff55b38E7";
+export const vWBNB_IRM = "0xb1c97b14dE87928845FCf0016b48B3a61aa3e1AD";
 export const RESERVE_FACTOR = parseUnits("0.15", 18);
 
 export const vip559 = async () => {
@@ -23,12 +24,12 @@ export const vip559 = async () => {
       {
         target: vBNB_ADMIN,
         signature: "setInterestRateModel(address)",
-        params: [IRM],
+        params: [vBNB_IRM],
       },
       {
         target: vWBNB,
         signature: "_setInterestRateModel(address)",
-        params: [IRM],
+        params: [vWBNB_IRM],
       },
       {
         target: vWBNB,
