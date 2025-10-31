@@ -104,6 +104,12 @@ If passed, this VIP will perform the following actions:
         signature: "withdrawTreasuryBEP20(address,uint256,address)",
         params: [USDC_BSC, CHAOS_LABS_USDC_AMOUNT, CHAOS_LABS],
       },
+      {
+        target: USDT_ETH,
+        signature: "approve(address,uint256)",
+        params: [UNISWAP_SWAP_ROUTER, 0],
+        dstChainId: LzChainId.ethereum,
+      },
     ],
     meta,
     ProposalType.REGULAR,
