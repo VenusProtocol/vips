@@ -19,10 +19,10 @@ export const USDT_TO_SWAP = parseUnits("2916", 6);
 
 export const UNISWAP_SWAP_ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
 
-export const vip560 = () => {
+export const vip561 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-560 Payments issuance to Providers",
+    title: "VIP-561 Payments issuance to Providers",
     description: `#### Summary
 
 If passed, this VIP will perform the following actions:
@@ -116,4 +116,4 @@ If passed, this VIP will perform the following actions:
   );
 };
 
-export default vip560;
+export default vip561;

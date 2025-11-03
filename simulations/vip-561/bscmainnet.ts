@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip560, { CHAOS_LABS, CHAOS_LABS_USDC_AMOUNT, USDC_BSC } from "../../vips/vip-560/bscmainnet";
+import vip561, { CHAOS_LABS, CHAOS_LABS_USDC_AMOUNT, USDC_BSC } from "../../vips/vip-561/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
@@ -17,7 +17,7 @@ forking(66427918, async () => {
   const chaosLabsBalanceBefore = await usdc.balanceOf(CHAOS_LABS);
   const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(bscmainnet.VTREASURY);
 
-  testVip("VIP-560", await vip560(), {
+  testVip("VIP-561", await vip561(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTREASURY_ABI], ["WithdrawTreasuryBEP20"], [1]);
       await expectEvents(
