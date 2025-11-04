@@ -6,7 +6,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { RESERVE_FACTOR, vBNB, vBNB_IRM, vWBNB, vWBNB_IRM, vip559 } from "../../vips/vip-559/bscmainnet";
+import { RESERVE_FACTOR, vBNB, vBNB_IRM, vWBNB, vWBNB_IRM, vip562 } from "../../vips/vip-562/bscmainnet";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const OLD_vBNB_IRM = "0xF78db86E58dc1b76569a0b3105EF5186033911A1";
@@ -50,7 +50,7 @@ forking(66542622, async () => {
     });
   });
 
-  testVip("VIP-559", await vip559(), {
+  testVip("VIP-562", await vip562(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["NewMarketInterestRateModel", "NewReserveFactor"], [2, 1]);
     },

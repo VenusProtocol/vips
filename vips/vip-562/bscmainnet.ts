@@ -9,11 +9,18 @@ export const vBNB_IRM = "0x5dff09a6D241eac6ccc63A7665CaC6eff55b38E7";
 export const vWBNB_IRM = "0xb1c97b14dE87928845FCf0016b48B3a61aa3e1AD";
 export const RESERVE_FACTOR = parseUnits("0.15", 18);
 
-export const vip559 = async () => {
+export const vip562 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-559",
-    description: ``,
+    title: "VIP-562 [BNB Chain] IRM Adjustments for BNB and WBNB Markets",
+    description: `This proposal seeks to optimize the market parameters for the BNB and WBNB markets in the Venus Core Pool. The objective is to drive higher utilization, improve rate stability, and enhance capital efficiency, while aligning Venus rates with broader market benchmarks.
+
+For both markets, we propose to:
+
+- **Flatten the IRM curve**
+- **Increase the first kink** to **80%**
+- **Reduce the maximum borrow rate** to **45%**
+- **Reduce the reserve factor** to **15% for WBNB**`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -42,4 +49,4 @@ export const vip559 = async () => {
   );
 };
 
-export default vip559;
+export default vip562;
