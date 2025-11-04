@@ -12,15 +12,22 @@ export const RESERVE_FACTOR = parseUnits("0.15", 18);
 export const vip562 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-562 [BNB Chain] IRM Adjustments for BNB and WBNB Markets",
-    description: `This proposal seeks to optimize the market parameters for the BNB and WBNB markets in the Venus Core Pool. The objective is to drive higher utilization, improve rate stability, and enhance capital efficiency, while aligning Venus rates with broader market benchmarks.
+    title: "VIP-562 [BNB Chain] BNB and WBNB market parameters update",
+    description: `If passed, this VIP will perform the changes recommended by Chaos Labs in the Venus community forum publication[Proposal: IRM Adjustments for BNB and WBNB Markets on BNB Chain (Core Pool)](https://community.venus.io/t/proposal-irm-adjustments-for-bnb-and-wbnb-markets-on-bnb-chain-core-pool/5503):
 
-For both markets, we propose to:
+- [BNB (Core pool)](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0xA07c5b74C9B40447a954e1466938b865b6BBea36?chainId=56&tab=supply):
+    - increase Kink 1 to 80% and Kink 2 to 90% utilization
+    - set the borrow rate (APR) at Kink 1 to 2.5%
+    - set the borrow rate (APR) at Kink 2 to 11%
+    - reduce the max borrow rate (APR) at 100% utilization rate, from 77.15% to 45%
+- [WBNB (Core pool)](https://app.venus.io/#/pool/0xfD36E2c2a6789Db23113685031d7F16329158384/market/0x6bCa74586218dB34cdB402295796b79663d816e9?chainId=56&tab=supply):
+    - increase Kink 1 to 80% and Kink 2 to 90% utilization
+    - set the borrow rate (APR) at Kink 1 to 5%
+    - set the borrow rate (APR) at Kink 2 to 11%
+    - reduce the max borrow rate (APR) at 100% utilization rate, from 77.15% to 45%
+    - reduce the reserve factor from 30% to 15%
 
-- **Flatten the IRM curve**
-- **Increase the first kink** to **80%**
-- **Reduce the maximum borrow rate** to **45%**
-- **Reduce the reserve factor** to **15% for WBNB**`,
+Complete analysis and details of these recommendations are available in the above publication.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
