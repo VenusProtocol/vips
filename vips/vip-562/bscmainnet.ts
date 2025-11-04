@@ -5,7 +5,7 @@ import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const BINANCE = "0x8f0f345c908c176fc829f69858c3ad6fdd3bee9a";
+export const BINANCE = "0x3c274B82b20a84A02d816Fd37EE096f7aC2cD396";
 export const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
 export const BINANCE_AMOUNT = parseUnits("400000", 18);
 
