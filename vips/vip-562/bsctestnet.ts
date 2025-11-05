@@ -30,7 +30,7 @@ export const vip524 = () => {
   };
 
   return makeProposal(
-    [ 
+    [
       {
         target: OPBNBTESTNET_VTOKEN_BEACON,
         signature: "upgradeTo(address)",

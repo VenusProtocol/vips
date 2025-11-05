@@ -6,17 +6,17 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip562, {
+  NEW_OPBNB_BLOCK_RATE,
   OPBNBTESTNET_ACM,
   OPBNBTESTNET_NEW_VTOKEN_IMPLEMENTATION,
   OPBNBTESTNET_RATE_MODEL_SETTER,
   OPBNBTESTNET_VTOKEN_BEACON,
   OPBNBTESTNET_XVS_VAULT_PROXY,
-  NEW_OPBNB_BLOCK_RATE,
 } from "../../vips/vip-562/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
-import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 import { RateCurvePoints, VTokenContractAndSymbol, getAllVTokens, getRateCurve } from "./common";
 
@@ -62,7 +62,12 @@ forking(94089034, async () => {
 
   testForkedNetworkVipCommands("VIP-562 Fourier Hardfork OPBNB", await vip562(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [VTOKEN_BEACON_ABI, XVS_VAULT_ABI, ACM_ABI], ["Upgraded", "SetBlocksPerYear", "PermissionGranted", "PermissionRevoked"], [1, 1, 1, 1]);
+      await expectEvents(
+        txResponse,
+        [VTOKEN_BEACON_ABI, XVS_VAULT_ABI, ACM_ABI],
+        ["Upgraded", "SetBlocksPerYear", "PermissionGranted", "PermissionRevoked"],
+        [1, 1, 1, 1],
+      );
     },
   });
 
