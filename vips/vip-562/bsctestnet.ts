@@ -19,7 +19,7 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip524 = () => {
+export const vip562 = () => {
   const meta = {
     version: "v2",
     title: "VIP-562 Fourier Hardfork OPBNB",
@@ -71,4 +71,4 @@ export const vip524 = () => {
   );
 };
 
-export default vip524;
+export default vip562;
