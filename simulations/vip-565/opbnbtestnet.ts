@@ -5,14 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip562, {
+import vip565, {
   NEW_OPBNB_BLOCK_RATE,
   OPBNBTESTNET_ACM,
   OPBNBTESTNET_NEW_VTOKEN_IMPLEMENTATION,
   OPBNBTESTNET_RATE_MODEL_SETTER,
   OPBNBTESTNET_VTOKEN_BEACON,
   OPBNBTESTNET_XVS_VAULT_PROXY,
-} from "../../vips/vip-562/bsctestnet";
+} from "../../vips/vip-565/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -60,7 +60,7 @@ forking(94089034, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-562 Fourier Hardfork OPBNB", await vip562(), {
+  testForkedNetworkVipCommands("VIP-562 Fourier Hardfork OPBNB", await vip565(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
