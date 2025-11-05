@@ -60,7 +60,7 @@ forking(94089034, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-562 Fourier Hardfork OPBNB", await vip565(), {
+  testForkedNetworkVipCommands("VIP-565 Fourier Hardfork OPBNB", await vip565(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
