@@ -45,7 +45,7 @@ forking(67239427, async () => {
 
   testVip("VIP-564", await vip564(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      // percentage distribution updates for those four assets
+      // percentage distribution updates for those two assets
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [2]);
 
       // setTokensDistributionSpeed for both USDC and USDT
