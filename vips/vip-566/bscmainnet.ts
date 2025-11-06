@@ -27,7 +27,7 @@ export const vip566 = () => {
       },
     ],
     meta,
-    ProposalType.REGULAR,
+    ProposalType.CRITICAL,
   );
 };
 
