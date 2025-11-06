@@ -260,13 +260,16 @@ export const vip557 = () => {
           params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
         }),
       ),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
-        (timelock: string) => ({
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [UNITROLLER, "setFlashLoanPaused(bool)", timelock],
-        }),
-      ),
+      ...[
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
+      ].map((timelock: string) => ({
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "setFlashLoanPaused(bool)", timelock],
+      })),
       ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
         (timelock: string) => ({
           target: bscmainnet.ACCESS_CONTROL_MANAGER,

@@ -182,10 +182,24 @@ forking(66299551, async () => {
         expect(
           await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
+        expect(
+          accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
+        ).to.equal(true);
+        expect(
+          accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
+        ).to.equal(true);
       }
 
       for (const method of NEW_VBEP20_DELEGATE_METHODS) {
         expect(await accessControlManager.isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method)).to.equal(true);
+        expect(await accessControlManager.isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method)).to.equal(true);
+        expect(await accessControlManager.isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method)).to.equal(true);
+      }
+    });
+
+    it("Guardian has permission to pause flash loans", async () => {
+      for (const method of ["setFlashLoanPaused(bool)"]) {
+        expect(await accessControlManager.isAllowedToCall(bscmainnet.GUARDIAN, method)).to.equal(true);
       }
     });
 
