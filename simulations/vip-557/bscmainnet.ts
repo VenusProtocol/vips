@@ -220,6 +220,13 @@ forking(66299551, async () => {
     it("comptroller should have new comptrollerLens", async () => {
       expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(NEW_COMPTROLLER_LENS.toLowerCase());
     });
+
+    it("storage layout of comptroller should be consistent", async () => {
+      expect(await comptroller.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
+      expect(await comptroller.oracle()).to.equal(bscmainnet.RESILIENT_ORACLE);
+      expect(await comptroller.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+      expect(await comptroller.poolRegistry()).to.equal(bscmainnet.POOL_REGISTRY);
+    });
   });
 
   describe("generic tests", async () => {
