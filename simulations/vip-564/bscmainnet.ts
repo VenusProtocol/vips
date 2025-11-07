@@ -63,8 +63,8 @@ forking(67239427, async () => {
     });
 
     it("check current prime reward distribution speeds", async () => {
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(1540099);
-      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(1540099);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDT)).to.equal(15400990000000000n);
+      expect(await primeLiquidityProvider.tokenDistributionSpeeds(USDC)).to.equal(15400990000000000n);
     });
   });
 });

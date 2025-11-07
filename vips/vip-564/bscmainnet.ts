@@ -37,7 +37,7 @@ export const vip564 = () => {
         signature: "setTokensDistributionSpeed(address[],uint256[])",
         params: [
           [USDC, USDT],
-          [1540099, 1540099],
+          [15400990000000000n, 15400990000000000n],
         ],
       },
     ],
