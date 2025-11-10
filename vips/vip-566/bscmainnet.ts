@@ -16,11 +16,24 @@ export const USDT_TO_SWAP = parseUnits("2916", 6);
 
 export const UNISWAP_SWAP_ROUTER = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
 
-export const vip565 = () => {
+export const vip566 = () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-565 Payments issuance to Providers",
-    description: ``,
+    title: "VIP-566 Oct-25 Payments issuance to providers (2)",
+    description: `If passed, this VIP will perform the following actions:
+
+- Transfer 23,750 USDC from the [Venus Treasury on Ethereum](https://etherscan.io/address/0xFD9B071168bC27DBE16406eC3Aba050Ce8Eb22FA) to Messari for commissioned research reports.
+
+**Details**
+
+The initial proposal, [VIP-561](https://app.venus.io/#/governance/proposal/561?chainId=56), failed to execute on Ethereum because the USDT–USDC swap used to obtain the required 23,750 USDC in the Treasury expired before completion. This updated VIP corrects the expiry date, ensuring that the transaction can be successfully executed this time.
+
+**Messari Protocol Services**
+
+- Service provider: Messari ([https://messari.io](https://messari.io/))
+- Concept: Venus Commissioned Research reports for Q3 2025.
+- Cost: 23,750 USDC, to be sent to the Ethereum address 0x8f0f345c908c176fc829f69858c3ad6fdd3bee9a
+- Last VIP with a payment to Messari: [VIP-474](https://app.venus.io/#/governance/proposal/474?chainId=56)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -81,4 +94,4 @@ export const vip565 = () => {
   );
 };
 
-export default vip565;
+export default vip566;

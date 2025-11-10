@@ -4,14 +4,14 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip565, {
+import vip566, {
   MESSARI,
   MESSARI_USDC_AMOUNT_1,
   MESSARI_USDC_AMOUNT_2,
   USDC_ETH,
   USDT_ETH,
   USDT_TO_SWAP,
-} from "../../vips/vip-565/bscmainnet";
+} from "../../vips/vip-566/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -24,7 +24,7 @@ forking(23767030, async () => {
   const vtreasuryUSDCBalanceBefore = await usdc.balanceOf(ethereum.VTREASURY);
   const vtreasuryUSDTBalanceBefore = await usdt.balanceOf(ethereum.VTREASURY);
 
-  testForkedNetworkVipCommands("vip-565", await vip565());
+  testForkedNetworkVipCommands("vip-566", await vip566());
 
   describe("Post-VIP behavior", async () => {
     it("should transfer USDC from the Venus Treasury to Messari", async () => {
