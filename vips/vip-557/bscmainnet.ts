@@ -253,7 +253,7 @@ export const vip557 = () => {
           params: [NEW_VBEP20_DELEGATE_IMPL, false, "0x"],
         };
       }),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
+      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
         (timelock: string) => ({
           target: bscmainnet.ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
@@ -270,14 +270,14 @@ export const vip557 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [UNITROLLER, "setFlashLoanPaused(bool)", timelock],
       })),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
+      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
         (timelock: string) => ({
           target: bscmainnet.ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
           params: [ethers.constants.AddressZero, "setFlashLoanEnabled(bool)", timelock],
         }),
       ),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK].map(
+      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
         (timelock: string) => ({
           target: bscmainnet.ACCESS_CONTROL_MANAGER,
           signature: "giveCallPermission(address,string,address)",
@@ -289,12 +289,6 @@ export const vip557 = () => {
         signature: "_setComptrollerLens(address)",
         params: [NEW_COMPTROLLER_LENS],
       },
-      // Enable flash loans for all core markets
-      ...CORE_MARKETS.map(vToken => ({
-        target: vToken.address,
-        signature: "setFlashLoanEnabled(bool)",
-        params: [true],
-      })),
     ],
     meta,
     ProposalType.REGULAR,

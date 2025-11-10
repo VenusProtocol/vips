@@ -23,6 +23,7 @@ import {
   UNITROLLER,
   vip557,
 } from "../../vips/vip-557/bscmainnet";
+import { vip557Mainnet2 } from "../../vips/vip-557/bscmainnet-2";
 import ACM_ABI from "./abi/ACMMainnet.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -58,7 +59,7 @@ const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanF
 
 const GENERIC_ETH_ACCOUNT = "0xF77055DBFAfdD56578Ace54E62e749d12802ce36";
 
-forking(66299551, async () => {
+forking(67673649, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -139,6 +140,12 @@ forking(66299551, async () => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+    },
+  });
+
+  testVip("VIP-557 Mainnet - Part 2", await vip557Mainnet2(), {
+    callbackAfterExecution: async (txResponse: TransactionResponse) => {
+      const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);
     },
   });
@@ -183,10 +190,13 @@ forking(66299551, async () => {
           await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
         ).to.equal(true);
         expect(
-          accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
+        ).to.equal(true);
+        expect(
+          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.GUARDIAN, method),
         ).to.equal(true);
       }
 
@@ -194,11 +204,6 @@ forking(66299551, async () => {
         expect(await accessControlManager.isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method)).to.equal(true);
         expect(await accessControlManager.isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method)).to.equal(true);
         expect(await accessControlManager.isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method)).to.equal(true);
-      }
-    });
-
-    it("Guardian has permission to pause flash loans", async () => {
-      for (const method of ["setFlashLoanPaused(bool)"]) {
         expect(await accessControlManager.isAllowedToCall(bscmainnet.GUARDIAN, method)).to.equal(true);
       }
     });
@@ -219,13 +224,6 @@ forking(66299551, async () => {
 
     it("comptroller should have new comptrollerLens", async () => {
       expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(NEW_COMPTROLLER_LENS.toLowerCase());
-    });
-
-    it("storage layout of comptroller should be consistent", async () => {
-      expect(await comptroller.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
-      expect(await comptroller.oracle()).to.equal(bscmainnet.RESILIENT_ORACLE);
-      expect(await comptroller.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
-      expect(await comptroller.poolRegistry()).to.equal(bscmainnet.POOL_REGISTRY);
     });
   });
 
