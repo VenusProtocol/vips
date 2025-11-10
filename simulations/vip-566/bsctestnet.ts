@@ -1,127 +1,85 @@
 import { TransactionResponse } from "@ethersproject/providers";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import {
-  expectEvents,
-  initMainnetUser,
-  setMaxStalePeriodInBinanceOracle,
-  setMaxStalePeriodInChainlinkOracle,
-  setRedstonePrice,
-} from "src/utils";
+import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
 import {
+  ACM,
   CORE_MARKETS,
   NEW_COMPTROLLER_LENS,
   NEW_DIAMOND_IMPLEMENTATION,
   NEW_VBEP20_DELEGATE_IMPL,
   UNITROLLER,
-  vip557,
-} from "../../vips/vip-557/bscmainnet";
-import { vip557Mainnet2 } from "../../vips/vip-557/bscmainnet-2";
-import ACM_ABI from "./abi/ACMMainnet.json";
+  vip566Testnet,
+} from "../../vips/vip-566/bsctestnet";
+import { vip566Testnet2 } from "../../vips/vip-566/bsctestnet-2";
+import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
-import REDSTONE_ABI from "./abi/RedstoneOracle.json";
-import RESILIENT_ABI from "./abi/ResilientOracle.json";
 import UNITROLLER_ABI from "./abi/Unitroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 import VTOKEN_ABI from "./abi/VToken.json";
-import { cutParams as params } from "./utils/bscmainnet-cut-params.json";
-
-const { bscmainnet } = NETWORK_ADDRESSES;
+import { cutParams as params } from "./utils/bsctestnet-cut-params.json";
 
 type CutParam = [string, number, string[]];
 const cutParams = params as unknown as CutParam[];
 
-const NEW_SETTER_FACET = "0x11B38582c61058eDd9a526561567B4c7b02060e7";
-const NEW_POLICY_FACET = "0x3C115aA5800A589D1E0c3163f3f562D5544F060f";
-const NEW_REWARD_FACET = "0x7fcEc39e83f17469069b7A0f24A59B5BbEC0faBb";
-const NEW_MARKET_FACET = "0x7ec871BA4248CC443a994f2febeDFB96DAe444F1";
-const NEW_FLASHLOAN_FACET = "0x72a284f144F2BE56549573DDFac2A90F8D662ed1";
+const NEW_SETTER_FACET = "0x98DCde088ED0208e4521867344532565657e0a91";
+const NEW_POLICY_FACET = "0xB15620d400B12B1d9431910B770Eb1E0179432B1";
+const NEW_REWARD_FACET = "0x771d07CE1FE51d261a9c3e00A42684Ed45e0c50b";
+const NEW_MARKET_FACET = "0x3cAe1E59cdE3E3258348375cf301b469FB40A092";
+const NEW_FLASHLOAN_FACET = "0x957BE05daF560bd56D9Adb8D7A52CfbCD828163B";
 
-const OLD_SETTER_FACET = "0x4Fd17b7df6004E04A6298EdE065dE431D408fD9b";
-const OLD_POLICY_FACET = "0x529aE2E71E0836bE7378a8D47657E805829c6b3C";
-const OLD_REWARD_FACET = "0x1d903eEa9d98a6Ac071a1f4531dc6958B4629cBE";
-const OLD_MARKET_FACET = "0x6e9bD95830bb775fb9F24b9559f8894d92143CA1";
+const OLD_SETTER_FACET = "0x3CCC9fC2fDA021ADb9C9FB0493C1a4a9357f4064";
+const OLD_POLICY_FACET = "0x8C9Ba060C2eF15755c5eE8DD06bB41Fd539C6FbD";
+const OLD_REWARD_FACET = "0xDD150De13849fB0776B466114b95770714c8Cc9d";
+const OLD_MARKET_FACET = "0xD3D5f6c68677051e6855Fa38dca0cD6D56ED0c4f";
 
-const OLD_DIAMOND = "0x6c151A4134006395D41319d713349660259DAB4e";
-const OLD_COMPTROLLER_LENS = "0xd701C1fDAE34f9Cf242a4de19a2e7288f924EA1C";
+const OLD_DIAMOND = "0xCe314cA8be79435FB0E4ffc102DAcA172B676a47";
+const OLD_COMPTROLLER_LENS = "0xACbc75C2D0438722c75D9BD20844b5aFda4155ea";
 
-const NEW_COMPT_METHODS = ["setWhiteListFlashLoanAccount(address,bool)", "setFlashLoanPaused(bool)"];
+const NEW_COMPT_METHODS = ["setWhiteListFlashLoanAccount(address,bool)"];
 
 const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanFeeMantissa(uint256,uint256)"];
 
-const GENERIC_ETH_ACCOUNT = "0xF77055DBFAfdD56578Ace54E62e749d12802ce36";
+const GENERIC_ETH_ACCOUNT = "0x804512132AA9E0c81Aab9Ef2113E05EC380d3cfc";
 
-forking(67673649, async () => {
+forking(68683541, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
-  let impUnitroller: SignerWithAddress;
 
   before(async () => {
     unitroller = await ethers.getContractAt(DIAMOND_ABI, UNITROLLER);
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
-    accessControlManager = await ethers.getContractAt(ACM_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
-    impUnitroller = await initMainnetUser(bscmainnet.UNITROLLER, parseUnits("2", 18));
+    accessControlManager = await ethers.getContractAt(ACM_ABI, ACM);
 
     console.log(`Setting max stale period...`);
     for (const market of CORE_MARKETS) {
       // Call function with default feed = AddressZero (so it fetches from oracle.tokenConfigs)
       await setMaxStalePeriodInChainlinkOracle(
-        bscmainnet.CHAINLINK_ORACLE,
-        market.underlying,
+        NETWORK_ADDRESSES.bsctestnet.CHAINLINK_ORACLE,
+        market.address,
         ethers.constants.AddressZero,
-        bscmainnet.NORMAL_TIMELOCK,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
         315360000,
       );
 
       await setMaxStalePeriodInChainlinkOracle(
-        bscmainnet.REDSTONE_ORACLE,
-        market.underlying,
+        NETWORK_ADDRESSES.bsctestnet.REDSTONE_ORACLE,
+        market.address,
         ethers.constants.AddressZero,
-        bscmainnet.NORMAL_TIMELOCK,
+        NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
         315360000,
       );
-      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, market.symbol.slice(1), 315360000);
     }
-
-    const xSolvBTC = "0x1346b618dC92810EC74163e4c27004c921D446a5";
-    const xSolvBTC_RedStone_Feed = "0x24c8964338Deb5204B096039147B8e8C3AEa42Cc";
-    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, xSolvBTC, xSolvBTC_RedStone_Feed, bscmainnet.NORMAL_TIMELOCK);
-
-    const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
-    const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
-    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
-
-    const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
-    const TRX_REDSTONE_FEED = "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916";
-    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, TRX, TRX_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK, 3153600000, {
-      tokenDecimals: 6,
-    });
-
-    const PTsUSDE_26JUN2025 = "0xDD809435ba6c9d6903730f923038801781cA66ce";
-    const PT_SUSDE_FIXED_PRICE = parseUnits("1.05", 18);
-
-    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-    const oracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ABI, ethers.provider);
-    const resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ABI, ethers.provider);
-
-    await resilientOracle
-      .connect(impersonatedTimelock)
-      .setTokenConfig([
-        PTsUSDE_26JUN2025,
-        [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-        [true, false, false],
-        false,
-      ]);
-    await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "WBETH", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "TWT", 315360000);
+    await setMaxStalePeriodInBinanceOracle(NETWORK_ADDRESSES.bsctestnet.BINANCE_ORACLE, "lisUSD", 315360000);
   });
 
   describe("Pre-VIP state", async () => {
@@ -134,19 +92,20 @@ forking(67673649, async () => {
     });
   });
 
-  testVip("VIP-557 Mainnet", await vip557(), {
+  testVip("VIP-566 testnet", await vip566Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+      await expectEvents(txResponse, [ACM_ABI], ["PermissionGranted"], [9]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);
     },
   });
-
-  testVip("VIP-557 Mainnet - Part 2", await vip557Mainnet2(), {
+  testVip("VIP-566 testnet 2", await vip566Testnet2(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
-      await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);
+      await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanFeeUpdated"], [totalMarkets]);
     },
   });
 
@@ -187,24 +146,18 @@ forking(67673649, async () => {
     it("Check new permission", async () => {
       for (const method of NEW_COMPT_METHODS) {
         expect(
-          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method),
-        ).to.equal(true);
-        expect(
-          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method),
-        ).to.equal(true);
-        expect(
-          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method),
-        ).to.equal(true);
-        expect(
-          await accessControlManager.connect(impUnitroller).isAllowedToCall(bscmainnet.GUARDIAN, method),
+          await accessControlManager.hasPermission(NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK, UNITROLLER, method),
         ).to.equal(true);
       }
 
       for (const method of NEW_VBEP20_DELEGATE_METHODS) {
-        expect(await accessControlManager.isAllowedToCall(bscmainnet.NORMAL_TIMELOCK, method)).to.equal(true);
-        expect(await accessControlManager.isAllowedToCall(bscmainnet.FAST_TRACK_TIMELOCK, method)).to.equal(true);
-        expect(await accessControlManager.isAllowedToCall(bscmainnet.CRITICAL_TIMELOCK, method)).to.equal(true);
-        expect(await accessControlManager.isAllowedToCall(bscmainnet.GUARDIAN, method)).to.equal(true);
+        expect(
+          await accessControlManager.hasPermission(
+            NETWORK_ADDRESSES.bsctestnet.NORMAL_TIMELOCK,
+            ethers.constants.AddressZero,
+            method,
+          ),
+        ).to.equal(true);
       }
     });
 
@@ -219,6 +172,20 @@ forking(67673649, async () => {
       for (const market of CORE_MARKETS) {
         const marketContract = await ethers.getContractAt(VTOKEN_ABI, market.address);
         expect(await marketContract.isFlashLoanEnabled()).to.equal(true);
+      }
+    });
+
+    it("flash loan fee should be set to 0.3% with 30% protocol share", async () => {
+      const expectedFee = ethers.utils.parseUnits("0.003", 18); // 0.3%
+      const expectedProtocolShare = ethers.utils.parseUnits("0.3", 18); // 30%
+
+      for (const market of CORE_MARKETS) {
+        const marketContract = await ethers.getContractAt(VTOKEN_ABI, market.address);
+        const flashLoanFee = await marketContract.flashLoanFeeMantissa();
+        const protocolShareMantissa = await marketContract.flashLoanProtocolShareMantissa();
+
+        expect(flashLoanFee).to.equal(expectedFee);
+        expect(protocolShareMantissa).to.equal(expectedProtocolShare);
       }
     });
 

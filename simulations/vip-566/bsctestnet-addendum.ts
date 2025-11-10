@@ -12,8 +12,8 @@ import {
   NEW_COMPTROLLER_LENS,
   NEW_DIAMOND_IMPLEMENTATION,
   UNITROLLER,
-  vip557Testnet,
-} from "../../vips/vip-557/bsctestnet-addendum";
+  vip566Testnet,
+} from "../../vips/vip-566/bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -63,7 +63,7 @@ forking(70284025, async () => {
     });
   });
 
-  testVip("VIP-557 testnet addendum", await vip557Testnet(), {
+  testVip("VIP-566 testnet addendum", await vip566Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);

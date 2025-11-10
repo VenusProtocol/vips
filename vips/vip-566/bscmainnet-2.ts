@@ -3,10 +3,10 @@ import { makeProposal } from "src/utils";
 
 import { CORE_MARKETS } from "./bscmainnet";
 
-export const vip557Mainnet2 = () => {
+export const vip566Mainnet2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-557: Enable flash loan feature for all markets on BSC Mainnet",
+    title: "VIP-566: Enable flash loan feature for all markets on BSC Mainnet",
     description: "Upgrade contracts and enable flash loans on BSC Mainnet.",
     forDescription: "Execute",
     againstDescription: "Do not execute",
@@ -26,4 +26,4 @@ export const vip557Mainnet2 = () => {
   );
 };
 
-export default vip557Mainnet2;
+export default vip566Mainnet2;

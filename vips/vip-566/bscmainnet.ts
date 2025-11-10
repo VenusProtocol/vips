@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-557/utils/bscmainnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-566/utils/bscmainnet-cut-params.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -220,10 +220,10 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip557 = () => {
+export const vip566 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-557: Flash loan feature for all markets on BSC Mainnet",
+    title: "VIP-566: Flash loan feature for all markets on BSC Mainnet",
     description: "Upgrade contracts and enable flash loans on BSC Mainnet.",
     forDescription: "Execute",
     againstDescription: "Do not execute",
@@ -253,13 +253,16 @@ export const vip557 = () => {
           params: [NEW_VBEP20_DELEGATE_IMPL, false, "0x"],
         };
       }),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
-        (timelock: string) => ({
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
-        }),
-      ),
+      ...[
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
+      ].map((timelock: string) => ({
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNITROLLER, "setWhiteListFlashLoanAccount(address,bool)", timelock],
+      })),
       ...[
         bscmainnet.NORMAL_TIMELOCK,
         bscmainnet.FAST_TRACK_TIMELOCK,
@@ -270,20 +273,26 @@ export const vip557 = () => {
         signature: "giveCallPermission(address,string,address)",
         params: [UNITROLLER, "setFlashLoanPaused(bool)", timelock],
       })),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
-        (timelock: string) => ({
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [ethers.constants.AddressZero, "setFlashLoanEnabled(bool)", timelock],
-        }),
-      ),
-      ...[bscmainnet.NORMAL_TIMELOCK, bscmainnet.FAST_TRACK_TIMELOCK, bscmainnet.CRITICAL_TIMELOCK, bscmainnet.GUARDIAN].map(
-        (timelock: string) => ({
-          target: bscmainnet.ACCESS_CONTROL_MANAGER,
-          signature: "giveCallPermission(address,string,address)",
-          params: [ethers.constants.AddressZero, "setFlashLoanFeeMantissa(uint256,uint256)", timelock],
-        }),
-      ),
+      ...[
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
+      ].map((timelock: string) => ({
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setFlashLoanEnabled(bool)", timelock],
+      })),
+      ...[
+        bscmainnet.NORMAL_TIMELOCK,
+        bscmainnet.FAST_TRACK_TIMELOCK,
+        bscmainnet.CRITICAL_TIMELOCK,
+        bscmainnet.GUARDIAN,
+      ].map((timelock: string) => ({
+        target: bscmainnet.ACCESS_CONTROL_MANAGER,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setFlashLoanFeeMantissa(uint256,uint256)", timelock],
+      })),
       {
         target: UNITROLLER,
         signature: "_setComptrollerLens(address)",
@@ -295,4 +304,4 @@ export const vip557 = () => {
   );
 };
 
-export default vip557;
+export default vip566;

@@ -4,10 +4,10 @@ import { makeProposal } from "src/utils";
 
 import { CORE_MARKETS } from "./bsctestnet";
 
-export const vip557Testnet2 = () => {
+export const vip566Testnet2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-557 flash loan fee update",
+    title: "VIP-566 flash loan fee update",
     description: "Update flash loan fee and protocol share for all core markets on BSC Testnet.",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -27,4 +27,4 @@ export const vip557Testnet2 = () => {
   );
 };
 
-export default vip557Testnet2;
+export default vip566Testnet2;
