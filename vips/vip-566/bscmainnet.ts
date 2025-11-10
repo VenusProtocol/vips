@@ -224,7 +224,77 @@ export const vip566 = () => {
   const meta = {
     version: "v2",
     title: "VIP-566: Flash loan feature for all markets on BSC Mainnet",
-    description: "Upgrade contracts and enable flash loans on BSC Mainnet.",
+    description: `#### Summary
+
+If passed, following the community proposal “[Flashloan in the BNB Chain Core pool]()” ([snapshot]()), this VIP will upgrade the implementations of the following contracts on BNB Chain, including support for [Flashloan](https://docs-v4.venus.io/whats-new/emode):
+
+- [Unitroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384)
+- VTokens. Every current market on BNB Chain Core Pool, other than vBNB
+
+- This upgrade implements the flash loan infrastructure that allows users to borrow assets without collateral as long as they repay the loan within the same transaction.
+
+#### Description
+
+This VIP will perform the following key actions:
+
+- **Upgrade Unitroller implementation**: Deploy new Diamond-based implementation with flash loan facets
+- **Update all vToken contracts**: Upgrade to new implementation supporting flash loan functionality  
+- **Configure flash loan permissions**: Grant flash loan management permissions to governance timelocks and guardian
+- **Update Comptroller Lens**: Deploy new lens contract
+
+**Granted permissions**
+
+- Normal, Fast-track, Critical timelocks and Guardian are authorized to execute the following functions:
+    - "setWhiteListFlashLoanAccount(address,bool)"
+    - "setFlashLoanPaused(bool)"
+    - "setFlashLoanEnabled(bool)"
+    - "setFlashLoanFeeMantissa(uint256,uint256)"
+
+#### Security and additional considerations
+
+We applied the following security procedures for this upgrade:
+
+- **Audits:** [Certik](https://www.certik.com/), [Quantstamp](https://quantstamp.com/) and [HashDit](https://www.hashdit.io/) have audited the deployed code
+- **VIP execution simulation**: in a simulation environment, validating that the new implementations (including the Comptroller facets), the updated permissions and the risk parameters are properly set on BNB Chain
+- **Deployment on testnet**: the same upgrade has been performed on BNB Chain testnet, and used in the Venus Protocol testnet deployment
+
+#### Audit reports
+
+- [Certik audit audit report (2025/10/14)](https://github.com/VenusProtocol/venus-protocol/blob/648e794cf1b422650d11c4d0c947ba2aaf1f290d/audits/153_flashloan_certik_20251014.pdf)
+- [HashDit audit report (2025/10/16)](https://github.com/VenusProtocol/venus-protocol/blob/648e794cf1b422650d11c4d0c947ba2aaf1f290d/audits/155_flashloan_hashdit_20251016.pdf)
+- [Quantstamp (2025/10/22)](https://github.com/VenusProtocol/venus-protocol/blob/648e794cf1b422650d11c4d0c947ba2aaf1f290d/audits/154_flashloan_quantstamp_20252210.pdf)
+
+#### Deployed contracts
+
+BNB Chain
+
+- [Unitroller implementation (Diamond)](https://bscscan.com/address/0xB2243Da976F2cbAAa4dd1a76BF7F6EFbe22c4CFc)
+- Facets:
+    - [MarketFacet](https://bscscan.com/address/0x7ec871BA4248CC443a994f2febeDFB96DAe444F1)
+    - [PolicyFacet](https://bscscan.com/address/0x3C115aA5800A589D1E0c3163f3f562D5544F060f)
+    - [RewardFacet](https://bscscan.com/address/0x7fcEc39e83f17469069b7A0f24A59B5BbEC0faBb)
+    - [SetterFacet](https://bscscan.com/address/0x11B38582c61058eDd9a526561567B4c7b02060e7)
+    - [FlashLoanFacet](https://bscscan.com/address/0x72a284f144F2BE56549573DDFac2A90F8D662ed1)
+- [VBep20 (VToken implementation)](https://bscscan.com/address/0x33D17F1E6107CD4d711b56eB0094bf39a471a8B5)
+- [ComptrollerLens](https://bscscan.com/address/0x732138e18fa6f8f8E456ad829DB429A450a79758)
+
+BNB Chain testnet
+
+- [Unitroller implementation (Diamond)](http://testnet.bscscan.com/address/0x1774f993861B14B7C3963F3e09f67cfBd2B32198)
+- Facets:
+    - [MarketFacet](https://testnet.bscscan.com/address/0x0A7A88aB6aB40417Bd6bF1EB3907EFF06D24C2FC)
+    - [PolicyFacet](https://testnet.bscscan.com/address/0xf8d94ef23c1188f8ab1009E56D558d7834d1F019)
+    - [RewardFacet](https://testnet.bscscan.com/address/0x0bc7922Cc08Ea32E196d25805558a84dF54beC6a)
+    - [SetterFacet](https://testnet.bscscan.com/address/0x4fc4C41388237D13A430879417f143EF54e5BB05)
+    - [FlashLoanFacet](https://testnet.bscscan.com/address/0x32348c5bB52E5468A11901e70BdE061192feCAf4)
+- [VBep20 (VToken implementation)](https://testnet.bscscan.com/address/0xb941C5D148c65Ce49115D12B5148247AaCeFF375)
+- [ComptrollerLens](https://testnet.bscscan.com/address/0x72dCB93F8c3fB00D31076e93b6E87C342A3eCC9c)
+
+#### References
+
+- [Flashloan feature](https://github.com/VenusProtocol/venus-protocol/pull/545)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/609)
+- [Upgrade on BNB Chain testnet](https://testnet.bscscan.com/tx/0x46016e8d58873c93864bc725b425fc878e20097d90c0e1d247fab072be7fcedc)`,
     forDescription: "Execute",
     againstDescription: "Do not execute",
     abstainDescription: "Abstain",
