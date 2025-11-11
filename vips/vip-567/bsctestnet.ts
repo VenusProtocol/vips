@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-566/utils/bsctestnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-567/utils/bsctestnet-cut-params.json";
 
 export const UNITROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const NEW_VBEP20_DELEGATE_IMPL = "0xb941C5D148c65Ce49115D12B5148247AaCeFF375";

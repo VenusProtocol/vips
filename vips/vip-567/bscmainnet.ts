@@ -3,7 +3,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import { cutParams as params } from "../../simulations/vip-566/utils/bscmainnet-cut-params.json";
+import { cutParams as params } from "../../simulations/vip-567/utils/bscmainnet-cut-params.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -220,10 +220,10 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip566 = () => {
+export const vip567 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-566: Flash loan feature for all markets on BSC Mainnet",
+    title: "VIP-567 [BNB Chain] Flash loan feature for all markets on BSC Mainnet",
     description: `#### Summary
 
 If passed, following the community proposal “[Flashloan in the BNB Chain Core pool]()” ([snapshot]()), this VIP will upgrade the implementations of the following contracts on BNB Chain, including support for [Flashloan](https://docs-v4.venus.io/whats-new/emode):
@@ -374,4 +374,4 @@ BNB Chain testnet
   );
 };
 
-export default vip566;
+export default vip567;

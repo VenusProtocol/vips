@@ -21,9 +21,9 @@ import {
   NEW_DIAMOND_IMPLEMENTATION,
   NEW_VBEP20_DELEGATE_IMPL,
   UNITROLLER,
-  vip566,
-} from "../../vips/vip-566/bscmainnet";
-import { vip566Mainnet2 } from "../../vips/vip-566/bscmainnet-2";
+  vip567,
+} from "../../vips/vip-567/bscmainnet";
+import { vip567Mainnet2 } from "../../vips/vip-567/bscmainnet-2";
 import ACM_ABI from "./abi/ACMMainnet.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
@@ -134,7 +134,7 @@ forking(67673649, async () => {
     });
   });
 
-  testVip("VIP-566 Mainnet", await vip566(), {
+  testVip("VIP-567 Mainnet", await vip567(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
@@ -143,7 +143,7 @@ forking(67673649, async () => {
     },
   });
 
-  testVip("VIP-566 Mainnet - Part 2", await vip566Mainnet2(), {
+  testVip("VIP-567 Mainnet - Part 2", await vip567Mainnet2(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanStatusChanged"], [totalMarkets]);

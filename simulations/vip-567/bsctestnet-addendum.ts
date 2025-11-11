@@ -13,7 +13,7 @@ import {
   NEW_DIAMOND_IMPLEMENTATION,
   UNITROLLER,
   vip566Testnet,
-} from "../../vips/vip-566/bsctestnet-addendum";
+} from "../../vips/vip-567/bsctestnet-addendum";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";

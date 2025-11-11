@@ -15,8 +15,8 @@ import {
   NEW_VBEP20_DELEGATE_IMPL,
   UNITROLLER,
   vip566Testnet,
-} from "../../vips/vip-566/bsctestnet";
-import { vip566Testnet2 } from "../../vips/vip-566/bsctestnet-2";
+} from "../../vips/vip-567/bsctestnet";
+import { vip566Testnet2 } from "../../vips/vip-567/bsctestnet-2";
 import ACM_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";

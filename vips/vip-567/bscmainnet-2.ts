@@ -3,11 +3,19 @@ import { makeProposal } from "src/utils";
 
 import { CORE_MARKETS } from "./bscmainnet";
 
-export const vip566Mainnet2 = () => {
+export const vip567Mainnet2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-566: Enable flash loan feature for all markets on BSC Mainnet",
-    description: "Upgrade contracts and enable flash loans on BSC Mainnet.",
+    title: "VIP-568 [BNB Chain] Enable flash loan feature for all markets on BSC Mainnet",
+    description: `If passed, this VIP will perform the following actions:
+
+- Enable flash loans on BSC Mainnet.
+
+**Details**
+
+This VIP is a follow-up to [VIP-567](https://app.venus.io/#/governance/proposal/567?chainId=56), which upgraded the corresponding contracts to support the flash loan feature.
+
+`,
     forDescription: "Execute",
     againstDescription: "Do not execute",
     abstainDescription: "Abstain",
@@ -26,4 +34,4 @@ export const vip566Mainnet2 = () => {
   );
 };
 
-export default vip566Mainnet2;
+export default vip567Mainnet2;
