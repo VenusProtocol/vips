@@ -22,8 +22,8 @@ export const Actions = {
 export const vip568 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-568",
-    description: ``,
+    title: "VIP-568 [BNB Chain] Delist PT-USDe-30OCT2025 Market",
+    description: `If passed, this VIP proposal will remove the PT-USDe-30OCT2025 market from the “Stablecoins” E-Mode group within the BNB Chain Core Pool, as the market has already expired on 30 OCT 2025.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
