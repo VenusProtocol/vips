@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip564, { Actions, vPT_USDe_30OCT2025 } from "../../vips/vip-564/bscmainnet";
+import vip564, { Actions, Stablecoins_Pool_ID, vPT_USDe_30OCT2025 } from "../../vips/vip-564/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
@@ -48,6 +48,11 @@ forking(67150931, async () => {
       const market = await comptroller.markets(vPT_USDe_30OCT2025);
       expect(market.isListed).to.be.true;
     });
+
+    it("token exists in Stablecoins Pool", async () => {
+      const markets = await comptroller.getPoolVTokens(Stablecoins_Pool_ID);
+      expect(markets).to.include(vPT_USDe_30OCT2025);
+    });
   });
 
   testVip("VIP-564 bscmainnet", await vip564(), {
@@ -55,8 +60,8 @@ forking(67150931, async () => {
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI],
-        ["NewSupplyCap", "MarketUnlisted", "ActionPausedMarket"],
-        [1, 1, 8],
+        ["NewSupplyCap", "MarketUnlisted", "ActionPausedMarket", "PoolMarketRemoved"],
+        [1, 1, 8, 1],
       );
     },
   });
@@ -82,9 +87,14 @@ forking(67150931, async () => {
       expect(supplyCap).to.be.equal(0);
     });
 
-    it("Check vPT_USDe_30OCT2025 market is listed", async () => {
+    it("Check vPT_USDe_30OCT2025 market is unlisted", async () => {
       const market = await comptroller.markets(vPT_USDe_30OCT2025);
       expect(market.isListed).to.be.false;
+    });
+
+    it("token no longer exists in Stablecoins Pool", async () => {
+      const markets = await comptroller.getPoolVTokens(Stablecoins_Pool_ID);
+      expect(markets).to.not.include(vPT_USDe_30OCT2025);
     });
   });
 });

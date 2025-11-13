@@ -5,6 +5,7 @@ import { makeProposal } from "src/utils";
 const { bsctestnet } = NETWORK_ADDRESSES;
 
 export const vPT_USDe_30OCT2025 = "0x86a94290f2B8295daA3e53bA1286f2Ff21199143";
+export const Stablecoins_Pool_ID = "1";
 
 export const Actions = {
   MINT: 0,
@@ -52,6 +53,11 @@ export const vip564 = () => {
         target: bsctestnet.UNITROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [[vPT_USDe_30OCT2025], [0]],
+      },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "removePoolMarket(uint96,address)",
+        params: [Stablecoins_Pool_ID, vPT_USDe_30OCT2025],
       },
       {
         target: bsctestnet.UNITROLLER,
