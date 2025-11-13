@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip568, { Actions, vPT_USDe_30OCT2025, Stablecoins_Pool_ID } from "../../vips/vip-568/bsctestnet";
+import vip568, { Actions, Stablecoins_Pool_ID, vPT_USDe_30OCT2025 } from "../../vips/vip-568/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
