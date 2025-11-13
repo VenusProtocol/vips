@@ -5,18 +5,18 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip564, { Actions, vPT_USDe_30OCT2025 } from "../../vips/vip-564/bsctestnet";
+import vip568, { Actions, vPT_USDe_30OCT2025 } from "../../vips/vip-568/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const provider = ethers.provider;
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(71412509, async () => {
+forking(67150931, async () => {
   let comptroller: Contract;
 
   before(async () => {
-    comptroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, provider);
+    comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -50,7 +50,7 @@ forking(71412509, async () => {
     });
   });
 
-  testVip("VIP-564 bscmainnet", await vip564(), {
+  testVip("VIP-568 bscmainnet", await vip568(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
