@@ -87,7 +87,7 @@ forking(71412509, async () => {
       expect(supplyCap).to.be.equal(0);
     });
 
-    it("Check vPT_USDe_30OCT2025 market is listed", async () => {
+    it("Check vPT_USDe_30OCT2025 market is unlisted", async () => {
       const market = await comptroller.markets(vPT_USDe_30OCT2025);
       expect(market.isListed).to.be.false;
     });
