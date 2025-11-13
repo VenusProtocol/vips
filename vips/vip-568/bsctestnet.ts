@@ -2,9 +2,9 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-export const vPT_USDe_30OCT2025 = "0x6D0cDb3355c93A0cD20071aBbb3622731a95c73E";
+export const vPT_USDe_30OCT2025 = "0x86a94290f2B8295daA3e53bA1286f2Ff21199143";
 export const Stablecoins_Pool_ID = "1";
 
 export const Actions = {
@@ -19,10 +19,10 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip564 = () => {
+export const vip568 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-563",
+    title: "VIP-568",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -32,7 +32,7 @@ export const vip564 = () => {
   return makeProposal(
     [
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setActionsPaused(address[],uint8[],bool)",
         params: [
           [vPT_USDe_30OCT2025],
@@ -50,17 +50,17 @@ export const vip564 = () => {
         ],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setMarketSupplyCaps(address[],uint256[])",
         params: [[vPT_USDe_30OCT2025], [0]],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "removePoolMarket(uint96,address)",
         params: [Stablecoins_Pool_ID, vPT_USDe_30OCT2025],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "unlistMarket(address)",
         params: [vPT_USDe_30OCT2025],
       },
@@ -70,4 +70,4 @@ export const vip564 = () => {
   );
 };
 
-export default vip564;
+export default vip568;
