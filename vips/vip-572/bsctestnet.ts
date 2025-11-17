@@ -11,6 +11,9 @@ export const BSCTESTNET_ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
 export const BSCTESTNET_USDC = "0x16227D60f7a0e586C66B005219dfc887D13C9531";
 export const BSCTESTNET_USDT = "0xA11c8D9DC9b66E209Ef60F0C8D969D3CD988782c";
 
+// Block reward calculations adjusted for new block time (0.45s vs 0.75s)
+// Formula: old_rate * 100 / 167 (equivalent to dividing by 1.67)
+// Block time ratio: 0.75s / 0.45s = 1.67
 export const BSCTESTNET_XVS_PER_BLOCK_REWARD = parseUnits("0.0025", 18).mul(100).div(167);
 export const BSCTESTNET_BTCB_PER_BLOCK_REWARD = parseUnits("0.000000315393518518", 18).mul(100).div(167);
 export const BSCTESTNET_ETH_PER_BLOCK_REWARD = parseUnits("0.000006109664351851", 18).mul(100).div(167);
@@ -18,7 +21,12 @@ export const BSCTESTNET_USDC_PER_BLOCK_REWARD = parseUnits("0.007", 6).mul(100).
 export const BSCTESTNET_USDT_PER_BLOCK_REWARD = parseUnits("0.007", 6).mul(100).div(167);
 export const BSCTESTNET_VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.048", 18).mul(100).div(167);
 
+// Updated block rate for 0.45 second blocks
+// Previous: 42,048,000 blocks/year (0.75s per block)
+// New: 70,080,000 blocks/year (0.45s per block)
+// Calculation: 365.25 days * 24 hours * 3600 seconds / 0.45s = 70,080,000
 const BSCTESTNET_NEW_BLOCK_RATE = 70080000;
+
 export const BSCTESTNET_DEFAULT_PROXY_ADMIN = "0x7877ffd62649b6a1557b55d4c20fcbab17344c91";
 export const BSCTESTNET_PRIME_PROXY = "0xe840F8EC2Dc50E7D22e5e2991975b9F6e34b62Ad";
 export const BSCTESTNET_PLP_PROXY = "0xAdeddc73eAFCbed174e6C400165b111b0cb80B7E";
@@ -34,6 +42,9 @@ export const BSCTESTNET_GOVERNANCE_BRAVO = "0x5573422A1a59385C247ec3a66B93B7C08e
 export const BSCTESTNET_SHORTFALL_PROXY = "0x503574a82fE2A9f968d355C8AAc1Ba0481859369";
 export const BSCTESTNET_NEW_SHORTFALL_IMPLEMENTATION = "0x84B09BC76ABA4c0FC45616AdD44017b678FBCA87";
 
+// Governance voting parameters adjusted for new block rate
+// All periods/delays multiplied by 1.67 to maintain same time duration
+// Formula: old_blocks * 167 / 100 (equivalent to multiplying by 1.67)
 export const MIN_VOTING_PERIOD = 334;
 export const MAX_VOTING_PERIOD = 1336;
 export const MIN_VOTING_DELAY = 1;
@@ -64,6 +75,7 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
+// Previous XVS emissions data for BSCTESTNET markets
 export const PREVIOUS_XVS_EMISSIONS: SpeedRecord[] = [
   {
     market: "0x35566ED3AF9E537Be487C98b1811cDf95ad0C32b",
