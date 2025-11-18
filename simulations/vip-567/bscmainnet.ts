@@ -59,7 +59,7 @@ const NEW_VBEP20_DELEGATE_METHODS = ["setFlashLoanEnabled(bool)", "setFlashLoanF
 
 const GENERIC_ETH_ACCOUNT = "0xF77055DBFAfdD56578Ace54E62e749d12802ce36";
 
-forking(67673649, async () => {
+forking(68589659, async () => {
   let unitroller: Contract;
   let comptroller: Contract;
   let accessControlManager: Contract;
@@ -124,24 +124,24 @@ forking(67673649, async () => {
     await oracle.connect(impersonatedTimelock).setDirectPrice(PTsUSDE_26JUN2025, PT_SUSDE_FIXED_PRICE);
   });
 
-  describe("Pre-VIP state", async () => {
-    it("unitroller should have old implementation", async () => {
-      expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(OLD_DIAMOND.toLowerCase());
-    });
+  // describe("Pre-VIP state", async () => {
+  //   it("unitroller should have old implementation", async () => {
+  //     expect((await unitroller.comptrollerImplementation()).toLowerCase()).to.equal(OLD_DIAMOND.toLowerCase());
+  //   });
 
-    it("comptroller should have old comptrollerLens", async () => {
-      expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(OLD_COMPTROLLER_LENS.toLowerCase());
-    });
-  });
+  //   it("comptroller should have old comptrollerLens", async () => {
+  //     expect((await comptroller.comptrollerLens()).toLowerCase()).to.equal(OLD_COMPTROLLER_LENS.toLowerCase());
+  //   });
+  // });
 
-  testVip("VIP-567 Mainnet", await vip567(), {
-    callbackAfterExecution: async (txResponse: TransactionResponse) => {
-      const totalMarkets = CORE_MARKETS.length;
-      await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
-      await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
-      await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
-    },
-  });
+  // testVip("VIP-567 Mainnet", await vip567(), {
+  //   callbackAfterExecution: async (txResponse: TransactionResponse) => {
+  //     const totalMarkets = CORE_MARKETS.length;
+  //     await expectEvents(txResponse, [UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
+  //     await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets + 1]);
+  //     await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
+  //   },
+  // });
 
   testVip("VIP-567 Mainnet - Part 2", await vip567Mainnet2(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {

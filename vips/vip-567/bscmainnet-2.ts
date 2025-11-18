@@ -6,7 +6,7 @@ import { CORE_MARKETS } from "./bscmainnet";
 export const vip567Mainnet2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-568 [BNB Chain] Enable flash loan feature for all markets on BSC Mainnet",
+    title: "VIP-569 [BNB Chain] Enable flash loan feature for all markets on BSC Mainnet",
     description: `If passed, following the community proposal "[Whitelisted Flash Loans](https://community.venus.io/t/whitelisted-flash-loans/5527)", this VIP will perform the following actions:
 
 - Enable flash loans on BSC Mainnet.
