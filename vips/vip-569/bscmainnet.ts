@@ -1,3 +1,4 @@
+import { parseUnits } from "ethers/lib/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -42,7 +43,7 @@ export const vip569 = (maxStalePeriod = MAX_STALE_PERIOD) => {
       {
         target: bscmainnet.UNITROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [vBETH, 0, 0],
+        params: [vBETH, 0, parseUnits("0.4", 18)],
       },
       {
         target: bscmainnet.UNITROLLER,
@@ -52,7 +53,7 @@ export const vip569 = (maxStalePeriod = MAX_STALE_PERIOD) => {
       {
         target: bscmainnet.UNITROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [vMATIC, 0, 0],
+        params: [vMATIC, 0, parseUnits("0.65", 18)],
       },
       {
         target: bscmainnet.UNITROLLER,

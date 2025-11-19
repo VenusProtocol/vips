@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
@@ -29,13 +30,13 @@ forking(68602103, async () => {
     it("Check vBETH market CF and LT is not zero", async () => {
       const market = await comptroller.markets(vBETH);
       expect(market.collateralFactorMantissa).to.be.not.equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.not.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.4", 18));
     });
 
     it("Check vMATIC market CF and LT is non-zero", async () => {
       const market = await comptroller.markets(vMATIC);
       expect(market.collateralFactorMantissa).to.be.not.equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.not.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.65", 18));
     });
 
     it("Check vBETH market actions are paused or not", async () => {
@@ -88,16 +89,16 @@ forking(68602103, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    it("Check vBETH market CF and LT is zero", async () => {
+    it("Check vBETH market CF is set to zero", async () => {
       const market = await comptroller.markets(vBETH);
       expect(market.collateralFactorMantissa).to.be.equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.4", 18));
     });
 
-    it("Check vMATIC market CF and LT is zero", async () => {
+    it("Check vMATIC market CF is set to zero", async () => {
       const market = await comptroller.markets(vMATIC);
       expect(market.collateralFactorMantissa).to.be.equal(0);
-      expect(market.liquidationThresholdMantissa).to.be.equal(0);
+      expect(market.liquidationThresholdMantissa).to.be.equal(parseUnits("0.65", 18));
     });
 
     it("Check vBETH market actions are paused or not", async () => {
