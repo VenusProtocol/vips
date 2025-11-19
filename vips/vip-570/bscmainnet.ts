@@ -23,11 +23,11 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-export const vip569 = (maxStalePeriod = MAX_STALE_PERIOD) => {
+export const vip570 = (maxStalePeriod = MAX_STALE_PERIOD) => {
   const meta = {
     version: "v2",
-    title: "VIP-569",
-    description: ``,
+    title: "VIP-570 [BNB Chain] Deprecate  BETH & MATIC Markets",
+    description: `If passed, this VIP proposal will deprecate the BETH & MATIC markets from the BNB Chain Core Pool. For more information, please refer to this [community post](https://community.venus.io/t/deprecation-plan-for-markets-on-bnb-core-pool/5541).`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -76,4 +76,4 @@ export const vip569 = (maxStalePeriod = MAX_STALE_PERIOD) => {
   );
 };
 
-export default vip569;
+export default vip570;

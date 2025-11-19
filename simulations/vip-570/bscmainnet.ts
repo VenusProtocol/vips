@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip569, { Actions, MATIC, POL_CHAINLINK_FEED, vBETH, vMATIC } from "../../vips/vip-569/bscmainnet";
+import vip570, { Actions, MATIC, POL_CHAINLINK_FEED, vBETH, vMATIC } from "../../vips/vip-570/bscmainnet";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -75,7 +75,7 @@ forking(68602103, async () => {
     });
   });
 
-  testVip("VIP-569 bscmainnet", await vip569(7 * 24 * 60 * 60), {
+  testVip("VIP-570 bscmainnet", await vip570(7 * 24 * 60 * 60), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
