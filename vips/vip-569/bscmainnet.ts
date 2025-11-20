@@ -22,8 +22,8 @@ export const HEARTBEAT_25_HOURS = 25 * 60 * 60;
 export const HEARTBEAT_13_HOURS = 13 * 60 * 60;
 export const HEARTBEAT_7_HOURS = 7 * 60 * 60;
 
-export const PRICE_LOWER_BOUND = parseUnits("0.95", 18);
-export const PRICE_UPPER_BOUND = parseUnits("1.05", 18);
+export const PRICE_LOWER_BOUND = parseUnits("0.99", 18);
+export const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
 export const vip569 = () => {
   const meta = {
