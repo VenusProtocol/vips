@@ -1,0 +1,41 @@
+{
+  "cutParams": [
+    [
+      "0x87FdF72FA2fB29Cb43f03aCa261A8DC2C613a860",
+      1,
+      [
+        "0xa76b3fda",
+        "0x929fe9a1",
+        "0xc2998238",
+        "0xede4edd0",
+        "0xb0772d0b",
+        "0xabfceffc",
+        "0x007e3dd2",
+        "0xc488847b",
+        "0xa78dc775",
+        "0x0686dab6",
+        "0xddbf54fd",
+        "0x3d98a1e5",
+        "0xcab4f84c",
+        "0xc5b4db55",
+        "0x89c13be0",
+        "0xd0d13036",
+        "0xf9682732",
+        "0x23617585",
+        "0xafd3783b",
+        "0x19ef3e8b",
+        "0xd686e9ee",
+        "0x7b86e42c",
+        "0x63e0d634",
+        "0xf02fdf97",
+        "0x0ef332ca",
+        "0x8e8f294b",
+        "0x3093c11e",
+        "0xd137f36e",
+        "0xd463654c",
+        "0x4d99c776"
+      ]
+    ],
+    ["0x87FdF72FA2fB29Cb43f03aCa261A8DC2C613a860", 0, ["0xd585c3c6"]]
+  ]
+}
