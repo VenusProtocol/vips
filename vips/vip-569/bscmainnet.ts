@@ -60,12 +60,14 @@ export const vip569 = () => {
       {
         target: bscmainnet.REDSTONE_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
-        params: [[
-          [ETH, ETH_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
-          [USDC, USDC_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
-          [USDT, USDT_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
-          [SolvBTC, SolvBTC_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
-        ]],
+        params: [
+          [
+            [ETH, ETH_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
+            [USDC, USDC_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
+            [USDT, USDT_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
+            [SolvBTC, SolvBTC_REDSTONE_ORACLE_FEED, HEARTBEAT_7_HOURS],
+          ],
+        ],
       },
       {
         target: bscmainnet.RESILIENT_ORACLE,
@@ -107,8 +109,8 @@ export const vip569 = () => {
             [ETH, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [USDC, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [USDT, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
-            [SolvBTC, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND]
-          ]
+            [SolvBTC, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
+          ],
         ],
       },
     ],
