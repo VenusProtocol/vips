@@ -9,7 +9,7 @@ import { forking, testVip } from "src/vip-framework";
 import vip569, { ETH, SolvBTC, USDC, USDT } from "../../vips/vip-569/bscmainnet";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
-import ERC20_ABI from "./abi/erc20.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
