@@ -260,13 +260,13 @@ export const vip571 = () => {
             ],
             [
               SolvBTC,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
+              [bscmainnet.REDSTONE_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
               [true, true, false],
               false,
             ],
             [
               THE,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
+              [bscmainnet.REDSTONE_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
               [true, true, false],
               false,
             ],

@@ -39,6 +39,7 @@ import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 const provider = ethers.provider;
 
 const { bscmainnet } = NETWORK_ADDRESSES;
+const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
 forking(69306243, async () => {
   let resilientOracle: Contract;
@@ -175,7 +176,7 @@ forking(69306243, async () => {
         txResponse,
         [RESILIENT_ORACLE_ABI, BINANCE_ORACLE_ABI, BOUND_VALIDATOR_ABI],
         ["TokenConfigAdded", "MaxStalePeriodAdded", "ValidateConfigAdded"],
-        [23, 23, 23],
+        [22, 22, 23],
       );
     },
   });
@@ -205,7 +206,7 @@ forking(69306243, async () => {
       const xrp = await new ethers.Contract(XRP, ERC20_ABI, provider);
       const xvs = await new ethers.Contract(XVS, ERC20_ABI, provider);
       const bnb = await new ethers.Contract(ORACLE_BNB, ERC20_ABI, provider);
-
+      const eth = await new ethers.Contract(ETH, ERC20_ABI, provider);
 
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "AAVE");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "ADA");
@@ -257,6 +258,7 @@ forking(69306243, async () => {
       await setMaxStalePeriod(resilientOracle, wbeth);
       await setMaxStalePeriod(resilientOracle, xrp);
       await setMaxStalePeriod(resilientOracle, xvs);
+      await setMaxStalePeriod(resilientOracle, eth);
 
     });
 
