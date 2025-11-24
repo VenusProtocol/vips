@@ -24,7 +24,6 @@ import vip571, {
   SolvBTC,
   THE,
   TUSD,
-  TWT,
   UNI,
   VAI,
   WBETH,
@@ -138,11 +137,6 @@ forking(69306243, async () => {
       expect(price).to.be.equal(parseUnits("0.99598455", 18));
     });
 
-    it("check TWT price", async () => {
-      const price = await resilientOracle.getPrice(TWT);
-      expect(price).to.be.equal(parseUnits("1.051994960000000000", 18));
-    });
-
     it("check UNI price", async () => {
       const price = await resilientOracle.getPrice(UNI);
       expect(price).to.be.equal(parseUnits("6.1390708", 18));
@@ -167,7 +161,6 @@ forking(69306243, async () => {
       const price = await resilientOracle.getPrice(XVS);
       expect(price).to.be.equal(parseUnits("4.148370200000000000", 18));
     });
-
   });
 
   testVip("VIP-571 bscmainnet", await vip571(), {
@@ -199,7 +192,6 @@ forking(69306243, async () => {
       const solvbtc = await new ethers.Contract(SolvBTC, ERC20_ABI, provider);
       const the = await new ethers.Contract(THE, ERC20_ABI, provider);
       const tusd = await new ethers.Contract(TUSD, ERC20_ABI, provider);
-      const twt = await new ethers.Contract(TWT, ERC20_ABI, provider);
       const uni = await new ethers.Contract(UNI, ERC20_ABI, provider);
       const vai = await new ethers.Contract(VAI, ERC20_ABI, provider);
       const wbeth = await new ethers.Contract(WBETH, ERC20_ABI, provider);
@@ -226,7 +218,6 @@ forking(69306243, async () => {
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "SolvBTC");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "THE");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "TUSD");
-      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "TWT");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "UNI");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "VAI");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "WBETH");
@@ -252,7 +243,6 @@ forking(69306243, async () => {
       await setMaxStalePeriod(resilientOracle, solvbtc);
       await setMaxStalePeriod(resilientOracle, the);
       await setMaxStalePeriod(resilientOracle, tusd);
-      await setMaxStalePeriod(resilientOracle, twt);
       await setMaxStalePeriod(resilientOracle, uni);
       await setMaxStalePeriod(resilientOracle, vai);
       await setMaxStalePeriod(resilientOracle, wbeth);
@@ -345,11 +335,6 @@ forking(69306243, async () => {
     it("check TUSD price", async () => {
       const price = await resilientOracle.getPrice(TUSD);
       expect(price).to.be.equal(parseUnits("0.99598455", 18));
-    });
-
-    it("check TWT price", async () => {
-      const price = await resilientOracle.getPrice(TWT);
-      expect(price).to.be.equal(parseUnits("1.051994960000000000", 18));
     });
 
     it("check UNI price", async () => {

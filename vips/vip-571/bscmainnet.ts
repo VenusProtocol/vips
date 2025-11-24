@@ -23,7 +23,6 @@ export const SOL = "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF";
 export const SolvBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
 export const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 export const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
-export const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 export const UNI = "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1";
 export const VAI = "0x4BD17003473389A42DAF6a0a729f6Fdb328BbBd7";
 export const WBETH = "0xa2e3356610840701bdf5611a53974510ae27e2e1";
@@ -32,7 +31,6 @@ export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
 export const asBNBOracle = "0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5";
 export const WBETHOracle = "0x49938fc72262c126eb5D4BdF6430C55189AEB2BA";
-export const CHAINLINK_TWT_FEED = "0x7E728dFA6bCa9023d9aBeE759fDF56BEAb8aC7aD";
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 
 export const HEARTBEAT_25_HOURS = 25 * 60 * 60;
@@ -165,11 +163,6 @@ export const vip571 = () => {
         params: ["XVS", HEARTBEAT_20_MINUTES],
       },
       {
-        target: bscmainnet.CHAINLINK_ORACLE,
-        signature: "setTokenConfig((address,address,uint256))",
-        params: [[TWT, CHAINLINK_TWT_FEED, HEARTBEAT_25_HOURS]],
-      },
-      {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
@@ -276,12 +269,6 @@ export const vip571 = () => {
               [true, true, false],
               false,
             ],
-            // [
-            //   TWT,
-            //   [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
-            //   [true, true, false],
-            //   false,
-            // ],
             [
               UNI,
               [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
@@ -337,7 +324,6 @@ export const vip571 = () => {
             [SolvBTC, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [THE, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [TUSD, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
-            [TWT, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [UNI, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [VAI, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
             [WBETH, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND],
