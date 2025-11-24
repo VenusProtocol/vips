@@ -22,11 +22,31 @@ export const HEARTBEAT_7_HOURS = 7 * 60 * 60;
 export const PRICE_LOWER_BOUND = parseUnits("0.99", 18);
 export const PRICE_UPPER_BOUND = parseUnits("1.01", 18);
 
-export const vip569 = () => {
+export const vip571 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-569",
-    description: ``,
+    title: "VIP-571 [BNB Chain] Set Pivot and Fallback Oracle for ETH, USDC, USDT",
+    description: `If passed, this VIP will perform the changes to add fallback and pivot oracle for the following asset in core pool
+
+- ETH
+    - main oracle: chainlink
+    - pivot oracle: redstone
+    - fallback oracle: binance oracle
+    - bound: 0.99 ~ 1.01
+- USDC
+    - main oracle: chainlink
+    - pivot oracle: redstone
+    - fallback oracle: binance oracle
+    - bound: 0.99 ~ 1.01
+- USDT
+    - main oracle: chainlink
+    - pivot oracle: redstone
+    - fallback oracle: binance oracle
+    - bound: 0.99 ~ 1.01
+
+**References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/641/files)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -103,4 +123,4 @@ export const vip569 = () => {
   );
 };
 
-export default vip569;
+export default vip571;

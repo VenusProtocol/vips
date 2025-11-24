@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip569, { ETH, USDC, USDT } from "../../vips/vip-569/bscmainnet";
+import vip571, { ETH, USDC, USDT } from "../../vips/vip-571/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
@@ -41,7 +41,7 @@ forking(68957096, async () => {
     });
   });
 
-  testVip("VIP-569 bscmainnet", await vip569(), {
+  testVip("VIP-571 bscmainnet", await vip571(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
