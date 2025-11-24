@@ -6,10 +6,10 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip569, { ETH, SolvBTC, USDC, USDT } from "../../vips/vip-569/bscmainnet";
+import vip569, { ETH, USDC, USDT } from "../../vips/vip-569/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
-import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
@@ -39,11 +39,6 @@ forking(68957096, async () => {
       const price = await resilientOracle.getPrice(USDT);
       expect(price).to.be.equal(parseUnits("0.99869", 18));
     });
-
-    it("check SolvBTC price", async () => {
-      const price = await resilientOracle.getPrice(SolvBTC);
-      expect(price).to.be.equal(parseUnits("82288.38515425", 18));
-    });
   });
 
   testVip("VIP-569 bscmainnet", await vip569(), {
@@ -52,7 +47,7 @@ forking(68957096, async () => {
         txResponse,
         [RESILIENT_ORACLE_ABI, BINANCE_ORACLE_ABI, REDSTONE_ORACLE_ABI, BOUND_VALIDATOR_ABI],
         ["TokenConfigAdded", "MaxStalePeriodAdded", "TokenConfigAdded", "ValidateConfigAdded"],
-        [8, 4, 8, 4],
+        [6, 3, 6, 3],
       );
     },
   });
@@ -62,7 +57,6 @@ forking(68957096, async () => {
       const eth = await new ethers.Contract(ETH, ERC20_ABI, provider);
       const usdc = await new ethers.Contract(USDC, ERC20_ABI, provider);
       const usdt = await new ethers.Contract(USDT, ERC20_ABI, provider);
-      const solvbtc = await new ethers.Contract(SolvBTC, ERC20_ABI, provider);
 
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "ETH");
 
@@ -75,7 +69,6 @@ forking(68957096, async () => {
       await setMaxStalePeriod(resilientOracle, eth);
       await setMaxStalePeriod(resilientOracle, usdc);
       await setMaxStalePeriod(resilientOracle, usdt);
-      await setMaxStalePeriod(resilientOracle, solvbtc);
     });
     it("check ETH price", async () => {
       const price = await resilientOracle.getPrice(ETH);
@@ -90,11 +83,6 @@ forking(68957096, async () => {
     it("check USDT price", async () => {
       const price = await resilientOracle.getPrice(USDT);
       expect(price).to.be.equal(parseUnits("0.99869", 18));
-    });
-
-    it("check SolvBTC price", async () => {
-      const price = await resilientOracle.getPrice(SolvBTC);
-      expect(price).to.be.equal(parseUnits("82279.6314825", 18));
     });
   });
 });
