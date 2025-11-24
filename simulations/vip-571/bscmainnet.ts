@@ -18,7 +18,6 @@ import vip571, {
   FDUSD,
   FIL,
   LINK,
-  lisUSD,
   LTC,
   SOL,
   SolvBTC,
@@ -107,11 +106,6 @@ forking(69306243, async () => {
       expect(price).to.be.equal(parseUnits("12.434677", 18));
     });
 
-    it("check lisUSD price", async () => {
-      const price = await resilientOracle.getPrice(lisUSD);
-      expect(price).to.be.equal(parseUnits("0.99916213", 18));
-    });
-
     it("check LTC price", async () => {
       const price = await resilientOracle.getPrice(LTC);
       expect(price).to.be.equal(parseUnits("83.031787930000000000", 18));
@@ -186,7 +180,6 @@ forking(69306243, async () => {
       const fdusd = await new ethers.Contract(FDUSD, ERC20_ABI, provider);
       const fil = await new ethers.Contract(FIL, ERC20_ABI, provider);
       const link = await new ethers.Contract(LINK, ERC20_ABI, provider);
-      const lisusd = await new ethers.Contract(lisUSD, ERC20_ABI, provider);
       const ltc = await new ethers.Contract(LTC, ERC20_ABI, provider);
       const sol = await new ethers.Contract(SOL, ERC20_ABI, provider);
       const solvbtc = await new ethers.Contract(SolvBTC, ERC20_ABI, provider);
@@ -212,7 +205,6 @@ forking(69306243, async () => {
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "FDUSD");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "FIL");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "LINK");
-      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "lisUSD");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "LTC");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "SOL");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "SolvBTC");
@@ -237,7 +229,6 @@ forking(69306243, async () => {
       await setMaxStalePeriod(resilientOracle, fdusd);
       await setMaxStalePeriod(resilientOracle, fil);
       await setMaxStalePeriod(resilientOracle, link);
-      await setMaxStalePeriod(resilientOracle, lisusd);
       await setMaxStalePeriod(resilientOracle, ltc);
       await setMaxStalePeriod(resilientOracle, sol);
       await setMaxStalePeriod(resilientOracle, solvbtc);
@@ -305,11 +296,6 @@ forking(69306243, async () => {
     it("check LINK price", async () => {
       const price = await resilientOracle.getPrice(LINK);
       expect(price).to.be.equal(parseUnits("12.434677", 18));
-    });
-
-    it("check lisUSD price", async () => {
-      const price = await resilientOracle.getPrice(lisUSD);
-      expect(price).to.be.equal(parseUnits("0.99916213", 18));
     });
 
     it("check LTC price", async () => {

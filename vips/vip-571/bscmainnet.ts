@@ -17,7 +17,6 @@ export const DOT = "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402";
 export const FDUSD = "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409";
 export const FIL = "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153";
 export const LINK = "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD";
-export const lisUSD = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
 export const LTC = "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94";
 export const SOL = "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF";
 export const SolvBTC = "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7";
@@ -106,11 +105,6 @@ export const vip571 = () => {
         target: bscmainnet.BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
         params: ["LINK", HEARTBEAT_25_HOURS],
-      },
-      {
-        target: bscmainnet.BINANCE_ORACLE,
-        signature: "setMaxStalePeriod(string,uint256)",
-        params: ["lisUSD", HEARTBEAT_20_MINUTES],
       },
       {
         target: bscmainnet.BINANCE_ORACLE,
@@ -229,12 +223,6 @@ export const vip571 = () => {
             ],
             [
               LINK,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
-              [true, true, false],
-              false,
-            ],
-            [
-              lisUSD,
               [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
               [true, true, false],
               false,
