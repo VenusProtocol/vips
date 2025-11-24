@@ -30,6 +30,9 @@ export const WBETH = "0xa2e3356610840701bdf5611a53974510ae27e2e1";
 export const XRP = "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
 
+export const asBNBOracle = "0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5";
+export const WBETHOracle = "0x49938fc72262c126eb5D4BdF6430C55189AEB2BA";
+export const CHAINLINK_TWT_FEED = "0x7E728dFA6bCa9023d9aBeE759fDF56BEAb8aC7aD";
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 
 export const HEARTBEAT_25_HOURS = 25 * 60 * 60;
@@ -139,11 +142,6 @@ export const vip571 = () => {
       {
         target: bscmainnet.BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["TWT", HEARTBEAT_20_MINUTES],
-      },
-      {
-        target: bscmainnet.BINANCE_ORACLE,
-        signature: "setMaxStalePeriod(string,uint256)",
         params: ["UNI", HEARTBEAT_25_HOURS],
       },
       {
@@ -167,6 +165,11 @@ export const vip571 = () => {
         params: ["XVS", HEARTBEAT_20_MINUTES],
       },
       {
+        target: bscmainnet.CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[TWT, CHAINLINK_TWT_FEED, HEARTBEAT_25_HOURS]],
+      },
+      {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
@@ -185,7 +188,7 @@ export const vip571 = () => {
             ],
             [
               asBNB,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
+              [asBNBOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
               [true, true, false],
               false,
             ],
@@ -273,12 +276,12 @@ export const vip571 = () => {
               [true, true, false],
               false,
             ],
-            [
-              TWT,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
-              [true, true, false],
-              false,
-            ],
+            // [
+            //   TWT,
+            //   [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
+            //   [true, true, false],
+            //   false,
+            // ],
             [
               UNI,
               [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
@@ -293,7 +296,7 @@ export const vip571 = () => {
             ],
             [
               WBETH,
-              [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
+              [WBETHOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
               [true, true, false],
               false,
             ],
