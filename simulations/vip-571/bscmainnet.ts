@@ -64,8 +64,6 @@ forking(68957096, async () => {
 
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "USDT");
 
-      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "SolvBTC");
-
       await setMaxStalePeriod(resilientOracle, eth);
       await setMaxStalePeriod(resilientOracle, usdc);
       await setMaxStalePeriod(resilientOracle, usdt);
