@@ -157,6 +157,11 @@ export const vip571 = () => {
         params: ["XVS", HEARTBEAT_20_MINUTES],
       },
       {
+        target: bscmainnet.BINANCE_ORACLE,
+        signature: "setSymbolOverride(string,string)",
+        params: ["Cake", "CAKE"],
+      },
+      {
         target: bscmainnet.RESILIENT_ORACLE,
         signature: "setTokenConfigs((address,address[3],bool[3],bool)[])",
         params: [
