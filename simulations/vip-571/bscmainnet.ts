@@ -163,7 +163,7 @@ forking(69306243, async () => {
         txResponse,
         [RESILIENT_ORACLE_ABI, BINANCE_ORACLE_ABI, BOUND_VALIDATOR_ABI],
         ["TokenConfigAdded", "MaxStalePeriodAdded", "ValidateConfigAdded"],
-        [22, 22, 23],
+        [21, 21, 21],
       );
     },
   });
