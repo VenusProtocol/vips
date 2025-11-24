@@ -178,12 +178,7 @@ export const vip571 = () => {
               [true, true, false],
               false,
             ],
-            [
-              asBNB,
-              [asBNBOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
-              [true, true, false],
-              false,
-            ],
+            [asBNB, [asBNBOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero], [true, true, false], false],
             [
               BCH,
               [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
@@ -274,12 +269,7 @@ export const vip571 = () => {
               [true, true, false],
               false,
             ],
-            [
-              WBETH,
-              [WBETHOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],
-              [true, true, false],
-              false,
-            ],
+            [WBETH, [WBETHOracle, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero], [true, true, false], false],
             [
               XRP,
               [bscmainnet.CHAINLINK_ORACLE, bscmainnet.BINANCE_ORACLE, ethers.constants.AddressZero],

@@ -3,18 +3,17 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES, ORACLE_BNB } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip571, { 
+import vip571, {
   AAVE,
   ADA,
-  asBNB,
   BCH,
   CAKE,
   DAI,
   DOGE,
-  DOT, 
+  DOT,
   FDUSD,
   FIL,
   LINK,
@@ -27,9 +26,11 @@ import vip571, {
   VAI,
   WBETH,
   XRP,
-  XVS
- } from "../../vips/vip-571/bscmainnet";
+  XVS,
+  asBNB,
+} from "../../vips/vip-571/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
+import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -41,13 +42,14 @@ const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 
 forking(69306243, async () => {
   let resilientOracle: Contract;
-  let binanceOracle: Contract;
-  let chainlinkOracle: Contract;
+  let redstoneOracle: Contract;
+  let impersonatedTimelock: any;
 
   before(async () => {
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, provider);
-    binanceOracle = new ethers.Contract(bscmainnet.BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
-    chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, RESILIENT_ORACLE_ABI, provider);
+    redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, provider);
+
+    impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -142,7 +144,7 @@ forking(69306243, async () => {
     });
 
     it("check WBETH price", async () => {
-      const price = await resilientOracle.getPrice(WBETH);  
+      const price = await resilientOracle.getPrice(WBETH);
       expect(price).to.be.equal(parseUnits("3038.578498421588886094", 18));
     });
 
@@ -182,8 +184,6 @@ forking(69306243, async () => {
       const link = await new ethers.Contract(LINK, ERC20_ABI, provider);
       const ltc = await new ethers.Contract(LTC, ERC20_ABI, provider);
       const sol = await new ethers.Contract(SOL, ERC20_ABI, provider);
-      const solvbtc = await new ethers.Contract(SolvBTC, ERC20_ABI, provider);
-      const the = await new ethers.Contract(THE, ERC20_ABI, provider);
       const tusd = await new ethers.Contract(TUSD, ERC20_ABI, provider);
       const uni = await new ethers.Contract(UNI, ERC20_ABI, provider);
       const vai = await new ethers.Contract(VAI, ERC20_ABI, provider);
@@ -216,8 +216,6 @@ forking(69306243, async () => {
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "XRP");
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "XVS");
 
-
-
       await setMaxStalePeriod(resilientOracle, aave);
       await setMaxStalePeriod(resilientOracle, ada);
       await setMaxStalePeriod(resilientOracle, bnb);
@@ -231,8 +229,6 @@ forking(69306243, async () => {
       await setMaxStalePeriod(resilientOracle, link);
       await setMaxStalePeriod(resilientOracle, ltc);
       await setMaxStalePeriod(resilientOracle, sol);
-      await setMaxStalePeriod(resilientOracle, solvbtc);
-      await setMaxStalePeriod(resilientOracle, the);
       await setMaxStalePeriod(resilientOracle, tusd);
       await setMaxStalePeriod(resilientOracle, uni);
       await setMaxStalePeriod(resilientOracle, vai);
@@ -241,6 +237,10 @@ forking(69306243, async () => {
       await setMaxStalePeriod(resilientOracle, xvs);
       await setMaxStalePeriod(resilientOracle, eth);
 
+      await redstoneOracle
+        .connect(impersonatedTimelock)
+        .setDirectPrice(SolvBTC, parseUnits("85930.196134040000000000", 18));
+      await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(THE, parseUnits("0.147200000000000000", 18));
     });
 
     it("check AAVE price", async () => {
@@ -291,7 +291,7 @@ forking(69306243, async () => {
     it("check FIL price", async () => {
       const price = await resilientOracle.getPrice(FIL);
       expect(price).to.be.equal(parseUnits("1.61386171", 18));
-    }); 
+    });
 
     it("check LINK price", async () => {
       const price = await resilientOracle.getPrice(LINK);
@@ -310,7 +310,7 @@ forking(69306243, async () => {
 
     it("check SolvBTC price", async () => {
       const price = await resilientOracle.getPrice(SolvBTC);
-      expect(price).to.be.equal(parseUnits("85923.46994603", 18));
+      expect(price).to.be.equal(parseUnits("85930.196134040000000000", 18));
     });
 
     it("check THE price", async () => {
@@ -334,7 +334,7 @@ forking(69306243, async () => {
     });
 
     it("check WBETH price", async () => {
-      const price = await resilientOracle.getPrice(WBETH);  
+      const price = await resilientOracle.getPrice(WBETH);
       expect(price).to.be.equal(parseUnits("3038.578498421588886094", 18));
     });
 
