@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES, ORACLE_BNB } from "src/networkAddresses";
 import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip571, {
+import vip572, {
   AAVE,
   ADA,
   BCH,
@@ -28,7 +28,7 @@ import vip571, {
   XRP,
   XVS,
   asBNB,
-} from "../../vips/vip-571/bscmainnet";
+} from "../../vips/vip-572/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
@@ -159,7 +159,7 @@ forking(69306243, async () => {
     });
   });
 
-  testVip("VIP-571 bscmainnet", await vip571(), {
+  testVip("VIP-572 bscmainnet", await vip572(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

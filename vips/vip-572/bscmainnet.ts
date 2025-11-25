@@ -39,11 +39,141 @@ export const HEARTBEAT_13_HOURS = 13 * 60 * 60;
 export const PRICE_LOWER_BOUND = parseUnits("0.95", 18);
 export const PRICE_UPPER_BOUND = parseUnits("1.05", 18);
 
-export const vip571 = () => {
+export const vip572 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-571",
-    description: ``,
+    title: "VIP-572 [BNB Chain] Set Pivot Oracle for Core Pool Tokens",
+    description: `If passed, this VIP will perform the changes to add pivot oracles for the following assets in core pool
+
+AAVE  
+-  main: chainlink  
+-  pivot: binance (0x0e3018768c0eFF613626b671eFf9F16CE4Fc4729)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+ADA  
+-  main: chainlink  
+-  pivot: binance (0x3F0FCBDa321DfEd71dA7532FA783379763D96f5A)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+asBNB  
+-  main: CorrelatedTokenOracle  
+-  pivot: binance (0x3D5b45fc74437e71321013a5F07049eF0a685d41)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+BCH  
+-  main: chainlink  
+-  pivot: binance (0x7664c905C6b36FdD831cAff88Dac4e9EB8B29210)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+CAKE  
+-  main: chainlink  
+-  pivot: binance (0xe2771302CFE70279aDE1734eD9Eb29ceE86AF627)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+DAI  
+-  main: chainlink  
+-  pivot: binance (0x939E274A591618F7ae2774b4525aa28f2e9C02ef)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+DOGE  
+-  main: chainlink  
+-  pivot: binance (0x3E609D3Ab5ad650b3e5a4F3a0B1AA4F94329C470)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+DOT  
+-  main: chainlink  
+-  pivot: binance (0xD78A354F9562FE110Eec3efaD8996bd8DEbDeAE8)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+FDUSD  
+-  main: chainlink  
+-  pivot: binance (0x665E8ad56f13A8451c1fBE3E679D97e76119A959)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+FIL  
+-  main: chainlink  
+-  pivot: binance (0x066edC843dD087A7CE5B2B66fE5e04B26bed47C0)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+LINK  
+-  main: chainlink  
+-  pivot: binance (0x29d3E3AeC0E7d8031c70e13D07b064BD5D390d13)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+LTC  
+-  main: chainlink  
+-  pivot: binance (0x9b8bd107c7ccC61210A1c6a7a99B967DF9c0C57D)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+SOL  
+-  main: chainlink  
+-  pivot: binance (0x322aB6d93dF49c0Af923f561c6fde22ab3c1Be79)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+SolvBTC  
+-  main: redstone  
+-  pivot: binance (0x2e00b5C80428f94A0e526BAfc526F19eC9c5c37B)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+THE  
+-  main: redstone  
+-  pivot: binance (0x44Bdb39F73B5278b6a9fb737102F9f5CC906CC45)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+TUSD  
+-  main: chainlink  
+-  pivot: binance (0x1688640097bFD52A4616250f7d76E974E8Eb1490)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+UNI  
+-  main: chainlink  
+-  pivot: binance (0xf16D0fe3cBC328c5514C1e9d71ca5fE38FBa57c4)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+VAI  
+-  main: chainlink  
+-  pivot: binance (0x97896F0bD853625D97EE81d25D80B70281C21C5E)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+WBETH  
+-  main: CorrelatedTokenOracle  
+-  pivot: binance (0x97398272a927c56735f7bfce95752540f5e23ccd)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+XRP  
+-  main: chainlink  
+-  pivot: binance (0x626Ae4693BFf1Ea4e2CA20EB9F1BFFF224C7EA94)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+XVS  
+-  main: chainlink  
+-  pivot: binance (0x15237dd430210234764f8C022E474FfE2C15F5a0)  
+-  fallback: -  
+-  bound range: 0.95 ~ 1.05  
+
+**References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/642/files)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -320,4 +450,4 @@ export const vip571 = () => {
   );
 };
 
-export default vip571;
+export default vip572;
