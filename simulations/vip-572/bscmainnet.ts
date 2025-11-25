@@ -30,9 +30,9 @@ import vip572, {
   asBNB,
 } from "../../vips/vip-572/bscmainnet";
 import ERC20_ABI from "./abi/ERC20.json";
-import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
+import REDSTONE_ORACLE_ABI from "./abi/redstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const provider = ethers.provider;
