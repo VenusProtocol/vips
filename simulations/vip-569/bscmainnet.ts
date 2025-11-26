@@ -25,7 +25,7 @@ const TEST_USER = "0x14A1c22EF6d2eF6cE33c0b018d8A34D02021e5c8";
 const TEST_DELEGATE = "0x9cc6f5f16498fceef4d00a350bd8f8921d304dc9";
 const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 
-forking(68832830, async () => {
+forking(69504850, async () => {
   const provider = ethers.provider;
   let unitroller: Contract;
 
