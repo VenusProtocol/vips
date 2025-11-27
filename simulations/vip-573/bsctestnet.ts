@@ -7,15 +7,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip569 from "../../vips/vip-569/bscmainnet";
+import vip573 from "../../vips/vip-573/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DIAMOND_ABI from "./abi/Diamond.json";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-const OLD_MARKET_FACET = "0x7ec871BA4248CC443a994f2febeDFB96DAe444F1";
+const OLD_MARKET_FACET = "0x0A7A88aB6aB40417Bd6bF1EB3907EFF06D24C2FC";
 
-const NEW_MARKET_FACET = "0x87FdF72FA2fB29Cb43f03aCa261A8DC2C613a860";
+const NEW_MARKET_FACET = "0x8e0e15C99Ab0985cB39B2FE36532E5692730eBA9";
 
 // Function selector for enterMarketBehalf(address,address)
 const ENTER_MARKET_BEHALF_SELECTOR = "0xd585c3c6";
@@ -23,16 +23,16 @@ const ENTER_MARKET_BEHALF_SELECTOR = "0xd585c3c6";
 // Test accounts
 const TEST_USER = "0x14A1c22EF6d2eF6cE33c0b018d8A34D02021e5c8";
 const TEST_DELEGATE = "0x9cc6f5f16498fceef4d00a350bd8f8921d304dc9";
-const VUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+const VUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 
-forking(69504850, async () => {
+forking(73659707, async () => {
   const provider = ethers.provider;
   let unitroller: Contract;
 
   let marketFacetFunctionSelectors: string[];
 
   before(async () => {
-    unitroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
+    unitroller = new ethers.Contract(bsctestnet.UNITROLLER, COMPTROLLER_ABI, provider);
 
     // Get current MarketFacet function selectors
     marketFacetFunctionSelectors = await unitroller.facetFunctionSelectors(OLD_MARKET_FACET);
@@ -54,7 +54,7 @@ forking(69504850, async () => {
     });
   });
 
-  testVip("vip-569", await vip569(), {
+  testVip("vip-573", await vip573(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
     },
