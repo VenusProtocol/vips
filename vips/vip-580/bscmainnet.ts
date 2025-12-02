@@ -1,3 +1,4 @@
+import { ethers } from "hardhat";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -7,7 +8,7 @@ export const OPBNBMAINNET_XVS_VAULT_PROXY = "0x7dc969122450749A8B0777c0e324522d6
 export const OPBNBMAINNET_XVS = "0x3E2e61F1c075881F3fB8dd568043d8c221fd5c61";
 export const OPBNBMAINNET_ACM = "0xA60Deae5344F1152426cA440fb6552eA0e3005D6";
 
-// export const OPBNBMAINNET_RATE_MODEL_SETTER = ""; // to be deployed once we have a finale timestamp
+export const OPBNBMAINNET_RATE_MODEL_SETTER = "0x5305CB5Dc76281d7e895aC4E492435167D5A95b1";
 
 export const NEW_OPBNB_BLOCK_RATE = 126144000;
 
@@ -18,10 +19,10 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip565 = () => {
+export const vip580 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-565 Fourier Hardfork OPBNB",
+    title: "VIP-580 Fourier Hardfork OPBNB",
     description: `#### Summary`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -46,28 +47,28 @@ export const vip565 = () => {
       },
 
       // update interest rate models
-      // {
-      //   target: OPBNBMAINNET_ACM,
-      //   signature: "giveCallPermission(address,string,address)",
-      //   params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBMAINNET_RATE_MODEL_SETTER],
-      //   dstChainId: LzChainId.opbnbmainnet,
-      // },
-      // {
-      //   target: OPBNBMAINNET_RATE_MODEL_SETTER,
-      //   signature: "run()",
-      //   params: [],
-      //   dstChainId: LzChainId.opbnbmainnet,
-      // },
-      // {
-      //   target: OPBNBMAINNET_ACM,
-      //   signature: "revokeCallPermission(address,string,address)",
-      //   params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBMAINNET_RATE_MODEL_SETTER],
-      //   dstChainId: LzChainId.opbnbmainnet,
-      // },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBMAINNET_RATE_MODEL_SETTER],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_RATE_MODEL_SETTER,
+        signature: "run()",
+        params: [],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
+      {
+        target: OPBNBMAINNET_ACM,
+        signature: "revokeCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setInterestRateModel(address)", OPBNBMAINNET_RATE_MODEL_SETTER],
+        dstChainId: LzChainId.opbnbmainnet,
+      },
     ],
     meta,
     ProposalType.REGULAR,
   );
 };
 
-export default vip565;
+export default vip580;

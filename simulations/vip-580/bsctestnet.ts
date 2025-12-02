@@ -1,11 +1,11 @@
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { vip565 } from "../../vips/vip-565/bsctestnet";
+import { vip580 } from "../../vips/vip-580/bsctestnet";
 import OMNICHAIN_PROPOSAL_SENDER_ABI from "./abi/OmnichainProposalSender.json";
 
 forking(71228174, async () => {
-  testVip("VIP-565", await vip565(), {
+  testVip("VIP-565", await vip580(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [OMNICHAIN_PROPOSAL_SENDER_ABI], ["ExecuteRemoteProposal"], [1]);
     },
