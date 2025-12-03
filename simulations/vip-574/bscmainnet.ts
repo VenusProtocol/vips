@@ -1,21 +1,35 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
-import { expectEvents } from "src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInBinanceOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import { IRM, vUSDC, vUSDT, vip574 } from "../../vips/vip-574/bscmainnet";
+import { IRM, XVS, vUSDC, vUSDT, vip574 } from "../../vips/vip-574/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 import VTOKEN_ABI from "./abi/vToken.json";
 
 const OLD_vUSDT_IRM = "0x1a7c9091973CABc491e361A9eaEFD047b48a3647";
 const OLD_vUSDC_IRM = "0xF48508A44da9C7D210a668eCe4d31Bc98702602b";
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 forking(69755774, async () => {
   const vUSDTContract = new ethers.Contract(vUSDT, VTOKEN_ABI, ethers.provider);
   const vUSDCContract = new ethers.Contract(vUSDC, VTOKEN_ABI, ethers.provider);
-
+  const resilientOracleContract = new ethers.Contract(
+    bscmainnet.RESILIENT_ORACLE,
+    RESILIENT_ORACLE_ABI,
+    ethers.provider,
+  );
   describe("Pre-VIP behaviour", async () => {
+    it("check XVS price", async () => {
+      const price = await resilientOracleContract.getPrice(XVS);
+      expect(price).to.be.equal(parseUnits("4.9102446", 18));
+    });
+
     it("check IRM of vUSDT and vUSDC", async () => {
       const vUSDT_IRM = await vUSDTContract.interestRateModel();
       const vUSDC_IRM = await vUSDCContract.interestRateModel();
@@ -51,6 +65,17 @@ forking(69755774, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
+    before(async () => {
+      const xvs = await new ethers.Contract(XVS, ERC20_ABI, ethers.provider);
+
+      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "XVS");
+      await setMaxStalePeriod(resilientOracleContract, xvs);
+    });
+    it("check XVS price", async () => {
+      const price = await resilientOracleContract.getPrice(XVS);
+      expect(price).to.be.equal(parseUnits("4.9102446", 18));
+    });
+
     it("check IRM of vUSDC and vUSDT", async () => {
       const vUSDT_IRM = await vUSDTContract.interestRateModel();
       const vUSDC_IRM = await vUSDCContract.interestRateModel();
