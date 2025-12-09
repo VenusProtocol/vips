@@ -35,25 +35,31 @@ const ACM = bsctestnet.ACCESS_CONTROL_MANAGER;
 const VAI_UNITROLLER = bsctestnet.VAI_UNITROLLER;
 const LIQUIDATOR = bsctestnet.LIQUIDATOR;
 
-// Previous implementations (update these with actual addresses if known)
 const OLD_DIAMOND = "0x1774f993861B14B7C3963F3e09f67cfBd2B32198";
 const OLD_COMPTROLLER_LENS = "0x72dCB93F8c3fB00D31076e93b6E87C342A3eCC9c";
 const OLD_VAI_CONTROLLER_IMPL = "0xA8122Fe0F9db39E266DE7A5BF953Cd72a87fe345";
 const OLD_LIQUIDATOR_IMPL = "0x91070E5b5Ff60a6c122740EB326D1f80E9f470e7";
 const OLD_VTOKEN_IMPL = "0xb941C5D148c65Ce49115D12B5148247AaCeFF375";
 
-// Extract facet addresses from cutParams
-const getFacetAddresses = (): string[] => {
-  const addresses: string[] = [];
-  for (const param of cutParams) {
-    if (param[0] !== "0x0000000000000000000000000000000000000000" && !addresses.includes(param[0])) {
-      addresses.push(param[0]);
-    }
-  }
-  return addresses;
-};
+const OLD_SETTER_FACET = "0x4fc4C41388237D13A430879417f143EF54e5BB05";
+const OLD_REWARD_FACET = "0x0bc7922Cc08Ea32E196d25805558a84dF54beC6a";
+const OLD_MARKET_FACET = "0x8e0e15C99Ab0985cB39B2FE36532E5692730eBA9";
+const OLD_POLICY_FACET = "0xf8d94ef23c1188f8ab1009E56D558d7834d1F019";
+const OLD_FLASHLOAN_FACET = "0x32348c5bB52E5468A11901e70BdE061192feCAf4";
 
-const NEW_FACET_ADDRESSES = getFacetAddresses();
+const NEW_SETTER_FACET = "0xe48f7E3F94349962A33D1e909b3F28E14A8770c9";
+const NEW_REWARD_FACET = "0x03Be0AAd2EADc48892335C6Ac10A71DaD5a81A15";
+const NEW_MARKET_FACET = "0x2A926859f87C322eEe043B8e5f098e618F92c529";
+const NEW_POLICY_FACET = "0x550F5408D34793a723C22ff84A6872d74D5597f1";
+const NEW_FLASHLOAN_FACET = "0x07347914d067C9227836870D6Be8F78539B91437";
+
+const newMethods = [
+  "setMarketMaxLiquidationIncentive(address,uint256)",
+  "setMarketMaxLiquidationIncentive(uint96,address,uint256)",
+  "setLiquidationManager(address)",
+  "setDynamicCloseFactorEnabled(address,bool)",
+  "setDynamicLiquidationIncentiveEnabled(address,bool)",
+];
 
 forking(76316411, async () => {
   let unitroller: Contract;
@@ -109,33 +115,16 @@ forking(76316411, async () => {
     });
 
     it("new liquidation functions should not have permissions", async () => {
-      const hasPermission1 = await accessControlManager.hasPermission(
+      for (const timelock of [
         bsctestnet.NORMAL_TIMELOCK,
-        UNITROLLER,
-        "setMarketMaxLiquidationIncentive(address,uint256)",
-      );
-      expect(hasPermission1).to.equal(false);
-
-      const hasPermission2 = await accessControlManager.hasPermission(
-        bsctestnet.NORMAL_TIMELOCK,
-        UNITROLLER,
-        "setLiquidationManager(address)",
-      );
-      expect(hasPermission2).to.equal(false);
-
-      const hasPermission3 = await accessControlManager.hasPermission(
-        bsctestnet.NORMAL_TIMELOCK,
-        UNITROLLER,
-        "setDynamicCloseFactorEnabled(address,bool)",
-      );
-      expect(hasPermission3).to.equal(false);
-
-      const hasPermission4 = await accessControlManager.hasPermission(
-        bsctestnet.NORMAL_TIMELOCK,
-        UNITROLLER,
-        "setDynamicLiquidationIncentiveEnabled(address,bool)",
-      );
-      expect(hasPermission4).to.equal(false);
+        bsctestnet.FAST_TRACK_TIMELOCK,
+        bsctestnet.CRITICAL_TIMELOCK,
+        bsctestnet.GUARDIAN,
+      ]) {
+        for (const method of newMethods) {
+          expect(await accessControlManager.hasPermission(timelock, UNITROLLER, method)).to.equal(false);
+        }
+      }
     });
   });
 
@@ -201,29 +190,44 @@ forking(76316411, async () => {
       expect(liquidationManagerAddress).to.equal(LIQUIDATION_MANAGER);
     });
 
-    it("diamond should contain new facet addresses", async () => {
-      const facetAddresses = await unitroller.facetAddresses();
-      for (const facetAddress of NEW_FACET_ADDRESSES) {
-        expect(facetAddresses).to.include(facetAddress);
-      }
+    it("market facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = [...cutParams[0][2], ...cutParams[1][2]];
+      expect(await unitroller.facetFunctionSelectors(NEW_MARKET_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_MARKET_FACET)).to.deep.equal([]);
     });
 
-    it("diamond cut should have configured function selectors correctly", async () => {
-      for (const [facetAddress, action, functionSelectors] of cutParams) {
-        if (action === 1) {
-          // Add or Replace
-          const actualSelectors = await unitroller.facetFunctionSelectors(facetAddress);
-          for (const selector of functionSelectors) {
-            expect(actualSelectors).to.include(selector);
-          }
-        } else if (action === 2) {
-          // Remove
-          const actualSelectors = await unitroller.facetFunctionSelectors(facetAddress);
-          for (const selector of functionSelectors) {
-            expect(actualSelectors).to.not.include(selector);
-          }
-        }
-      }
+    it("policy facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = [...cutParams[2][2], ...cutParams[3][2]];
+      expect(await unitroller.facetFunctionSelectors(NEW_POLICY_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_POLICY_FACET)).to.deep.equal([]);
+    });
+
+    it("reward facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = cutParams[4][2];
+      expect(await unitroller.facetFunctionSelectors(NEW_REWARD_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_REWARD_FACET)).to.deep.equal([]);
+    });
+
+    it("setter facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = [...cutParams[5][2], ...cutParams[6][2]];
+      expect(await unitroller.facetFunctionSelectors(NEW_SETTER_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_SETTER_FACET)).to.deep.equal([]);
+    });
+
+    it("flashloan facet function selectors should be replaced with new facet address", async () => {
+      const functionSelectors = cutParams[7][2];
+      expect(await unitroller.facetFunctionSelectors(NEW_FLASHLOAN_FACET)).to.deep.equal(functionSelectors);
+      expect(await unitroller.facetFunctionSelectors(OLD_FLASHLOAN_FACET)).to.deep.equal([]);
+    });
+
+    it("unitroller should contain the new facet addresses", async () => {
+      expect(await unitroller.facetAddresses()).to.include(NEW_SETTER_FACET, NEW_REWARD_FACET);
+      expect(await unitroller.facetAddresses()).to.include(NEW_MARKET_FACET, NEW_POLICY_FACET);
+      expect(await unitroller.facetAddresses()).to.include(NEW_FLASHLOAN_FACET);
+
+      expect(await unitroller.facetAddresses()).to.not.include(OLD_SETTER_FACET, OLD_REWARD_FACET);
+      expect(await unitroller.facetAddresses()).to.not.include(OLD_MARKET_FACET, OLD_POLICY_FACET);
+      expect(await unitroller.facetAddresses()).to.not.include(OLD_FLASHLOAN_FACET);
     });
 
     it("old liquidation incentive permissions should be revoked", async () => {
@@ -247,14 +251,6 @@ forking(76316411, async () => {
     });
 
     it("new liquidation functions should have permissions", async () => {
-      const newMethods = [
-        "setMarketMaxLiquidationIncentive(address,uint256)",
-        "setMarketMaxLiquidationIncentive(uint96,address,uint256)",
-        "setLiquidationManager(address)",
-        "setDynamicCloseFactorEnabled(address,bool)",
-        "setDynamicLiquidationIncentiveEnabled(address,bool)",
-      ];
-
       for (const timelock of [
         bsctestnet.NORMAL_TIMELOCK,
         bsctestnet.FAST_TRACK_TIMELOCK,
@@ -264,82 +260,6 @@ forking(76316411, async () => {
         for (const method of newMethods) {
           expect(await accessControlManager.hasPermission(timelock, UNITROLLER, method)).to.equal(true);
         }
-      }
-    });
-
-    it("liquidation manager should be a valid contract", async () => {
-      const code = await ethers.provider.getCode(LIQUIDATION_MANAGER);
-      expect(code).to.not.equal("0x");
-    });
-
-    it("comptroller should support new liquidation features", async () => {
-      // Test that new functions exist and are callable
-      // These will revert if the functions don't exist
-      try {
-        await comptroller.liquidationManager();
-        // If it doesn't revert, the function exists
-        expect(true).to.be.true;
-      } catch (error) {
-        expect.fail("liquidationManager function should exist");
-      }
-    });
-  });
-
-  describe("Liquidation Threshold Features", async () => {
-    it("markets should have liquidation threshold set", async () => {
-      // Assuming liquidation threshold is stored in market data
-      // This test structure depends on the actual implementation
-      for (const vToken of CORE_POOL_VTOKENS.slice(0, 5)) {
-        // Test first 5 markets
-        const marketData = await comptroller.markets(vToken.address);
-        // Market data structure: [isListed, collateralFactorMantissa, isVenus, liquidationThresholdMantissa, ...]
-        // Verify liquidation threshold is set (assuming index 3)
-        expect(marketData[3]).to.exist;
-      }
-    });
-  });
-
-  describe("Dynamic Liquidation Features", async () => {
-    it("dynamic liquidation incentive should be configurable", async () => {
-      // Test that the function exists
-      try {
-        // This is a read-only check to verify the function exists
-        const hasPermission = await accessControlManager.hasPermission(
-          bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "setDynamicLiquidationIncentiveEnabled(address,bool)",
-        );
-        expect(hasPermission).to.equal(true);
-      } catch (error) {
-        expect.fail("Dynamic liquidation incentive function should exist");
-      }
-    });
-
-    it("dynamic close factor should be configurable", async () => {
-      // Test that the function exists
-      try {
-        const hasPermission = await accessControlManager.hasPermission(
-          bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "setDynamicCloseFactorEnabled(address,bool)",
-        );
-        expect(hasPermission).to.equal(true);
-      } catch (error) {
-        expect.fail("Dynamic close factor function should exist");
-      }
-    });
-
-    it("max liquidation incentive should be configurable per market", async () => {
-      // Test that the function exists
-      try {
-        const hasPermission = await accessControlManager.hasPermission(
-          bsctestnet.NORMAL_TIMELOCK,
-          UNITROLLER,
-          "setMarketMaxLiquidationIncentive(address,uint256)",
-        );
-        expect(hasPermission).to.equal(true);
-      } catch (error) {
-        expect.fail("Max liquidation incentive function should exist");
       }
     });
   });

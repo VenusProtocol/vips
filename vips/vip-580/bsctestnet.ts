@@ -17,7 +17,7 @@ const FAST_TRACK_TIMELOCK = bsctestnet.FAST_TRACK_TIMELOCK;
 const CRITICAL_TIMELOCK = bsctestnet.CRITICAL_TIMELOCK;
 
 export const LIQUIDATOR_PROXY_ADMIN = "0x1469AeB2768931f979a1c957692e32Aa802dd55a";
-export const LIQUIDATION_MANAGER = "0xA0Eef73F94DB337F08f34F9013bCAF8D392289A5";
+export const LIQUIDATION_MANAGER = "0x03CF41c8777A4e359147309F74a53c8b6b4c6969";
 export const NEW_COMPTROLLER_LENS = "0x9D542132fa552B6b416944501bF0D689286E1535";
 export const NEW_DIAMOND = "0xe492CCD207760fE4Dfa9B83Fd1590632dDE33BAB";
 export const NEW_LIQUIDATOR_IMPL = "0xbC89aA9ab926b8491CB7E613A56A13A14BCfa8bc";
@@ -86,7 +86,7 @@ const grantAccessControl = () => {
 export const vip580 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-580 Liquidation Threshold and Dynamic Liquidation Improvements",
+    title: "VIP-580 Liquidation improvements for Core Pool on BNB Chain Testnet",
     description: `#### Summary
 
 This VIP introduces enhanced liquidation mechanisms to the Venus Core Pool on BNB Chain Testnet, implementing the following improvements:
@@ -94,9 +94,9 @@ This VIP introduces enhanced liquidation mechanisms to the Venus Core Pool on BN
 #### Description
 
 - **Liquidation Threshold**: Adds the concept of liquidation threshold to the Core Pool, enabling more granular control over when positions become eligible for liquidation
-- **Dynamic Liquidation Incentive**: Implements dynamic liquidation incentives that adjust based on market conditions and account health factors
-- **Dynamic Close Factor**: Introduces dynamic close factors that vary based on borrower position health
-- **Maximum Liquidation Incentive**: Defines maximum liquidation incentive limits per seized asset to protect borrowers from excessive liquidation penalties
+- **Dynamic Liquidation Incentive**: Implements dynamic liquidation incentives that adjust based on market conditions and users account health factors
+- **Dynamic Close Factor**: Introduces dynamic close factors that vary based on borrowers health factor, allowing for more flexible liquidation amounts
+- **Maximum Liquidation Incentive**: Defines maximum liquidation incentive per seized asset to protect borrowers from excessive liquidation penalties
 
 #### Contract Upgrades
 
@@ -107,17 +107,14 @@ This VIP will perform the following:
 - Upgrade VAI Controller with updated liquidation logic
 - Upgrade Liquidator contract to support dynamic incentives
 - Upgrade all Core Pool vTokens to new implementation
-- Update Comptroller Lens for new data structures
+- Update Comptroller Lens to reflect new liquidation parameters
 - Configure new access controls for liquidation parameters
 
 #### References
 
 - [VIP Pull Request](https://github.com/VenusProtocol/venus-protocol/pull/604)
 - [Community Forum Discussion](https://community.venus.io)
-
-#### Disclaimer
-
-Proposed changes do not guarantee profit and are subject to market risks. Users should conduct independent research before participating.`,
+`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
