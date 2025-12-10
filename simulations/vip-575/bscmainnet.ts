@@ -24,7 +24,7 @@ forking(71031323, async () => {
     it("check exchange rate", async () => {
       const exchangeRate = await vlisUSDContract.exchangeRateStored();
       const lisUSDAmount = exchangeRate.mul(vlisUSD_AMOUNT).div(parseUnits("1", 18));
-      expect(lisUSDAmount).to.be.equal(parseUnits("1015299.578569802594352060", 18));
+      expect(lisUSDAmount).to.be.equal(parseUnits("1015300.593880539429264053", 18));
     });
   });
 
@@ -33,10 +33,10 @@ forking(71031323, async () => {
   describe("Post-VIP behavior", async () => {
     it("check vlisUSD balance", async () => {
       let balance = await vlisUSDContract.balanceOf(bscmainnet.NORMAL_TIMELOCK);
-      expect(balance).to.be.equal(parseUnits("0.99999999", 8));
+      expect(balance).to.be.equal(parseUnits("0", 8));
 
       balance = await vlisUSDContract.balanceOf(RECEIVER_ADDRESS);
-      expect(balance).to.be.equal(parseUnits("999989", 8));
+      expect(balance).to.be.equal(parseUnits("999989.99999999", 8));
     });
   });
 });

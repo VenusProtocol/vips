@@ -4,7 +4,7 @@ import { makeProposal } from "src/utils";
 
 export const vlisUSD = "0x689E0daB47Ab16bcae87Ec18491692BF621Dc6Ab";
 export const RECEIVER_ADDRESS = "0x85CE862C5BB61938FFcc97DA4A80C8aaE43C6A27";
-export const vlisUSD_AMOUNT = parseUnits("999989", 8);
+export const vlisUSD_AMOUNT = parseUnits("999989.99999999", 8);
 
 export const vip575 = async () => {
   const meta: ProposalMeta = {
