@@ -4,12 +4,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
 import { forking, testVip } from "../../src/vip-framework";
-import vip572Addendum, {
+import vip778Addendum, {
   BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION,
   BSCTESTNET_VPLANET_BEACON,
   BSCTESTNET_VSLIS_BEACON,
   BSCTESTNET_VTOKEN_BEACON,
-} from "../../vips/vip-572/bsctestnet-addendum";
+} from "../../vips/vip-778/bsctestnet-addendum";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import VTOKEN_ABI from "./abi/vtoken.json";
@@ -42,7 +42,7 @@ forking(77292356, async () => {
     });
   });
 
-  testVip("VIP-572 Addendum", await vip572Addendum(), {});
+  testVip("VIP-778 Addendum", await vip778Addendum(), {});
 
   describe("Post-VIP behavior", async () => {
     it("should have new vToken implementation", async () => {
