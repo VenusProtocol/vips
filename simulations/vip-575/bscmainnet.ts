@@ -5,18 +5,17 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { LEVERAGE_STRATEGIES_MANAGER, UNITROLLER, vip575 } from "../../vips/vip-575/bscmainnet";
+import { LEVERAGE_STRATEGIES_MANAGER, SWAP_HELPER, UNITROLLER, vip575 } from "../../vips/vip-575/bscmainnet";
 import COMPTROLLER_ABI from "./abi/FlashLoanFacet.json";
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "./abi/LeverageStrategiesManager.json";
+import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
-const SWAP_HELPER = "0xe1a3b4189F56Cf38747BE79348b8664Ef18cCFd1";
-
-forking(69761773, async () => {
+forking(71263393, async () => {
   let comptroller: Contract;
   let leverageStrategiesManager: Contract;
+  let swapHelper: Contract;
 
   before(async () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, UNITROLLER);
@@ -24,6 +23,7 @@ forking(69761773, async () => {
       LEVERAGE_STRATEGIES_MANAGER_ABI,
       LEVERAGE_STRATEGIES_MANAGER,
     );
+    swapHelper = await ethers.getContractAt(SWAP_HELPER_ABI, SWAP_HELPER);
   });
 
   describe("Pre-VIP behavior", () => {
@@ -35,6 +35,10 @@ forking(69761773, async () => {
       expect(await leverageStrategiesManager.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
+    it("SwapHelper should have NORMAL_TIMELOCK as pending owner", async () => {
+      expect(await swapHelper.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
     it("Comptroller should have flash loans unpaused", async () => {
       expect(await comptroller.flashLoanPaused()).to.equal(false);
     });
@@ -42,10 +46,6 @@ forking(69761773, async () => {
     describe("LeverageStrategiesManager configuration", () => {
       it("should have correct COMPTROLLER", async () => {
         expect(await leverageStrategiesManager.COMPTROLLER()).to.equal(UNITROLLER);
-      });
-
-      it("should have correct protocolShareReserve", async () => {
-        expect(await leverageStrategiesManager.protocolShareReserve()).to.equal(PSR);
       });
 
       it("should have correct swapHelper", async () => {
@@ -71,6 +71,21 @@ forking(69761773, async () => {
 
     it("LeverageStrategiesManager should have zero address as pending owner", async () => {
       expect(await leverageStrategiesManager.pendingOwner()).to.equal(ethers.constants.AddressZero);
+    });
+
+    it("SwapHelper should have NORMAL_TIMELOCK as owner", async () => {
+      expect(await swapHelper.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+    });
+
+    it("SwapHelper should have zero address as pending owner", async () => {
+      expect(await swapHelper.pendingOwner()).to.equal(ethers.constants.AddressZero);
+    });
+
+    describe("SwapHelper configuration", () => {
+      it("should have correct backendSigner", async () => {
+        const backendSigner = await swapHelper.backendSigner();
+        expect(backendSigner).to.not.equal(ethers.constants.AddressZero);
+      });
     });
   });
 });

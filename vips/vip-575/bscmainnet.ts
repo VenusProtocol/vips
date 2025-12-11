@@ -2,7 +2,8 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 export const UNITROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const LEVERAGE_STRATEGIES_MANAGER = "0x3Ee4F1474A1071c5fAC97bd881eabcA2Cf8F6085";
+export const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
+export const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
 
 export const vip575 = () => {
   const meta = {
@@ -10,15 +11,19 @@ export const vip575 = () => {
     title: "VIP-575 [BNB Chain] Whitelist LeverageStrategiesManager for flash loans",
     description: `#### Summary
 
-This VIP whitelists the LeverageStrategiesManager contract for flash loans on BNB Chain mainnet.
+This VIP whitelists the LeverageStrategiesManager contract for flash loans on BNB Chain mainnet and accepts ownership of SwapHelper and LeverageStrategiesManager contracts.
 
 #### Description
 
-This VIP will whitelist the [LeverageStrategiesManager](https://bscscan.com/address/0x3Ee4F1474A1071c5fAC97bd881eabcA2Cf8F6085) contract to enable flash loan functionality for leverage strategies.
+This VIP will:
+- Accept ownership of [SwapHelper](https://bscscan.com/address/0xD79be25aEe798Aa34A9Ba1230003d7499be29A24) contract
+- Accept ownership of [LeverageStrategiesManager](https://bscscan.com/address/0x03F079E809185a669Ca188676D0ADb09cbAd6dC1) contract
+- Whitelist the [LeverageStrategiesManager](https://bscscan.com/address/0x03F079E809185a669Ca188676D0ADb09cbAd6dC1) contract to enable flash loan functionality for leverage strategies
 
 #### Deployed contracts
 
-- [LeverageStrategiesManager](https://bscscan.com/address/0x3Ee4F1474A1071c5fAC97bd881eabcA2Cf8F6085)`,
+- [LeverageStrategiesManager](https://bscscan.com/address/0x03F079E809185a669Ca188676D0ADb09cbAd6dC1)
+- [SwapHelper](https://bscscan.com/address/0xD79be25aEe798Aa34A9Ba1230003d7499be29A24)`,
     forDescription: "Execute",
     againstDescription: "Do not execute",
     abstainDescription: "Abstain",
@@ -26,6 +31,11 @@ This VIP will whitelist the [LeverageStrategiesManager](https://bscscan.com/addr
 
   return makeProposal(
     [
+      {
+        target: SWAP_HELPER,
+        signature: "acceptOwnership()",
+        params: [],
+      },
       {
         target: LEVERAGE_STRATEGIES_MANAGER,
         signature: "acceptOwnership()",
