@@ -1,11 +1,11 @@
 import { BigNumber } from "ethers";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 
+import arbitrumoneData from "../../simulations/vip-780/utils/marketData_arbitrumone.json";
 import bscMainnetData from "../../simulations/vip-780/utils/marketData_bscmainnet.json";
 import ethereumData from "../../simulations/vip-780/utils/marketData_ethereum.json";
-import arbitrumoneData from "../../simulations/vip-780/utils/marketData_arbitrumone.json";
 
 interface Market {
   name: string;
@@ -60,10 +60,10 @@ const generateRewardTokenTransferCommands = (
   dstChainId?: LzChainId,
 ) => {
   const commands = [];
-  
+
   // Filter reward distributors that have balance > 0
   const distributorsWithBalance = rewardDistributors.filter(rd => BigNumber.from(rd.balance).gt(0));
-  
+
   for (const distributor of distributorsWithBalance) {
     commands.push({
       target: distributor.address,
@@ -72,18 +72,14 @@ const generateRewardTokenTransferCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   return commands;
 };
 
 // Helper function to generate deprecation commands for a pool
-const generatePoolDeprecationCommands = (
-  comptroller: string,
-  markets: Market[],
-  dstChainId?: LzChainId,
-) => {
+const generatePoolDeprecationCommands = (comptroller: string, markets: Market[], dstChainId?: LzChainId) => {
   const commands = [];
-  
+
   // Filter markets that need MINT paused (only those not already paused)
   const marketsNeedingMintPause = markets.filter(m => !m.isMintActionPaused);
   if (marketsNeedingMintPause.length > 0) {
@@ -94,7 +90,7 @@ const generatePoolDeprecationCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   // Filter markets that need BORROW paused (only those not already paused)
   const marketsNeedingBorrowPause = markets.filter(m => !m.isBorrowActionPaused);
   if (marketsNeedingBorrowPause.length > 0) {
@@ -105,7 +101,7 @@ const generatePoolDeprecationCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   // Filter markets that need supply cap set to 0 (skip if already 0)
   const marketsNeedingSupplyCapZero = markets.filter(m => m.supplyCap !== "0");
   if (marketsNeedingSupplyCapZero.length > 0) {
@@ -116,7 +112,7 @@ const generatePoolDeprecationCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   // Filter markets that need borrow cap set to 0 (skip if already 0)
   const marketsNeedingBorrowCapZero = markets.filter(m => m.borrowCap !== "0");
   if (marketsNeedingBorrowCapZero.length > 0) {
@@ -127,7 +123,7 @@ const generatePoolDeprecationCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   // Filter markets that need collateral factor set to 0 (skip if already 0)
   const marketsNeedingCFZero = markets.filter(m => m.collateralFactor !== "0");
   for (const market of marketsNeedingCFZero) {
@@ -138,7 +134,7 @@ const generatePoolDeprecationCommands = (
       ...(dstChainId && { dstChainId }),
     });
   }
-  
+
   return commands;
 };
 
@@ -201,19 +197,33 @@ We applied the following security procedures for this upgrade:
   // Generate commands for BNB Chain Isolated Pools
   for (const pool of ADDRESS_DATA.bscmainnet.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets));
-    commands.push(...generateRewardTokenTransferCommands(pool.rewardDistributor, NETWORK_ADDRESSES.bscmainnet.VTREASURY));
+    commands.push(
+      ...generateRewardTokenTransferCommands(pool.rewardDistributor, NETWORK_ADDRESSES.bscmainnet.VTREASURY),
+    );
   }
 
   // Generate commands for Ethereum Isolated Pools
   for (const pool of ADDRESS_DATA.ethereum.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.ethereum));
-    commands.push(...generateRewardTokenTransferCommands(pool.rewardDistributor, NETWORK_ADDRESSES.ethereum.VTREASURY, LzChainId.ethereum));
+    commands.push(
+      ...generateRewardTokenTransferCommands(
+        pool.rewardDistributor,
+        NETWORK_ADDRESSES.ethereum.VTREASURY,
+        LzChainId.ethereum,
+      ),
+    );
   }
 
   // Generate commands for Arbitrum One Isolated Pools
   for (const pool of ADDRESS_DATA.arbitrumone.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.arbitrumone));
-    commands.push(...generateRewardTokenTransferCommands(pool.rewardDistributor, NETWORK_ADDRESSES.arbitrumone.VTREASURY, LzChainId.arbitrumone));
+    commands.push(
+      ...generateRewardTokenTransferCommands(
+        pool.rewardDistributor,
+        NETWORK_ADDRESSES.arbitrumone.VTREASURY,
+        LzChainId.arbitrumone,
+      ),
+    );
   }
 
   return makeProposal(commands, meta, ProposalType.REGULAR);

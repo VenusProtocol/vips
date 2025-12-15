@@ -1,10 +1,11 @@
-import { ethers } from "hardhat";
 import { providers } from "ethers";
 import fs from "fs";
+import { ethers } from "hardhat";
 import path from "path";
+
+import ERC20_ABI from "../abi/ERC20.json";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 import REWARDS_DISTRIBUTOR_ABI from "../abi/rewardsDistributor.json";
-import ERC20_ABI from "../abi/ERC20.json";
 
 // Configuration for different networks with isolated pools
 const networkConfigs: {
@@ -15,12 +16,8 @@ const networkConfigs: {
     { address: "0x1b43ea8622e76627B81665B1eCeBB4867566B963", name: "GameFi" },
     { address: "0xd933909A4a2b7A4638903028f44D1d38ce27c352", name: "LiquidStakedBNB" },
   ],
-  ethereum: [
-    { address: "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3", name: "LiquidStakedETH" },
-  ],
-  arbitrumone: [
-    { address: "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16", name: "LiquidStakedETH" },
-  ],
+  ethereum: [{ address: "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3", name: "LiquidStakedETH" }],
+  arbitrumone: [{ address: "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16", name: "LiquidStakedETH" }],
 };
 
 // Action enum values
@@ -70,7 +67,7 @@ interface NetworkData {
 async function fetchPoolData(
   comptrollerAddress: string,
   poolName: string,
-  provider: providers.Provider
+  provider: providers.Provider,
 ): Promise<PoolData> {
   console.log(`\nFetching data for ${poolName} pool (${comptrollerAddress})...`);
 
@@ -82,17 +79,16 @@ async function fetchPoolData(
   // Fetch reward distributor data
   const rewardDistributorDataList: RewardDistributorData[] = [];
   for (const rdAddress of rewardDistributors) {
-    
     try {
       const rewardsDistributor = new ethers.Contract(rdAddress, REWARDS_DISTRIBUTOR_ABI, provider);
-      
+
       // Get reward token address
       const rewardTokenAddress = await rewardsDistributor.rewardToken();
-      
+
       // Get reward token balance of the distributor
       const rewardToken = new ethers.Contract(rewardTokenAddress, ERC20_ABI, provider);
       const balance = await rewardToken.balanceOf(rdAddress);
-      
+
       rewardDistributorDataList.push({
         address: rdAddress,
         rewardToken: rewardTokenAddress,
@@ -114,7 +110,6 @@ async function fetchPoolData(
   const marketDataList: MarketData[] = [];
 
   for (const marketAddress of markets) {
-
     // Get vToken symbol
     let symbol = "Unknown";
     try {
@@ -160,10 +155,7 @@ async function fetchPoolData(
 /**
  * Main function to fetch market data for given network and comptrollers
  */
-async function fetchMarketData(
-  network: string,
-  comptrollers: { address: string; name: string }[]
-) {
+async function fetchMarketData(network: string, comptrollers: { address: string; name: string }[]) {
   console.log(`\n========================================`);
   console.log(`Fetching market data for ${network}`);
   console.log(`========================================`);
@@ -214,7 +206,7 @@ async function main() {
 if (require.main === module) {
   main()
     .then(() => process.exit(0))
-    .catch((error) => {
+    .catch(error => {
       console.error(error);
       process.exit(1);
     });
