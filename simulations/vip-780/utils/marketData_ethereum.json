@@ -1,0 +1,122 @@
+{
+  "pools": [
+    {
+      "name": "LiquidStakedETH",
+      "comptroller": "0xF522cd0360EF8c2FF48B648d53EA1717Ec0F3Ac3",
+      "rewardDistributor": [
+        {
+          "address": "0x7A91bEd36D96E4e644d3A181c287E0fcf9E9cc98",
+          "rewardToken": "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
+          "balance": "2983982832028474545366"
+        },
+        {
+          "address": "0xe72Aa7BaB160eaa2605964D2379AA56Cb4b9A1BB",
+          "rewardToken": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+          "balance": "31795457217285580"
+        },
+        {
+          "address": "0xDCB0CfA130496c749738Acbe2d6aA06C7C320f06",
+          "rewardToken": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "balance": "127875114"
+        },
+        {
+          "address": "0x1e25CF968f12850003Db17E0Dba32108509C4359",
+          "rewardToken": "0xd3CC9d8f3689B83c91b7B59cAB4946B063EB894A",
+          "balance": "246380560225262489746"
+        }
+      ],
+      "markets": [
+        {
+          "name": "vwstETH_LiquidStakedETH",
+          "address": "0x4a240F0ee138697726C8a3E43eFE6Ac3593432CB",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "20000000000000000000000",
+          "borrowCap": "10000000000000000000000",
+          "collateralFactor": "930000000000000000",
+          "liquidationThreshold": "950000000000000000"
+        },
+        {
+          "name": "vWETH_LiquidStakedETH",
+          "address": "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "20000000000000000000000",
+          "borrowCap": "18000000000000000000000",
+          "collateralFactor": "900000000000000000",
+          "liquidationThreshold": "930000000000000000"
+        },
+        {
+          "name": "vweETH_LiquidStakedETH",
+          "address": "0xb4933AF59868986316Ed37fa865C829Eba2df0C7",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "50000000000000000000000",
+          "borrowCap": "25000000000000000000000",
+          "collateralFactor": "930000000000000000",
+          "liquidationThreshold": "950000000000000000"
+        },
+        {
+          "name": "vPT-weETH-26DEC2024_LiquidStakedETH",
+          "address": "0x76697f8eaeA4bE01C678376aAb97498Ee8f80D5C",
+          "isMintActionPaused": true,
+          "isBorrowActionPaused": true,
+          "supplyCap": "0",
+          "borrowCap": "0",
+          "collateralFactor": "0",
+          "liquidationThreshold": "0"
+        },
+        {
+          "name": "vrsETH_LiquidStakedETH",
+          "address": "0xDB6C345f864883a8F4cae87852Ac342589E76D1B",
+          "isMintActionPaused": true,
+          "isBorrowActionPaused": true,
+          "supplyCap": "0",
+          "borrowCap": "0",
+          "collateralFactor": "0",
+          "liquidationThreshold": "0"
+        },
+        {
+          "name": "vsfrxETH_LiquidStakedETH",
+          "address": "0xF9E9Fe17C00a8B96a8ac20c4E344C8688D7b947E",
+          "isMintActionPaused": true,
+          "isBorrowActionPaused": true,
+          "supplyCap": "10000000000000000000000",
+          "borrowCap": "1000000000000000000000",
+          "collateralFactor": "0",
+          "liquidationThreshold": "930000000000000000"
+        },
+        {
+          "name": "vezETH_LiquidStakedETH",
+          "address": "0xA854D35664c658280fFf27B6eDC6C4195c3229B3",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "14000000000000000000000",
+          "borrowCap": "1400000000000000000000",
+          "collateralFactor": "800000000000000000",
+          "liquidationThreshold": "850000000000000000"
+        },
+        {
+          "name": "vweETHs_LiquidStakedETH",
+          "address": "0xEF26C64bC06A8dE4CA5D31f119835f9A1d9433b9",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": true,
+          "supplyCap": "180000000000000000000",
+          "borrowCap": "0",
+          "collateralFactor": "800000000000000000",
+          "liquidationThreshold": "850000000000000000"
+        },
+        {
+          "name": "vpufETH_LiquidStakedETH",
+          "address": "0xE0ee5dDeBFe0abe0a4Af50299D68b74Cec31668e",
+          "isMintActionPaused": false,
+          "isBorrowActionPaused": false,
+          "supplyCap": "3000000000000000000000",
+          "borrowCap": "600000000000000000000",
+          "collateralFactor": "800000000000000000",
+          "liquidationThreshold": "850000000000000000"
+        }
+      ]
+    }
+  ]
+}
