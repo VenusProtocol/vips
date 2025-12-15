@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -16,12 +14,19 @@ interface Market {
   borrowCap: string;
   collateralFactor: string;
   liquidationThreshold: string;
+  rewardSpeeds?: {
+    [distributorAddress: string]: {
+      supplySpeed: string;
+      borrowSpeed: string;
+    };
+  };
 }
 
 interface RewardDistributor {
   address: string;
   rewardToken: string;
   balance: string;
+  marketsWithNonZeroSpeeds?: string[];
 }
 
 interface Pool {
@@ -53,22 +58,25 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-// Helper function to generate commands for transferring reward tokens to treasury
-const generateRewardTokenTransferCommands = (
-  rewardDistributors: RewardDistributor[],
-  treasury: string,
-  dstChainId?: LzChainId,
-) => {
+// Helper function to generate commands for setting reward token speeds to zero
+const generateSetRewardSpeedsToZeroCommands = (rewardDistributors: RewardDistributor[], dstChainId?: LzChainId) => {
   const commands = [];
 
-  // Filter reward distributors that have balance > 0
-  const distributorsWithBalance = rewardDistributors.filter(rd => BigNumber.from(rd.balance).gt(0));
+  for (const distributor of rewardDistributors) {
+    // Skip if no markets have non-zero speeds for this distributor
+    if (!distributor.marketsWithNonZeroSpeeds || distributor.marketsWithNonZeroSpeeds.length === 0) {
+      continue;
+    }
 
-  for (const distributor of distributorsWithBalance) {
+    // Only set speeds to zero for markets that currently have non-zero speeds
+    const marketAddresses = distributor.marketsWithNonZeroSpeeds;
+    const supplySpeeds = marketAddresses.map(() => 0);
+    const borrowSpeeds = marketAddresses.map(() => 0);
+
     commands.push({
       target: distributor.address,
-      signature: "grantRewardToken(address,uint256)",
-      params: [treasury, distributor.balance],
+      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+      params: [marketAddresses, supplySpeeds, borrowSpeeds],
       ...(dstChainId && { dstChainId }),
     });
   }
@@ -169,7 +177,7 @@ For each market, the VIP will:
 3. Set collateral factor to 0 (liquidation thresholds will remain unchanged to protect existing positions)
 
 Additionally, for each pool:
-4. Transfer all remaining reward tokens from RewardsDistributor contracts to the respective network Treasury
+4. Set reward token supply and borrow speeds to 0 for all markets in the RewardsDistributor contracts
 
 These actions will effectively deprecate the markets while allowing users to:
 - Repay their borrows
@@ -197,33 +205,19 @@ We applied the following security procedures for this upgrade:
   // Generate commands for BNB Chain Isolated Pools
   for (const pool of ADDRESS_DATA.bscmainnet.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets));
-    commands.push(
-      ...generateRewardTokenTransferCommands(pool.rewardDistributor, NETWORK_ADDRESSES.bscmainnet.VTREASURY),
-    );
+    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor));
   }
 
   // Generate commands for Ethereum Isolated Pools
   for (const pool of ADDRESS_DATA.ethereum.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.ethereum));
-    commands.push(
-      ...generateRewardTokenTransferCommands(
-        pool.rewardDistributor,
-        NETWORK_ADDRESSES.ethereum.VTREASURY,
-        LzChainId.ethereum,
-      ),
-    );
+    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor, LzChainId.ethereum));
   }
 
   // Generate commands for Arbitrum One Isolated Pools
   for (const pool of ADDRESS_DATA.arbitrumone.pools) {
     commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.arbitrumone));
-    commands.push(
-      ...generateRewardTokenTransferCommands(
-        pool.rewardDistributor,
-        NETWORK_ADDRESSES.arbitrumone.VTREASURY,
-        LzChainId.arbitrumone,
-      ),
-    );
+    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor, LzChainId.arbitrumone));
   }
 
   return makeProposal(commands, meta, ProposalType.REGULAR);

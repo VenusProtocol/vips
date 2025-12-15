@@ -1,24 +1,18 @@
+import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
+import { Contract, Wallet } from "ethers";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip780, { ADDRESS_DATA, Actions } from "../../vips/vip-780/bscmainnet";
-import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 
 const provider = ethers.provider;
 const arbitrumPools = ADDRESS_DATA.arbitrumone.pools;
-const VTREASURY = NETWORK_ADDRESSES.arbitrumone.VTREASURY;
 
 forking(409487867, async () => {
-  // Store pre-VIP balances for reward distributors and treasury per token
-  const preVipRewardBalances: { [key: string]: { distributorBalance: BigNumber; treasuryBalance: BigNumber } } = {};
-  const preTreasuryBalancePerToken: { [token: string]: BigNumber } = {};
-
   describe("Pre-VIP behavior", async () => {
     for (const pool of arbitrumPools) {
       describe(`${pool.name} Pool`, () => {
@@ -66,29 +60,6 @@ forking(409487867, async () => {
         });
       });
     }
-
-    it("Store reward token balances before VIP", async () => {
-      for (const pool of arbitrumPools) {
-        for (const rd of pool.rewardDistributor) {
-          const rewardToken = new ethers.Contract(rd.rewardToken, ERC20_ABI, provider);
-          const distributorBalance = await rewardToken.balanceOf(rd.address);
-
-          preVipRewardBalances[rd.address] = {
-            distributorBalance,
-            treasuryBalance: BigNumber.from(0), // Not used
-          };
-
-          // Store treasury balance per token (only once per unique token)
-          if (!preTreasuryBalancePerToken[rd.rewardToken]) {
-            const treasuryBalance = await rewardToken.balanceOf(VTREASURY);
-            preTreasuryBalancePerToken[rd.rewardToken] = treasuryBalance;
-          }
-
-          // Verify data matches current state
-          expect(distributorBalance.toString()).to.equal(rd.balance);
-        }
-      }
-    });
   });
 
   testForkedNetworkVipCommands("VIP-780 Arbitrum One", await vip780(), {
@@ -102,9 +73,26 @@ forking(409487867, async () => {
       const marketsNeedingBorrowCapZero = allArbitrumMarkets.filter(m => m.borrowCap !== "0").length;
       const marketsNeedingCFZero = allArbitrumMarkets.filter(m => m.collateralFactor !== "0").length;
 
-      // Count reward distributors with balance > 0
-      const allRewardDistributors = arbitrumPools.flatMap(pool => pool.rewardDistributor);
-      const distributorsWithBalance = allRewardDistributors.filter(rd => BigNumber.from(rd.balance).gt(0)).length;
+      // Count total reward speed update events only for markets with non-zero speeds
+      // Need to count supply and borrow events separately as some markets may have only one set
+      let totalSupplySpeedUpdates = 0;
+      let totalBorrowSpeedUpdates = 0;
+
+      for (const pool of arbitrumPools) {
+        for (const rd of pool.rewardDistributor) {
+          for (const market of pool.markets) {
+            const rewardSpeed = market.rewardSpeeds?.[rd.address];
+            if (rewardSpeed) {
+              if (rewardSpeed.supplySpeed !== "0") {
+                totalSupplySpeedUpdates++;
+              }
+              if (rewardSpeed.borrowSpeed !== "0") {
+                totalBorrowSpeedUpdates++;
+              }
+            }
+          }
+        }
+      }
 
       // ActionPausedMarket events: one for each market needing MINT pause + one for each market needing BORROW pause
       const totalActionPausedEvents = marketsNeedingMintPause + marketsNeedingBorrowPause;
@@ -112,13 +100,21 @@ forking(409487867, async () => {
       await expectEvents(
         txResponse,
         [COMPTROLLER_ABI, REWARDS_DISTRIBUTOR_ABI],
-        ["NewSupplyCap", "NewBorrowCap", "ActionPausedMarket", "NewCollateralFactor", "RewardTokenGranted"],
+        [
+          "NewSupplyCap",
+          "NewBorrowCap",
+          "ActionPausedMarket",
+          "NewCollateralFactor",
+          "RewardTokenSupplySpeedUpdated",
+          "RewardTokenBorrowSpeedUpdated",
+        ],
         [
           marketsNeedingSupplyCapZero,
           marketsNeedingBorrowCapZero,
           totalActionPausedEvents,
           marketsNeedingCFZero,
-          distributorsWithBalance,
+          totalSupplySpeedUpdates, // RewardTokenSupplySpeedUpdated events
+          totalBorrowSpeedUpdates, // RewardTokenBorrowSpeedUpdated events
         ],
       );
     },
@@ -176,48 +172,46 @@ forking(409487867, async () => {
       });
     }
 
-    it("Check reward distributors have 0 balance after VIP", async () => {
+    it("Check reward speeds are set to zero for all markets", async () => {
       for (const pool of arbitrumPools) {
         for (const rd of pool.rewardDistributor) {
-          const expectedTransfer = BigNumber.from(rd.balance);
-          if (expectedTransfer.gt(0)) {
-            const rewardToken = new ethers.Contract(rd.rewardToken, ERC20_ABI, provider);
-            const distributorBalanceAfter = await rewardToken.balanceOf(rd.address);
+          const rewardsDistributor = new ethers.Contract(rd.address, REWARDS_DISTRIBUTOR_ABI, provider);
 
-            // Distributor should have 0 balance after transfer
-            expect(distributorBalanceAfter).to.equal(0, `Distributor ${rd.address} should have 0 balance`);
+          for (const market of pool.markets) {
+            const supplySpeed = await rewardsDistributor.rewardTokenSupplySpeeds(market.address);
+            const borrowSpeed = await rewardsDistributor.rewardTokenBorrowSpeeds(market.address);
+
+            expect(supplySpeed).to.equal(0, `Supply speed should be 0 for ${market.name} in ${pool.name}`);
+            expect(borrowSpeed).to.equal(0, `Borrow speed should be 0 for ${market.name} in ${pool.name}`);
           }
         }
       }
     });
 
-    it("Check Treasury received all reward tokens", async () => {
-      // Group by reward token to handle multiple distributors with same token
-      const rewardTokenTotals: { [token: string]: BigNumber } = {};
+    it("Users should be able to claim rewards", async () => {
+      const holder = "0x8e6973e8b89adf1e16e5DB628ff7F84ef92c7039";
 
-      for (const pool of arbitrumPools) {
-        for (const rd of pool.rewardDistributor) {
-          const expectedTransfer = BigNumber.from(rd.balance);
-          if (expectedTransfer.gt(0)) {
-            if (!rewardTokenTotals[rd.rewardToken]) {
-              rewardTokenTotals[rd.rewardToken] = BigNumber.from(0);
-            }
-            rewardTokenTotals[rd.rewardToken] = rewardTokenTotals[rd.rewardToken].add(expectedTransfer);
-          }
-        }
+      const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+      if (!privateKey) {
+        throw new Error("DEPLOYER_PRIVATE_KEY not set in environment");
       }
 
-      // Check treasury received the total expected amount for each reward token
-      for (const [tokenAddress, expectedTotal] of Object.entries(rewardTokenTotals)) {
-        const rewardToken = new ethers.Contract(tokenAddress, ERC20_ABI, provider);
-        const treasuryBalanceAfter = await rewardToken.balanceOf(VTREASURY);
-        const actualIncrease = treasuryBalanceAfter.sub(preTreasuryBalancePerToken[tokenAddress]);
+      const signer = new Wallet(privateKey, provider);
 
-        expect(actualIncrease).to.equal(
-          expectedTotal,
-          `Treasury should have received ${expectedTotal.toString()} tokens for reward token ${tokenAddress}`,
-        );
-      }
+      // Fund the signer with ETH for gas
+      await setBalance(signer.address, ethers.utils.parseEther("10"));
+
+      const distributor = await ethers.getContractAt(
+        REWARDS_DISTRIBUTOR_ABI,
+        "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D",
+        signer,
+      );
+
+      const accruedBefore = await distributor.rewardTokenAccrued(holder);
+      await distributor["claimRewardToken(address)"](holder);
+      const accruedAfter = await distributor.rewardTokenAccrued(holder);
+
+      expect(accruedAfter).to.be.lessThanOrEqual(accruedBefore);
     });
   });
 });

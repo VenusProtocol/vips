@@ -42,12 +42,19 @@ interface MarketData {
   borrowCap: string;
   collateralFactor: string;
   liquidationThreshold: string;
+  rewardSpeeds?: {
+    [distributorAddress: string]: {
+      supplySpeed: string;
+      borrowSpeed: string;
+    };
+  };
 }
 
 interface RewardDistributorData {
   address: string;
   rewardToken: string;
   balance: string;
+  marketsWithNonZeroSpeeds?: string[]; // List of market addresses with non-zero supply or borrow speeds
 }
 
 interface PoolData {
@@ -76,8 +83,15 @@ async function fetchPoolData(
   // Get reward distributors
   const rewardDistributors = await comptroller.getRewardDistributors();
 
-  // Fetch reward distributor data
+  // Get all markets first
+  const markets = await comptroller.getAllMarkets();
+
+  // Fetch reward distributor data and check speeds for each market
   const rewardDistributorDataList: RewardDistributorData[] = [];
+  const marketRewardSpeeds: {
+    [marketAddress: string]: { [distributorAddress: string]: { supplySpeed: string; borrowSpeed: string } };
+  } = {};
+
   for (const rdAddress of rewardDistributors) {
     try {
       const rewardsDistributor = new ethers.Contract(rdAddress, REWARDS_DISTRIBUTOR_ABI, provider);
@@ -89,10 +103,37 @@ async function fetchPoolData(
       const rewardToken = new ethers.Contract(rewardTokenAddress, ERC20_ABI, provider);
       const balance = await rewardToken.balanceOf(rdAddress);
 
+      // Check speeds for each market
+      const marketsWithNonZeroSpeeds: string[] = [];
+
+      for (const marketAddress of markets) {
+        try {
+          const supplySpeed = await rewardsDistributor.rewardTokenSupplySpeeds(marketAddress);
+          const borrowSpeed = await rewardsDistributor.rewardTokenBorrowSpeeds(marketAddress);
+
+          // Store the speeds for this market and distributor
+          if (!marketRewardSpeeds[marketAddress]) {
+            marketRewardSpeeds[marketAddress] = {};
+          }
+          marketRewardSpeeds[marketAddress][rdAddress] = {
+            supplySpeed: supplySpeed.toString(),
+            borrowSpeed: borrowSpeed.toString(),
+          };
+
+          // If either speed is non-zero, add to the list
+          if (!supplySpeed.isZero() || !borrowSpeed.isZero()) {
+            marketsWithNonZeroSpeeds.push(marketAddress);
+          }
+        } catch (e) {
+          console.warn(`    Warning: Could not fetch speeds for market ${marketAddress} in distributor ${rdAddress}`);
+        }
+      }
+
       rewardDistributorDataList.push({
         address: rdAddress,
         rewardToken: rewardTokenAddress,
         balance: balance.toString(),
+        marketsWithNonZeroSpeeds: marketsWithNonZeroSpeeds,
       });
     } catch (e) {
       console.warn(`    Warning: Could not fetch data for reward distributor ${rdAddress}:`, e);
@@ -100,13 +141,12 @@ async function fetchPoolData(
         address: rdAddress,
         rewardToken: "Unknown",
         balance: "0",
+        marketsWithNonZeroSpeeds: [],
       });
     }
   }
 
-  // Get all markets
-  const markets = await comptroller.getAllMarkets();
-
+  // Fetch market data
   const marketDataList: MarketData[] = [];
 
   for (const marketAddress of markets) {
@@ -139,6 +179,7 @@ async function fetchPoolData(
       borrowCap: borrowCap.toString(),
       collateralFactor: marketData.collateralFactorMantissa.toString(),
       liquidationThreshold: marketData.liquidationThresholdMantissa.toString(),
+      rewardSpeeds: marketRewardSpeeds[marketAddress] || {},
     };
 
     marketDataList.push(marketInfo);
