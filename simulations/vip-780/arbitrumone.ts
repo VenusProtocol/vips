@@ -1,6 +1,5 @@
-import { setBalance } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
@@ -190,16 +189,7 @@ forking(409487867, async () => {
 
     it("Users should be able to claim rewards", async () => {
       const holder = "0x8e6973e8b89adf1e16e5DB628ff7F84ef92c7039";
-
-      const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
-      if (!privateKey) {
-        throw new Error("DEPLOYER_PRIVATE_KEY not set in environment");
-      }
-
-      const signer = new Wallet(privateKey, provider);
-
-      // Fund the signer with ETH for gas
-      await setBalance(signer.address, ethers.utils.parseEther("10"));
+      const [signer] = await ethers.getSigners();
 
       const distributor = await ethers.getContractAt(
         REWARDS_DISTRIBUTOR_ABI,
