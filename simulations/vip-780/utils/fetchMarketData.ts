@@ -185,7 +185,7 @@ async function fetchMarketData(
 /**
  * Generates JSON file with the fetched data
  */
-function generateOutputFile(data: NetworkData, outputPath: string, network: string) {
+function generateOutputFile(data: NetworkData, outputPath: string) {
   // Write JSON file
   fs.writeFileSync(outputPath, JSON.stringify(data, null, 2), "utf-8");
   console.log(`\n✅ Output JSON file generated: ${outputPath}`);
@@ -207,7 +207,7 @@ async function main() {
 
   // Generate output file
   const outputPath = path.join(__dirname, `marketData_${network}.json`);
-  generateOutputFile(networkData, outputPath, network);
+  generateOutputFile(networkData, outputPath);
 }
 
 // Allow the script to be run directly or imported
