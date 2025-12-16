@@ -4,8 +4,14 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip780, { ADDRESS_DATA, Actions } from "../../vips/vip-780/bscmainnet";
+import vip780, {
+  ADDRESS_DATA,
+  Actions,
+  PRIME_CONTRACT_ADDRESS,
+  VWETH_MARKET_ADDRESS,
+} from "../../vips/vip-780/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
+import PRIME_ABI from "./abi/prime.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 
 const provider = ethers.provider;
@@ -57,6 +63,14 @@ forking(411152865, async () => {
         });
       });
     }
+
+    it("Check Prime multipliers for vWETH_LiquidStakedETH are greater than zero", async () => {
+      const prime = new ethers.Contract(PRIME_CONTRACT_ADDRESS.arbitrumone, PRIME_ABI, provider);
+      const marketData = await prime.markets(VWETH_MARKET_ADDRESS.arbitrumone);
+
+      expect(marketData.supplyMultiplier).to.be.greaterThan(0);
+      expect(marketData.borrowMultiplier).to.be.greaterThan(0);
+    });
   });
 
   testForkedNetworkVipCommands("VIP-780 Arbitrum One", await vip780(), {
@@ -66,7 +80,7 @@ forking(411152865, async () => {
 
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, REWARDS_DISTRIBUTOR_ABI],
+        [COMPTROLLER_ABI, REWARDS_DISTRIBUTOR_ABI, PRIME_ABI],
         [
           "NewSupplyCap",
           "NewBorrowCap",
@@ -74,6 +88,7 @@ forking(411152865, async () => {
           "NewCollateralFactor",
           "RewardTokenSupplySpeedUpdated",
           "RewardTokenBorrowSpeedUpdated",
+          "MultiplierUpdated",
         ],
         [
           totals.totalSupplyCap,
@@ -82,6 +97,7 @@ forking(411152865, async () => {
           totals.totalCollateralFactor,
           totals.totalSupplySpeed,
           totals.totalBorrowSpeed,
+          1, // One MultiplierUpdated event for vWETH_LiquidStakedETH
         ],
       );
     },
@@ -165,6 +181,14 @@ forking(411152865, async () => {
       const accruedAfter = await distributor.rewardTokenAccrued(holder);
 
       expect(accruedAfter).to.be.lessThanOrEqual(accruedBefore);
+    });
+
+    it("Check Prime multipliers for vWETH_LiquidStakedETH are set to zero", async () => {
+      const prime = new ethers.Contract(PRIME_CONTRACT_ADDRESS.arbitrumone, PRIME_ABI, provider);
+      const marketData = await prime.markets(VWETH_MARKET_ADDRESS.arbitrumone);
+
+      expect(marketData.supplyMultiplier).to.be.equal(0);
+      expect(marketData.borrowMultiplier).to.be.equal(0);
     });
   });
 });

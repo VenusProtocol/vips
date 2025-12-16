@@ -49,6 +49,16 @@ export const ADDRESS_DATA = {
   arbitrumone: arbitrumoneData as NetworkData,
 };
 
+export const PRIME_CONTRACT_ADDRESS = {
+  ethereum: "0x14C4525f47A7f7C984474979c57a2Dccb8EACB39",
+  arbitrumone: "0xFE69720424C954A2da05648a0FAC84f9bf11Ef49",
+};
+
+export const VWETH_MARKET_ADDRESS = {
+  ethereum: "0xc82780Db1257C788F262FBbDA960B3706Dfdcaf2",
+  arbitrumone: "0x39D6d13Ea59548637104E40e729E4aABE27FE106",
+};
+
 export const Actions = {
   MINT: 0,
   REDEEM: 1,
@@ -167,8 +177,9 @@ For each market, the VIP will:
 2. Set supply and borrow caps to 0
 3. Set collateral factor to 0 (liquidation thresholds will remain unchanged to protect existing positions)
 
-Additionally, for each pool:
+Additionally, for each isolated pool:
 4. Set reward token supply and borrow speeds to 0 for all markets in the RewardsDistributor contracts
+5. Set supply and borrow multipliers to 0 for markets present in the Prime contracts.
 
 These actions will effectively deprecate the markets while allowing users to:
 - Repay their borrows
@@ -196,6 +207,22 @@ We applied the following security procedures for this upgrade:
 
       // Arbitrum One commands
       ...ADDRESS_DATA.arbitrumone.pools.flatMap(pool => generatePoolCommands(pool, LzChainId.arbitrumone)),
+
+      // Set Prime multipliers to zero for vWETH_LiquidStakedETH on Ethereum
+      {
+        target: PRIME_CONTRACT_ADDRESS.ethereum,
+        signature: "updateMultipliers(address,uint256,uint256)",
+        params: [VWETH_MARKET_ADDRESS.ethereum, 0, 0],
+        dstChainId: LzChainId.ethereum,
+      },
+
+      // Set Prime multipliers to zero for vWETH_LiquidStakedETH on Arbitrum One
+      {
+        target: PRIME_CONTRACT_ADDRESS.arbitrumone,
+        signature: "updateMultipliers(address,uint256,uint256)",
+        params: [VWETH_MARKET_ADDRESS.arbitrumone, 0, 0],
+        dstChainId: LzChainId.arbitrumone,
+      },
     ],
     meta,
     ProposalType.REGULAR,
