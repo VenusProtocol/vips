@@ -14,12 +14,6 @@ interface Market {
   borrowCap: string;
   collateralFactor: string;
   liquidationThreshold: string;
-  rewardSpeeds?: {
-    [distributorAddress: string]: {
-      supplySpeed: string;
-      borrowSpeed: string;
-    };
-  };
 }
 
 interface RewardDistributor {
@@ -34,10 +28,28 @@ interface Pool {
   comptroller: string;
   rewardDistributor: RewardDistributor[];
   markets: Market[];
+  totals?: {
+    totalMintPaused: number;
+    totalBorrowPaused: number;
+    totalSupplyCap: number;
+    totalBorrowCap: number;
+    totalCollateralFactor: number;
+    totalSupplySpeed: number;
+    totalBorrowSpeed: number;
+  };
 }
 
 interface NetworkData {
   pools: Pool[];
+  totals?: {
+    totalMintPaused: number;
+    totalBorrowPaused: number;
+    totalSupplyCap: number;
+    totalBorrowCap: number;
+    totalCollateralFactor: number;
+    totalSupplySpeed: number;
+    totalBorrowSpeed: number;
+  };
 }
 
 export const ADDRESS_DATA = {
@@ -58,37 +70,12 @@ export const Actions = {
   EXIT_MARKET: 8,
 };
 
-// Helper function to generate commands for setting reward token speeds to zero
-const generateSetRewardSpeedsToZeroCommands = (rewardDistributors: RewardDistributor[], dstChainId?: LzChainId) => {
+// Helper function to generate all deprecation commands for a pool
+const generatePoolCommands = (pool: Pool, dstChainId?: LzChainId) => {
   const commands = [];
+  const { comptroller, markets, rewardDistributor } = pool;
 
-  for (const distributor of rewardDistributors) {
-    // Skip if no markets have non-zero speeds for this distributor
-    if (!distributor.marketsWithNonZeroSpeeds || distributor.marketsWithNonZeroSpeeds.length === 0) {
-      continue;
-    }
-
-    // Only set speeds to zero for markets that currently have non-zero speeds
-    const marketAddresses = distributor.marketsWithNonZeroSpeeds;
-    const supplySpeeds = marketAddresses.map(() => 0);
-    const borrowSpeeds = marketAddresses.map(() => 0);
-
-    commands.push({
-      target: distributor.address,
-      signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
-      params: [marketAddresses, supplySpeeds, borrowSpeeds],
-      ...(dstChainId && { dstChainId }),
-    });
-  }
-
-  return commands;
-};
-
-// Helper function to generate deprecation commands for a pool
-const generatePoolDeprecationCommands = (comptroller: string, markets: Market[], dstChainId?: LzChainId) => {
-  const commands = [];
-
-  // Filter markets that need MINT paused (only those not already paused)
+  // Pause MINT action for markets that aren't already paused
   const marketsNeedingMintPause = markets.filter(m => !m.isMintActionPaused);
   if (marketsNeedingMintPause.length > 0) {
     commands.push({
@@ -99,7 +86,7 @@ const generatePoolDeprecationCommands = (comptroller: string, markets: Market[],
     });
   }
 
-  // Filter markets that need BORROW paused (only those not already paused)
+  // Pause BORROW action for markets that aren't already paused
   const marketsNeedingBorrowPause = markets.filter(m => !m.isBorrowActionPaused);
   if (marketsNeedingBorrowPause.length > 0) {
     commands.push({
@@ -110,7 +97,7 @@ const generatePoolDeprecationCommands = (comptroller: string, markets: Market[],
     });
   }
 
-  // Filter markets that need supply cap set to 0 (skip if already 0)
+  // Set supply caps to 0 for markets with non-zero caps
   const marketsNeedingSupplyCapZero = markets.filter(m => m.supplyCap !== "0");
   if (marketsNeedingSupplyCapZero.length > 0) {
     commands.push({
@@ -121,7 +108,7 @@ const generatePoolDeprecationCommands = (comptroller: string, markets: Market[],
     });
   }
 
-  // Filter markets that need borrow cap set to 0 (skip if already 0)
+  // Set borrow caps to 0 for markets with non-zero caps
   const marketsNeedingBorrowCapZero = markets.filter(m => m.borrowCap !== "0");
   if (marketsNeedingBorrowCapZero.length > 0) {
     commands.push({
@@ -132,7 +119,7 @@ const generatePoolDeprecationCommands = (comptroller: string, markets: Market[],
     });
   }
 
-  // Filter markets that need collateral factor set to 0 (skip if already 0)
+  // Set collateral factor to 0 for markets with non-zero CF (preserving liquidation threshold)
   const marketsNeedingCFZero = markets.filter(m => m.collateralFactor !== "0");
   for (const market of marketsNeedingCFZero) {
     commands.push({
@@ -141,6 +128,19 @@ const generatePoolDeprecationCommands = (comptroller: string, markets: Market[],
       params: [market.address, 0, market.liquidationThreshold],
       ...(dstChainId && { dstChainId }),
     });
+  }
+
+  // Set reward token speeds to 0 for markets with active rewards
+  for (const distributor of rewardDistributor) {
+    if (distributor.marketsWithNonZeroSpeeds && distributor.marketsWithNonZeroSpeeds.length > 0) {
+      const marketAddresses = distributor.marketsWithNonZeroSpeeds;
+      commands.push({
+        target: distributor.address,
+        signature: "setRewardTokenSpeeds(address[],uint256[],uint256[])",
+        params: [marketAddresses, marketAddresses.map(() => 0), marketAddresses.map(() => 0)],
+        ...(dstChainId && { dstChainId }),
+      });
+    }
   }
 
   return commands;
@@ -200,27 +200,20 @@ We applied the following security procedures for this upgrade:
     abstainDescription: "Indifferent to execution",
   };
 
-  const commands = [];
+  return makeProposal(
+    [
+      // BNB Chain commands
+      ...ADDRESS_DATA.bscmainnet.pools.flatMap(pool => generatePoolCommands(pool)),
 
-  // Generate commands for BNB Chain Isolated Pools
-  for (const pool of ADDRESS_DATA.bscmainnet.pools) {
-    commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets));
-    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor));
-  }
+      // Ethereum commands
+      ...ADDRESS_DATA.ethereum.pools.flatMap(pool => generatePoolCommands(pool, LzChainId.ethereum)),
 
-  // Generate commands for Ethereum Isolated Pools
-  for (const pool of ADDRESS_DATA.ethereum.pools) {
-    commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.ethereum));
-    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor, LzChainId.ethereum));
-  }
-
-  // Generate commands for Arbitrum One Isolated Pools
-  for (const pool of ADDRESS_DATA.arbitrumone.pools) {
-    commands.push(...generatePoolDeprecationCommands(pool.comptroller, pool.markets, LzChainId.arbitrumone));
-    commands.push(...generateSetRewardSpeedsToZeroCommands(pool.rewardDistributor, LzChainId.arbitrumone));
-  }
-
-  return makeProposal(commands, meta, ProposalType.REGULAR);
+      // Arbitrum One commands
+      ...ADDRESS_DATA.arbitrumone.pools.flatMap(pool => generatePoolCommands(pool, LzChainId.arbitrumone)),
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
 };
 
 export default vip780;

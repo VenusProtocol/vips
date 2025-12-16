@@ -42,12 +42,6 @@ interface MarketData {
   borrowCap: string;
   collateralFactor: string;
   liquidationThreshold: string;
-  rewardSpeeds?: {
-    [distributorAddress: string]: {
-      supplySpeed: string;
-      borrowSpeed: string;
-    };
-  };
 }
 
 interface RewardDistributorData {
@@ -62,10 +56,28 @@ interface PoolData {
   comptroller: string;
   rewardDistributor: RewardDistributorData[];
   markets: MarketData[];
+  totals?: {
+    totalMintPaused: number; // Markets needing MINT pause
+    totalBorrowPaused: number; // Markets needing BORROW pause
+    totalSupplyCap: number; // Markets needing supply cap set to 0
+    totalBorrowCap: number; // Markets needing borrow cap set to 0
+    totalCollateralFactor: number; // Markets needing CF set to 0
+    totalSupplySpeed: number; // Total supply speed events across all distributors
+    totalBorrowSpeed: number; // Total borrow speed events across all distributors
+  };
 }
 
 interface NetworkData {
   pools: PoolData[];
+  totals?: {
+    totalMintPaused: number;
+    totalBorrowPaused: number;
+    totalSupplyCap: number;
+    totalBorrowCap: number;
+    totalCollateralFactor: number;
+    totalSupplySpeed: number;
+    totalBorrowSpeed: number;
+  };
 }
 
 /**
@@ -170,6 +182,19 @@ async function fetchPoolData(
     const supplyCap = await comptroller.supplyCaps(marketAddress);
     const borrowCap = await comptroller.borrowCaps(marketAddress);
 
+    // Only include markets that need at least one change
+    const needsMintPause = !isMintPaused;
+    const needsBorrowPause = !isBorrowPaused;
+    const needsSupplyCapZero = supplyCap.toString() !== "0";
+    const needsBorrowCapZero = borrowCap.toString() !== "0";
+    const needsCFZero = marketData.collateralFactorMantissa.toString() !== "0";
+
+    // Skip markets that are already fully deprecated
+    if (!needsMintPause && !needsBorrowPause && !needsSupplyCapZero && !needsBorrowCapZero && !needsCFZero) {
+      console.log(`    Skipping ${symbol} - already fully deprecated`);
+      continue;
+    }
+
     const marketInfo: MarketData = {
       name: symbol,
       address: marketAddress,
@@ -179,10 +204,31 @@ async function fetchPoolData(
       borrowCap: borrowCap.toString(),
       collateralFactor: marketData.collateralFactorMantissa.toString(),
       liquidationThreshold: marketData.liquidationThresholdMantissa.toString(),
-      rewardSpeeds: marketRewardSpeeds[marketAddress] || {},
     };
 
     marketDataList.push(marketInfo);
+  }
+
+  // Calculate totals for event counting
+  const totalMintPaused = marketDataList.filter(m => !m.isMintActionPaused).length;
+  const totalBorrowPaused = marketDataList.filter(m => !m.isBorrowActionPaused).length;
+  const totalSupplyCap = marketDataList.filter(m => m.supplyCap !== "0").length;
+  const totalBorrowCap = marketDataList.filter(m => m.borrowCap !== "0").length;
+  const totalCollateralFactor = marketDataList.filter(m => m.collateralFactor !== "0").length;
+
+  // Count total supply and borrow speed events across all distributors
+  let totalSupplySpeed = 0;
+  let totalBorrowSpeed = 0;
+  for (const rd of rewardDistributorDataList) {
+    if (rd.marketsWithNonZeroSpeeds) {
+      for (const marketAddress of rd.marketsWithNonZeroSpeeds) {
+        const speeds = marketRewardSpeeds[marketAddress]?.[rd.address];
+        if (speeds) {
+          if (speeds.supplySpeed !== "0") totalSupplySpeed++;
+          if (speeds.borrowSpeed !== "0") totalBorrowSpeed++;
+        }
+      }
+    }
   }
 
   return {
@@ -190,6 +236,15 @@ async function fetchPoolData(
     comptroller: comptrollerAddress,
     rewardDistributor: rewardDistributorDataList,
     markets: marketDataList,
+    totals: {
+      totalMintPaused,
+      totalBorrowPaused,
+      totalSupplyCap,
+      totalBorrowCap,
+      totalCollateralFactor,
+      totalSupplySpeed,
+      totalBorrowSpeed,
+    },
   };
 }
 
@@ -210,8 +265,34 @@ async function fetchMarketData(network: string, comptrollers: { address: string;
     pools.push(poolData);
   }
 
+  // Calculate network-level totals by summing all pool totals
+  const totals = pools.reduce(
+    (acc, pool) => {
+      if (pool.totals) {
+        acc.totalMintPaused += pool.totals.totalMintPaused;
+        acc.totalBorrowPaused += pool.totals.totalBorrowPaused;
+        acc.totalSupplyCap += pool.totals.totalSupplyCap;
+        acc.totalBorrowCap += pool.totals.totalBorrowCap;
+        acc.totalCollateralFactor += pool.totals.totalCollateralFactor;
+        acc.totalSupplySpeed += pool.totals.totalSupplySpeed;
+        acc.totalBorrowSpeed += pool.totals.totalBorrowSpeed;
+      }
+      return acc;
+    },
+    {
+      totalMintPaused: 0,
+      totalBorrowPaused: 0,
+      totalSupplyCap: 0,
+      totalBorrowCap: 0,
+      totalCollateralFactor: 0,
+      totalSupplySpeed: 0,
+      totalBorrowSpeed: 0,
+    },
+  );
+
   return {
     pools,
+    totals,
   };
 }
 
@@ -228,6 +309,10 @@ async function main() {
   const network = process.env.HARDHAT_NETWORK || "bscmainnet";
 
   console.log(`Network: ${network}`);
+  const provider = ethers.provider;
+  const blockNumber = await provider.getBlockNumber();
+  console.log(`Current block number: ${blockNumber}`);
+
   const comptrollers = networkConfigs[network];
 
   if (!comptrollers) {

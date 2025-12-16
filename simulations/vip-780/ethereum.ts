@@ -11,7 +11,7 @@ import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
 const provider = ethers.provider;
 const ethereumPools = ADDRESS_DATA.ethereum.pools;
 
-forking(23990011, async () => {
+forking(24023389, async () => {
   describe("Pre-VIP behavior", async () => {
     for (const pool of ethereumPools) {
       describe(`${pool.name} Pool`, () => {
@@ -24,37 +24,35 @@ forking(23990011, async () => {
         it("Check MINT pause state matches data", async () => {
           for (const market of pool.markets) {
             const isPaused = await comptroller.actionPaused(market.address, Actions.MINT);
-            expect(isPaused, `MINT pause state for ${market.name}`).to.be.equal(market.isMintActionPaused);
+            expect(isPaused).to.be.equal(market.isMintActionPaused);
           }
         });
 
         it("Check BORROW pause state matches data", async () => {
           for (const market of pool.markets) {
             const isPaused = await comptroller.actionPaused(market.address, Actions.BORROW);
-            expect(isPaused, `BORROW pause state for ${market.name}`).to.be.equal(market.isBorrowActionPaused);
+            expect(isPaused).to.be.equal(market.isBorrowActionPaused);
           }
         });
 
         it("Check collateral factors match data", async () => {
           for (const market of pool.markets) {
             const marketData = await comptroller.markets(market.address);
-            expect(marketData.collateralFactorMantissa.toString(), `CF for ${market.name}`).to.be.equal(
-              market.collateralFactor,
-            );
+            expect(marketData.collateralFactorMantissa.toString()).to.be.equal(market.collateralFactor);
           }
         });
 
         it("Check supply caps match data", async () => {
           for (const market of pool.markets) {
             const supplyCap = await comptroller.supplyCaps(market.address);
-            expect(supplyCap.toString(), `Supply cap for ${market.name}`).to.be.equal(market.supplyCap);
+            expect(supplyCap.toString()).to.be.equal(market.supplyCap);
           }
         });
 
         it("Check borrow caps match data", async () => {
           for (const market of pool.markets) {
             const borrowCap = await comptroller.borrowCaps(market.address);
-            expect(borrowCap.toString(), `Borrow cap for ${market.name}`).to.be.equal(market.borrowCap);
+            expect(borrowCap.toString()).to.be.equal(market.borrowCap);
           }
         });
       });
@@ -63,38 +61,8 @@ forking(23990011, async () => {
 
   testForkedNetworkVipCommands("VIP-780 Ethereum", await vip780(), {
     callbackAfterExecution: async txResponse => {
-      // Calculate expected event counts based on markets that need changes
-      const allEthereumMarkets = ethereumPools.flatMap(pool => pool.markets);
-
-      const marketsNeedingMintPause = allEthereumMarkets.filter(m => !m.isMintActionPaused).length;
-      const marketsNeedingBorrowPause = allEthereumMarkets.filter(m => !m.isBorrowActionPaused).length;
-      const marketsNeedingSupplyCapZero = allEthereumMarkets.filter(m => m.supplyCap !== "0").length;
-      const marketsNeedingBorrowCapZero = allEthereumMarkets.filter(m => m.borrowCap !== "0").length;
-      const marketsNeedingCFZero = allEthereumMarkets.filter(m => m.collateralFactor !== "0").length;
-
-      // Count total reward speed update events only for markets with non-zero speeds
-      // Need to count supply and borrow events separately as some markets may have only one set
-      let totalSupplySpeedUpdates = 0;
-      let totalBorrowSpeedUpdates = 0;
-
-      for (const pool of ethereumPools) {
-        for (const rd of pool.rewardDistributor) {
-          for (const market of pool.markets) {
-            const rewardSpeed = market.rewardSpeeds?.[rd.address];
-            if (rewardSpeed) {
-              if (rewardSpeed.supplySpeed !== "0") {
-                totalSupplySpeedUpdates++;
-              }
-              if (rewardSpeed.borrowSpeed !== "0") {
-                totalBorrowSpeedUpdates++;
-              }
-            }
-          }
-        }
-      }
-
-      // ActionPausedMarket events: one for each market needing MINT pause + one for each market needing BORROW pause
-      const totalActionPausedEvents = marketsNeedingMintPause + marketsNeedingBorrowPause;
+      const totals = ADDRESS_DATA.ethereum.totals!;
+      const totalActionPausedEvents = totals.totalMintPaused + totals.totalBorrowPaused;
 
       await expectEvents(
         txResponse,
@@ -108,12 +76,12 @@ forking(23990011, async () => {
           "RewardTokenBorrowSpeedUpdated",
         ],
         [
-          marketsNeedingSupplyCapZero,
-          marketsNeedingBorrowCapZero,
+          totals.totalSupplyCap,
+          totals.totalBorrowCap,
           totalActionPausedEvents,
-          marketsNeedingCFZero,
-          totalSupplySpeedUpdates, // RewardTokenSupplySpeedUpdated events
-          totalBorrowSpeedUpdates, // RewardTokenBorrowSpeedUpdated events
+          totals.totalCollateralFactor,
+          totals.totalSupplySpeed,
+          totals.totalBorrowSpeed,
         ],
       );
     },
@@ -131,41 +99,36 @@ forking(23990011, async () => {
         it("Check all markets have CF set to zero, LT preserved", async () => {
           for (const market of pool.markets) {
             const marketData = await comptroller.markets(market.address);
-            expect(marketData.collateralFactorMantissa.toString(), `CF should be 0 for ${market.name}`).to.be.equal(
-              "0",
-            );
-            expect(
-              marketData.liquidationThresholdMantissa.toString(),
-              `LT should be preserved for ${market.name}`,
-            ).to.be.equal(market.liquidationThreshold);
+            expect(marketData.collateralFactorMantissa.toString()).to.be.equal("0");
+            expect(marketData.liquidationThresholdMantissa.toString()).to.be.equal(market.liquidationThreshold);
           }
         });
 
         it("Check MINT is paused for markets", async () => {
           for (const market of pool.markets) {
             const mintPaused = await comptroller.actionPaused(market.address, Actions.MINT);
-            expect(mintPaused, `MINT should be paused for ${market.name}`).to.be.true;
+            expect(mintPaused).to.be.true;
           }
         });
 
         it("Check BORROW is paused for markets", async () => {
           for (const market of pool.markets) {
             const borrowPaused = await comptroller.actionPaused(market.address, Actions.BORROW);
-            expect(borrowPaused, `BORROW should be paused for ${market.name}`).to.be.true;
+            expect(borrowPaused).to.be.true;
           }
         });
 
         it("Check supply caps are zero for markets", async () => {
           for (const market of pool.markets) {
             const supplyCap = await comptroller.supplyCaps(market.address);
-            expect(supplyCap, `Supply cap should be zero for ${market.name}`).to.be.equal(0);
+            expect(supplyCap).to.be.equal(0);
           }
         });
 
         it("Check borrow caps are zero for markets", async () => {
           for (const market of pool.markets) {
             const borrowCap = await comptroller.borrowCaps(market.address);
-            expect(borrowCap, `Borrow cap should be zero for ${market.name}`).to.be.equal(0);
+            expect(borrowCap).to.be.equal(0);
           }
         });
       });
@@ -180,8 +143,8 @@ forking(23990011, async () => {
             const supplySpeed = await rewardsDistributor.rewardTokenSupplySpeeds(market.address);
             const borrowSpeed = await rewardsDistributor.rewardTokenBorrowSpeeds(market.address);
 
-            expect(supplySpeed).to.equal(0, `Supply speed should be 0 for ${market.name} in ${pool.name}`);
-            expect(borrowSpeed).to.equal(0, `Borrow speed should be 0 for ${market.name} in ${pool.name}`);
+            expect(supplySpeed).to.equal(0);
+            expect(borrowSpeed).to.equal(0);
           }
         }
       }

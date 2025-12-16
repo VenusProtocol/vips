@@ -20,13 +20,7 @@
           "supplyCap": "8000000000000000000000",
           "borrowCap": "800000000000000000000",
           "collateralFactor": "930000000000000000",
-          "liquidationThreshold": "950000000000000000",
-          "rewardSpeeds": {
-            "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D": {
-              "supplySpeed": "0",
-              "borrowSpeed": "0"
-            }
-          }
+          "liquidationThreshold": "950000000000000000"
         },
         {
           "name": "vweETH_LiquidStakedETH",
@@ -36,13 +30,7 @@
           "supplyCap": "4600000000000000000000",
           "borrowCap": "2300000000000000000000",
           "collateralFactor": "930000000000000000",
-          "liquidationThreshold": "950000000000000000",
-          "rewardSpeeds": {
-            "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D": {
-              "supplySpeed": "0",
-              "borrowSpeed": "0"
-            }
-          }
+          "liquidationThreshold": "950000000000000000"
         },
         {
           "name": "vWETH_LiquidStakedETH",
@@ -52,15 +40,27 @@
           "supplyCap": "14000000000000000000000",
           "borrowCap": "12500000000000000000000",
           "collateralFactor": "0",
-          "liquidationThreshold": "0",
-          "rewardSpeeds": {
-            "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D": {
-              "supplySpeed": "0",
-              "borrowSpeed": "0"
-            }
-          }
+          "liquidationThreshold": "0"
         }
-      ]
+      ],
+      "totals": {
+        "totalMintPaused": 3,
+        "totalBorrowPaused": 3,
+        "totalSupplyCap": 3,
+        "totalBorrowCap": 3,
+        "totalCollateralFactor": 2,
+        "totalSupplySpeed": 0,
+        "totalBorrowSpeed": 0
+      }
     }
-  ]
+  ],
+  "totals": {
+    "totalMintPaused": 3,
+    "totalBorrowPaused": 3,
+    "totalSupplyCap": 3,
+    "totalBorrowCap": 3,
+    "totalCollateralFactor": 2,
+    "totalSupplySpeed": 0,
+    "totalBorrowSpeed": 0
+  }
 }
