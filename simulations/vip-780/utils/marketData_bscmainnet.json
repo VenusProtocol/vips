@@ -94,16 +94,7 @@
           "collateralFactor": "0",
           "liquidationThreshold": "600000000000000000"
         }
-      ],
-      "totals": {
-        "totalMintPaused": 4,
-        "totalBorrowPaused": 4,
-        "totalSupplyCap": 7,
-        "totalBorrowCap": 7,
-        "totalCollateralFactor": 2,
-        "totalSupplySpeed": 3,
-        "totalBorrowSpeed": 3
-      }
+      ]
     },
     {
       "name": "GameFi",
@@ -163,16 +154,7 @@
           "collateralFactor": "0",
           "liquidationThreshold": "700000000000000000"
         }
-      ],
-      "totals": {
-        "totalMintPaused": 3,
-        "totalBorrowPaused": 3,
-        "totalSupplyCap": 4,
-        "totalBorrowCap": 4,
-        "totalCollateralFactor": 3,
-        "totalSupplySpeed": 2,
-        "totalBorrowSpeed": 2
-      }
+      ]
     },
     {
       "name": "LiquidStakedBNB",
@@ -270,16 +252,7 @@
           "collateralFactor": "870000000000000000",
           "liquidationThreshold": "900000000000000000"
         }
-      ],
-      "totals": {
-        "totalMintPaused": 5,
-        "totalBorrowPaused": 4,
-        "totalSupplyCap": 6,
-        "totalBorrowCap": 4,
-        "totalCollateralFactor": 5,
-        "totalSupplySpeed": 5,
-        "totalBorrowSpeed": 3
-      }
+      ]
     }
   ],
   "totals": {

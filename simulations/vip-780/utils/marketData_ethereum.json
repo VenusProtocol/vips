@@ -103,16 +103,7 @@
           "collateralFactor": "800000000000000000",
           "liquidationThreshold": "850000000000000000"
         }
-      ],
-      "totals": {
-        "totalMintPaused": 6,
-        "totalBorrowPaused": 5,
-        "totalSupplyCap": 7,
-        "totalBorrowCap": 6,
-        "totalCollateralFactor": 6,
-        "totalSupplySpeed": 4,
-        "totalBorrowSpeed": 1
-      }
+      ]
     }
   ],
   "totals": {

@@ -42,16 +42,7 @@
           "collateralFactor": "0",
           "liquidationThreshold": "0"
         }
-      ],
-      "totals": {
-        "totalMintPaused": 3,
-        "totalBorrowPaused": 3,
-        "totalSupplyCap": 3,
-        "totalBorrowCap": 3,
-        "totalCollateralFactor": 2,
-        "totalSupplySpeed": 0,
-        "totalBorrowSpeed": 0
-      }
+      ]
     }
   ],
   "totals": {

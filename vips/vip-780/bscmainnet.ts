@@ -28,15 +28,6 @@ interface Pool {
   comptroller: string;
   rewardDistributor: RewardDistributor[];
   markets: Market[];
-  totals?: {
-    totalMintPaused: number;
-    totalBorrowPaused: number;
-    totalSupplyCap: number;
-    totalBorrowCap: number;
-    totalCollateralFactor: number;
-    totalSupplySpeed: number;
-    totalBorrowSpeed: number;
-  };
 }
 
 interface NetworkData {
@@ -132,7 +123,7 @@ const generatePoolCommands = (pool: Pool, dstChainId?: LzChainId) => {
 
   // Set reward token speeds to 0 for markets with active rewards
   for (const distributor of rewardDistributor) {
-    if (distributor.marketsWithNonZeroSpeeds && distributor.marketsWithNonZeroSpeeds.length > 0) {
+    if (distributor.marketsWithNonZeroSpeeds?.length) {
       const marketAddresses = distributor.marketsWithNonZeroSpeeds;
       commands.push({
         target: distributor.address,
@@ -189,12 +180,7 @@ These actions will effectively deprecate the markets while allowing users to:
 We applied the following security procedures for this upgrade:
 
 - **VIP execution simulation**: in a simulation environment, validating the markets are properly deprecated with the correct parameters
-- **Deployment on testnet**: the same deprecation flow has been tested on testnet
-
-#### References
-
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/XXX)
-- [Documentation](https://docs-v4.venus.io/)`,
+- **Deployment on testnet**: the same deprecation flow has been tested on testnet`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
