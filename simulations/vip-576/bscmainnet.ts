@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { LEVERAGE_STRATEGIES_MANAGER, SWAP_HELPER, UNITROLLER, vip575 } from "../../vips/vip-575/bscmainnet";
+import vip576, { LEVERAGE_STRATEGIES_MANAGER, SWAP_HELPER, UNITROLLER } from "../../vips/vip-576/bscmainnet";
 import COMPTROLLER_ABI from "./abi/FlashLoanFacet.json";
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "./abi/LeverageStrategiesManager.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
@@ -54,7 +54,7 @@ forking(71263393, async () => {
     });
   });
 
-  testVip("VIP-575", await vip575(), {
+  testVip("VIP-576", await vip576(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
     },
