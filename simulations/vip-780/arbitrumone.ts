@@ -13,6 +13,7 @@ import vip780, {
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_ABI from "./abi/prime.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 
 const provider = ethers.provider;
 const arbitrumPools = ADDRESS_DATA.arbitrumone.pools;
@@ -189,6 +190,46 @@ forking(411152865, async () => {
 
       expect(marketData.supplyMultiplier).to.be.equal(0);
       expect(marketData.borrowMultiplier).to.be.equal(0);
+    });
+  });
+
+  describe("Critical Operations After Market Pause", async () => {
+    const WETH_MARKET = "0x39D6d13Ea59548637104E40e729E4aABE27FE106"; // vWETH_LiquidStakedETH
+    const COMPTROLLER = "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16"; // LiquidStakedETH Pool
+
+    let vToken: Contract;
+
+    before(async () => {
+      vToken = new ethers.Contract(WETH_MARKET, VTOKEN_ABI, provider);
+    });
+
+    it("Users can withdraw their supplied assets", async () => {
+      // Check if withdrawal is allowed (REDEEM not paused)
+      const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
+      const redeemPaused = await comptroller.actionPaused(WETH_MARKET, Actions.REDEEM);
+      expect(redeemPaused).to.be.false;
+
+      // Use the specific address that minted vWETH
+      const supplierAddress = "0x7A6a943EA0AeDf91DfCb9984E1AB4963B2Ad906B";
+
+      let supplier = null;
+      const balance = await vToken.balanceOf(supplierAddress);
+      if (balance.gt(0)) {
+        await ethers.provider.send("hardhat_impersonateAccount", [supplierAddress]);
+        await ethers.provider.send("hardhat_setBalance", [supplierAddress, "0x1000000000000000000"]);
+        supplier = ethers.provider.getSigner(supplierAddress);
+      }
+
+      if (supplier) {
+        const supplierAddress = await supplier.getAddress();
+        const initialBalance = await vToken.balanceOf(supplierAddress);
+        const redeemAmount = initialBalance.div(10);
+
+        await vToken.connect(supplier).redeem(redeemAmount);
+
+        const finalBalance = await vToken.balanceOf(supplierAddress);
+        expect(finalBalance).to.be.lt(initialBalance);
+      }
     });
   });
 });
