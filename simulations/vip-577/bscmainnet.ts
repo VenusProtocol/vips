@@ -2,25 +2,21 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
-import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testVip } from "src/vip-framework";
 
-import vip780, {
-  ADDRESS_DATA,
-  Actions,
-  PRIME_CONTRACT_ADDRESS,
-  VWETH_MARKET_ADDRESS,
-} from "../../vips/vip-780/bscmainnet";
+import vip577, { ADDRESS_DATA, Actions } from "../../vips/vip-577/bscmainnet";
+import VTOKEN_ABI from "../vip-778/abi/vtoken.json";
+import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
-import PRIME_ABI from "./abi/prime.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
-import VTOKEN_ABI from "./abi/vtoken.json";
 
 const provider = ethers.provider;
-const arbitrumPools = ADDRESS_DATA.arbitrumone.pools;
 
-forking(411152865, async () => {
+forking(71819752, async () => {
+  const bscPools = ADDRESS_DATA.bscmainnet.pools;
+
   describe("Pre-VIP behavior", async () => {
-    for (const pool of arbitrumPools) {
+    for (const pool of bscPools) {
       describe(`${pool.name} Pool`, () => {
         let comptroller: Contract;
 
@@ -64,24 +60,16 @@ forking(411152865, async () => {
         });
       });
     }
-
-    it("Check Prime multipliers for vWETH_LiquidStakedETH are greater than zero", async () => {
-      const prime = new ethers.Contract(PRIME_CONTRACT_ADDRESS.arbitrumone, PRIME_ABI, provider);
-      const marketData = await prime.markets(VWETH_MARKET_ADDRESS.arbitrumone);
-
-      expect(marketData.supplyMultiplier).to.be.greaterThan(0);
-      expect(marketData.borrowMultiplier).to.be.greaterThan(0);
-    });
   });
 
-  testForkedNetworkVipCommands("VIP-780 Arbitrum One", await vip780(), {
+  testVip("VIP-577 BNB Chain", await vip577(), {
     callbackAfterExecution: async txResponse => {
-      const totals = ADDRESS_DATA.arbitrumone.totals!;
+      const totals = ADDRESS_DATA.bscmainnet.totals!;
       const totalActionPausedEvents = totals.totalMintPaused + totals.totalBorrowPaused;
 
       await expectEvents(
         txResponse,
-        [COMPTROLLER_ABI, REWARDS_DISTRIBUTOR_ABI, PRIME_ABI],
+        [COMPTROLLER_ABI, REWARDS_DISTRIBUTOR_ABI],
         [
           "NewSupplyCap",
           "NewBorrowCap",
@@ -89,7 +77,6 @@ forking(411152865, async () => {
           "NewCollateralFactor",
           "RewardTokenSupplySpeedUpdated",
           "RewardTokenBorrowSpeedUpdated",
-          "MultiplierUpdated",
         ],
         [
           totals.totalSupplyCap,
@@ -98,14 +85,13 @@ forking(411152865, async () => {
           totals.totalCollateralFactor,
           totals.totalSupplySpeed,
           totals.totalBorrowSpeed,
-          1, // One MultiplierUpdated event for vWETH_LiquidStakedETH
         ],
       );
     },
   });
 
   describe("Post-VIP behavior", async () => {
-    for (const pool of arbitrumPools) {
+    for (const pool of bscPools) {
       describe(`${pool.name} Pool`, () => {
         let comptroller: Contract;
 
@@ -152,7 +138,7 @@ forking(411152865, async () => {
     }
 
     it("Check reward speeds are set to zero for all markets", async () => {
-      for (const pool of arbitrumPools) {
+      for (const pool of bscPools) {
         for (const rd of pool.rewardDistributor) {
           const rewardsDistributor = new ethers.Contract(rd.address, REWARDS_DISTRIBUTOR_ABI, provider);
 
@@ -166,69 +152,91 @@ forking(411152865, async () => {
         }
       }
     });
-
-    it("Users should be able to claim rewards", async () => {
-      const holder = "0x8e6973e8b89adf1e16e5DB628ff7F84ef92c7039";
-      const [signer] = await ethers.getSigners();
-
-      const distributor = await ethers.getContractAt(
-        REWARDS_DISTRIBUTOR_ABI,
-        "0x6204Bae72dE568384Ca4dA91735dc343a0C7bD6D",
-        signer,
-      );
-
-      const accruedBefore = await distributor.rewardTokenAccrued(holder);
-      await distributor["claimRewardToken(address)"](holder);
-      const accruedAfter = await distributor.rewardTokenAccrued(holder);
-
-      expect(accruedAfter).to.be.lessThanOrEqual(accruedBefore);
-    });
-
-    it("Check Prime multipliers for vWETH_LiquidStakedETH are set to zero", async () => {
-      const prime = new ethers.Contract(PRIME_CONTRACT_ADDRESS.arbitrumone, PRIME_ABI, provider);
-      const marketData = await prime.markets(VWETH_MARKET_ADDRESS.arbitrumone);
-
-      expect(marketData.supplyMultiplier).to.be.equal(0);
-      expect(marketData.borrowMultiplier).to.be.equal(0);
-    });
   });
 
   describe("Critical Operations After Market Pause", async () => {
-    const WETH_MARKET = "0x39D6d13Ea59548637104E40e729E4aABE27FE106"; // vWETH_LiquidStakedETH
-    const COMPTROLLER = "0x52bAB1aF7Ff770551BD05b9FC2329a0Bf5E23F16"; // LiquidStakedETH Pool
+    const USDT_MARKET = "0x1D8bBDE12B6b34140604E18e9f9c6e14deC16854"; // vUSDT_DeFi
+    const USDT_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
 
     let vToken: Contract;
+    let usdtToken: Contract;
 
     before(async () => {
-      vToken = new ethers.Contract(WETH_MARKET, VTOKEN_ABI, provider);
+      vToken = new ethers.Contract(USDT_MARKET, VTOKEN_ABI, provider);
+      usdtToken = new ethers.Contract(USDT_TOKEN, ERC20_ABI, provider);
     });
 
     it("Users can withdraw their supplied assets", async () => {
-      // Check if withdrawal is allowed (REDEEM not paused)
-      const comptroller = new ethers.Contract(COMPTROLLER, COMPTROLLER_ABI, provider);
-      const redeemPaused = await comptroller.actionPaused(WETH_MARKET, Actions.REDEEM);
-      expect(redeemPaused).to.be.false;
-
-      // Use the specific address that minted vWETH
-      const supplierAddress = "0x7A6a943EA0AeDf91DfCb9984E1AB4963B2Ad906B";
+      // Find a user with vToken balance
+      const filter = vToken.filters.Transfer(null, null);
+      const events = await vToken.queryFilter(filter, -500, "latest");
 
       let supplier = null;
-      const balance = await vToken.balanceOf(supplierAddress);
-      if (balance.gt(0)) {
-        await ethers.provider.send("hardhat_impersonateAccount", [supplierAddress]);
-        await ethers.provider.send("hardhat_setBalance", [supplierAddress, "0x1000000000000000000"]);
-        supplier = ethers.provider.getSigner(supplierAddress);
+      for (const event of events.reverse()) {
+        if (event.args?.to && event.args.to !== ethers.constants.AddressZero) {
+          const balance = await vToken.balanceOf(event.args.to);
+          if (balance.gt(0)) {
+            await ethers.provider.send("hardhat_impersonateAccount", [event.args.to]);
+            await ethers.provider.send("hardhat_setBalance", [event.args.to, "0x1000000000000000000"]);
+            supplier = ethers.provider.getSigner(event.args.to);
+            break;
+          }
+        }
       }
 
       if (supplier) {
-        const supplierAddress = await supplier.getAddress();
-        const initialBalance = await vToken.balanceOf(supplierAddress);
+        const initialBalance = await vToken.balanceOf(await supplier.getAddress());
         const redeemAmount = initialBalance.div(10);
 
         await vToken.connect(supplier).redeem(redeemAmount);
 
-        const finalBalance = await vToken.balanceOf(supplierAddress);
+        const finalBalance = await vToken.balanceOf(await supplier.getAddress());
         expect(finalBalance).to.be.lt(initialBalance);
+      }
+    });
+
+    it("Users can repay their borrows", async () => {
+      // Find a user with borrow balance
+      const filter = vToken.filters.Borrow();
+      const events = await vToken.queryFilter(filter, -500, "latest");
+
+      let borrower = null;
+      for (const event of events.reverse()) {
+        if (event.args?.borrower) {
+          const borrowBalance = await vToken.borrowBalanceStored(event.args.borrower);
+          if (borrowBalance.gt(0)) {
+            await ethers.provider.send("hardhat_impersonateAccount", [event.args.borrower]);
+            await ethers.provider.send("hardhat_setBalance", [event.args.borrower, "0x1000000000000000000"]);
+            borrower = ethers.provider.getSigner(event.args.borrower);
+
+            // Fund with USDT from a whale
+            const usdtFilter = usdtToken.filters.Transfer();
+            const usdtEvents = await usdtToken.queryFilter(usdtFilter, -200, "latest");
+            for (const usdtEvent of usdtEvents.reverse()) {
+              if (usdtEvent.args?.to) {
+                const balance = await usdtToken.balanceOf(usdtEvent.args.to);
+                if (balance.gt(ethers.utils.parseUnits("1000", 18))) {
+                  await ethers.provider.send("hardhat_impersonateAccount", [usdtEvent.args.to]);
+                  const whale = ethers.provider.getSigner(usdtEvent.args.to);
+                  await usdtToken.connect(whale).transfer(event.args.borrower, ethers.utils.parseUnits("100", 18));
+                  break;
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      if (borrower) {
+        const initialBorrow = await vToken.borrowBalanceStored(await borrower.getAddress());
+        const repayAmount = ethers.utils.parseUnits("1", 18);
+
+        await usdtToken.connect(borrower).approve(USDT_MARKET, repayAmount);
+        await vToken.connect(borrower).repayBorrow(repayAmount);
+
+        const finalBorrow = await vToken.borrowBalanceStored(await borrower.getAddress());
+        expect(finalBorrow).to.be.lt(initialBorrow);
       }
     });
   });

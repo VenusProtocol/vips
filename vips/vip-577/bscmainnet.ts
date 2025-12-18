@@ -1,9 +1,9 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import arbitrumoneData from "../../simulations/vip-780/utils/marketData_arbitrumone.json";
-import bscMainnetData from "../../simulations/vip-780/utils/marketData_bscmainnet.json";
-import ethereumData from "../../simulations/vip-780/utils/marketData_ethereum.json";
+import arbitrumoneData from "../../simulations/vip-577/utils/marketData_arbitrumone.json";
+import bscMainnetData from "../../simulations/vip-577/utils/marketData_bscmainnet.json";
+import ethereumData from "../../simulations/vip-577/utils/marketData_ethereum.json";
 
 interface Market {
   name: string;
@@ -147,11 +147,13 @@ const generatePoolCommands = (pool: Pool, dstChainId?: LzChainId) => {
   return commands;
 };
 
-export const vip780 = () => {
+export const vip577 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-780 Deprecate Isolated Pools on BNB Chain, Ethereum, and Arbitrum One",
-    description: `#### Summary
+    title: "VIP-577 Pause and Sunset Preparation for Isolated Pools on BNB Chain, Ethereum, and Arbitrum One",
+    description: `
+    #### Summary
+This proposal is informed by the Venus community forum publication [Isolated Pools Sunset](https://community.venus.io/t/isolated-pools-sunset/5603). The community post outlines the rationale for initiating the sunset process for isolated pools within the Venus V4 protocol, citing low utilisation, limited liquidity, minimal revenue contribution, and the availability of isolated E-Mode groups in the core pool that provide similar functionality in a more capital-efficient manner.
 
 If passed, this VIP will deprecate isolated pools across multiple networks as part of the Isolated Lending (IL) deprecation flow.
 
@@ -229,4 +231,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip780;
+export default vip577;

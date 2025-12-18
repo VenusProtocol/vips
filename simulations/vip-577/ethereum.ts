@@ -4,12 +4,12 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip780, {
+import vip577, {
   ADDRESS_DATA,
   Actions,
   PRIME_CONTRACT_ADDRESS,
   VWETH_MARKET_ADDRESS,
-} from "../../vips/vip-780/bscmainnet";
+} from "../../vips/vip-577/bscmainnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PRIME_ABI from "./abi/prime.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";
@@ -74,7 +74,7 @@ forking(24023389, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-780 Ethereum", await vip780(), {
+  testForkedNetworkVipCommands("VIP-577 Ethereum", await vip577(), {
     callbackAfterExecution: async txResponse => {
       const totals = ADDRESS_DATA.ethereum.totals!;
       const totalActionPausedEvents = totals.totalMintPaused + totals.totalBorrowPaused;
