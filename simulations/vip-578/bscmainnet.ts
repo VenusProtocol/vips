@@ -12,8 +12,8 @@ import {
   USDC_PRIME_CONVERTER,
   USDT,
   USDT_PRIME_CONVERTER,
-  vip779,
-} from "../../vips/vip-779/bscmainnet";
+  vip578,
+} from "../../vips/vip-578/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
@@ -43,7 +43,7 @@ forking(71829710, async () => {
     });
   });
 
-  testVip("VIP-779", await vip779(), {
+  testVip("VIP-578", await vip578(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       // percentage distribution updates for those two assets
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [2]);
