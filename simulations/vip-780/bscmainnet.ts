@@ -51,7 +51,7 @@ import { RateCurvePoints, VTokenContractAndSymbol, getCorePoolRateCurve, getPool
 
 const BSCMAINNET_CHECKPOINT = 1768357822;
 
-forking(72081024, async () => {
+forking(73348770, async () => {
   const OLD_BSC_BLOCK_RATE = 42048000;
   let plp: Contract;
   let xvsVault: Contract;
@@ -108,12 +108,12 @@ forking(72081024, async () => {
       });
 
       it("has the old USDC distribution speed", async () => {
-        const OLD_USDC_PER_BLOCK_REWARD = parseUnits("0.015400990000000000", 18);
+        const OLD_USDC_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18);
         expect(await plp.tokenDistributionSpeeds(USDC)).to.equal(OLD_USDC_PER_BLOCK_REWARD);
       });
 
       it("has the old USDT distribution speed", async () => {
-        const OLD_USDT_PER_BLOCK_REWARD = parseUnits("0.015400990000000000", 18);
+        const OLD_USDT_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18);
         expect(await plp.tokenDistributionSpeeds(USDT)).to.equal(OLD_USDT_PER_BLOCK_REWARD);
       });
 

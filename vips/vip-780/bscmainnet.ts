@@ -21,8 +21,8 @@ export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 export const XVS_PER_BLOCK_REWARD = parseUnits("0.012135420000000000", 18).mul(100).div(167);
 export const BTCB_PER_BLOCK_REWARD = parseUnits("0.000000038051750381", 18).mul(100).div(167);
 export const ETH_PER_BLOCK_REWARD = parseUnits("0.00000333999", 18).mul(100).div(167);
-export const USDC_PER_BLOCK_REWARD = parseUnits("0.015400990000000000", 18).mul(100).div(167);
-export const USDT_PER_BLOCK_REWARD = parseUnits("0.015400990000000000", 18).mul(100).div(167);
+export const USDC_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18).mul(100).div(167);
+export const USDT_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18).mul(100).div(167);
 export const VAI_VAULT_RATE_PER_BLOCK = parseUnits("0.00056973379", 18).mul(100).div(167);
 export const XVS_MARKET_SUPPLY_REWARD_PER_BLOCK = parseUnits("0.0001953125", 18).mul(100).div(167);
 
