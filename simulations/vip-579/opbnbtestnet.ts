@@ -12,7 +12,7 @@ import vip580, {
   OPBNBTESTNET_RATE_MODEL_SETTER,
   OPBNBTESTNET_VTOKEN_BEACON,
   OPBNBTESTNET_XVS_VAULT_PROXY,
-} from "../../vips/vip-580/bsctestnet";
+} from "../../vips/vip-579/bsctestnet";
 import ACM_ABI from "./abi/ACM.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";

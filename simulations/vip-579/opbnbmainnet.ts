@@ -5,14 +5,14 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip580, {
+import vip579, {
   NEW_OPBNB_BLOCK_RATE,
   OPBNBMAINNET_ACM,
   OPBNBMAINNET_NEW_VTOKEN_IMPLEMENTATION,
   OPBNBMAINNET_RATE_MODEL_SETTER,
   OPBNBMAINNET_VTOKEN_BEACON,
   OPBNBMAINNET_XVS_VAULT_PROXY,
-} from "../../vips/vip-580/bscmainnet";
+} from "../../vips/vip-579/bscmainnet";
 import ACM_ABI from "./abi/ACM.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -22,7 +22,7 @@ import { RateCurvePoints, VTokenContractAndSymbol, getAllVTokens, getRateCurve }
 
 const OPBNBMAINNET_CHECKPOINT = 1767754800;
 
-forking(92370808, async () => {
+forking(97236925, async () => {
   const xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, OPBNBMAINNET_XVS_VAULT_PROXY);
   const vTokenBeacon = await ethers.getContractAt(VTOKEN_BEACON_ABI, OPBNBMAINNET_VTOKEN_BEACON);
   const acm = await ethers.getContractAt(ACM_ABI, OPBNBMAINNET_ACM);
@@ -59,7 +59,7 @@ forking(92370808, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-580 Fourier Hardfork OPBNB", await vip580(), {
+  testForkedNetworkVipCommands("VIP-579 [opBNB] Fourier Hardfork Block rate upgrade", await vip579(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

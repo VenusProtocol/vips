@@ -18,11 +18,20 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip580 = () => {
+export const vip579 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-580 Fourier Hardfork OPBNB",
-    description: `#### Summary`,
+    title: "VIP-579 [opBNB] Fourier Hardfork block rate upgrade",
+    description: `#### Summary
+If passed, following the community proposal "[OpBNB Mainnet Fourier Hardfork Update](https://community.venus.io/t/opbnb-mainnet-fourier-hardfork-update/5623)", this VIP will perform the following changes, taking into account the increase in the block rate on opBNB, from two blocks per second to four blocks per second:
+- Upgrade implementation of every VToken contract, with the new blocks per year (126,144,000)
+- Set the blocks per year to the new value
+- update the interest rate models of every VToken, using the CheckpointView contract, that will be able to calculate the interest rates considering when the block rate will change on opBNB
+#### Description
+These changes are mandatory to accommodate the Venus Protocol to [the Fourier hardfork on opBNB](https://github.com/bnb-chain/opbnb/releases/tag/v0.5.5), which will happen on Jan-07-2026 03:00:00 AM +UTC.
+The interest rate contracts of every market will be replaced with the [CheckpointView contract](https://github.com/VenusProtocol/isolated-pools/pull/546). CheckpointView is a contract that will call a different contract (in this case, a different interest rate contract) depending on the current timestamp. This way, the VToken contracts will consider the right interest rates on every block, being transparently switched under the hood after the hardfork on the opBNB network.
+This VIP uses an auxiliary contract [SetCheckpointOpbnbmainnet](https://github.com/VenusProtocol/isolated-pools/pull/546) to change every interest rate contract in one transaction.
+VToken had a constant value with the number of blocks per year. The VToken implementation has been simply redeployed using the new value. The XVSVault has a setBlocksPerYear function to support future changes in the blocks per year, so we just set the new value accordingly.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -70,4 +79,4 @@ export const vip580 = () => {
   );
 };
 
-export default vip580;
+export default vip579;
