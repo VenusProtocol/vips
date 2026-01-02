@@ -22,6 +22,16 @@
   },
   {
     "inputs": [],
+    "name": "ConfigStatusUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ExecutorStatusUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidDebounce",
     "type": "error"
   },
@@ -37,12 +47,17 @@
   },
   {
     "inputs": [],
-    "name": "InvalidUpdateType",
+    "name": "InvalidLayerZeroEid",
     "type": "error"
   },
   {
     "inputs": [],
-    "name": "LzTokenUnavailable",
+    "name": "InvalidRemoteDelay",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidUpdateType",
     "type": "error"
   },
   {
@@ -59,17 +74,6 @@
   {
     "inputs": [],
     "name": "NotAnExecutor",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "msgValue",
-        "type": "uint256"
-      }
-    ],
-    "name": "NotEnoughNative",
     "type": "error"
   },
   {
@@ -97,6 +101,16 @@
       }
     ],
     "name": "OnlyPeer",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RemoteDelayUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RenounceOwnershipNotAllowed",
     "type": "error"
   },
   {
@@ -197,7 +211,7 @@
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "string",
         "name": "updateType",
         "type": "string"
@@ -228,7 +242,7 @@
         "type": "bool"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "bool",
         "name": "approved",
         "type": "bool"
@@ -342,7 +356,7 @@
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "string",
         "name": "updateType",
         "type": "string"
@@ -399,7 +413,7 @@
         "type": "uint256"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "string",
         "name": "updateType",
         "type": "string"
@@ -490,19 +504,6 @@
         "internalType": "uint32",
         "name": "",
         "type": "uint32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "REMOTE_DELAY",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -736,7 +737,7 @@
             "type": "tuple"
           },
           {
-            "internalType": "enum DestinationStewardReceiver.UpdateStatus",
+            "internalType": "enum IDestinationStewardReceiver.UpdateStatus",
             "name": "status",
             "type": "uint8"
           },
@@ -751,7 +752,7 @@
             "type": "address"
           }
         ],
-        "internalType": "struct DestinationStewardReceiver.DestinationUpdate",
+        "internalType": "struct IDestinationStewardReceiver.DestinationUpdate",
         "name": "",
         "type": "tuple"
       }
@@ -787,7 +788,7 @@
             "type": "address"
           }
         ],
-        "internalType": "struct DestinationStewardReceiver.RiskParamConfig",
+        "internalType": "struct IDestinationStewardReceiver.RiskParamConfig",
         "name": "",
         "type": "tuple"
       }
@@ -896,7 +897,7 @@
         "type": "address"
       }
     ],
-    "name": "lastRegisteredUpdate",
+    "name": "lastRegisteredUpdateId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -996,7 +997,7 @@
         "type": "uint64"
       }
     ],
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1059,9 +1060,22 @@
   },
   {
     "inputs": [],
+    "name": "remoteDelay",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "renounceOwnership",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1151,6 +1165,19 @@
       }
     ],
     "name": "setPeer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "newRemoteDelay",
+        "type": "uint256"
+      }
+    ],
+    "name": "setRemoteDelay",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1287,7 +1314,7 @@
         "type": "tuple"
       },
       {
-        "internalType": "enum DestinationStewardReceiver.UpdateStatus",
+        "internalType": "enum IDestinationStewardReceiver.UpdateStatus",
         "name": "status",
         "type": "uint8"
       },

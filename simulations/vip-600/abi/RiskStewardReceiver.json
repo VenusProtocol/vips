@@ -27,6 +27,16 @@
   },
   {
     "inputs": [],
+    "name": "ConfigStatusUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ExecutorStatusUnchanged",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidDebounce",
     "type": "error"
   },
@@ -38,6 +48,11 @@
   {
     "inputs": [],
     "name": "InvalidEndpointCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLayerZeroEid",
     "type": "error"
   },
   {
@@ -73,6 +88,11 @@
   },
   {
     "inputs": [],
+    "name": "InvalidUpdateType",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "LzTokenUnavailable",
     "type": "error"
   },
@@ -101,17 +121,6 @@
       }
     ],
     "name": "NotEnoughNative",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
-      }
-    ],
-    "name": "OnlyEndpoint",
     "type": "error"
   },
   {
@@ -214,6 +223,11 @@
   },
   {
     "inputs": [],
+    "name": "UpdateWillExpireBeforeUnlock",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ZeroAddressNotAllowed",
     "type": "error"
   },
@@ -239,7 +253,7 @@
         "type": "bool"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "bool",
         "name": "active",
         "type": "bool"
@@ -264,7 +278,7 @@
         "type": "bool"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "bool",
         "name": "approved",
         "type": "bool"
@@ -541,7 +555,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "updateId",
         "type": "uint256"
@@ -553,7 +567,7 @@
         "type": "uint32"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "string",
         "name": "updateType",
         "type": "string"
@@ -572,7 +586,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "updateId",
         "type": "uint256"
@@ -584,7 +598,7 @@
         "type": "uint32"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "string",
         "name": "updateType",
         "type": "string"
@@ -653,42 +667,6 @@
         "internalType": "contract IAccessControlManagerV8",
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint32",
-            "name": "srcEid",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "sender",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint64",
-            "name": "nonce",
-            "type": "uint64"
-          }
-        ],
-        "internalType": "struct Origin",
-        "name": "origin",
-        "type": "tuple"
-      }
-    ],
-    "name": "allowInitializePath",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -854,52 +832,6 @@
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "uint32",
-            "name": "srcEid",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "sender",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint64",
-            "name": "nonce",
-            "type": "uint64"
-          }
-        ],
-        "internalType": "struct Origin",
-        "name": "",
-        "type": "tuple"
-      },
-      {
-        "internalType": "bytes",
-        "name": "",
-        "type": "bytes"
-      },
-      {
-        "internalType": "address",
-        "name": "_sender",
-        "type": "address"
-      }
-    ],
-    "name": "isComposeMsgSender",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "updateId",
         "type": "uint256"
@@ -962,56 +894,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint32",
-            "name": "srcEid",
-            "type": "uint32"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "sender",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint64",
-            "name": "nonce",
-            "type": "uint64"
-          }
-        ],
-        "internalType": "struct Origin",
-        "name": "_origin",
-        "type": "tuple"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "_guid",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_message",
-        "type": "bytes"
-      },
-      {
-        "internalType": "address",
-        "name": "_executor",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "_extraData",
-        "type": "bytes"
-      }
-    ],
-    "name": "lzReceive",
-    "outputs": [],
-    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -1122,30 +1004,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint32",
-        "name": "",
-        "type": "uint32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "name": "nextNonce",
-    "outputs": [
-      {
-        "internalType": "uint64",
-        "name": "nonce",
-        "type": "uint64"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "oAppVersion",
     "outputs": [
@@ -1160,7 +1018,7 @@
         "type": "uint64"
       }
     ],
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {

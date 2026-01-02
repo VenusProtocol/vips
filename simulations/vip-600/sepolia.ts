@@ -7,9 +7,7 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip600, {
-  BSCTESTNET_EID,
   DESTINATION_RECEIVER_STEWARD,
-  RISK_STEWARD_RECEIVER,
   SEPOLIA_ACM,
   SEPOLIA_CF_STEWARD,
   SEPOLIA_COMPTROLLER,
@@ -24,7 +22,7 @@ import Owner_ABI from "./abi/OwnerMinimalAbi.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(9844003, async () => {
+forking(9965225, async () => {
   const provider = ethers.provider;
   const acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
   const isolatedPoolComptroller = new ethers.Contract(SEPOLIA_COMPTROLLER, ISOLATED_POOL_COMPTROLLER_ABI, provider);
@@ -41,7 +39,7 @@ forking(9844003, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI],
         ["PermissionGranted"],
-        [18], // Expected number of PermissionGranted events for Sepolia commands
+        [20], // Expected number of PermissionGranted events for Sepolia commands
       );
     },
   });
@@ -207,13 +205,6 @@ forking(9844003, async () => {
 
       it("should set SEPOLIA_IRM_STEWARD owner to NORMAL_TIMELOCK", async () => {
         expect(await sepoliaIrmSteward.owner()).to.equal(sepolia.NORMAL_TIMELOCK);
-      });
-    });
-
-    describe("Cross-chain peer connections", () => {
-      it("should set peer for DESTINATION_RECEIVER_STEWARD (DSR) to RISK_STEWARD_RECEIVER (RSR)", async () => {
-        const expectedPeer = ethers.utils.hexZeroPad(RISK_STEWARD_RECEIVER, 32);
-        expect(await destinationReceiverSteward.peers(BSCTESTNET_EID)).to.equal(expectedPeer.toLocaleLowerCase());
       });
     });
   });
