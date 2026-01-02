@@ -22,7 +22,7 @@ import Owner_ABI from "./abi/OwnerMinimalAbi.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(9965225, async () => {
+forking(9965780, async () => {
   const provider = ethers.provider;
   const acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
   const isolatedPoolComptroller = new ethers.Contract(SEPOLIA_COMPTROLLER, ISOLATED_POOL_COMPTROLLER_ABI, provider);

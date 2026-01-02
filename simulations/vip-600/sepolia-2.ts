@@ -19,7 +19,7 @@ import vip600, {
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 
-forking(9965225, async () => {
+forking(9965780, async () => {
   const provider = ethers.provider;
   const destinationReceiverSteward = new ethers.Contract(DESTINATION_RECEIVER_STEWARD, DSR_ABI, provider);
   const sepoliaMcSteward = new ethers.Contract(SEPOLIA_MC_STEWARD, STEWARD_ABI, provider);
