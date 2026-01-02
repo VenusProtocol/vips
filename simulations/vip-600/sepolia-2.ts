@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
-import { forking, pretendExecutingVip, testForkedNetworkVipCommands } from "src/vip-framework";
+import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { vip600 as vip600a } from "../../vips/vip-600/bsctestnet";
 import vip600, {
