@@ -143,7 +143,7 @@ forking(82078679, async () => {
     });
 
     describe("Steward permissions", () => {
-      it("should grant setSafeDeltaBps permission to MARKETCAP_STEWARD", async () => {
+      it("should grant MC_STEWARD setSafeDeltaBps permission to NORMAL and FAST_TRACK TIMELOCK", async () => {
         const marketCapRole = ethers.utils.solidityPack(
           ["address", "string"],
           [MARKETCAP_STEWARD, "setSafeDeltaBps(uint256)"],
@@ -153,7 +153,7 @@ forking(82078679, async () => {
         expect(await acm.hasRole(marketCapRoleHash, bsctestnet.FAST_TRACK_TIMELOCK)).to.be.true;
       });
 
-      it("should grant setSafeDeltaBps permission to COLLATERALFACTORS_STEWARD", async () => {
+      it("should grant CF_STEWARD setSafeDeltaBps permission to NORMAL and FAST_TRACK TIMELOCK ", async () => {
         const cfRole = ethers.utils.solidityPack(
           ["address", "string"],
           [COLLATERALFACTORS_STEWARD, "setSafeDeltaBps(uint256)"],
