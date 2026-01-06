@@ -10,7 +10,7 @@ export const SENTINEL_ORACLE = "0xa4f2B03919BAAdCA80C31406412C7Ee059A579D3";
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 // Keeper address that can call functions in the contracts
-export const KEEPER_ADDRESS = "0x4bB24e5fdfBb351Dba42238d813885dE33fdE3B3";
+export const KEEPER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
 
 export const vip580Testnet = () => {
   const meta = {
