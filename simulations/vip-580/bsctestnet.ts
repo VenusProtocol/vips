@@ -57,9 +57,6 @@ forking(82830213, async () => {
       expect(
         await accessControlManager.hasPermission(KEEPER_ADDRESS, DEVIATION_SENTINEL, "resetMarketState(address)"),
       ).to.equal(false);
-      expect(
-        await accessControlManager.hasPermission(KEEPER_ADDRESS, DEVIATION_SENTINEL, "handleDeviation(address)"),
-      ).to.equal(false);
     });
 
     it("Keeper should not have permissions on SentinelOracle", async () => {
@@ -108,7 +105,7 @@ forking(82830213, async () => {
         ["OwnershipTransferred"],
         [2],
       );
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [10]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [9]);
     },
   });
 
@@ -141,9 +138,6 @@ forking(82830213, async () => {
       ).to.equal(true);
       expect(
         await accessControlManager.hasPermission(KEEPER_ADDRESS, DEVIATION_SENTINEL, "resetMarketState(address)"),
-      ).to.equal(true);
-      expect(
-        await accessControlManager.hasPermission(KEEPER_ADDRESS, DEVIATION_SENTINEL, "handleDeviation(address)"),
       ).to.equal(true);
     });
 

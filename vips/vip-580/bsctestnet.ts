@@ -37,7 +37,6 @@ For the keeper address on DeviationSentinel:
 - setTokenConfig(address,(uint8,bool))
 - setTokenMonitoringEnabled(address,bool)
 - resetMarketState(address)
-- handleDeviation(address)
 
 For the keeper address on SentinelOracle:
 - setTokenOracleConfig(address,address)
@@ -99,11 +98,6 @@ For DeviationSentinel on any Comptroller:
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [DEVIATION_SENTINEL, "resetMarketState(address)", KEEPER_ADDRESS],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [DEVIATION_SENTINEL, "handleDeviation(address)", KEEPER_ADDRESS],
       },
 
       // ========================================
