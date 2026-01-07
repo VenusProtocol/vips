@@ -13,9 +13,10 @@ export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 export const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
 export const RATE_MODEL = "0x846883aC2AFdaeF9d226182e82f3640d3D6D4d3f";
 export const REDUCE_RESERVES_BLOCK_DELTA = "115200"; // 42048000 blocks per year (Before Fermi upgrade)
-export const USDT_CHAINLINK_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
 
 // Oracle configuration
+export const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
+export const USD1_FEED = "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0";
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26 hours
 const UPPER_BOUND_RATIO = parseUnits("1.02", 18); // 2% upper bound
 const LOWER_BOUND_RATIO = parseUnits("0.98", 18); // 2% lower bound
@@ -80,11 +81,15 @@ export const vip795 = () => {
 
   return makeProposal(
     [
-      // Configure Oracle
+      {
+        target: USDT_CHAINLINK_ORACLE,
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[U, bscmainnet.USDT_CHAINLINK_FEED, CHAINLINK_MAX_STALE_PERIOD]],
+      },
       {
         target: CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[U, USDT_CHAINLINK_FEED, CHAINLINK_MAX_STALE_PERIOD]],
+        params: [[U, USD1_FEED, CHAINLINK_MAX_STALE_PERIOD]],
       },
       {
         target: BOUND_VALIDATOR,
@@ -94,7 +99,9 @@ export const vip795 = () => {
       {
         target: RESILIENT_ORACLE,
         signature: "setTokenConfig((address,address[3],bool[3],bool))",
-        params: [[U, [CHAINLINK_ORACLE, CHAINLINK_ORACLE, ethers.constants.AddressZero], [true, true, false], false]],
+        params: [
+          [U, [USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE, ethers.constants.AddressZero], [true, true, false], false],
+        ],
       },
       // Add Market
       {

@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -15,6 +15,7 @@ import {
   REDUCE_RESERVES_BLOCK_DELTA,
   U,
   UMarketSpec,
+  USDT_CHAINLINK_ORACLE,
   convertAmountToVTokens,
   vip795,
 } from "../../vips/vip-795/bscmainnet";
@@ -34,23 +35,26 @@ forking(74286551, async () => {
   let u: Contract;
   let vU: Contract;
   let chainlinkOracle: Contract;
+  let usdtChainlinkOracle: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(UMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     u = new ethers.Contract(UMarketSpec.vToken.underlying.address, ERC20_ABI, provider);
     vU = new ethers.Contract(UMarketSpec.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
     chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+    usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
 
     await resilientOracle
       .connect(impersonatedTimelock)
       .setTokenConfig([
         U,
-        [bscmainnet.CHAINLINK_ORACLE, bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero],
+        [USDT_CHAINLINK_ORACLE, bscmainnet.CHAINLINK_ORACLE, ethers.constants.AddressZero],
         [true, true, false],
         false,
       ]);
+    await usdtChainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
     await chainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
   });
 
@@ -83,6 +87,22 @@ forking(74286551, async () => {
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
+      await setMaxStalePeriodInChainlinkOracle(
+        USDT_CHAINLINK_ORACLE,
+        U,
+        ethers.constants.AddressZero,
+        bscmainnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+
+      await setMaxStalePeriodInChainlinkOracle(
+        bscmainnet.CHAINLINK_ORACLE,
+        U,
+        ethers.constants.AddressZero,
+        bscmainnet.NORMAL_TIMELOCK,
+        315360000,
+      );
+
       await setMaxStalePeriod(resilientOracle, u);
     });
 
