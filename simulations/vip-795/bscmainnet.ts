@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -12,6 +12,7 @@ import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRate
 import {
   PROTOCOL_SHARE_RESERVE,
   RATE_MODEL,
+  REDUCE_RESERVES_BLOCK_DELTA,
   U,
   UMarketSpec,
   convertAmountToVTokens,
@@ -26,14 +27,13 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 
 const provider = ethers.provider;
 const { bscmainnet } = NETWORK_ADDRESSES;
-const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
 forking(74286551, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let u: Contract;
   let vU: Contract;
-  let redstoneOracle: Contract;
+  let chainlinkOracle: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(UMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
@@ -41,17 +41,17 @@ forking(74286551, async () => {
     vU = new ethers.Contract(UMarketSpec.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-    redstoneOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+    chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
 
     await resilientOracle
       .connect(impersonatedTimelock)
       .setTokenConfig([
         U,
-        [bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
-        [true, false, false],
+        [bscmainnet.CHAINLINK_ORACLE, bscmainnet.REDSTONE_ORACLE, ethers.constants.AddressZero],
+        [true, true, false],
         false,
       ]);
-    await redstoneOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
+    await chainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -74,22 +74,15 @@ forking(74286551, async () => {
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
           "NewReserveFactor",
+          "NewCollateralFactor",
         ],
-        [1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1],
       );
     },
   });
 
   describe("Post-VIP behavior", async () => {
     before(async () => {
-      await setMaxStalePeriodInChainlinkOracle(
-        bscmainnet.CHAINLINK_ORACLE,
-        USDT,
-        ethers.constants.AddressZero,
-        bscmainnet.NORMAL_TIMELOCK,
-        315360000,
-      );
-
       await setMaxStalePeriod(resilientOracle, u);
     });
 
@@ -121,7 +114,6 @@ forking(74286551, async () => {
     it("get correct price from oracle ", async () => {
       const price = await resilientOracle.getUnderlyingPrice(UMarketSpec.vToken.address);
       // Price should be within bound validator range (0.98 to 1.02)
-      console.log("U price:", ethers.utils.formatUnits(price, 18));
       expect(price).to.be.gte(parseUnits("0.98", 18));
       expect(price).to.be.lte(parseUnits("1.02", 18));
     });
@@ -140,27 +132,28 @@ forking(74286551, async () => {
 
     it("market should have correct total supply", async () => {
       const vUSupply = await vU.totalSupply();
-
       expect(vUSupply).to.equal(
         convertAmountToVTokens(UMarketSpec.initialSupply.amount, UMarketSpec.vToken.exchangeRate),
       );
     });
 
+    it("market should have correct reduce reserves block delta", async () => {
+      const blockDelta = await vU.reduceReservesBlockDelta();
+      expect(blockDelta).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
+    });
+
     it("market should have balance of underlying", async () => {
       const mockuBalance = await u.balanceOf(vU.address);
-
       expect(mockuBalance).to.equal(UMarketSpec.initialSupply.amount);
     });
 
     it("should burn vTokens", async () => {
       const vUBalanceBurned = await vU.balanceOf(ethers.constants.AddressZero);
-
       expect(vUBalanceBurned).to.equal(UMarketSpec.initialSupply.vTokensToBurn);
     });
 
     it("should not leave any vTokens in the timelock", async () => {
       const vUTimelockBalance = await vU.balanceOf(bscmainnet.NORMAL_TIMELOCK);
-
       expect(vUTimelockBalance).to.equal(0);
     });
   });

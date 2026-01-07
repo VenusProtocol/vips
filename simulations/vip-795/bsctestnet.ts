@@ -12,6 +12,7 @@ import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRate
 import {
   PROTOCOL_SHARE_RESERVE,
   RATE_MODEL,
+  REDUCE_RESERVES_BLOCK_DELTA,
   UMarketSpec,
   convertAmountToVTokens,
   vip795,
@@ -110,27 +111,28 @@ forking(82838591, async () => {
 
     it("market should have correct total supply", async () => {
       const vUSupply = await vU.totalSupply();
-
       expect(vUSupply).to.equal(
         convertAmountToVTokens(UMarketSpec.initialSupply.amount, UMarketSpec.vToken.exchangeRate),
       );
     });
 
+    it("market should have correct reduce reserves block delta", async () => {
+      const blockDelta = await vU.reduceReservesBlockDelta();
+      expect(blockDelta).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
+    });
+
     it("market should have balance of underlying", async () => {
       const mockuBalance = await mocku.balanceOf(vU.address);
-
       expect(mockuBalance).to.equal(UMarketSpec.initialSupply.amount);
     });
 
     it("should burn vTokens", async () => {
       const vUBalanceBurned = await vU.balanceOf(ethers.constants.AddressZero);
-
       expect(vUBalanceBurned).to.equal(UMarketSpec.initialSupply.vTokensToBurn);
     });
 
     it("should not leave any vTokens in the timelock", async () => {
       const vUTimelockBalance = await vU.balanceOf(bsctestnet.NORMAL_TIMELOCK);
-
       expect(vUTimelockBalance).to.equal(0);
     });
   });

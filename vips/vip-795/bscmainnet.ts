@@ -5,14 +5,15 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { RESILIENT_ORACLE, CHAINLINK_ORACLE, USDT_CHAINLINK_FEED } = NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 const bscmainnet = NETWORK_ADDRESSES.bscmainnet;
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 export const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
 export const RATE_MODEL = "0x846883aC2AFdaeF9d226182e82f3640d3D6D4d3f";
-export const REDUCE_RESERVES_BLOCK_DELTA = "115200";
+export const REDUCE_RESERVES_BLOCK_DELTA = "115200"; // 42048000 blocks per year (Before Fermi upgrade)
+export const USDT_CHAINLINK_FEED = "0xB97Ad0E74fa7d920791E90258A6E2085088b4320";
 
 // Oracle configuration
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26 hours
@@ -71,7 +72,7 @@ export const vip795 = () => {
   const meta = {
     version: "v2",
     title: "VIP-795 [BNB Chain] Add U market to the Core Pool",
-    description: "",
+    description: "VIP-795 [BNB Chain] Add U market to the Core Pool",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
