@@ -2,10 +2,10 @@ import { BigNumber, Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import CORE_POOL_RATE_MODEL_ABI from "./abi/JumpRateModel.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import VTOKEN_ABI from "./abi/VToken.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 export type VTokenContractAndSymbol = {
   symbol: string;

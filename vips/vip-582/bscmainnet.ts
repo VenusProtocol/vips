@@ -75,11 +75,23 @@ export interface SpeedRecord {
   borrowSideSpeed: string;
 }
 
-export const vip780 = () => {
+export const vip582 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-780 [BNB Chain] Block Rate Upgrade (1/2)",
-    description: ``,
+    title: "VIP-582 [BNB Chain] Updates for BNB Mainnet Fourier Hardfork",
+    description: `This proposal is informed by the Venus community forum publication [**BNB Mainnet Fourier Hardfork Update**](https://community.venus.io/t/bnb-mainnet-fourier-hardfork-update/5625). The post shares an update on the upcoming **BNB Mainnet Fourier Hardfork**, scheduled for **14th January 2026 at 02:30:00 AM (UTC)**, which will reduce the block interval from 0.75 seconds to 0.45 seconds as part of the BNB Chain roadmap. 
+
+If approved, this proposal will update the Venus Protocol’s block-dependent parameters to remain consistent with the new block interval introduced by the Fourier Hardfork, applying adjustments that maintain existing real-time behaviour prior to the network upgrade
+Community Post reference: [Venus Community](https://community.venus.io/t/bnb-mainnet-fourier-hardfork-update/5625?utm_source=chatgpt.com)
+
+**Action :**
+
+- **Apply parameter updates in the Venus Protocol on BNB Chain ahead of the Fourier Hardfork**:
+    - Review all Venus protocol parameters that are dependent on block intervals or per-block calculations and identify those affected by the reduced block time from 0.75 seconds to 0.45 seconds.
+    - Update **reward distribution parameters** (e.g., per-block reward amounts) to preserve the same reward rates over real-time after the reduction in block interval.
+    - Update **interest rate-related parameters** that rely on block-based timing to ensure continuity in supply and borrow behaviour post-hardfork.
+    - Adjust any **other time-dependent parameters** (accrual, accounting, or timing) that require recalibration in light of the new block frequency to maintain existing protocol behaviour.
+    - Execute the above updates **prior to the Fourier Hardfork activation** (targeting the network’s scheduled upgrade on **14th January 2026 at 02:30:00 AM UTC**) to ensure protocol alignment with the new block interval while preserving real-time behaviour.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -181,4 +193,4 @@ export const vip780 = () => {
   );
 };
 
-export default vip780;
+export default vip582;

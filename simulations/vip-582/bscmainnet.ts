@@ -6,7 +6,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip780 from "../../vips/vip-780/bscmainnet";
+import vip582 from "../../vips/vip-582/bscmainnet";
 import {
   BTCB,
   BTCB_PER_BLOCK_REWARD,
@@ -37,7 +37,7 @@ import {
   XVS_MARKET_SUPPLY_REWARD_PER_BLOCK,
   XVS_PER_BLOCK_REWARD,
   XVS_VAULT_PROXY,
-} from "../../vips/vip-780/bscmainnet";
+} from "../../vips/vip-582/bscmainnet";
 import CORE_POOL_RATE_MODEL_ABI from "./abi/JumpRateModel.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
@@ -164,7 +164,7 @@ forking(73348770, async () => {
     });
   });
 
-  testVip("VIP-780", await vip780(), {
+  testVip("VIP-582", await vip582(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

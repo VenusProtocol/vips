@@ -40,19 +40,19 @@ import {
   MIN_VOTING_PERIOD,
   PREVIOUS_XVS_EMISSIONS,
   PROPOSAL_CONFIGS,
-  vip778,
-} from "../../vips/vip-778/bsctestnet";
+  vip582,
+} from "../../vips/vip-582/bsctestnet-2";
+import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/defaultProxyAdmin.json";
 import DELEGATE_ABI from "./abi/governorBravodelegate.json";
 import PROXY_ABI from "./abi/manualProxy.json";
-import POOL_REGISTRY_ABI from "./abi/poolRegistry.json";
 import SHORTFALL_ABI from "./abi/shortfall.json";
 import VAI_CONTROLLER_ABI from "./abi/vaiController.json";
-import VTOKEN_ABI from "./abi/vtoken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 forking(73267381, async () => {
@@ -202,7 +202,7 @@ forking(73267381, async () => {
     });
   });
 
-  testVip("VIP-778", await vip778(), {
+  testVip("VIP-582", await vip582(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
