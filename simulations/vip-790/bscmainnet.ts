@@ -13,7 +13,6 @@ import vip790, {
   BSC_XVS_VAULT_TREASURY,
   NEW_PRIME_SPEED_FOR_USDC_USDT,
   PRIME_LIQUIDITY_PROVIDER,
-  UNICHAIN_XVS_BRIDGE_AMOUNT,
   USDC,
   USDT,
   ZKSYNC_XVS_BRIDGE_AMOUNT,
@@ -59,7 +58,7 @@ forking(74385484, async () => {
     it("should transfer XVS from the Comptroller", async () => {
       const comptrollerXVSBalanceAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
       expect(comptrollerXVSBalanceAfter).to.equal(
-        comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT.add(UNICHAIN_XVS_BRIDGE_AMOUNT)),
+        comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT),
       );
     });
 
