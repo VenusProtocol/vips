@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet, ethereum, unichainmainnet, zksyncmainnet, arbitrumone } = NETWORK_ADDRESSES;
+const { bscmainnet, ethereum, zksyncmainnet } = NETWORK_ADDRESSES;
 
 export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
@@ -16,7 +16,6 @@ export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 
 export const NEW_PRIME_SPEED_FOR_USDC_USDT = parseUnits("0.005422374429223744", 18);
 
-// TODO: XVS Buyback and Funds Allocation Values TO BE UPDATED
 export const ADAPTER_PARAMS = ethers.utils.solidityPack(["uint16", "uint256"], [1, 300000]);
 export const BRIDGE_FEES_BSC = parseUnits("0.5", 18);
 
@@ -32,7 +31,7 @@ export const BSC_SPEED = parseUnits("0.01985445205479452", 18); // 2319 XVS/day
 
 export const ETH_XVS_VAULT_TREASURY = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
 export const ETH_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
-export const ETH_XVS_AMOUNT = parseUnits("1191", 18);
+export const ETH_XVS_AMOUNT = parseUnits("1190", 18);
 export const ETH_SPEED = parseUnits("0.000049657534246575", 18); // 5.8 XVS/day
 
 export const vip790 = () => {

@@ -57,9 +57,7 @@ forking(74385484, async () => {
 
     it("should transfer XVS from the Comptroller", async () => {
       const comptrollerXVSBalanceAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
-      expect(comptrollerXVSBalanceAfter).to.equal(
-        comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT),
-      );
+      expect(comptrollerXVSBalanceAfter).to.equal(comptrollerPreviousXVSBalance.sub(ZKSYNC_XVS_BRIDGE_AMOUNT));
     });
 
     it("should transfer XVS from the XVS Vault Treasury to the XVS Store", async () => {
