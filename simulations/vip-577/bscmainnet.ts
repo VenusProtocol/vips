@@ -5,7 +5,7 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip577, { ADDRESS_DATA, Actions } from "../../vips/vip-577/bscmainnet";
-import VTOKEN_ABI from "../vip-778/abi/vtoken.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import REWARDS_DISTRIBUTOR_ABI from "./abi/rewardsDistributor.json";

@@ -45,7 +45,7 @@ import {
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
 import PRIME_ABI from "./abi/Prime.json";
 import PLP_ABI from "./abi/PrimeLiquidityProvider.json";
-import VTOKEN_ABI from "./abi/VToken.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import PROXY_ADMIN_ABI from "./abi/defaultProxyAdmin.json";

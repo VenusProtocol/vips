@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 import CORE_POOL_RATE_MODEL_ABI from "./abi/JumpRateModel.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
-import VTOKEN_ABI from "./abi/VToken.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 export type VTokenContractAndSymbol = {

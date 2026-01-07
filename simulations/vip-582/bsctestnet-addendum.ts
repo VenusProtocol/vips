@@ -11,7 +11,7 @@ import vip778Addendum, {
   BSCTESTNET_VTOKEN_BEACON,
 } from "../../vips/vip-582/bsctestnet-addendum";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
-import VTOKEN_ABI from "./abi/VToken.json";
+import VTOKEN_ABI from "./abi/vtoken.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
