@@ -11,7 +11,7 @@ export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E
 export const MOCKU = "0x180Bc1a9843A65D4116e44886FD3558515a56A49";
 export const vU = "0x93969F17d4c1C7B22000eA26D5C2766E0f616D90";
 export const RATE_MODEL = "0x27670709C5CD7EA594a887Af5D4eBA926F36c561"; // two-kinks
-export const REDUCE_RESERVES_BLOCK_DELTA = "192000"; // 70080000 blocks per year (Fermi upgrade)
+export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 
 export const UMarketSpec = {
   vToken: {
