@@ -92,7 +92,6 @@ export const vip790 = () => {
         target: USDT,
         signature: "approve(address,uint256)",
         params: [UNISWAP_SWAP_ROUTER, 0],
-        dstChainId: LzChainId.ethereum,
       },
 
       // XVS Buyback and Funds Allocation
