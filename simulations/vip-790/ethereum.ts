@@ -14,7 +14,7 @@ import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
 const { ethereum } = NETWORK_ADDRESSES;
 
-forking(24183252, async () => {
+forking(24188026, async () => {
   let provider: any;
   let xvs: any;
   let xvsVaultTreasuryPreviousXVSBalance: any;

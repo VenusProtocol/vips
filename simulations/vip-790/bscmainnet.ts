@@ -1,6 +1,7 @@
 import { TransactionResponse } from "@ethersproject/providers";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
@@ -21,16 +22,22 @@ import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
+import ERC20_ABI from "./abi/erc20.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(74385484, async () => {
+forking(74468791, async () => {
   let xvs: Contract;
-  let comptrollerPreviousXVSBalance: Contract;
-  let xvsVaultTreasuryPreviousXVSBalance: Contract;
-  let xvsStorePreviousXVSBalance: Contract;
+  let comptrollerPreviousXVSBalance: any;
+  let xvsVaultTreasuryPreviousXVSBalance: any;
+  let xvsStorePreviousXVSBalance: any;
   let xvsVault: Contract;
   let primeLiquidityProvider: Contract;
+  let usdc: Contract;
+  let usdt: Contract;
+  let usdtPreviousBalance: any;
+  let usdcPreviousBalance: any;
+  let normalTimelockUsdcPreviousBalance: any;
 
   before(async () => {
     xvs = await ethers.getContractAt(XVS_ABI, bscmainnet.XVS);
@@ -39,6 +46,11 @@ forking(74385484, async () => {
     xvsStorePreviousXVSBalance = await xvs.balanceOf(BSC_XVS_STORE);
     xvsVault = await ethers.getContractAt(XVS_VAULT_ABI, bscmainnet.XVS_VAULT_PROXY);
     primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+    usdc = await ethers.getContractAt(ERC20_ABI, USDC);
+    usdt = await ethers.getContractAt(ERC20_ABI, USDT);
+    usdtPreviousBalance = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    usdcPreviousBalance = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+    normalTimelockUsdcPreviousBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
   });
 
   testVip("vip-790", await vip790(), {
@@ -53,6 +65,22 @@ forking(74385484, async () => {
       const usdtSpeed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
       expect(usdcSpeed).to.equal(NEW_PRIME_SPEED_FOR_USDC_USDT);
       expect(usdtSpeed).to.equal(NEW_PRIME_SPEED_FOR_USDC_USDT);
+    });
+
+    it("check sweep and token conversion status", async () => {
+      // PLP USDT decreased by 15000
+      const usdtBalance = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      const usdtDecreaseBalance = usdtPreviousBalance.sub(usdtBalance);
+      expect(usdtDecreaseBalance).to.eq(parseUnits("15000", 18));
+
+      // PLP USDC increased by 15980
+      const usdcBalance = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
+      const usdcIncreasedBalance = usdcBalance.sub(usdcPreviousBalance);
+      expect(usdcIncreasedBalance).to.eq(parseUnits("14980", 18));
+
+      // Normal timelock USDC balance remains the same
+      const normalTimelockUsdcBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
+      expect(normalTimelockUsdcBalance).to.be.closeTo(normalTimelockUsdcBalance, parseUnits("10", 18)); // +-10
     });
 
     it("should transfer XVS from the Comptroller", async () => {

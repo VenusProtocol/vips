@@ -27,12 +27,14 @@ export const BSC_XVS_BRIDGE = "0xf8F46791E3dB29a029Ec6c9d946226f3c613e854";
 export const BSC_XVS_VAULT_TREASURY = "0x269ff7818DB317f60E386D2be0B259e1a324a40a";
 export const BSC_XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 export const BSC_XVS_AMOUNT = parseUnits("183018", 18);
-export const BSC_SPEED = parseUnits("0.01985445205479452", 18); // 2319 XVS/day
+export const BSC_SPEED = parseUnits("0.020130208333333333", 18); // 2319 XVS/day
 
 export const ETH_XVS_VAULT_TREASURY = "0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE";
 export const ETH_XVS_STORE = "0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B";
-export const ETH_XVS_AMOUNT = parseUnits("1190", 18);
-export const ETH_SPEED = parseUnits("0.000049657534246575", 18); // 5.8 XVS/day
+export const ETH_XVS_AMOUNT = parseUnits("1191", 18);
+export const ETH_SPEED = parseUnits("0.000805555555555555", 18); // 5.8 XVS/day
+
+export const UNISWAP_SWAP_ROUTER = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
 
 export const vip790 = () => {
   const meta = {
@@ -54,6 +56,43 @@ export const vip790 = () => {
           [USDC, USDT],
           [NEW_PRIME_SPEED_FOR_USDC_USDT, NEW_PRIME_SPEED_FOR_USDC_USDT],
         ],
+      },
+      {
+        target: PRIME_LIQUIDITY_PROVIDER,
+        signature: "sweepToken(address,address,uint256)",
+        params: [USDT, NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK, parseUnits("15000", 18)],
+      },
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [UNISWAP_SWAP_ROUTER, parseUnits("15000", 18)],
+      },
+      {
+        target: UNISWAP_SWAP_ROUTER,
+        signature: "exactInputSingle((address,address,uint24,address,uint256,uint256,uint256,uint160))",
+        params: [
+          [
+            USDT,
+            USDC,
+            100,
+            bscmainnet.NORMAL_TIMELOCK,
+            Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 14, // 14 days from now
+            parseUnits("15000", 18),
+            parseUnits("14980", 18),
+            0n,
+          ],
+        ],
+      },
+      {
+        target: USDC,
+        signature: "transfer(address,uint256)",
+        params: [PRIME_LIQUIDITY_PROVIDER, parseUnits("14980", 18)],
+      },
+      {
+        target: USDT,
+        signature: "approve(address,uint256)",
+        params: [UNISWAP_SWAP_ROUTER, 0],
+        dstChainId: LzChainId.ethereum,
       },
 
       // XVS Buyback and Funds Allocation
