@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+export const { RESILIENT_ORACLE, CHAINLINK_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 const bscmainnet = NETWORK_ADDRESSES.bscmainnet;
 export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
@@ -13,13 +13,14 @@ export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 export const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
 export const RATE_MODEL = "0x846883aC2AFdaeF9d226182e82f3640d3D6D4d3f";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const USDT_FEED = "0x6E64923A9C1dC94E2B746C5DC58abEbd2d2E0b56";
 
 // Oracle configuration
 export const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
 export const USD1_FEED = "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0";
 export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26 hours
-const UPPER_BOUND_RATIO = parseUnits("1.02", 18); // 2% upper bound
-const LOWER_BOUND_RATIO = parseUnits("0.98", 18); // 2% lower bound
+const UPPER_BOUND_RATIO = parseUnits("1.01", 18); // 1% upper bound
+const LOWER_BOUND_RATIO = parseUnits("0.99", 18); // 1% lower bound
 
 export const UMarketSpec = {
   vToken: {
@@ -84,7 +85,7 @@ export const vip795 = () => {
       {
         target: USDT_CHAINLINK_ORACLE,
         signature: "setTokenConfig((address,address,uint256))",
-        params: [[U, bscmainnet.USDT_CHAINLINK_FEED, CHAINLINK_MAX_STALE_PERIOD]],
+        params: [[U, USDT_FEED, CHAINLINK_MAX_STALE_PERIOD]],
       },
       {
         target: CHAINLINK_ORACLE,

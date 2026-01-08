@@ -10,9 +10,11 @@ import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
+  CHAINLINK_ORACLE,
   PROTOCOL_SHARE_RESERVE,
   RATE_MODEL,
   REDUCE_RESERVES_BLOCK_DELTA,
+  RESILIENT_ORACLE,
   U,
   UMarketSpec,
   USDT_CHAINLINK_ORACLE,
@@ -41,8 +43,8 @@ forking(74286551, async () => {
     comptroller = new ethers.Contract(UMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     u = new ethers.Contract(UMarketSpec.vToken.underlying.address, ERC20_ABI, provider);
     vU = new ethers.Contract(UMarketSpec.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-    chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
+    resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+    chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
 
