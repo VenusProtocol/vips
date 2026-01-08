@@ -7,7 +7,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip790, {
+import vip580, {
   BSC_SPEED,
   BSC_XVS_AMOUNT,
   BSC_XVS_STORE,
@@ -17,7 +17,7 @@ import vip790, {
   USDC,
   USDT,
   ZKSYNC_XVS_BRIDGE_AMOUNT,
-} from "../../vips/vip-790/bscmainnet";
+} from "../../vips/vip-580/bscmainnet";
 import CORE_COMPTROLLER_ABI from "./abi/CoreComptroller.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
@@ -53,7 +53,7 @@ forking(74468791, async () => {
     normalTimelockUsdcPreviousBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
   });
 
-  testVip("vip-790", await vip790(), {
+  testVip("vip-580", await vip580(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [CORE_COMPTROLLER_ABI], ["VenusGranted"], [1]);
     },
@@ -73,14 +73,14 @@ forking(74468791, async () => {
       const usdtDecreaseBalance = usdtPreviousBalance.sub(usdtBalance);
       expect(usdtDecreaseBalance).to.eq(parseUnits("15000", 18));
 
-      // PLP USDC increased by 15980
+      // PLP USDC increased by 14925
       const usdcBalance = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
       const usdcIncreasedBalance = usdcBalance.sub(usdcPreviousBalance);
-      expect(usdcIncreasedBalance).to.eq(parseUnits("14980", 18));
+      expect(usdcIncreasedBalance).to.eq(parseUnits("14925", 18));
 
       // Normal timelock USDC balance remains the same
       const normalTimelockUsdcBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
-      expect(normalTimelockUsdcPreviousBalance).to.be.closeTo(normalTimelockUsdcBalance, parseUnits("10", 18)); // +-10
+      expect(normalTimelockUsdcPreviousBalance).to.be.closeTo(normalTimelockUsdcBalance, parseUnits("100", 18)); // +-10
     });
 
     it("should transfer XVS from the Comptroller", async () => {

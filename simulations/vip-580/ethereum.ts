@@ -3,12 +3,12 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip790, {
+import vip580, {
   ETH_SPEED,
   ETH_XVS_AMOUNT,
   ETH_XVS_STORE,
   ETH_XVS_VAULT_TREASURY,
-} from "../../vips/vip-790/bscmainnet";
+} from "../../vips/vip-580/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -29,7 +29,7 @@ forking(24188026, async () => {
     xvsVault = new ethers.Contract(ethereum.XVS_VAULT_PROXY, XVS_VAULT_ABI, provider);
   });
 
-  testForkedNetworkVipCommands("vip-790", await vip790());
+  testForkedNetworkVipCommands("vip-580", await vip580());
 
   describe("Post-VIP behavior", async () => {
     it("should transfer XVS from the XVS Vault Treasury to the XVS Store", async () => {

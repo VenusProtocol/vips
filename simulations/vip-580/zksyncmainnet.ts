@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip790, { ZKSYNC_SPEED, ZKSYNC_XVS_BRIDGE_AMOUNT, ZKSYNC_XVS_STORE } from "../../vips/vip-790/bscmainnet";
+import vip580, { ZKSYNC_SPEED, ZKSYNC_XVS_BRIDGE_AMOUNT, ZKSYNC_XVS_STORE } from "../../vips/vip-580/bscmainnet";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
 
@@ -25,7 +25,7 @@ forking(67612987, async () => {
     await xvs.connect(signer).mint(ZKSYNC_XVS_STORE, ZKSYNC_XVS_BRIDGE_AMOUNT);
   });
 
-  testForkedNetworkVipCommands("VIP 790", await vip790());
+  testForkedNetworkVipCommands("VIP 580", await vip580());
 
   describe("Post-VIP behaviour", async () => {
     it("check xvs balance", async () => {

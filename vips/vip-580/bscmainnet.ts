@@ -36,11 +36,36 @@ export const ETH_SPEED = parseUnits("0.000805555555555555", 18); // 5.8 XVS/day
 
 export const UNISWAP_SWAP_ROUTER = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
 
-export const vip790 = () => {
+export const vip580 = () => {
   const meta = {
     version: "v2",
-    title: "VIP790 PRIME and XVS REWARDS ALLOCATION",
-    description: `VIP790 PRIME and XVS REWARDS ALLOCATION`,
+    title: "VIP580 [Multi-Chain] January 2026 Prime Reward Adjustment and Q1 2026 XVS Buyback Distribution",
+    description: `This proposal outlines two related initiatives proposed to be executed together, as shared with the Venus community: 
+**(1) the January 2026 Prime reward adjustment on BNB Chain
+(2) the Q1 2026 XVS Buyback and Vault Rewards Distribution**, in accordance with [Tokenomics V4.1](https://docs-v4.venus.io/governance/tokenomics).
+
+The Prime reward adjustment addresses an overpayment that occurred in December 2025 due to a delayed update in Prime reward rates. To account for this overpayment, the Prime reward allocation for January 2026 is proposed to be adjusted while maintaining a buffer to safeguard against price fluctuations. Prime rewards will continue to focus exclusively on the USDT and USDC supply markets on BNB Chain.
+
+In parallel, this proposal covers the redistribution of XVS accumulated through protocol buybacks during Q4 2025 to XVS stakers in Q1 2026. Buybacks were executed progressively during Q4 2025, and this proposal focuses on transferring the accumulated XVS from Vault Treasuries to XVS Stores and updating Vault reward speeds on eligible chains that meet the minimum revenue threshold.
+
+**Action :**
+
+- **January 2026 Prime Reward Adjustment (BNB Chain)**:
+    - Adjust the January 2026 Prime reward allocation to **$38,000**, accounting for prior overpayment and maintaining a buffer to mitigate price volatility.
+    - Continue distributing Prime rewards **exclusively to the USDT and USDC supply markets** on BNB Chain.
+    - Apply a **50% / 50% allocation split** between USDT and USDC Prime rewards.
+    - Convert **150,000 USDT to USDC** within the Prime Budget to support balanced reward distribution.
+    - Update Prime reward speeds accordingly based on prevailing market prices at execution time.
+- **Q1 2026 XVS Buyback and Vault Rewards Distribution**:
+    - **BNB Chain**:
+        - Transfer **183,018 XVS** from the [XVS Vault Treasury](https://bscscan.com/address/0x269ff7818DB317f60E386D2be0B259e1a324a40a) to the [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359).
+        - Set the XVS Vault reward speed to **2,319 XVS/day**, reflecting Q4 2025 buybacks and the base reward allocation of 308.7 XVS/day.
+    - **Ethereum**:
+        - Transfer **1,191 XVS** from the [XVS Vault Treasury](https://etherscan.io/address/0xaE39C38AF957338b3cEE2b3E5d825ea88df02EfE) to the [XVS Store](https://etherscan.io/address/0x1Db646E1Ab05571AF99e47e8F909801e5C99d37B).
+        - Set the XVS Vault reward speed to **5.8 XVS/day**, reflecting Q4 2025 buybacks net of a 662 XVS adjustment.
+    - **ZKsync**:
+        - Bridge **473 XVS** from the [Core Pool Comptroller](https://bscscan.com/address/0xfD36E2c2a6789Db23113685031d7F16329158384) to the [XVS Store](https://explorer.zksync.io/address/0x84266F552756cBed893b1FFA85248cD99501e3ce).
+        - Set the XVS Vault reward speed to **5.68 XVS/day**, reflecting Q4 2025 buybacks and existing XVS balances.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -78,7 +103,7 @@ export const vip790 = () => {
             bscmainnet.NORMAL_TIMELOCK,
             Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 14, // 14 days from now
             parseUnits("15000", 18),
-            parseUnits("14980", 18),
+            parseUnits("14925", 18),
             0n,
           ],
         ],
@@ -86,7 +111,7 @@ export const vip790 = () => {
       {
         target: USDC,
         signature: "transfer(address,uint256)",
-        params: [PRIME_LIQUIDITY_PROVIDER, parseUnits("14980", 18)],
+        params: [PRIME_LIQUIDITY_PROVIDER, parseUnits("14925", 18)],
       },
       {
         target: USDT,
@@ -151,4 +176,4 @@ export const vip790 = () => {
   );
 };
 
-export default vip790;
+export default vip580;
