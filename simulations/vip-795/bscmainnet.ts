@@ -11,8 +11,8 @@ import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRate
 
 import {
   CHAINLINK_ORACLE,
+  CHECKPOIINT_IRM,
   PROTOCOL_SHARE_RESERVE,
-  RATE_MODEL,
   REDUCE_RESERVES_BLOCK_DELTA,
   RESILIENT_ORACLE,
   U,
@@ -31,7 +31,7 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 const provider = ethers.provider;
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-forking(74286551, async () => {
+forking(74517975, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let u: Contract;
@@ -109,10 +109,10 @@ forking(74286551, async () => {
     });
 
     it("check new IRM", async () => {
-      expect(await vU.interestRateModel()).to.equal(RATE_MODEL);
+      expect(await vU.interestRateModel()).to.equal(CHECKPOIINT_IRM);
     });
 
-    checkTwoKinksInterestRate(RATE_MODEL, "vU", {
+    checkTwoKinksInterestRate(CHECKPOIINT_IRM, "vU", {
       base: UMarketSpec.interestRateModel.baseRatePerYear,
       base2: UMarketSpec.interestRateModel.baseRatePerYear2,
       multiplier: UMarketSpec.interestRateModel.multiplierPerYear,

@@ -11,9 +11,9 @@ export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const PROTOCOL_SHARE_RESERVE = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const U = "0xcE24439F2D9C6a2289F741120FE202248B666666";
 export const VU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
-export const RATE_MODEL = "0x846883aC2AFdaeF9d226182e82f3640d3D6D4d3f";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 export const STABLE_USDT_PRICE_FEED = "0xf373A7a76De77f7A86ea65BE15577AEA8bE02A36";
+export const CHECKPOIINT_IRM = "0x381829DBb51cD74F3172574f4111F2F58d8b0E53";
 
 // Oracle configuration
 export const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
@@ -139,6 +139,11 @@ export const vip795 = () => {
         target: UMarketSpec.vToken.address,
         signature: "_setReserveFactor(uint256)",
         params: [UMarketSpec.riskParameters.reserveFactor],
+      },
+      {
+        target: UMarketSpec.vToken.address,
+        signature: "_setInterestRateModel(address)",
+        params: [CHECKPOIINT_IRM],
       },
       {
         target: UMarketSpec.vToken.comptroller,
