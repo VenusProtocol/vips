@@ -23,7 +23,7 @@ import VToken_ABI from "./abi/VToken.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(82078679, async () => {
+forking(83235428, async () => {
   const provider = ethers.provider;
   const acm = new ethers.Contract(bsctestnet.ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, provider);
   const comptroller = new ethers.Contract(CORE_COMPTROLLER, COMPTROLLER_ABI, provider);
@@ -43,20 +43,21 @@ forking(82078679, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI],
         ["PermissionGranted"],
-        [33], // Expected number of PermissionGranted events (BSC only)
+        [34], // Expected number of PermissionGranted events (BSC only)
       );
     },
   });
 
   describe("Post-VIP behavior", () => {
     describe("RISK_ORACLE permissions", () => {
-      it("should grant addAuthorizedSender permission to NORMAL_TIMELOCK", async () => {
+      it("should grant addAuthorizedSender permission to NORMAL_TIMELOCK and GUARDIAN", async () => {
         const addAuthorizedSenderRoleNormal = ethers.utils.solidityPack(
           ["address", "string"],
           [RISK_ORACLE, "addAuthorizedSender(address)"],
         );
         const addAuthorizedSenderRoleHashNormal = ethers.utils.keccak256(addAuthorizedSenderRoleNormal);
         expect(await acm.hasRole(addAuthorizedSenderRoleHashNormal, bsctestnet.NORMAL_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(addAuthorizedSenderRoleHashNormal, bsctestnet.GUARDIAN)).to.be.true;
       });
 
       it("should grant removeAuthorizedSender permission to all timelocks", async () => {

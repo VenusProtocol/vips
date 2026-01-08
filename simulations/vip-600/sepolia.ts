@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Signer } from "ethers";
+import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -7,13 +7,17 @@ import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import vip600, {
-  DESTINATION_RECEIVER_STEWARD,
   SEPOLIA_ACM,
+  SEPOLIA_ACM_AGGREGATOR,
+  SEPOLIA_ACM_AGR_INDEX,
   SEPOLIA_CF_STEWARD,
   SEPOLIA_COMPTROLLER,
+  SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   SEPOLIA_IRM_STEWARD,
   SEPOLIA_MC_STEWARD,
+  SEPOLIA_PERMISSIONS,
 } from "../../vips/vip-600/bsctestnet";
+import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";
 import ISOLATED_VToken_ABI from "./abi/ILVToken.json";
@@ -22,16 +26,56 @@ import Owner_ABI from "./abi/OwnerMinimalAbi.json";
 
 const { sepolia } = NETWORK_ADDRESSES;
 
-forking(9965780, async () => {
-  const provider = ethers.provider;
-  const acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
-  const isolatedPoolComptroller = new ethers.Contract(SEPOLIA_COMPTROLLER, ISOLATED_POOL_COMPTROLLER_ABI, provider);
+forking(10002670, async () => {
+  let acm: Contract;
+  let isolatedPoolComptroller: Contract;
+  let acmAggregator: Contract;
+  let destinationReceiverSteward: Contract;
+  let sepoliaMcSteward: Contract;
+  let sepoliaCfSteward: Contract;
+  let sepoliaIrmSteward: Contract;
 
-  // SEPOLIA Risk Steward contracts
-  const destinationReceiverSteward = new ethers.Contract(DESTINATION_RECEIVER_STEWARD, DSR_ABI, provider);
-  const sepoliaMcSteward = new ethers.Contract(SEPOLIA_MC_STEWARD, Owner_ABI, provider);
-  const sepoliaCfSteward = new ethers.Contract(SEPOLIA_CF_STEWARD, Owner_ABI, provider);
-  const sepoliaIrmSteward = new ethers.Contract(SEPOLIA_IRM_STEWARD, Owner_ABI, provider);
+  before(async () => {
+    const provider = ethers.provider;
+    acm = new ethers.Contract(SEPOLIA_ACM, ACCESS_CONTROL_MANAGER_ABI, provider);
+    isolatedPoolComptroller = new ethers.Contract(SEPOLIA_COMPTROLLER, ISOLATED_POOL_COMPTROLLER_ABI, provider);
+    acmAggregator = new ethers.Contract(SEPOLIA_ACM_AGGREGATOR, ACM_AGGREGATOR_ABI, provider);
+
+    // SEPOLIA Risk Steward contracts
+    destinationReceiverSteward = new ethers.Contract(SEPOLIA_DESTINATION_STEWARD_RECEIVER, DSR_ABI, provider);
+    sepoliaMcSteward = new ethers.Contract(SEPOLIA_MC_STEWARD, Owner_ABI, provider);
+    sepoliaCfSteward = new ethers.Contract(SEPOLIA_CF_STEWARD, Owner_ABI, provider);
+    sepoliaIrmSteward = new ethers.Contract(SEPOLIA_IRM_STEWARD, Owner_ABI, provider);
+    const signer = provider.getSigner();
+    await acmAggregator.connect(signer).addGrantPermissions(SEPOLIA_PERMISSIONS);
+  });
+
+  describe("Pre-VIP behavior", () => {
+    it("should verify stored permissions match SEPOLIA_PERMISSIONS from buildRemoteChainPermissions", async () => {
+      // Retrieve all permissions from the aggregator using grantPermissions and verify they match SEPOLIA_PERMISSIONS
+      const storedPermissions = [];
+      for (let i = 0; i < SEPOLIA_PERMISSIONS.length; i++) {
+        const storedPermission = await acmAggregator.grantPermissions(SEPOLIA_ACM_AGR_INDEX, i);
+        storedPermissions.push(storedPermission);
+        const expectedPermission = SEPOLIA_PERMISSIONS[i];
+
+        expect(storedPermission.contractAddress.toLowerCase()).to.equal(
+          expectedPermission[0].toLowerCase(),
+          `Permission ${i} contractAddress mismatch`,
+        );
+        expect(storedPermission.functionSig).to.equal(expectedPermission[1], `Permission ${i} functionSig mismatch`);
+        expect(storedPermission.account.toLowerCase()).to.equal(
+          expectedPermission[2].toLowerCase(),
+          `Permission ${i} account mismatch`,
+        );
+      }
+      // Verify the count matches
+      expect(storedPermissions.length).to.equal(SEPOLIA_PERMISSIONS.length);
+      // Out of bound
+      await expect(acmAggregator.callStatic.grantPermissions(SEPOLIA_ACM_AGR_INDEX, SEPOLIA_PERMISSIONS.length)).to.be
+        .reverted;
+    });
+  });
 
   testForkedNetworkVipCommands("vip600 Configuring Risk Stewards on Sepolia", await vip600(), {
     callbackAfterExecution: async txResponse => {
@@ -39,27 +83,28 @@ forking(9965780, async () => {
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI],
         ["PermissionGranted"],
-        [20], // Expected number of PermissionGranted events for Sepolia commands
+        [24], // Expected number of PermissionGranted events for Sepolia commands
       );
     },
   });
 
   describe("Post-VIP behavior", () => {
     describe("DESTINATION_RECEIVER_STEWARD permissions", () => {
-      it("should grant setRiskParameterConfig permission to NORMAL_TIMELOCK and FAST_TRACK_TIMELOCK", async () => {
+      it("should grant setRiskParameterConfig permission to NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK and GUARDIAN", async () => {
         const setRiskParamRole = ethers.utils.solidityPack(
           ["address", "string"],
-          [DESTINATION_RECEIVER_STEWARD, "setRiskParameterConfig(string,address,uint256)"],
+          [SEPOLIA_DESTINATION_STEWARD_RECEIVER, "setRiskParameterConfig(string,address,uint256)"],
         );
         const setRiskParamRoleHash = ethers.utils.keccak256(setRiskParamRole);
         expect(await acm.hasRole(setRiskParamRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
         expect(await acm.hasRole(setRiskParamRoleHash, sepolia.FAST_TRACK_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(setRiskParamRoleHash, sepolia.GUARDIAN)).to.be.true;
       });
 
       it("should grant setConfigActive permission to all timelocks", async () => {
         const setConfigActiveRole = ethers.utils.solidityPack(
           ["address", "string"],
-          [DESTINATION_RECEIVER_STEWARD, "setConfigActive(string,bool)"],
+          [SEPOLIA_DESTINATION_STEWARD_RECEIVER, "setConfigActive(string,bool)"],
         );
         const setConfigActiveRoleHash = ethers.utils.keccak256(setConfigActiveRole);
         expect(await acm.hasRole(setConfigActiveRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
@@ -68,10 +113,21 @@ forking(9965780, async () => {
         expect(await acm.hasRole(setConfigActiveRoleHash, sepolia.GUARDIAN)).to.be.true;
       });
 
+      it("should grant setRemoteDelay permission to NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK and GUARDIAN", async () => {
+        const setRemoteDelayRole = ethers.utils.solidityPack(
+          ["address", "string"],
+          [SEPOLIA_DESTINATION_STEWARD_RECEIVER, "setRemoteDelay(uint256)"],
+        );
+        const setRemoteDelayRoleHash = ethers.utils.keccak256(setRemoteDelayRole);
+        expect(await acm.hasRole(setRemoteDelayRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(setRemoteDelayRoleHash, sepolia.FAST_TRACK_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(setRemoteDelayRoleHash, sepolia.GUARDIAN)).to.be.true;
+      });
+
       it("should grant setWhitelistedExecutor permission to all timelocks", async () => {
         const setWhitelistedExecutorRole = ethers.utils.solidityPack(
           ["address", "string"],
-          [DESTINATION_RECEIVER_STEWARD, "setWhitelistedExecutor(address,bool)"],
+          [SEPOLIA_DESTINATION_STEWARD_RECEIVER, "setWhitelistedExecutor(address,bool)"],
         );
         const setWhitelistedExecutorRoleHash = ethers.utils.keccak256(setWhitelistedExecutorRole);
         expect(await acm.hasRole(setWhitelistedExecutorRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
@@ -82,7 +138,7 @@ forking(9965780, async () => {
     });
 
     describe("REMOTE_RS setSafeDeltaBps permissions", () => {
-      it("should grant MC_STEWARD setSafeDeltaBps permission to NORMAL and FAST_TRACK TIMELOCK ", async () => {
+      it("should grant MC_STEWARD setSafeDeltaBps permission to NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK and GUARDIAN", async () => {
         const marketCapRole = ethers.utils.solidityPack(
           ["address", "string"],
           [SEPOLIA_MC_STEWARD, "setSafeDeltaBps(uint256)"],
@@ -90,9 +146,10 @@ forking(9965780, async () => {
         const marketCapRoleHash = ethers.utils.keccak256(marketCapRole);
         expect(await acm.hasRole(marketCapRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
         expect(await acm.hasRole(marketCapRoleHash, sepolia.FAST_TRACK_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(marketCapRoleHash, sepolia.GUARDIAN)).to.be.true;
       });
 
-      it("should grant CF_STEWARD setSafeDeltaBps permission to NORMAL and FAST_TRACK TIMELOCK", async () => {
+      it("should grant CF_STEWARD setSafeDeltaBps permission to NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK and GUARDIAN", async () => {
         const cfRole = ethers.utils.solidityPack(
           ["address", "string"],
           [SEPOLIA_CF_STEWARD, "setSafeDeltaBps(uint256)"],
@@ -100,6 +157,7 @@ forking(9965780, async () => {
         const cfRoleHash = ethers.utils.keccak256(cfRole);
         expect(await acm.hasRole(cfRoleHash, sepolia.NORMAL_TIMELOCK)).to.be.true;
         expect(await acm.hasRole(cfRoleHash, sepolia.FAST_TRACK_TIMELOCK)).to.be.true;
+        expect(await acm.hasRole(cfRoleHash, sepolia.GUARDIAN)).to.be.true;
       });
     });
 
@@ -176,12 +234,12 @@ forking(9965780, async () => {
           isolatedPoolComptroller
             .connect(collateralFactorSteward)
             .setCollateralFactor(marketAddress, parseUnits("0.8", 18), parseUnits("0.85", 18)),
-        ).to.emit(isolatedPoolComptroller, "NewCollateralFactor");
+        ).to.be.revertedWith("invalid resilient oracle price"); // this reverts due to stale period but it means passed the ACM check
       });
 
       it("should allow SEPOLIA_IRM_STEWARD to set interest rate models on remote markets", async () => {
         const irmAddress = "0x8E09246751bcf2F621694881bd0E55d681f061c3";
-        const market = new ethers.Contract(marketAddress, ISOLATED_VToken_ABI, provider);
+        const market = new ethers.Contract(marketAddress, ISOLATED_VToken_ABI, ethers.provider);
 
         await expect(market.connect(irmSteward).setInterestRateModel(irmAddress)).to.emit(
           market,

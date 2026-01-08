@@ -6,24 +6,34 @@ import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
 import { vip600 as vip600a } from "../../vips/vip-600/bsctestnet";
 import vip600, {
+  ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  ARBITRUM_SEPOLIA_EID,
+  BASE_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  BASE_SEPOLIA_EID,
   COLLATERALFACTORS_STEWARD,
-  DESTINATION_RECEIVER_STEWARD,
   FIVE_MINUTES,
   IRM_STEWARD,
   MARKETCAP_STEWARD,
+  OP_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  OP_SEPOLIA_EID,
   RISK_ORACLE,
   RISK_PARAMETER_SENDER,
   RISK_STEWARD_RECEIVER,
+  SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   SEPOLIA_EID,
   TEN_MINUTES,
+  UNICHAIN_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  UNICHAIN_SEPOLIA_EID,
   UPDATE_TYPES,
   WHITELISTED_EXECUTORS,
+  ZK_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  ZK_SEPOLIA_EID,
 } from "../../vips/vip-600/bsctestnet-2";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import RISK_ORACLE_ABI from "./abi/RiskOracle.json";
 import RSR_ABI from "./abi/RiskStewardReceiver.json";
 
-forking(82091393, async () => {
+forking(83235428, async () => {
   const provider = ethers.provider;
   const riskOracle = new ethers.Contract(RISK_ORACLE, RISK_ORACLE_ABI, provider);
   const riskStewardReceiver = new ethers.Contract(RISK_STEWARD_RECEIVER, RSR_ABI, provider);
@@ -113,9 +123,34 @@ forking(82091393, async () => {
     });
 
     describe("Cross-chain peer connections", () => {
-      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to DESTINATION_RECEIVER_STEWARD (DSR)", async () => {
-        const expectedPeer = ethers.utils.hexZeroPad(DESTINATION_RECEIVER_STEWARD, 32);
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
         expect(await riskStewardReceiver.peers(SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
+      });
+
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
+        expect(await riskStewardReceiver.peers(ARBITRUM_SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
+      });
+
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to BASE_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(BASE_SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
+        expect(await riskStewardReceiver.peers(BASE_SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
+      });
+
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to OP_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(OP_SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
+        expect(await riskStewardReceiver.peers(OP_SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
+      });
+
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to UNICHAIN_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(UNICHAIN_SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
+        expect(await riskStewardReceiver.peers(UNICHAIN_SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
+      });
+
+      it("should set peer for RISK_STEWARD_RECEIVER (RSR) to ZK_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR)", async () => {
+        const expectedPeer = ethers.utils.hexZeroPad(ZK_SEPOLIA_DESTINATION_STEWARD_RECEIVER, 32);
+        expect(await riskStewardReceiver.peers(ZK_SEPOLIA_EID)).to.equal(expectedPeer.toLowerCase());
       });
     });
   });

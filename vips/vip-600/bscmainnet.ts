@@ -13,7 +13,7 @@ export const IRM_STEWARD = "0x8acaBc42Bb98E2e2b091902a7E23f60CcB730aaa";
 
 export const WHITELISTED_EXECUTORS = ["0x1111111111111111111111111111111111111111"]; // TODO
 export const RISK_PARAMETER_SENDER = ["0x1111111111111111111111111111111111111111"]; // TODO
-export const UPDATE_TYPES = ["SupplyCap", "BorrowCap", "CollateralFactor", "IRM"];
+export const UPDATE_TYPES = ["supplyCap", "borrowCap", "collateralFactors", "interestRateModel"];
 export const DEBOUNCE = 259200; // THREE_DAYS
 export const TIMELOCK = 21600; // SIX_HOURS
 export const MC_STEWARD_SAFE_DELTA = 4000; // 40%

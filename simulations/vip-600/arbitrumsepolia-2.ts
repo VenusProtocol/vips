@@ -5,13 +5,13 @@ import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import { vip600 as vip600a } from "../../vips/vip-600/bsctestnet";
 import vip600, {
+  ARBITRUM_SEPOLIA_CF_STEWARD,
+  ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+  ARBITRUM_SEPOLIA_IRM_STEWARD,
+  ARBITRUM_SEPOLIA_MC_STEWARD,
   BSCTESTNET_EID,
   FIVE_MINUTES,
   RISK_STEWARD_RECEIVER,
-  SEPOLIA_CF_STEWARD,
-  SEPOLIA_DESTINATION_STEWARD_RECEIVER,
-  SEPOLIA_IRM_STEWARD,
-  SEPOLIA_MC_STEWARD,
   TEN_MINUTES,
   UPDATE_TYPES,
   WHITELISTED_EXECUTORS,
@@ -19,15 +19,19 @@ import vip600, {
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 
-forking(10002670, async () => {
+forking(231698540, async () => {
   const provider = ethers.provider;
-  const destinationReceiverSteward = new ethers.Contract(SEPOLIA_DESTINATION_STEWARD_RECEIVER, DSR_ABI, provider);
-  const sepoliaMcSteward = new ethers.Contract(SEPOLIA_MC_STEWARD, STEWARD_ABI, provider);
-  const sepoliaCfSteward = new ethers.Contract(SEPOLIA_CF_STEWARD, STEWARD_ABI, provider);
+  const destinationReceiverSteward = new ethers.Contract(
+    ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
+    DSR_ABI,
+    provider,
+  );
+  const arbitrumsepoliaMcSteward = new ethers.Contract(ARBITRUM_SEPOLIA_MC_STEWARD, STEWARD_ABI, provider);
+  const arbitrumsepoliaCfSteward = new ethers.Contract(ARBITRUM_SEPOLIA_CF_STEWARD, STEWARD_ABI, provider);
 
   testForkedNetworkVipCommands("vip600a Phase-1", await vip600a());
 
-  testForkedNetworkVipCommands("vip600 Phase-2 Configuring Risk Stewards on Sepolia", await vip600(), {
+  testForkedNetworkVipCommands("vip600 Phase-2 Configuring Risk Stewards on Arbitrum Sepolia", await vip600(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -38,32 +42,32 @@ forking(10002670, async () => {
     },
   });
 
-  describe("Post-VIP Phase-2 behavior on Sepolia", () => {
+  describe("Post-VIP Phase-2 behavior on Arbitrum Sepolia", () => {
     describe("Destination Receiver Steward Configuration", () => {
       it("should configure risk parameters for SupplyCap on remote chain", async () => {
         const config = await destinationReceiverSteward.getRiskParameterConfig(UPDATE_TYPES[0]);
-        expect(config.riskSteward).to.equal(SEPOLIA_MC_STEWARD);
+        expect(config.riskSteward).to.equal(ARBITRUM_SEPOLIA_MC_STEWARD);
         expect(config.debounce).to.equal(TEN_MINUTES);
         expect(config.active).to.be.true;
       });
 
       it("should configure risk parameters for BorrowCap on remote chain", async () => {
         const config = await destinationReceiverSteward.getRiskParameterConfig(UPDATE_TYPES[1]);
-        expect(config.riskSteward).to.equal(SEPOLIA_MC_STEWARD);
+        expect(config.riskSteward).to.equal(ARBITRUM_SEPOLIA_MC_STEWARD);
         expect(config.debounce).to.equal(TEN_MINUTES);
         expect(config.active).to.be.true;
       });
 
       it("should configure risk parameters for CollateralFactors on remote chain", async () => {
         const config = await destinationReceiverSteward.getRiskParameterConfig(UPDATE_TYPES[2]);
-        expect(config.riskSteward).to.equal(SEPOLIA_CF_STEWARD);
+        expect(config.riskSteward).to.equal(ARBITRUM_SEPOLIA_CF_STEWARD);
         expect(config.debounce).to.equal(TEN_MINUTES);
         expect(config.active).to.be.true;
       });
 
       it("should configure risk parameters for IRM on remote chain", async () => {
         const config = await destinationReceiverSteward.getRiskParameterConfig(UPDATE_TYPES[3]);
-        expect(config.riskSteward).to.equal(SEPOLIA_IRM_STEWARD);
+        expect(config.riskSteward).to.equal(ARBITRUM_SEPOLIA_IRM_STEWARD);
         expect(config.debounce).to.equal(TEN_MINUTES);
         expect(config.active).to.be.true;
       });
@@ -80,17 +84,17 @@ forking(10002670, async () => {
     });
 
     describe("Remote Steward Safe Delta Configuration", () => {
-      it("should set safe delta BPS for Sepolia Market Cap Steward to 40%", async () => {
-        expect(await sepoliaMcSteward.safeDeltaBps()).to.equal(4000);
+      it("should set safe delta BPS for Arbitrum Sepolia Market Cap Steward to 40%", async () => {
+        expect(await arbitrumsepoliaMcSteward.safeDeltaBps()).to.equal(4000);
       });
 
-      it("should set safe delta BPS for Sepolia Collateral Factor Steward to 40%", async () => {
-        expect(await sepoliaCfSteward.safeDeltaBps()).to.equal(4000);
+      it("should set safe delta BPS for Arbitrum Sepolia Collateral Factor Steward to 40%", async () => {
+        expect(await arbitrumsepoliaCfSteward.safeDeltaBps()).to.equal(4000);
       });
     });
 
     describe("Cross-chain peer connections", () => {
-      it("should set peer for SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR) to RISK_STEWARD_RECEIVER (RSR)", async () => {
+      it("should set peer for ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER (DSR) to RISK_STEWARD_RECEIVER (RSR)", async () => {
         const expectedPeer = ethers.utils.hexZeroPad(RISK_STEWARD_RECEIVER, 32);
         expect(await destinationReceiverSteward.peers(BSCTESTNET_EID)).to.equal(expectedPeer.toLowerCase());
       });
