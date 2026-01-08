@@ -80,7 +80,7 @@ forking(74468791, async () => {
 
       // Normal timelock USDC balance remains the same
       const normalTimelockUsdcBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
-      expect(normalTimelockUsdcBalance).to.be.closeTo(normalTimelockUsdcBalance, parseUnits("10", 18)); // +-10
+      expect(normalTimelockUsdcPreviousBalance).to.be.closeTo(normalTimelockUsdcBalance, parseUnits("10", 18)); // +-10
     });
 
     it("should transfer XVS from the Comptroller", async () => {
