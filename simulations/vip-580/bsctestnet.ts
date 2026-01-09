@@ -5,13 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import {
-  ACM,
-  DEVIATION_SENTINEL,
-  KEEPER_ADDRESS,
-  SENTINEL_ORACLE,
-  vip580Testnet,
-} from "../../vips/vip-580/bsctestnet";
+import { ACM, DEVIATION_SENTINEL, KEEPER_ADDRESS, SENTINEL_ORACLE, vip580Testnet } from "../../vips/vip-580/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
@@ -99,12 +93,7 @@ forking(82830213, async () => {
 
   testVip("VIP-580 Configure DeviationSentinel and SentinelOracle", await vip580Testnet(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [DEVIATION_SENTINEL_ABI],
-        ["OwnershipTransferred"],
-        [2],
-      );
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["OwnershipTransferred"], [2]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [9]);
     },
   });

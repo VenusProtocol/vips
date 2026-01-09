@@ -138,7 +138,11 @@ For DeviationSentinel on any Comptroller:
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(uint96,address,uint256,uint256)", DEVIATION_SENTINEL],
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(uint96,address,uint256,uint256)",
+          DEVIATION_SENTINEL,
+        ],
       },
     ],
     meta,
