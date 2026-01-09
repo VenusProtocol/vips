@@ -26,10 +26,12 @@ import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
+import VENUS_LENS_ABI from "./abi/VenusLens.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 
 const provider = ethers.provider;
 const { bscmainnet } = NETWORK_ADDRESSES;
+const VENUS_LENS = "0x344cD779C5aAF3436795B49f7C375E716A20f527";
 
 forking(74517975, async () => {
   let comptroller: Contract;
@@ -38,11 +40,13 @@ forking(74517975, async () => {
   let vU: Contract;
   let chainlinkOracle: Contract;
   let usdtChainlinkOracle: Contract;
+  let venusLens: Contract;
 
   before(async () => {
     comptroller = new ethers.Contract(UMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
     u = new ethers.Contract(UMarketSpec.vToken.underlying.address, ERC20_ABI, provider);
     vU = new ethers.Contract(UMarketSpec.vToken.address, VTOKEN_ABI, provider);
+    venusLens = new ethers.Contract(VENUS_LENS, VENUS_LENS_ABI, provider);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
@@ -162,6 +166,16 @@ forking(74517975, async () => {
     it("market should have correct reduce reserves block delta", async () => {
       const blockDelta = await vU.reduceReservesBlockDelta();
       expect(blockDelta).to.equal(REDUCE_RESERVES_BLOCK_DELTA);
+    });
+
+    it("market should be listed in venus lens", async () => {
+      const markets = await venusLens.getCorePoolMarketsData(UMarketSpec.vToken.comptroller);
+      const vUMarket = markets.find(
+        (market: any) => market.vToken.toLowerCase() === UMarketSpec.vToken.address.toLowerCase(),
+      );
+
+      expect(vUMarket).to.not.be.undefined;
+      expect(vUMarket.isListed).to.equal(true);
     });
 
     it("market should have balance of underlying", async () => {
