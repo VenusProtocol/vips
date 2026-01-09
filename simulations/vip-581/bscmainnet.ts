@@ -31,7 +31,7 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 
 const provider = ethers.provider;
 const { bscmainnet } = NETWORK_ADDRESSES;
-const VENUS_LENS = "0x344cD779C5aAF3436795B49f7C375E716A20f527";
+const VENUS_LENS = "0xf15A9c5aaDc327B383945D5821C7aC08Cdac7430";
 
 forking(74517975, async () => {
   let comptroller: Contract;
