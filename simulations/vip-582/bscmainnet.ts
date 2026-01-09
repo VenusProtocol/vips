@@ -88,7 +88,7 @@ forking(73348770, async () => {
   describe("Pre-VIP behaviour", async () => {
     describe("Old distribution speed", () => {
       it("has the old XVS distribution speed", async () => {
-        const OLD_XVS_PER_BLOCK_REWARD = parseUnits("0.012135420000000000", 18);
+        const OLD_XVS_PER_BLOCK_REWARD = parseUnits("0.020130208333333333", 18);
         expect(await xvsVault.rewardTokenAmountsPerBlock(XVS)).to.equal(OLD_XVS_PER_BLOCK_REWARD);
       });
 
@@ -108,12 +108,12 @@ forking(73348770, async () => {
       });
 
       it("has the old USDC distribution speed", async () => {
-        const OLD_USDC_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18);
+        const OLD_USDC_PER_BLOCK_REWARD = parseUnits("0.005422374429223744", 18);
         expect(await plp.tokenDistributionSpeeds(USDC)).to.equal(OLD_USDC_PER_BLOCK_REWARD);
       });
 
       it("has the old USDT distribution speed", async () => {
-        const OLD_USDT_PER_BLOCK_REWARD = parseUnits("0.010360663100000000", 18);
+        const OLD_USDT_PER_BLOCK_REWARD = parseUnits("0.005422374429223744", 18);
         expect(await plp.tokenDistributionSpeeds(USDT)).to.equal(OLD_USDT_PER_BLOCK_REWARD);
       });
 
