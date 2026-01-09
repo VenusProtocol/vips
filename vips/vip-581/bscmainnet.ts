@@ -73,8 +73,45 @@ const vTokensRemaining = vTokensMinted.sub(UMarketSpec.initialSupply.vTokensToBu
 export const vip581 = () => {
   const meta = {
     version: "v2",
-    title: "",
-    description: "",
+    title: "VIP-581 [BNB Chain] New U markets in the Core pool",
+    description: `If passed, this VIP will add one new market to the Core pool on BNB Chain, for the following underlying asset:
+
+- [U](https://bscscan.com/address/0xcE24439F2D9C6a2289F741120FE202248B666666)
+
+Community posts associated with these markets:
+
+- [**United Stables(U) Stablecoin Collaboration**](https://community.venus.io/t/united-stables-u-stablecoin-collaboration/5608)
+- [**Proposal to list $U in the Core Pool**](https://community.venus.io/t/proposal-to-list-united-stables-u-in-the-venus-core-pool-on-bnb-chain/5610)
+
+### **Description**
+
+**Risk parameters of the new markets**
+
+- Borrow cap: 20,000,000
+- Supply cap: 20,000,000
+- Collateral factor: 75%
+- Reserve factor: 10%
+- Bootstrap liquidity: 100 U
+- Interest rates:
+    - kink: 0.8
+    - base (yearly): 0
+    - multiplier (yearly): 0.0625
+    - jump multiplier (yearly): 0.6
+    - kink2: 0.9
+    - jump multiplier (yearly): 3.4
+
+**Oracle configuration**
+
+- main oracle: usdt underlying but capped within the range of 0.98 ~ 1.02
+- pivot: USD1/USD oracle
+
+### **U market Contracts on mainnet**
+
+- [U Market](https://bscscan.com/address/0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E#code)
+
+### **References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/659)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
