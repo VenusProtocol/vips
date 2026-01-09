@@ -3,61 +3,40 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkTwoKinksInterestRate } from "src/vip-framework/checks/interestRateModel";
 
 import {
-  CHAINLINK_ORACLE,
-  CHECKPOIINT_IRM,
   PROTOCOL_SHARE_RESERVE,
+  RATE_MODEL,
   REDUCE_RESERVES_BLOCK_DELTA,
-  RESILIENT_ORACLE,
-  U,
   UMarketSpec,
-  USDT_CHAINLINK_ORACLE,
   convertAmountToVTokens,
-  vip795,
-} from "../../vips/vip-795/bscmainnet";
+  vip581,
+} from "../../vips/vip-581/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
-import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 
-const provider = ethers.provider;
-const { bscmainnet } = NETWORK_ADDRESSES;
+const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(74517975, async () => {
+forking(82838591, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
-  let u: Contract;
+  let mocku: Contract;
   let vU: Contract;
-  let chainlinkOracle: Contract;
-  let usdtChainlinkOracle: Contract;
 
   before(async () => {
+    const provider = ethers.provider;
     comptroller = new ethers.Contract(UMarketSpec.vToken.comptroller, COMPTROLLER_ABI, provider);
-    u = new ethers.Contract(UMarketSpec.vToken.underlying.address, ERC20_ABI, provider);
+    mocku = new ethers.Contract(UMarketSpec.vToken.underlying.address, ERC20_ABI, provider);
     vU = new ethers.Contract(UMarketSpec.vToken.address, VTOKEN_ABI, provider);
-    resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-    chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-    usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-    const impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
-
-    await resilientOracle
-      .connect(impersonatedTimelock)
-      .setTokenConfig([
-        U,
-        [USDT_CHAINLINK_ORACLE, bscmainnet.CHAINLINK_ORACLE, ethers.constants.AddressZero],
-        [true, true, false],
-        false,
-      ]);
-    await usdtChainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
-    await chainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
+    resilientOracle = new ethers.Contract(bsctestnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -67,7 +46,7 @@ forking(74517975, async () => {
     });
   });
 
-  testVip("VIP-795", await vip795(), {
+  testVip("VIP-581", await vip581(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -88,31 +67,11 @@ forking(74517975, async () => {
   });
 
   describe("Post-VIP behavior", async () => {
-    before(async () => {
-      await setMaxStalePeriodInChainlinkOracle(
-        USDT_CHAINLINK_ORACLE,
-        U,
-        ethers.constants.AddressZero,
-        bscmainnet.NORMAL_TIMELOCK,
-        315360000,
-      );
-
-      await setMaxStalePeriodInChainlinkOracle(
-        bscmainnet.CHAINLINK_ORACLE,
-        U,
-        ethers.constants.AddressZero,
-        bscmainnet.NORMAL_TIMELOCK,
-        315360000,
-      );
-
-      await setMaxStalePeriod(resilientOracle, u);
-    });
-
     it("check new IRM", async () => {
-      expect(await vU.interestRateModel()).to.equal(CHECKPOIINT_IRM);
+      expect(await vU.interestRateModel()).to.equal(RATE_MODEL);
     });
 
-    checkTwoKinksInterestRate(CHECKPOIINT_IRM, "vU", {
+    checkTwoKinksInterestRate(RATE_MODEL, "vU", {
       base: UMarketSpec.interestRateModel.baseRatePerYear,
       base2: UMarketSpec.interestRateModel.baseRatePerYear2,
       multiplier: UMarketSpec.interestRateModel.multiplierPerYear,
@@ -135,17 +94,15 @@ forking(74517975, async () => {
 
     it("get correct price from oracle ", async () => {
       const price = await resilientOracle.getUnderlyingPrice(UMarketSpec.vToken.address);
-      // Price should be within bound validator range (0.98 to 1.02)
-      expect(price).to.be.gte(parseUnits("0.98", 18));
-      expect(price).to.be.lte(parseUnits("1.02", 18));
+      expect(price).to.equal(parseUnits("1", 18));
     });
 
     it("market have correct owner", async () => {
-      expect(await vU.admin()).to.equal(bscmainnet.NORMAL_TIMELOCK);
+      expect(await vU.admin()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
     it("market have correct ACM", async () => {
-      expect(await vU.accessControlManager()).to.equal(bscmainnet.ACCESS_CONTROL_MANAGER);
+      expect(await vU.accessControlManager()).to.equal(bsctestnet.ACCESS_CONTROL_MANAGER);
     });
 
     it("market should have correct protocol share reserve", async () => {
@@ -165,7 +122,7 @@ forking(74517975, async () => {
     });
 
     it("market should have balance of underlying", async () => {
-      const mockuBalance = await u.balanceOf(vU.address);
+      const mockuBalance = await mocku.balanceOf(vU.address);
       expect(mockuBalance).to.equal(UMarketSpec.initialSupply.amount);
     });
 
@@ -175,7 +132,7 @@ forking(74517975, async () => {
     });
 
     it("should not leave any vTokens in the timelock", async () => {
-      const vUTimelockBalance = await vU.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+      const vUTimelockBalance = await vU.balanceOf(bsctestnet.NORMAL_TIMELOCK);
       expect(vUTimelockBalance).to.equal(0);
     });
   });

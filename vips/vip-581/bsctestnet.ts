@@ -61,7 +61,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vTokensMinted = convertAmountToVTokens(UMarketSpec.initialSupply.amount, UMarketSpec.vToken.exchangeRate);
 const vTokensRemaining = vTokensMinted.sub(UMarketSpec.initialSupply.vTokensToBurn);
 
-export const vip795 = () => {
+export const vip581 = () => {
   const meta = {
     version: "v2",
     title: "VIP-795 [BNB Chain] Add U market to the Core pool",
@@ -179,4 +179,4 @@ export const vip795 = () => {
   );
 };
 
-export default vip795;
+export default vip581;

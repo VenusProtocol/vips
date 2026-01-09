@@ -70,11 +70,11 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
 const vTokensMinted = convertAmountToVTokens(UMarketSpec.initialSupply.amount, UMarketSpec.vToken.exchangeRate);
 const vTokensRemaining = vTokensMinted.sub(UMarketSpec.initialSupply.vTokensToBurn);
 
-export const vip795 = () => {
+export const vip581 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-795 [BNB Chain] Add U market to the Core Pool",
-    description: "VIP-795 [BNB Chain] Add U market to the Core Pool",
+    title: "",
+    description: "",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -197,4 +197,4 @@ export const vip795 = () => {
   );
 };
 
-export default vip795;
+export default vip581;
