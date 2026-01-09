@@ -26,8 +26,8 @@ import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 import VTREASURY_ABI from "./abi/VTreasury.json";
-import VENUS_LENS_ABI from "./abi/VenusLens.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
+import VENUS_LENS_ABI from "./abi/venusLens.json";
 
 const provider = ethers.provider;
 const { bscmainnet } = NETWORK_ADDRESSES;
