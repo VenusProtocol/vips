@@ -6,10 +6,10 @@ export const BSCTESTNET_VSLIS_BEACON = "0x1103Bec24Eb194d69ae116d62DD9559412E7C2
 export const BSCTESTNET_VPLANET_BEACON = "0x6f48cf8e94562b5c37be1d0b6c50c845118cc498";
 export const BSCTESTNET_NEW_VTOKEN_IMPLEMENTATION = "0xA8365BFC43cb814F4780127aaD44ecaa8651Fd71";
 
-export const vip778Addendum = () => {
+export const vip582Addendum = () => {
   const meta = {
     version: "v2",
-    title: "VIP-778 Addendum: Upgrade VToken implementations on BSC Testnet",
+    title: "VIP-582 Addendum: Upgrade VToken implementations on BSC Testnet",
     description: `This proposal upgrades the VToken implementations for VTOKENS to correct the incorrect MAX_BORROW_RATE_MANTISSA value introduced in the earlier implementations deployed through [VIP-572](https://venus-testnet.vercel.app/#/governance/proposal/643?chainId=97) on the BSC Testnet as part of the BNB block rate (Fermi) upgrade.`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -40,4 +40,4 @@ export const vip778Addendum = () => {
   );
 };
 
-export default vip778Addendum;
+export default vip582Addendum;

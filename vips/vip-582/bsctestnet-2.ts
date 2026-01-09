@@ -187,7 +187,7 @@ export const PREVIOUS_XVS_EMISSIONS: SpeedRecord[] = [
   },
 ];
 
-export const vip778 = () => {
+export const vip582 = () => {
   const meta = {
     version: "v2",
     title:
@@ -302,4 +302,4 @@ export const vip778 = () => {
   );
 };
 
-export default vip778;
+export default vip582;
