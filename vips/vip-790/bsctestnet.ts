@@ -6,12 +6,14 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const PROTOCOL_SHARE_RESERVE = "0x25c7c7D6Bf710949fD7f03364E9BA19a1b3c10E3";
-export const PT_slisBNBx_24JUN2026 = "0x0560Ec87515eeF5E971CE41198529627DAB72094";
-export const vPT_slisBNBx_24JUN2026 = "0xA9cD767e434A71Cb8173079b4eF7494F71D79180";
+export const PT_clisBNB_25JUN2026 = "0x60825e8eBbed5C32c1DAA7eA68ceCA70BEA65040";
+export const vPT_clisBNB_25JUN2026 = "0xCd5A0037ebfC4a22A755923bB5C983947FaBdCe7";
+export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
+export const PT_clisBNB_25JUN2026_PENDLE_ORACLE = "0x86EB1cE03e825CFD4516F385d7b90DE72B90BF69";
 export const RATE_MODEL = "0x274362695401Bb1B0468BfcFE448AD7021D97562";
 export const REDUCE_RESERVES_BLOCK_DELTA = "192000"; // 70080000 blocks per year
+const TWAP_DURATION = 1800;
 
 // Converters
 const ETH = "0x98f7A83361F7Ac8765CcEBAB1425da6b341958a7";
@@ -29,6 +31,30 @@ const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
 const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
 export const CONVERSION_INCENTIVE = 1e14;
 
+// Capped oracles
+export const DAYS_30 = 30 * 24 * 60 * 60;
+export const increaseExchangeRateByPercentage = (
+  exchangeRate: BigNumber,
+  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
+) => {
+  const increaseAmount = exchangeRate.mul(percentage).div(10000);
+  return exchangeRate.add(increaseAmount).toString();
+};
+export const getSnapshotGap = (
+  exchangeRate: BigNumber,
+  percentage: number, // BPS value (e.g., 10000 for 100%)
+) => {
+  // snapshot gap is percentage of the exchange rate
+  const snapshotGap = exchangeRate.mul(percentage).div(10000);
+  return snapshotGap.toString();
+};
+export const SECONDS_PER_YEAR = 31536000;
+export const PT_clisBNB_25JUN2026_InitialExchangeRate = parseUnits("0.944938575631117449", 18);
+export const PT_clisBNB_25JUN2026_Timestamp = 1758874206;
+export const PT_clisBNB_25JUN2026_GrowthRate = SECONDS_PER_YEAR; // 0% per year
+export const PT_clisBNB_25JUN2026_SnapshotGap = 400; // 4.00%
+export const MAIN_ORACLE_ROLE = 0;
+
 export const converterBaseAssets = {
   [RISK_FUND_CONVERTER]: USDT,
   [USDT_PRIME_CONVERTER]: USDT,
@@ -41,13 +67,13 @@ export const converterBaseAssets = {
 
 export const marketSpecs = {
   vToken: {
-    address: vPT_slisBNBx_24JUN2026,
-    name: "Venus PT-slisBNBx-24JUN2026",
-    symbol: "vPT-slisBNBx-24JUN2026",
+    address: vPT_clisBNB_25JUN2026,
+    name: "Venus PT-clisBNB-25JUN2026",
+    symbol: "vPT-clisBNB-25JUN2026",
     underlying: {
-      address: PT_slisBNBx_24JUN2026,
+      address: PT_clisBNB_25JUN2026,
       decimals: 18,
-      symbol: "PT-slisBNBx-24JUN2026",
+      symbol: "PT-clisBNB-25JUN2026",
     },
     decimals: 8,
     exchangeRate: parseUnits("1", 28),
@@ -80,11 +106,11 @@ export const marketSpecs = {
 export const EMODE_POOL = {
   label: "BNB",
   id: 4,
-  markets: [vPT_slisBNBx_24JUN2026],
+  markets: [vPT_clisBNB_25JUN2026],
   allowCorePoolFallback: true,
   marketsConfig: {
-    vPT_slisBNBx_24JUN2026: {
-      address: vPT_slisBNBx_24JUN2026,
+    vPT_clisBNB_25JUN2026: {
+      address: vPT_clisBNB_25JUN2026,
       collateralFactor: parseUnits("0.87", 18),
       liquidationThreshold: parseUnits("0.90", 18),
       liquidationIncentive: parseUnits("1.04", 18),
@@ -122,7 +148,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
 export const vip790 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-790 [BNB Chain] Add PT-slisBNBx-24JUN2026 market to the BNB emode group",
+    title: "VIP-790 [BNB Chain] Add PT-clisBNB-25JUN2026 market to the BNB emode group",
     description: "VIP-790 [BNB Chain] BNB emode group",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -131,6 +157,46 @@ export const vip790 = () => {
 
   return makeProposal(
     [
+      // Configure Oracle
+      {
+        target: MOCK_PENDLE_PT_ORACLE,
+        signature: "setPtToSyRate(address,uint32,uint256)",
+        params: ["0x0000000000000000000000000000000000000004", TWAP_DURATION, parseUnits("0.944938575631117449", 18)],
+      },
+      {
+        target: bsctestnet.RESILIENT_ORACLE,
+        signature: "setTokenConfig((address,address[3],bool[3],bool))",
+        params: [
+          [
+            PT_clisBNB_25JUN2026,
+            [PT_clisBNB_25JUN2026_PENDLE_ORACLE, ethers.constants.AddressZero, ethers.constants.AddressZero],
+            [true, false, false],
+            false,
+          ],
+        ],
+      },
+      {
+        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
+        signature: "setSnapshot(uint256,uint256)",
+        params: [
+          increaseExchangeRateByPercentage(
+            PT_clisBNB_25JUN2026_InitialExchangeRate,
+            BigNumber.from(PT_clisBNB_25JUN2026_SnapshotGap),
+          ),
+          PT_clisBNB_25JUN2026_Timestamp,
+        ],
+      },
+      {
+        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
+        signature: "setGrowthRate(uint256,uint256)",
+        params: [PT_clisBNB_25JUN2026_GrowthRate, DAYS_30],
+      },
+      {
+        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
+        signature: "setSnapshotGap(uint256)",
+        params: [getSnapshotGap(PT_clisBNB_25JUN2026_InitialExchangeRate, PT_clisBNB_25JUN2026_SnapshotGap)],
+      },
+
       // Add Market
       {
         target: marketSpecs.vToken.comptroller,
@@ -182,7 +248,7 @@ export const vip790 = () => {
         params: [marketSpecs.vToken.address, marketSpecs.riskParameters.liquidationIncentive],
       },
       {
-        target: PT_slisBNBx_24JUN2026,
+        target: PT_clisBNB_25JUN2026,
         signature: "faucet(uint256)",
         params: [marketSpecs.initialSupply.amount],
       },
@@ -232,23 +298,24 @@ export const vip790 = () => {
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL.markets.length).fill(EMODE_POOL.id), EMODE_POOL.markets],
       },
-      {
-        target: bsctestnet.UNITROLLER,
-        signature: "setCollateralFactor(uint96,address,uint256,uint256)",
-        params: [
-          EMODE_POOL.id,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.address,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.collateralFactor,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.liquidationThreshold,
-        ],
-      },
+      // This call is breaking because inside setCollateralFactor getPrices called which is returning "invalid resilient oracle price", Even after setting up the oracle above setTokenConfig.
+      // {
+      //   target: bsctestnet.UNITROLLER,
+      //   signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+      //   params: [
+      //     EMODE_POOL.id,
+      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
+      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.collateralFactor,
+      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationThreshold,
+      //   ],
+      // },
       {
         target: bsctestnet.UNITROLLER,
         signature: "setLiquidationIncentive(uint96,address,uint256)",
         params: [
           EMODE_POOL.id,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.address,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.liquidationIncentive,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationIncentive,
         ],
       },
       {
@@ -256,8 +323,8 @@ export const vip790 = () => {
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [
           EMODE_POOL.id,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.address,
-          EMODE_POOL.marketsConfig.vPT_slisBNBx_24JUN2026.borrowAllowed,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.borrowAllowed,
         ],
       },
     ],
