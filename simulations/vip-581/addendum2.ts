@@ -64,10 +64,17 @@ async function getSwapData(
 
   try {
     const response = await fetch(url);
-    const data = await response.json();
+    const data: unknown = await response.json();
 
-    if (data.quotes && data.quotes.length > 0) {
-      const quote = data.quotes[0];
+    // Type guard for expected Venus API response
+    if (
+      typeof data === "object" &&
+      data !== null &&
+      "quotes" in data &&
+      Array.isArray((data as any).quotes) &&
+      (data as any).quotes.length > 0
+    ) {
+      const quote = (data as any).quotes[0];
       return {
         swapData: quote.swapHelperMulticall.calldata.encodedCall,
         minAmountOut: BigNumber.from(quote.amountOut).mul(99).div(100), // 1% slippage buffer
