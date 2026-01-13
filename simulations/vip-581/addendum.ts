@@ -172,9 +172,9 @@ forking(FORK_BLOCK, async () => {
 
     it("Verify oracle returns valid price for U token", async () => {
       const price = await resilientOracle.getUnderlyingPrice(UMarketSpec.vToken.address);
-      // U is a stablecoin, price should be around $1 (within 2% bounds)
-      expect(price).to.be.gte(parseUnits("0.98", 18));
-      expect(price).to.be.lte(parseUnits("1.02", 18));
+      // U is a stablecoin, price should be around $1 (within 1% bounds)
+      expect(price).to.be.gte(parseUnits("0.99", 18));
+      expect(price).to.be.lte(parseUnits("1.01", 18));
     });
 
     /**
