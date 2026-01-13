@@ -20,8 +20,8 @@ import {
   USD1_FEED,
   USDT_CHAINLINK_ORACLE,
 } from "../../vips/vip-581/bscmainnet";
-import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
 import VTOKEN_ABI from "../vip-567/abi/VToken.json";
+import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -144,13 +144,7 @@ forking(FORK_BLOCK, async () => {
       315360000,
     );
 
-    await setMaxStalePeriodInChainlinkOracle(
-      CHAINLINK_ORACLE,
-      U,
-      USD1_FEED,
-      bscmainnet.NORMAL_TIMELOCK,
-      315360000,
-    );
+    await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, U, USD1_FEED, bscmainnet.NORMAL_TIMELOCK, 315360000);
 
     await setMaxStalePeriod(resilientOracle, u);
 
@@ -227,11 +221,9 @@ forking(FORK_BLOCK, async () => {
       const borrowBalanceBefore = await vUContract.callStatic.borrowBalanceCurrent(userAddress);
 
       // Call enterSingleAssetLeverage
-      const tx = await leverageStrategiesManager.connect(testUser).enterSingleAssetLeverage(
-        vU,
-        0,
-        collateralAmountToFlashLoan,
-      );
+      const tx = await leverageStrategiesManager
+        .connect(testUser)
+        .enterSingleAssetLeverage(vU, 0, collateralAmountToFlashLoan);
       const receipt = await tx.wait();
 
       // Parse and verify SingleAssetLeverageEntered event
@@ -337,12 +329,7 @@ forking(FORK_BLOCK, async () => {
 
       // Fetch swap data from Venus API for swapping borrowed USDT to USDC
       // This is required for the leverage manager to perform the swap on-chain
-      const { swapData, minAmountOut } = await getSwapData(
-        USDT,
-        USDC,
-        borrowedAmountToFlashLoan.toString(),
-        "0.01",
-      );
+      const { swapData, minAmountOut } = await getSwapData(USDT, USDC, borrowedAmountToFlashLoan.toString(), "0.01");
 
       // If swap data is unavailable, skip the test
       if (swapData === "0x") {
@@ -442,12 +429,7 @@ forking(FORK_BLOCK, async () => {
       const collateralAmountToRedeem = parseUnits("50", 18);
 
       // Get swap data from Venus API (USDC -> USDT)
-      const { swapData, minAmountOut } = await getSwapData(
-        USDC,
-        USDT,
-        collateralAmountToRedeem.toString(),
-        "0.01",
-      );
+      const { swapData, minAmountOut } = await getSwapData(USDC, USDT, collateralAmountToRedeem.toString(), "0.01");
 
       if (swapData === "0x") {
         console.log("Skipping exitLeverage test - Venus API unavailable");
@@ -634,10 +616,7 @@ forking(FORK_BLOCK, async () => {
       const flashLoanAmount = borrowBalance.mul(101).div(100);
 
       // Call exitSingleAssetLeverage
-      const tx = await leverageStrategiesManager.connect(testUser).exitSingleAssetLeverage(
-        vU,
-        flashLoanAmount,
-      );
+      const tx = await leverageStrategiesManager.connect(testUser).exitSingleAssetLeverage(vU, flashLoanAmount);
       const receipt = await tx.wait();
 
       // Parse and verify SingleAssetLeverageExited event
