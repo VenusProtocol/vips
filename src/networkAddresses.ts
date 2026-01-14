@@ -75,6 +75,7 @@ export const NETWORK_ADDRESSES = {
     BINANCE_ORACLE: oracleBsctestnetContracts.addresses.BinanceOracle,
     RESILIENT_ORACLE: oracleBsctestnetContracts.addresses.ResilientOracle,
     REDSTONE_ORACLE: oracleBsctestnetContracts.addresses.RedStoneOracle,
+    LIQUIDATOR: bsctestnetDeployedContracts.addresses.Liquidator,
   },
   ethereum: {
     NORMAL_TIMELOCK: "0xd969E79406c35E80750aAae061D402Aab9325714",
