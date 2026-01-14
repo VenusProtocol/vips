@@ -94,9 +94,9 @@ export const marketSpecs = {
     borrowCap: parseUnits("0", 18),
   },
   initialSupply: {
-    amount: parseUnits("0.14", 18),
+    amount: parseUnits("0.035", 18),
     vTokenReceiver: bscmainnet.VTREASURY,
-    vTokensToBurn: parseUnits("0.1", 8),
+    vTokensToBurn: parseUnits("0.035", 8),
   },
 };
 
@@ -238,38 +238,38 @@ export const vip790 = () => {
         signature: "setLiquidationIncentive(address,uint256)",
         params: [marketSpecs.vToken.address, marketSpecs.riskParameters.liquidationIncentive],
       },
-      // {
-      //   target: bscmainnet.VTREASURY,
-      //   signature: "withdrawTreasuryBEP20(address,uint256,address)",
-      //   params: [marketSpecs.vToken.underlying.address, marketSpecs.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
-      // },
-      // {
-      //   target: marketSpecs.vToken.underlying.address,
-      //   signature: "approve(address,uint256)",
-      //   params: [marketSpecs.vToken.address, marketSpecs.initialSupply.amount],
-      // },
-      //   {
-      //     target: marketSpecs.vToken.address,
-      //     signature: "mint(uint256)",
-      //     params: [marketSpecs.initialSupply.amount],
-      //   },
-      // {
-      //   target: marketSpecs.vToken.underlying.address,
-      //   signature: "approve(address,uint256)",
-      //   params: [marketSpecs.vToken.address, 0],
-      // },
-      // // Burn some vTokens
-      // {
-      //   target: marketSpecs.vToken.address,
-      //   signature: "transfer(address,uint256)",
-      //   params: [ethers.constants.AddressZero, marketSpecs.initialSupply.vTokensToBurn],
-      // },
-      // // Transfer leftover vTokens to receiver
-      // {
-      //   target: marketSpecs.vToken.address,
-      //   signature: "transfer(address,uint256)",
-      //   params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
-      // },
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [marketSpecs.vToken.underlying.address, marketSpecs.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
+      },
+      {
+        target: marketSpecs.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [marketSpecs.vToken.address, marketSpecs.initialSupply.amount],
+      },
+      {
+        target: marketSpecs.vToken.address,
+        signature: "mint(uint256)",
+        params: [marketSpecs.initialSupply.amount],
+      },
+      {
+        target: marketSpecs.vToken.underlying.address,
+        signature: "approve(address,uint256)",
+        params: [marketSpecs.vToken.address, 0],
+      },
+      // Burn some vTokens
+      {
+        target: marketSpecs.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [ethers.constants.AddressZero, marketSpecs.initialSupply.vTokensToBurn],
+      },
+      // Transfer leftover vTokens to receiver
+      {
+        target: marketSpecs.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
+      },
       {
         target: marketSpecs.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",

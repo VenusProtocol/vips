@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { expectEvents, initMainnetUser, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -28,13 +28,15 @@ import VTOKEN_ABI from "./abi/VToken.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 const BNB_FEED = "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE";
+const PT_clisBNB_25JUN2026_HOLDER = "0x3B7e10fFe65c5A59475055D489F71699F7dabfF4";
 
-forking(75055660, async () => {
+forking(75229002, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let Pt_clisBNB_25JUN2026: Contract;
   let vPT_clisBNB_25JUN2026: Contract;
   let bnb: Contract;
+  let testUser: Signer;
 
   before(async () => {
     const provider = ethers.provider;
@@ -42,6 +44,18 @@ forking(75055660, async () => {
     Pt_clisBNB_25JUN2026 = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
     vPT_clisBNB_25JUN2026 = new ethers.Contract(marketSpecs.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+
+    const [signer] = await ethers.getSigners();
+    testUser = signer;
+
+    const PT_clisBNB_25JUN2026Holder = await initMainnetUser(
+      PT_clisBNB_25JUN2026_HOLDER,
+      ethers.utils.parseEther("10"),
+    );
+    await Pt_clisBNB_25JUN2026.connect(PT_clisBNB_25JUN2026Holder).transfer(
+      await testUser.getAddress(),
+      parseUnits("10", 18),
+    );
 
     // set maxStalePeriod
     bnb = new ethers.Contract(NATIVE_TOKEN_ADDR, ERC20_ABI, ethers.provider);
@@ -117,7 +131,7 @@ forking(75055660, async () => {
     checkRiskParameters(marketSpecs.vToken.address, marketSpecs.vToken, marketSpecs.riskParameters);
 
     it("check price PT_clisBNB_25JUN2026", async () => {
-      const expectedPrice = parseUnits("889.065723820186309413", 18);
+      const expectedPrice = parseUnits("912.542908694200730345", 18);
       const underlyingPrice = await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address);
       expect(underlyingPrice).to.equal(expectedPrice);
     });
@@ -134,36 +148,31 @@ forking(75055660, async () => {
       expect(await vPT_clisBNB_25JUN2026.protocolShareReserve()).to.equal(PROTOCOL_SHARE_RESERVE);
     });
 
-    //     it("market should have correct total supply", async () => {
-    //       const vPT_clisBNB_25JUN2026Supply = await vPT_clisBNB_25JUN2026.totalSupply();
-    //       expect(vPT_clisBNB_25JUN2026Supply).to.equal(
-    //         convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate),
-    //       );
-    //     });
+    it("market should have correct total supply", async () => {
+      const vPT_clisBNB_25JUN2026Supply = await vPT_clisBNB_25JUN2026.totalSupply();
+      expect(vPT_clisBNB_25JUN2026Supply).to.equal(
+        convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate),
+      );
+    });
 
-    //     it("market should have balance of underlying", async () => {
-    //       const PT_clisBNB_25JUN2026_balance = await PT_clisBNB_25JUN2026.balanceOf(vPT_clisBNB_25JUN2026.address);
-    //       expect(PT_clisBNB_25JUN2026_balance).to.greaterThan(0);
-    //     });
+    it("should burn vTokens", async () => {
+      const vPT_clisBNB_25JUN2026BalanceBurned = await vPT_clisBNB_25JUN2026.balanceOf(ethers.constants.AddressZero);
+      expect(vPT_clisBNB_25JUN2026BalanceBurned).to.equal(marketSpecs.initialSupply.vTokensToBurn);
+    });
 
-    //     it("should burn vTokens", async () => {
-    //       const vPT_clisBNB_25JUN2026BalanceBurned = await vPT_clisBNB_25JUN2026.balanceOf(ethers.constants.AddressZero);
-    //       expect(vPT_clisBNB_25JUN2026BalanceBurned).to.equal(marketSpecs.initialSupply.vTokensToBurn);
-    //     });
+    it("should transfer remaining vTokens to receiver", async () => {
+      const slisBNBReceiverBalance = await vPT_clisBNB_25JUN2026.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
+      expect(slisBNBReceiverBalance).to.equal(
+        convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate).sub(
+          marketSpecs.initialSupply.vTokensToBurn,
+        ),
+      );
+    });
 
-    //     it("should transfer remaining vTokens to receiver", async () => {
-    //       const slisBNBReceiverBalance = await vPT_clisBNB_25JUN2026.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
-    //       expect(slisBNBReceiverBalance).to.equal(
-    //         convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate).sub(
-    //           marketSpecs.initialSupply.vTokensToBurn,
-    //         ),
-    //       );
-    //     });
-
-    //     it("should not leave any vTokens in the timelock", async () => {
-    //       const vPT_clisBNB_25JUN2026TimelockBalance = await vPT_clisBNB_25JUN2026.balanceOf(bsctestnet.NORMAL_TIMELOCK);
-    //       expect(vPT_clisBNB_25JUN2026TimelockBalance).to.equal(0);
-    //     });
+    it("should not leave any vTokens in the timelock", async () => {
+      const vPT_clisBNB_25JUN2026TimelockBalance = await vPT_clisBNB_25JUN2026.balanceOf(bscmainnet.NORMAL_TIMELOCK);
+      expect(vPT_clisBNB_25JUN2026TimelockBalance).to.equal(0);
+    });
 
     it("should pause vPT_clisBNB_25JUN2026 market", async () => {
       expect(await comptroller.actionPaused(marketSpecs.vToken.address, 2)).to.equal(true);
@@ -199,6 +208,29 @@ forking(75055660, async () => {
           expect(marketData.liquidationIncentiveMantissa).to.be.equal(config.liquidationIncentive);
           expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
         }
+      });
+    });
+
+    describe("Mint and redeem PT_clisBNB_25JUN2026", async () => {
+      it("User can mint vU", async () => {
+        const userAddress = await testUser.getAddress();
+        const mintAmount = parseUnits("5", 18);
+
+        // Enter market so minted vU can be used as collateral for borrowing
+        await comptroller.connect(testUser).enterMarkets([vPT_clisBNB_25JUN2026.address]);
+
+        const vTokenBalBefore = await vPT_clisBNB_25JUN2026.balanceOf(userAddress);
+        await Pt_clisBNB_25JUN2026.connect(testUser).approve(vPT_clisBNB_25JUN2026.address, mintAmount);
+        await vPT_clisBNB_25JUN2026.connect(testUser).mint(mintAmount);
+        expect(await vPT_clisBNB_25JUN2026.balanceOf(userAddress)).to.be.gt(vTokenBalBefore);
+      });
+
+      it("User can redeem vU", async () => {
+        const userAddress = await testUser.getAddress();
+        const uBalBefore = await Pt_clisBNB_25JUN2026.balanceOf(userAddress);
+        const redeemAmount = parseUnits("0.5", 18);
+        await vPT_clisBNB_25JUN2026.connect(testUser).redeemUnderlying(redeemAmount);
+        expect(await Pt_clisBNB_25JUN2026.balanceOf(userAddress)).to.be.gt(uBalBefore);
       });
     });
   });
