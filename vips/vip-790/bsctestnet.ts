@@ -12,7 +12,7 @@ export const vPT_clisBNB_25JUN2026 = "0xCd5A0037ebfC4a22A755923bB5C983947FaBdCe7
 export const MOCK_PENDLE_PT_ORACLE = "0xa37A9127C302fEc17d456a6E1a5643a18a1779aD";
 export const PT_clisBNB_25JUN2026_PENDLE_ORACLE = "0x86EB1cE03e825CFD4516F385d7b90DE72B90BF69";
 export const RATE_MODEL = "0x274362695401Bb1B0468BfcFE448AD7021D97562";
-export const REDUCE_RESERVES_BLOCK_DELTA = "192000"; // 70080000 blocks per year
+export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
 const TWAP_DURATION = 1800;
 
 // Converters
@@ -40,6 +40,7 @@ export const increaseExchangeRateByPercentage = (
   const increaseAmount = exchangeRate.mul(percentage).div(10000);
   return exchangeRate.add(increaseAmount).toString();
 };
+
 export const getSnapshotGap = (
   exchangeRate: BigNumber,
   percentage: number, // BPS value (e.g., 10000 for 100%)
@@ -48,8 +49,9 @@ export const getSnapshotGap = (
   const snapshotGap = exchangeRate.mul(percentage).div(10000);
   return snapshotGap.toString();
 };
+
 export const SECONDS_PER_YEAR = 31536000;
-export const PT_clisBNB_25JUN2026_InitialExchangeRate = parseUnits("0.944938575631117449", 18);
+export const PT_clisBNB_25JUN2026_InitialExchangeRate = parseUnits("1.034169826638422493", 18);
 export const PT_clisBNB_25JUN2026_Timestamp = 1758874206;
 export const PT_clisBNB_25JUN2026_GrowthRate = SECONDS_PER_YEAR; // 0% per year
 export const PT_clisBNB_25JUN2026_SnapshotGap = 400; // 4.00%
@@ -68,7 +70,7 @@ export const converterBaseAssets = {
 export const marketSpecs = {
   vToken: {
     address: vPT_clisBNB_25JUN2026,
-    name: "Venus PT-clisBNB-25JUN2026",
+    name: "Venus PT Lista collateral BNB 25JUN2026",
     symbol: "vPT-clisBNB-25JUN2026",
     underlying: {
       address: PT_clisBNB_25JUN2026,
@@ -161,7 +163,7 @@ export const vip790 = () => {
       {
         target: MOCK_PENDLE_PT_ORACLE,
         signature: "setPtToSyRate(address,uint32,uint256)",
-        params: ["0x0000000000000000000000000000000000000004", TWAP_DURATION, parseUnits("0.944938575631117449", 18)],
+        params: ["0x0000000000000000000000000000000000000004", TWAP_DURATION, parseUnits("1.034169826638422493", 18)],
       },
       {
         target: bsctestnet.RESILIENT_ORACLE,
@@ -298,17 +300,16 @@ export const vip790 = () => {
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL.markets.length).fill(EMODE_POOL.id), EMODE_POOL.markets],
       },
-      // This call is breaking because inside setCollateralFactor getPrices called which is returning "invalid resilient oracle price", Even after setting up the oracle above setTokenConfig.
-      // {
-      //   target: bsctestnet.UNITROLLER,
-      //   signature: "setCollateralFactor(uint96,address,uint256,uint256)",
-      //   params: [
-      //     EMODE_POOL.id,
-      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
-      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.collateralFactor,
-      //     EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationThreshold,
-      //   ],
-      // },
+      {
+        target: bsctestnet.UNITROLLER,
+        signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+        params: [
+          EMODE_POOL.id,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.collateralFactor,
+          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationThreshold,
+        ],
+      },
       {
         target: bsctestnet.UNITROLLER,
         signature: "setLiquidationIncentive(uint96,address,uint256)",
