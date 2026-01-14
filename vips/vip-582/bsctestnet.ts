@@ -7,10 +7,10 @@ export const VBNB_ADMIN = "0x04109575c1dbB4ac2e59e60c783800ea10441BBe";
 export const IL_RATE_MODEL_SETTER = "0x6F212b6fe4F33b9A3fC7a7eCbAdD3476ea5A1B8B";
 export const CORE_POOL_RATE_MODEL_SETTER = "0x69B83Bf4e8501D97217b545ce4151b62a5b550c9";
 
-export const vip777 = () => {
+export const vip582 = () => {
   const meta = {
     version: "v2",
-    title: "Set checkpoint rate models for BNB Fermi hardfork block rate upgrade",
+    title: "Set checkpoint rate models for BNB block rate upgrade (2/2)",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -65,4 +65,4 @@ export const vip777 = () => {
   );
 };
 
-export default vip777;
+export default vip582;

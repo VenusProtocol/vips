@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip777 from "../../vips/vip-777/bsctestnet";
+import vip582 from "../../vips/vip-582/bsctestnet";
 import CORE_POOL_RATE_MODEL_ABI from "./abi/JumpRateModel.json";
 import RATE_MODEL_ABI from "./abi/JumpRateModelV2.json";
 import POOL_REGISTRY_ABI from "./abi/PoolRegistry.json";
@@ -40,7 +40,7 @@ forking(72472859, async () => {
     ),
   );
 
-  testVip("VIP-777", await vip777(), {});
+  testVip("VIP-582", await vip582(), {});
 
   describe("Interest rates after checkpoint", () => {
     describe("Core pool", () => {
