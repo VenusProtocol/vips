@@ -30,7 +30,7 @@ const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
 
-// const VOTING_PERIOD = 115200;
+const VOTING_PERIOD = 192384;
 
 export const {
   DEFAULT_PROPOSER_ADDRESS,
@@ -193,10 +193,7 @@ export const testVip = (description: string, proposal: Proposal, options: Testin
     });
 
     it("should be queued successfully", async () => {
-      // Mine up to proposal endBlock + 1 to ensure proposal is succeeded
-      const proposalData = await governorProxy.proposals(proposalId);
-      const endBlock = proposalData.endBlock.toNumber();
-      await mineUpTo(endBlock + 1);
+      await mineUpTo((await ethers.provider.getBlockNumber()) + VOTING_PERIOD + 1);
       const tx = await governorProxy.connect(proposer).queue(proposalId);
       await tx.wait();
     });
