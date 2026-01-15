@@ -1,4 +1,9 @@
-import { impersonateAccount, setBalance, takeSnapshot, SnapshotRestorer } from "@nomicfoundation/hardhat-network-helpers";
+import {
+  SnapshotRestorer,
+  impersonateAccount,
+  setBalance,
+  takeSnapshot,
+} from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
@@ -16,7 +21,6 @@ import RISK_FUND_V2_ABI from "./abi/RiskFundV2.json";
 
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-const RISK_FUND_CONVERTER = "0xA5622D276CcbB8d9BBE3D1ffd1BB11a0032E53F0";
 
 // Core Pool Comptroller for testing poolAssetsFunds
 const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
@@ -107,7 +111,6 @@ forking(73352569, async () => {
 
       try {
         // Get current state to calculate proper attack amounts
-        const balance = await usdt.balanceOf(RISK_FUND_V2_PROXY);
         const corePoolReserve = await riskFundV2.poolAssetsFunds(CORE_POOL_COMPTROLLER, USDT);
 
         // Donate enough to make balance significantly larger than tracked reserves
@@ -125,9 +128,7 @@ forking(73352569, async () => {
         console.log(`    Attempting to sweep: ${ethers.utils.formatUnits(sweepAmount, 18)} USDT`);
 
         // With buggy code: distributedShare (based on large `amount`) > amountDiff → underflow
-        await expect(
-          riskFundV2.connect(timelockSigner).sweepToken(USDT, NORMAL_TIMELOCK, sweepAmount),
-        ).to.be.reverted; // Arithmetic underflow
+        await expect(riskFundV2.connect(timelockSigner).sweepToken(USDT, NORMAL_TIMELOCK, sweepAmount)).to.be.reverted; // Arithmetic underflow
 
         console.log("    ✓ sweepToken reverted as expected (bug confirmed)");
       } finally {
