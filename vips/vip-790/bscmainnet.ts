@@ -30,29 +30,6 @@ const XVS_VAULT_CONVERTER = "0xd5b9AE835F4C59272032B3B954417179573331E0";
 const WBNB_BURN_CONVERTER = "0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE";
 export const CONVERSION_INCENTIVE = 1e14;
 
-// Capped oracles
-export const DAYS_30 = 30 * 24 * 60 * 60;
-export const increaseExchangeRateByPercentage = (
-  exchangeRate: BigNumber,
-  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
-) => {
-  const increaseAmount = exchangeRate.mul(percentage).div(10000);
-  return exchangeRate.add(increaseAmount).toString();
-};
-export const getSnapshotGap = (
-  exchangeRate: BigNumber,
-  percentage: number, // BPS value (e.g., 10000 for 100%)
-) => {
-  // snapshot gap is percentage of the exchange rate
-  const snapshotGap = exchangeRate.mul(percentage).div(10000);
-  return snapshotGap.toString();
-};
-export const SECONDS_PER_YEAR = 31536000;
-export const PTCLISBNB25JUN2026_InitialExchangeRate = parseUnits("1.034146782295294254", 18);
-export const PTCLISBNB25JUN2026_Timestamp = 1768293952;
-export const PTCLISBNB25JUN2026_GrowthRate = SECONDS_PER_YEAR; // 0% per year
-export const PTCLISBNB25JUN2026_SnapshotGap = 400; // 4.00%
-
 export const converterBaseAssets = {
   [RISK_FUND_CONVERTER]: USDT,
   [USDT_PRIME_CONVERTER]: USDT,
@@ -167,27 +144,6 @@ export const vip790 = () => {
             false,
           ],
         ],
-      },
-      {
-        target: PT_clisBNB_PENDLE_ORACLE,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(
-            PTCLISBNB25JUN2026_InitialExchangeRate,
-            BigNumber.from(PTCLISBNB25JUN2026_SnapshotGap),
-          ),
-          PTCLISBNB25JUN2026_Timestamp,
-        ],
-      },
-      {
-        target: PT_clisBNB_PENDLE_ORACLE,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [PTCLISBNB25JUN2026_GrowthRate, DAYS_30],
-      },
-      {
-        target: PT_clisBNB_PENDLE_ORACLE,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(PTCLISBNB25JUN2026_InitialExchangeRate, PTCLISBNB25JUN2026_SnapshotGap)],
       },
       {
         target: marketSpecs.vToken.comptroller,

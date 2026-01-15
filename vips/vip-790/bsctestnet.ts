@@ -31,32 +31,6 @@ const ETH_PRIME_CONVERTER = "0xf358650A007aa12ecC8dac08CF8929Be7f72A4D9";
 const XVS_VAULT_CONVERTER = "0x258f49254C758a0E37DAb148ADDAEA851F4b02a2";
 export const CONVERSION_INCENTIVE = 1e14;
 
-// Capped oracles
-export const DAYS_30 = 30 * 24 * 60 * 60;
-export const increaseExchangeRateByPercentage = (
-  exchangeRate: BigNumber,
-  percentage: BigNumber, // BPS value (e.g., 10000 for 100%)
-) => {
-  const increaseAmount = exchangeRate.mul(percentage).div(10000);
-  return exchangeRate.add(increaseAmount).toString();
-};
-
-export const getSnapshotGap = (
-  exchangeRate: BigNumber,
-  percentage: number, // BPS value (e.g., 10000 for 100%)
-) => {
-  // snapshot gap is percentage of the exchange rate
-  const snapshotGap = exchangeRate.mul(percentage).div(10000);
-  return snapshotGap.toString();
-};
-
-export const SECONDS_PER_YEAR = 31536000;
-export const PT_clisBNB_25JUN2026_InitialExchangeRate = parseUnits("1.034169826638422493", 18);
-export const PT_clisBNB_25JUN2026_Timestamp = 1758874206;
-export const PT_clisBNB_25JUN2026_GrowthRate = SECONDS_PER_YEAR; // 0% per year
-export const PT_clisBNB_25JUN2026_SnapshotGap = 400; // 4.00%
-export const MAIN_ORACLE_ROLE = 0;
-
 export const converterBaseAssets = {
   [RISK_FUND_CONVERTER]: USDT,
   [USDT_PRIME_CONVERTER]: USDT,
@@ -177,28 +151,6 @@ export const vip790 = () => {
           ],
         ],
       },
-      {
-        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
-        signature: "setSnapshot(uint256,uint256)",
-        params: [
-          increaseExchangeRateByPercentage(
-            PT_clisBNB_25JUN2026_InitialExchangeRate,
-            BigNumber.from(PT_clisBNB_25JUN2026_SnapshotGap),
-          ),
-          PT_clisBNB_25JUN2026_Timestamp,
-        ],
-      },
-      {
-        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
-        signature: "setGrowthRate(uint256,uint256)",
-        params: [PT_clisBNB_25JUN2026_GrowthRate, DAYS_30],
-      },
-      {
-        target: PT_clisBNB_25JUN2026_PENDLE_ORACLE,
-        signature: "setSnapshotGap(uint256)",
-        params: [getSnapshotGap(PT_clisBNB_25JUN2026_InitialExchangeRate, PT_clisBNB_25JUN2026_SnapshotGap)],
-      },
-
       // Add Market
       {
         target: marketSpecs.vToken.comptroller,
