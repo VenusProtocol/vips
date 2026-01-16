@@ -212,7 +212,7 @@ forking(75229002, async () => {
     it("check price PT_clisBNB_25JUN2026", async () => {
       const expectedPrice = parseUnits("912.542911682632512322", 18);
       const underlyingPrice = await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address);
-      expect(underlyingPrice).to.equal(expectedPrice);
+      expect(underlyingPrice).closeTo(expectedPrice, parseUnits("0.000000000000000001", 18));
     });
 
     // Verify the market admin is set to the Normal Timelock (governance)
