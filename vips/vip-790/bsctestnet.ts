@@ -258,15 +258,6 @@ export const vip790 = () => {
           EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationIncentive,
         ],
       },
-      {
-        target: bsctestnet.UNITROLLER,
-        signature: "setIsBorrowAllowed(uint96,address,bool)",
-        params: [
-          EMODE_POOL.id,
-          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
-          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.borrowAllowed,
-        ],
-      },
     ],
     meta,
     ProposalType.REGULAR,

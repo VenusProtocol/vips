@@ -226,11 +226,6 @@ export const vip790 = () => {
       // BNB Emode Group
       {
         target: bscmainnet.UNITROLLER,
-        signature: "setPoolActive(uint96,bool)",
-        params: [EMODE_POOL.id, true],
-      },
-      {
-        target: bscmainnet.UNITROLLER,
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL.markets.length).fill(EMODE_POOL.id), EMODE_POOL.markets],
       },
@@ -251,15 +246,6 @@ export const vip790 = () => {
           EMODE_POOL.id,
           EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
           EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.liquidationIncentive,
-        ],
-      },
-      {
-        target: bscmainnet.UNITROLLER,
-        signature: "setIsBorrowAllowed(uint96,address,bool)",
-        params: [
-          EMODE_POOL.id,
-          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.address,
-          EMODE_POOL.marketsConfig.vPT_clisBNB_25JUN2026.borrowAllowed,
         ],
       },
     ],
