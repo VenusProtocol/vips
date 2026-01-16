@@ -161,17 +161,13 @@ forking(75229002, async () => {
         [
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
-          "NewReserveFactor",
-          "NewCollateralFactor",
-          "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "PoolMarketInitialized",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+        [1, 1, 1, 1, 1, 2, 1],
       );
     },
   });

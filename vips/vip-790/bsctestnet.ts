@@ -151,21 +151,12 @@ export const vip790 = () => {
           ],
         ],
       },
+
       // Add Market
       {
         target: marketSpecs.vToken.comptroller,
         signature: "_supportMarket(address)",
         params: [marketSpecs.vToken.address],
-      },
-      {
-        target: marketSpecs.vToken.comptroller,
-        signature: "_setMarketSupplyCaps(address[],uint256[])",
-        params: [[marketSpecs.vToken.address], [marketSpecs.riskParameters.supplyCap]],
-      },
-      {
-        target: marketSpecs.vToken.comptroller,
-        signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[marketSpecs.vToken.address], [marketSpecs.riskParameters.borrowCap]],
       },
       {
         target: marketSpecs.vToken.address,
@@ -182,25 +173,18 @@ export const vip790 = () => {
         signature: "setReduceReservesBlockDelta(uint256)",
         params: [REDUCE_RESERVES_BLOCK_DELTA],
       },
-      {
-        target: marketSpecs.vToken.address,
-        signature: "_setReserveFactor(uint256)",
-        params: [marketSpecs.riskParameters.reserveFactor],
-      },
-      {
-        target: marketSpecs.vToken.comptroller,
-        signature: "setCollateralFactor(address,uint256,uint256)",
-        params: [
-          marketSpecs.vToken.address,
-          marketSpecs.riskParameters.collateralFactor,
-          marketSpecs.riskParameters.liquidationThreshold,
-        ],
-      },
+      // set risk parameters. Setting liquidation incentive and supply cap only as others are zero
       {
         target: marketSpecs.vToken.comptroller,
         signature: "setLiquidationIncentive(address,uint256)",
         params: [marketSpecs.vToken.address, marketSpecs.riskParameters.liquidationIncentive],
       },
+      {
+        target: marketSpecs.vToken.comptroller,
+        signature: "_setMarketSupplyCaps(address[],uint256[])",
+        params: [[marketSpecs.vToken.address], [marketSpecs.riskParameters.supplyCap]],
+      },
+      // Seed initial liquidity
       {
         target: PT_clisBNB_25JUN2026,
         signature: "faucet(uint256)",
@@ -221,7 +205,7 @@ export const vip790 = () => {
         signature: "approve(address,uint256)",
         params: [marketSpecs.vToken.address, 0],
       },
-      // Burn some vTokens
+      // Burn some vTokens to prevents exchange rate manipulation at market launch.
       {
         target: marketSpecs.vToken.address,
         signature: "transfer(address,uint256)",
@@ -233,12 +217,15 @@ export const vip790 = () => {
         signature: "transfer(address,uint256)",
         params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
       },
+
+      // Pause Borrow actions for vPT_clisBNB_25JUN2026 market
       {
         target: marketSpecs.vToken.comptroller,
         signature: "_setActionsPaused(address[],uint8[],bool)",
-        params: [[marketSpecs.vToken.address], [2], true], // Pause Borrow actions
+        params: [[marketSpecs.vToken.address], [2], true],
       },
 
+      // Configure converters
       ...configureConverters([marketSpecs.vToken.underlying.address]),
 
       // BNB Emode Group

@@ -137,17 +137,15 @@ forking(84342013, async () => {
         [
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
-          "NewReserveFactor",
           "NewCollateralFactor",
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "PoolMarketInitialized",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+        [1, 1, 1, 1, 1, 1, 1, 2, 1],
       );
     },
   });
@@ -161,7 +159,7 @@ forking(84342013, async () => {
    *      - Initial supply distribution and borrowing restrictions
    */
   describe("Post-VIP behavior", async () => {
-    // Verify the correct interest rate model is assigned to the market
+    // Verify that the correct interest rate model is assigned to the market at deployment time
     it("check new IRM", async () => {
       expect(await vPT_clisBNB_25JUN2026.interestRateModel()).to.equal(RATE_MODEL);
     });
