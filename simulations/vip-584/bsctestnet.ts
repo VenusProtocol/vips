@@ -1,5 +1,5 @@
 /**
- * @title VIP-790 Simulation Test for BSC Testnet
+ * @title VIP-584 Simulation Test for BSC Testnet
  * @notice This simulation test validates the listing of PT_clisBNB_25JUN2026 (Pendle Principal Token)
  *         market in the Venus Protocol on BSC Testnet.
  *
@@ -30,7 +30,7 @@ import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameter
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
 import { checkInterestRate } from "src/vip-framework/checks/interestRateModel";
 
-import {
+import vip584, {
   CONVERSION_INCENTIVE,
   EMODE_POOL,
   PROTOCOL_SHARE_RESERVE,
@@ -38,8 +38,7 @@ import {
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
-  vip790,
-} from "../../vips/vip-790/bsctestnet";
+} from "../../vips/vip-584/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SINGLE_TOKEN_CONVERTER_ABI from "./abi/SingleTokenConverter.json";
@@ -52,7 +51,7 @@ const { bsctestnet } = NETWORK_ADDRESSES;
 const NATIVE_TOKEN_ADDR = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
 
 /**
- * Fork BSC Testnet at block 84342013 to simulate VIP-790 execution
+ * Fork BSC Testnet at block 84342013 to simulate VIP-584 execution
  * This allows testing against the actual testnet state at a specific block height
  */
 forking(84342013, async () => {
@@ -115,7 +114,7 @@ forking(84342013, async () => {
   });
 
   /**
-   * @notice Execute VIP-790 and validate emitted events
+   * @notice Execute VIP-584 and validate emitted events
    * @dev The VIP execution should emit the following events:
    *      - MarketListed: Market is added to the comptroller (1 event)
    *      - NewSupplyCap: Supply cap is set for the market (1 event)
@@ -129,7 +128,7 @@ forking(84342013, async () => {
    *      - NewLiquidationIncentive: Liquidation incentive is set (2 events - base + E-mode)
    *      - PoolMarketInitialized: Market is initialized in the E-mode pool (1 event)
    */
-  testVip("VIP-790", await vip790(), {
+  testVip("VIP-584", await vip584(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

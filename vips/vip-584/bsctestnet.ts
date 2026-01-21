@@ -121,7 +121,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip790 = () => {
+export const vip584 = () => {
   const meta = {
     version: "v2",
     title: "VIP-790 [BNB Chain] Add PT-clisBNB-25JUN2026 market to the BNB emode group",
@@ -264,4 +264,4 @@ export const vip790 = () => {
   );
 };
 
-export default vip790;
+export default vip584;

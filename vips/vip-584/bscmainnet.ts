@@ -120,11 +120,50 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip790 = () => {
+export const vip584 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-790 [BNB Chain] Add PT-slisBNBx-24JUN2026 market to the BNB emode group",
-    description: "VIP-790 [BNB Chain] BNB emode group",
+    title: "VIP-584 [BNB Chain] New PT-clisBNBx-25JUN2026 Listing markets in the BNB e-mode",
+    description: `If passed, this VIP will add one new market to the **BNB e-mode** on BNB Chain, for the following underlying asset:
+
+- [**PT-clisBNBx-25JUN2026**](https://bscscan.com/token/0xe052823b4aefc6e230faf46231a57d0905e30ae0)
+
+Community posts associated with these markets:
+
+- [**Add Support for PT-slisBNB in Venus BNB E-Mode Group**](https://community.venus.io/t/add-support-for-pt-slisbnb-in-venus-bnb-e-mode-group/5556)
+
+### **Description**
+
+**Name**
+
+- slisBNBx/clisBNBx: [**Rebranding clisBNB to slisBNBx**](https://www.binance.com/en/square/post/26438548906666)
+
+**Risk parameters of the new markets**
+
+- Borrow cap: 0
+- Supply cap: 25,000
+- Collateral factor: 87%
+- Liquidation Threshold: 90%
+- Liquidation Incentive: 4%
+- Bootstrap liquidity: 0.035 **PT-clisBNBx-25JUN2026**
+
+**Price configuration**
+
+- Pricing: Pendle's 30-minute TWAP of the **PT-slisBNBx / slisBNB** market and combining it with the existing **slisBNB price oracle**.
+
+### **PT-clisBNBx-25JUN2026 market Contracts on mainnet**
+
+- [**PT-clisBNBx-25JUN2026**](https://bscscan.com/address/0x6d3BD68E90B42615cb5abF4B8DE92b154ADc435e)
+
+### **References**
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/657)
+
+### **Voting options**
+
+- For - I agree that Venus Protocol should proceed with this proposal
+- Against - I do not think that Venus Protocol should proceed with this proposal
+- Abstain - I am indifferent to whether Venus Protocol proceeds or not`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -254,4 +293,4 @@ export const vip790 = () => {
   );
 };
 
-export default vip790;
+export default vip584;
