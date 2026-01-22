@@ -26,7 +26,7 @@ export const ARB_SEPOLIA_WBTC_PRIME_CONVERTER = "0x3089F46caf6611806caA39Ffaf672
 export const ARB_SEPOLIA_WETH_PRIME_CONVERTER = "0x0d1e90c1F86CD1c1dF514B493c5985B3FD9CD6C8";
 export const ARB_SEPOLIA_XVS_VAULT_CONVERTER = "0x99942a033454Cef6Ffb2843886C8b2E658E7D5fd";
 
-export const vip590 = () => {
+export const vip585 = () => {
   const meta = {
     version: "v2",
     title: "VIP-90 New tokenomics",
@@ -90,4 +90,4 @@ export const vip590 = () => {
   );
 };
 
-export default vip590;
+export default vip585;

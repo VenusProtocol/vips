@@ -6,60 +6,58 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import {
-  ARB_SEPOLIA_PSR,
-  ARB_SEPOLIA_USDC_PRIME_CONVERTER,
-  ARB_SEPOLIA_USDT_PRIME_CONVERTER,
-  ARB_SEPOLIA_WBTC_PRIME_CONVERTER,
-  ARB_SEPOLIA_WETH_PRIME_CONVERTER,
-  ARB_SEPOLIA_XVS_VAULT_CONVERTER,
-  vip590,
-} from "../../vips/vip-590/bsctestnet";
+  SEPOLIA_PSR,
+  SEPOLIA_USDC_PRIME_CONVERTER,
+  SEPOLIA_USDT_PRIME_CONVERTER,
+  SEPOLIA_WBTC_PRIME_CONVERTER,
+  SEPOLIA_WETH_PRIME_CONVERTER,
+  SEPOLIA_XVS_VAULT_CONVERTER,
+  vip585,
+} from "../../vips/vip-585/bsctestnet";
 import PSR_ABI from "./abi/ProtocolShareReserve.json";
 
-const { arbitrumsepolia } = NETWORK_ADDRESSES;
-const VTREASURY = arbitrumsepolia.VTREASURY;
+const { sepolia } = NETWORK_ADDRESSES;
+const VTREASURY = sepolia.VTREASURY;
 
 const oldProtocolPercentage = [
-  [ARB_SEPOLIA_USDC_PRIME_CONVERTER, 500],
-  [ARB_SEPOLIA_USDT_PRIME_CONVERTER, 500],
-  [ARB_SEPOLIA_WBTC_PRIME_CONVERTER, 300],
-  [ARB_SEPOLIA_WETH_PRIME_CONVERTER, 700],
-  [ARB_SEPOLIA_XVS_VAULT_CONVERTER, 2000],
+  [SEPOLIA_USDC_PRIME_CONVERTER, 200],
+  [SEPOLIA_USDT_PRIME_CONVERTER, 200],
+  [SEPOLIA_WBTC_PRIME_CONVERTER, 100],
+  [SEPOLIA_WETH_PRIME_CONVERTER, 1500],
+  [SEPOLIA_XVS_VAULT_CONVERTER, 2000],
   [VTREASURY, 6000],
 ];
 
 const oldAdditionalPercentage = [
-  [ARB_SEPOLIA_USDC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_USDT_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WBTC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WETH_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_XVS_VAULT_CONVERTER, 2000],
+  [SEPOLIA_USDC_PRIME_CONVERTER, 0],
+  [SEPOLIA_USDT_PRIME_CONVERTER, 0],
+  [SEPOLIA_WBTC_PRIME_CONVERTER, 0],
+  [SEPOLIA_WETH_PRIME_CONVERTER, 0],
+  [SEPOLIA_XVS_VAULT_CONVERTER, 2000],
   [VTREASURY, 8000],
 ];
 
 const newProtocolPercentage = [
-  [ARB_SEPOLIA_USDC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_USDT_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WBTC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WETH_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_XVS_VAULT_CONVERTER, 0],
+  [SEPOLIA_USDC_PRIME_CONVERTER, 0],
+  [SEPOLIA_USDT_PRIME_CONVERTER, 0],
+  [SEPOLIA_WBTC_PRIME_CONVERTER, 0],
+  [SEPOLIA_WETH_PRIME_CONVERTER, 0],
   [VTREASURY, 10000],
 ];
 
 const newAdditionalPercentage = [
-  [ARB_SEPOLIA_USDC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_USDT_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WBTC_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_WETH_PRIME_CONVERTER, 0],
-  [ARB_SEPOLIA_XVS_VAULT_CONVERTER, 0],
+  [SEPOLIA_USDC_PRIME_CONVERTER, 0],
+  [SEPOLIA_USDT_PRIME_CONVERTER, 0],
+  [SEPOLIA_WBTC_PRIME_CONVERTER, 0],
+  [SEPOLIA_WETH_PRIME_CONVERTER, 0],
   [VTREASURY, 10000],
 ];
 
-forking(235177341, async () => {
+forking(10084609, async () => {
   let psr: Contract;
 
   before(async () => {
-    psr = await ethers.getContractAt(PSR_ABI, ARB_SEPOLIA_PSR);
+    psr = await ethers.getContractAt(PSR_ABI, SEPOLIA_PSR);
   });
 
   describe("Pre-VIP behaviour", async () => {
@@ -73,7 +71,7 @@ forking(235177341, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-590", await vip590(), {
+  testForkedNetworkVipCommands("VIP-585", await vip585(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [8]);
     },
