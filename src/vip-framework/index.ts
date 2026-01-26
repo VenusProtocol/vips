@@ -30,6 +30,12 @@ const OMNICHAIN_PROPOSAL_SENDER = getOmnichainProposalSenderAddress();
 const OMNICHAIN_GOVERNANCE_EXECUTOR =
   NETWORK_ADDRESSES[FORKED_NETWORK as REMOTE_NETWORKS].OMNICHAIN_GOVERNANCE_EXECUTOR;
 
+// VOTING_PERIOD is updated for the Fermi upgrade.
+// Previous blocks/year: 42,048,000
+// After Fermi: 70,080,000
+// Ratio: 70,080,000 / 42,048,000 = 1.67
+// Previous voting period: 115,200
+// New voting period: 115,200 * 1.67 = 192,384
 const VOTING_PERIOD = 192384;
 
 export const {
