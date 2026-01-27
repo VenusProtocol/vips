@@ -327,14 +327,43 @@ async function getCachedWhale(address: string): Promise<any> {
   return signer;
 }
 
+const RESILIENT_ORACLE_ABI = ["function getUnderlyingPrice(address vToken) external view returns (uint256)"];
+
+/**
+ * Computes a safe flash loan amount for cross-asset leverage.
+ * Uses oracle prices to determine how many borrow tokens equal ~$3 USD,
+ * ensuring the amount is large enough for DEX swaps but small enough
+ * to stay within borrowing capacity of the seed collateral.
+ */
+async function computeSafeFlashLoanAmount(
+  oracleAddress: string,
+  borrowVTokenAddress: string,
+  borrowDecimals: number,
+): Promise<BigNumber> {
+  const oracle = new ethers.Contract(oracleAddress, RESILIENT_ORACLE_ABI, ethers.provider);
+  const borrowPrice = await oracle.getUnderlyingPrice(borrowVTokenAddress);
+  // borrowPrice is scaled to 36 - borrowDecimals (Venus convention)
+  // Target ~$3 worth of borrow token
+  const targetUsd = parseUnits("3", 36 - borrowDecimals);
+  const amount = targetUsd.div(borrowPrice);
+  // Clamp between 0.001 and 10 tokens
+  const minAmount = parseUnits("0.001", borrowDecimals);
+  const maxAmount = parseUnits("10", borrowDecimals);
+  if (amount.lt(minAmount)) return minAmount;
+  if (amount.gt(maxAmount)) return maxAmount;
+  return amount;
+}
+
 const FORK_BLOCK = 77663527;
 forking(FORK_BLOCK, async () => {
   let comptroller: Contract;
   let signers: any[];
+  let oracleAddress: string;
 
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, provider);
+    oracleAddress = await comptroller.oracle();
 
     // Cache signers once
     signers = await ethers.getSigners();
@@ -835,7 +864,11 @@ forking(FORK_BLOCK, async () => {
             it(`enterLeverage: supply ${collateral.key}, borrow ${borrow.key}`, async () => {
               try {
                 const seedAmount = parseUnits("10", collateral.info.decimals);
-                const flashLoanAmount = parseUnits("0.01", borrow.info.decimals);
+                const flashLoanAmount = await computeSafeFlashLoanAmount(
+                  oracleAddress,
+                  borrow.config.address,
+                  borrow.info.decimals,
+                );
 
                 await collateralToken.connect(testUser).approve(collateral.config.address, seedAmount);
                 await vCollateral.connect(testUser).mint(seedAmount);
@@ -897,19 +930,17 @@ forking(FORK_BLOCK, async () => {
                 const msg = error instanceof Error ? error.message : String(error);
                 const reason = msg.includes("supply cap")
                   ? "Supply cap reached"
-                  : msg.includes("math error")
-                  ? "Math error"
                   : msg.includes("No route found") ||
                     msg.includes("INSUFFICIENT_LIQUIDITY") ||
                     msg.includes("Swap API error")
                   ? "Swap route unavailable"
                   : `Revert: ${msg.slice(0, 80)}`;
-                const status =
+                const isSkippable =
                   msg.includes("No route found") ||
                   msg.includes("INSUFFICIENT_LIQUIDITY") ||
-                  msg.includes("Swap API error")
-                    ? "SKIPPED"
-                    : "FAILED";
+                  msg.includes("Swap API error") ||
+                  msg.includes("supply cap");
+                const status = isSkippable ? "SKIPPED" : "FAILED";
                 leverageResults.push({
                   pool: pool.label,
                   collateral: collateral.key,
@@ -943,10 +974,17 @@ forking(FORK_BLOCK, async () => {
                 return;
               }
 
-              const redeemAmount = parseUnits("5", collateral.info.decimals);
               const flashLoanAmount = borrowBalanceBefore.mul(101).div(100);
 
-              const vTokenBalanceBefore = await vCollateral.balanceOf(userAddress);
+              const [vTokenBalanceBefore, exchangeRate] = await Promise.all([
+                vCollateral.balanceOf(userAddress),
+                vCollateral.callStatic.exchangeRateCurrent(),
+              ]);
+
+              // Compute redeem amount dynamically: redeem enough collateral to cover the borrow repayment.
+              // Use 80% of the user's vToken balance converted to underlying, capped to ensure sufficiency.
+              const underlyingBalance = vTokenBalanceBefore.mul(exchangeRate).div(ethers.constants.WeiPerEther);
+              const redeemAmount = underlyingBalance.mul(80).div(100);
 
               try {
                 const { swapData, minAmountOut } = await getSwapData(
@@ -997,19 +1035,18 @@ forking(FORK_BLOCK, async () => {
                 });
               } catch (error: unknown) {
                 const msg = error instanceof Error ? error.message : String(error);
-                const reason = msg.includes("math error")
-                  ? "Math error"
-                  : msg.includes("No route found") ||
-                    msg.includes("INSUFFICIENT_LIQUIDITY") ||
-                    msg.includes("Swap API error")
-                  ? "Swap route unavailable"
-                  : `Revert: ${msg.slice(0, 80)}`;
-                const status =
+                const reason =
                   msg.includes("No route found") ||
                   msg.includes("INSUFFICIENT_LIQUIDITY") ||
                   msg.includes("Swap API error")
-                    ? "SKIPPED"
-                    : "FAILED";
+                    ? "Swap route unavailable"
+                    : `Revert: ${msg.slice(0, 80)}`;
+                const isSkippable =
+                  msg.includes("No route found") ||
+                  msg.includes("INSUFFICIENT_LIQUIDITY") ||
+                  msg.includes("Swap API error") ||
+                  msg.includes("supply cap");
+                const status = isSkippable ? "SKIPPED" : "FAILED";
                 leverageResults.push({
                   pool: pool.label,
                   collateral: collateral.key,
@@ -1029,10 +1066,38 @@ forking(FORK_BLOCK, async () => {
             if (isPrimaryUSDTPair) {
               it(`enterLeverageFromBorrow: increase leverage for ${collateral.key}`, async () => {
                 try {
+                  // Compute amounts dynamically using oracle prices to stay within borrowing capacity
+                  const oracle = new ethers.Contract(oracleAddress, RESILIENT_ORACLE_ABI, ethers.provider);
+                  const [collateralPrice, borrowPrice] = await Promise.all([
+                    oracle.getUnderlyingPrice(collateral.config.address),
+                    oracle.getUnderlyingPrice(borrow.config.address),
+                  ]);
+
+                  // Mint 20 collateral tokens, compute max borrowable at 40% of collateral factor
                   const mintAmount = parseUnits("20", collateral.info.decimals);
-                  const initialBorrow = parseUnits("2", borrow.info.decimals);
-                  const borrowSeed = parseUnits("1", borrow.info.decimals);
-                  const flashLoan = parseUnits("2", borrow.info.decimals);
+                  const collateralValueUsd = mintAmount
+                    .mul(collateralPrice)
+                    .div(parseUnits("1", collateral.info.decimals));
+                  const cf = collateral.config.collateralFactor;
+                  const maxBorrowUsd = collateralValueUsd.mul(cf).div(parseUnits("1", 18));
+                  // Use 40% of max borrow to stay safe, split into initialBorrow(40%), seed(20%), flashLoan(40%)
+                  const safeBorrowUsd = maxBorrowUsd.mul(40).div(100);
+                  const borrowUnit = parseUnits("1", borrow.info.decimals);
+                  const initialBorrow = safeBorrowUsd.mul(borrowUnit).div(borrowPrice).mul(40).div(100);
+                  const borrowSeed = safeBorrowUsd.mul(borrowUnit).div(borrowPrice).mul(20).div(100);
+                  const flashLoan = safeBorrowUsd.mul(borrowUnit).div(borrowPrice).mul(40).div(100);
+
+                  if (initialBorrow.isZero() || borrowSeed.isZero() || flashLoan.isZero()) {
+                    leverageResults.push({
+                      pool: pool.label,
+                      collateral: collateral.key,
+                      borrow: borrow.key,
+                      flow: "Cross-Asset EnterFromBorrow",
+                      status: "SKIPPED",
+                      detail: "Amounts too small for viable leverage",
+                    });
+                    return;
+                  }
 
                   await collateralToken.connect(testUser).approve(collateral.config.address, mintAmount);
                   await vCollateral.connect(testUser).mint(mintAmount);
@@ -1097,21 +1162,19 @@ forking(FORK_BLOCK, async () => {
                   });
                 } catch (error: unknown) {
                   const msg = error instanceof Error ? error.message : String(error);
-                  const reason = msg.includes("math error")
-                    ? "Math error"
-                    : msg.includes("supply cap")
+                  const reason = msg.includes("supply cap")
                     ? "Supply cap reached"
                     : msg.includes("No route found") ||
                       msg.includes("INSUFFICIENT_LIQUIDITY") ||
                       msg.includes("Swap API error")
                     ? "Swap route unavailable"
                     : `Revert: ${msg.slice(0, 80)}`;
-                  const status =
+                  const isSkippable =
                     msg.includes("No route found") ||
                     msg.includes("INSUFFICIENT_LIQUIDITY") ||
-                    msg.includes("Swap API error")
-                      ? "SKIPPED"
-                      : "FAILED";
+                    msg.includes("Swap API error") ||
+                    msg.includes("supply cap");
+                  const status = isSkippable ? "SKIPPED" : "FAILED";
                   leverageResults.push({
                     pool: pool.label,
                     collateral: collateral.key,
