@@ -34,8 +34,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
 const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
 
-// Core Pool markets with flash loans enabled (from VIP-567)
-const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+// Core Pool markets
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -49,9 +48,7 @@ const PANCAKE_V2_ROUTER_ABI = [
 ];
 
 // User with U tokens to fund test user
-const U_HOLDER = "0x95282779ee2f3d4cf383041f7361c741cf8cc00e";
-// User with USDC tokens
-const USDC_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
+const U_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
 // User with USDT tokens
 const USDT_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
@@ -203,9 +200,7 @@ forking(FORK_BLOCK, async () => {
   let vUContract: Contract;
   let leverageStrategiesManager: Contract;
   let u: Contract;
-  let usdc: Contract;
   let usdt: Contract;
-  let vUSDCContract: Contract;
   let vUSDTContract: Contract;
   let comptroller: Contract;
   let resilientOracle: Contract;
@@ -223,9 +218,7 @@ forking(FORK_BLOCK, async () => {
       ethers.provider,
     );
     u = new ethers.Contract(U, ERC20_ABI, ethers.provider);
-    usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
     usdt = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
-    vUSDCContract = new ethers.Contract(vUSDC, VTOKEN_ABI, ethers.provider);
     vUSDTContract = new ethers.Contract(vUSDT, VTOKEN_ABI, ethers.provider);
     comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
@@ -240,11 +233,10 @@ forking(FORK_BLOCK, async () => {
 
     // Fund test users with tokens
     const uHolder = await initMainnetUser(U_HOLDER, ethers.utils.parseEther("10"));
-    const usdcHolder = await initMainnetUser(USDC_HOLDER, ethers.utils.parseEther("10"));
     const usdtHolder = await initMainnetUser(USDT_HOLDER, ethers.utils.parseEther("10"));
 
     await u.connect(uHolder).transfer(await testUser.getAddress(), parseUnits("100", 18));
-    await usdc.connect(usdcHolder).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
+    await u.connect(uHolder).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
     await usdt.connect(usdtHolder).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
 
     // Set direct prices and extend stale periods for oracle compatibility
@@ -404,27 +396,24 @@ forking(FORK_BLOCK, async () => {
    * =====================================================================
    *
    * This test demonstrates a cross-asset leverage operation using the
-   * LeverageStrategiesManager contract. The user supplies USDC as collateral,
-   * borrows USDT via a flash loan, and swaps the borrowed USDT for more USDC
-   * to increase their leveraged position. The swap data is fetched live from
-   * the Venus API, which provides a signed quote for the swap.
+   * LeverageStrategiesManager contract. The user supplies U as collateral,
+   * borrows USDT via a flash loan, and swaps the borrowed USDT for more U
+   * to increase their leveraged position.
    *
    * Key steps:
-   * 1. User enters both USDC and USDT markets and delegates to the manager.
-   * 2. User approves the manager to spend their USDC.
-   * 3. The test fetches swap data for USDT->USDC from the Venus API.
+   * 1. User enters both vU and vUSDT markets and delegates to the manager.
+   * 2. User approves the manager to spend their U.
+   * 3. The test fetches swap data for USDT->U.
    * 4. The manager's enterLeverage is called, which:
-   *    - Supplies USDC as seed collateral
+   *    - Supplies U as seed collateral
    *    - Borrows USDT via flash loan
-   *    - Swaps USDT for more USDC (increasing collateral)
+   *    - Swaps USDT for more U (increasing collateral)
    *    - Leaves the user with a leveraged position
    * 5. The test verifies:
    *    - The LeverageEntered event is emitted with correct parameters
-   *    - The user's vUSDC balance increases
+   *    - The user's vU balance increases
    *    - The user's USDT borrow balance increases
-   *    - The user's USDC wallet balance decreases by the seed amount
-   *
-   * This test will gracefully skip if the Venus API is unavailable or the swap fails.
+   *    - The user's U wallet balance decreases by the seed amount
    */
   describe("LeverageStrategiesManager: enterLeverage (cross-asset)", () => {
     let leverageUserAddress: string;
@@ -432,51 +421,50 @@ forking(FORK_BLOCK, async () => {
     before(async () => {
       leverageUserAddress = await leverageTestUser.getAddress();
 
-      // Enter markets for both USDC and USDT so the user can supply collateral and borrow
-      await comptroller.connect(leverageTestUser).enterMarkets([vUSDC, vUSDT]);
+      // Enter markets for both vU and vUSDT so the user can supply collateral and borrow
+      await comptroller.connect(leverageTestUser).enterMarkets([vU, vUSDT]);
 
       // Approve leverage manager to act on behalf of user (required for leverage operations)
       await comptroller.connect(leverageTestUser).updateDelegate(LEVERAGE_STRATEGIES_MANAGER, true);
     });
 
-    it("should enter cross-asset leverage position (USDC collateral, USDT borrow) with value checks", async () => {
-      // User will supply 100 USDC as seed collateral
+    it("should enter cross-asset leverage position (U collateral, USDT borrow) with value checks", async () => {
+      // User will supply 100 U as seed collateral
       const collateralAmountSeed = parseUnits("100", 18);
       // User will borrow 50 USDT via flash loan
       const borrowedAmountToFlashLoan = parseUnits("50", 18);
 
-      // Fetch swap data from Venus API for swapping borrowed USDT to USDC
-      // This is required for the leverage manager to perform the swap on-chain
-      const { swapData, minAmountOut } = await getSwapData(USDT, USDC, borrowedAmountToFlashLoan.toString(), "0.01");
+      // Fetch swap data for swapping borrowed USDT to U
+      const { swapData, minAmountOut } = await getSwapData(USDT, U, borrowedAmountToFlashLoan.toString(), "0.01");
 
       // If swap data is unavailable, skip the test
       if (swapData === "0x") {
-        console.log("Skipping cross-asset enterLeverage test - Venus API unavailable");
+        console.log("Skipping cross-asset enterLeverage test - swap data unavailable");
         return;
       }
 
       // Record balances before leverage
-      const vUSDCBalanceBefore = await vUSDCContract.balanceOf(leverageUserAddress);
+      const vUBalanceBefore = await vUContract.balanceOf(leverageUserAddress);
       const usdtBorrowBefore = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-      const usdcBalanceBefore = await usdc.balanceOf(leverageUserAddress);
+      const uBalanceBefore = await u.balanceOf(leverageUserAddress);
 
-      // Approve the leverage manager to spend user's USDC for seed collateral
-      await usdc.connect(leverageTestUser).approve(LEVERAGE_STRATEGIES_MANAGER, collateralAmountSeed);
+      // Approve the leverage manager to spend user's U for seed collateral
+      await u.connect(leverageTestUser).approve(LEVERAGE_STRATEGIES_MANAGER, collateralAmountSeed);
 
       try {
         // Call enterLeverage on the manager contract
         // This will:
-        //   - Supply USDC as collateral
+        //   - Supply U as collateral
         //   - Borrow USDT via flash loan
-        //   - Swap USDT for more USDC (increasing collateral)
+        //   - Swap USDT for more U (increasing collateral)
         //   - Leave the user with a leveraged position
         const tx = await leverageStrategiesManager.connect(leverageTestUser).enterLeverage(
-          vUSDC, // collateralMarket
+          vU, // collateralMarket
           collateralAmountSeed, // collateralAmountSeed
           vUSDT, // borrowedMarket
           borrowedAmountToFlashLoan, // borrowedAmountToFlashLoan
           minAmountOut, // minAmountOutAfterSwap
-          swapData, // swapData from Venus API
+          swapData, // swapData
         );
         const receipt = await tx.wait();
 
@@ -498,27 +486,27 @@ forking(FORK_BLOCK, async () => {
 
         // Verify event parameters match input
         expect(event.args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vUSDC.toLowerCase());
+        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
         expect(event.args.collateralAmountSeed).to.equal(collateralAmountSeed);
         expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
         expect(event.args.borrowedAmountToFlashLoan).to.equal(borrowedAmountToFlashLoan);
 
         // Record balances after leverage
-        const vUSDCBalanceAfter = await vUSDCContract.balanceOf(leverageUserAddress);
+        const vUBalanceAfter = await vUContract.balanceOf(leverageUserAddress);
         const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-        const usdcBalanceAfter = await usdc.balanceOf(leverageUserAddress);
+        const uBalanceAfter = await u.balanceOf(leverageUserAddress);
 
-        // The user's vUSDC balance should increase (more collateral)
-        expect(vUSDCBalanceAfter).to.be.gt(vUSDCBalanceBefore);
+        // The user's vU balance should increase (more collateral)
+        expect(vUBalanceAfter).to.be.gt(vUBalanceBefore);
         // The user's USDT borrow balance should increase (from flash loan)
         expect(usdtBorrowAfter).to.be.gt(usdtBorrowBefore);
         expect(usdtBorrowAfter).to.be.gte(borrowedAmountToFlashLoan);
-        // The user's USDC wallet balance should decrease by the seed amount
-        expect(usdcBalanceAfter).to.equal(usdcBalanceBefore.sub(collateralAmountSeed));
+        // The user's U wallet balance should decrease by the seed amount
+        expect(uBalanceAfter).to.equal(uBalanceBefore.sub(collateralAmountSeed));
 
         // Log the results for manual inspection
         console.log(`Cross-asset leverage entered:`);
-        console.log(`  vUSDC balance: ${vUSDCBalanceBefore.toString()} -> ${vUSDCBalanceAfter.toString()}`);
+        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
         console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
       } catch (error: unknown) {
         // TokenSwapCallFailed (0x428c0cc7) or similar swap errors - skip gracefully
@@ -543,21 +531,21 @@ forking(FORK_BLOCK, async () => {
         return;
       }
 
-      // For exitLeverage: flash loan USDT to repay, redeem USDC, swap USDC to USDT
+      // For exitLeverage: flash loan USDT to repay, redeem U, swap U to USDT
       // Redeem more than borrow to cover swap slippage and flash loan fees
       const collateralAmountToRedeem = parseUnits("55", 18);
 
-      // Get swap data from Venus API (USDC -> USDT)
-      const { swapData, minAmountOut } = await getSwapData(USDC, USDT, collateralAmountToRedeem.toString(), "0.01");
+      // Get swap data (U -> USDT)
+      const { swapData, minAmountOut } = await getSwapData(U, USDT, collateralAmountToRedeem.toString(), "0.01");
 
       if (swapData === "0x") {
-        console.log("Skipping exitLeverage test - Venus API unavailable");
+        console.log("Skipping exitLeverage test - swap data unavailable");
         return;
       }
 
       // Get balances before exit
-      const vUSDCBalanceBefore = await vUSDCContract.balanceOf(leverageUserAddress);
-      const usdcBalanceBefore = await usdc.balanceOf(leverageUserAddress);
+      const vUBalanceBefore = await vUContract.balanceOf(leverageUserAddress);
+      const uBalanceBefore = await u.balanceOf(leverageUserAddress);
 
       // Flash loan amount: borrow balance + 1% buffer for interest
       const flashLoanAmount = usdtBorrowBefore.mul(101).div(100);
@@ -565,12 +553,12 @@ forking(FORK_BLOCK, async () => {
       try {
         // Call exitLeverage
         const tx = await leverageStrategiesManager.connect(leverageTestUser).exitLeverage(
-          vUSDC, // collateralMarket
+          vU, // collateralMarket
           collateralAmountToRedeem, // collateralAmountToRedeemForSwap
           vUSDT, // borrowedMarket
           flashLoanAmount, // borrowedAmountToFlashLoan
           minAmountOut, // minAmountOutAfterSwap
-          swapData, // swapData from Venus API
+          swapData, // swapData
         );
         const receipt = await tx.wait();
 
@@ -591,22 +579,22 @@ forking(FORK_BLOCK, async () => {
 
         // Verify event parameters
         expect(event.args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vUSDC.toLowerCase());
+        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
         expect(event.args.collateralAmountToRedeemForSwap).to.equal(collateralAmountToRedeem);
         expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
         expect(event.args.borrowedAmountToFlashLoan).to.equal(flashLoanAmount);
 
         // Get balances after exit
-        const vUSDCBalanceAfter = await vUSDCContract.balanceOf(leverageUserAddress);
+        const vUBalanceAfter = await vUContract.balanceOf(leverageUserAddress);
         const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-        const usdcBalanceAfter = await usdc.balanceOf(leverageUserAddress);
+        const uBalanceAfter = await u.balanceOf(leverageUserAddress);
 
-        expect(vUSDCBalanceAfter).to.be.lt(vUSDCBalanceBefore);
+        expect(vUBalanceAfter).to.be.lt(vUBalanceBefore);
         expect(usdtBorrowAfter).to.equal(0);
-        expect(usdcBalanceAfter).to.be.gte(usdcBalanceBefore);
+        expect(uBalanceAfter).to.be.gte(uBalanceBefore);
 
         console.log(`Cross-asset leverage exited:`);
-        console.log(`  vUSDC balance: ${vUSDCBalanceBefore.toString()} -> ${vUSDCBalanceAfter.toString()}`);
+        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
         console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -623,19 +611,19 @@ forking(FORK_BLOCK, async () => {
     it("should enter leverage from existing borrow position with value checks", async () => {
       const userAddress = await leverageTestUser.getAddress();
 
-      // Setup: mint vUSDC and borrow some USDT first
+      // Setup: mint vU and borrow some USDT first
       const mintAmount = parseUnits("200", 18);
       const initialBorrow = parseUnits("20", 18);
 
-      const usdcBalance = await usdc.balanceOf(userAddress);
-      if (usdcBalance.lt(mintAmount)) {
-        console.log("Skipping enterLeverageFromBorrow test - insufficient USDC balance");
+      const uBalance = await u.balanceOf(userAddress);
+      if (uBalance.lt(mintAmount)) {
+        console.log("Skipping enterLeverageFromBorrow test - insufficient U balance");
         return;
       }
 
-      // Approve and mint vUSDC
-      await usdc.connect(leverageTestUser).approve(vUSDC, mintAmount);
-      await vUSDCContract.connect(leverageTestUser).mint(mintAmount);
+      // Approve and mint vU
+      await u.connect(leverageTestUser).approve(vU, mintAmount);
+      await vUContract.connect(leverageTestUser).mint(mintAmount);
 
       // Borrow some USDT to create initial position
       await vUSDTContract.connect(leverageTestUser).borrow(initialBorrow);
@@ -644,23 +632,23 @@ forking(FORK_BLOCK, async () => {
       const additionalBorrowSeed = parseUnits("10", 18);
       const additionalFlashLoan = parseUnits("20", 18);
 
-      // Get swap data (USDT -> USDC)
+      // Get swap data (USDT -> U)
       const totalUSDT = additionalBorrowSeed.add(additionalFlashLoan);
-      const { swapData, minAmountOut } = await getSwapData(USDT, USDC, totalUSDT.toString(), "0.01");
+      const { swapData, minAmountOut } = await getSwapData(USDT, U, totalUSDT.toString(), "0.01");
 
       if (swapData === "0x") {
-        console.log("Skipping enterLeverageFromBorrow test - Venus API unavailable");
+        console.log("Skipping enterLeverageFromBorrow test - swap data unavailable");
         return;
       }
 
       // Get balances before
-      const vUSDCBalanceBefore = await vUSDCContract.balanceOf(userAddress);
+      const vUBalanceBefore = await vUContract.balanceOf(userAddress);
       const usdtBorrowBefore = await vUSDTContract.callStatic.borrowBalanceCurrent(userAddress);
 
       try {
         // Call enterLeverageFromBorrow
         const tx = await leverageStrategiesManager.connect(leverageTestUser).enterLeverageFromBorrow(
-          vUSDC, // collateralMarket
+          vU, // collateralMarket
           vUSDT, // borrowedMarket
           additionalBorrowSeed, // borrowedAmountSeed (additional borrow, not flash loaned)
           additionalFlashLoan, // borrowedAmountToFlashLoan
@@ -686,20 +674,20 @@ forking(FORK_BLOCK, async () => {
 
         // Verify event parameters
         expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vUSDC.toLowerCase());
+        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
         expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
         expect(event.args.borrowedAmountSeed).to.equal(additionalBorrowSeed);
         expect(event.args.borrowedAmountToFlashLoan).to.equal(additionalFlashLoan);
 
         // Get balances after
-        const vUSDCBalanceAfter = await vUSDCContract.balanceOf(userAddress);
+        const vUBalanceAfter = await vUContract.balanceOf(userAddress);
         const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(userAddress);
 
-        expect(vUSDCBalanceAfter).to.be.gt(vUSDCBalanceBefore);
+        expect(vUBalanceAfter).to.be.gt(vUBalanceBefore);
         expect(usdtBorrowAfter).to.be.gt(usdtBorrowBefore);
 
         console.log(`Leverage from borrow entered:`);
-        console.log(`  vUSDC balance: ${vUSDCBalanceBefore.toString()} -> ${vUSDCBalanceAfter.toString()}`);
+        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
         console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
