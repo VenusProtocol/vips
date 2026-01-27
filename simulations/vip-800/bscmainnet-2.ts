@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -18,17 +18,13 @@ import { EMODE_POOLS, vip800 as vip800_2 } from "../../vips/vip-800/bscmainnet-2
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
-import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
 import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const provider = ethers.provider;
 
 // Contract addresses
-const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
-const USDC_WHALE = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
-const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
 
 const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals: number }> = {
   // USDT
@@ -123,40 +119,20 @@ const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals:
   },
 };
 
-// =============================================================================
-// EIP-712 Swap Signer & Calldata Builder
-// =============================================================================
-
-let swapSignerWallet: Wallet;
-let swapHelperContract: Contract;
-let eip712Domain: { name: string; version: string; chainId: number; verifyingContract: string };
-
 /**
- * Configures a deterministic EIP-712 signer for the SwapHelper contract on the forked chain.
- *
- * In production, the SwapHelper requires a backend signer to authorize multicall executions
- * via EIP-712 signatures. In tests, we:
- * 1. Create a deterministic Hardhat wallet (using Hardhat's default private key)
- * 2. Impersonate the SwapHelper owner to register this wallet as the authorized backendSigner
- * 3. Cache the EIP-712 domain parameters (name, version, chainId, verifyingContract) for later signing
+ * Parse transaction logs and find events matching a given name.
  */
-async function setupSwapSigner() {
-  swapSignerWallet = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ethers.provider);
-
-  swapHelperContract = new ethers.Contract(SWAP_HELPER, SWAP_HELPER_ABI, ethers.provider);
-
-  const swapHelperOwner = await swapHelperContract.owner();
-  const impersonatedOwner = await initMainnetUser(swapHelperOwner, ethers.utils.parseEther("1"));
-  await swapHelperContract.connect(impersonatedOwner).setBackendSigner(swapSignerWallet.address);
-
-  const domain = await swapHelperContract.eip712Domain();
-  const network = await ethers.provider.getNetwork();
-  eip712Domain = {
-    name: domain.name,
-    version: domain.version,
-    chainId: network.chainId,
-    verifyingContract: domain.verifyingContract,
-  };
+function findEvents(logs: { topics: string[]; data: string }[], abi: any[], eventName: string) {
+  const iface = new ethers.utils.Interface(abi);
+  return logs
+    .map(log => {
+      try {
+        return iface.parseLog(log);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null && e.name === eventName);
 }
 
 forking(76766086, async () => {
@@ -573,11 +549,9 @@ forking(76766086, async () => {
 
     // single-asset leverage tests
     for (const pool of EMODE_POOLS) {
-      describe(`EMode Pool: ${pool.label}`, () => {
+      describe(`Single-Asset Leverage: ${pool.label}`, () => {
         let leverageStrategiesManager: Contract;
         let testUser: any;
-        let leverageTestUser: any;
-        let usdc: Contract;
 
         before(async () => {
           leverageStrategiesManager = new ethers.Contract(
@@ -586,27 +560,18 @@ forking(76766086, async () => {
             ethers.provider,
           );
 
-          usdc = new ethers.Contract(USDC, ERC20_ABI, ethers.provider);
-
-          // Use a unique/fresh signer for each pool to avoid EMode pool entry conflicts
+          // Use higher signer indices to avoid collision with signers[0] used by mint/borrow tests
           const signers = await ethers.getSigners();
           const poolIndex = EMODE_POOLS.findIndex(p => p.id === pool.id);
-          testUser = signers[poolIndex % signers.length];
-          leverageTestUser = signers[(poolIndex + 1) % signers.length];
+          testUser = signers[2 + poolIndex];
 
           await comptroller.connect(testUser).enterPool(pool.id);
-
-          // Approve leverage manager to act on behalf of user (updateDelegate)
           await comptroller.connect(testUser).updateDelegate(LEVERAGE_STRATEGIES_MANAGER, true);
-
-          // Setup the EIP-712 swap signer so we can build signed multicall calldata
-          await setupSwapSigner();
         });
 
         for (const [marketKey, config] of Object.entries(pool.marketsConfig)) {
           const marketInfo = MARKET_INFO[config.address];
           if (!marketInfo) continue;
-          if (marketKey === "vMATIC" || marketKey === "vTRX" || marketKey === "vTHE") continue; // supply cap reached
 
           const { address: vTokenAddr } = config;
           const { underlying, whale, decimals } = marketInfo;
@@ -615,12 +580,26 @@ forking(76766086, async () => {
             let vToken: any;
             let token: any;
 
+            const collateralAmountSeed = parseUnits("10", decimals);
+            const collateralAmountToFlashLoan = parseUnits("5", decimals);
+
+            const supplyCapAllowsLeverage = async () => {
+              const supplyCap = await comptroller.supplyCaps(vTokenAddr);
+              if (supplyCap.eq(0)) return false;
+
+              const [totalSupply, exchangeRate] = await Promise.all([
+                vToken.totalSupply(),
+                vToken.exchangeRateStored(),
+              ]);
+
+              const currentSupply = exchangeRate.mul(totalSupply).div(ethers.constants.WeiPerEther);
+              const needed = collateralAmountSeed.add(collateralAmountToFlashLoan);
+              return currentSupply.add(needed).lte(supplyCap);
+            };
+
             before(async () => {
               vToken = new ethers.Contract(vTokenAddr, VTOKEN_ABI, provider);
               token = new ethers.Contract(underlying, ERC20_ABI, provider);
-
-              const usdcWhale = await initMainnetUser(USDC_WHALE, ethers.utils.parseEther("10"));
-              await usdc.connect(usdcWhale).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
 
               // Fund user
               const whaleSigner = await initMainnetUser(whale, ethers.utils.parseEther("10"));
@@ -632,58 +611,43 @@ forking(76766086, async () => {
               expect(isFlashLoanEnabled).to.be.equal(true);
             });
 
-            it("LeverageStrategiesManager: enterSingleAssetLeverage with value checks", async () => {
+            it("enterSingleAssetLeverage with value checks", async () => {
+              if (!(await supplyCapAllowsLeverage())) {
+                console.log(`Supply cap would be exceeded for ${marketKey}, skipping enter leverage`);
+                return;
+              }
+
               const userAddress = await testUser.getAddress();
-              const collateralAmountSeed = parseUnits("10", 18);
-              const collateralAmountToFlashLoan = parseUnits("5", 18);
 
-              // Approve underlying tokens to vtoken for minting collateral first
               await token.connect(testUser).approve(vTokenAddr, collateralAmountSeed);
-
-              // Mint vtokens as collateral
               await vToken.connect(testUser).mint(collateralAmountSeed);
-
-              // Enter market so vtokens can be used as collateral
               await comptroller.connect(testUser).enterMarkets([vTokenAddr]);
 
-              // Get balances before
               const vTokenBalanceBefore = await vToken.balanceOf(userAddress);
               const borrowBalanceBefore = await vToken.callStatic.borrowBalanceCurrent(userAddress);
 
-              // Call enterSingleAssetLeverage
               const tx = await leverageStrategiesManager
                 .connect(testUser)
                 .enterSingleAssetLeverage(vTokenAddr, 0, collateralAmountToFlashLoan);
               const receipt = await tx.wait();
 
-              // Parse and verify SingleAssetLeverageEntered event
-              const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-              const leverageEvents = receipt.logs
-                .map((log: { topics: string[]; data: string }) => {
-                  try {
-                    return iface.parseLog(log);
-                  } catch {
-                    return null;
-                  }
-                })
-                .filter((e: { name: string } | null) => e && e.name === "SingleAssetLeverageEntered");
-
+              const leverageEvents = findEvents(
+                receipt.logs,
+                LEVERAGE_STRATEGIES_MANAGER_ABI,
+                "SingleAssetLeverageEntered",
+              );
               expect(leverageEvents.length).to.equal(1);
               const event = leverageEvents[0];
 
-              // Verify event parameters
               expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
               expect(event.args.collateralMarket.toLowerCase()).to.equal(vTokenAddr.toLowerCase());
               expect(event.args.collateralAmountSeed).to.equal(0);
               expect(event.args.collateralAmountToFlashLoan).to.equal(collateralAmountToFlashLoan);
 
-              // Verify balance changes
               const vTokenBalanceAfter = await vToken.balanceOf(userAddress);
               const borrowBalanceAfter = await vToken.callStatic.borrowBalanceCurrent(userAddress);
 
-              // User should have more vtokens (from flash loan collateral added)
               expect(vTokenBalanceAfter).to.be.gt(vTokenBalanceBefore);
-              // User should now have a borrow balance equal to or greater than flash loan amount
               expect(borrowBalanceAfter).to.be.gt(borrowBalanceBefore);
               expect(borrowBalanceAfter).to.be.gte(collateralAmountToFlashLoan);
 
@@ -692,10 +656,8 @@ forking(76766086, async () => {
               console.log(`  Borrow: ${borrowBalanceBefore.toString()} -> ${borrowBalanceAfter.toString()}`);
             });
 
-            it("should exit single asset leverage position with value checks", async () => {
+            it("exitSingleAssetLeverage with value checks", async () => {
               const userAddress = await testUser.getAddress();
-
-              // Get current borrow balance
               const borrowBalance = await vToken.callStatic.borrowBalanceCurrent(userAddress);
 
               if (borrowBalance.eq(0)) {
@@ -703,46 +665,26 @@ forking(76766086, async () => {
                 return;
               }
 
-              // Get balances before
               const vTokenBalanceBefore = await vToken.balanceOf(userAddress);
-
-              // Flash loan amount: borrow balance + 1% buffer
               const flashLoanAmount = borrowBalance.mul(101).div(100);
 
-              // Call exitSingleAssetLeverage
               const tx = await leverageStrategiesManager
                 .connect(testUser)
                 .exitSingleAssetLeverage(vTokenAddr, flashLoanAmount);
               const receipt = await tx.wait();
 
-              // Parse and verify SingleAssetLeverageExited event
-              const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-              const exitEvents = receipt.logs
-                .map((log: { topics: string[]; data: string }) => {
-                  try {
-                    return iface.parseLog(log);
-                  } catch {
-                    return null;
-                  }
-                })
-                .filter((e: { name: string } | null) => e && e.name === "SingleAssetLeverageExited");
-
+              const exitEvents = findEvents(receipt.logs, LEVERAGE_STRATEGIES_MANAGER_ABI, "SingleAssetLeverageExited");
               expect(exitEvents.length).to.equal(1);
               const event = exitEvents[0];
 
-              // Verify event parameters
               expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
               expect(event.args.collateralMarket.toLowerCase()).to.equal(vTokenAddr.toLowerCase());
               expect(event.args.collateralAmountToFlashLoan).to.equal(flashLoanAmount);
 
-              // Get balances after
               const vTokenBalanceAfter = await vToken.balanceOf(userAddress);
               const borrowBalanceAfter = await vToken.callStatic.borrowBalanceCurrent(userAddress);
 
-              // Borrow balance should be zero
               expect(borrowBalanceAfter).to.equal(0);
-
-              // User should have less vToken (used to repay flash loan)
               expect(vTokenBalanceAfter).to.be.lt(vTokenBalanceBefore);
 
               console.log(`Single asset leverage exited:`);
