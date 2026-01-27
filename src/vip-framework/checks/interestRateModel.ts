@@ -6,7 +6,7 @@ import RATE_MODEL_ABI from "../abi/il_rateModel.json";
 import TWO_KINKS_RATE_MODEL_ABI from "../abi/twoKinksIRM.json";
 import TWO_KINKS_RATE_MODEL_IL_ABI from "../abi/twoKinksIRMIL.json";
 
-const DEFAULT_BLOCKS_PER_YEAR = BigNumber.from(42048000);
+const DEFAULT_BLOCKS_PER_YEAR = BigNumber.from(70080000);
 
 export function checkInterestRate(
   rateModelAddress: string,
