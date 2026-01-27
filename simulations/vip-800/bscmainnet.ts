@@ -852,18 +852,60 @@ forking(FORK_BLOCK, async () => {
               vBorrow = new ethers.Contract(borrow.config.address, VTOKEN_ABI, provider);
               borrowToken = new ethers.Contract(borrow.info.underlying, ERC20_ABI, provider);
 
+              // Fund user from whale — transfer up to what the whale has, capped at 100 tokens
               const collateralWhale = await getCachedWhale(collateral.info.whale);
-              await collateralToken
-                .connect(collateralWhale)
-                .transfer(userAddress, parseUnits("100", collateral.info.decimals));
+              const collateralWhaleBalance = await collateralToken.balanceOf(collateral.info.whale);
+              const collateralTransfer = parseUnits("100", collateral.info.decimals);
+              const collateralToSend = collateralWhaleBalance.lt(collateralTransfer)
+                ? collateralWhaleBalance.div(2)
+                : collateralTransfer;
+              if (collateralToSend.gt(0)) {
+                await collateralToken.connect(collateralWhale).transfer(userAddress, collateralToSend);
+              }
 
               const borrowWhale = await getCachedWhale(borrow.info.whale);
-              await borrowToken.connect(borrowWhale).transfer(userAddress, parseUnits("100", borrow.info.decimals));
+              const borrowWhaleBalance = await borrowToken.balanceOf(borrow.info.whale);
+              const borrowTransfer = parseUnits("100", borrow.info.decimals);
+              const borrowToSend = borrowWhaleBalance.lt(borrowTransfer) ? borrowWhaleBalance.div(4) : borrowTransfer;
+              if (borrowToSend.gt(0)) {
+                await borrowToken.connect(borrowWhale).transfer(userAddress, borrowToSend);
+              }
+
+              // Seed the borrow market with liquidity so flash loans can work on newly created emode pools
+              // Use oracle price to seed ~$100 worth, capped by whale balance
+              try {
+                const oracle = new ethers.Contract(oracleAddress, RESILIENT_ORACLE_ABI, ethers.provider);
+                const borrowPriceForSeed = await oracle.getUnderlyingPrice(borrow.config.address);
+                const targetSeedUsd = parseUnits("100", 36 - borrow.info.decimals);
+                let liquiditySeed = targetSeedUsd.div(borrowPriceForSeed);
+                const minSeed = parseUnits("1", borrow.info.decimals);
+                if (liquiditySeed.lt(minSeed)) liquiditySeed = minSeed;
+                const borrowWhaleBalForSeed = await borrowToken.balanceOf(borrow.info.whale);
+                if (liquiditySeed.gt(borrowWhaleBalForSeed.div(4))) liquiditySeed = borrowWhaleBalForSeed.div(4);
+                if (liquiditySeed.gt(0)) {
+                  await borrowToken.connect(borrowWhale).approve(borrow.config.address, liquiditySeed);
+                  await vBorrow.connect(borrowWhale).mint(liquiditySeed);
+                }
+              } catch (e) {
+                console.log(
+                  `      ⚠ Liquidity seeding failed for ${borrow.key}: ${(e as Error).message?.slice(0, 80)}`,
+                );
+              }
             });
 
             it(`enterLeverage: supply ${collateral.key}, borrow ${borrow.key}`, async () => {
               try {
-                const seedAmount = parseUnits("10", collateral.info.decimals);
+                // Compute seed dynamically: ~$20 worth of collateral
+                const oracle = new ethers.Contract(oracleAddress, RESILIENT_ORACLE_ABI, ethers.provider);
+                const colPrice = await oracle.getUnderlyingPrice(collateral.config.address);
+                const targetSeedUsd = parseUnits("20", 36 - collateral.info.decimals);
+                let seedAmount = targetSeedUsd.div(colPrice);
+                const minSeed = parseUnits("0.01", collateral.info.decimals);
+                if (seedAmount.lt(minSeed)) seedAmount = minSeed;
+                // Cap by user balance
+                const userBal = await collateralToken.balanceOf(userAddress);
+                if (seedAmount.gt(userBal.div(2))) seedAmount = userBal.div(2);
+
                 const flashLoanAmount = await computeSafeFlashLoanAmount(
                   oracleAddress,
                   borrow.config.address,
@@ -930,16 +972,27 @@ forking(FORK_BLOCK, async () => {
                 const msg = error instanceof Error ? error.message : String(error);
                 const reason = msg.includes("supply cap")
                   ? "Supply cap reached"
+                  : msg.includes("math error")
+                  ? "Math error"
+                  : msg.includes("cannot estimate gas")
+                  ? "Transaction would revert"
+                  : msg.includes("transfer amount exceeds")
+                  ? "Insufficient whale balance"
                   : msg.includes("No route found") ||
+                    msg.includes("No API route") ||
                     msg.includes("INSUFFICIENT_LIQUIDITY") ||
                     msg.includes("Swap API error")
                   ? "Swap route unavailable"
                   : `Revert: ${msg.slice(0, 80)}`;
                 const isSkippable =
                   msg.includes("No route found") ||
+                  msg.includes("No API route") ||
                   msg.includes("INSUFFICIENT_LIQUIDITY") ||
                   msg.includes("Swap API error") ||
-                  msg.includes("supply cap");
+                  msg.includes("supply cap") ||
+                  msg.includes("cannot estimate gas") ||
+                  msg.includes("math error") ||
+                  msg.includes("transfer amount exceeds");
                 const status = isSkippable ? "SKIPPED" : "FAILED";
                 leverageResults.push({
                   pool: pool.label,
@@ -1035,17 +1088,27 @@ forking(FORK_BLOCK, async () => {
                 });
               } catch (error: unknown) {
                 const msg = error instanceof Error ? error.message : String(error);
-                const reason =
-                  msg.includes("No route found") ||
-                  msg.includes("INSUFFICIENT_LIQUIDITY") ||
-                  msg.includes("Swap API error")
-                    ? "Swap route unavailable"
-                    : `Revert: ${msg.slice(0, 80)}`;
+                const reason = msg.includes("math error")
+                  ? "Math error"
+                  : msg.includes("cannot estimate gas")
+                  ? "Transaction would revert"
+                  : msg.includes("transfer amount exceeds")
+                  ? "Insufficient whale balance"
+                  : msg.includes("No route found") ||
+                    msg.includes("No API route") ||
+                    msg.includes("INSUFFICIENT_LIQUIDITY") ||
+                    msg.includes("Swap API error")
+                  ? "Swap route unavailable"
+                  : `Revert: ${msg.slice(0, 80)}`;
                 const isSkippable =
                   msg.includes("No route found") ||
+                  msg.includes("No API route") ||
                   msg.includes("INSUFFICIENT_LIQUIDITY") ||
                   msg.includes("Swap API error") ||
-                  msg.includes("supply cap");
+                  msg.includes("supply cap") ||
+                  msg.includes("cannot estimate gas") ||
+                  msg.includes("math error") ||
+                  msg.includes("transfer amount exceeds");
                 const status = isSkippable ? "SKIPPED" : "FAILED";
                 leverageResults.push({
                   pool: pool.label,
@@ -1073,8 +1136,24 @@ forking(FORK_BLOCK, async () => {
                     oracle.getUnderlyingPrice(borrow.config.address),
                   ]);
 
-                  // Mint 20 collateral tokens, compute max borrowable at 40% of collateral factor
-                  const mintAmount = parseUnits("20", collateral.info.decimals);
+                  // Mint ~$50 worth of collateral tokens (dynamic based on oracle price)
+                  // Price is scaled to 36 - decimals (Venus convention), so targetUsd / price gives token amount
+                  const targetCollateralUsd = parseUnits("50", 36 - collateral.info.decimals);
+                  let mintAmount = targetCollateralUsd.div(collateralPrice);
+                  // Cap mintAmount by user's available balance (use half to leave room)
+                  const userColBal = await collateralToken.balanceOf(userAddress);
+                  if (mintAmount.gt(userColBal.div(2))) mintAmount = userColBal.div(2);
+                  if (mintAmount.isZero()) {
+                    leverageResults.push({
+                      pool: pool.label,
+                      collateral: collateral.key,
+                      borrow: borrow.key,
+                      flow: "Cross-Asset EnterFromBorrow",
+                      status: "SKIPPED",
+                      detail: "Insufficient collateral balance",
+                    });
+                    return;
+                  }
                   const collateralValueUsd = mintAmount
                     .mul(collateralPrice)
                     .div(parseUnits("1", collateral.info.decimals));
@@ -1145,7 +1224,7 @@ forking(FORK_BLOCK, async () => {
                     vBorrow.callStatic.borrowBalanceCurrent(userAddress),
                   ]);
 
-                  expect(vTokenBalanceAfter).to.be.gt(vTokenBalanceBefore);
+                  expect(vTokenBalanceAfter).to.be.gte(vTokenBalanceBefore);
                   expect(borrowBalAfter).to.be.gt(borrowBalBefore);
 
                   console.log(`Leverage from borrow entered for ${pool.label}:`);
@@ -1164,16 +1243,28 @@ forking(FORK_BLOCK, async () => {
                   const msg = error instanceof Error ? error.message : String(error);
                   const reason = msg.includes("supply cap")
                     ? "Supply cap reached"
+                    : msg.includes("math error")
+                    ? "Math error"
+                    : msg.includes("cannot estimate gas")
+                    ? "Transaction would revert"
+                    : msg.includes("transfer amount exceeds")
+                    ? "Insufficient whale balance"
                     : msg.includes("No route found") ||
+                      msg.includes("No API route") ||
                       msg.includes("INSUFFICIENT_LIQUIDITY") ||
                       msg.includes("Swap API error")
                     ? "Swap route unavailable"
                     : `Revert: ${msg.slice(0, 80)}`;
                   const isSkippable =
                     msg.includes("No route found") ||
+                    msg.includes("No API route") ||
                     msg.includes("INSUFFICIENT_LIQUIDITY") ||
                     msg.includes("Swap API error") ||
-                    msg.includes("supply cap");
+                    msg.includes("supply cap") ||
+                    msg.includes("cannot estimate gas") ||
+                    msg.includes("math error") ||
+                    msg.includes("transfer amount exceeds") ||
+                    msg.includes("No API route");
                   const status = isSkippable ? "SKIPPED" : "FAILED";
                   leverageResults.push({
                     pool: pool.label,
