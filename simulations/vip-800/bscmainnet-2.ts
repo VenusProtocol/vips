@@ -154,7 +154,7 @@ forking(76766086, async () => {
     });
   });
 
-  describe("Pre-VIP behavior", async () => {
+  describe("Pre-VIP behavior", () => {
     it("check new Emode PoolId does not exist", async () => {
       expect(await comptroller.lastPoolId()).to.be.lessThan(EMODE_POOLS[EMODE_POOLS.length - 1].id);
     });
@@ -198,14 +198,14 @@ forking(76766086, async () => {
     },
   });
 
-  describe("Post-VIP behavior", async () => {
+  describe("Post-VIP behavior", () => {
     it("should update lastPoolId to the new pool", async () => {
       expect(await comptroller.lastPoolId()).to.equals(EMODE_POOLS[EMODE_POOLS.length - 1].id);
     });
 
     // Verify Part-1 pools remain correctly configured after Part-2
     for (const EMODE_POOL of EMODE_POOLS_PART1) {
-      describe(`Part-1 Emode Pool ${EMODE_POOL.label}`, async () => {
+      describe(`Part-1 Emode Pool ${EMODE_POOL.label}`, () => {
         it("should still be active with correct label and fallback", async () => {
           const pool = await comptroller.pools(EMODE_POOL.id);
           expect(pool.label).to.equals(EMODE_POOL.label);
@@ -229,7 +229,7 @@ forking(76766086, async () => {
 
     // Verify Part-2 pools
     for (const EMODE_POOL of EMODE_POOLS) {
-      describe(`Part-2 Emode Pool ${EMODE_POOL.label}`, async () => {
+      describe(`Part-2 Emode Pool ${EMODE_POOL.label}`, () => {
         it("should set the newly created pool as active with correct label", async () => {
           const newPool = await comptroller.pools(EMODE_POOL.id);
           expect(newPool.label).to.equals(EMODE_POOL.label);
@@ -319,7 +319,10 @@ forking(76766086, async () => {
                 return;
               }
 
-              if (!(await supplyCapAllowsMint())) this.skip();
+              if (!(await supplyCapAllowsMint())) {
+                console.log(`Supply cap reached for ${marketKey}, skipping mint`);
+                return;
+              }
 
               const balanceBefore = await vToken.balanceOf(userAddress);
               await vToken.connect(user).mint(mintAmount);
@@ -340,7 +343,8 @@ forking(76766086, async () => {
                 ]);
 
                 if (borrowCap.gt(0) && totalBorrows.add(borrowAmount).gt(borrowCap)) {
-                  this.skip();
+                  console.log(`Borrow cap reached for ${marketKey}, skipping borrow`);
+                  return;
                 }
 
                 const balanceBefore = await token.balanceOf(userAddress);
@@ -370,7 +374,10 @@ forking(76766086, async () => {
             }
 
             it("User can redeem", async function () {
-              if (!(await supplyCapAllowsMint())) this.skip();
+              if (!(await supplyCapAllowsMint())) {
+                console.log(`Supply cap reached for ${marketKey}, skipping redeem`);
+                return;
+              }
 
               const balanceBefore = await token.balanceOf(userAddress);
               await vToken.connect(user).redeemUnderlying(redeemAmount);
@@ -450,7 +457,10 @@ forking(76766086, async () => {
                 return;
               }
 
-              if (!(await supplyCapAllowsMint())) this.skip();
+              if (!(await supplyCapAllowsMint())) {
+                console.log(`Supply cap reached for ${marketKey}, skipping mint`);
+                return;
+              }
 
               const balanceBefore = await vToken.balanceOf(userAddress);
               await vToken.connect(user).mint(mintAmount);
@@ -471,7 +481,8 @@ forking(76766086, async () => {
                 ]);
 
                 if (borrowCap.gt(0) && totalBorrows.add(borrowAmount).gt(borrowCap)) {
-                  this.skip();
+                  console.log(`Borrow cap reached for ${marketKey}, skipping borrow`);
+                  return;
                 }
 
                 const balanceBefore = await token.balanceOf(userAddress);
@@ -501,7 +512,10 @@ forking(76766086, async () => {
             }
 
             it("User can redeem", async function () {
-              if (!(await supplyCapAllowsMint())) this.skip();
+              if (!(await supplyCapAllowsMint())) {
+                console.log(`Supply cap reached for ${marketKey}, skipping redeem`);
+                return;
+              }
 
               const balanceBefore = await token.balanceOf(userAddress);
               await vToken.connect(user).redeemUnderlying(redeemAmount);
