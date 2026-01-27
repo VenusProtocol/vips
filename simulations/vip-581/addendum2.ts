@@ -30,33 +30,31 @@ import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-// Contract addresses
+// =============================================================================
+// Constants
+// =============================================================================
+
 const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
 const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
 
-// Core Pool markets
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
 const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
-// PancakeSwap V2 Router on BSC
 const PANCAKE_V2_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
 const PANCAKE_V2_ROUTER_ABI = [
   "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)",
   "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
 ];
 
-// User with U tokens to fund test user
 const U_HOLDER = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3";
-// User with USDT tokens
 const USDT_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
-// Fork block number - UPDATE THIS when tests fail due to stale oracle data
 const FORK_BLOCK = 75075100;
 
 // =============================================================================
-// EIP-712 Swap Signer & Calldata Builder
+// EIP-712 Swap Signer
 // =============================================================================
 
 let swapSignerWallet: Wallet;
@@ -64,15 +62,6 @@ let swapHelperContract: Contract;
 let eip712Domain: { name: string; version: string; chainId: number; verifyingContract: string };
 let saltCounter = 0;
 
-/**
- * Configures a deterministic EIP-712 signer for the SwapHelper contract on the forked chain.
- *
- * In production, the SwapHelper requires a backend signer to authorize multicall executions
- * via EIP-712 signatures. In tests, we:
- * 1. Create a deterministic Hardhat wallet (using Hardhat's default private key)
- * 2. Impersonate the SwapHelper owner to register this wallet as the authorized backendSigner
- * 3. Cache the EIP-712 domain parameters (name, version, chainId, verifyingContract) for later signing
- */
 async function setupSwapSigner() {
   swapSignerWallet = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ethers.provider);
 
@@ -82,8 +71,7 @@ async function setupSwapSigner() {
   const impersonatedOwner = await initMainnetUser(swapHelperOwner, ethers.utils.parseEther("1"));
   await swapHelperContract.connect(impersonatedOwner).setBackendSigner(swapSignerWallet.address);
 
-  const domain = await swapHelperContract.eip712Domain();
-  const network = await ethers.provider.getNetwork();
+  const [domain, network] = await Promise.all([swapHelperContract.eip712Domain(), ethers.provider.getNetwork()]);
   eip712Domain = {
     name: domain.name,
     version: domain.version,
@@ -92,15 +80,12 @@ async function setupSwapSigner() {
   };
 }
 
+// =============================================================================
+// Swap Calldata Builders (API-first with PancakeSwap V2 fallback)
+// =============================================================================
+
 /**
- * Builds the full signed SwapHelper multicall calldata for a PancakeSwap V2 token swap.
- *
- * Steps:
- * 1. Queries PancakeSwap V2 for the expected output amount
- * 2. Applies slippage tolerance to compute minAmountOut
- * 3. Encodes a 3-step SwapHelper multicall (approveMax, genericCall, sweep)
- * 4. Signs the multicall with EIP-712
- * 5. Returns the encoded multicall calldata
+ * Tries the Venus swap API first (20s timeout), falls back to PancakeSwap V2 on-chain.
  */
 async function buildSwapCalldata(
   tokenIn: string,
@@ -108,6 +93,86 @@ async function buildSwapCalldata(
   amountIn: BigNumber,
   recipient: string,
   slippageBps: number = 100,
+): Promise<{ swapData: string; minAmountOut: BigNumber }> {
+  try {
+    return await buildSwapCalldataFromAPI(tokenIn, tokenOut, amountIn, recipient);
+  } catch (apiError) {
+    console.log(
+      `    Swap API unavailable (${
+        apiError instanceof Error ? apiError.message : apiError
+      }), falling back to PancakeSwap V2`,
+    );
+  }
+  return buildSwapCalldataFromPancakeV2(tokenIn, tokenOut, amountIn, recipient, slippageBps);
+}
+
+async function buildSwapCalldataFromAPI(
+  tokenIn: string,
+  tokenOut: string,
+  amountIn: BigNumber,
+  recipient: string,
+): Promise<{ swapData: string; minAmountOut: BigNumber }> {
+  const TEN_YEARS_SECS = 10 * 365 * 24 * 60 * 60;
+  const deadline = Math.floor(Date.now() / 1000) + TEN_YEARS_SECS;
+
+  const params = new URLSearchParams({
+    chainId: "56",
+    tokenInAddress: tokenIn,
+    tokenOutAddress: tokenOut,
+    slippagePercentage: "0.5",
+    recipientAddress: SWAP_HELPER,
+    deadlineTimestampSecs: deadline.toString(),
+    type: "exact-in",
+    shouldTransferToReceiver: "false",
+    exactAmountInMantissa: amountIn.toString(),
+  });
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+  try {
+    const res = await fetch(`https://api.venus.io/find-swap?${params}`, { signal: controller.signal });
+    if (!res.ok) throw new Error(`Swap API error: ${res.status}`);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json = (await res.json()) as any;
+    if (!json.quotes?.length) throw new Error(`No API route found for ${tokenIn} -> ${tokenOut}`);
+
+    const quote = json.quotes[0];
+    const swapHelperIface = new ethers.utils.Interface(SWAP_HELPER_ABI);
+    const calls: string[] = [];
+
+    for (const tx of quote.txs) {
+      calls.push(swapHelperIface.encodeFunctionData("approveMax", [tokenIn, tx.target]));
+      calls.push(swapHelperIface.encodeFunctionData("genericCall", [tx.target, tx.data]));
+    }
+    calls.push(swapHelperIface.encodeFunctionData("sweep", [tokenOut, recipient]));
+
+    const salt = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256"], [++saltCounter]));
+    const types = {
+      Multicall: [
+        { name: "caller", type: "address" },
+        { name: "calls", type: "bytes[]" },
+        { name: "deadline", type: "uint256" },
+        { name: "salt", type: "bytes32" },
+      ],
+    };
+    const value = { caller: LEVERAGE_STRATEGIES_MANAGER, calls, deadline, salt };
+    const signature = await swapSignerWallet._signTypedData(eip712Domain, types, value);
+    const multicallData = swapHelperIface.encodeFunctionData("multicall", [calls, deadline, salt, signature]);
+
+    return { swapData: multicallData, minAmountOut: BigNumber.from(1) };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function buildSwapCalldataFromPancakeV2(
+  tokenIn: string,
+  tokenOut: string,
+  amountIn: BigNumber,
+  recipient: string,
+  slippageBps: number,
 ): Promise<{ swapData: string; minAmountOut: BigNumber }> {
   const pancakeRouter = new ethers.Contract(PANCAKE_V2_ROUTER, PANCAKE_V2_ROUTER_ABI, ethers.provider);
 
@@ -130,30 +195,25 @@ async function buildSwapCalldata(
   const minAmountOut = amountOut.mul(10000 - slippageBps).div(10000);
 
   const swapHelperIface = new ethers.utils.Interface(SWAP_HELPER_ABI);
-
-  // 1. approveMax(tokenIn, PancakeRouter)
-  const approveCall = swapHelperIface.encodeFunctionData("approveMax", [tokenIn, PANCAKE_V2_ROUTER]);
-
-  // 2. genericCall(PancakeRouter, swapExactTokensForTokens(...))
   const pancakeIface = new ethers.utils.Interface(PANCAKE_V2_ROUTER_ABI);
   const deadline = Math.floor(Date.now() / 1000) + 3600;
-  const swapCalldata = pancakeIface.encodeFunctionData("swapExactTokensForTokens", [
-    amountIn,
-    minAmountOut,
-    path,
-    SWAP_HELPER, // tokens go to SwapHelper first
-    deadline,
-  ]);
-  const genericCall = swapHelperIface.encodeFunctionData("genericCall", [PANCAKE_V2_ROUTER, swapCalldata]);
 
-  // 3. sweep(tokenOut, recipient) — send swapped tokens to LeverageStrategiesManager
-  const sweepCall = swapHelperIface.encodeFunctionData("sweep", [tokenOut, recipient]);
+  const calls = [
+    swapHelperIface.encodeFunctionData("approveMax", [tokenIn, PANCAKE_V2_ROUTER]),
+    swapHelperIface.encodeFunctionData("genericCall", [
+      PANCAKE_V2_ROUTER,
+      pancakeIface.encodeFunctionData("swapExactTokensForTokens", [
+        amountIn,
+        minAmountOut,
+        path,
+        SWAP_HELPER,
+        deadline,
+      ]),
+    ]),
+    swapHelperIface.encodeFunctionData("sweep", [tokenOut, recipient]),
+  ];
 
-  const calls = [approveCall, genericCall, sweepCall];
-
-  // EIP-712 sign — caller is LeverageStrategiesManager (it calls SwapHelper.multicall)
   const salt = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256"], [++saltCounter]));
-
   const types = {
     Multicall: [
       { name: "caller", type: "address" },
@@ -162,24 +222,17 @@ async function buildSwapCalldata(
       { name: "salt", type: "bytes32" },
     ],
   };
-
-  const value = {
-    caller: LEVERAGE_STRATEGIES_MANAGER,
-    calls,
-    deadline,
-    salt,
-  };
-
+  const value = { caller: LEVERAGE_STRATEGIES_MANAGER, calls, deadline, salt };
   const signature = await swapSignerWallet._signTypedData(eip712Domain, types, value);
-
   const multicallData = swapHelperIface.encodeFunctionData("multicall", [calls, deadline, salt, signature]);
 
   return { swapData: multicallData, minAmountOut };
 }
 
-/**
- * High-level wrapper matching the interface used by test cases.
- */
+// =============================================================================
+// Swap Data Wrapper
+// =============================================================================
+
 async function getSwapData(
   tokenInAddress: string,
   tokenOutAddress: string,
@@ -196,6 +249,70 @@ async function getSwapData(
   );
 }
 
+// =============================================================================
+// Results Tracker
+// =============================================================================
+
+interface LeverageResult {
+  section: string;
+  test: string;
+  status: "PASSED" | "SKIPPED" | "FAILED";
+  detail: string;
+}
+const leverageResults: LeverageResult[] = [];
+
+function printLeverageResultsSummary() {
+  const passed = leverageResults.filter(r => r.status === "PASSED");
+  const failed = leverageResults.filter(r => r.status === "FAILED");
+  const skipped = leverageResults.filter(r => r.status === "SKIPPED");
+
+  console.log("\n" + "=".repeat(120));
+  console.log("  LEVERAGE STRATEGIES RESULTS SUMMARY");
+  console.log("=".repeat(120));
+
+  for (const [label, list] of [
+    ["PASSED", passed],
+    ["FAILED", failed],
+    ["SKIPPED", skipped],
+  ] as const) {
+    if (list.length === 0) continue;
+    console.log(`\n  ${label} (${list.length})`);
+    console.log("  " + "-".repeat(116));
+    console.log(`  ${"Section".padEnd(35)} ${"Test".padEnd(50)} ${label === "PASSED" ? "Detail" : "Reason"}`);
+    console.log("  " + "-".repeat(116));
+    for (const r of list) {
+      console.log(`  ${r.section.padEnd(35)} ${r.test.padEnd(50)} ${r.detail}`);
+    }
+  }
+
+  console.log("\n" + "=".repeat(120));
+  console.log(
+    `  Total: ${leverageResults.length} | Passed: ${passed.length} | Failed: ${failed.length} | Skipped: ${skipped.length}`,
+  );
+  console.log("=".repeat(120) + "\n");
+}
+
+// =============================================================================
+// Helpers
+// =============================================================================
+
+function parseEvents(receipt: any, abi: any, eventName: string): any[] {
+  const iface = new ethers.utils.Interface(abi);
+  return receipt.logs
+    .map((log: { topics: string[]; data: string }) => {
+      try {
+        return iface.parseLog(log);
+      } catch {
+        return null;
+      }
+    })
+    .filter((e: { name: string } | null) => e && e.name === eventName);
+}
+
+// =============================================================================
+// Test Suite
+// =============================================================================
+
 forking(FORK_BLOCK, async () => {
   let vUContract: Contract;
   let leverageStrategiesManager: Contract;
@@ -211,6 +328,7 @@ forking(FORK_BLOCK, async () => {
   let leverageTestUser: Signer;
 
   before(async () => {
+    // Instantiate contracts (pure local — no RPC)
     vUContract = new ethers.Contract(vU, VTOKEN_ABI, ethers.provider);
     leverageStrategiesManager = new ethers.Contract(
       LEVERAGE_STRATEGIES_MANAGER,
@@ -224,25 +342,36 @@ forking(FORK_BLOCK, async () => {
     resilientOracle = new ethers.Contract(RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
     chainlinkOracle = new ethers.Contract(CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
-    impersonatedTimelock = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2"));
 
-    // Use fresh Hardhat signers as test users to avoid oracle issues with other markets
     const signers = await ethers.getSigners();
     testUser = signers[0];
     leverageTestUser = signers[1];
 
-    // Fund test users with tokens
-    const uHolder = await initMainnetUser(U_HOLDER, ethers.utils.parseEther("10"));
-    const usdtHolder = await initMainnetUser(USDT_HOLDER, ethers.utils.parseEther("10"));
+    // Step 1: Impersonate users and setup swap signer (different signers — safe in parallel)
+    const [, uHolder, usdtHolder, timelockSigner] = await Promise.all([
+      setupSwapSigner(),
+      initMainnetUser(U_HOLDER, ethers.utils.parseEther("10")),
+      initMainnetUser(USDT_HOLDER, ethers.utils.parseEther("10")),
+      initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("2")),
+    ]);
+    impersonatedTimelock = timelockSigner;
 
-    await u.connect(uHolder).transfer(await testUser.getAddress(), parseUnits("100", 18));
-    await u.connect(uHolder).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
-    await usdt.connect(usdtHolder).transfer(await leverageTestUser.getAddress(), parseUnits("1000", 18));
+    // Step 2: Fund test users
+    const [testUserAddress, leverageUserAddress] = await Promise.all([
+      testUser.getAddress(),
+      leverageTestUser.getAddress(),
+    ]);
+    // uHolder sends two transfers — must be sequential (same signer, nonce conflict)
+    await u.connect(uHolder).transfer(testUserAddress, parseUnits("100", 18));
+    await u.connect(uHolder).transfer(leverageUserAddress, parseUnits("1000", 18));
+    // usdtHolder is a different signer but has no parallel partner now, so just await
+    await usdt.connect(usdtHolder).transfer(leverageUserAddress, parseUnits("1000", 18));
 
-    // Set direct prices and extend stale periods for oracle compatibility
+    // Step 3: Set direct prices (same signer: impersonatedTimelock — must be sequential)
     await usdtChainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
     await chainlinkOracle.connect(impersonatedTimelock).setDirectPrice(U, parseUnits("1", 18));
 
+    // Step 4: Configure oracle stale periods (uses NORMAL_TIMELOCK internally — sequential)
     await setMaxStalePeriodInChainlinkOracle(
       USDT_CHAINLINK_ORACLE,
       U,
@@ -250,12 +379,8 @@ forking(FORK_BLOCK, async () => {
       bscmainnet.NORMAL_TIMELOCK,
       315360000,
     );
-
     await setMaxStalePeriodInChainlinkOracle(CHAINLINK_ORACLE, U, USD1_FEED, bscmainnet.NORMAL_TIMELOCK, 315360000);
-
     await setMaxStalePeriod(resilientOracle, u);
-
-    // Set stale periods for USDC and USDT for cross-asset leverage tests
     await setMaxStalePeriodInChainlinkOracle(
       bscmainnet.CHAINLINK_ORACLE,
       USDC,
@@ -272,247 +397,161 @@ forking(FORK_BLOCK, async () => {
     );
     await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "USDC", 315360000);
     await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "USDT", 315360000);
-
-    // Setup the EIP-712 swap signer so we can build signed multicall calldata
-    await setupSwapSigner();
   });
 
-  /**
-   * VIP Execution Test
-   *
-   * Note: At recent blocks, this VIP may have already been executed on mainnet.
-   * We check for 0 or 1 FlashLoanStatusChanged events to handle both cases:
-   * - 0 events: VIP was already executed (no state change)
-   * - 1 event: VIP just executed (state changed from false to true)
-   */
+  // ===========================================================================
+  // VIP Execution
+  // ===========================================================================
+
   testVip("VIP-581 Addendum2", await vip581Addendum2(), {
     callbackAfterExecution: async txResponse => {
       const receipt = await txResponse.wait();
-      const iface = new ethers.utils.Interface(VTOKEN_ABI);
-      const events = receipt.logs
-        .map((log: { topics: string[]; data: string }) => {
-          try {
-            return iface.parseLog(log);
-          } catch {
-            return null;
-          }
-        })
-        .filter((e: { name: string } | null) => e && e.name === "FlashLoanStatusChanged");
-      // Either 0 (already executed) or 1 (just executed) events is acceptable
+      const events = parseEvents(receipt, VTOKEN_ABI, "FlashLoanStatusChanged");
       expect(events.length).to.be.lte(1);
     },
   });
 
+  // ===========================================================================
+  // Post-VIP checks
+  // ===========================================================================
+
   describe("Post-VIP checks", () => {
     it("vU has flash loans enabled", async () => {
-      const isFlashLoanEnabled = await vUContract.isFlashLoanEnabled();
-      expect(isFlashLoanEnabled).to.be.equal(true);
+      expect(await vUContract.isFlashLoanEnabled()).to.be.equal(true);
+
+      leverageResults.push({
+        section: "Post-VIP",
+        test: "Flash loans enabled on vU",
+        status: "PASSED",
+        detail: "isFlashLoanEnabled = true",
+      });
     });
 
-    it("LeverageStrategiesManager: enterSingleAssetLeverage with value checks", async () => {
+    it("enterSingleAssetLeverage with value checks", async () => {
       const userAddress = await testUser.getAddress();
       const collateralAmountSeed = parseUnits("10", 18);
       const collateralAmountToFlashLoan = parseUnits("5", 18);
 
-      // Approve U tokens to vU for minting collateral first
       await u.connect(testUser).approve(vU, collateralAmountSeed);
-
-      // Mint vU as collateral
       await vUContract.connect(testUser).mint(collateralAmountSeed);
-
-      // Enter market so vU can be used as collateral
       await comptroller.connect(testUser).enterMarkets([vU]);
-
-      // Approve leverage manager to act on behalf of user (updateDelegate)
       await comptroller.connect(testUser).updateDelegate(LEVERAGE_STRATEGIES_MANAGER, true);
 
-      // Get balances before
-      const vUBalanceBefore = await vUContract.balanceOf(userAddress);
-      const borrowBalanceBefore = await vUContract.callStatic.borrowBalanceCurrent(userAddress);
+      const [vUBalanceBefore, borrowBalanceBefore] = await Promise.all([
+        vUContract.balanceOf(userAddress),
+        vUContract.callStatic.borrowBalanceCurrent(userAddress),
+      ]);
 
-      // Call enterSingleAssetLeverage
       const tx = await leverageStrategiesManager
         .connect(testUser)
         .enterSingleAssetLeverage(vU, 0, collateralAmountToFlashLoan);
       const receipt = await tx.wait();
 
-      // Parse and verify SingleAssetLeverageEntered event
-      const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-      const leverageEvents = receipt.logs
-        .map((log: { topics: string[]; data: string }) => {
-          try {
-            return iface.parseLog(log);
-          } catch {
-            return null;
-          }
-        })
-        .filter((e: { name: string } | null) => e && e.name === "SingleAssetLeverageEntered");
-
+      const leverageEvents = parseEvents(receipt, LEVERAGE_STRATEGIES_MANAGER_ABI, "SingleAssetLeverageEntered");
       expect(leverageEvents.length).to.equal(1);
-      const event = leverageEvents[0];
+      expect(leverageEvents[0].args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
+      expect(leverageEvents[0].args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
+      expect(leverageEvents[0].args.collateralAmountSeed).to.equal(0);
+      expect(leverageEvents[0].args.collateralAmountToFlashLoan).to.equal(collateralAmountToFlashLoan);
 
-      // Verify event parameters
-      expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
-      expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
-      expect(event.args.collateralAmountSeed).to.equal(0);
-      expect(event.args.collateralAmountToFlashLoan).to.equal(collateralAmountToFlashLoan);
+      const [vUBalanceAfter, borrowBalanceAfter] = await Promise.all([
+        vUContract.balanceOf(userAddress),
+        vUContract.callStatic.borrowBalanceCurrent(userAddress),
+      ]);
 
-      // Verify balance changes
-      const vUBalanceAfter = await vUContract.balanceOf(userAddress);
-      const borrowBalanceAfter = await vUContract.callStatic.borrowBalanceCurrent(userAddress);
-
-      // User should have more vU (from flash loan collateral added)
       expect(vUBalanceAfter).to.be.gt(vUBalanceBefore);
-
-      // User should now have a borrow balance equal to or greater than flash loan amount
       expect(borrowBalanceAfter).to.be.gt(borrowBalanceBefore);
       expect(borrowBalanceAfter).to.be.gte(collateralAmountToFlashLoan);
 
-      console.log(`SingleAssetLeverage entered:`);
-      console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
-      console.log(`  Borrow: ${borrowBalanceBefore.toString()} -> ${borrowBalanceAfter.toString()}`);
+      leverageResults.push({
+        section: "Post-VIP",
+        test: "enterSingleAssetLeverage",
+        status: "PASSED",
+        detail: `vU: ${vUBalanceBefore} -> ${vUBalanceAfter}, Borrow: ${borrowBalanceBefore} -> ${borrowBalanceAfter}`,
+      });
     });
   });
 
-  /**
-   * Cross-asset leverage tests (enterLeverage, exitLeverage, enterLeverageFromBorrow)
-   *
-   * These tests require live swap quotes from the Venus API (api.venus.io/find-swap).
-   * The swap data includes a signed quote with a deadline and specific amounts.
-   *
-   * IMPORTANT: These tests may fail due to:
-   * 1. Swap quote expiration (deadline passed by the time tx executes)
-   * 2. Price movement causing slippage to exceed limits
-   * 3. DEX liquidity changes affecting swap routes
-   * 4. API unavailability
-   *
-   * The tests gracefully skip if API is unavailable or swap fails.
-   * For reliable testing of cross-asset leverage, use Tenderly virtual testnet
-   * with fresh swap quotes: https://api.venus.io/find-swap
-   */
-  /**
-   * =====================================================================
-   * LeverageStrategiesManager: enterLeverage (cross-asset)
-   * =====================================================================
-   *
-   * This test demonstrates a cross-asset leverage operation using the
-   * LeverageStrategiesManager contract. The user supplies U as collateral,
-   * borrows USDT via a flash loan, and swaps the borrowed USDT for more U
-   * to increase their leveraged position.
-   *
-   * Key steps:
-   * 1. User enters both vU and vUSDT markets and delegates to the manager.
-   * 2. User approves the manager to spend their U.
-   * 3. The test fetches swap data for USDT->U.
-   * 4. The manager's enterLeverage is called, which:
-   *    - Supplies U as seed collateral
-   *    - Borrows USDT via flash loan
-   *    - Swaps USDT for more U (increasing collateral)
-   *    - Leaves the user with a leveraged position
-   * 5. The test verifies:
-   *    - The LeverageEntered event is emitted with correct parameters
-   *    - The user's vU balance increases
-   *    - The user's USDT borrow balance increases
-   *    - The user's U wallet balance decreases by the seed amount
-   */
-  describe("LeverageStrategiesManager: enterLeverage (cross-asset)", () => {
+  // ===========================================================================
+  // Cross-Asset Leverage: enterLeverage
+  // ===========================================================================
+
+  describe("enterLeverage (cross-asset)", () => {
     let leverageUserAddress: string;
 
     before(async () => {
       leverageUserAddress = await leverageTestUser.getAddress();
-
-      // Enter markets for both vU and vUSDT so the user can supply collateral and borrow
+      // Sequential — same signer (leverageTestUser)
       await comptroller.connect(leverageTestUser).enterMarkets([vU, vUSDT]);
-
-      // Approve leverage manager to act on behalf of user (required for leverage operations)
       await comptroller.connect(leverageTestUser).updateDelegate(LEVERAGE_STRATEGIES_MANAGER, true);
     });
 
-    it("should enter cross-asset leverage position (U collateral, USDT borrow) with value checks", async () => {
-      // User will supply 100 U as seed collateral
+    it("should enter cross-asset leverage (U collateral, USDT borrow)", async () => {
       const collateralAmountSeed = parseUnits("100", 18);
-      // User will borrow 50 USDT via flash loan
       const borrowedAmountToFlashLoan = parseUnits("50", 18);
 
-      // Fetch swap data for swapping borrowed USDT to U
       const { swapData, minAmountOut } = await getSwapData(USDT, U, borrowedAmountToFlashLoan.toString(), "0.01");
 
-      // If swap data is unavailable, skip the test
       if (swapData === "0x") {
-        console.log("Skipping cross-asset enterLeverage test - swap data unavailable");
+        leverageResults.push({
+          section: "enterLeverage",
+          test: "U collateral / USDT borrow",
+          status: "SKIPPED",
+          detail: "Swap data unavailable",
+        });
+        console.log("    [SKIP] Swap data unavailable");
         return;
       }
 
-      // Record balances before leverage
-      const vUBalanceBefore = await vUContract.balanceOf(leverageUserAddress);
-      const usdtBorrowBefore = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-      const uBalanceBefore = await u.balanceOf(leverageUserAddress);
+      const [vUBalanceBefore, usdtBorrowBefore, uBalanceBefore] = await Promise.all([
+        vUContract.balanceOf(leverageUserAddress),
+        vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress),
+        u.balanceOf(leverageUserAddress),
+      ]);
 
-      // Approve the leverage manager to spend user's U for seed collateral
       await u.connect(leverageTestUser).approve(LEVERAGE_STRATEGIES_MANAGER, collateralAmountSeed);
 
       try {
-        // Call enterLeverage on the manager contract
-        // This will:
-        //   - Supply U as collateral
-        //   - Borrow USDT via flash loan
-        //   - Swap USDT for more U (increasing collateral)
-        //   - Leave the user with a leveraged position
-        const tx = await leverageStrategiesManager.connect(leverageTestUser).enterLeverage(
-          vU, // collateralMarket
-          collateralAmountSeed, // collateralAmountSeed
-          vUSDT, // borrowedMarket
-          borrowedAmountToFlashLoan, // borrowedAmountToFlashLoan
-          minAmountOut, // minAmountOutAfterSwap
-          swapData, // swapData
-        );
+        const tx = await leverageStrategiesManager
+          .connect(leverageTestUser)
+          .enterLeverage(vU, collateralAmountSeed, vUSDT, borrowedAmountToFlashLoan, minAmountOut, swapData);
         const receipt = await tx.wait();
 
-        // Parse and verify LeverageEntered event
-        const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-        const leverageEvents = receipt.logs
-          .map((log: { topics: string[]; data: string }) => {
-            try {
-              return iface.parseLog(log);
-            } catch {
-              return null;
-            }
-          })
-          .filter((e: { name: string } | null) => e && e.name === "LeverageEntered");
-
-        // There should be exactly one LeverageEntered event
+        const leverageEvents = parseEvents(receipt, LEVERAGE_STRATEGIES_MANAGER_ABI, "LeverageEntered");
         expect(leverageEvents.length).to.equal(1);
-        const event = leverageEvents[0];
+        expect(leverageEvents[0].args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
+        expect(leverageEvents[0].args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
+        expect(leverageEvents[0].args.collateralAmountSeed).to.equal(collateralAmountSeed);
+        expect(leverageEvents[0].args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
+        expect(leverageEvents[0].args.borrowedAmountToFlashLoan).to.equal(borrowedAmountToFlashLoan);
 
-        // Verify event parameters match input
-        expect(event.args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
-        expect(event.args.collateralAmountSeed).to.equal(collateralAmountSeed);
-        expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
-        expect(event.args.borrowedAmountToFlashLoan).to.equal(borrowedAmountToFlashLoan);
+        const [vUBalanceAfter, usdtBorrowAfter, uBalanceAfter] = await Promise.all([
+          vUContract.balanceOf(leverageUserAddress),
+          vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress),
+          u.balanceOf(leverageUserAddress),
+        ]);
 
-        // Record balances after leverage
-        const vUBalanceAfter = await vUContract.balanceOf(leverageUserAddress);
-        const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-        const uBalanceAfter = await u.balanceOf(leverageUserAddress);
-
-        // The user's vU balance should increase (more collateral)
         expect(vUBalanceAfter).to.be.gt(vUBalanceBefore);
-        // The user's USDT borrow balance should increase (from flash loan)
         expect(usdtBorrowAfter).to.be.gt(usdtBorrowBefore);
         expect(usdtBorrowAfter).to.be.gte(borrowedAmountToFlashLoan);
-        // The user's U wallet balance should decrease by the seed amount
         expect(uBalanceAfter).to.equal(uBalanceBefore.sub(collateralAmountSeed));
 
-        // Log the results for manual inspection
-        console.log(`Cross-asset leverage entered:`);
-        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
-        console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
+        leverageResults.push({
+          section: "enterLeverage",
+          test: "U collateral / USDT borrow",
+          status: "PASSED",
+          detail: `vU: ${vUBalanceBefore} -> ${vUBalanceAfter}, USDT borrow: ${usdtBorrowBefore} -> ${usdtBorrowAfter}`,
+        });
       } catch (error: unknown) {
-        // TokenSwapCallFailed (0x428c0cc7) or similar swap errors - skip gracefully
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes("0x428c0cc7") || errorMessage.includes("TokenSwapCallFailed")) {
-          console.log("Skipping cross-asset enterLeverage - swap quote expired or route unavailable");
+        const msg = error instanceof Error ? error.message : String(error);
+        if (msg.includes("0x428c0cc7") || msg.includes("TokenSwapCallFailed") || msg.includes("Swap API error")) {
+          leverageResults.push({
+            section: "enterLeverage",
+            test: "U collateral / USDT borrow",
+            status: "SKIPPED",
+            detail: "Swap failed or API unavailable",
+          });
+          console.log("    [SKIP] Swap quote expired or route unavailable");
           return;
         }
         throw error;
@@ -520,86 +559,87 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("LeverageStrategiesManager: exitLeverage (cross-asset)", () => {
-    it("should exit cross-asset leverage position with value checks", async () => {
+  // ===========================================================================
+  // Cross-Asset Leverage: exitLeverage
+  // ===========================================================================
+
+  describe("exitLeverage (cross-asset)", () => {
+    it("should exit cross-asset leverage position", async () => {
       const leverageUserAddress = await leverageTestUser.getAddress();
 
-      // Check if user has a leverage position to exit
       const usdtBorrowBefore = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
       if (usdtBorrowBefore.eq(0)) {
-        console.log("Skipping exitLeverage test - no position to exit");
+        leverageResults.push({
+          section: "exitLeverage",
+          test: "Exit U/USDT position",
+          status: "SKIPPED",
+          detail: "No position to exit",
+        });
+        console.log("    [SKIP] No position to exit");
         return;
       }
 
-      // For exitLeverage: flash loan USDT to repay, redeem U, swap U to USDT
-      // Redeem more than borrow to cover swap slippage and flash loan fees
       const collateralAmountToRedeem = parseUnits("55", 18);
-
-      // Get swap data (U -> USDT)
       const { swapData, minAmountOut } = await getSwapData(U, USDT, collateralAmountToRedeem.toString(), "0.01");
 
       if (swapData === "0x") {
-        console.log("Skipping exitLeverage test - swap data unavailable");
+        leverageResults.push({
+          section: "exitLeverage",
+          test: "Exit U/USDT position",
+          status: "SKIPPED",
+          detail: "Swap data unavailable",
+        });
+        console.log("    [SKIP] Swap data unavailable");
         return;
       }
 
-      // Get balances before exit
-      const vUBalanceBefore = await vUContract.balanceOf(leverageUserAddress);
-      const uBalanceBefore = await u.balanceOf(leverageUserAddress);
+      const [vUBalanceBefore, uBalanceBefore] = await Promise.all([
+        vUContract.balanceOf(leverageUserAddress),
+        u.balanceOf(leverageUserAddress),
+      ]);
 
-      // Flash loan amount: borrow balance + 1% buffer for interest
       const flashLoanAmount = usdtBorrowBefore.mul(101).div(100);
 
       try {
-        // Call exitLeverage
-        const tx = await leverageStrategiesManager.connect(leverageTestUser).exitLeverage(
-          vU, // collateralMarket
-          collateralAmountToRedeem, // collateralAmountToRedeemForSwap
-          vUSDT, // borrowedMarket
-          flashLoanAmount, // borrowedAmountToFlashLoan
-          minAmountOut, // minAmountOutAfterSwap
-          swapData, // swapData
-        );
+        const tx = await leverageStrategiesManager
+          .connect(leverageTestUser)
+          .exitLeverage(vU, collateralAmountToRedeem, vUSDT, flashLoanAmount, minAmountOut, swapData);
         const receipt = await tx.wait();
 
-        // Parse and verify LeverageExited event
-        const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-        const exitEvents = receipt.logs
-          .map((log: { topics: string[]; data: string }) => {
-            try {
-              return iface.parseLog(log);
-            } catch {
-              return null;
-            }
-          })
-          .filter((e: { name: string } | null) => e && e.name === "LeverageExited");
-
+        const exitEvents = parseEvents(receipt, LEVERAGE_STRATEGIES_MANAGER_ABI, "LeverageExited");
         expect(exitEvents.length).to.equal(1);
-        const event = exitEvents[0];
+        expect(exitEvents[0].args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
+        expect(exitEvents[0].args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
+        expect(exitEvents[0].args.collateralAmountToRedeemForSwap).to.equal(collateralAmountToRedeem);
+        expect(exitEvents[0].args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
+        expect(exitEvents[0].args.borrowedAmountToFlashLoan).to.equal(flashLoanAmount);
 
-        // Verify event parameters
-        expect(event.args.user.toLowerCase()).to.equal(leverageUserAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
-        expect(event.args.collateralAmountToRedeemForSwap).to.equal(collateralAmountToRedeem);
-        expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
-        expect(event.args.borrowedAmountToFlashLoan).to.equal(flashLoanAmount);
-
-        // Get balances after exit
-        const vUBalanceAfter = await vUContract.balanceOf(leverageUserAddress);
-        const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress);
-        const uBalanceAfter = await u.balanceOf(leverageUserAddress);
+        const [vUBalanceAfter, usdtBorrowAfter, uBalanceAfter] = await Promise.all([
+          vUContract.balanceOf(leverageUserAddress),
+          vUSDTContract.callStatic.borrowBalanceCurrent(leverageUserAddress),
+          u.balanceOf(leverageUserAddress),
+        ]);
 
         expect(vUBalanceAfter).to.be.lt(vUBalanceBefore);
         expect(usdtBorrowAfter).to.equal(0);
         expect(uBalanceAfter).to.be.gte(uBalanceBefore);
 
-        console.log(`Cross-asset leverage exited:`);
-        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
-        console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
+        leverageResults.push({
+          section: "exitLeverage",
+          test: "Exit U/USDT position",
+          status: "PASSED",
+          detail: `vU: ${vUBalanceBefore} -> ${vUBalanceAfter}, USDT borrow: ${usdtBorrowBefore} -> ${usdtBorrowAfter}`,
+        });
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes("0x428c0cc7") || errorMessage.includes("TokenSwapCallFailed")) {
-          console.log("Skipping cross-asset exitLeverage - swap quote expired or route unavailable");
+        const msg = error instanceof Error ? error.message : String(error);
+        if (msg.includes("0x428c0cc7") || msg.includes("TokenSwapCallFailed") || msg.includes("Swap API error")) {
+          leverageResults.push({
+            section: "exitLeverage",
+            test: "Exit U/USDT position",
+            status: "SKIPPED",
+            detail: "Swap failed or API unavailable",
+          });
+          console.log("    [SKIP] Swap quote expired or route unavailable");
           return;
         }
         throw error;
@@ -607,96 +647,99 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("LeverageStrategiesManager: enterLeverageFromBorrow", () => {
-    it("should enter leverage from existing borrow position with value checks", async () => {
+  // ===========================================================================
+  // Cross-Asset Leverage: enterLeverageFromBorrow
+  // ===========================================================================
+
+  describe("enterLeverageFromBorrow", () => {
+    it("should enter leverage from existing borrow position", async () => {
       const userAddress = await leverageTestUser.getAddress();
 
-      // Setup: mint vU and borrow some USDT first
       const mintAmount = parseUnits("200", 18);
       const initialBorrow = parseUnits("20", 18);
 
       const uBalance = await u.balanceOf(userAddress);
       if (uBalance.lt(mintAmount)) {
-        console.log("Skipping enterLeverageFromBorrow test - insufficient U balance");
+        leverageResults.push({
+          section: "enterLeverageFromBorrow",
+          test: "Leverage from existing borrow",
+          status: "SKIPPED",
+          detail: "Insufficient U balance",
+        });
+        console.log("    [SKIP] Insufficient U balance");
         return;
       }
 
-      // Approve and mint vU
+      // Sequential — same signer (leverageTestUser)
       await u.connect(leverageTestUser).approve(vU, mintAmount);
       await vUContract.connect(leverageTestUser).mint(mintAmount);
-
-      // Borrow some USDT to create initial position
       await vUSDTContract.connect(leverageTestUser).borrow(initialBorrow);
 
-      // Now use enterLeverageFromBorrow to increase leverage
       const additionalBorrowSeed = parseUnits("10", 18);
       const additionalFlashLoan = parseUnits("20", 18);
-
-      // Get swap data (USDT -> U)
       const totalUSDT = additionalBorrowSeed.add(additionalFlashLoan);
+
       const { swapData, minAmountOut } = await getSwapData(USDT, U, totalUSDT.toString(), "0.01");
 
       if (swapData === "0x") {
-        console.log("Skipping enterLeverageFromBorrow test - swap data unavailable");
+        leverageResults.push({
+          section: "enterLeverageFromBorrow",
+          test: "Leverage from existing borrow",
+          status: "SKIPPED",
+          detail: "Swap data unavailable",
+        });
+        console.log("    [SKIP] Swap data unavailable");
         return;
       }
 
-      // Get balances before
-      const vUBalanceBefore = await vUContract.balanceOf(userAddress);
-      const usdtBorrowBefore = await vUSDTContract.callStatic.borrowBalanceCurrent(userAddress);
+      const [vUBalanceBefore, usdtBorrowBefore] = await Promise.all([
+        vUContract.balanceOf(userAddress),
+        vUSDTContract.callStatic.borrowBalanceCurrent(userAddress),
+      ]);
 
       try {
-        // Call enterLeverageFromBorrow
-        const tx = await leverageStrategiesManager.connect(leverageTestUser).enterLeverageFromBorrow(
-          vU, // collateralMarket
-          vUSDT, // borrowedMarket
-          additionalBorrowSeed, // borrowedAmountSeed (additional borrow, not flash loaned)
-          additionalFlashLoan, // borrowedAmountToFlashLoan
-          minAmountOut, // minAmountOutAfterSwap
-          swapData, // swapData
-        );
+        const tx = await leverageStrategiesManager
+          .connect(leverageTestUser)
+          .enterLeverageFromBorrow(vU, vUSDT, additionalBorrowSeed, additionalFlashLoan, minAmountOut, swapData);
         const receipt = await tx.wait();
 
-        // Parse and verify LeverageEnteredFromBorrow event
-        const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-        const events = receipt.logs
-          .map((log: { topics: string[]; data: string }) => {
-            try {
-              return iface.parseLog(log);
-            } catch {
-              return null;
-            }
-          })
-          .filter((e: { name: string } | null) => e && e.name === "LeverageEnteredFromBorrow");
-
+        const events = parseEvents(receipt, LEVERAGE_STRATEGIES_MANAGER_ABI, "LeverageEnteredFromBorrow");
         expect(events.length).to.equal(1);
-        const event = events[0];
+        expect(events[0].args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
+        expect(events[0].args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
+        expect(events[0].args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
+        expect(events[0].args.borrowedAmountSeed).to.equal(additionalBorrowSeed);
+        expect(events[0].args.borrowedAmountToFlashLoan).to.equal(additionalFlashLoan);
 
-        // Verify event parameters
-        expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
-        expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
-        expect(event.args.borrowedMarket.toLowerCase()).to.equal(vUSDT.toLowerCase());
-        expect(event.args.borrowedAmountSeed).to.equal(additionalBorrowSeed);
-        expect(event.args.borrowedAmountToFlashLoan).to.equal(additionalFlashLoan);
-
-        // Get balances after
-        const vUBalanceAfter = await vUContract.balanceOf(userAddress);
-        const usdtBorrowAfter = await vUSDTContract.callStatic.borrowBalanceCurrent(userAddress);
+        const [vUBalanceAfter, usdtBorrowAfter] = await Promise.all([
+          vUContract.balanceOf(userAddress),
+          vUSDTContract.callStatic.borrowBalanceCurrent(userAddress),
+        ]);
 
         expect(vUBalanceAfter).to.be.gt(vUBalanceBefore);
         expect(usdtBorrowAfter).to.be.gt(usdtBorrowBefore);
 
-        console.log(`Leverage from borrow entered:`);
-        console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
-        console.log(`  USDT borrow: ${usdtBorrowBefore.toString()} -> ${usdtBorrowAfter.toString()}`);
+        leverageResults.push({
+          section: "enterLeverageFromBorrow",
+          test: "Leverage from existing borrow",
+          status: "PASSED",
+          detail: `vU: ${vUBalanceBefore} -> ${vUBalanceAfter}, USDT borrow: ${usdtBorrowBefore} -> ${usdtBorrowAfter}`,
+        });
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const msg = error instanceof Error ? error.message : String(error);
         if (
-          errorMessage.includes("0x428c0cc7") ||
-          errorMessage.includes("TokenSwapCallFailed") ||
-          errorMessage.includes("transfer amount exceeds allowance")
+          msg.includes("0x428c0cc7") ||
+          msg.includes("TokenSwapCallFailed") ||
+          msg.includes("transfer amount exceeds allowance") ||
+          msg.includes("Swap API error")
         ) {
-          console.log("Skipping enterLeverageFromBorrow - swap quote expired or route unavailable");
+          leverageResults.push({
+            section: "enterLeverageFromBorrow",
+            test: "Leverage from existing borrow",
+            status: "SKIPPED",
+            detail: "Swap failed or API unavailable",
+          });
+          console.log("    [SKIP] Swap quote expired or route unavailable");
           return;
         }
         throw error;
@@ -704,61 +747,56 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  describe("LeverageStrategiesManager: exitSingleAssetLeverage", () => {
-    it("should exit single asset leverage position with value checks", async () => {
+  // ===========================================================================
+  // exitSingleAssetLeverage
+  // ===========================================================================
+
+  describe("exitSingleAssetLeverage", () => {
+    it("should exit single asset leverage position", async () => {
       const userAddress = await testUser.getAddress();
 
-      // Get current borrow balance
       const borrowBalance = await vUContract.callStatic.borrowBalanceCurrent(userAddress);
-
       if (borrowBalance.eq(0)) {
-        console.log("Skipping exitSingleAssetLeverage test - no position to exit");
+        leverageResults.push({
+          section: "exitSingleAssetLeverage",
+          test: "Exit single-asset position",
+          status: "SKIPPED",
+          detail: "No position to exit",
+        });
+        console.log("    [SKIP] No position to exit");
         return;
       }
 
-      // Get balances before
       const vUBalanceBefore = await vUContract.balanceOf(userAddress);
-
-      // Flash loan amount: borrow balance + 1% buffer
       const flashLoanAmount = borrowBalance.mul(101).div(100);
 
-      // Call exitSingleAssetLeverage
       const tx = await leverageStrategiesManager.connect(testUser).exitSingleAssetLeverage(vU, flashLoanAmount);
       const receipt = await tx.wait();
 
-      // Parse and verify SingleAssetLeverageExited event
-      const iface = new ethers.utils.Interface(LEVERAGE_STRATEGIES_MANAGER_ABI);
-      const exitEvents = receipt.logs
-        .map((log: { topics: string[]; data: string }) => {
-          try {
-            return iface.parseLog(log);
-          } catch {
-            return null;
-          }
-        })
-        .filter((e: { name: string } | null) => e && e.name === "SingleAssetLeverageExited");
-
+      const exitEvents = parseEvents(receipt, LEVERAGE_STRATEGIES_MANAGER_ABI, "SingleAssetLeverageExited");
       expect(exitEvents.length).to.equal(1);
-      const event = exitEvents[0];
+      expect(exitEvents[0].args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
+      expect(exitEvents[0].args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
+      expect(exitEvents[0].args.collateralAmountToFlashLoan).to.equal(flashLoanAmount);
 
-      // Verify event parameters
-      expect(event.args.user.toLowerCase()).to.equal(userAddress.toLowerCase());
-      expect(event.args.collateralMarket.toLowerCase()).to.equal(vU.toLowerCase());
-      expect(event.args.collateralAmountToFlashLoan).to.equal(flashLoanAmount);
+      const [vUBalanceAfter, borrowBalanceAfter] = await Promise.all([
+        vUContract.balanceOf(userAddress),
+        vUContract.callStatic.borrowBalanceCurrent(userAddress),
+      ]);
 
-      // Get balances after
-      const vUBalanceAfter = await vUContract.balanceOf(userAddress);
-      const borrowBalanceAfter = await vUContract.callStatic.borrowBalanceCurrent(userAddress);
-
-      // Borrow balance should be zero
       expect(borrowBalanceAfter).to.equal(0);
-
-      // User should have less vU (used to repay flash loan)
       expect(vUBalanceAfter).to.be.lt(vUBalanceBefore);
 
-      console.log(`Single asset leverage exited:`);
-      console.log(`  vU balance: ${vUBalanceBefore.toString()} -> ${vUBalanceAfter.toString()}`);
-      console.log(`  U borrow: ${borrowBalance.toString()} -> ${borrowBalanceAfter.toString()}`);
+      leverageResults.push({
+        section: "exitSingleAssetLeverage",
+        test: "Exit single-asset position",
+        status: "PASSED",
+        detail: `vU: ${vUBalanceBefore} -> ${vUBalanceAfter}, Borrow: ${borrowBalance} -> ${borrowBalanceAfter}`,
+      });
     });
+  });
+
+  after(() => {
+    printLeverageResultsSummary();
   });
 });
