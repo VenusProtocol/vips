@@ -147,8 +147,8 @@ forking(FORK_BLOCK, async () => {
           expect(newPool.allowCorePoolFallback).to.equal(EMODE_POOL.allowCorePoolFallback);
         });
 
-        it("should set the correct risk parameters to all pool markets", async () => {
-          for (const config of Object.values(EMODE_POOL.marketsConfig)) {
+        for (const [marketKey, config] of Object.entries(EMODE_POOL.marketsConfig)) {
+          it(`should set the correct risk parameters for ${marketKey}`, async () => {
             const marketData = await comptroller.poolMarkets(EMODE_POOL.id, config.address);
             expect(marketData.marketPoolId).to.be.equal(EMODE_POOL.id);
             expect(marketData.isListed).to.be.equal(true);
@@ -156,8 +156,8 @@ forking(FORK_BLOCK, async () => {
             expect(marketData.liquidationThresholdMantissa).to.be.equal(config.liquidationThreshold);
             expect(marketData.liquidationIncentiveMantissa).to.be.equal(config.liquidationIncentive);
             expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
-          }
-        });
+          });
+        }
       });
     }
 
