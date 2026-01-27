@@ -1,9 +1,11 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import {
   expectEvents,
+  initMainnetUser,
   setMaxStalePeriodInBinanceOracle,
   setMaxStalePeriodInChainlinkOracle,
   setRedstonePrice,
@@ -14,8 +16,62 @@ import { CORE_MARKETS } from "../../vips/vip-547/bscmainnet";
 import { vip800 } from "../../vips/vip-800/bscmainnet";
 import { EMODE_POOLS, vip800 as vip800_2 } from "../../vips/vip-800/bscmainnet-2";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
+import ERC20_ABI from "./abi/ERC20.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
+const provider = ethers.provider;
+
+const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals: number }> = {
+  // USDT
+  "0xfD5840Cd36d94D7229439859C0112a4185BC0255": {
+    underlying: "0x55d398326f99059fF775485246999027B3197955", // USDT
+    whale: "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3", // usdt whale
+    decimals: 18,
+  },
+  // USDC
+  "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8": {
+    underlying: "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
+    whale: "0x98ADeF6F2ac8572ec48965509d69A8Dd5E8BbA9D", // usdc whale
+    decimals: 18,
+  },
+  // LTC
+  "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B": {
+    underlying: "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94", // LTC
+    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // ltc whale
+    decimals: 18,
+  },
+  // FIL
+  "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343": {
+    underlying: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153", // FIL
+    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // fil whale
+    decimals: 18,
+  },
+  // MATIC
+  "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8": {
+    underlying: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD", // MATIC
+    whale: "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3", // matic whale
+    decimals: 18,
+  },
+  // TRX
+  "0xC5D3466aA484B040eE977073fcF337f2c00071c1": {
+    underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", // TRX
+    whale: "0xCa266910d92a313E5F9eb1AfFC462bcbb7d9c4A9", // trx whale
+    decimals: 6,
+  },
+  // DOT
+  "0x1610bc33319e9398de5f57B33a5b184c806aD217": {
+    underlying: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402", // DOT
+    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // dot whale
+    decimals: 18,
+  },
+  // THE
+  "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f": {
+    underlying: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11", // THE
+    whale: "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D", // the whale
+    decimals: 18,
+  },
+};
 
 forking(76766086, async () => {
   let comptroller: Contract;
@@ -125,6 +181,136 @@ forking(76766086, async () => {
             expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
           }
         });
+      });
+    }
+
+    for (const pool of EMODE_POOLS) {
+      describe(`EMode Pool: ${pool.label}`, () => {
+        let user: any;
+        let userAddress: string;
+
+        before(async () => {
+          [user] = await ethers.getSigners();
+          userAddress = await user.getAddress();
+
+          // Enter E-Mode once per pool
+          await comptroller.connect(user).enterPool(pool.id);
+        });
+
+        for (const [marketKey, config] of Object.entries(pool.marketsConfig)) {
+          const marketInfo = MARKET_INFO[config.address];
+          if (!marketInfo) continue;
+
+          const { address: vTokenAddr } = config;
+          const { underlying, whale, decimals } = marketInfo;
+
+          describe(`${marketKey} market`, () => {
+            let vToken: any;
+            let token: any;
+
+            const mintAmount = parseUnits("10", decimals);
+            const borrowAmount = parseUnits("0.1", decimals);
+            const redeemAmount = parseUnits("0.5", decimals);
+
+            before(async () => {
+              vToken = new ethers.Contract(vTokenAddr, VTOKEN_ABI, provider);
+              token = new ethers.Contract(underlying, ERC20_ABI, provider);
+
+              // Fund user
+              const whaleSigner = await initMainnetUser(whale, ethers.utils.parseEther("10"));
+              await token.connect(whaleSigner).transfer(userAddress, mintAmount);
+
+              // Approve + enter market
+              await token.connect(user).approve(vTokenAddr, mintAmount);
+              await comptroller.connect(user).enterMarkets([vTokenAddr]);
+            });
+
+            /* ----------------------------- Helpers ----------------------------- */
+
+            const isPaused = async (action: number) => comptroller.actionPaused(vTokenAddr, action);
+
+            const supplyCapAllowsMint = async () => {
+              const supplyCap = await comptroller.supplyCaps(vTokenAddr);
+              if (supplyCap.eq(0)) return false;
+
+              const [totalSupply, exchangeRate] = await Promise.all([
+                vToken.totalSupply(),
+                vToken.exchangeRateStored(),
+              ]);
+
+              const nextTotalSupply = exchangeRate.mul(totalSupply).div(ethers.constants.WeiPerEther).add(mintAmount);
+
+              return nextTotalSupply.lte(supplyCap);
+            };
+
+            /* ------------------------------ Tests ------------------------------ */
+
+            it("User can mint", async function () {
+              if (await isPaused(0)) {
+                console.log(`Mint paused for ${marketKey}, skipping`);
+                return;
+              }
+
+              if (!(await supplyCapAllowsMint())) this.skip();
+
+              const balanceBefore = await vToken.balanceOf(userAddress);
+              await vToken.connect(user).mint(mintAmount);
+
+              expect(await vToken.balanceOf(userAddress)).to.be.gt(balanceBefore);
+            });
+
+            if (config.borrowAllowed) {
+              it("User can borrow", async function () {
+                if (await isPaused(2)) {
+                  console.log(`Borrow paused for ${marketKey}, skipping`);
+                  return;
+                }
+
+                const [borrowCap, totalBorrows] = await Promise.all([
+                  comptroller.borrowCaps(vTokenAddr),
+                  vToken.totalBorrows(),
+                ]);
+
+                if (borrowCap.gt(0) && totalBorrows.add(borrowAmount).gt(borrowCap)) {
+                  this.skip();
+                }
+
+                const balanceBefore = await token.balanceOf(userAddress);
+                await vToken.connect(user).borrow(borrowAmount);
+
+                expect(await token.balanceOf(userAddress)).to.be.gt(balanceBefore);
+              });
+
+              it("User can repay borrow", async () => {
+                const borrowBalance = await vToken.callStatic.borrowBalanceCurrent(userAddress);
+
+                if (borrowBalance.eq(0)) return;
+
+                const repayAmount = borrowBalance.mul(101).div(100); // +1% buffer
+                const userBalance = await token.balanceOf(userAddress);
+
+                if (userBalance.lt(repayAmount)) {
+                  const whaleSigner = await initMainnetUser(whale, ethers.utils.parseEther("10"));
+                  await token.connect(whaleSigner).transfer(userAddress, repayAmount.sub(userBalance));
+                }
+
+                await token.connect(user).approve(vTokenAddr, repayAmount);
+                await vToken.connect(user).repayBorrow(ethers.constants.MaxUint256);
+
+                expect(await vToken.callStatic.borrowBalanceCurrent(userAddress)).to.eq(0);
+              });
+            }
+
+            it("User can redeem", async function () {
+              if (!(await supplyCapAllowsMint())) this.skip();
+
+              const balanceBefore = await token.balanceOf(userAddress);
+              await vToken.connect(user).redeemUnderlying(redeemAmount);
+
+              expect(await token.balanceOf(userAddress)).to.be.gt(balanceBefore);
+            });
+          });
+        }
       });
     }
   });
