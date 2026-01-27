@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { BigNumber, Contract, Signer } from "ethers";
+import { BigNumber, Contract, Signer, Wallet } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
@@ -22,6 +22,7 @@ import {
 } from "../../vips/vip-581/bscmainnet";
 import VTOKEN_ABI from "../vip-567/abi/VToken.json";
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
+import SWAP_HELPER_ABI from "../vip-600/abi/SwapHelper.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -31,12 +32,21 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 // Contract addresses
 const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
+const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
 
 // Core Pool markets with flash loans enabled (from VIP-567)
 const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
 const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const WBNB = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+
+// PancakeSwap V2 Router on BSC
+const PANCAKE_V2_ROUTER = "0x10ED43C718714eb63d5aA57B78B54704E256024E";
+const PANCAKE_V2_ROUTER_ABI = [
+  "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)",
+  "function swapExactTokensForTokens(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline) external returns (uint[] memory amounts)",
+];
 
 // User with U tokens to fund test user
 const U_HOLDER = "0x95282779ee2f3d4cf383041f7361c741cf8cc00e";
@@ -48,9 +58,130 @@ const USDT_HOLDER = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 // Fork block number - UPDATE THIS when tests fail due to stale oracle data
 const FORK_BLOCK = 75075100;
 
+// =============================================================================
+// EIP-712 Swap Signer & Calldata Builder
+// =============================================================================
+
+let swapSignerWallet: Wallet;
+let swapHelperContract: Contract;
+let eip712Domain: { name: string; version: string; chainId: number; verifyingContract: string };
+let saltCounter = 0;
+
 /**
- * Fetches swap data from Venus API for swapping tokens
- * Uses swapHelperMulticall format required by LeverageStrategiesManager
+ * Configures a deterministic EIP-712 signer for the SwapHelper contract on the forked chain.
+ *
+ * In production, the SwapHelper requires a backend signer to authorize multicall executions
+ * via EIP-712 signatures. In tests, we:
+ * 1. Create a deterministic Hardhat wallet (using Hardhat's default private key)
+ * 2. Impersonate the SwapHelper owner to register this wallet as the authorized backendSigner
+ * 3. Cache the EIP-712 domain parameters (name, version, chainId, verifyingContract) for later signing
+ */
+async function setupSwapSigner() {
+  swapSignerWallet = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ethers.provider);
+
+  swapHelperContract = new ethers.Contract(SWAP_HELPER, SWAP_HELPER_ABI, ethers.provider);
+
+  const swapHelperOwner = await swapHelperContract.owner();
+  const impersonatedOwner = await initMainnetUser(swapHelperOwner, ethers.utils.parseEther("1"));
+  await swapHelperContract.connect(impersonatedOwner).setBackendSigner(swapSignerWallet.address);
+
+  const domain = await swapHelperContract.eip712Domain();
+  const network = await ethers.provider.getNetwork();
+  eip712Domain = {
+    name: domain.name,
+    version: domain.version,
+    chainId: network.chainId,
+    verifyingContract: domain.verifyingContract,
+  };
+}
+
+/**
+ * Builds the full signed SwapHelper multicall calldata for a PancakeSwap V2 token swap.
+ *
+ * Steps:
+ * 1. Queries PancakeSwap V2 for the expected output amount
+ * 2. Applies slippage tolerance to compute minAmountOut
+ * 3. Encodes a 3-step SwapHelper multicall (approveMax, genericCall, sweep)
+ * 4. Signs the multicall with EIP-712
+ * 5. Returns the encoded multicall calldata
+ */
+async function buildSwapCalldata(
+  tokenIn: string,
+  tokenOut: string,
+  amountIn: BigNumber,
+  recipient: string,
+  slippageBps: number = 100,
+): Promise<{ swapData: string; minAmountOut: BigNumber }> {
+  const pancakeRouter = new ethers.Contract(PANCAKE_V2_ROUTER, PANCAKE_V2_ROUTER_ABI, ethers.provider);
+
+  let path: string[];
+  let amounts: BigNumber[];
+
+  try {
+    path = [tokenIn, tokenOut];
+    amounts = await pancakeRouter.getAmountsOut(amountIn, path);
+  } catch {
+    if (tokenIn !== WBNB && tokenOut !== WBNB) {
+      path = [tokenIn, WBNB, tokenOut];
+      amounts = await pancakeRouter.getAmountsOut(amountIn, path);
+    } else {
+      throw new Error(`No route found for ${tokenIn} -> ${tokenOut}`);
+    }
+  }
+
+  const amountOut = amounts[amounts.length - 1];
+  const minAmountOut = amountOut.mul(10000 - slippageBps).div(10000);
+
+  const swapHelperIface = new ethers.utils.Interface(SWAP_HELPER_ABI);
+
+  // 1. approveMax(tokenIn, PancakeRouter)
+  const approveCall = swapHelperIface.encodeFunctionData("approveMax", [tokenIn, PANCAKE_V2_ROUTER]);
+
+  // 2. genericCall(PancakeRouter, swapExactTokensForTokens(...))
+  const pancakeIface = new ethers.utils.Interface(PANCAKE_V2_ROUTER_ABI);
+  const deadline = Math.floor(Date.now() / 1000) + 3600;
+  const swapCalldata = pancakeIface.encodeFunctionData("swapExactTokensForTokens", [
+    amountIn,
+    minAmountOut,
+    path,
+    SWAP_HELPER, // tokens go to SwapHelper first
+    deadline,
+  ]);
+  const genericCall = swapHelperIface.encodeFunctionData("genericCall", [PANCAKE_V2_ROUTER, swapCalldata]);
+
+  // 3. sweep(tokenOut, recipient) — send swapped tokens to LeverageStrategiesManager
+  const sweepCall = swapHelperIface.encodeFunctionData("sweep", [tokenOut, recipient]);
+
+  const calls = [approveCall, genericCall, sweepCall];
+
+  // EIP-712 sign — caller is LeverageStrategiesManager (it calls SwapHelper.multicall)
+  const salt = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256"], [++saltCounter]));
+
+  const types = {
+    Multicall: [
+      { name: "caller", type: "address" },
+      { name: "calls", type: "bytes[]" },
+      { name: "deadline", type: "uint256" },
+      { name: "salt", type: "bytes32" },
+    ],
+  };
+
+  const value = {
+    caller: LEVERAGE_STRATEGIES_MANAGER,
+    calls,
+    deadline,
+    salt,
+  };
+
+  const signature = await swapSignerWallet._signTypedData(eip712Domain, types, value);
+
+  const multicallData = swapHelperIface.encodeFunctionData("multicall", [calls, deadline, salt, signature]);
+
+  return { swapData: multicallData, minAmountOut };
+}
+
+/**
+ * High-level wrapper matching the interface used by test cases.
  */
 async function getSwapData(
   tokenInAddress: string,
@@ -58,37 +189,14 @@ async function getSwapData(
   exactAmountInMantissa: string,
   slippagePercentage: string = "0.01",
 ): Promise<{ swapData: string; minAmountOut: BigNumber }> {
-  const deadlineTimestamp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
-
-  const url = `https://api.venus.io/find-swap?chainId=56&tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&slippagePercentage=${slippagePercentage}&recipientAddress=${LEVERAGE_STRATEGIES_MANAGER}&deadlineTimestampSecs=${deadlineTimestamp}&type=exact-in&shouldTransferToReceiver=true&exactAmountInMantissa=${exactAmountInMantissa}`;
-
-  try {
-    const response = await fetch(url);
-    const data: unknown = await response.json();
-
-    // Type guard for expected Venus API response
-    if (
-      typeof data === "object" &&
-      data !== null &&
-      "quotes" in data &&
-      Array.isArray((data as any).quotes) &&
-      (data as any).quotes.length > 0
-    ) {
-      const quote = (data as any).quotes[0];
-      return {
-        swapData: quote.swapHelperMulticall.calldata.encodedCall,
-        minAmountOut: BigNumber.from(quote.amountOut).mul(99).div(100), // 1% slippage buffer
-      };
-    }
-    throw new Error("No quotes returned from Venus API");
-  } catch (error) {
-    console.log("Failed to fetch swap data from Venus API, using fallback");
-    // Return empty swap data - tests will skip cross-asset tests
-    return {
-      swapData: "0x",
-      minAmountOut: BigNumber.from(0),
-    };
-  }
+  const slippageBps = Math.round(parseFloat(slippagePercentage) * 10000);
+  return buildSwapCalldata(
+    tokenInAddress,
+    tokenOutAddress,
+    BigNumber.from(exactAmountInMantissa),
+    LEVERAGE_STRATEGIES_MANAGER,
+    slippageBps,
+  );
 }
 
 forking(FORK_BLOCK, async () => {
@@ -172,6 +280,9 @@ forking(FORK_BLOCK, async () => {
     );
     await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "USDC", 315360000);
     await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, "USDT", 315360000);
+
+    // Setup the EIP-712 swap signer so we can build signed multicall calldata
+    await setupSwapSigner();
   });
 
   /**
@@ -433,7 +544,8 @@ forking(FORK_BLOCK, async () => {
       }
 
       // For exitLeverage: flash loan USDT to repay, redeem USDC, swap USDC to USDT
-      const collateralAmountToRedeem = parseUnits("50", 18);
+      // Redeem more than borrow to cover swap slippage and flash loan fees
+      const collateralAmountToRedeem = parseUnits("55", 18);
 
       // Get swap data from Venus API (USDC -> USDT)
       const { swapData, minAmountOut } = await getSwapData(USDC, USDT, collateralAmountToRedeem.toString(), "0.01");
