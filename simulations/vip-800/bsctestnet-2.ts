@@ -60,9 +60,8 @@ forking(85524987, async () => {
           "BorrowAllowedUpdated",
           "PoolCreated",
           "PoolMarketInitialized",
-          "PoolFallbackStatusUpdated",
         ],
-        [18, 18, 18, 18, 6, 18, 6],
+        [18, 18, 18, 18, 6, 18],
       );
     },
   });
@@ -79,9 +78,8 @@ forking(85524987, async () => {
           "BorrowAllowedUpdated",
           "PoolCreated",
           "PoolMarketInitialized",
-          "PoolFallbackStatusUpdated",
         ],
-        [6, 6, 6, 6, 2, 6, 2],
+        [6, 6, 6, 6, 2, 6],
       );
     },
   });

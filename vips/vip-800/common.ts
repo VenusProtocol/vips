@@ -62,7 +62,7 @@ export function createEmodePool(
     label,
     id,
     markets: [vTokenAddress, opts.usdtMarketConfig.address, opts.usdcMarketConfig.address],
-    allowCorePoolFallback: true,
+    allowCorePoolFallback: false,
     marketsConfig: {
       [vTokenKey]: {
         address: vTokenAddress,
@@ -101,11 +101,6 @@ export function generateEmodePoolCommands(
       target: unitrollerAddress,
       signature: "addPoolMarkets(uint96[],address[])",
       params: [Array(pool.markets.length).fill(pool.id), pool.markets],
-    },
-    {
-      target: unitrollerAddress,
-      signature: "setAllowCorePoolFallback(uint96,bool)",
-      params: [pool.id, pool.allowCorePoolFallback],
     },
   ];
 

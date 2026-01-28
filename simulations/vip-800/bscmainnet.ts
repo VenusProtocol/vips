@@ -417,9 +417,8 @@ forking(FORK_BLOCK, async () => {
           "BorrowAllowedUpdated",
           "PoolCreated",
           "PoolMarketInitialized",
-          "PoolFallbackStatusUpdated",
         ],
-        [21, 21, 21, 21, 7, 21, 7],
+        [21, 21, 21, 21, 7, 21],
       );
     },
   });
