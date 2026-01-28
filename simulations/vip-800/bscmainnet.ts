@@ -1283,6 +1283,471 @@ forking(FORK_BLOCK, async () => {
       });
     }
 
+    // =========================================================================
+    // LINK Isolated E-Mode Pool Restrictions
+    //
+    // Tests that verify isolated e-mode pool market restrictions:
+    // - When in LINK e-mode pool: can only use LINK, USDT, USDC markets
+    // - When in core pool: can use LINK along with all other core pool markets
+    // =========================================================================
+    describe("LINK Isolated E-Mode Pool Restrictions", () => {
+      const LINK_POOL = EMODE_POOLS.find(p => p.label === "LINK")!;
+      const vLINK = LINK_POOL.marketsConfig.vLINK.address;
+      const vUSDT_ADDR = LINK_POOL.marketsConfig.vUSDT.address;
+      const vUSDC_ADDR = LINK_POOL.marketsConfig.vUSDC.address;
+
+      // ETH is in core pool but NOT in LINK e-mode pool
+      const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
+      const ETH_UNDERLYING = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+      const ETH_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+
+      let vLINKContract: Contract;
+      let vUSDTContract: Contract;
+      let vUSDCContract: Contract;
+      let vETHContract: Contract;
+      let linkToken: Contract;
+      let usdtToken: Contract;
+      let usdcToken: Contract;
+      let ethToken: Contract;
+
+      before(async () => {
+        vLINKContract = new ethers.Contract(vLINK, VTOKEN_ABI, provider);
+        vUSDTContract = new ethers.Contract(vUSDT_ADDR, VTOKEN_ABI, provider);
+        vUSDCContract = new ethers.Contract(vUSDC_ADDR, VTOKEN_ABI, provider);
+        vETHContract = new ethers.Contract(vETH, VTOKEN_ABI, provider);
+
+        const linkInfo = MARKET_INFO[vLINK];
+        const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+        const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+
+        linkToken = new ethers.Contract(linkInfo.underlying, ERC20_ABI, provider);
+        usdtToken = new ethers.Contract(usdtInfo.underlying, ERC20_ABI, provider);
+        usdcToken = new ethers.Contract(usdcInfo.underlying, ERC20_ABI, provider);
+        ethToken = new ethers.Contract(ETH_UNDERLYING, ERC20_ABI, provider);
+      });
+
+      describe("Core pool behavior (existing users / new users staying in core pool)", () => {
+        let corePoolUser: any;
+        let corePoolUserAddress: string;
+
+        before(async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8887), 20)),
+          );
+          corePoolUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+          corePoolUserAddress = userAddr;
+
+          // Fund user with LINK, ETH, USDT
+          const linkInfo = MARKET_INFO[vLINK];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+
+          await linkToken.connect(linkWhale).transfer(corePoolUserAddress, parseUnits("100", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(corePoolUserAddress, parseUnits("10", 18));
+          await usdtToken.connect(usdtWhale).transfer(corePoolUserAddress, parseUnits("500", usdtInfo.decimals));
+
+          // User stays in core pool (pool 0) - no enterPool call needed
+          const userPool = await comptroller.userPoolId(corePoolUserAddress);
+          expect(userPool).to.equal(0);
+          console.log("  User is in core pool (pool 0) - same behavior as before VIP");
+        });
+
+        it("user CAN supply and borrow LINK in core pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          await linkToken.connect(corePoolUser).approve(vLINK, parseUnits("10", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser).mint(parseUnits("10", linkInfo.decimals));
+          await comptroller.connect(corePoolUser).enterMarkets([vLINK]);
+
+          expect(await vLINKContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
+          console.log("  User successfully supplied LINK in core pool");
+        });
+
+        it("user CAN supply and use ETH in core pool", async () => {
+          await ethToken.connect(corePoolUser).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(corePoolUser).mint(parseUnits("5", 18));
+          await comptroller.connect(corePoolUser).enterMarkets([vETH]);
+
+          expect(await vETHContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
+          console.log("  User successfully supplied ETH in core pool");
+        });
+
+        it("user CAN borrow LINK using ETH collateral in core pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkBalanceBefore = await linkToken.balanceOf(corePoolUserAddress);
+          await vLINKContract.connect(corePoolUser).borrow(parseUnits("1", linkInfo.decimals));
+          const linkBalanceAfter = await linkToken.balanceOf(corePoolUserAddress);
+
+          expect(linkBalanceAfter).to.be.gt(linkBalanceBefore);
+          console.log("  User borrowed LINK using ETH collateral in core pool");
+        });
+
+        it("user CAN borrow ETH using LINK collateral in core pool", async () => {
+          const user2Addr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8886), 20)),
+          );
+          const corePoolUser2 = await initMainnetUser(user2Addr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          await linkToken.connect(linkWhale).transfer(user2Addr, parseUnits("50", linkInfo.decimals));
+
+          await linkToken.connect(corePoolUser2).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser2).mint(parseUnits("50", linkInfo.decimals));
+          await comptroller.connect(corePoolUser2).enterMarkets([vLINK]);
+
+          const ethBalanceBefore = await ethToken.balanceOf(user2Addr);
+          await vETHContract.connect(corePoolUser2).borrow(parseUnits("0.01", 18));
+          const ethBalanceAfter = await ethToken.balanceOf(user2Addr);
+
+          expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
+          console.log("  User borrowed ETH using LINK collateral in core pool");
+        });
+
+        it("user CAN interact with ALL markets simultaneously (LINK, ETH, USDT)", async () => {
+          const user3Addr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8885), 20)),
+          );
+          const corePoolUser3 = await initMainnetUser(user3Addr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+
+          await linkToken.connect(linkWhale).transfer(user3Addr, parseUnits("20", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(user3Addr, parseUnits("2", 18));
+          await usdtToken.connect(usdtWhale).transfer(user3Addr, parseUnits("500", usdtInfo.decimals));
+
+          await linkToken.connect(corePoolUser3).approve(vLINK, parseUnits("20", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser3).mint(parseUnits("20", linkInfo.decimals));
+
+          await ethToken.connect(corePoolUser3).approve(vETH, parseUnits("2", 18));
+          await vETHContract.connect(corePoolUser3).mint(parseUnits("2", 18));
+
+          await usdtToken.connect(corePoolUser3).approve(vUSDT_ADDR, parseUnits("500", usdtInfo.decimals));
+          await vUSDTContract.connect(corePoolUser3).mint(parseUnits("500", usdtInfo.decimals));
+
+          await comptroller.connect(corePoolUser3).enterMarkets([vLINK, vETH, vUSDT_ADDR]);
+
+          expect(await vLINKContract.balanceOf(user3Addr)).to.be.gt(0);
+          expect(await vETHContract.balanceOf(user3Addr)).to.be.gt(0);
+          expect(await vUSDTContract.balanceOf(user3Addr)).to.be.gt(0);
+
+          console.log("  User interacts with LINK, ETH, and USDT simultaneously in core pool");
+        });
+      });
+
+      describe("Isolated e-mode behavior (new users opting into LINK e-mode pool)", () => {
+        let emodeUser: any;
+        let emodeUserAddress: string;
+
+        before(async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8888), 20)),
+          );
+          emodeUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+          emodeUserAddress = userAddr;
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+          const usdcWhale = await getCachedWhale(usdcInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await linkToken.connect(linkWhale).transfer(emodeUserAddress, parseUnits("100", linkInfo.decimals));
+          await usdtToken.connect(usdtWhale).transfer(emodeUserAddress, parseUnits("1000", usdtInfo.decimals));
+          await usdcToken.connect(usdcWhale).transfer(emodeUserAddress, parseUnits("1000", usdcInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(emodeUserAddress, parseUnits("5", 18));
+
+          // User opts into LINK e-mode pool
+          await comptroller.connect(emodeUser).enterPool(LINK_POOL.id);
+
+          const userPool = await comptroller.userPoolId(emodeUserAddress);
+          expect(userPool).to.equal(LINK_POOL.id);
+          console.log(`  User opted into LINK e-mode pool (id=${LINK_POOL.id})`);
+        });
+
+        it("user CAN supply and borrow LINK in LINK e-mode pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          await linkToken.connect(emodeUser).approve(vLINK, parseUnits("10", linkInfo.decimals));
+          await vLINKContract.connect(emodeUser).mint(parseUnits("10", linkInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vLINK]);
+
+          expect(await vLINKContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("0.1", linkInfo.decimals);
+          await vLINKContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vLINKContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed LINK in LINK e-mode pool");
+        });
+
+        it("user CAN supply and borrow USDT in LINK e-mode pool", async () => {
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          await usdtToken.connect(emodeUser).approve(vUSDT_ADDR, parseUnits("100", usdtInfo.decimals));
+          await vUSDTContract.connect(emodeUser).mint(parseUnits("100", usdtInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vUSDT_ADDR]);
+
+          expect(await vUSDTContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("10", usdtInfo.decimals);
+          await vUSDTContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vUSDTContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed USDT in LINK e-mode pool");
+        });
+
+        it("user CAN supply and borrow USDC in LINK e-mode pool", async () => {
+          const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+          await usdcToken.connect(emodeUser).approve(vUSDC_ADDR, parseUnits("100", usdcInfo.decimals));
+          await vUSDCContract.connect(emodeUser).mint(parseUnits("100", usdcInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vUSDC_ADDR]);
+
+          expect(await vUSDCContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("10", usdcInfo.decimals);
+          await vUSDCContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vUSDCContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed USDC in LINK e-mode pool");
+        });
+
+        it("user CAN deposit ETH (deposits are unrestricted) but CANNOT borrow ETH", async () => {
+          // Deposits/mints are allowed to any vToken regardless of pool
+          await ethToken.connect(emodeUser).approve(vETH, parseUnits("1", 18));
+          await vETHContract.connect(emodeUser).mint(parseUnits("1", 18));
+          expect(await vETHContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+          console.log("  User CAN deposit ETH even in LINK e-mode (deposits unrestricted)");
+
+          // But borrowing non-pool markets is restricted
+          try {
+            await vETHContract.connect(emodeUser).borrow(parseUnits("0.01", 18));
+            expect.fail("Borrow should have failed - ETH is not in LINK e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  ETH borrow correctly rejected in LINK e-mode pool`);
+          }
+        });
+
+        it("ETH collateral does NOT count for borrowing power in e-mode (allowCorePoolFallback = false)", async () => {
+          const pool = await comptroller.pools(LINK_POOL.id);
+          expect(pool.allowCorePoolFallback).to.equal(false);
+
+          // Create a user with ONLY ETH collateral (no LINK pool assets)
+          const ethOnlyUserAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8889), 20)),
+          );
+          const ethOnlyUser = await initMainnetUser(ethOnlyUserAddr, ethers.utils.parseEther("10"));
+
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          await ethToken.connect(ethWhale).transfer(ethOnlyUserAddr, parseUnits("10", 18));
+
+          await ethToken.connect(ethOnlyUser).approve(vETH, parseUnits("10", 18));
+          await vETHContract.connect(ethOnlyUser).mint(parseUnits("10", 18));
+          await comptroller.connect(ethOnlyUser).enterMarkets([vETH]);
+
+          // Enter LINK e-mode pool
+          await comptroller.connect(ethOnlyUser).enterPool(LINK_POOL.id);
+
+          // Try to borrow LINK using only ETH collateral - should FAIL
+          try {
+            await vLINKContract.connect(ethOnlyUser).borrow(parseUnits("0.1", 18));
+            expect.fail("Borrow should have failed - ETH collateral not usable with fallback disabled");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  LINK borrow correctly rejected with ETH-only collateral (fallback=false)`);
+          }
+
+          // Also try to borrow USDT (a pool asset) using ETH collateral - should also FAIL
+          try {
+            await vUSDTContract.connect(ethOnlyUser).borrow(parseUnits("10", 18));
+            expect.fail("Borrow should have failed - ETH collateral not usable with fallback disabled");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  USDT borrow correctly rejected with ETH-only collateral (fallback=false)`);
+          }
+        });
+
+        it("user with LINK pool collateral CAN borrow normally in e-mode", async () => {
+          const linkUserAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(7776), 20)),
+          );
+          const linkUser = await initMainnetUser(linkUserAddr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          await linkToken.connect(linkWhale).transfer(linkUserAddr, parseUnits("50", linkInfo.decimals));
+
+          await linkToken.connect(linkUser).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(linkUser).mint(parseUnits("50", linkInfo.decimals));
+          await comptroller.connect(linkUser).enterMarkets([vLINK]);
+
+          await comptroller.connect(linkUser).enterPool(LINK_POOL.id);
+
+          const usdtBalanceBefore = await usdtToken.balanceOf(linkUserAddr);
+          await vUSDTContract.connect(linkUser).borrow(parseUnits("10", 18));
+          const usdtBalanceAfter = await usdtToken.balanceOf(linkUserAddr);
+
+          expect(usdtBalanceAfter).to.be.gt(usdtBalanceBefore);
+          console.log("  User with LINK collateral CAN borrow USDT in e-mode pool");
+        });
+      });
+
+      describe("Mutual exclusivity: user CANNOT be in core pool and e-mode simultaneously", () => {
+        it("user in core pool loses e-mode benefits when they enter e-mode they lose core pool flexibility", async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9901), 20)),
+          );
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
+
+          // Supply both in core pool
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
+
+          // In core pool: CAN borrow ETH (all markets accessible)
+          let userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(0);
+          const ethBalBefore = await ethToken.balanceOf(userAddr);
+          await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+          expect(await ethToken.balanceOf(userAddr)).to.be.gt(ethBalBefore);
+          console.log("  In core pool: user CAN borrow ETH using LINK+ETH collateral");
+
+          // Repay ETH borrow before switching — fund extra to cover interest
+          const ethWhale2 = await getCachedWhale(ETH_WHALE);
+          await ethToken.connect(ethWhale2).transfer(userAddr, parseUnits("0.1", 18));
+          await ethToken.connect(user).approve(vETH, ethers.constants.MaxUint256);
+          await vETHContract.connect(user).repayBorrow(ethers.constants.MaxUint256);
+
+          // Now switch to LINK e-mode pool
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
+          userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(LINK_POOL.id);
+          console.log("  User switched from core pool to LINK e-mode pool");
+
+          // In e-mode: CANNOT borrow ETH anymore (not a pool market)
+          try {
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed in LINK e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  In e-mode: user CANNOT borrow ETH (not in LINK pool) - mutual exclusivity enforced");
+          }
+        });
+
+        it("user switching from e-mode back to core pool regains full market access", async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9902), 20)),
+          );
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
+
+          // Supply collateral
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
+
+          // Start in LINK e-mode pool
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
+          let userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(LINK_POOL.id);
+
+          // In e-mode: CANNOT borrow ETH
+          try {
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed in LINK e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  In e-mode: user CANNOT borrow ETH");
+          }
+
+          // Switch back to core pool
+          await comptroller.connect(user).enterPool(0);
+          userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(0);
+          console.log("  User switched back to core pool");
+
+          // In core pool: CAN borrow ETH again
+          const ethBalBefore = await ethToken.balanceOf(userAddr);
+          await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+          expect(await ethToken.balanceOf(userAddr)).to.be.gt(ethBalBefore);
+          console.log("  In core pool: user CAN borrow ETH again - full market access restored");
+        });
+
+        it("user CANNOT borrow in e-mode pool and core pool at the same time", async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9903), 20)),
+          );
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
+
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
+
+          // Enter LINK e-mode
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
+
+          // Verify: user is in LINK pool, NOT in core pool
+          const userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(LINK_POOL.id);
+          expect(userPool).to.not.equal(0);
+
+          // CAN borrow LINK (e-mode market)
+          const linkBalBefore = await linkToken.balanceOf(userAddr);
+          await vLINKContract.connect(user).borrow(parseUnits("0.1", linkInfo.decimals));
+          expect(await linkToken.balanceOf(userAddr)).to.be.gt(linkBalBefore);
+          console.log("  In e-mode: CAN borrow LINK");
+
+          // CANNOT borrow ETH (core-pool-only market) at the same time
+          try {
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed - user is in e-mode, not core pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  In e-mode: CANNOT borrow ETH - user must choose one pool, cannot use both");
+          }
+        });
+      });
+    });
+
     after(() => {
       printLeverageResultsSummary();
     });

@@ -1513,5 +1513,478 @@ forking(76766086, async () => {
     after(() => {
       printLeverageResultsSummary();
     });
+
+    // =========================================================================
+    // DOT Isolated E-Mode Pool Restriction Tests
+    // =========================================================================
+    //
+    // Tests that verify isolated e-mode pool market restrictions:
+    // - When in DOT e-mode pool: can only use DOT, USDT, USDC markets
+    // - When in core pool: can use DOT along with all other core pool markets
+    // =========================================================================
+    describe("DOT Isolated E-Mode Pool Restrictions", () => {
+      // DOT pool is id=15 in EMODE_POOLS
+      const DOT_POOL = EMODE_POOLS.find(p => p.label === "DOT")!;
+      const vDOT = DOT_POOL.marketsConfig.vDOT.address;
+      const vUSDT_ADDR = DOT_POOL.marketsConfig.vUSDT.address;
+      const vUSDC_ADDR = DOT_POOL.marketsConfig.vUSDC.address;
+
+      // ETH is in core pool but NOT in DOT e-mode pool
+      const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
+      const ETH_UNDERLYING = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
+      const ETH_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+
+      let vDOTContract: Contract;
+      let vUSDTContract: Contract;
+      let vUSDCContract: Contract;
+      let vETHContract: Contract;
+      let dotToken: Contract;
+      let usdtToken: Contract;
+      let usdcToken: Contract;
+      let ethToken: Contract;
+
+      before(async () => {
+        vDOTContract = new ethers.Contract(vDOT, VTOKEN_ABI, provider);
+        vUSDTContract = new ethers.Contract(vUSDT_ADDR, VTOKEN_ABI, provider);
+        vUSDCContract = new ethers.Contract(vUSDC_ADDR, VTOKEN_ABI, provider);
+        vETHContract = new ethers.Contract(vETH, VTOKEN_ABI, provider);
+
+        const dotInfo = MARKET_INFO[vDOT];
+        const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+        const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+
+        dotToken = new ethers.Contract(dotInfo.underlying, ERC20_ABI, provider);
+        usdtToken = new ethers.Contract(usdtInfo.underlying, ERC20_ABI, provider);
+        usdcToken = new ethers.Contract(usdcInfo.underlying, ERC20_ABI, provider);
+        ethToken = new ethers.Contract(ETH_UNDERLYING, ERC20_ABI, provider);
+      });
+
+      describe("Core pool behavior (existing users / new users staying in core pool)", () => {
+        let corePoolUser: any;
+        let corePoolUserAddress: string;
+
+        before(async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8887), 20)),
+          );
+          corePoolUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+          corePoolUserAddress = userAddr;
+
+          // Fund user with DOT, ETH, USDT
+          const dotInfo = MARKET_INFO[vDOT];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+
+          await dotToken.connect(dotWhale).transfer(corePoolUserAddress, parseUnits("100", dotInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(corePoolUserAddress, parseUnits("10", 18));
+          await usdtToken.connect(usdtWhale).transfer(corePoolUserAddress, parseUnits("500", usdtInfo.decimals));
+
+          // User stays in core pool (pool 0) - no enterPool call needed
+          const userPool = await comptroller.userPoolId(corePoolUserAddress);
+          expect(userPool).to.equal(0);
+          console.log("  User is in core pool (pool 0) - same behavior as before VIP");
+        });
+
+        it("user CAN supply and borrow DOT in core pool", async () => {
+          const dotInfo = MARKET_INFO[vDOT];
+          await dotToken.connect(corePoolUser).approve(vDOT, parseUnits("10", dotInfo.decimals));
+          await vDOTContract.connect(corePoolUser).mint(parseUnits("10", dotInfo.decimals));
+          await comptroller.connect(corePoolUser).enterMarkets([vDOT]);
+
+          expect(await vDOTContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
+          console.log("  User successfully supplied DOT in core pool");
+        });
+
+        it("user CAN supply and use ETH in core pool", async () => {
+          await ethToken.connect(corePoolUser).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(corePoolUser).mint(parseUnits("5", 18));
+          await comptroller.connect(corePoolUser).enterMarkets([vETH]);
+
+          expect(await vETHContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
+          console.log("  User successfully supplied ETH in core pool");
+        });
+
+        it("user CAN borrow DOT using ETH collateral in core pool", async () => {
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotBalanceBefore = await dotToken.balanceOf(corePoolUserAddress);
+          await vDOTContract.connect(corePoolUser).borrow(parseUnits("1", dotInfo.decimals));
+          const dotBalanceAfter = await dotToken.balanceOf(corePoolUserAddress);
+
+          expect(dotBalanceAfter).to.be.gt(dotBalanceBefore);
+          console.log("  User borrowed DOT using ETH collateral in core pool");
+        });
+
+        it("user CAN borrow ETH using DOT collateral in core pool", async () => {
+          const user2Addr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8886), 20)),
+          );
+          const corePoolUser2 = await initMainnetUser(user2Addr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          await dotToken.connect(dotWhale).transfer(user2Addr, parseUnits("50", dotInfo.decimals));
+
+          await dotToken.connect(corePoolUser2).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(corePoolUser2).mint(parseUnits("50", dotInfo.decimals));
+          await comptroller.connect(corePoolUser2).enterMarkets([vDOT]);
+
+          const ethBalanceBefore = await ethToken.balanceOf(user2Addr);
+          await vETHContract.connect(corePoolUser2).borrow(parseUnits("0.01", 18));
+          const ethBalanceAfter = await ethToken.balanceOf(user2Addr);
+
+          expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
+          console.log("  User borrowed ETH using DOT collateral in core pool");
+        });
+
+        it("user CAN interact with ALL markets simultaneously (DOT, ETH, USDT)", async () => {
+          const user3Addr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8885), 20)),
+          );
+          const corePoolUser3 = await initMainnetUser(user3Addr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+
+          await dotToken.connect(dotWhale).transfer(user3Addr, parseUnits("20", dotInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(user3Addr, parseUnits("2", 18));
+          await usdtToken.connect(usdtWhale).transfer(user3Addr, parseUnits("500", usdtInfo.decimals));
+
+          await dotToken.connect(corePoolUser3).approve(vDOT, parseUnits("20", dotInfo.decimals));
+          await vDOTContract.connect(corePoolUser3).mint(parseUnits("20", dotInfo.decimals));
+
+          await ethToken.connect(corePoolUser3).approve(vETH, parseUnits("2", 18));
+          await vETHContract.connect(corePoolUser3).mint(parseUnits("2", 18));
+
+          await usdtToken.connect(corePoolUser3).approve(vUSDT_ADDR, parseUnits("500", usdtInfo.decimals));
+          await vUSDTContract.connect(corePoolUser3).mint(parseUnits("500", usdtInfo.decimals));
+
+          await comptroller.connect(corePoolUser3).enterMarkets([vDOT, vETH, vUSDT_ADDR]);
+
+          expect(await vDOTContract.balanceOf(user3Addr)).to.be.gt(0);
+          expect(await vETHContract.balanceOf(user3Addr)).to.be.gt(0);
+          expect(await vUSDTContract.balanceOf(user3Addr)).to.be.gt(0);
+
+          console.log("  User interacts with DOT, ETH, and USDT simultaneously in core pool");
+        });
+      });
+
+      describe("Isolated e-mode behavior (new users opting into DOT e-mode pool)", () => {
+        let emodeUser: any;
+        let emodeUserAddress: string;
+
+        before(async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8888), 20)),
+          );
+          emodeUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+          emodeUserAddress = userAddr;
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const usdtWhale = await getCachedWhale(usdtInfo.whale);
+          const usdcWhale = await getCachedWhale(usdcInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await dotToken.connect(dotWhale).transfer(emodeUserAddress, parseUnits("100", dotInfo.decimals));
+          await usdtToken.connect(usdtWhale).transfer(emodeUserAddress, parseUnits("1000", usdtInfo.decimals));
+          await usdcToken.connect(usdcWhale).transfer(emodeUserAddress, parseUnits("1000", usdcInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(emodeUserAddress, parseUnits("5", 18));
+
+          // User opts into DOT e-mode pool
+          await comptroller.connect(emodeUser).enterPool(DOT_POOL.id);
+
+          const userPool = await comptroller.userPoolId(emodeUserAddress);
+          expect(userPool).to.equal(DOT_POOL.id);
+          console.log(`  User opted into DOT e-mode pool (id=${DOT_POOL.id})`);
+        });
+
+        it("user CAN supply and borrow DOT in DOT e-mode pool", async () => {
+          const dotInfo = MARKET_INFO[vDOT];
+          await dotToken.connect(emodeUser).approve(vDOT, parseUnits("10", dotInfo.decimals));
+          await vDOTContract.connect(emodeUser).mint(parseUnits("10", dotInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vDOT]);
+
+          expect(await vDOTContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("0.1", dotInfo.decimals);
+          await vDOTContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vDOTContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed DOT in DOT e-mode pool");
+        });
+
+        it("user CAN supply and borrow USDT in DOT e-mode pool", async () => {
+          const usdtInfo = MARKET_INFO[vUSDT_ADDR];
+          await usdtToken.connect(emodeUser).approve(vUSDT_ADDR, parseUnits("100", usdtInfo.decimals));
+          await vUSDTContract.connect(emodeUser).mint(parseUnits("100", usdtInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vUSDT_ADDR]);
+
+          expect(await vUSDTContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("10", usdtInfo.decimals);
+          await vUSDTContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vUSDTContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed USDT in DOT e-mode pool");
+        });
+
+        it("user CAN supply and borrow USDC in DOT e-mode pool", async () => {
+          const usdcInfo = MARKET_INFO[vUSDC_ADDR];
+          await usdcToken.connect(emodeUser).approve(vUSDC_ADDR, parseUnits("100", usdcInfo.decimals));
+          await vUSDCContract.connect(emodeUser).mint(parseUnits("100", usdcInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vUSDC_ADDR]);
+
+          expect(await vUSDCContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+
+          const borrowAmount = parseUnits("10", usdcInfo.decimals);
+          await vUSDCContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vUSDCContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          expect(borrowBalance).to.be.gte(borrowAmount);
+          console.log("  User supplied and borrowed USDC in DOT e-mode pool");
+        });
+
+        it("user CAN deposit ETH (deposits are unrestricted) but CANNOT borrow ETH", async () => {
+          // Deposits/mints are allowed to any vToken regardless of pool
+          await ethToken.connect(emodeUser).approve(vETH, parseUnits("1", 18));
+          await vETHContract.connect(emodeUser).mint(parseUnits("1", 18));
+          expect(await vETHContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+          console.log("  User CAN deposit ETH even in DOT e-mode (deposits unrestricted)");
+
+          // But borrowing non-pool markets is restricted
+          try {
+            await vETHContract.connect(emodeUser).borrow(parseUnits("0.01", 18));
+            expect.fail("Borrow should have failed - ETH is not in DOT e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  ETH borrow correctly rejected in DOT e-mode pool`);
+          }
+        });
+
+        it("ETH collateral does NOT count for borrowing power in e-mode (allowCorePoolFallback = false)", async () => {
+          // VIP sets allowCorePoolFallback = false, so core-pool-only collateral is ignored
+          const pool = await comptroller.pools(DOT_POOL.id);
+          expect(pool.allowCorePoolFallback).to.equal(false);
+
+          // Create a user with ONLY ETH collateral (no DOT pool assets)
+          const ethOnlyUserAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8889), 20)),
+          );
+          const ethOnlyUser = await initMainnetUser(ethOnlyUserAddr, ethers.utils.parseEther("10"));
+
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+          await ethToken.connect(ethWhale).transfer(ethOnlyUserAddr, parseUnits("10", 18));
+
+          await ethToken.connect(ethOnlyUser).approve(vETH, parseUnits("10", 18));
+          await vETHContract.connect(ethOnlyUser).mint(parseUnits("10", 18));
+          await comptroller.connect(ethOnlyUser).enterMarkets([vETH]);
+
+          // Enter DOT e-mode pool
+          await comptroller.connect(ethOnlyUser).enterPool(DOT_POOL.id);
+
+          // Try to borrow DOT using only ETH collateral - should FAIL
+          try {
+            await vDOTContract.connect(ethOnlyUser).borrow(parseUnits("0.1", 18));
+            expect.fail("Borrow should have failed - ETH collateral not usable with fallback disabled");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  DOT borrow correctly rejected with ETH-only collateral (fallback=false)`);
+          }
+
+          // Also try to borrow USDT (a pool asset) using ETH collateral - should also FAIL
+          try {
+            await vUSDTContract.connect(ethOnlyUser).borrow(parseUnits("10", 18));
+            expect.fail("Borrow should have failed - ETH collateral not usable with fallback disabled");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("Borrow should have failed");
+            console.log(`  USDT borrow correctly rejected with ETH-only collateral (fallback=false)`);
+          }
+        });
+
+        it("user with DOT pool collateral CAN borrow normally in e-mode", async () => {
+          const dotUserAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(7776), 20)),
+          );
+          const dotUser = await initMainnetUser(dotUserAddr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          await dotToken.connect(dotWhale).transfer(dotUserAddr, parseUnits("50", dotInfo.decimals));
+
+          await dotToken.connect(dotUser).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(dotUser).mint(parseUnits("50", dotInfo.decimals));
+          await comptroller.connect(dotUser).enterMarkets([vDOT]);
+
+          await comptroller.connect(dotUser).enterPool(DOT_POOL.id);
+
+          const usdtBalanceBefore = await usdtToken.balanceOf(dotUserAddr);
+          await vUSDTContract.connect(dotUser).borrow(parseUnits("10", 18));
+          const usdtBalanceAfter = await usdtToken.balanceOf(dotUserAddr);
+
+          expect(usdtBalanceAfter).to.be.gt(usdtBalanceBefore);
+          console.log("  User with DOT collateral CAN borrow USDT in e-mode pool");
+        });
+      });
+
+      describe("Mutual exclusivity: user CANNOT be in core pool and e-mode simultaneously", () => {
+        it("core pool user CAN borrow ETH, but same user in e-mode CANNOT", async () => {
+          // User A in core pool: CAN borrow ETH with DOT collateral
+          const userAAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9901), 20)),
+          );
+          const userA = await initMainnetUser(userAAddr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await dotToken.connect(dotWhale).transfer(userAAddr, parseUnits("50", dotInfo.decimals));
+          await dotToken.connect(userA).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(userA).mint(parseUnits("50", dotInfo.decimals));
+          await comptroller.connect(userA).enterMarkets([vDOT]);
+
+          // Core pool: borrow ETH works
+          let userPool = await comptroller.userPoolId(userAAddr);
+          expect(userPool).to.equal(0);
+          const ethBalBefore = await ethToken.balanceOf(userAAddr);
+          await vETHContract.connect(userA).borrow(parseUnits("0.01", 18));
+          expect(await ethToken.balanceOf(userAAddr)).to.be.gt(ethBalBefore);
+          console.log("  User A in core pool: CAN borrow ETH using DOT collateral");
+
+          // User B with same setup but in e-mode: CANNOT borrow ETH
+          const userBAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9911), 20)),
+          );
+          const userB = await initMainnetUser(userBAddr, ethers.utils.parseEther("10"));
+
+          await dotToken.connect(dotWhale).transfer(userBAddr, parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userBAddr, parseUnits("5", 18));
+
+          await dotToken.connect(userB).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(userB).mint(parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(userB).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(userB).mint(parseUnits("5", 18));
+          await comptroller.connect(userB).enterMarkets([vDOT, vETH]);
+
+          // Enter DOT e-mode
+          await comptroller.connect(userB).enterPool(DOT_POOL.id);
+          userPool = await comptroller.userPoolId(userBAddr);
+          expect(userPool).to.equal(DOT_POOL.id);
+
+          // E-mode: borrow ETH fails
+          try {
+            await vETHContract.connect(userB).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed in DOT e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  User B in e-mode: CANNOT borrow ETH - mutual exclusivity enforced");
+          }
+        });
+
+        it("user switching from e-mode back to core pool regains full market access", async () => {
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9902), 20)),
+          );
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await dotToken.connect(dotWhale).transfer(userAddr, parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
+
+          // Supply collateral
+          await dotToken.connect(user).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(user).mint(parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vDOT, vETH]);
+
+          // Start in DOT e-mode pool
+          await comptroller.connect(user).enterPool(DOT_POOL.id);
+          let userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(DOT_POOL.id);
+
+          // In e-mode: CANNOT borrow ETH
+          try {
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed in DOT e-mode pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  In e-mode: user CANNOT borrow ETH");
+          }
+
+          // Switch back to core pool
+          await comptroller.connect(user).enterPool(0);
+          userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(0);
+          console.log("  User switched back to core pool");
+
+          // In core pool: CAN borrow ETH again
+          const ethBalBefore = await ethToken.balanceOf(userAddr);
+          await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+          expect(await ethToken.balanceOf(userAddr)).to.be.gt(ethBalBefore);
+          console.log("  In core pool: user CAN borrow ETH again - full market access restored");
+        });
+
+        it("user CANNOT borrow in e-mode pool and core pool at the same time", async () => {
+          // A user can only be in one pool at a time - they must choose
+          const userAddr = ethers.utils.getAddress(
+            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9903), 20)),
+          );
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
+
+          const dotInfo = MARKET_INFO[vDOT];
+          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const ethWhale = await getCachedWhale(ETH_WHALE);
+
+          await dotToken.connect(dotWhale).transfer(userAddr, parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
+
+          await dotToken.connect(user).approve(vDOT, parseUnits("50", dotInfo.decimals));
+          await vDOTContract.connect(user).mint(parseUnits("50", dotInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vDOT, vETH]);
+
+          // Enter DOT e-mode
+          await comptroller.connect(user).enterPool(DOT_POOL.id);
+
+          // Verify: user is in DOT pool, NOT in core pool
+          const userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(DOT_POOL.id);
+          expect(userPool).to.not.equal(0);
+
+          // CAN borrow DOT (e-mode market)
+          const dotBalBefore = await dotToken.balanceOf(userAddr);
+          await vDOTContract.connect(user).borrow(parseUnits("0.1", dotInfo.decimals));
+          expect(await dotToken.balanceOf(userAddr)).to.be.gt(dotBalBefore);
+          console.log("  In e-mode: CAN borrow DOT");
+
+          // CANNOT borrow ETH (core-pool-only market) at the same time
+          try {
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed - user is in e-mode, not core pool");
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error);
+            expect(msg).to.not.include("ETH borrow should have failed");
+            console.log("  In e-mode: CANNOT borrow ETH - user must choose one pool, cannot use both");
+          }
+        });
+      });
+    });
   });
 });
