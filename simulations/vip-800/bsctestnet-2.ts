@@ -6,7 +6,7 @@ import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChai
 import { forking, testVip } from "src/vip-framework";
 
 import { CORE_MARKETS } from "../../vips/vip-547/bsctestnet";
-import { vip800 } from "../../vips/vip-800/bsctestnet";
+import { EMODE_POOLS as EMODE_POOLS_PART1, vip800 } from "../../vips/vip-800/bsctestnet";
 import { EMODE_POOLS, vip800 as vip800Bsctestnet2 } from "../../vips/vip-800/bsctestnet-2";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
@@ -91,18 +91,49 @@ forking(85524987, async () => {
       expect(await comptroller.lastPoolId()).to.equals(EMODE_POOLS[EMODE_POOLS.length - 1].id);
     });
 
+    // Verify Part-1 pools remain correctly configured after Part-2
+    for (const EMODE_POOL of EMODE_POOLS_PART1) {
+      describe(`Part-1 Emode Pool ${EMODE_POOL.label}`, () => {
+        it("should still be active with correct label, fallback, and risk parameters for all markets", async () => {
+          const marketEntries = Object.entries(EMODE_POOL.marketsConfig);
+          const [pool, ...marketDataResults] = await Promise.all([
+            comptroller.pools(EMODE_POOL.id),
+            ...marketEntries.map(([, config]) => comptroller.poolMarkets(EMODE_POOL.id, config.address)),
+          ]);
+          expect(pool.label).to.equals(EMODE_POOL.label);
+          expect(pool.isActive).to.equals(true);
+          expect(pool.allowCorePoolFallback).to.equal(EMODE_POOL.allowCorePoolFallback);
+
+          for (let i = 0; i < marketEntries.length; i++) {
+            const [, config] = marketEntries[i];
+            const marketData = marketDataResults[i];
+            expect(marketData.marketPoolId).to.be.equal(EMODE_POOL.id);
+            expect(marketData.isListed).to.be.equal(true);
+            expect(marketData.collateralFactorMantissa).to.be.equal(config.collateralFactor);
+            expect(marketData.liquidationThresholdMantissa).to.be.equal(config.liquidationThreshold);
+            expect(marketData.liquidationIncentiveMantissa).to.be.equal(config.liquidationIncentive);
+            expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
+          }
+        });
+      });
+    }
+
+    // Verify Part-2 pools
     for (const EMODE_POOL of EMODE_POOLS) {
-      describe(`Emode Pool ${EMODE_POOL.label}`, async () => {
-        it("should set the newly created pool as active with correct label", async () => {
-          const newPool = await comptroller.pools(EMODE_POOL.id);
+      describe(`Part-2 Emode Pool ${EMODE_POOL.label}`, () => {
+        it("should set the newly created pool as active with correct label and risk parameters for all markets", async () => {
+          const marketEntries = Object.entries(EMODE_POOL.marketsConfig);
+          const [newPool, ...marketDataResults] = await Promise.all([
+            comptroller.pools(EMODE_POOL.id),
+            ...marketEntries.map(([, config]) => comptroller.poolMarkets(EMODE_POOL.id, config.address)),
+          ]);
           expect(newPool.label).to.equals(EMODE_POOL.label);
           expect(newPool.isActive).to.equals(true);
           expect(newPool.allowCorePoolFallback).to.equal(EMODE_POOL.allowCorePoolFallback);
-        });
 
-        it("should set the correct risk parameters to all pool markets", async () => {
-          for (const config of Object.values(EMODE_POOL.marketsConfig)) {
-            const marketData = await comptroller.poolMarkets(EMODE_POOL.id, config.address);
+          for (let i = 0; i < marketEntries.length; i++) {
+            const [, config] = marketEntries[i];
+            const marketData = marketDataResults[i];
             expect(marketData.marketPoolId).to.be.equal(EMODE_POOL.id);
             expect(marketData.isListed).to.be.equal(true);
             expect(marketData.collateralFactorMantissa).to.be.equal(config.collateralFactor);

@@ -1,12 +1,5 @@
 import { BigNumber } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
-
-const { bscmainnet } = NETWORK_ADDRESSES;
-
-// Shared vToken addresses
-export const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
-export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
 
 // Shared market config type
 export interface MarketConfig {
@@ -25,25 +18,30 @@ export interface EmodePool {
   marketsConfig: Record<string, MarketConfig>;
 }
 
-// Reusable stablecoin market configs
-export const USDT_MARKET_CONFIG: MarketConfig = {
-  address: vUSDT,
-  collateralFactor: parseUnits("0.8", 18),
-  liquidationThreshold: parseUnits("0.8", 18),
-  liquidationIncentive: parseUnits("1.1", 18),
-  borrowAllowed: true,
-};
+// Reusable stablecoin market config factories
+export function makeUSDTMarketConfig(address: string, cf = "0.8", lt = "0.8"): MarketConfig {
+  return {
+    address,
+    collateralFactor: parseUnits(cf, 18),
+    liquidationThreshold: parseUnits(lt, 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    borrowAllowed: true,
+  };
+}
 
-export const USDC_MARKET_CONFIG: MarketConfig = {
-  address: vUSDC,
-  collateralFactor: parseUnits("0.825", 18),
-  liquidationThreshold: parseUnits("0.825", 18),
-  liquidationIncentive: parseUnits("1.1", 18),
-  borrowAllowed: true,
-};
+export function makeUSDCMarketConfig(address: string, cf = "0.825", lt = "0.825"): MarketConfig {
+  return {
+    address,
+    collateralFactor: parseUnits(cf, 18),
+    liquidationThreshold: parseUnits(lt, 18),
+    liquidationIncentive: parseUnits("1.1", 18),
+    borrowAllowed: true,
+  };
+}
 
 /**
  * Creates a standard 3-market emode pool config (primary token + USDT + USDC).
+ * Accepts vToken addresses and market configs for USDT/USDC for flexibility.
  */
 export function createEmodePool(
   label: string,
@@ -51,14 +49,19 @@ export function createEmodePool(
   vTokenKey: string,
   vTokenAddress: string,
   collateralFactor: string,
-  opts?: { liquidationThreshold?: string; borrowAllowed?: boolean },
+  opts: {
+    liquidationThreshold?: string;
+    borrowAllowed?: boolean;
+    usdtMarketConfig: MarketConfig;
+    usdcMarketConfig: MarketConfig;
+  },
 ): EmodePool {
   const cf = parseUnits(collateralFactor, 18);
-  const lt = opts?.liquidationThreshold ? parseUnits(opts.liquidationThreshold, 18) : cf;
+  const lt = opts.liquidationThreshold ? parseUnits(opts.liquidationThreshold, 18) : cf;
   return {
     label,
     id,
-    markets: [vTokenAddress, vUSDT, vUSDC],
+    markets: [vTokenAddress, opts.usdtMarketConfig.address, opts.usdcMarketConfig.address],
     allowCorePoolFallback: true,
     marketsConfig: {
       [vTokenKey]: {
@@ -66,37 +69,41 @@ export function createEmodePool(
         collateralFactor: cf,
         liquidationThreshold: lt,
         liquidationIncentive: parseUnits("1.1", 18),
-        borrowAllowed: opts?.borrowAllowed ?? true,
+        borrowAllowed: opts.borrowAllowed ?? true,
       },
-      vUSDT: USDT_MARKET_CONFIG,
-      vUSDC: USDC_MARKET_CONFIG,
+      vUSDT: opts.usdtMarketConfig,
+      vUSDC: opts.usdcMarketConfig,
     },
   };
 }
 
 /**
  * Generates the governance proposal commands for a single emode pool.
+ * Accepts the network addresses object to support mainnet/testnet.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function generateEmodePoolCommands(pool: EmodePool): { target: string; signature: string; params: any[] }[] {
+export function generateEmodePoolCommands(
+  pool: EmodePool,
+  unitrollerAddress: string,
+): { target: string; signature: string; params: any[] }[] {
   const commands: { target: string; signature: string; params: any[] }[] = [
     {
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "createPool(string)",
       params: [pool.label],
     },
     {
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "setPoolActive(uint96,bool)",
       params: [pool.id, true],
     },
     {
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "addPoolMarkets(uint96[],address[])",
       params: [Array(pool.markets.length).fill(pool.id), pool.markets],
     },
     {
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "setAllowCorePoolFallback(uint96,bool)",
       params: [pool.id, pool.allowCorePoolFallback],
     },
@@ -105,7 +112,7 @@ export function generateEmodePoolCommands(pool: EmodePool): { target: string; si
   for (const marketKey of Object.keys(pool.marketsConfig)) {
     const market = pool.marketsConfig[marketKey];
     commands.push({
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "setCollateralFactor(uint96,address,uint256,uint256)",
       params: [pool.id, market.address, market.collateralFactor, market.liquidationThreshold],
     });
@@ -114,7 +121,7 @@ export function generateEmodePoolCommands(pool: EmodePool): { target: string; si
   for (const marketKey of Object.keys(pool.marketsConfig)) {
     const market = pool.marketsConfig[marketKey];
     commands.push({
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "setLiquidationIncentive(uint96,address,uint256)",
       params: [pool.id, market.address, market.liquidationIncentive],
     });
@@ -123,7 +130,7 @@ export function generateEmodePoolCommands(pool: EmodePool): { target: string; si
   for (const marketKey of Object.keys(pool.marketsConfig)) {
     const market = pool.marketsConfig[marketKey];
     commands.push({
-      target: bscmainnet.UNITROLLER,
+      target: unitrollerAddress,
       signature: "setIsBorrowAllowed(uint96,address,bool)",
       params: [pool.id, market.address, market.borrowAllowed],
     });
