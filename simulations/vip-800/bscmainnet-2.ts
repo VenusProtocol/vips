@@ -482,7 +482,7 @@ forking(76766086, async () => {
           "PoolCreated",
           "PoolMarketInitialized",
         ],
-        [17, 18, 18, 18, 6, 18],
+        [15, 18, 18, 18, 6, 18],
       );
     },
   });

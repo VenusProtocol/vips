@@ -4,7 +4,6 @@ import { makeProposal } from "src/utils";
 
 import { createEmodePool, generateEmodePoolCommands, makeUSDCMarketConfig, makeUSDTMarketConfig } from "./common";
 
-export const vMATIC = "0x3619bdDc61189F33365CC572DF3a68FB3b316516";
 export const vTRX = "0x6AF3Fdb3282c5bb6926269Db10837fa8Aec67C04";
 export const vTHE = "0x39A239F5117BFaC7a1b0b3A517c454113323451d";
 
@@ -16,7 +15,6 @@ const usdcConfig = makeUSDCMarketConfig(vUSDC, "0.81", "0.81");
 export { vUSDT, vUSDC };
 
 export const EMODE_POOLS = [
-  // createEmodePool("MATIC", 11, "vMATIC", vMATIC, "0.6", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }), // commented due to oracle issue
   createEmodePool("TRX", 11, "vTRX", vTRX, "0.6", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
   createEmodePool("THE", 12, "vTHE", vTHE, "0.53", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
 ];

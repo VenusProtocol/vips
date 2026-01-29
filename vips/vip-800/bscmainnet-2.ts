@@ -6,7 +6,6 @@ import { createEmodePool, generateEmodePoolCommands, makeUSDCMarketConfig, makeU
 
 export const vLTC = "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B";
 export const vFIL = "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343";
-export const vMATIC = "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8";
 export const vTRX = "0xC5D3466aA484B040eE977073fcF337f2c00071c1";
 export const vDOT = "0x1610bc33319e9398de5f57B33a5b184c806aD217";
 export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
@@ -21,14 +20,9 @@ export { vUSDT, vUSDC };
 export const EMODE_POOLS = [
   createEmodePool("LTC", 11, "vLTC", vLTC, "0.63", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
   createEmodePool("FIL", 12, "vFIL", vFIL, "0.63", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
-  createEmodePool("MATIC", 13, "vMATIC", vMATIC, "0", {
-    liquidationThreshold: "0.65",
-    usdtMarketConfig: usdtConfig,
-    usdcMarketConfig: usdcConfig,
-  }),
-  createEmodePool("TRX", 14, "vTRX", vTRX, "0.525", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
-  createEmodePool("DOT", 15, "vDOT", vDOT, "0.65", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
-  createEmodePool("THE", 16, "vTHE", vTHE, "0.53", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
+  createEmodePool("TRX", 13, "vTRX", vTRX, "0.525", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
+  createEmodePool("DOT", 14, "vDOT", vDOT, "0.65", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
+  createEmodePool("THE", 15, "vTHE", vTHE, "0.53", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
 ];
 
 export const vip800 = () => {

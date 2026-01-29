@@ -94,11 +94,6 @@ export function generateEmodePoolCommands(
     },
     {
       target: unitrollerAddress,
-      signature: "setPoolActive(uint96,bool)",
-      params: [pool.id, true],
-    },
-    {
-      target: unitrollerAddress,
       signature: "addPoolMarkets(uint96[],address[])",
       params: [Array(pool.markets.length).fill(pool.id), pool.markets],
     },
