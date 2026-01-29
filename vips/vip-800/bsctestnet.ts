@@ -10,6 +10,8 @@ export const vDOGE = "0xF912d3001CAf6DC4ADD366A62Cc9115B4303c9A9";
 export const vTWT = "0x95DaED37fdD3F557b3A5cCEb7D50Be65b36721DF";
 export const vADA = "0x37C28DE42bA3d22217995D146FC684B2326Ede64";
 export const vLTC = "0xAfc13BC065ABeE838540823431055D2ea52eBA52";
+export const vTRX = "0x6AF3Fdb3282c5bb6926269Db10837fa8Aec67C04";
+export const vTHE = "0x39A239F5117BFaC7a1b0b3A517c454113323451d";
 
 const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
 const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
@@ -25,6 +27,8 @@ export const EMODE_POOLS = [
   createEmodePool("TWT", 8, "vTWT", vTWT, "0.5", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
   createEmodePool("ADA", 9, "vADA", vADA, "0.6", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
   createEmodePool("LTC", 10, "vLTC", vLTC, "0.6", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
+  createEmodePool("TRX", 11, "vTRX", vTRX, "0.6", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
+  createEmodePool("THE", 12, "vTHE", vTHE, "0.53", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
 ];
 
 export const vip800 = () => {
