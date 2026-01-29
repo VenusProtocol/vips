@@ -6,6 +6,8 @@ import { makeProposal } from "src/utils";
 const addressZero = ethers.constants.AddressZero;
 const { RESILIENT_ORACLE, CHAINLINK_ORACLE, REDSTONE_ORACLE, BINANCE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
 
+/* ============ Chainlink Oracle configs ============ */
+
 export const NEW_CHAINLINK_ORACLE_CONFIG = [
   {
     NAME: "BTCB",
@@ -123,6 +125,166 @@ export const NEW_ORACLE_CONFIG = OLD_ORACLE_CONFIG.filter(oracleData => oracleDa
   NEW_BTCB_ORACLE_CONFIG,
 );
 
+/* ============ Redstone Oracle configs ============ */
+
+// Already have required feeds
+export const OLD_REDSTONE_ORACLE_FEEDS = [
+  {
+    NAME: "BNB",
+    ASSET: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    FEED: "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e",
+    MAX_STALE_PERIOD: 100,
+  },
+  {
+    NAME: "USDC",
+    ASSET: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    FEED: "0xeA2511205b959548459A01e358E0A30424dc0B70",
+    MAX_STALE_PERIOD: 25200,
+  },
+  {
+    NAME: "WBNB",
+    ASSET: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    FEED: "0x8dd2D85C7c28F43F965AE4d9545189C7D022ED0e",
+    MAX_STALE_PERIOD: 100,
+  },
+  {
+    NAME: "SolvBTC",
+    ASSET: "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+    FEED: "0xa51738d1937FFc553d5070f43300B385AA2D9F55",
+    MAX_STALE_PERIOD: 100,
+  },
+  {
+    NAME: "THE",
+    ASSET: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
+    FEED: "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5",
+    MAX_STALE_PERIOD: 1800,
+  },
+];
+
+// Add fresh redstone oracle with new feeds
+export const NEW_REDSTONE_ORACLE_FEEDS = [
+  {
+    NAME: "CAKE",
+    ASSET: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    FEED: "0x1102D8C7A6021e45cCddEC4912dc998Bc5ebD8e5",
+    MAX_STALE_PERIOD: 25200,
+  },
+  {
+    NAME: "ADA",
+    ASSET: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+    FEED: "0xc44be6D00307c3565FDf753e852Fc003036cBc13",
+    MAX_STALE_PERIOD: 25200,
+  },
+  {
+    NAME: "XRP",
+    ASSET: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+    FEED: "0xeC7C6AdcC867E1C22713D14797339750E36538E4",
+    MAX_STALE_PERIOD: 25200,
+  },
+];
+
+export const OLD_ORACLE_CONFIG_FOR_RS_CHANGES = [
+  {
+    NAME: "BNB",
+    ASSET: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "USDC",
+    ASSET: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: REDSTONE_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "WBNB",
+    ASSET: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "SolvBTC",
+    ASSET: "0x1346b618dC92810EC74163e4c27004c921D446a5",
+    MAIN: "0xf5534f78Df9b610B19A63956d498d00CFaD8B9D3", // OneJump Oracle xSolvBTC/SolvBTC/USD (intermediate Redstone)
+    PIVOT: addressZero,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+  {
+    NAME: "THE",
+    ASSET: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: BINANCE_ORACLE,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+  {
+    NAME: "CAKE",
+    ASSET: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: BINANCE_ORACLE,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+  {
+    NAME: "ADA",
+    ASSET: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: BINANCE_ORACLE,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+  {
+    NAME: "XRP",
+    ASSET: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: BINANCE_ORACLE,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+];
+
+export const NEW_ORACLE_CONFIG_FOR_RS_CHANGES = [
+  {
+    NAME: "USDC",
+    ASSET: "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "XRP",
+    ASSET: "0x1D2F0da169ceB9fC7B3144628dB156f3F6c60dBE",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "CAKE",
+    ASSET: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "ADA",
+    ASSET: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+];
+
 export const vip595 = () => {
   const meta = {
     version: "v2",
@@ -135,6 +297,7 @@ export const vip595 = () => {
 
   return makeProposal(
     [
+      /* ============ Chainlink Oracle ============ */
       ...NEW_CHAINLINK_ORACLE_CONFIG.map(oracleData => {
         return {
           target: CHAINLINK_ORACLE,
@@ -155,6 +318,31 @@ export const vip595 = () => {
           ],
         ],
       },
+
+      /* ============ Redstone Oracle ============ */
+
+      ...NEW_REDSTONE_ORACLE_FEEDS.map(feedData => {
+        return {
+          target: REDSTONE_ORACLE,
+          signature: "setTokenConfig((address,address,uint256))",
+          params: [[feedData.ASSET, feedData.FEED, feedData.MAX_STALE_PERIOD]],
+        };
+      }),
+
+      ...NEW_ORACLE_CONFIG_FOR_RS_CHANGES.map(oracleData => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3],bool))",
+          params: [
+            [
+              oracleData.ASSET,
+              [oracleData.MAIN, oracleData.PIVOT, oracleData.FALLBACK],
+              [oracleData.MAIN != addressZero, oracleData.PIVOT != addressZero, oracleData.FALLBACK != addressZero],
+              oracleData.CACHED,
+            ],
+          ],
+        };
+      }),
     ],
     meta,
     ProposalType.REGULAR,
