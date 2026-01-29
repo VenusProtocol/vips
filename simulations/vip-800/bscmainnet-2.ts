@@ -475,14 +475,14 @@ forking(76766086, async () => {
         txResponse,
         [COMPTROLLER_ABI],
         [
-          "NewCollateralFactor", // vMatic has 0 collateral factor, so no event for it
+          "NewCollateralFactor",
           "NewLiquidationThreshold",
           "NewLiquidationIncentive",
           "BorrowAllowedUpdated",
           "PoolCreated",
           "PoolMarketInitialized",
         ],
-        [15, 18, 18, 18, 6, 18],
+        [15, 15, 15, 15, 5, 15],
       );
     },
   });

@@ -42,3 +42,5 @@ export const vip800 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip800;
