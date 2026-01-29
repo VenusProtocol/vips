@@ -1,10 +1,14 @@
+import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const addressZero = ethers.constants.AddressZero;
-const { RESILIENT_ORACLE, CHAINLINK_ORACLE, REDSTONE_ORACLE, BINANCE_ORACLE } = NETWORK_ADDRESSES.bscmainnet;
+const { RESILIENT_ORACLE, CHAINLINK_ORACLE, REDSTONE_ORACLE, BINANCE_ORACLE, VTREASURY } = NETWORK_ADDRESSES.bscmainnet;
+export const USDT_BSC = "0x55d398326f99059fF775485246999027B3197955";
+export const SAFE_ACCOUNT = "0xBE0EdB1F457334B8d2DfEb3627567137E745A00B";
+export const FLUX_CAMPAIGN_USDT_AMOUNT = parseUnits("450000", 18);
 
 /* ============ Chainlink Oracle configs ============ */
 
@@ -343,6 +347,13 @@ export const vip595 = () => {
           ],
         };
       }),
+
+      /* ============ withdraw fund ============ */
+      {
+        target: VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT_BSC, FLUX_CAMPAIGN_USDT_AMOUNT, SAFE_ACCOUNT],
+      },
     ],
     meta,
     ProposalType.REGULAR,

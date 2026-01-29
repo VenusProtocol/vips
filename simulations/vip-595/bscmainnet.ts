@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import {
@@ -11,6 +11,7 @@ import {
 import { forking, testVip } from "src/vip-framework";
 
 import vip595, {
+  FLUX_CAMPAIGN_USDT_AMOUNT,
   NEW_CHAINLINK_ORACLE_CONFIG,
   NEW_ORACLE_CONFIG,
   NEW_ORACLE_CONFIG_FOR_RS_CHANGES,
@@ -18,7 +19,10 @@ import vip595, {
   OLD_ORACLE_CONFIG,
   OLD_ORACLE_CONFIG_FOR_RS_CHANGES,
   OLD_REDSTONE_ORACLE_FEEDS,
+  SAFE_ACCOUNT,
+  USDT_BSC,
 } from "../../vips/vip-595/bscmainnet";
+import ERC20_ABI from "../vip-595/abi/ERC20.json";
 import CHAINLINK_ORACLE_ABI from "../vip-595/abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "../vip-595/abi/resilientOracle.json";
 
@@ -29,13 +33,17 @@ forking(78096227, async () => {
   let chainlinkOracle: Contract;
   let redstoneOracle: Contract;
   let resilientOracle: Contract;
+  let usdt: Contract;
   const preVipPrices: Record<string, any> = {};
   const preVipPricesRS: Record<string, any> = {};
+  let safeAccountBalanceBefore: BigNumber;
 
   before(async () => {
     chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, CHAINLINK_ORACLE_ABI, ethers.provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
+    usdt = new Contract(USDT_BSC, ERC20_ABI, ethers.provider);
+    safeAccountBalanceBefore = await usdt.balanceOf(SAFE_ACCOUNT);
 
     await setRedstonePrice(
       bscmainnet.REDSTONE_ORACLE,
@@ -240,6 +248,13 @@ forking(78096227, async () => {
         const tolerance = priceBefore.mul(3).div(100); // allow 3% difference
         expect(priceAfter).to.be.closeTo(priceBefore, tolerance);
       }
+    });
+  });
+
+  describe("Fund Withdrawal from Tresury", async () => {
+    it("check SAFE_ACCOUNT USDT balance", async () => {
+      const certikBalanceAfter = await usdt.balanceOf(SAFE_ACCOUNT);
+      expect(certikBalanceAfter).to.equal(safeAccountBalanceBefore.add(FLUX_CAMPAIGN_USDT_AMOUNT));
     });
   });
 });
