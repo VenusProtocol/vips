@@ -87,6 +87,13 @@ forking(78096227, async () => {
     });
 
     describe("Redstone", async () => {
+      it("has no Redstone feed for assets to be added", async () => {
+        for (const { ASSET } of NEW_REDSTONE_ORACLE_FEEDS) {
+          const cfg = await redstoneOracle.tokenConfigs(ASSET);
+          expect(cfg.asset).to.equal(addressZero);
+        }
+      });
+
       it("check current redstone oracle Feeds", async () => {
         for (const { ASSET, FEED, MAX_STALE_PERIOD } of OLD_REDSTONE_ORACLE_FEEDS) {
           const cfg = await redstoneOracle.tokenConfigs(ASSET);
@@ -119,11 +126,16 @@ forking(78096227, async () => {
 
   testVip("VIP-595 bscmainnet", await vip595(), {
     callbackAfterExecution: async txResponse => {
+      const totalTokenConfigAdded =
+        NEW_CHAINLINK_ORACLE_CONFIG.length +
+        NEW_REDSTONE_ORACLE_FEEDS.length +
+        NEW_ORACLE_CONFIG_FOR_RS_CHANGES.length +
+        1; // NEW_BTCB_ORACLE_CONFIG
       await expectEvents(
         txResponse,
-        [CHAINLINK_ORACLE_ABI],
-        ["TokenConfigAdded"],
-        [NEW_CHAINLINK_ORACLE_CONFIG.length + NEW_REDSTONE_ORACLE_FEEDS.length],
+        [CHAINLINK_ORACLE_ABI, RESILIENT_ORACLE_ABI],
+        ["TokenConfigAdded", "TokenConfigAdded"],
+        [totalTokenConfigAdded, totalTokenConfigAdded],
       );
     },
   });
