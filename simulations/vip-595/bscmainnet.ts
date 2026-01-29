@@ -48,11 +48,13 @@ forking(78096227, async () => {
   describe("Pre-VIP behavior", async () => {
     describe("Chainlink", async () => {
       it("has different Chainlink feeds for assets to be updated", async () => {
-        for (const { ASSET, FEED, MAX_STALE_PERIOD } of NEW_CHAINLINK_ORACLE_CONFIG) {
+        for (const { NAME, ASSET, FEED, MAX_STALE_PERIOD } of NEW_CHAINLINK_ORACLE_CONFIG) {
           const cfg = await chainlinkOracle.tokenConfigs(ASSET);
           expect(cfg.asset).to.equal(ASSET);
           expect(cfg.feed).to.not.equal(FEED);
-          expect(cfg.maxStalePeriod).to.equal(MAX_STALE_PERIOD);
+          if (NAME != "BTCB")
+            // BTCB has same MAX_STALE_PERIOD = 100
+            expect(cfg.maxStalePeriod).to.not.equal(MAX_STALE_PERIOD);
         }
       });
 
