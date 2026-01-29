@@ -29,6 +29,11 @@ import RESILIENT_ORACLE_ABI from "../vip-595/abi/resilientOracle.json";
 const { bscmainnet } = NETWORK_ADDRESSES;
 const addressZero = ethers.constants.AddressZero;
 
+const solvBTC_CONFIG = {
+  NAME: "SolvBTC",
+  ASSET: "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+};
+
 forking(78096227, async () => {
   let chainlinkOracle: Contract;
   let redstoneOracle: Contract;
@@ -49,6 +54,13 @@ forking(78096227, async () => {
       bscmainnet.REDSTONE_ORACLE,
       "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c", // BTCB
       "0xa51738d1937FFc553d5070f43300B385AA2D9F55", // Red stone for BTC/USD
+      bscmainnet.NORMAL_TIMELOCK,
+    );
+
+    await setRedstonePrice(
+      bscmainnet.REDSTONE_ORACLE,
+      "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7", // SolvBTC
+      "0xF5F641fF3c7E39876A76e77E84041C300DFa4550", // new Redstone Feed
       bscmainnet.NORMAL_TIMELOCK,
     );
   });
@@ -88,15 +100,18 @@ forking(78096227, async () => {
 
     describe("Redstone", async () => {
       it("has no Redstone feed for assets to be added", async () => {
-        for (const { ASSET } of NEW_REDSTONE_ORACLE_FEEDS) {
+        for (const { NAME, ASSET } of NEW_REDSTONE_ORACLE_FEEDS) {
           const cfg = await redstoneOracle.tokenConfigs(ASSET);
-          expect(cfg.asset).to.equal(addressZero);
+          if (NAME != "SolvBTC")
+            // Updating existing Feed
+            expect(cfg.asset).to.equal(addressZero);
         }
       });
 
       it("check current redstone oracle Feeds", async () => {
-        for (const { ASSET, FEED, MAX_STALE_PERIOD } of OLD_REDSTONE_ORACLE_FEEDS) {
+        for (const { NAME, ASSET, FEED, MAX_STALE_PERIOD } of OLD_REDSTONE_ORACLE_FEEDS) {
           const cfg = await redstoneOracle.tokenConfigs(ASSET);
+          if (NAME == "SolvBTC") continue; // because setRedstonePrice for SolvBTC
           expect(cfg.asset).to.equal(ASSET);
           expect(cfg.feed).to.equal(FEED);
           expect(cfg.maxStalePeriod).to.equal(MAX_STALE_PERIOD);
@@ -116,7 +131,7 @@ forking(78096227, async () => {
       });
 
       it("stores current resilient oracle prices for affected assets", async () => {
-        for (const { ASSET } of NEW_ORACLE_CONFIG_FOR_RS_CHANGES) {
+        for (const { ASSET } of [...NEW_ORACLE_CONFIG_FOR_RS_CHANGES, solvBTC_CONFIG]) {
           const price = await resilientOracle.getPrice(ASSET);
           preVipPricesRS[ASSET] = price;
         }
@@ -232,7 +247,7 @@ forking(78096227, async () => {
 
     it("keeps resilient oracle prices unchanged for all affected assets", async () => {
       // NEW_ORACLE_CONFIG_FOR_RS_CHANGES ⊇ NEW_REDSTONE_ORACLE_FEEDS
-      for (const { ASSET, NAME } of NEW_ORACLE_CONFIG_FOR_RS_CHANGES) {
+      for (const { ASSET, NAME } of [...NEW_ORACLE_CONFIG_FOR_RS_CHANGES, solvBTC_CONFIG]) {
         await setMaxStalePeriodInChainlinkOracle(
           bscmainnet.CHAINLINK_ORACLE,
           ASSET,
@@ -251,7 +266,7 @@ forking(78096227, async () => {
         await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, NAME, 315360000);
       }
 
-      for (const { NAME, ASSET } of NEW_ORACLE_CONFIG_FOR_RS_CHANGES) {
+      for (const { NAME, ASSET } of [...NEW_ORACLE_CONFIG_FOR_RS_CHANGES, solvBTC_CONFIG]) {
         const priceAfter = await resilientOracle.getPrice(ASSET);
         const priceBefore = preVipPricesRS[ASSET];
         const diff = priceAfter.sub(priceBefore);

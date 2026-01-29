@@ -168,6 +168,12 @@ export const OLD_REDSTONE_ORACLE_FEEDS = [
 // Add fresh redstone oracle with new feeds
 export const NEW_REDSTONE_ORACLE_FEEDS = [
   {
+    NAME: "SolvBTC",
+    ASSET: "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+    FEED: "0xF5F641fF3c7E39876A76e77E84041C300DFa4550",
+    MAX_STALE_PERIOD: 25200,
+  },
+  {
     NAME: "CAKE",
     ASSET: "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82",
     FEED: "0x1102D8C7A6021e45cCddEC4912dc998Bc5ebD8e5",
@@ -214,9 +220,9 @@ export const OLD_ORACLE_CONFIG_FOR_RS_CHANGES = [
   },
   {
     NAME: "SolvBTC",
-    ASSET: "0x1346b618dC92810EC74163e4c27004c921D446a5",
-    MAIN: "0xf5534f78Df9b610B19A63956d498d00CFaD8B9D3", // OneJump Oracle xSolvBTC/SolvBTC/USD (intermediate Redstone)
-    PIVOT: addressZero,
+    ASSET: "0x4aae823a6a0b376De6A78e74eCC5b079d38cBCf7",
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: BINANCE_ORACLE,
     FALLBACK: addressZero,
     CACHED: false,
   },
