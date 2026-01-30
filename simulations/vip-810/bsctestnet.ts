@@ -1,3 +1,44 @@
+/**
+ * =============================================================================
+ * VIP-810 Test Suite - BNB Chain Testnet
+ * =============================================================================
+ *
+ * Overview:
+ * VIP-810 adds the U market to the Stablecoins e-mode pool on BNB Chain Testnet.
+ * U is configured as a borrow-only asset with CF=0% and LT=0%, meaning it
+ * cannot be used as collateral but can be borrowed against other stablecoins
+ * in the pool.
+ *
+ * Test Structure:
+ *
+ * 1. Pre-VIP Behavior
+ *    - Verifies Stablecoins e-mode pool (id=1) exists and is active
+ *    - Confirms U market is not yet listed in the pool
+ *
+ * 2. VIP Execution
+ *    - Executes VIP-810 proposal on testnet
+ *    - Verifies emission of required events:
+ *      * PoolMarketInitialized (1 event)
+ *      * NewLiquidationIncentive (1 event)
+ *      * BorrowAllowedUpdated (1 event)
+ *
+ * 3. Post-VIP Behavior
+ *    - Verifies U market is correctly listed in Stablecoins e-mode pool
+ *    - Validates market configuration:
+ *      * isListed = true
+ *      * marketPoolId = 1 (Stablecoins pool)
+ *      * collateralFactor = 0% (borrow-only)
+ *      * liquidationThreshold = 0%
+ *      * liquidationIncentive = 1.0 (100%)
+ *      * isBorrowAllowed = true
+ *
+ * Fork Block: 87217291
+ *
+ * Note: This is a lightweight testnet verification suite. Comprehensive
+ * operational tests (basic operations, leverage strategies, core pool fallback)
+ * are performed in the mainnet simulation suite.
+ * =============================================================================
+ */
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
