@@ -8,7 +8,7 @@ export const VWBNB_CORE = "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C";
 
 const Action = {
   MINT: 0,
-  BORROW: 2
+  BORROW: 2,
 };
 
 export const NEW_CF = "800000000000000000";

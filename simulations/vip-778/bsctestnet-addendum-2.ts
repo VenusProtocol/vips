@@ -1,24 +1,21 @@
 import { expect } from "chai";
-import { BigNumber, Contract } from "ethers";
-import { parseUnits } from "ethers/lib/utils";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { expectEvents, setMaxStalePeriod, setMaxStalePeriodInChainlinkOracle } from "src/utils";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { expectEvents, setMaxStalePeriod } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
   COMPTROLLER,
-  DEVIATION_SENTINEL,
+  LT,
+  NEW_CF,
   VETH_CORE,
   VWBNB_CORE,
   vip778Addendum2,
-  LT,
-  NEW_CF
 } from "../../vips/vip-778/bsctestnet-addendum-2";
-import COMPTROLLER_ABI from "./abi/comptroller.json";
-import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
-import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
+import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const Action = {
   MINT: 0,
@@ -30,7 +27,7 @@ const WBNB = "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd";
 
 forking(84038082, async () => {
   let comptroller: Contract;
-  let resilientOracle: Contract
+  let resilientOracle: Contract;
   let eth: Contract;
   let wbnb: Contract;
 
@@ -38,23 +35,23 @@ forking(84038082, async () => {
     comptroller = await ethers.getContractAt(COMPTROLLER_ABI, COMPTROLLER);
     resilientOracle = await ethers.getContractAt(
       RESILIENT_ORACLE_ABI,
-      NETWORK_ADDRESSES["bsctestnet"].RESILIENT_ORACLE
+      NETWORK_ADDRESSES["bsctestnet"].RESILIENT_ORACLE,
     );
 
     eth = await ethers.getContractAt(ERC20_ABI, ETH);
     wbnb = await ethers.getContractAt(ERC20_ABI, WBNB);
 
-
     await setMaxStalePeriod(
       resilientOracle,
       eth,
-      7 * 24 * 60 * 60 // 7 days in seconds
-    )
+      7 * 24 * 60 * 60, // 7 days in seconds
+    );
 
     await setMaxStalePeriod(
-      resilientOracle, wbnb,
-      7 * 24 * 60 * 60 // 7 days in seconds
-    )
+      resilientOracle,
+      wbnb,
+      7 * 24 * 60 * 60, // 7 days in seconds
+    );
   });
 
   describe("Pre-VIP behavior", () => {
@@ -93,12 +90,7 @@ forking(84038082, async () => {
 
   testVip("VIP-778 Addendum 2: Unpause Mint and Update CF", await vip778Addendum2(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        ["ActionPausedMarket", "NewCollateralFactor"],
-        [8, 2],
-      );
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket", "NewCollateralFactor"], [8, 2]);
     },
   });
 
