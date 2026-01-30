@@ -298,8 +298,34 @@ export const NEW_ORACLE_CONFIG_FOR_RS_CHANGES = [
 export const vip595 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-595",
-    description: `VIP-595`,
+    title: "VIP-586 [BNB Chain] Venus Flux Launch Incentives Funding and Two-Vendor OEV Integration Framework",
+    description: `**Description :**
+
+This proposal consolidates two related initiatives discussed in the Venus community forum: 
+**(1) treasury funding for Venus Flux launch incentives
+(2) the adoption of a two-vendor Order Execution Value (OEV) integration framework**. 
+Both initiatives are intended to support the growth, resilience, and operational scalability of the Venus protocol and are proposed to be executed together, subject to governance approval.
+
+The first component of this proposal is informed by the community publication [**Request for $450,000 in Treasury Funding for Venus Flux Launch Incentives**](https://community.venus.io/t/request-for-450-000-in-treasury-funding-for-venus-x-launch-incentives/5647?utm_source=chatgpt.com). The post outlines a request for treasury funding to bootstrap user adoption, liquidity, and early usage of **Venus Flux** through targeted launch incentives.
+
+The second component is informed by the community publication [**Venus Community Proposal: Two-Vendor OEV Integration Framework**](https://community.venus.io/t/venus-community-proposal-two-vendor-oev-integration-framework/5657). This proposal introduces a framework for integrating multiple OEV vendors to improve liquidation execution, increase competition, and reduce operational reliance on a single provider.
+
+If approved, this VIP will authorise the treasury allocation for Venus Flux incentives and adopt the two-vendor OEV framework as described in the respective community posts.
+
+**Action :**
+
+- **Approve treasury funding for Venus Flux launch incentives**:
+    - Allocate up to **$450,000** from the Venus treasury to support Venus Flux launch incentives.
+    - Execute the treasury transfer using the funding source and mechanism specified in the community post.
+    - Use the allocated funds exclusively for **Venus Flux incentive programs**, in line with the proposed launch and monitoring plan.
+- **Approve the Two-Vendor OEV Integration Framework**:
+    - Adopt the proposed framework to support **multiple OEV vendors** operating concurrently within the Venus protocol.
+    - Enable redundancy and competition in liquidation execution by allowing more than one OEV provider.
+    - Apply the framework to govern:
+        - OEV vendor onboarding criteria
+        - Execution responsibilities and operational boundaries
+        - Ongoing vendor participation under standardised rules
+    - Use the approved framework as the baseline for current and future OEV integrations.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

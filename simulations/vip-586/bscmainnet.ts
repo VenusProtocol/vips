@@ -21,10 +21,10 @@ import vip595, {
   OLD_REDSTONE_ORACLE_FEEDS,
   SAFE_ACCOUNT,
   USDT_BSC,
-} from "../../vips/vip-595/bscmainnet";
-import ERC20_ABI from "../vip-595/abi/ERC20.json";
-import CHAINLINK_ORACLE_ABI from "../vip-595/abi/chainlinkOracle.json";
-import RESILIENT_ORACLE_ABI from "../vip-595/abi/resilientOracle.json";
+} from "../../vips/vip-586/bscmainnet";
+import ERC20_ABI from "./abi/ERC20.json";
+import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
+import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 const addressZero = ethers.constants.AddressZero;
