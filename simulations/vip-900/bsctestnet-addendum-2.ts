@@ -13,8 +13,8 @@ import {
   VWBNB_CORE,
   vip900TestnetAddendum2,
 } from "../../vips/vip-900/bsctestnet-addendum-2";
-import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const Action = {
