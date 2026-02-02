@@ -6,16 +6,16 @@ import { makeProposal } from "src/utils";
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 // Deployed contract addresses on BSC Mainnet
-export const DEVIATION_SENTINEL = ethers.constants.AddressZero; // TODO: Replace with deployed address
-export const SENTINEL_ORACLE = ethers.constants.AddressZero; // TODO: Replace with deployed address
-export const UNISWAP_ORACLE = ethers.constants.AddressZero; // TODO: Replace with deployed address
-export const PANCAKESWAP_ORACLE = ethers.constants.AddressZero; // TODO: Replace with deployed address
+export const DEVIATION_SENTINEL = "0x6599C15cc8407046CD91E5c0F8B7f765fF914870";
+export const SENTINEL_ORACLE = "0x58eae0Cf4215590E19860b66b146C5d539cb6f14";
+export const UNISWAP_ORACLE = "0x8FD05458faf220B2324c4BFbb29DBC4B3CF6f23f";
+export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
 
 // Keeper address
-export const KEEPER_ADDRESS = ethers.constants.AddressZero; // TODO: Replace with deployed address
+export const KEEPER_ADDRESS = "0x24c30C9C84b8a3C71A521ad30007ED47372331b3"; // TODO: Replace with actual keeper address
 
 // Access Control Manager
-export const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
+export const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
 
 export const GOVERNANCE_TIMELOCKS = [
   bscmainnet.NORMAL_TIMELOCK,
