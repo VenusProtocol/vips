@@ -1,0 +1,209 @@
+import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
+import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+// Deployed contract addresses on BSC Mainnet
+export const DEVIATION_SENTINEL = "0x6599C15cc8407046CD91E5c0F8B7f765fF914870";
+export const SENTINEL_ORACLE = "0x58eae0Cf4215590E19860b66b146C5d539cb6f14";
+export const UNISWAP_ORACLE = "0x8FD05458faf220B2324c4BFbb29DBC4B3CF6f23f";
+export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
+
+// Keeper address that can call functions in the contracts
+export const KEEPER_ADDRESS = "0x24c30C9C84b8a3C71A521ad30007ED47372331b3"; // TODO: Replace with actual keeper address
+
+// Access Control Manager
+export const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
+
+export const GOVERNANCE_TIMELOCKS = [
+  bscmainnet.NORMAL_TIMELOCK,
+  bscmainnet.FAST_TRACK_TIMELOCK,
+  bscmainnet.CRITICAL_TIMELOCK,
+];
+
+export const vip900 = () => {
+  const meta = {
+    version: "v2",
+    title: "VIP-900 Configure DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle on BSC Mainnet",
+    description: `#### Summary
+
+This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle contracts on BSC Mainnet by:
+
+1. Accepting ownership of all four contracts
+2. Granting permissions for the keeper address and governance timelocks to call functions on DeviationSentinel
+3. Granting permissions for the keeper address to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
+4. Granting permissions for DeviationSentinel to call required functions on all comptrollers (both isolated pools and core pool)
+5. Whitelisting governance timelocks as trusted keepers on DeviationSentinel
+
+#### Description
+
+**DeviationSentinel** monitors price deviations between the ResilientOracle and SentinelOracle. When significant deviations are detected, it can pause specific market actions (borrow, mint) and adjust collateral factors to protect the protocol.
+
+**SentinelOracle** is an aggregator oracle that routes price requests to appropriate DEX oracles and supports direct price overrides.
+
+**UniswapOracle** and **PancakeSwapOracle** are DEX-based oracles that provide TWAP prices from Uniswap V3 and PancakeSwap V3 pools respectively.
+
+**Permissions being granted:**
+
+For the keeper address and governance timelocks on DeviationSentinel:
+- setTrustedKeeper(address,bool)
+- setTokenConfig(address,(uint8,bool))
+- setTokenMonitoringEnabled(address,bool)
+- resetMarketState(address)
+
+For the keeper address on SentinelOracle:
+- setTokenOracleConfig(address,address)
+- setDirectPrice(address,uint256)
+
+For the keeper address on UniswapOracle:
+- setPoolConfig(address,address)
+
+For the keeper address on PancakeSwapOracle:
+- setPoolConfig(address,address)
+
+For DeviationSentinel on any Comptroller:
+- setActionsPaused(address[],uint8[],bool) - to pause/unpause borrow and mint actions
+- setCollateralFactor(address,uint256,uint256) - for isolated pools
+- setCollateralFactor(uint96,address,uint256,uint256) - for core pool with emode groups
+
+#### References
+
+- [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/658)
+- [DeviationSentinel Contract](https://bscscan.com/address/${DEVIATION_SENTINEL})
+- [SentinelOracle Contract](https://bscscan.com/address/${SENTINEL_ORACLE})
+- [UniswapOracle Contract](https://bscscan.com/address/${UNISWAP_ORACLE})
+- [PancakeSwapOracle Contract](https://bscscan.com/address/${PANCAKESWAP_ORACLE})
+- [Keeper Address](https://bscscan.com/address/${KEEPER_ADDRESS})`,
+    forDescription: "Execute this proposal",
+    againstDescription: "Do not execute this proposal",
+    abstainDescription: "Indifferent to execution",
+  };
+
+  return makeProposal(
+    [
+      // ========================================
+      // Accept ownership of all contracts
+      // ========================================
+
+      // Accept ownership of DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle
+      ...[DEVIATION_SENTINEL, SENTINEL_ORACLE, UNISWAP_ORACLE, PANCAKESWAP_ORACLE].map((contract: string) => ({
+        target: contract,
+        signature: "acceptOwnership()",
+        params: [],
+      })),
+
+      // ========================================
+      // Grant permissions for DeviationSentinel
+      // ========================================
+
+      // Grant keeper permission to configure token deviation thresholds on DeviationSentinel
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [DEVIATION_SENTINEL, "setTokenConfig(address,(uint8,bool))", KEEPER_ADDRESS],
+      },
+
+      // Grant keeper and governance timelocks permissions to manage keepers, monitoring, and market state on DeviationSentinel
+      ...[KEEPER_ADDRESS, ...GOVERNANCE_TIMELOCKS].flatMap((account: string) => [
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [DEVIATION_SENTINEL, "setTrustedKeeper(address,bool)", account],
+        },
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [DEVIATION_SENTINEL, "setTokenMonitoringEnabled(address,bool)", account],
+        },
+        {
+          target: ACM,
+          signature: "giveCallPermission(address,string,address)",
+          params: [DEVIATION_SENTINEL, "resetMarketState(address)", account],
+        },
+      ]),
+
+      // Whitelist keeper and governance timelocks as trusted keepers so VIPs can call handleDeviation after parameter changes
+      ...[KEEPER_ADDRESS, ...GOVERNANCE_TIMELOCKS].flatMap((timelock: string) => ({
+        target: DEVIATION_SENTINEL,
+        signature: "setTrustedKeeper(address,bool)",
+        params: [timelock, true],
+      })),
+
+      // ========================================
+      // Grant permissions for SentinelOracle
+      // ========================================
+
+      // Grant keeper permission to configure token-to-oracle mappings on SentinelOracle
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SENTINEL_ORACLE, "setTokenOracleConfig(address,address)", KEEPER_ADDRESS],
+      },
+
+      // Grant keeper permission to set direct prices on SentinelOracle
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [SENTINEL_ORACLE, "setDirectPrice(address,uint256)", KEEPER_ADDRESS],
+      },
+
+      // ========================================
+      // Grant permissions for DEX Oracles
+      // ========================================
+
+      // Grant keeper permission to configure TWAP pool settings on UniswapOracle
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [UNISWAP_ORACLE, "setPoolConfig(address,address)", KEEPER_ADDRESS],
+      },
+
+      // Grant keeper permission to configure TWAP pool settings on PancakeSwapOracle
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [PANCAKESWAP_ORACLE, "setPoolConfig(address,address)", KEEPER_ADDRESS],
+      },
+
+      // ========================================
+      // Grant DeviationSentinel permissions on Comptrollers
+      // ========================================
+
+      // Grant DeviationSentinel permission to pause/unpause borrow and mint actions on any comptroller
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "_setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
+      },
+
+      // Grant DeviationSentinel permission to set collateral factor on isolated pool comptrollers
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", DEVIATION_SENTINEL],
+      },
+
+      // Grant DeviationSentinel permission to set collateral factor on core pool comptroller (with emode poolId)
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [
+          ethers.constants.AddressZero,
+          "setCollateralFactor(uint96,address,uint256,uint256)",
+          DEVIATION_SENTINEL,
+        ],
+      },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
+};
+
+export default vip900;
