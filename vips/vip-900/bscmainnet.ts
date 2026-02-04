@@ -11,8 +11,11 @@ export const SENTINEL_ORACLE = "0x58eae0Cf4215590E19860b66b146C5d539cb6f14";
 export const UNISWAP_ORACLE = "0x8FD05458faf220B2324c4BFbb29DBC4B3CF6f23f";
 export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
 
-// Keeper address that can call functions in the contracts
-export const KEEPER_ADDRESS = "0x24c30C9C84b8a3C71A521ad30007ED47372331b3"; // TODO: Replace with actual keeper address
+// GUARDIAN address
+export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
+
+// Keeper address
+export const KEEPER_ADDRESS = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
 // Access Control Manager
 export const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
@@ -32,10 +35,10 @@ export const vip900 = () => {
 This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle contracts on BSC Mainnet by:
 
 1. Accepting ownership of all four contracts
-2. Granting permissions for the keeper address and governance timelocks to call functions on DeviationSentinel
-3. Granting permissions for the keeper address to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
+2. Granting permissions for GUARDIAN and governance timelocks to call functions on DeviationSentinel
+3. Granting permissions for GUARDIAN and governance timelocks to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
 4. Granting permissions for DeviationSentinel to call required functions on all comptrollers (both isolated pools and core pool)
-5. Whitelisting governance timelocks as trusted keepers on DeviationSentinel
+5. Whitelisting keeper, GUARDIAN and governance timelocks as trusted keepers on DeviationSentinel
 
 #### Description
 
@@ -47,20 +50,20 @@ This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and Pa
 
 **Permissions being granted:**
 
-For the keeper address and governance timelocks on DeviationSentinel:
+For GUARDIAN and governance timelocks on DeviationSentinel:
 - setTrustedKeeper(address,bool)
 - setTokenConfig(address,(uint8,bool))
 - setTokenMonitoringEnabled(address,bool)
 - resetMarketState(address)
 
-For the keeper address on SentinelOracle:
+For GUARDIAN and governance timelocks on SentinelOracle:
 - setTokenOracleConfig(address,address)
 - setDirectPrice(address,uint256)
 
-For the keeper address on UniswapOracle:
+For GUARDIAN and governance timelocks on UniswapOracle:
 - setPoolConfig(address,address)
 
-For the keeper address on PancakeSwapOracle:
+For GUARDIAN and governance timelocks on PancakeSwapOracle:
 - setPoolConfig(address,address)
 
 For DeviationSentinel on any Comptroller:
@@ -74,8 +77,7 @@ For DeviationSentinel on any Comptroller:
 - [DeviationSentinel Contract](https://bscscan.com/address/${DEVIATION_SENTINEL})
 - [SentinelOracle Contract](https://bscscan.com/address/${SENTINEL_ORACLE})
 - [UniswapOracle Contract](https://bscscan.com/address/${UNISWAP_ORACLE})
-- [PancakeSwapOracle Contract](https://bscscan.com/address/${PANCAKESWAP_ORACLE})
-- [Keeper Address](https://bscscan.com/address/${KEEPER_ADDRESS})`,
+- [PancakeSwapOracle Contract](https://bscscan.com/address/${PANCAKESWAP_ORACLE})`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -98,15 +100,15 @@ For DeviationSentinel on any Comptroller:
       // Grant permissions for DeviationSentinel
       // ========================================
 
-      // Grant keeper permission to configure token deviation thresholds on DeviationSentinel
-      {
+      // Grant GUARDIAN and governance timelocks permission to configure token deviation thresholds on DeviationSentinel
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((account: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [DEVIATION_SENTINEL, "setTokenConfig(address,(uint8,bool))", KEEPER_ADDRESS],
-      },
+        params: [DEVIATION_SENTINEL, "setTokenConfig(address,(uint8,bool))", account],
+      })),
 
-      // Grant keeper and governance timelocks permissions to manage keepers, monitoring, and market state on DeviationSentinel
-      ...[KEEPER_ADDRESS, ...GOVERNANCE_TIMELOCKS].flatMap((account: string) => [
+      // Grant GUARDIAN and governance timelocks permissions to manage keepers, monitoring, and market state on DeviationSentinel
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].flatMap((account: string) => [
         {
           target: ACM,
           signature: "giveCallPermission(address,string,address)",
@@ -124,8 +126,8 @@ For DeviationSentinel on any Comptroller:
         },
       ]),
 
-      // Whitelist keeper and governance timelocks as trusted keepers so VIPs can call handleDeviation after parameter changes
-      ...[KEEPER_ADDRESS, ...GOVERNANCE_TIMELOCKS].flatMap((timelock: string) => ({
+      // Whitelist Keeper, GUARDIAN and governance timelocks as trusted keepers so VIPs can call handleDeviation after parameter changes
+      ...[KEEPER_ADDRESS, GUARDIAN, ...GOVERNANCE_TIMELOCKS].flatMap((timelock: string) => ({
         target: DEVIATION_SENTINEL,
         signature: "setTrustedKeeper(address,bool)",
         params: [timelock, true],
@@ -135,37 +137,37 @@ For DeviationSentinel on any Comptroller:
       // Grant permissions for SentinelOracle
       // ========================================
 
-      // Grant keeper permission to configure token-to-oracle mappings on SentinelOracle
-      {
+      // Grant GUARDIAN and governance timelocks permission to configure token-to-oracle mappings on SentinelOracle
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((account: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [SENTINEL_ORACLE, "setTokenOracleConfig(address,address)", KEEPER_ADDRESS],
-      },
+        params: [SENTINEL_ORACLE, "setTokenOracleConfig(address,address)", account],
+      })),
 
-      // Grant keeper permission to set direct prices on SentinelOracle
-      {
+      // Grant GUARDIAN and governance timelocks permission to set direct prices on SentinelOracle
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((account: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [SENTINEL_ORACLE, "setDirectPrice(address,uint256)", KEEPER_ADDRESS],
-      },
+        params: [SENTINEL_ORACLE, "setDirectPrice(address,uint256)", account],
+      })),
 
       // ========================================
       // Grant permissions for DEX Oracles
       // ========================================
 
-      // Grant keeper permission to configure TWAP pool settings on UniswapOracle
-      {
+      // Grant GUARDIAN and governance timelocks permission to configure TWAP pool settings on UniswapOracle
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((account: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [UNISWAP_ORACLE, "setPoolConfig(address,address)", KEEPER_ADDRESS],
-      },
+        params: [UNISWAP_ORACLE, "setPoolConfig(address,address)", account],
+      })),
 
-      // Grant keeper permission to configure TWAP pool settings on PancakeSwapOracle
-      {
+      // Grant GUARDIAN and governance timelocks permission to configure TWAP pool settings on PancakeSwapOracle
+      ...[GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((account: string) => ({
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [PANCAKESWAP_ORACLE, "setPoolConfig(address,address)", KEEPER_ADDRESS],
-      },
+        params: [PANCAKESWAP_ORACLE, "setPoolConfig(address,address)", account],
+      })),
 
       // ========================================
       // Grant DeviationSentinel permissions on Comptrollers

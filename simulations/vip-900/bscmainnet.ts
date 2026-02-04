@@ -10,6 +10,7 @@ import vip900, {
   ACM,
   DEVIATION_SENTINEL,
   GOVERNANCE_TIMELOCKS,
+  GUARDIAN,
   KEEPER_ADDRESS,
   PANCAKESWAP_ORACLE,
   SENTINEL_ORACLE,
@@ -21,6 +22,12 @@ import DEX_ORACLE_ABI from "./abi/DexOracle.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
+
+// Accounts that should have ACM permissions (GUARDIAN + governance timelocks)
+const PERMISSION_ACCOUNTS = [GUARDIAN, ...GOVERNANCE_TIMELOCKS];
+
+// Accounts that should be whitelisted as trusted keepers (keeper + GUARDIAN + governance timelocks)
+const TRUSTED_KEEPER_ACCOUNTS = [KEEPER_ADDRESS, GUARDIAN, ...GOVERNANCE_TIMELOCKS];
 
 forking(78835203, async () => {
   let accessControlManager: Contract;
@@ -69,43 +76,38 @@ forking(78835203, async () => {
     });
 
     // ========================================
-    // Keeper should not have permissions
+    // GUARDIAN and timelocks should not have permissions
     // ========================================
 
-    it("Keeper should not have permissions on DeviationSentinel", async () => {
+    it("GUARDIAN and governance timelocks should not have permissions on DeviationSentinel", async () => {
       const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTrustedKeeper(address,bool)")).to.equal(false);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenConfig(address,(uint8,bool))")).to.equal(false);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenMonitoringEnabled(address,bool)")).to.equal(false);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "resetMarketState(address)")).to.equal(false);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setTrustedKeeper(address,bool)")).to.equal(false);
+        expect(await acm.isAllowedToCall(account, "setTokenConfig(address,(uint8,bool))")).to.equal(false);
+        expect(await acm.isAllowedToCall(account, "setTokenMonitoringEnabled(address,bool)")).to.equal(false);
+        expect(await acm.isAllowedToCall(account, "resetMarketState(address)")).to.equal(false);
+      }
     });
 
-    it("Keeper should not have permissions on SentinelOracle", async () => {
+    it("GUARDIAN and governance timelocks should not have permissions on SentinelOracle", async () => {
       const acm = accessControlManager.connect(impersonatedSentinelOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenOracleConfig(address,address)")).to.equal(false);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setDirectPrice(address,uint256)")).to.equal(false);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setTokenOracleConfig(address,address)")).to.equal(false);
+        expect(await acm.isAllowedToCall(account, "setDirectPrice(address,uint256)")).to.equal(false);
+      }
     });
 
-    it("Keeper should not have permissions on UniswapOracle", async () => {
+    it("GUARDIAN and governance timelocks should not have permissions on UniswapOracle", async () => {
       const acm = accessControlManager.connect(impersonatedUniswapOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setPoolConfig(address,address)")).to.equal(false);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setPoolConfig(address,address)")).to.equal(false);
+      }
     });
 
-    it("Keeper should not have permissions on PancakeSwapOracle", async () => {
+    it("GUARDIAN and governance timelocks should not have permissions on PancakeSwapOracle", async () => {
       const acm = accessControlManager.connect(impersonatedPancakeSwapOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setPoolConfig(address,address)")).to.equal(false);
-    });
-
-    // ========================================
-    // Governance timelocks should not have permissions
-    // ========================================
-
-    it("Governance timelocks should not have permissions on DeviationSentinel", async () => {
-      const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      for (const timelock of GOVERNANCE_TIMELOCKS) {
-        expect(await acm.isAllowedToCall(timelock, "setTrustedKeeper(address,bool)")).to.equal(false);
-        expect(await acm.isAllowedToCall(timelock, "setTokenMonitoringEnabled(address,bool)")).to.equal(false);
-        expect(await acm.isAllowedToCall(timelock, "resetMarketState(address)")).to.equal(false);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setPoolConfig(address,address)")).to.equal(false);
       }
     });
 
@@ -129,14 +131,14 @@ forking(78835203, async () => {
     });
   });
 
-  testVip("VIP-900 Configure DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle", await vip900(), {
+  testVip("VIP-900", await vip900(), {
     callbackAfterExecution: async txResponse => {
       // 4 contracts accept ownership
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["OwnershipTransferred"], [4]);
       // Note: BSC mainnet ACM does not emit PermissionGranted events parseable via the standard ABI.
       // Permission correctness is verified in the Post-VIP behavior tests below.
-      // 4 accounts (keeper and 3 timelocks) whitelisted as trusted keepers on DeviationSentinel
-      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [4]);
+      // 5 accounts (keeper, GUARDIAN, and 3 timelocks) whitelisted as trusted keepers on DeviationSentinel
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [5]);
     },
   });
 
@@ -169,78 +171,61 @@ forking(78835203, async () => {
     });
 
     // ========================================
-    // Keeper permissions on DeviationSentinel
+    // GUARDIAN and timelocks permissions on DeviationSentinel
     // ========================================
 
-    it("Keeper should have all required permissions on DeviationSentinel", async () => {
+    it("GUARDIAN and governance timelocks should have all required permissions on DeviationSentinel", async () => {
       const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTrustedKeeper(address,bool)")).to.equal(true);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenConfig(address,(uint8,bool))")).to.equal(true);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenMonitoringEnabled(address,bool)")).to.equal(true);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "resetMarketState(address)")).to.equal(true);
-    });
-
-    // ============================================
-    // Governance permissions on DeviationSentinel
-    // ============================================
-
-    it("Governance timelocks should have setTrustedKeeper permission on DeviationSentinel", async () => {
-      const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      for (const timelock of GOVERNANCE_TIMELOCKS) {
-        expect(await acm.isAllowedToCall(timelock, "setTrustedKeeper(address,bool)")).to.equal(true);
-      }
-    });
-
-    it("Governance timelocks should have setTokenMonitoringEnabled permission on DeviationSentinel", async () => {
-      const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      for (const timelock of GOVERNANCE_TIMELOCKS) {
-        expect(await acm.isAllowedToCall(timelock, "setTokenMonitoringEnabled(address,bool)")).to.equal(true);
-      }
-    });
-
-    it("Governance timelocks should have resetMarketState permission on DeviationSentinel", async () => {
-      const acm = accessControlManager.connect(impersonatedDeviationSentinel);
-      for (const timelock of GOVERNANCE_TIMELOCKS) {
-        expect(await acm.isAllowedToCall(timelock, "resetMarketState(address)")).to.equal(true);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setTrustedKeeper(address,bool)")).to.equal(true);
+        expect(await acm.isAllowedToCall(account, "setTokenConfig(address,(uint8,bool))")).to.equal(true);
+        expect(await acm.isAllowedToCall(account, "setTokenMonitoringEnabled(address,bool)")).to.equal(true);
+        expect(await acm.isAllowedToCall(account, "resetMarketState(address)")).to.equal(true);
       }
     });
 
     // ============================================
-    // Governance timelocks whitelisted as keepers
+    // Trusted keepers whitelisted
     // ============================================
 
-    it("Governance timelocks should be whitelisted as trusted keepers on DeviationSentinel", async () => {
-      for (const timelock of GOVERNANCE_TIMELOCKS) {
-        expect(await deviationSentinel.trustedKeepers(timelock)).to.equal(true);
+    it("Keeper, GUARDIAN, and governance timelocks should be whitelisted as trusted keepers on DeviationSentinel", async () => {
+      for (const account of TRUSTED_KEEPER_ACCOUNTS) {
+        expect(await deviationSentinel.trustedKeepers(account)).to.equal(true);
       }
     });
 
     // ====================================
-    // Keeper permissions on SentinelOracle
+    // GUARDIAN and timelocks permissions on SentinelOracle
     // ====================================
 
-    it("Keeper should have all required permissions on SentinelOracle", async () => {
+    it("GUARDIAN and governance timelocks should have all required permissions on SentinelOracle", async () => {
       const acm = accessControlManager.connect(impersonatedSentinelOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setTokenOracleConfig(address,address)")).to.equal(true);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setDirectPrice(address,uint256)")).to.equal(true);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setTokenOracleConfig(address,address)")).to.equal(true);
+        expect(await acm.isAllowedToCall(account, "setDirectPrice(address,uint256)")).to.equal(true);
+      }
     });
 
     // ====================================
-    // Keeper permissions on UniswapOracle
+    // GUARDIAN and timelocks permissions on UniswapOracle
     // ====================================
 
-    it("Keeper should have setPoolConfig permission on UniswapOracle", async () => {
+    it("GUARDIAN and governance timelocks should have setPoolConfig permission on UniswapOracle", async () => {
       const acm = accessControlManager.connect(impersonatedUniswapOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setPoolConfig(address,address)")).to.equal(true);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setPoolConfig(address,address)")).to.equal(true);
+      }
     });
 
     // ========================================
-    // Keeper permissions on PancakeSwapOracle
+    // GUARDIAN and timelocks permissions on PancakeSwapOracle
     // ========================================
 
-    it("Keeper should have setPoolConfig permission on PancakeSwapOracle", async () => {
+    it("GUARDIAN and governance timelocks should have setPoolConfig permission on PancakeSwapOracle", async () => {
       const acm = accessControlManager.connect(impersonatedPancakeSwapOracle);
-      expect(await acm.isAllowedToCall(KEEPER_ADDRESS, "setPoolConfig(address,address)")).to.equal(true);
+      for (const account of PERMISSION_ACCOUNTS) {
+        expect(await acm.isAllowedToCall(account, "setPoolConfig(address,address)")).to.equal(true);
+      }
     });
 
     // ============================================
