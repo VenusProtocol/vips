@@ -272,5 +272,10 @@ forking(78835203, async () => {
       expect(tokenConfig.deviation).to.equal(20);
       expect(tokenConfig.enabled).to.equal(true);
     });
+
+    it("Sentinel oracle should have CAKE configured with PancakeSwapOracle", async () => {
+      const oracleAddress = await sentinelOracle.tokenConfigs(CAKE);
+      expect(oracleAddress).to.equal(PANCAKESWAP_ORACLE);
+    });
   });
 });

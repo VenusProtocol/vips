@@ -231,6 +231,13 @@ For DeviationSentinel on any Comptroller:
         signature: "setTokenConfig(address,(uint8,bool))",
         params: [CAKE, [20, true]],
       },
+
+      // set config in sentinel oracle
+      {
+        target: SENTINEL_ORACLE,
+        signature: "setTokenOracleConfig(address,address)",
+        params: [CAKE, PANCAKESWAP_ORACLE],
+      },
     ],
     meta,
     ProposalType.REGULAR,
