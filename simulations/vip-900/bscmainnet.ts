@@ -8,6 +8,8 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip900, {
   ACM,
+  CAKE,
+  CAKE_PCS_POOL,
   DEVIATION_SENTINEL,
   GOVERNANCE_TIMELOCKS,
   GUARDIAN,
@@ -254,6 +256,21 @@ forking(78835203, async () => {
           "setCollateralFactor(uint96,address,uint256,uint256)",
         ),
       ).to.equal(true);
+    });
+
+    // ============================================
+    // CAKE token configuration
+    // ============================================
+
+    it("CAKE pool should be configured on PancakeSwapOracle", async () => {
+      const pool = await pancakeSwapOracle.tokenPools(CAKE);
+      expect(pool).to.equal(CAKE_PCS_POOL);
+    });
+
+    it("CAKE deviation threshold should be configured on DeviationSentinel", async () => {
+      const tokenConfig = await deviationSentinel.tokenConfigs(CAKE);
+      expect(tokenConfig.deviation).to.equal(20);
+      expect(tokenConfig.enabled).to.equal(true);
     });
   });
 });

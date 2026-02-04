@@ -17,6 +17,12 @@ export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 // Keeper address
 export const KEEPER_ADDRESS = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
+// Token addresses
+export const CAKE = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82";
+
+// PancakeSwap pool for CAKE
+export const CAKE_PCS_POOL = "0x7f51c8AaA6B0599aBd16674e2b17FEc7a9f674A1";
+
 // Access Control Manager
 export const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
 
@@ -39,6 +45,7 @@ This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and Pa
 3. Granting permissions for GUARDIAN and governance timelocks to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
 4. Granting permissions for DeviationSentinel to call required functions on all comptrollers (both isolated pools and core pool)
 5. Whitelisting keeper, GUARDIAN and governance timelocks as trusted keepers on DeviationSentinel
+6. Configuring CAKE token with PancakeSwap pool and 20% deviation threshold
 
 #### Description
 
@@ -70,6 +77,10 @@ For DeviationSentinel on any Comptroller:
 - setActionsPaused(address[],uint8[],bool) - to pause/unpause borrow and mint actions
 - setCollateralFactor(address,uint256,uint256) - for isolated pools
 - setCollateralFactor(uint96,address,uint256,uint256) - for core pool with emode groups
+
+**CAKE token configuration:**
+- PancakeSwap pool: 0x7f51c8AaA6B0599aBd16674e2b17FEc7a9f674A1
+- Deviation threshold: 20%
 
 #### References
 
@@ -201,6 +212,24 @@ For DeviationSentinel on any Comptroller:
           "setCollateralFactor(uint96,address,uint256,uint256)",
           DEVIATION_SENTINEL,
         ],
+      },
+
+      // ========================================
+      // Configure CAKE token
+      // ========================================
+
+      // Set CAKE pool config on PancakeSwapOracle
+      {
+        target: PANCAKESWAP_ORACLE,
+        signature: "setPoolConfig(address,address)",
+        params: [CAKE, CAKE_PCS_POOL],
+      },
+
+      // Set CAKE deviation threshold (20%) on DeviationSentinel
+      {
+        target: DEVIATION_SENTINEL,
+        signature: "setTokenConfig(address,(uint8,bool))",
+        params: [CAKE, [20, true]],
       },
     ],
     meta,
