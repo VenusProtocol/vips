@@ -31,11 +31,11 @@ export const EMODE_POOLS = [
   createEmodePool("THE", 12, "vTHE", vTHE, "0.53", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
 ];
 
-export const vip800 = () => {
+export const vip587 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain] Asset Migration from BNB core pool to isolated Emode pools",
-    description: "VIP-800 [BNB Chain] Asset Migration from BNB core pool to isolated Emode pools",
+    title: "VIP-587 [BNB Chain] Add new markets to the Emode pools",
+    description: "VIP-587 [BNB Chain] Add new markets to the Emode pools",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -49,4 +49,4 @@ export const vip800 = () => {
   );
 };
 
-export default vip800;
+export default vip587;

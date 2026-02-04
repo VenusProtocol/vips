@@ -8,13 +8,11 @@ import {
   initMainnetUser,
   setMaxStalePeriodInBinanceOracle,
   setMaxStalePeriodInChainlinkOracle,
-  setRedstonePrice,
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import { CORE_MARKETS } from "../../vips/vip-547/bscmainnet";
-import { EMODE_POOLS as EMODE_POOLS_PART1, vip800 } from "../../vips/vip-800/bscmainnet";
-import { EMODE_POOLS, vip800 as vip800_2 } from "../../vips/vip-800/bscmainnet-2";
+import { EMODE_POOLS, vip587 } from "../../vips/vip-587/bscmainnet";
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
@@ -27,6 +25,7 @@ const provider = ethers.provider;
 // Contract addresses
 const LEVERAGE_STRATEGIES_MANAGER = "0x03F079E809185a669Ca188676D0ADb09cbAd6dC1";
 const SWAP_HELPER = "0xD79be25aEe798Aa34A9Ba1230003d7499be29A24";
+// Map vToken address to underlying and whale (update as needed)
 const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals: number }> = {
   // USDT
   "0xfD5840Cd36d94D7229439859C0112a4185BC0255": {
@@ -40,82 +39,46 @@ const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals:
     whale: "0x98ADeF6F2ac8572ec48965509d69A8Dd5E8BbA9D", // usdc whale
     decimals: 18,
   },
-  // LINK (Part-1)
+  // LINK
   "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f": {
     underlying: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD", // LINK
     whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // link whale
     decimals: 18,
   },
-  // UNI (Part-1)
+  // UNI
   "0x27FF564707786720C71A2e5c1490A63266683612": {
     underlying: "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1", // UNI
     whale: "0x27FF564707786720C71A2e5c1490A63266683612", // uni whale
     decimals: 18,
   },
-  // AAVE (Part-1)
+  // AAVE
   "0x26DA28954763B92139ED49283625ceCAf52C6f94": {
     underlying: "0xfb6115445Bff7b52FeB98650C87f44907E58f802", // AAVE
     whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // aave whale
     decimals: 18,
   },
-  // DOGE (Part-1)
+  // DOGE
   "0xec3422Ef92B2fb59e84c8B02Ba73F1fE84Ed8D71": {
     underlying: "0xba2ae424d960c26247dd6c32edc70b295c744c43", // DOGE
     whale: "0x0000000000000000000000000000000000001004", // doge whale
     decimals: 8,
   },
-  // BCH (Part-1)
+  // BCH
   "0x5F0388EBc2B94FA8E123F404b79cCF5f40b29176": {
     underlying: "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf", // BCH
     whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // bch whale
     decimals: 18,
   },
-  // TWT (Part-1)
+  // TWT
   "0x4d41a36D04D97785bcEA57b057C412b278e6Edcc": {
     underlying: "0x4B0F1812e5Df2A09796481Ff14017e6005508003", // TWT
     whale: "0x8808390062EBcA540ff10ee43DB60125bB061621", // twt whale
     decimals: 18,
   },
-  // ADA (Part-1)
+  // ADA
   "0x9A0AF7FDb2065Ce470D72664DE73cAE409dA28Ec": {
     underlying: "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47", // ADA
     whale: "0x835678a611B28684005a5e2233695fB6cbbB0007", // ada whale
-    decimals: 18,
-  },
-  // LTC
-  "0x57A5297F2cB2c0AaC9D554660acd6D385Ab50c6B": {
-    underlying: "0x4338665CBB7B2485A8855A139b75D5e34AB0DB94", // LTC
-    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // ltc whale
-    decimals: 18,
-  },
-  // FIL
-  "0xf91d58b5aE142DAcC749f58A49FCBac340Cb0343": {
-    underlying: "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153", // FIL
-    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // fil whale
-    decimals: 18,
-  },
-  // MATIC
-  "0x5c9476FcD6a4F9a3654139721c949c2233bBbBc8": {
-    underlying: "0xCC42724C6683B7E57334c4E856f4c9965ED682bD", // MATIC
-    whale: "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3", // matic whale
-    decimals: 18,
-  },
-  // TRX
-  "0xC5D3466aA484B040eE977073fcF337f2c00071c1": {
-    underlying: "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3", // TRX
-    whale: "0xCa266910d92a313E5F9eb1AfFC462bcbb7d9c4A9", // trx whale
-    decimals: 6,
-  },
-  // DOT
-  "0x1610bc33319e9398de5f57B33a5b184c806aD217": {
-    underlying: "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402", // DOT
-    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC", // dot whale
-    decimals: 18,
-  },
-  // THE
-  "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f": {
-    underlying: "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11", // THE
-    whale: "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D", // the whale
     decimals: 18,
   },
 };
@@ -140,7 +103,7 @@ function findEvents(logs: { topics: string[]; data: string }[], abi: any[], even
 // EIP-712 Swap Signer & Calldata Builder
 // =============================================================================
 //
-// Cross-asset leverage requires swapping between tokens (e.g., USDT → LTC).
+// Cross-asset leverage requires swapping between tokens (e.g., USDT → LINK).
 // The SwapHelper contract enforces that all multicall payloads are signed by
 // an authorized backend signer using EIP-712 typed data signatures.
 //
@@ -352,6 +315,18 @@ function printLeverageResultsSummary() {
   console.log("=".repeat(120) + "\n");
 }
 
+// Whale signer cache — avoids redundant impersonateAccount + setBalance RPC calls
+const whaleCache = new Map<string, any>();
+async function getCachedWhale(address: string): Promise<any> {
+  const key = address.toLowerCase();
+  let signer = whaleCache.get(key);
+  if (!signer) {
+    signer = await initMainnetUser(address, ethers.utils.parseEther("10"));
+    whaleCache.set(key, signer);
+  }
+  return signer;
+}
+
 const RESILIENT_ORACLE_ABI = ["function getUnderlyingPrice(address vToken) external view returns (uint256)"];
 
 /**
@@ -379,19 +354,8 @@ async function computeSafeFlashLoanAmount(
   return amount;
 }
 
-// Whale signer cache — avoids redundant impersonateAccount + setBalance RPC calls
-const whaleCache = new Map<string, any>();
-async function getCachedWhale(address: string): Promise<any> {
-  const key = address.toLowerCase();
-  let signer = whaleCache.get(key);
-  if (!signer) {
-    signer = await initMainnetUser(address, ethers.utils.parseEther("10"));
-    whaleCache.set(key, signer);
-  }
-  return signer;
-}
-
-forking(76766086, async () => {
+const FORK_BLOCK = 77663527;
+forking(FORK_BLOCK, async () => {
   let comptroller: Contract;
   let signers: any[];
   let oracleAddress: string;
@@ -433,16 +397,6 @@ forking(76766086, async () => {
       );
       await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, market.symbol.slice(1), 315360000);
     }
-
-    const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
-    const THE_REDSTONE_FEED = "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5";
-    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, THE, THE_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK);
-
-    const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
-    const TRX_REDSTONE_FEED = "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916";
-    await setRedstonePrice(bscmainnet.REDSTONE_ORACLE, TRX, TRX_REDSTONE_FEED, bscmainnet.NORMAL_TIMELOCK, 3153600000, {
-      tokenDecimals: 6,
-    });
   });
 
   describe("Pre-VIP behavior", () => {
@@ -451,7 +405,7 @@ forking(76766086, async () => {
     });
   });
 
-  testVip("VIP-800 Part-1", await vip800(), {
+  testVip("VIP-587", await vip587(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -469,59 +423,13 @@ forking(76766086, async () => {
     },
   });
 
-  testVip("VIP-800 Part-2", await vip800_2(), {
-    callbackAfterExecution: async txResponse => {
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        [
-          "NewCollateralFactor",
-          "NewLiquidationThreshold",
-          "NewLiquidationIncentive",
-          "BorrowAllowedUpdated",
-          "PoolCreated",
-          "PoolMarketInitialized",
-        ],
-        [15, 15, 15, 15, 5, 15],
-      );
-    },
-  });
-
   describe("Post-VIP behavior", () => {
     it("should update lastPoolId to the new pool", async () => {
       expect(await comptroller.lastPoolId()).to.equals(EMODE_POOLS[EMODE_POOLS.length - 1].id);
     });
 
-    // Verify Part-1 pools remain correctly configured after Part-2
-    for (const EMODE_POOL of EMODE_POOLS_PART1) {
-      describe(`Part-1 Emode Pool ${EMODE_POOL.label}`, () => {
-        it("should still be active with correct label, fallback, and risk parameters for all markets", async () => {
-          const marketEntries = Object.entries(EMODE_POOL.marketsConfig);
-          const [pool, ...marketDataResults] = await Promise.all([
-            comptroller.pools(EMODE_POOL.id),
-            ...marketEntries.map(([, config]) => comptroller.poolMarkets(EMODE_POOL.id, config.address)),
-          ]);
-          expect(pool.label).to.equals(EMODE_POOL.label);
-          expect(pool.isActive).to.equals(true);
-          expect(pool.allowCorePoolFallback).to.equal(EMODE_POOL.allowCorePoolFallback);
-
-          for (let i = 0; i < marketEntries.length; i++) {
-            const [, config] = marketEntries[i];
-            const marketData = marketDataResults[i];
-            expect(marketData.marketPoolId).to.be.equal(EMODE_POOL.id);
-            expect(marketData.isListed).to.be.equal(true);
-            expect(marketData.collateralFactorMantissa).to.be.equal(config.collateralFactor);
-            expect(marketData.liquidationThresholdMantissa).to.be.equal(config.liquidationThreshold);
-            expect(marketData.liquidationIncentiveMantissa).to.be.equal(config.liquidationIncentive);
-            expect(marketData.isBorrowAllowed).to.be.equal(config.borrowAllowed);
-          }
-        });
-      });
-    }
-
-    // Verify Part-2 pools
     for (const EMODE_POOL of EMODE_POOLS) {
-      describe(`Part-2 Emode Pool ${EMODE_POOL.label}`, () => {
+      describe(`Emode Pool ${EMODE_POOL.label}`, () => {
         it("should set the newly created pool as active with correct label and risk parameters for all markets", async () => {
           const marketEntries = Object.entries(EMODE_POOL.marketsConfig);
           const [newPool, ...marketDataResults] = await Promise.all([
@@ -546,147 +454,8 @@ forking(76766086, async () => {
       });
     }
 
-    // Part-1 mint/borrow/repay/redeem tests
-    for (const pool of EMODE_POOLS_PART1) {
-      describe(`EMode Pool (Part-1): ${pool.label}`, () => {
-        let user: any;
-        let userAddress: string;
-
-        before(async () => {
-          [user] = signers;
-          userAddress = await user.getAddress();
-
-          // Enter E-Mode once per pool
-          await comptroller.connect(user).enterPool(pool.id);
-        });
-
-        for (const [marketKey, config] of Object.entries(pool.marketsConfig)) {
-          const marketInfo = MARKET_INFO[config.address];
-          if (!marketInfo) continue;
-
-          const { address: vTokenAddr } = config;
-          const { underlying, whale, decimals } = marketInfo;
-
-          describe(`${marketKey} market`, () => {
-            let vToken: any;
-            let token: any;
-
-            const mintAmount = parseUnits("10", decimals);
-            const borrowAmount = parseUnits("0.1", decimals);
-            const redeemAmount = parseUnits("0.5", decimals);
-
-            before(async () => {
-              vToken = new ethers.Contract(vTokenAddr, VTOKEN_ABI, provider);
-              token = new ethers.Contract(underlying, ERC20_ABI, provider);
-
-              // Fund user
-              const whaleSigner = await getCachedWhale(whale);
-              await token.connect(whaleSigner).transfer(userAddress, mintAmount);
-
-              await token.connect(user).approve(vTokenAddr, mintAmount);
-              await comptroller.connect(user).enterMarkets([vTokenAddr]);
-            });
-
-            /* ----------------------------- Helpers ----------------------------- */
-
-            const isPaused = async (action: number) => comptroller.actionPaused(vTokenAddr, action);
-
-            const supplyCapAllowsMint = async () => {
-              const [supplyCap, totalSupply, exchangeRate] = await Promise.all([
-                comptroller.supplyCaps(vTokenAddr),
-                vToken.totalSupply(),
-                vToken.exchangeRateStored(),
-              ]);
-              if (supplyCap.eq(0)) return false;
-
-              const nextTotalSupply = exchangeRate.mul(totalSupply).div(ethers.constants.WeiPerEther).add(mintAmount);
-
-              return nextTotalSupply.lte(supplyCap);
-            };
-
-            /* ------------------------------ Tests ------------------------------ */
-
-            it("User can mint", async function () {
-              const [paused, capAllows] = await Promise.all([isPaused(0), supplyCapAllowsMint()]);
-              if (paused) {
-                console.log(`Mint paused for ${marketKey}, skipping`);
-                return;
-              }
-              if (!capAllows) {
-                console.log(`Supply cap reached for ${marketKey}, skipping mint`);
-                return;
-              }
-
-              const balanceBefore = await vToken.balanceOf(userAddress);
-              await vToken.connect(user).mint(mintAmount);
-
-              expect(await vToken.balanceOf(userAddress)).to.be.gt(balanceBefore);
-            });
-
-            if (config.borrowAllowed) {
-              it("User can borrow", async function () {
-                if (await isPaused(2)) {
-                  console.log(`Borrow paused for ${marketKey}, skipping`);
-                  return;
-                }
-
-                const [borrowCap, totalBorrows] = await Promise.all([
-                  comptroller.borrowCaps(vTokenAddr),
-                  vToken.totalBorrows(),
-                ]);
-
-                if (borrowCap.gt(0) && totalBorrows.add(borrowAmount).gt(borrowCap)) {
-                  console.log(`Borrow cap reached for ${marketKey}, skipping borrow`);
-                  return;
-                }
-
-                const balanceBefore = await token.balanceOf(userAddress);
-                await vToken.connect(user).borrow(borrowAmount);
-
-                expect(await token.balanceOf(userAddress)).to.be.gt(balanceBefore);
-              });
-
-              it("User can repay borrow", async () => {
-                const [borrowBalance, userBalance] = await Promise.all([
-                  vToken.callStatic.borrowBalanceCurrent(userAddress),
-                  token.balanceOf(userAddress),
-                ]);
-
-                if (borrowBalance.eq(0)) return;
-
-                const repayAmount = borrowBalance.mul(101).div(100); // +1% buffer
-
-                if (userBalance.lt(repayAmount)) {
-                  const whaleSigner = await getCachedWhale(whale);
-                  await token.connect(whaleSigner).transfer(userAddress, repayAmount.sub(userBalance));
-                }
-
-                await token.connect(user).approve(vTokenAddr, repayAmount);
-                await vToken.connect(user).repayBorrow(ethers.constants.MaxUint256);
-
-                expect(await vToken.callStatic.borrowBalanceCurrent(userAddress)).to.eq(0);
-              });
-            }
-
-            it("User can redeem", async function () {
-              if (!(await supplyCapAllowsMint())) {
-                console.log(`Supply cap reached for ${marketKey}, skipping redeem`);
-                return;
-              }
-
-              const balanceBefore = await token.balanceOf(userAddress);
-              await vToken.connect(user).redeemUnderlying(redeemAmount);
-
-              expect(await token.balanceOf(userAddress)).to.be.gt(balanceBefore);
-            });
-          });
-        }
-      });
-    }
-
-    // Part-2 mint/borrow/repay/redeem tests
     for (const pool of EMODE_POOLS) {
-      describe(`EMode Pool (Part-2): ${pool.label}`, () => {
+      describe(`EMode Pool: ${pool.label}`, () => {
         let user: any;
         let userAddress: string;
 
@@ -822,7 +591,6 @@ forking(76766086, async () => {
       });
     }
 
-    // single-asset leverage tests
     for (const pool of EMODE_POOLS) {
       describe(`Single-Asset Leverage: ${pool.label}`, () => {
         let leverageStrategiesManager: Contract;
@@ -1103,6 +871,7 @@ forking(76766086, async () => {
               }
 
               // Seed the borrow market with liquidity so flash loans can work on newly created emode pools
+              // Use oracle price to seed ~$100 worth, capped by whale balance
               try {
                 const oracle = new ethers.Contract(oracleAddress, RESILIENT_ORACLE_ABI, ethers.provider);
                 const borrowPriceForSeed = await oracle.getUnderlyingPrice(borrow.config.address);
@@ -1235,6 +1004,7 @@ forking(76766086, async () => {
                 console.log(
                   `Cross-asset enterLeverage ${status} for ${pool.label} (${collateral.key}/${borrow.key}) - ${reason}`,
                 );
+                return;
               }
             });
 
@@ -1350,6 +1120,7 @@ forking(76766086, async () => {
                 console.log(
                   `Cross-asset exitLeverage ${status} for ${pool.label} (${collateral.key}/${borrow.key}) - ${reason}`,
                 );
+                return;
               }
             });
 
@@ -1491,7 +1262,8 @@ forking(76766086, async () => {
                     msg.includes("supply cap") ||
                     msg.includes("cannot estimate gas") ||
                     msg.includes("math error") ||
-                    msg.includes("transfer amount exceeds");
+                    msg.includes("transfer amount exceeds") ||
+                    msg.includes("No API route");
                   const status = isSkippable ? "SKIPPED" : "FAILED";
                   leverageResults.push({
                     pool: pool.label,
@@ -1502,6 +1274,7 @@ forking(76766086, async () => {
                     detail: reason,
                   });
                   console.log(`Cross-asset enterLeverageFromBorrow ${status} for ${pool.label} - ${reason}`);
+                  return;
                 }
               });
             }
@@ -1510,50 +1283,44 @@ forking(76766086, async () => {
       });
     }
 
-    after(() => {
-      printLeverageResultsSummary();
-    });
-
     // =========================================================================
-    // DOT Isolated E-Mode Pool Restriction Tests
-    // =========================================================================
+    // LINK Isolated E-Mode Pool Restrictions
     //
     // Tests that verify isolated e-mode pool market restrictions:
-    // - When in DOT e-mode pool: can only use DOT, USDT, USDC markets
-    // - When in core pool: can use DOT along with all other core pool markets
+    // - When in LINK e-mode pool: can only use LINK, USDT, USDC markets
+    // - When in core pool: can use LINK along with all other core pool markets
     // =========================================================================
-    describe("DOT Isolated E-Mode Pool Restrictions", () => {
-      // DOT pool is id=15 in EMODE_POOLS
-      const DOT_POOL = EMODE_POOLS.find(p => p.label === "DOT")!;
-      const vDOT = DOT_POOL.marketsConfig.vDOT.address;
-      const vUSDT_ADDR = DOT_POOL.marketsConfig.vUSDT.address;
-      const vUSDC_ADDR = DOT_POOL.marketsConfig.vUSDC.address;
+    describe("LINK Isolated E-Mode Pool Restrictions", () => {
+      const LINK_POOL = EMODE_POOLS.find(p => p.label === "LINK")!;
+      const vLINK = LINK_POOL.marketsConfig.vLINK.address;
+      const vUSDT_ADDR = LINK_POOL.marketsConfig.vUSDT.address;
+      const vUSDC_ADDR = LINK_POOL.marketsConfig.vUSDC.address;
 
-      // ETH is in core pool but NOT in DOT e-mode pool
+      // ETH is in core pool but NOT in LINK e-mode pool
       const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
       const ETH_UNDERLYING = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
       const ETH_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
-      let vDOTContract: Contract;
+      let vLINKContract: Contract;
       let vUSDTContract: Contract;
       let vUSDCContract: Contract;
       let vETHContract: Contract;
-      let dotToken: Contract;
+      let linkToken: Contract;
       let usdtToken: Contract;
       let usdcToken: Contract;
       let ethToken: Contract;
 
       before(async () => {
-        vDOTContract = new ethers.Contract(vDOT, VTOKEN_ABI, provider);
+        vLINKContract = new ethers.Contract(vLINK, VTOKEN_ABI, provider);
         vUSDTContract = new ethers.Contract(vUSDT_ADDR, VTOKEN_ABI, provider);
         vUSDCContract = new ethers.Contract(vUSDC_ADDR, VTOKEN_ABI, provider);
         vETHContract = new ethers.Contract(vETH, VTOKEN_ABI, provider);
 
-        const dotInfo = MARKET_INFO[vDOT];
+        const linkInfo = MARKET_INFO[vLINK];
         const usdtInfo = MARKET_INFO[vUSDT_ADDR];
         const usdcInfo = MARKET_INFO[vUSDC_ADDR];
 
-        dotToken = new ethers.Contract(dotInfo.underlying, ERC20_ABI, provider);
+        linkToken = new ethers.Contract(linkInfo.underlying, ERC20_ABI, provider);
         usdtToken = new ethers.Contract(usdtInfo.underlying, ERC20_ABI, provider);
         usdcToken = new ethers.Contract(usdcInfo.underlying, ERC20_ABI, provider);
         ethToken = new ethers.Contract(ETH_UNDERLYING, ERC20_ABI, provider);
@@ -1570,14 +1337,14 @@ forking(76766086, async () => {
           corePoolUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
           corePoolUserAddress = userAddr;
 
-          // Fund user with DOT, ETH, USDT
-          const dotInfo = MARKET_INFO[vDOT];
+          // Fund user with LINK, ETH, USDT
+          const linkInfo = MARKET_INFO[vLINK];
           const usdtInfo = MARKET_INFO[vUSDT_ADDR];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
           const usdtWhale = await getCachedWhale(usdtInfo.whale);
 
-          await dotToken.connect(dotWhale).transfer(corePoolUserAddress, parseUnits("100", dotInfo.decimals));
+          await linkToken.connect(linkWhale).transfer(corePoolUserAddress, parseUnits("100", linkInfo.decimals));
           await ethToken.connect(ethWhale).transfer(corePoolUserAddress, parseUnits("10", 18));
           await usdtToken.connect(usdtWhale).transfer(corePoolUserAddress, parseUnits("500", usdtInfo.decimals));
 
@@ -1587,14 +1354,14 @@ forking(76766086, async () => {
           console.log("  User is in core pool (pool 0) - same behavior as before VIP");
         });
 
-        it("user CAN supply and borrow DOT in core pool", async () => {
-          const dotInfo = MARKET_INFO[vDOT];
-          await dotToken.connect(corePoolUser).approve(vDOT, parseUnits("10", dotInfo.decimals));
-          await vDOTContract.connect(corePoolUser).mint(parseUnits("10", dotInfo.decimals));
-          await comptroller.connect(corePoolUser).enterMarkets([vDOT]);
+        it("user CAN supply and borrow LINK in core pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          await linkToken.connect(corePoolUser).approve(vLINK, parseUnits("10", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser).mint(parseUnits("10", linkInfo.decimals));
+          await comptroller.connect(corePoolUser).enterMarkets([vLINK]);
 
-          expect(await vDOTContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
-          console.log("  User successfully supplied DOT in core pool");
+          expect(await vLINKContract.balanceOf(corePoolUserAddress)).to.be.gt(0);
+          console.log("  User successfully supplied LINK in core pool");
         });
 
         it("user CAN supply and use ETH in core pool", async () => {
@@ -1606,56 +1373,56 @@ forking(76766086, async () => {
           console.log("  User successfully supplied ETH in core pool");
         });
 
-        it("user CAN borrow DOT using ETH collateral in core pool", async () => {
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotBalanceBefore = await dotToken.balanceOf(corePoolUserAddress);
-          await vDOTContract.connect(corePoolUser).borrow(parseUnits("1", dotInfo.decimals));
-          const dotBalanceAfter = await dotToken.balanceOf(corePoolUserAddress);
+        it("user CAN borrow LINK using ETH collateral in core pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkBalanceBefore = await linkToken.balanceOf(corePoolUserAddress);
+          await vLINKContract.connect(corePoolUser).borrow(parseUnits("1", linkInfo.decimals));
+          const linkBalanceAfter = await linkToken.balanceOf(corePoolUserAddress);
 
-          expect(dotBalanceAfter).to.be.gt(dotBalanceBefore);
-          console.log("  User borrowed DOT using ETH collateral in core pool");
+          expect(linkBalanceAfter).to.be.gt(linkBalanceBefore);
+          console.log("  User borrowed LINK using ETH collateral in core pool");
         });
 
-        it("user CAN borrow ETH using DOT collateral in core pool", async () => {
+        it("user CAN borrow ETH using LINK collateral in core pool", async () => {
           const user2Addr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8886), 20)),
           );
           const corePoolUser2 = await initMainnetUser(user2Addr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
-          await dotToken.connect(dotWhale).transfer(user2Addr, parseUnits("50", dotInfo.decimals));
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          await linkToken.connect(linkWhale).transfer(user2Addr, parseUnits("50", linkInfo.decimals));
 
-          await dotToken.connect(corePoolUser2).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(corePoolUser2).mint(parseUnits("50", dotInfo.decimals));
-          await comptroller.connect(corePoolUser2).enterMarkets([vDOT]);
+          await linkToken.connect(corePoolUser2).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser2).mint(parseUnits("50", linkInfo.decimals));
+          await comptroller.connect(corePoolUser2).enterMarkets([vLINK]);
 
           const ethBalanceBefore = await ethToken.balanceOf(user2Addr);
           await vETHContract.connect(corePoolUser2).borrow(parseUnits("0.01", 18));
           const ethBalanceAfter = await ethToken.balanceOf(user2Addr);
 
           expect(ethBalanceAfter).to.be.gt(ethBalanceBefore);
-          console.log("  User borrowed ETH using DOT collateral in core pool");
+          console.log("  User borrowed ETH using LINK collateral in core pool");
         });
 
-        it("user CAN interact with ALL markets simultaneously (DOT, ETH, USDT)", async () => {
+        it("user CAN interact with ALL markets simultaneously (LINK, ETH, USDT)", async () => {
           const user3Addr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8885), 20)),
           );
           const corePoolUser3 = await initMainnetUser(user3Addr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
+          const linkInfo = MARKET_INFO[vLINK];
           const usdtInfo = MARKET_INFO[vUSDT_ADDR];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
           const usdtWhale = await getCachedWhale(usdtInfo.whale);
 
-          await dotToken.connect(dotWhale).transfer(user3Addr, parseUnits("20", dotInfo.decimals));
+          await linkToken.connect(linkWhale).transfer(user3Addr, parseUnits("20", linkInfo.decimals));
           await ethToken.connect(ethWhale).transfer(user3Addr, parseUnits("2", 18));
           await usdtToken.connect(usdtWhale).transfer(user3Addr, parseUnits("500", usdtInfo.decimals));
 
-          await dotToken.connect(corePoolUser3).approve(vDOT, parseUnits("20", dotInfo.decimals));
-          await vDOTContract.connect(corePoolUser3).mint(parseUnits("20", dotInfo.decimals));
+          await linkToken.connect(corePoolUser3).approve(vLINK, parseUnits("20", linkInfo.decimals));
+          await vLINKContract.connect(corePoolUser3).mint(parseUnits("20", linkInfo.decimals));
 
           await ethToken.connect(corePoolUser3).approve(vETH, parseUnits("2", 18));
           await vETHContract.connect(corePoolUser3).mint(parseUnits("2", 18));
@@ -1663,17 +1430,17 @@ forking(76766086, async () => {
           await usdtToken.connect(corePoolUser3).approve(vUSDT_ADDR, parseUnits("500", usdtInfo.decimals));
           await vUSDTContract.connect(corePoolUser3).mint(parseUnits("500", usdtInfo.decimals));
 
-          await comptroller.connect(corePoolUser3).enterMarkets([vDOT, vETH, vUSDT_ADDR]);
+          await comptroller.connect(corePoolUser3).enterMarkets([vLINK, vETH, vUSDT_ADDR]);
 
-          expect(await vDOTContract.balanceOf(user3Addr)).to.be.gt(0);
+          expect(await vLINKContract.balanceOf(user3Addr)).to.be.gt(0);
           expect(await vETHContract.balanceOf(user3Addr)).to.be.gt(0);
           expect(await vUSDTContract.balanceOf(user3Addr)).to.be.gt(0);
 
-          console.log("  User interacts with DOT, ETH, and USDT simultaneously in core pool");
+          console.log("  User interacts with LINK, ETH, and USDT simultaneously in core pool");
         });
       });
 
-      describe("Isolated e-mode behavior (new users opting into DOT e-mode pool)", () => {
+      describe("Isolated e-mode behavior (new users opting into LINK e-mode pool)", () => {
         let emodeUser: any;
         let emodeUserAddress: string;
 
@@ -1684,44 +1451,44 @@ forking(76766086, async () => {
           emodeUser = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
           emodeUserAddress = userAddr;
 
-          const dotInfo = MARKET_INFO[vDOT];
+          const linkInfo = MARKET_INFO[vLINK];
           const usdtInfo = MARKET_INFO[vUSDT_ADDR];
           const usdcInfo = MARKET_INFO[vUSDC_ADDR];
 
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const usdtWhale = await getCachedWhale(usdtInfo.whale);
           const usdcWhale = await getCachedWhale(usdcInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
 
-          await dotToken.connect(dotWhale).transfer(emodeUserAddress, parseUnits("100", dotInfo.decimals));
+          await linkToken.connect(linkWhale).transfer(emodeUserAddress, parseUnits("100", linkInfo.decimals));
           await usdtToken.connect(usdtWhale).transfer(emodeUserAddress, parseUnits("1000", usdtInfo.decimals));
           await usdcToken.connect(usdcWhale).transfer(emodeUserAddress, parseUnits("1000", usdcInfo.decimals));
           await ethToken.connect(ethWhale).transfer(emodeUserAddress, parseUnits("5", 18));
 
-          // User opts into DOT e-mode pool
-          await comptroller.connect(emodeUser).enterPool(DOT_POOL.id);
+          // User opts into LINK e-mode pool
+          await comptroller.connect(emodeUser).enterPool(LINK_POOL.id);
 
           const userPool = await comptroller.userPoolId(emodeUserAddress);
-          expect(userPool).to.equal(DOT_POOL.id);
-          console.log(`  User opted into DOT e-mode pool (id=${DOT_POOL.id})`);
+          expect(userPool).to.equal(LINK_POOL.id);
+          console.log(`  User opted into LINK e-mode pool (id=${LINK_POOL.id})`);
         });
 
-        it("user CAN supply and borrow DOT in DOT e-mode pool", async () => {
-          const dotInfo = MARKET_INFO[vDOT];
-          await dotToken.connect(emodeUser).approve(vDOT, parseUnits("10", dotInfo.decimals));
-          await vDOTContract.connect(emodeUser).mint(parseUnits("10", dotInfo.decimals));
-          await comptroller.connect(emodeUser).enterMarkets([vDOT]);
+        it("user CAN supply and borrow LINK in LINK e-mode pool", async () => {
+          const linkInfo = MARKET_INFO[vLINK];
+          await linkToken.connect(emodeUser).approve(vLINK, parseUnits("10", linkInfo.decimals));
+          await vLINKContract.connect(emodeUser).mint(parseUnits("10", linkInfo.decimals));
+          await comptroller.connect(emodeUser).enterMarkets([vLINK]);
 
-          expect(await vDOTContract.balanceOf(emodeUserAddress)).to.be.gt(0);
+          expect(await vLINKContract.balanceOf(emodeUserAddress)).to.be.gt(0);
 
-          const borrowAmount = parseUnits("0.1", dotInfo.decimals);
-          await vDOTContract.connect(emodeUser).borrow(borrowAmount);
-          const borrowBalance = await vDOTContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
+          const borrowAmount = parseUnits("0.1", linkInfo.decimals);
+          await vLINKContract.connect(emodeUser).borrow(borrowAmount);
+          const borrowBalance = await vLINKContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
           expect(borrowBalance).to.be.gte(borrowAmount);
-          console.log("  User supplied and borrowed DOT in DOT e-mode pool");
+          console.log("  User supplied and borrowed LINK in LINK e-mode pool");
         });
 
-        it("user CAN supply and borrow USDT in DOT e-mode pool", async () => {
+        it("user CAN supply and borrow USDT in LINK e-mode pool", async () => {
           const usdtInfo = MARKET_INFO[vUSDT_ADDR];
           await usdtToken.connect(emodeUser).approve(vUSDT_ADDR, parseUnits("100", usdtInfo.decimals));
           await vUSDTContract.connect(emodeUser).mint(parseUnits("100", usdtInfo.decimals));
@@ -1733,10 +1500,10 @@ forking(76766086, async () => {
           await vUSDTContract.connect(emodeUser).borrow(borrowAmount);
           const borrowBalance = await vUSDTContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
           expect(borrowBalance).to.be.gte(borrowAmount);
-          console.log("  User supplied and borrowed USDT in DOT e-mode pool");
+          console.log("  User supplied and borrowed USDT in LINK e-mode pool");
         });
 
-        it("user CAN supply and borrow USDC in DOT e-mode pool", async () => {
+        it("user CAN supply and borrow USDC in LINK e-mode pool", async () => {
           const usdcInfo = MARKET_INFO[vUSDC_ADDR];
           await usdcToken.connect(emodeUser).approve(vUSDC_ADDR, parseUnits("100", usdcInfo.decimals));
           await vUSDCContract.connect(emodeUser).mint(parseUnits("100", usdcInfo.decimals));
@@ -1748,7 +1515,7 @@ forking(76766086, async () => {
           await vUSDCContract.connect(emodeUser).borrow(borrowAmount);
           const borrowBalance = await vUSDCContract.callStatic.borrowBalanceCurrent(emodeUserAddress);
           expect(borrowBalance).to.be.gte(borrowAmount);
-          console.log("  User supplied and borrowed USDC in DOT e-mode pool");
+          console.log("  User supplied and borrowed USDC in LINK e-mode pool");
         });
 
         it("user CAN deposit ETH (deposits are unrestricted) but CANNOT borrow ETH", async () => {
@@ -1756,25 +1523,24 @@ forking(76766086, async () => {
           await ethToken.connect(emodeUser).approve(vETH, parseUnits("1", 18));
           await vETHContract.connect(emodeUser).mint(parseUnits("1", 18));
           expect(await vETHContract.balanceOf(emodeUserAddress)).to.be.gt(0);
-          console.log("  User CAN deposit ETH even in DOT e-mode (deposits unrestricted)");
+          console.log("  User CAN deposit ETH even in LINK e-mode (deposits unrestricted)");
 
           // But borrowing non-pool markets is restricted
           try {
             await vETHContract.connect(emodeUser).borrow(parseUnits("0.01", 18));
-            expect.fail("Borrow should have failed - ETH is not in DOT e-mode pool");
+            expect.fail("Borrow should have failed - ETH is not in LINK e-mode pool");
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : String(error);
             expect(msg).to.not.include("Borrow should have failed");
-            console.log(`  ETH borrow correctly rejected in DOT e-mode pool`);
+            console.log(`  ETH borrow correctly rejected in LINK e-mode pool`);
           }
         });
 
         it("ETH collateral does NOT count for borrowing power in e-mode (allowCorePoolFallback = false)", async () => {
-          // VIP sets allowCorePoolFallback = false, so core-pool-only collateral is ignored
-          const pool = await comptroller.pools(DOT_POOL.id);
+          const pool = await comptroller.pools(LINK_POOL.id);
           expect(pool.allowCorePoolFallback).to.equal(false);
 
-          // Create a user with ONLY ETH collateral (no DOT pool assets)
+          // Create a user with ONLY ETH collateral (no LINK pool assets)
           const ethOnlyUserAddr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(8889), 20)),
           );
@@ -1787,17 +1553,17 @@ forking(76766086, async () => {
           await vETHContract.connect(ethOnlyUser).mint(parseUnits("10", 18));
           await comptroller.connect(ethOnlyUser).enterMarkets([vETH]);
 
-          // Enter DOT e-mode pool
-          await comptroller.connect(ethOnlyUser).enterPool(DOT_POOL.id);
+          // Enter LINK e-mode pool
+          await comptroller.connect(ethOnlyUser).enterPool(LINK_POOL.id);
 
-          // Try to borrow DOT using only ETH collateral - should FAIL
+          // Try to borrow LINK using only ETH collateral - should FAIL
           try {
-            await vDOTContract.connect(ethOnlyUser).borrow(parseUnits("0.1", 18));
+            await vLINKContract.connect(ethOnlyUser).borrow(parseUnits("0.1", 18));
             expect.fail("Borrow should have failed - ETH collateral not usable with fallback disabled");
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : String(error);
             expect(msg).to.not.include("Borrow should have failed");
-            console.log(`  DOT borrow correctly rejected with ETH-only collateral (fallback=false)`);
+            console.log(`  LINK borrow correctly rejected with ETH-only collateral (fallback=false)`);
           }
 
           // Also try to borrow USDT (a pool asset) using ETH collateral - should also FAIL
@@ -1811,84 +1577,80 @@ forking(76766086, async () => {
           }
         });
 
-        it("user with DOT pool collateral CAN borrow normally in e-mode", async () => {
-          const dotUserAddr = ethers.utils.getAddress(
+        it("user with LINK pool collateral CAN borrow normally in e-mode", async () => {
+          const linkUserAddr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(7776), 20)),
           );
-          const dotUser = await initMainnetUser(dotUserAddr, ethers.utils.parseEther("10"));
+          const linkUser = await initMainnetUser(linkUserAddr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
-          await dotToken.connect(dotWhale).transfer(dotUserAddr, parseUnits("50", dotInfo.decimals));
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
+          await linkToken.connect(linkWhale).transfer(linkUserAddr, parseUnits("50", linkInfo.decimals));
 
-          await dotToken.connect(dotUser).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(dotUser).mint(parseUnits("50", dotInfo.decimals));
-          await comptroller.connect(dotUser).enterMarkets([vDOT]);
+          await linkToken.connect(linkUser).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(linkUser).mint(parseUnits("50", linkInfo.decimals));
+          await comptroller.connect(linkUser).enterMarkets([vLINK]);
 
-          await comptroller.connect(dotUser).enterPool(DOT_POOL.id);
+          await comptroller.connect(linkUser).enterPool(LINK_POOL.id);
 
-          const usdtBalanceBefore = await usdtToken.balanceOf(dotUserAddr);
-          await vUSDTContract.connect(dotUser).borrow(parseUnits("10", 18));
-          const usdtBalanceAfter = await usdtToken.balanceOf(dotUserAddr);
+          const usdtBalanceBefore = await usdtToken.balanceOf(linkUserAddr);
+          await vUSDTContract.connect(linkUser).borrow(parseUnits("10", 18));
+          const usdtBalanceAfter = await usdtToken.balanceOf(linkUserAddr);
 
           expect(usdtBalanceAfter).to.be.gt(usdtBalanceBefore);
-          console.log("  User with DOT collateral CAN borrow USDT in e-mode pool");
+          console.log("  User with LINK collateral CAN borrow USDT in e-mode pool");
         });
       });
 
       describe("Mutual exclusivity: user CANNOT be in core pool and e-mode simultaneously", () => {
-        it("core pool user CAN borrow ETH, but same user in e-mode CANNOT", async () => {
-          // User A in core pool: CAN borrow ETH with DOT collateral
-          const userAAddr = ethers.utils.getAddress(
+        it("user in core pool loses e-mode benefits when they enter e-mode they lose core pool flexibility", async () => {
+          const userAddr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9901), 20)),
           );
-          const userA = await initMainnetUser(userAAddr, ethers.utils.parseEther("10"));
+          const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
 
-          await dotToken.connect(dotWhale).transfer(userAAddr, parseUnits("50", dotInfo.decimals));
-          await dotToken.connect(userA).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(userA).mint(parseUnits("50", dotInfo.decimals));
-          await comptroller.connect(userA).enterMarkets([vDOT]);
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
 
-          // Core pool: borrow ETH works
-          let userPool = await comptroller.userPoolId(userAAddr);
+          // Supply both in core pool
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
+          await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
+          await vETHContract.connect(user).mint(parseUnits("5", 18));
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
+
+          // In core pool: CAN borrow ETH (all markets accessible)
+          let userPool = await comptroller.userPoolId(userAddr);
           expect(userPool).to.equal(0);
-          const ethBalBefore = await ethToken.balanceOf(userAAddr);
-          await vETHContract.connect(userA).borrow(parseUnits("0.01", 18));
-          expect(await ethToken.balanceOf(userAAddr)).to.be.gt(ethBalBefore);
-          console.log("  User A in core pool: CAN borrow ETH using DOT collateral");
+          const ethBalBefore = await ethToken.balanceOf(userAddr);
+          await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+          expect(await ethToken.balanceOf(userAddr)).to.be.gt(ethBalBefore);
+          console.log("  In core pool: user CAN borrow ETH using LINK+ETH collateral");
 
-          // User B with same setup but in e-mode: CANNOT borrow ETH
-          const userBAddr = ethers.utils.getAddress(
-            ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9911), 20)),
-          );
-          const userB = await initMainnetUser(userBAddr, ethers.utils.parseEther("10"));
+          // Repay ETH borrow before switching — fund extra to cover interest
+          const ethWhale2 = await getCachedWhale(ETH_WHALE);
+          await ethToken.connect(ethWhale2).transfer(userAddr, parseUnits("0.1", 18));
+          await ethToken.connect(user).approve(vETH, ethers.constants.MaxUint256);
+          await vETHContract.connect(user).repayBorrow(ethers.constants.MaxUint256);
 
-          await dotToken.connect(dotWhale).transfer(userBAddr, parseUnits("50", dotInfo.decimals));
-          await ethToken.connect(ethWhale).transfer(userBAddr, parseUnits("5", 18));
+          // Now switch to LINK e-mode pool
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
+          userPool = await comptroller.userPoolId(userAddr);
+          expect(userPool).to.equal(LINK_POOL.id);
+          console.log("  User switched from core pool to LINK e-mode pool");
 
-          await dotToken.connect(userB).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(userB).mint(parseUnits("50", dotInfo.decimals));
-          await ethToken.connect(userB).approve(vETH, parseUnits("5", 18));
-          await vETHContract.connect(userB).mint(parseUnits("5", 18));
-          await comptroller.connect(userB).enterMarkets([vDOT, vETH]);
-
-          // Enter DOT e-mode
-          await comptroller.connect(userB).enterPool(DOT_POOL.id);
-          userPool = await comptroller.userPoolId(userBAddr);
-          expect(userPool).to.equal(DOT_POOL.id);
-
-          // E-mode: borrow ETH fails
+          // In e-mode: CANNOT borrow ETH anymore (not a pool market)
           try {
-            await vETHContract.connect(userB).borrow(parseUnits("0.01", 18));
-            expect.fail("ETH borrow should have failed in DOT e-mode pool");
+            await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
+            expect.fail("ETH borrow should have failed in LINK e-mode pool");
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : String(error);
             expect(msg).to.not.include("ETH borrow should have failed");
-            console.log("  User B in e-mode: CANNOT borrow ETH - mutual exclusivity enforced");
+            console.log("  In e-mode: user CANNOT borrow ETH (not in LINK pool) - mutual exclusivity enforced");
           }
         });
 
@@ -1898,29 +1660,29 @@ forking(76766086, async () => {
           );
           const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
 
-          await dotToken.connect(dotWhale).transfer(userAddr, parseUnits("50", dotInfo.decimals));
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
           await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
 
           // Supply collateral
-          await dotToken.connect(user).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(user).mint(parseUnits("50", dotInfo.decimals));
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
           await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
           await vETHContract.connect(user).mint(parseUnits("5", 18));
-          await comptroller.connect(user).enterMarkets([vDOT, vETH]);
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
 
-          // Start in DOT e-mode pool
-          await comptroller.connect(user).enterPool(DOT_POOL.id);
+          // Start in LINK e-mode pool
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
           let userPool = await comptroller.userPoolId(userAddr);
-          expect(userPool).to.equal(DOT_POOL.id);
+          expect(userPool).to.equal(LINK_POOL.id);
 
           // In e-mode: CANNOT borrow ETH
           try {
             await vETHContract.connect(user).borrow(parseUnits("0.01", 18));
-            expect.fail("ETH borrow should have failed in DOT e-mode pool");
+            expect.fail("ETH borrow should have failed in LINK e-mode pool");
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : String(error);
             expect(msg).to.not.include("ETH borrow should have failed");
@@ -1941,38 +1703,37 @@ forking(76766086, async () => {
         });
 
         it("user CANNOT borrow in e-mode pool and core pool at the same time", async () => {
-          // A user can only be in one pool at a time - they must choose
           const userAddr = ethers.utils.getAddress(
             ethers.utils.hexlify(ethers.utils.zeroPad(ethers.utils.hexlify(9903), 20)),
           );
           const user = await initMainnetUser(userAddr, ethers.utils.parseEther("10"));
 
-          const dotInfo = MARKET_INFO[vDOT];
-          const dotWhale = await getCachedWhale(dotInfo.whale);
+          const linkInfo = MARKET_INFO[vLINK];
+          const linkWhale = await getCachedWhale(linkInfo.whale);
           const ethWhale = await getCachedWhale(ETH_WHALE);
 
-          await dotToken.connect(dotWhale).transfer(userAddr, parseUnits("50", dotInfo.decimals));
+          await linkToken.connect(linkWhale).transfer(userAddr, parseUnits("50", linkInfo.decimals));
           await ethToken.connect(ethWhale).transfer(userAddr, parseUnits("5", 18));
 
-          await dotToken.connect(user).approve(vDOT, parseUnits("50", dotInfo.decimals));
-          await vDOTContract.connect(user).mint(parseUnits("50", dotInfo.decimals));
+          await linkToken.connect(user).approve(vLINK, parseUnits("50", linkInfo.decimals));
+          await vLINKContract.connect(user).mint(parseUnits("50", linkInfo.decimals));
           await ethToken.connect(user).approve(vETH, parseUnits("5", 18));
           await vETHContract.connect(user).mint(parseUnits("5", 18));
-          await comptroller.connect(user).enterMarkets([vDOT, vETH]);
+          await comptroller.connect(user).enterMarkets([vLINK, vETH]);
 
-          // Enter DOT e-mode
-          await comptroller.connect(user).enterPool(DOT_POOL.id);
+          // Enter LINK e-mode
+          await comptroller.connect(user).enterPool(LINK_POOL.id);
 
-          // Verify: user is in DOT pool, NOT in core pool
+          // Verify: user is in LINK pool, NOT in core pool
           const userPool = await comptroller.userPoolId(userAddr);
-          expect(userPool).to.equal(DOT_POOL.id);
+          expect(userPool).to.equal(LINK_POOL.id);
           expect(userPool).to.not.equal(0);
 
-          // CAN borrow DOT (e-mode market)
-          const dotBalBefore = await dotToken.balanceOf(userAddr);
-          await vDOTContract.connect(user).borrow(parseUnits("0.1", dotInfo.decimals));
-          expect(await dotToken.balanceOf(userAddr)).to.be.gt(dotBalBefore);
-          console.log("  In e-mode: CAN borrow DOT");
+          // CAN borrow LINK (e-mode market)
+          const linkBalBefore = await linkToken.balanceOf(userAddr);
+          await vLINKContract.connect(user).borrow(parseUnits("0.1", linkInfo.decimals));
+          expect(await linkToken.balanceOf(userAddr)).to.be.gt(linkBalBefore);
+          console.log("  In e-mode: CAN borrow LINK");
 
           // CANNOT borrow ETH (core-pool-only market) at the same time
           try {
@@ -1985,6 +1746,10 @@ forking(76766086, async () => {
           }
         });
       });
+    });
+
+    after(() => {
+      printLeverageResultsSummary();
     });
   });
 });

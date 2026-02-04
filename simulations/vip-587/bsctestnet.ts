@@ -6,7 +6,7 @@ import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChai
 import { forking, testVip } from "src/vip-framework";
 
 import { CORE_MARKETS } from "../../vips/vip-547/bsctestnet";
-import { EMODE_POOLS, vip800 } from "../../vips/vip-800/bsctestnet";
+import { EMODE_POOLS, vip587 } from "../../vips/vip-587/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -47,7 +47,7 @@ forking(85516647, async () => {
     });
   });
 
-  testVip("VIP-800", await vip800(), {
+  testVip("VIP-587", await vip587(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

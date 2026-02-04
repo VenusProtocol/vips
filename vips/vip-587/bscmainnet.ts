@@ -29,11 +29,55 @@ export const EMODE_POOLS = [
   createEmodePool("ADA", 10, "vADA", vADA, "0.63", { usdtMarketConfig: usdtConfig, usdcMarketConfig: usdcConfig }),
 ];
 
-export const vip800 = () => {
+export const vip587 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-800 [BNB Chain] Asset Migration from BNB core pool to isolated Emode pools",
-    description: "VIP-800 [BNB Chain] Asset Migration from BNB core pool to isolated Emode pools",
+    title: "VIP-587 [BNB Chain] The migration of certain assets from the Venus Core Pool to Isolated E-Mode(Part 1)",
+    description: `## Summary
+
+This VIP proposes the migration of certain assets from the Venus Core to Isolated E-Mode. Isolated E-Mode is a feature that allows riskier assets to be collateralised and borrowed while leveraging Core Pool liquidity and limiting associated risks.
+
+Assets were selected for migration based on project fundamentals, liquidity, utilisation rate, value to the protocol, and price volatility.
+
+**This proposal will be executed in two separate VIPs. This VIP represents Part 1 of the migration proposal.**
+
+If approved, this VIP will execute **Phase 1 (Buffer Phase)** of the migration:
+
+- Migrate 7 assets to Isolated E-Mode alongside USDT and USDC
+- Assets will exist in both Core Pool and Isolated E-Mode simultaneously
+- Existing Core Pool positions remain unaffected
+- Asset parameters (LTV, LT, supply/borrow caps, collateral cap, IRM) remain unchanged
+
+## Assets Proposed for Migration
+
+- LINK
+- UNI
+- AAVE
+- DOGE
+- BCH
+- TWT
+- ADA
+
+
+## Migration Phases
+
+**Phase 1: Buffer Phase (This VIP)**
+
+- Assets will exist in both Core Pool and Isolated E-Mode simultaneously
+- Users may choose to use assets in either mode
+- Existing Core Pool positions remain unaffected
+- Updates will be communicated via X and Telegram
+
+**Phase 2: Final Switch Phase (Future VIP)**
+
+- Assets will only be usable in Isolated E-Mode (with USDT and USDC)
+- Users must enable Isolated E-Mode to use these assets as collateral or borrow
+- Existing Core Pool positions remain unaffected
+
+## References
+
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/661/changes#diff-c31ce6dbded7aa36db06a47518f663c2b50f735caf6628c5611fe58c5cb30f5d)
+- [Community post](https://community.venus.io/t/asset-migration-from-core-pool-to-isolated-e-mode/5648)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -47,4 +91,4 @@ export const vip800 = () => {
   );
 };
 
-export default vip800;
+export default vip587;
