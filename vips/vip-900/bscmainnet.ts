@@ -45,7 +45,7 @@ This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and Pa
 3. Granting permissions for GUARDIAN and governance timelocks to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
 4. Granting permissions for DeviationSentinel to call required functions on all comptrollers (both isolated pools and core pool)
 5. Whitelisting keeper, GUARDIAN and governance timelocks as trusted keepers on DeviationSentinel
-6. Configuring CAKE token with PancakeSwap pool and 20% deviation threshold
+6. Configuring CAKE token with PancakeSwap pool, 20% deviation threshold with monitoring enabled.
 
 #### Description
 
@@ -84,7 +84,7 @@ For DeviationSentinel on any Comptroller:
 
 #### References
 
-- [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/658)
+- [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/666/)
 - [DeviationSentinel Contract](https://bscscan.com/address/${DEVIATION_SENTINEL})
 - [SentinelOracle Contract](https://bscscan.com/address/${SENTINEL_ORACLE})
 - [UniswapOracle Contract](https://bscscan.com/address/${UNISWAP_ORACLE})
@@ -138,7 +138,7 @@ For DeviationSentinel on any Comptroller:
       ]),
 
       // Whitelist Keeper, GUARDIAN and governance timelocks as trusted keepers so VIPs can call handleDeviation after parameter changes
-      ...[KEEPER_ADDRESS, GUARDIAN, ...GOVERNANCE_TIMELOCKS].flatMap((timelock: string) => ({
+      ...[KEEPER_ADDRESS, GUARDIAN, ...GOVERNANCE_TIMELOCKS].map((timelock: string) => ({
         target: DEVIATION_SENTINEL,
         signature: "setTrustedKeeper(address,bool)",
         params: [timelock, true],
