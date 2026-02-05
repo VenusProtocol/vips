@@ -16,7 +16,7 @@ export const USDT = "0x55d398326f99059fF775485246999027B3197955";
 /// 0.010044642857142858 * (192000 * 28 days) = 54,000 usd
 export const NEW_PRIME_SPEED_FOR_USDT = parseUnits("0.010044642857142858", 18);
 export const USDC_TOKENS_TO_SWAP = parseUnits("27000", 18);
-export const USDT_TOKENS_TO_RECEIVE = parseUnits("26900", 18);
+export const USDT_TOKENS_TO_RECEIVE = parseUnits("26950", 18);
 
 export const UNISWAP_SWAP_ROUTER = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
 
@@ -46,7 +46,10 @@ export const vip811 = () => {
       {
         target: PRIME_LIQUIDITY_PROVIDER,
         signature: "setTokensDistributionSpeed(address[],uint256[])",
-        params: [[USDT], [NEW_PRIME_SPEED_FOR_USDT]],
+        params: [
+          [USDT, USDC],
+          [NEW_PRIME_SPEED_FOR_USDT, 0],
+        ],
       },
 
       // Swap USDC to USDT

@@ -29,16 +29,16 @@ forking(79249790, async () => {
   let psr: Contract;
   let usdtPreviousBalance: any;
   let usdcPreviousBalance: any;
-  let normalTimelockUsdcPreviousBalance: any;
+  let normalTimelockUsdtPreviousBalance: any;
 
   before(async () => {
     primeLiquidityProvider = await ethers.getContractAt(PRIME_LIQUIDITY_PROVIDER_ABI, PRIME_LIQUIDITY_PROVIDER);
+    psr = await ethers.getContractAt(PSR_ABI, PSR);
     usdc = await ethers.getContractAt(ERC20_ABI, USDC);
     usdt = await ethers.getContractAt(ERC20_ABI, USDT);
     usdtPreviousBalance = await usdt.balanceOf(PRIME_LIQUIDITY_PROVIDER);
     usdcPreviousBalance = await usdc.balanceOf(PRIME_LIQUIDITY_PROVIDER);
-    normalTimelockUsdcPreviousBalance = await usdc.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
-    psr = await ethers.getContractAt(PSR_ABI, PSR);
+    normalTimelockUsdtPreviousBalance = await usdt.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
   });
 
   describe("Pre-VIP state", async () => {
@@ -60,15 +60,25 @@ forking(79249790, async () => {
       // percentage distribution updates for those two assets
       await expectEvents(txResponse, [PSR_ABI], ["DistributionConfigUpdated"], [2]);
 
-      // setTokensDistributionSpeed for USDT
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
+      // setTokensDistributionSpeed for USDT and USDC
+      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [2]);
     },
   });
 
   describe("Post-VIP behavior", async () => {
+    it("check current distribution configs", async () => {
+      expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 0)).to.equal(2000);
+      expect(await psr.getPercentageDistribution(USDC_PRIME_CONVERTER, 0)).to.equal(0);
+      expect(await psr.getPercentageDistribution(USDC_PRIME_CONVERTER, 1)).to.equal(0);
+      expect(await psr.getPercentageDistribution(USDT_PRIME_CONVERTER, 1)).to.equal(0);
+    });
+
     it("should update Prime rewards distribution speed for USDC and USDT", async () => {
       const usdtSpeed = await primeLiquidityProvider.tokenDistributionSpeeds(USDT);
       expect(usdtSpeed).to.equal(NEW_PRIME_SPEED_FOR_USDT);
+
+      const usdcSpeed = await primeLiquidityProvider.tokenDistributionSpeeds(USDC);
+      expect(usdcSpeed).to.equal(0);
     });
 
     it("check sweep and token conversion status", async () => {
@@ -84,9 +94,8 @@ forking(79249790, async () => {
 
       // Normal timelock USDT balance remains the same
       const normalTimelockUsdtBalance = await usdt.balanceOf(NETWORK_ADDRESSES.bscmainnet.NORMAL_TIMELOCK);
-      expect(normalTimelockUsdcPreviousBalance).to.be.closeTo(normalTimelockUsdtBalance, parseUnits("100", 18)); // +-100
-      const NTusdtIncreasedBalance = normalTimelockUsdtBalance.sub(normalTimelockUsdcPreviousBalance);
-
+      expect(normalTimelockUsdtPreviousBalance).to.be.closeTo(normalTimelockUsdtBalance, parseUnits("100", 18)); // +-100
+      const NTusdtIncreasedBalance = normalTimelockUsdtBalance.sub(normalTimelockUsdtPreviousBalance);
       console.log("NT USDT BALANCE DIFFERENCE :", formatUnits(NTusdtIncreasedBalance, 18));
     });
   });
