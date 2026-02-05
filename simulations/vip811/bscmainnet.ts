@@ -22,7 +22,7 @@ import ERC20_ABI from "./abi/ERC20.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import PSR_ABI from "./abi/protocolShareReserve.json";
 
-forking(79249790, async () => {
+forking(79390567, async () => {
   let primeLiquidityProvider: Contract;
   let usdc: Contract;
   let usdt: Contract;
