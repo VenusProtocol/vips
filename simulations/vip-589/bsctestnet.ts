@@ -1,10 +1,10 @@
 /**
  * =============================================================================
- * VIP-810 Test Suite - BNB Chain Testnet
+ * VIP-589 Test Suite - BNB Chain Testnet
  * =============================================================================
  *
  * Overview:
- * VIP-810 adds the U market to the Stablecoins e-mode pool on BNB Chain Testnet.
+ * VIP-589 adds the U market to the Stablecoins e-mode pool on BNB Chain Testnet.
  * U is configured as a borrow-only asset with CF=0% and LT=0%, meaning it
  * cannot be used as collateral but can be borrowed against other stablecoins
  * in the pool.
@@ -16,7 +16,7 @@
  *    - Confirms U market is not yet listed in the pool
  *
  * 2. VIP Execution
- *    - Executes VIP-810 proposal on testnet
+ *    - Executes VIP-589 proposal on testnet
  *    - Verifies emission of required events:
  *      * PoolMarketInitialized (1 event)
  *      * NewLiquidationIncentive (1 event)
@@ -46,7 +46,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { EMODE_POOL_SPECS, vU, vip810 } from "../../vips/vip-810/bsctestnet";
+import { EMODE_POOL_SPECS, vU, vip589 } from "../../vips/vip-589/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -72,7 +72,7 @@ forking(87217291, async () => {
     });
   });
 
-  testVip("VIP-810 Add U market to Stablecoins emode pool", await vip810(), {
+  testVip("VIP-589 Add U market to Stablecoins emode pool", await vip589(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

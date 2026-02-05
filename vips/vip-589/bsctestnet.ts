@@ -3,8 +3,8 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bscmainnet } = NETWORK_ADDRESSES;
-export const vU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
+const { bsctestnet } = NETWORK_ADDRESSES;
+export const vU = "0x93969F17d4c1C7B22000eA26D5C2766E0f616D90";
 
 export const EMODE_POOL_SPECS = {
   label: "Stablecoins",
@@ -21,11 +21,11 @@ export const EMODE_POOL_SPECS = {
   },
 };
 
-export const vip810 = () => {
+export const vip589 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-810 [BNB Chain] Add U market to the stablecoin Emode pool",
-    description: "VIP-810 [BNB Chain] Add U market to the stablecoin Emode pool",
+    title: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
+    description: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -35,12 +35,12 @@ export const vip810 = () => {
     [
       // Add market to Stablecoins emode
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "addPoolMarkets(uint96[],address[])",
         params: [Array(EMODE_POOL_SPECS.markets.length).fill(EMODE_POOL_SPECS.id), EMODE_POOL_SPECS.markets],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setLiquidationIncentive(uint96,address,uint256)",
         params: [
           EMODE_POOL_SPECS.id,
@@ -49,7 +49,7 @@ export const vip810 = () => {
         ],
       },
       {
-        target: bscmainnet.UNITROLLER,
+        target: bsctestnet.UNITROLLER,
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [
           EMODE_POOL_SPECS.id,

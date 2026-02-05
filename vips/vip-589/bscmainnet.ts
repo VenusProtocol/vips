@@ -4,14 +4,13 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
-
 export const PSR = "0xCa01D5A9A248a830E9D93231e791B1afFed7c446";
 export const USDT_PRIME_CONVERTER = "0xD9f101AA67F3D72662609a2703387242452078C3";
 export const USDC_PRIME_CONVERTER = "0xa758c9C215B6c4198F0a0e3FA46395Fa15Db691b";
 export const PRIME_LIQUIDITY_PROVIDER = "0x23c4F844ffDdC6161174eB32c770D4D8C07833F2";
-
 export const USDC = "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+
 /// assume 192000 blocks per Day
 /// 0.00855654761904762 * (192000 * 28 days) = 46,000 USD
 export const NEW_PRIME_SPEED_FOR_USDT = parseUnits("0.00855654761904762", 18);
@@ -20,18 +19,60 @@ export const USDT_TOKENS_TO_RECEIVE = parseUnits("19950", 18);
 
 export const UNISWAP_SWAP_ROUTER = "0x1b81D678ffb9C0263b24A97847620C99d213eB14";
 
-export const vip811 = () => {
+export const vU = "0x3d5E269787d562b74aCC55F18Bd26C5D09Fa245E";
+
+export const EMODE_POOL_SPECS = {
+  label: "Stablecoins",
+  id: 1,
+  markets: [vU],
+  marketsConfig: {
+    vU: {
+      address: vU,
+      collateralFactor: parseUnits("0", 18),
+      liquidationThreshold: parseUnits("0", 18),
+      liquidationIncentive: parseUnits("1", 18),
+      borrowAllowed: true,
+    },
+  },
+};
+
+export const vip589 = () => {
   const meta = {
     version: "v2",
-    title: "vip811",
-    description: "",
-    forDescription: "Execute this proposal",
-    againstDescription: "Do not execute this proposal",
-    abstainDescription: "Indifferent to execution",
+    title: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
+    description: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
+    forDescription: "I agree that Venus Protocol should proceed with this proposal",
+    againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
+    abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
   };
 
   return makeProposal(
     [
+      // Add market to Stablecoins emode
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "addPoolMarkets(uint96[],address[])",
+        params: [Array(EMODE_POOL_SPECS.markets.length).fill(EMODE_POOL_SPECS.id), EMODE_POOL_SPECS.markets],
+      },
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "setLiquidationIncentive(uint96,address,uint256)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vU.address,
+          EMODE_POOL_SPECS.marketsConfig.vU.liquidationIncentive,
+        ],
+      },
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "setIsBorrowAllowed(uint96,address,bool)",
+        params: [
+          EMODE_POOL_SPECS.id,
+          EMODE_POOL_SPECS.marketsConfig.vU.address,
+          EMODE_POOL_SPECS.marketsConfig.vU.borrowAllowed,
+        ],
+      },
+
       // Adjust Prime Rewards Distributions
       {
         target: PSR,
@@ -94,5 +135,3 @@ export const vip811 = () => {
     ProposalType.REGULAR,
   );
 };
-
-export default vip811;
