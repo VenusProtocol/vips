@@ -10,6 +10,7 @@ import vip900, {
   ACM,
   CAKE,
   CAKE_PCS_POOL,
+  CORE_POOL_COMPTROLLER,
   DEVIATION_SENTINEL,
   GOVERNANCE_TIMELOCKS,
   GUARDIAN,
@@ -42,6 +43,7 @@ forking(78835203, async () => {
   let impersonatedSentinelOracle: SignerWithAddress;
   let impersonatedUniswapOracle: SignerWithAddress;
   let impersonatedPancakeSwapOracle: SignerWithAddress;
+  let impersonatedCorePoolComptroller: SignerWithAddress;
 
   before(async () => {
     accessControlManager = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, ACM);
@@ -54,6 +56,7 @@ forking(78835203, async () => {
     impersonatedSentinelOracle = await initMainnetUser(SENTINEL_ORACLE, ethers.utils.parseEther("1"));
     impersonatedUniswapOracle = await initMainnetUser(UNISWAP_ORACLE, ethers.utils.parseEther("1"));
     impersonatedPancakeSwapOracle = await initMainnetUser(PANCAKESWAP_ORACLE, ethers.utils.parseEther("1"));
+    impersonatedCorePoolComptroller = await initMainnetUser(CORE_POOL_COMPTROLLER, ethers.utils.parseEther("1"));
   });
 
   describe("Pre-VIP behavior", () => {
@@ -117,18 +120,14 @@ forking(78835203, async () => {
     // DeviationSentinel should not have comptroller permissions
     // ========================================
 
-    it("DeviationSentinel should not have permissions on any comptroller", async () => {
+    it("DeviationSentinel should not have permissions on core pool comptroller", async () => {
+      const acm = accessControlManager.connect(impersonatedCorePoolComptroller);
+      expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, "setActionsPaused(address[],uint8[],bool)")).to.equal(false);
+      expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, "_setActionsPaused(address[],uint8[],bool)")).to.equal(
+        false,
+      );
       expect(
-        await accessControlManager.isAllowedToCall(DEVIATION_SENTINEL, "setActionsPaused(address[],uint8[],bool)"),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.isAllowedToCall(DEVIATION_SENTINEL, "setCollateralFactor(address,uint256,uint256)"),
-      ).to.equal(false);
-      expect(
-        await accessControlManager.isAllowedToCall(
-          DEVIATION_SENTINEL,
-          "setCollateralFactor(uint96,address,uint256,uint256)",
-        ),
+        await acm.isAllowedToCall(DEVIATION_SENTINEL, "setCollateralFactor(uint96,address,uint256,uint256)"),
       ).to.equal(false);
     });
   });
@@ -234,27 +233,16 @@ forking(78835203, async () => {
     // DeviationSentinel permissions on Comptrollers
     // ============================================
 
-    it("DeviationSentinel should have setActionsPaused permission on any comptroller", async () => {
-      expect(
-        await accessControlManager.isAllowedToCall(DEVIATION_SENTINEL, "setActionsPaused(address[],uint8[],bool)"),
-      ).to.equal(true);
-      expect(
-        await accessControlManager.isAllowedToCall(DEVIATION_SENTINEL, "_setActionsPaused(address[],uint8[],bool)"),
-      ).to.equal(true);
+    it("DeviationSentinel should have setActionsPaused permission on core pool comptroller", async () => {
+      const acm = accessControlManager.connect(impersonatedCorePoolComptroller);
+      expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, "setActionsPaused(address[],uint8[],bool)")).to.equal(true);
+      expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, "_setActionsPaused(address[],uint8[],bool)")).to.equal(true);
     });
 
-    it("DeviationSentinel should have setCollateralFactor (isolated) permission on any comptroller", async () => {
+    it("DeviationSentinel should have setCollateralFactor (core pool) permission on core pool comptroller", async () => {
+      const acm = accessControlManager.connect(impersonatedCorePoolComptroller);
       expect(
-        await accessControlManager.isAllowedToCall(DEVIATION_SENTINEL, "setCollateralFactor(address,uint256,uint256)"),
-      ).to.equal(true);
-    });
-
-    it("DeviationSentinel should have setCollateralFactor (core pool) permission on any comptroller", async () => {
-      expect(
-        await accessControlManager.isAllowedToCall(
-          DEVIATION_SENTINEL,
-          "setCollateralFactor(uint96,address,uint256,uint256)",
-        ),
+        await acm.isAllowedToCall(DEVIATION_SENTINEL, "setCollateralFactor(uint96,address,uint256,uint256)"),
       ).to.equal(true);
     });
 

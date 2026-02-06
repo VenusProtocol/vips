@@ -1,4 +1,3 @@
-import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
@@ -10,6 +9,7 @@ export const DEVIATION_SENTINEL = "0x6599C15cc8407046CD91E5c0F8B7f765fF914870";
 export const SENTINEL_ORACLE = "0x58eae0Cf4215590E19860b66b146C5d539cb6f14";
 export const UNISWAP_ORACLE = "0x8FD05458faf220B2324c4BFbb29DBC4B3CF6f23f";
 export const PANCAKESWAP_ORACLE = "0x44B72078240A3509979faF450085Fa818401D32E";
+export const CORE_POOL_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
 
 // GUARDIAN address
 export const GUARDIAN = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
@@ -188,30 +188,18 @@ For DeviationSentinel on any Comptroller:
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
+        params: [CORE_POOL_COMPTROLLER, "setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "_setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
+        params: [CORE_POOL_COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
       },
-
-      // Grant DeviationSentinel permission to set collateral factor on isolated pool comptrollers
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", DEVIATION_SENTINEL],
-      },
-
       // Grant DeviationSentinel permission to set collateral factor on core pool comptroller (with emode poolId)
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
-        params: [
-          ethers.constants.AddressZero,
-          "setCollateralFactor(uint96,address,uint256,uint256)",
-          DEVIATION_SENTINEL,
-        ],
+        params: [CORE_POOL_COMPTROLLER, "setCollateralFactor(uint96,address,uint256,uint256)", DEVIATION_SENTINEL],
       },
 
       // ========================================
