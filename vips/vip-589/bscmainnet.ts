@@ -39,8 +39,37 @@ export const EMODE_POOL_SPECS = {
 export const vip589 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
-    description: "VIP-589 [BNB Chain] Add U market to the stablecoin Emode pool",
+    title: "VIP-589 [BNB Chain] U Stablecoin E-Mode Listing and February 2026 Prime Rewards Adjustment",
+    description: `**Description :**
+
+This proposal consolidates two governance initiatives discussed in the Venus community into a single VIP for on-chain execution:
+
+1. **Addition of U as a borrow-only asset in the Stablecoin E-Mode group**, as outlined in the community forum post: [**Add U Asset to Stablecoin E-Mode Group](https://community.venus.io/t/add-u-asset-to-stablecoin-e-mode-group/5665)**
+
+The U market proposal enables additional borrowing flexibility by listing U within the Stablecoin E-Mode group as a **borrow-only asset**, with all collateral and liquidation-related parameters set to **0%**, ensuring no additional liquidation or systemic risk is introduced.
+
+2. **Adjustment of Prime Rewards allocation on BNB Chain for February 2026**, as described in
+    
+    [**[BNB Chain] Adjust Prime Rewards Allocation for Feb 2026**](https://community.venus.io/t/bnb-chain-adjust-prime-rewards-allocation-for-feb-2026/5667)
+    
+    The Prime Rewards adjustment redistributes protocol revenue generated in January 2026 into February 2026 Prime Rewards, with incentives focused exclusively on **USDT suppliers**, based on observed liquidity contribution and reserve generation.
+    
+
+**Action :**
+
+1. **U Stablecoin E-Mode Listing**
+- Add **U** as a market in the **Stablecoin E-Mode** group
+- Enable borrowing for U
+- Disable collateral usage for U
+- Set collateral factor to **0%**
+- Set liquidation threshold to **0%**
+- Set liquidation incentive to **0%**
+1. **February 2026 Prime Rewards Adjustment**
+- Allocate **$46,000 in Prime Rewards** on BNB Chain for February 2026 while maintaining a **20% buffer** in the Prime budget to account for market volatility
+- Distribute **100% of Prime Rewards to USDT suppliers**
+- Apply rewards exclusively to the **supply side**, with no borrow-side incentives
+
+If approved, this VIP authorises the execution of both the **U Stablecoin E-Mode listing** and the **February 2026 Prime Rewards allocation adjustment** on BNB Chain.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -135,3 +164,5 @@ export const vip589 = () => {
     ProposalType.REGULAR,
   );
 };
+
+export default vip589;
