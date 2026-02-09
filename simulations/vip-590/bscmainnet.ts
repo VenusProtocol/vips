@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip900, {
+import vip590, {
   ACM,
   CAKE,
   CAKE_PCS_POOL,
@@ -18,7 +18,7 @@ import vip900, {
   PANCAKESWAP_ORACLE,
   SENTINEL_ORACLE,
   UNISWAP_ORACLE,
-} from "../../vips/vip-900/bscmainnet";
+} from "../../vips/vip-590/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import DEX_ORACLE_ABI from "./abi/DexOracle.json";
@@ -132,7 +132,7 @@ forking(78835203, async () => {
     });
   });
 
-  testVip("VIP-900", await vip900(), {
+  testVip("VIP-590", await vip590(), {
     callbackAfterExecution: async txResponse => {
       // 4 contracts accept ownership
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["OwnershipTransferred"], [4]);

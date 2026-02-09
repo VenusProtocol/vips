@@ -32,55 +32,38 @@ export const GOVERNANCE_TIMELOCKS = [
   bscmainnet.CRITICAL_TIMELOCK,
 ];
 
-export const vip900 = () => {
+export const vip590 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-900 Configure DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle on BSC Mainnet",
-    description: `#### Summary
+    title: "VIP-590 [BNB Chain] Enable Emergency Brake in Venus Core",
+    description: `## Summary
 
-This VIP configures the DeviationSentinel, SentinelOracle, UniswapOracle, and PancakeSwapOracle contracts on BSC Mainnet by:
+This VIP will enable **Emergency Brake** function in Venus core through configuring **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **PancakeSwapOracle** on BNB Chain mainnet. The goal is to enable automated deviation monitoring, trusted keeper operations, and oracle configuration while ensuring governance retains full control.
 
-1. Accepting ownership of all four contracts
-2. Granting permissions for GUARDIAN and governance timelocks to call functions on DeviationSentinel
-3. Granting permissions for GUARDIAN and governance timelocks to call functions on SentinelOracle, UniswapOracle, and PancakeSwapOracle
-4. Granting permissions for DeviationSentinel to call required functions on all comptrollers (both isolated pools and core pool)
-5. Whitelisting keeper, GUARDIAN and governance timelocks as trusted keepers on DeviationSentinel
-6. Configuring CAKE token with PancakeSwap pool, 20% deviation threshold with monitoring enabled.
+If approved, this VIP will:
 
-#### Description
+- Governance accept ownership of all four contracts
+- Grant keeper and governance timelocks the required permissions on DeviationSentinel
+- Grant keeper permissions on SentinelOracle and DEX oracles
+- Allow DeviationSentinel to pause actions and adjust collateral factors across comptrollers
+- Whitelist governance timelocks as trusted keepers
+- Enable Emergency Brake for $CAKE with PancakeSwap pool, 20% deviation threshold
 
-**DeviationSentinel** monitors price deviations between the ResilientOracle and SentinelOracle. When significant deviations are detected, it can pause specific market actions (borrow, mint) and adjust collateral factors to protect the protocol.
+## What This VIP Enables
 
-**SentinelOracle** is an aggregator oracle that routes price requests to appropriate DEX oracles and supports direct price overrides.
+**DeviationSentinel**
 
-**UniswapOracle** and **PancakeSwapOracle** are DEX-based oracles that provide TWAP prices from Uniswap V3 and PancakeSwap V3 pools respectively.
+- Monitors price deviations between ResilientOracle and SentinelOracle
+- Can pause mint/borrow actions and adjust CFs when deviations exceed thresholds
 
-**Permissions being granted:**
+**SentinelOracle**
 
-For GUARDIAN and governance timelocks on DeviationSentinel:
-- setTrustedKeeper(address,bool)
-- setTokenConfig(address,(uint8,bool))
-- setTokenMonitoringEnabled(address,bool)
-- resetMarketState(address)
+- Routes price queries to DEX oracles
+- Supports direct price overrides (keeper-set)
 
-For GUARDIAN and governance timelocks on SentinelOracle:
-- setTokenOracleConfig(address,address)
-- setDirectPrice(address,uint256)
+**UniswapOracle / PancakeSwapOracle**
 
-For GUARDIAN and governance timelocks on UniswapOracle:
-- setPoolConfig(address,address)
-
-For GUARDIAN and governance timelocks on PancakeSwapOracle:
-- setPoolConfig(address,address)
-
-For DeviationSentinel on any Comptroller:
-- setActionsPaused(address[],uint8[],bool) - to pause/unpause borrow and mint actions
-- setCollateralFactor(address,uint256,uint256) - for isolated pools
-- setCollateralFactor(uint96,address,uint256,uint256) - for core pool with emode groups
-
-**CAKE token configuration:**
-- PancakeSwap pool: 0x7f51c8AaA6B0599aBd16674e2b17FEc7a9f674A1
-- Deviation threshold: 20%
+- Provide TWAP prices from Uniswap V3 / PancakeSwap V3 pools
 
 #### References
 
@@ -232,4 +215,4 @@ For DeviationSentinel on any Comptroller:
   );
 };
 
-export default vip900;
+export default vip590;
