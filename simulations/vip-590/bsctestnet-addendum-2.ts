@@ -11,8 +11,8 @@ import {
   NEW_CF,
   VETH_CORE,
   VWBNB_CORE,
-  vip900TestnetAddendum2,
-} from "../../vips/vip-900/bsctestnet-addendum-2";
+  vip590TestnetAddendum2,
+} from "../../vips/vip-590/bsctestnet-addendum-2";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
@@ -88,7 +88,7 @@ forking(84038082, async () => {
     });
   });
 
-  testVip("VIP-900 Addendum 2: Unpause Mint and Update CF", await vip900TestnetAddendum2(), {
+  testVip("VIP-590 Addendum 2: Unpause Mint and Update CF", await vip590TestnetAddendum2(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["ActionPausedMarket", "NewCollateralFactor"], [8, 2]);
     },

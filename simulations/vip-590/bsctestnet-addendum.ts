@@ -4,10 +4,10 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { ACM, DEVIATION_SENTINEL, vip900TestnetAddendum } from "../../vips/vip-900/bsctestnet-addendum";
+import { ACM, DEVIATION_SENTINEL, vip590TestnetAddendum } from "../../vips/vip-590/bsctestnet-addendum";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
-forking(82830213, async () => {
+forking(80138518, async () => {
   let accessControlManager: Contract;
 
   before(async () => {
@@ -26,7 +26,7 @@ forking(82830213, async () => {
     });
   });
 
-  testVip("VIP-900 Addendum: Grant _setActionsPaused permission", await vip900TestnetAddendum(), {
+  testVip("VIP-590 Addendum: Grant _setActionsPaused permission", await vip590TestnetAddendum(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [1]);
     },

@@ -14,10 +14,10 @@ const Action = {
 export const NEW_CF = "800000000000000000";
 export const LT = "800000000000000000";
 
-export const vip900TestnetAddendum2 = () => {
+export const vip590TestnetAddendum2 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-900 Addendum 2: Unpause Mint and Update CF for vETH_Core and vWBNB_Core on BSC Testnet",
+    title: "VIP-590 Addendum 2: Unpause Mint and Update CF for vETH_Core and vWBNB_Core on BSC Testnet",
     description: ``,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -55,4 +55,4 @@ export const vip900TestnetAddendum2 = () => {
   );
 };
 
-export default vip900TestnetAddendum2;
+export default vip590TestnetAddendum2;
