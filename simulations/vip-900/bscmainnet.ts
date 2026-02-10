@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { expectEvents } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip900, {
@@ -15,6 +15,7 @@ import COMPTROLLER_ABI from "./abi/FlashLoanFacet.json";
 const SINGLE_TOKEN_CONVERTER_ABI = [
   "function owner() view returns (address)",
   "function pendingOwner() view returns (address)",
+  "function acceptOwnership() external",
 ];
 
 forking(80413671, async () => {
@@ -45,6 +46,13 @@ forking(80413671, async () => {
 
     it("Guardian 2 should be set as pending owner of WBNBBurnConverter", async () => {
       expect(await wbnbBurnConverter.pendingOwner()).to.equal(GUARDIAN_2);
+    });
+
+    it("Guardian 2 should be able to accept ownership of WBNBBurnConverter", async () => {
+      const guardian2Signer = await initMainnetUser(GUARDIAN_2, ethers.utils.parseEther("1"));
+      await wbnbBurnConverter.connect(guardian2Signer).acceptOwnership();
+      expect(await wbnbBurnConverter.owner()).to.equal(GUARDIAN_2);
+      expect(await wbnbBurnConverter.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
   });
 });
