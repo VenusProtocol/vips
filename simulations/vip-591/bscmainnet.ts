@@ -9,7 +9,7 @@ import vip900, {
   GUARDIAN_2,
   UNITROLLER,
   WBNB_BURN_CONVERTER,
-} from "../../vips/vip-900/bscmainnet";
+} from "../../vips/vip-591/bscmainnet";
 import COMPTROLLER_ABI from "./abi/FlashLoanFacet.json";
 
 const SINGLE_TOKEN_CONVERTER_ABI = [

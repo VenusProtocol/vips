@@ -6,10 +6,10 @@ export const WBNB_BURN_CONVERTER = "0x9eF79830e626C8ccA7e46DCEd1F90e51E7cFCeBE";
 export const CHAINLINK_OEV_SEARCHER = "0x82aC8c837E31D47c6508CBfD4c1627F04dDe5298";
 export const GUARDIAN_2 = "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B";
 
-export const vip900 = () => {
+export const vip591 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-900 Add Chainlink OEV Searcher to Flashloan Whitelist and Transfer WBNBBurnConverter Ownership",
+    title: "VIP-591 Add Chainlink OEV Searcher to Flashloan Whitelist and Transfer WBNBBurnConverter Ownership",
     description: `#### Summary
 
 This VIP performs two actions:
@@ -45,4 +45,4 @@ This VIP performs two actions:
   );
 };
 
-export default vip900;
+export default vip591;
