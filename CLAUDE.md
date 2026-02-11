@@ -63,16 +63,27 @@ Converts an array of `Command` objects into a `Proposal`. Automatically handles 
 
 ```typescript
 // vips/vip-NNN.ts
-import { makeProposal } from "src/utils";
 import { ProposalType } from "src/types";
+import { makeProposal } from "src/utils";
 
 export const vipNNN = () => {
-  const meta = { version: "v2", title: "...", description: "...", forDescription: "...", againstDescription: "...", abstainDescription: "..." };
-  return makeProposal([
-    { target: "0x...", signature: "functionName(type1,type2)", params: [arg1, arg2] },
-    // Cross-chain command:
-    { target: "0x...", signature: "functionName(type)", params: [arg], dstChainId: LzChainId.ethereum },
-  ], meta, ProposalType.REGULAR);
+  const meta = {
+    version: "v2",
+    title: "...",
+    description: "...",
+    forDescription: "...",
+    againstDescription: "...",
+    abstainDescription: "...",
+  };
+  return makeProposal(
+    [
+      { target: "0x...", signature: "functionName(type1,type2)", params: [arg1, arg2] },
+      // Cross-chain command:
+      { target: "0x...", signature: "functionName(type)", params: [arg], dstChainId: LzChainId.ethereum },
+    ],
+    meta,
+    ProposalType.REGULAR,
+  );
 };
 export default vipNNN;
 ```
@@ -82,12 +93,17 @@ export default vipNNN;
 ```typescript
 // simulations/vip-NNN/simulations.ts
 import { forking, testVip } from "src/vip-framework";
+
 import { vipNNN } from "../../vips/vip-NNN";
 
 forking(BLOCK_NUMBER, async () => {
-  describe("Pre-VIP behavior", () => { /* assert current state */ });
+  describe("Pre-VIP behavior", () => {
+    /* assert current state */
+  });
   testVip("VIP-NNN Description", await vipNNN());
-  describe("Post-VIP behavior", () => { /* assert state changes */ });
+  describe("Post-VIP behavior", () => {
+    /* assert state changes */
+  });
 });
 ```
 
@@ -126,19 +142,19 @@ BSC is the governance hub. Commands targeting other chains use `dstChainId` (Lay
 
 ### VIP Types
 
-| Type           | Voting Period | Execution Delay | Cross-chain Extra Delay | Use Case                    |
-| -------------- | ------------- | --------------- | ----------------------- | --------------------------- |
-| **Normal**     | 24h           | 48h             | +48h                    | Regular proposals           |
-| **Fast-track** | 24h           | 6h              | +6h                     | Semi-urgent adjustments     |
-| **Critical**   | 6h            | 1h              | +1h                     | Emergency security fixes    |
+| Type           | Voting Period | Execution Delay | Cross-chain Extra Delay | Use Case                 |
+| -------------- | ------------- | --------------- | ----------------------- | ------------------------ |
+| **Normal**     | 24h           | 48h             | +48h                    | Regular proposals        |
+| **Fast-track** | 24h           | 6h              | +6h                     | Semi-urgent adjustments  |
+| **Critical**   | 6h            | 1h              | +1h                     | Emergency security fixes |
 
 ### Timeline Estimates
 
-| Scenario            | Pre-work | On-chain | Total     |
-| ------------------- | -------- | -------- | --------- |
-| **BSC Normal**      | 2-3 days | 3 days   | **5-6 days** |
-| **Cross-chain Normal** | 2-3 days | 5 days | **7-8 days** |
-| **Critical**        | varies   | ~7h      | faster    |
+| Scenario               | Pre-work | On-chain | Total        |
+| ---------------------- | -------- | -------- | ------------ |
+| **BSC Normal**         | 2-3 days | 3 days   | **5-6 days** |
+| **Cross-chain Normal** | 2-3 days | 5 days   | **7-8 days** |
+| **Critical**           | varies   | ~7h      | faster       |
 
 ### Full Workflow
 
@@ -186,6 +202,7 @@ cast implementation <proxy_address> --rpc-url <rpc_url>
 ## Environment
 
 Requires archive node URLs in `.env` (see `.env.example`):
+
 ```
 ARCHIVE_NODE_bscmainnet=https://...
 ARCHIVE_NODE_ethereum=https://...

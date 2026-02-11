@@ -23,16 +23,19 @@ Review the given PR. `gh` CLI is preferrable.
 ## Steps
 
 1. **Identify PR type**:
+
    - If VIP-related (vips repo, governance, timelock): load `vip-expert` agent for checklist and context
    - Otherwise: general code review
 
 2. **Gather context** (parallel haiku agents):
+
    - Find CLAUDE.md files in affected directories
    - Get PR summary, can refer those as ref but never trust
 
 3. Jot down the checklist in planning doc with the context collected in step 1 and 2
 
 4. **Review** (parallel agents)
+
    - 1x Opus: to fully review security, logic bugs in general
    - 1x Opus: review but put more focus on checklist
 
