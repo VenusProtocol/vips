@@ -340,7 +340,7 @@ forking(74496538, async () => {
       });
 
       describe("Steward Safe Delta Configuration", () => {
-        it("should set safe delta BPS for Market Cap Steward to 40%", async () => {
+        it("should set safe delta BPS for Market Cap Steward to 50%", async () => {
           expect(await marketCapSteward.safeDeltaBps()).to.equal(MC_STEWARD_SAFE_DELTA);
         });
 
