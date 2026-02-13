@@ -60,6 +60,12 @@ forking(80964126, async () => {
       }
     });
 
+    it("has no BoundValidator config for TWT", async () => {
+      const cfg = await boundValidator.validateConfigs(NEW_TWT_ORACLE_CONFIG.ASSET);
+      expect(cfg.upperBoundRatio).to.equal(0);
+      expect(cfg.lowerBoundRatio).to.equal(0);
+    });
+
     it("stores current resilient oracle prices for all assets", async () => {
       for (const { ASSET } of NEW_ORACLE_CONFIG) {
         const price = await resilientOracle.getPrice(ASSET);
@@ -77,6 +83,7 @@ forking(80964126, async () => {
         ["TokenConfigAdded", "TokenConfigAdded"],
         [totalTokenConfigAdded, totalTokenConfigAdded],
       );
+      await expectEvents(txResponse, [BOUND_VALIDATOR_ABI], ["ValidateConfigAdded"], [1]);
     },
   });
 
