@@ -16,7 +16,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 import LEVERAGE_MANAGER_ABI from "./abi/LeverageStrategiesManager.json";
 import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
-import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
+import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
