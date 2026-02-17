@@ -49,16 +49,19 @@ forking(90876709, async () => {
       expect(await comptroller.authorizedFlashLoan(LEVERAGE_STRATEGIES_MANAGER)).to.equal(false);
     });
 
-    it("SwapHelper should have NORMAL_TIMELOCK as owner", async () => {
+    it("SwapHelper should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
       expect(await swapHelper.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await swapHelper.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
-    it("LeverageStrategiesManager should have NORMAL_TIMELOCK as pending owner", async () => {
+    it("LeverageStrategiesManager should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
       expect(await leverageStrategiesManager.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await leverageStrategiesManager.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
-    it("RelativePositionManager should have NORMAL_TIMELOCK as pending owner", async () => {
+    it("RelativePositionManager should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
       expect(await relativePositionManager.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await relativePositionManager.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
     });
 
     it("Timelocks/Guardian should not have ACM permissions on RelativePositionManager", async () => {
