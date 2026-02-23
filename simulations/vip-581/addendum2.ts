@@ -22,7 +22,7 @@ import {
 } from "../../vips/vip-581/bscmainnet";
 import VTOKEN_ABI from "../vip-567/abi/VToken.json";
 import LEVERAGE_STRATEGIES_MANAGER_ABI from "../vip-576/abi/LeverageStrategiesManager.json";
-import SWAP_HELPER_ABI from "../vip-600/abi/SwapHelper.json";
+import SWAP_HELPER_ABI from "../vip-593/abi/SwapHelper.json";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";

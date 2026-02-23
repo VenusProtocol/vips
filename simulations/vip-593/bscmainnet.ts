@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { SWAP_HELPER, SWAP_ROUTER, UNITROLLER, vip600 } from "../../vips/vip-600/bscmainnet";
+import { SWAP_HELPER, SWAP_ROUTER, UNITROLLER, vip593 } from "../../vips/vip-593/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelper.json";
@@ -404,7 +404,7 @@ forking(FORK_BLOCK, async () => {
   // VIP Execution
   // ===========================================================================
 
-  testVip("VIP-600", await vip600(), {
+  testVip("VIP-593", await vip593(), {
     callbackAfterExecution: async txResponse => {
       const receipt = await txResponse.wait();
       const events = parseEventFromReceipt(receipt, "OwnershipTransferred");

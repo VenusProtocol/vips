@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import { SWAP_HELPER, SWAP_ROUTER, UNITROLLER, vip600 } from "../../vips/vip-600/bsctestnet";
+import { SWAP_HELPER, SWAP_ROUTER, UNITROLLER, vip593 } from "../../vips/vip-593/bsctestnet";
 import SWAP_ROUTER_ABI from "./abi/SwapRouter.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -32,7 +32,7 @@ forking(85710269, async () => {
     });
   });
 
-  testVip("VIP-600", await vip600(), {});
+  testVip("VIP-593", await vip593(), {});
 
   describe("Post-VIP behavior", () => {
     it("SwapRouter should have NORMAL_TIMELOCK as owner", async () => {
