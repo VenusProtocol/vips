@@ -245,12 +245,12 @@ forking(80591637, async () => {
           await expect(
             comptroller
               .connect(collateralFactorStewardSigner)
-            ["setCollateralFactor(uint96,address,uint256,uint256)"](
-              0,
-              vBTC,
-              parseUnits("0.7", 18),
-              parseUnits("0.75", 18),
-            ),
+              ["setCollateralFactor(uint96,address,uint256,uint256)"](
+                0,
+                vBTC,
+                parseUnits("0.7", 18),
+                parseUnits("0.75", 18),
+              ),
           ).to.be.revertedWith("invalid resilient oracle price"); // this reverts due to stale period but it means passed the ACM check
         });
 
