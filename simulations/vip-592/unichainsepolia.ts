@@ -16,7 +16,7 @@ import vip600, {
   UNICHAIN_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   UNICHAIN_SEPOLIA_IRM_STEWARD,
   UNICHAIN_SEPOLIA_MC_STEWARD,
-} from "../../vips/vip-600/bsctestnet";
+} from "../../vips/vip-592/bsctestnet";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";

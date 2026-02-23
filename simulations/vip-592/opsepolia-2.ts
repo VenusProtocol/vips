@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
-import { vip600 as vip600a } from "../../vips/vip-600/bsctestnet";
+import { vip600 as vip600a } from "../../vips/vip-592/bsctestnet";
 import vip600, {
   BSCTESTNET_EID,
   FIVE_MINUTES,
@@ -15,7 +15,7 @@ import vip600, {
   TEN_MINUTES,
   UPDATE_TYPES,
   WHITELISTED_EXECUTORS,
-} from "../../vips/vip-600/bsctestnet-2";
+} from "../../vips/vip-592/bsctestnet-2";
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 

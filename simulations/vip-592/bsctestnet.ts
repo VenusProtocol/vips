@@ -13,7 +13,7 @@ import vip600, {
   MARKETCAP_STEWARD,
   RISK_ORACLE,
   RISK_STEWARD_RECEIVER,
-} from "../../vips/vip-600/bsctestnet";
+} from "../../vips/vip-592/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import Owner_ABI from "./abi/OwnerMinimalAbi.json";
@@ -230,12 +230,12 @@ forking(83235428, async () => {
         await expect(
           comptroller
             .connect(collateralFactorSteward)
-            ["setCollateralFactor(uint96,address,uint256,uint256)"](
-              0,
-              vBTC,
-              parseUnits("0.7", 18),
-              parseUnits("0.75", 18),
-            ),
+          ["setCollateralFactor(uint96,address,uint256,uint256)"](
+            0,
+            vBTC,
+            parseUnits("0.7", 18),
+            parseUnits("0.75", 18),
+          ),
         ).to.be.revertedWith("invalid resilient oracle price"); // this reverts due to stale period but it means passed the ACM check
       });
 

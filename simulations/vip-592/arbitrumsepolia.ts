@@ -16,7 +16,7 @@ import vip600, {
   ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   ARBITRUM_SEPOLIA_IRM_STEWARD,
   ARBITRUM_SEPOLIA_MC_STEWARD,
-} from "../../vips/vip-600/bsctestnet";
+} from "../../vips/vip-592/bsctestnet";
 import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DSR_ABI from "./abi/DestinationStewardReceiver.json";

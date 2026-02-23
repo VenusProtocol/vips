@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip600, {
+import vip592, {
   CF_STEWARD_SAFE_DELTA,
   COLLATERALFACTORS_STEWARD,
   CORE_COMPTROLLER,
@@ -20,7 +20,7 @@ import vip600, {
   TIMELOCK,
   UPDATE_TYPES,
   WHITELISTED_EXECUTORS,
-} from "../../vips/vip-600/bscmainnet";
+} from "../../vips/vip-592/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
@@ -45,7 +45,7 @@ forking(80591637, async () => {
   const collateralFactorSteward = new ethers.Contract(COLLATERALFACTORS_STEWARD, STEWARD_ABI, provider);
   const irmSteward = new ethers.Contract(IRM_STEWARD, Owner_ABI, provider);
 
-  testVip("VIP-600 Risk-Steward ACM Permissions & Configuration", await vip600(), {
+  testVip("VIP-592 Risk-Steward ACM Permissions & Configuration", await vip592(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -245,12 +245,12 @@ forking(80591637, async () => {
           await expect(
             comptroller
               .connect(collateralFactorStewardSigner)
-              ["setCollateralFactor(uint96,address,uint256,uint256)"](
-                0,
-                vBTC,
-                parseUnits("0.7", 18),
-                parseUnits("0.75", 18),
-              ),
+            ["setCollateralFactor(uint96,address,uint256,uint256)"](
+              0,
+              vBTC,
+              parseUnits("0.7", 18),
+              parseUnits("0.75", 18),
+            ),
           ).to.be.revertedWith("invalid resilient oracle price"); // this reverts due to stale period but it means passed the ACM check
         });
 

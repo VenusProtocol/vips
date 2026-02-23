@@ -19,11 +19,29 @@ export const TIMELOCK = 21600; // SIX_HOURS
 export const MC_STEWARD_SAFE_DELTA = 5000; // 50%
 export const CF_STEWARD_SAFE_DELTA = 1000; // 10%
 
-export const vip600 = async () => {
+export const vip592 = async () => {
   const meta: ProposalMeta = {
     version: "v2",
-    title: "VIP-600 Risk-Steward Phase-1",
-    description: `VIP-600 Risk-Steward Phase-1 Grant ACM Permissions`,
+    title: "VIP-592 [BNB Chain] Risk Stewards Framework Implementation",
+    description: `**Description :**
+
+This proposal introduces a **Risk Stewards framework** for Venus Protocol across all supported chains to improve the efficiency and responsiveness of risk parameter management.
+Community Post:  [**Proposed Risk Stewards Framework for More Efficient Risk Management**](https://community.venus.io/t/proposed-risk-stewards-framework-for-more-efficient-risk-management/5606)
+
+Currently, most risk parameter updates follow the same governance process regardless of scope or urgency. The proposed framework categorises parameters by impact level and allows approved Risk Stewards to propose bounded adjustments under differentiated review paths, while maintaining governance oversight for higher-impact changes.
+
+The framework aims to enable more proactive risk management, reduce operational overhead for routine updates, and improve adaptability to market conditions.
+
+- The newly onboarded risk manager, **Allez Labs,** will be added as a Risk Steward under the defined permissions of this framework
+- From a user perspective, the system operates in the background, with parameter updates communicated transparently when executed.
+
+**Action :**
+
+- Establish the **Risk Stewards framework** across Venus markets on all supported chains
+- Authorise approved Risk Stewards to propose risk parameter adjustments within predefined bounds
+- Enforce safeguards including adjustment limits and frequency controls
+
+If approved, this VIP authorises the implementation of the Risk Stewards framework and the onboarding of Allez Labs in the future to enhance Venus’ risk management processes while preserving governance oversight for material changes.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -231,4 +249,4 @@ export const vip600 = async () => {
   );
 };
 
-export default vip600;
+export default vip592;

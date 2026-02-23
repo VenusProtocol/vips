@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip600, {
+import vip592, {
   COLLATERALFACTORS_STEWARD,
   CORE_COMPTROLLER,
   DEBOUNCE,
@@ -15,7 +15,7 @@ import vip600, {
   TIMELOCK,
   UPDATE_TYPES,
   WHITELISTED_EXECUTORS,
-} from "../../vips/vip-600/bscmainnet";
+} from "../../vips/vip-592/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comproller.json";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import RISK_ORACLE_ABI from "./abi/RiskOracle.json";
@@ -41,7 +41,7 @@ forking(80591637, async () => {
   let authorizedSender: Signer;
   let executor: Signer;
 
-  testVip("VIP-600 Risk-Steward (setup for e2e)", await vip600(), {});
+  testVip("VIP-592 Risk-Steward (setup for e2e)", await vip592(), {});
 
   describe("End-to-End Risk Steward Flow Tests", () => {
     before(async () => {

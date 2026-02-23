@@ -4,7 +4,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
 import { forking, pretendExecutingVip, testVip } from "src/vip-framework";
 
-import { vip600 as vip600a } from "../../vips/vip-600/bsctestnet";
+import { vip600 as vip600a } from "../../vips/vip-592/bsctestnet";
 import vip600, {
   ARBITRUM_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   ARBITRUM_SEPOLIA_EID,
@@ -28,7 +28,7 @@ import vip600, {
   WHITELISTED_EXECUTORS,
   ZK_SEPOLIA_DESTINATION_STEWARD_RECEIVER,
   ZK_SEPOLIA_EID,
-} from "../../vips/vip-600/bsctestnet-2";
+} from "../../vips/vip-592/bsctestnet-2";
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import RISK_ORACLE_ABI from "./abi/RiskOracle.json";
 import RSR_ABI from "./abi/RiskStewardReceiver.json";
