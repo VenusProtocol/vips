@@ -5,7 +5,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip592, { NEW_SUPPLY_CAP, vTUSD } from "../../vips/vip-592/bsctestnet";
+import vip478, { NEW_SUPPLY_CAP, vTUSD } from "../../vips/vip-478/bsctestnet";
 import COMPTROLLER_ABI from "./abi/comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -26,7 +26,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-592 Increase TUSD supply cap", await vip592());
+  testVip("VIP-478 Risk Parameters Adjustments (FDUSD, TUSD)", await vip478());
 
   describe("Post-VIP behavior", async () => {
     it("has the new supply cap for vTUSD", async () => {
