@@ -34,18 +34,18 @@ const XAUM_HOLDER = "0x5C7B4ad5293F1BEf3f1C57EF5640375Bc0a08013";
 forking(82142040, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
-  let mockXAUM: Contract;
+  let XAUM: Contract;
   let vXAUM: Contract;
 
   before(async () => {
     const provider = ethers.provider;
     comptroller = new ethers.Contract(marketSpecs.vToken.comptroller, COMPTROLLER_ABI, provider);
-    mockXAUM = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
+    XAUM = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
     vXAUM = new ethers.Contract(marketSpecs.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
     const xaumHolder = await initMainnetUser(XAUM_HOLDER, ethers.utils.parseEther("1"));
-    await mockXAUM.connect(xaumHolder).transfer(bscmainnet.VTREASURY, marketSpecs.initialSupply.amount);
+    await XAUM.connect(xaumHolder).transfer(bscmainnet.VTREASURY, marketSpecs.initialSupply.amount);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -63,7 +63,6 @@ forking(82142040, async () => {
         [
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
@@ -73,7 +72,7 @@ forking(82142040, async () => {
           "NewLiquidationIncentive",
           "ActionPausedMarket",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       );
     },
   });
@@ -131,8 +130,8 @@ forking(82142040, async () => {
     });
 
     it("market should have balance of underlying", async () => {
-      const mockXAUMBalance = await mockXAUM.balanceOf(vXAUM.address);
-      expect(mockXAUMBalance).to.equal(marketSpecs.initialSupply.amount);
+      const XAUMBalance = await XAUM.balanceOf(vXAUM.address);
+      expect(XAUMBalance).to.equal(marketSpecs.initialSupply.amount);
     });
 
     it("should burn vTokens", async () => {

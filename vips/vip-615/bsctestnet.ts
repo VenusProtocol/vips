@@ -145,11 +145,6 @@ export const vip615 = () => {
         params: [[marketSpecs.vToken.address], [marketSpecs.riskParameters.supplyCap]],
       },
       {
-        target: marketSpecs.vToken.comptroller,
-        signature: "_setMarketBorrowCaps(address[],uint256[])",
-        params: [[marketSpecs.vToken.address], [marketSpecs.riskParameters.borrowCap]],
-      },
-      {
         target: marketSpecs.vToken.address,
         signature: "setAccessControlManager(address)",
         params: [bsctestnet.ACCESS_CONTROL_MANAGER],

@@ -29,7 +29,7 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 
-forking(91260874, async () => {
+forking(91993997, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let mockXAUM: Contract;
@@ -58,7 +58,6 @@ forking(91260874, async () => {
         [
           "MarketListed",
           "NewSupplyCap",
-          "NewBorrowCap",
           "NewAccessControlManager",
           "NewProtocolShareReserve",
           "NewReduceReservesBlockDelta",
@@ -69,7 +68,7 @@ forking(91260874, async () => {
           "ActionPausedMarket",
           "FlashLoanStatusChanged",
         ],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       );
     },
   });
