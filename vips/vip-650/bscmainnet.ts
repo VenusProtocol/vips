@@ -11,6 +11,87 @@ export const BOUND_VALIDATOR = "0x6E332fF0bB52475304494E4AE5063c1051c7d735";
 export const PRICE_LOWER_BOUND = parseUnits("0.95", 18);
 export const PRICE_UPPER_BOUND = parseUnits("1.05", 18);
 
+/* ============ Fallback Oracle Additions ============ */
+
+export const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
+
+export const BTCB = "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c";
+export const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
+export const USDe = "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34";
+export const USD1 = "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d";
+
+export const BINANCE_HEARTBEAT = 25 * 60 * 60; // 25 hours
+
+export const OLD_FALLBACK_ORACLE_CONFIG = [
+  {
+    NAME: "BTCB",
+    ASSET: BTCB,
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: REDSTONE_ORACLE,
+    FALLBACK: REDSTONE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "TRX",
+    ASSET: TRX,
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: REDSTONE_ORACLE,
+    FALLBACK: addressZero,
+    CACHED: false,
+  },
+  {
+    NAME: "USDe",
+    ASSET: USDe,
+    MAIN: USDT_CHAINLINK_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: CHAINLINK_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "USD1",
+    ASSET: USD1,
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: CHAINLINK_ORACLE,
+    CACHED: false,
+  },
+];
+
+export const NEW_FALLBACK_ORACLE_CONFIG = [
+  {
+    NAME: "BTCB",
+    ASSET: BTCB,
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: REDSTONE_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "TRX",
+    ASSET: TRX,
+    MAIN: CHAINLINK_ORACLE,
+    PIVOT: REDSTONE_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "USDe",
+    ASSET: USDe,
+    MAIN: USDT_CHAINLINK_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: REDSTONE_ORACLE,
+    CACHED: false,
+  },
+  {
+    NAME: "USD1",
+    ASSET: USD1,
+    MAIN: REDSTONE_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: BINANCE_ORACLE,
+    CACHED: false,
+  },
+];
+
 /* ============ New RedStone Oracle Feeds ============ */
 
 export const NEW_REDSTONE_ORACLE_FEEDS = [
@@ -321,9 +402,9 @@ export const vip650 = () => {
     title: "VIP-650 [BNB Chain] Two-Vendor OEV Integration - RedStone Oracle Feed Expansion",
     description: `**Description:**
 
-This proposal continues the Two-Vendor OEV Integration Framework adopted in [VIP-586](https://app.venus.io/#/governance/proposal/586) by expanding RedStone oracle coverage across the BSC Core Pool.
+This proposal continues the Two-Vendor OEV Integration Framework adopted in [VIP-586](https://app.venus.io/#/governance/proposal/586) by expanding RedStone oracle coverage across the BSC Core Pool and adding fallback oracles for additional assets.
 
-It registers new RedStone price feeds for 13 additional assets and updates their resilient oracle configurations to strengthen price reliability through multi-vendor redundancy.
+It registers new RedStone price feeds for 13 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, USDe, and USD1.
 
 **Actions:**
 
@@ -331,7 +412,13 @@ It registers new RedStone price feeds for 13 additional assets and updates their
 - **Update resilient oracle configurations:**
     - For XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, SOL: Set MAIN=Chainlink, PIVOT=Binance, FALLBACK=RedStone
     - For TWT: Set MAIN=Binance, PIVOT=RedStone
-- **Set BoundValidator config** for TWT (required since TWT previously had no PIVOT oracle)`,
+- **Set BoundValidator config** for TWT (required since TWT previously had no PIVOT oracle)
+- **Add fallback oracles:**
+    - BTCB: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
+    - TRX: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
+    - USDe: Update FALLBACK to RedStone (MAIN=USDT Chainlink, PIVOT=Chainlink, FALLBACK=RedStone)
+    - USD1: Update FALLBACK to Binance (MAIN=RedStone, PIVOT=Chainlink, FALLBACK=Binance)
+- **Configure Binance Oracle** for BTCB (symbol override BTCB→BTC), TRX, and USD1 feeds`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -373,6 +460,46 @@ It registers new RedStone price feeds for 13 additional assets and updates their
         signature: "setValidateConfig((address,uint256,uint256))",
         params: [[NEW_TWT_ORACLE_CONFIG.ASSET, PRICE_UPPER_BOUND, PRICE_LOWER_BOUND]],
       },
+
+      /* ============ Binance Oracle: Setup for BTCB, TRX, USD1 fallback feeds ============ */
+
+      {
+        target: BINANCE_ORACLE,
+        signature: "setSymbolOverride(string,string)",
+        params: ["BTCB", "BTC"],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["BTC", BINANCE_HEARTBEAT],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["TRX", BINANCE_HEARTBEAT],
+      },
+      {
+        target: BINANCE_ORACLE,
+        signature: "setMaxStalePeriod(string,uint256)",
+        params: ["USD1", BINANCE_HEARTBEAT],
+      },
+
+      /* ============ Resilient Oracle: Update fallback configs for BTCB, TRX, USDe, USD1 ============ */
+
+      ...NEW_FALLBACK_ORACLE_CONFIG.map(oracleData => {
+        return {
+          target: RESILIENT_ORACLE,
+          signature: "setTokenConfig((address,address[3],bool[3],bool))",
+          params: [
+            [
+              oracleData.ASSET,
+              [oracleData.MAIN, oracleData.PIVOT, oracleData.FALLBACK],
+              [oracleData.MAIN != addressZero, oracleData.PIVOT != addressZero, oracleData.FALLBACK != addressZero],
+              oracleData.CACHED,
+            ],
+          ],
+        };
+      }),
     ],
     meta,
     ProposalType.REGULAR,

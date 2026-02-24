@@ -12,13 +12,16 @@ import { forking, testVip } from "src/vip-framework";
 
 import vip650, {
   BOUND_VALIDATOR,
+  NEW_FALLBACK_ORACLE_CONFIG,
   NEW_ORACLE_CONFIG,
   NEW_REDSTONE_ORACLE_FEEDS,
   NEW_STANDARD_ORACLE_CONFIG,
   NEW_TWT_ORACLE_CONFIG,
+  OLD_FALLBACK_ORACLE_CONFIG,
   OLD_ORACLE_CONFIG,
   PRICE_LOWER_BOUND,
   PRICE_UPPER_BOUND,
+  USDT_CHAINLINK_ORACLE,
 } from "../../vips/vip-650/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -66,8 +69,20 @@ forking(80964126, async () => {
       expect(cfg.lowerBoundRatio).to.equal(0);
     });
 
+    it("has resilient oracle configs matching old fallback config", async () => {
+      for (const oldConfig of OLD_FALLBACK_ORACLE_CONFIG) {
+        const cfg = await resilientOracle.getTokenConfig(oldConfig.ASSET);
+
+        expect(cfg.asset).to.equal(oldConfig.ASSET);
+        expect(cfg.oracles[0]).to.equal(oldConfig.MAIN);
+        expect(cfg.oracles[1]).to.equal(oldConfig.PIVOT);
+        expect(cfg.oracles[2]).to.equal(oldConfig.FALLBACK);
+        expect(cfg.cachingEnabled).to.equal(oldConfig.CACHED);
+      }
+    });
+
     it("stores current resilient oracle prices for all assets", async () => {
-      for (const { ASSET } of NEW_ORACLE_CONFIG) {
+      for (const { ASSET } of [...NEW_ORACLE_CONFIG, ...NEW_FALLBACK_ORACLE_CONFIG]) {
         const price = await resilientOracle.getPrice(ASSET);
         preVipPrices[ASSET] = price;
       }
@@ -76,7 +91,8 @@ forking(80964126, async () => {
 
   testVip("VIP-650 bscmainnet", await vip650(), {
     callbackAfterExecution: async txResponse => {
-      const totalTokenConfigAdded = NEW_REDSTONE_ORACLE_FEEDS.length + NEW_ORACLE_CONFIG.length;
+      const totalTokenConfigAdded =
+        NEW_REDSTONE_ORACLE_FEEDS.length + NEW_ORACLE_CONFIG.length + NEW_FALLBACK_ORACLE_CONFIG.length;
       await expectEvents(
         txResponse,
         [CHAINLINK_ORACLE_ABI, RESILIENT_ORACLE_ABI],
@@ -162,6 +178,70 @@ forking(80964126, async () => {
 
       // Verify prices haven't deviated significantly
       for (const { NAME, ASSET } of NEW_ORACLE_CONFIG) {
+        const priceAfter = await resilientOracle.getPrice(ASSET);
+        const priceBefore = preVipPrices[ASSET];
+        const diff = priceAfter.sub(priceBefore);
+        const diffPct = `${(Number(diff.mul(10000).div(priceBefore)) / 100).toFixed(2)}%`;
+        console.log(`${NAME}: difference = ${diff.toString()} (${diffPct})`);
+        const tolerance = priceBefore.mul(3).div(100); // allow 3% difference
+        expect(priceAfter).to.be.closeTo(priceBefore, tolerance);
+      }
+    });
+
+    it("sets expected resilient oracle config for fallback assets", async () => {
+      for (const oracleConfig of NEW_FALLBACK_ORACLE_CONFIG) {
+        const cfg = await resilientOracle.getTokenConfig(oracleConfig.ASSET);
+
+        const expectedOracles = [oracleConfig.MAIN, oracleConfig.PIVOT, oracleConfig.FALLBACK];
+
+        expect(cfg.asset).to.equal(oracleConfig.ASSET);
+        expect(cfg.oracles[0]).to.equal(expectedOracles[0]);
+        expect(cfg.oracles[1]).to.equal(expectedOracles[1]);
+        expect(cfg.oracles[2]).to.equal(expectedOracles[2]);
+
+        expect(cfg.enableFlagsForOracles[0]).to.equal(expectedOracles[0] !== addressZero);
+        expect(cfg.enableFlagsForOracles[1]).to.equal(expectedOracles[1] !== addressZero);
+        expect(cfg.enableFlagsForOracles[2]).to.equal(expectedOracles[2] !== addressZero);
+
+        expect(cfg.cachingEnabled).to.equal(oracleConfig.CACHED);
+      }
+    });
+
+    it("keeps resilient oracle prices unchanged for fallback assets", async () => {
+      for (const { ASSET, NAME } of NEW_FALLBACK_ORACLE_CONFIG) {
+        // Extend stale periods for all oracles used by each asset
+        await setMaxStalePeriodInChainlinkOracle(
+          bscmainnet.CHAINLINK_ORACLE,
+          ASSET,
+          ethers.constants.AddressZero,
+          bscmainnet.NORMAL_TIMELOCK,
+          315360000,
+        );
+        await setMaxStalePeriodInChainlinkOracle(
+          bscmainnet.REDSTONE_ORACLE,
+          ASSET,
+          ethers.constants.AddressZero,
+          bscmainnet.NORMAL_TIMELOCK,
+          315360000,
+        );
+
+        // USDe uses USDT_CHAINLINK_ORACLE as MAIN (separate oracle instance)
+        if (NAME === "USDe") {
+          await setMaxStalePeriodInChainlinkOracle(
+            USDT_CHAINLINK_ORACLE,
+            ASSET,
+            ethers.constants.AddressZero,
+            bscmainnet.NORMAL_TIMELOCK,
+            315360000,
+          );
+        }
+
+        // Extend Binance stale period (BTCB uses "BTC" after symbol override)
+        const binanceSymbol = NAME === "BTCB" ? "BTC" : NAME;
+        await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, binanceSymbol, 315360000);
+      }
+
+      for (const { NAME, ASSET } of NEW_FALLBACK_ORACLE_CONFIG) {
         const priceAfter = await resilientOracle.getPrice(ASSET);
         const priceBefore = preVipPrices[ASSET];
         const diff = priceAfter.sub(priceBefore);
