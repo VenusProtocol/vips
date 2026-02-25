@@ -155,7 +155,19 @@ forking(80964126, async () => {
           bscmainnet.NORMAL_TIMELOCK,
           315360000,
         );
-        await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, NAME, 315360000);
+
+        // USDe uses USDT_CHAINLINK_ORACLE as MAIN (not Binance)
+        if (NAME === "USDe") {
+          await setMaxStalePeriodInChainlinkOracle(
+            USDT_CHAINLINK_ORACLE,
+            ASSET,
+            ethers.constants.AddressZero,
+            bscmainnet.NORMAL_TIMELOCK,
+            315360000,
+          );
+        } else {
+          await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, NAME, 315360000);
+        }
       }
 
       // TWT: extend stale periods for RedStone and Binance (no Chainlink feed)
@@ -224,17 +236,6 @@ forking(80964126, async () => {
           bscmainnet.NORMAL_TIMELOCK,
           315360000,
         );
-
-        // USDe uses USDT_CHAINLINK_ORACLE as MAIN (separate oracle instance)
-        if (NAME === "USDe") {
-          await setMaxStalePeriodInChainlinkOracle(
-            USDT_CHAINLINK_ORACLE,
-            ASSET,
-            ethers.constants.AddressZero,
-            bscmainnet.NORMAL_TIMELOCK,
-            315360000,
-          );
-        }
 
         // Extend Binance stale period (BTCB uses "BTC" after symbol override)
         const binanceSymbol = NAME === "BTCB" ? "BTC" : NAME;

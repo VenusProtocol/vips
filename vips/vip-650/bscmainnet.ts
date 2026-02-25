@@ -20,7 +20,8 @@ export const TRX = "0xCE7de646e7208a4Ef112cb6ed5038FA6cC6b12e3";
 export const USDe = "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34";
 export const USD1 = "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d";
 
-export const BINANCE_HEARTBEAT = 25 * 60 * 60; // 25 hours
+export const BTC_BINANCE_STALE_PERIOD = 25 * 60; // 25 minutes (1-min feed)
+export const BINANCE_HEARTBEAT = 25 * 60 * 60; // 25 hours (1-day feed)
 
 export const OLD_FALLBACK_ORACLE_CONFIG = [
   {
@@ -37,14 +38,6 @@ export const OLD_FALLBACK_ORACLE_CONFIG = [
     MAIN: CHAINLINK_ORACLE,
     PIVOT: REDSTONE_ORACLE,
     FALLBACK: addressZero,
-    CACHED: false,
-  },
-  {
-    NAME: "USDe",
-    ASSET: USDe,
-    MAIN: USDT_CHAINLINK_ORACLE,
-    PIVOT: CHAINLINK_ORACLE,
-    FALLBACK: CHAINLINK_ORACLE,
     CACHED: false,
   },
   {
@@ -72,14 +65,6 @@ export const NEW_FALLBACK_ORACLE_CONFIG = [
     MAIN: CHAINLINK_ORACLE,
     PIVOT: REDSTONE_ORACLE,
     FALLBACK: BINANCE_ORACLE,
-    CACHED: false,
-  },
-  {
-    NAME: "USDe",
-    ASSET: USDe,
-    MAIN: USDT_CHAINLINK_ORACLE,
-    PIVOT: CHAINLINK_ORACLE,
-    FALLBACK: REDSTONE_ORACLE,
     CACHED: false,
   },
   {
@@ -282,6 +267,14 @@ export const OLD_ORACLE_CONFIG = [
     FALLBACK: addressZero,
     CACHED: false,
   },
+  {
+    NAME: "USDe",
+    ASSET: USDe,
+    MAIN: USDT_CHAINLINK_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: CHAINLINK_ORACLE,
+    CACHED: false,
+  },
 ];
 
 /* ============ New Oracle Configs (post-VIP) ============ */
@@ -382,6 +375,14 @@ export const NEW_STANDARD_ORACLE_CONFIG = [
     FALLBACK: REDSTONE_ORACLE,
     CACHED: false,
   },
+  {
+    NAME: "USDe",
+    ASSET: USDe,
+    MAIN: USDT_CHAINLINK_ORACLE,
+    PIVOT: CHAINLINK_ORACLE,
+    FALLBACK: REDSTONE_ORACLE,
+    CACHED: false,
+  },
 ];
 
 // TWT: no Chainlink available, so Binance as MAIN, RedStone as PIVOT
@@ -404,19 +405,19 @@ export const vip650 = () => {
 
 This proposal continues the Two-Vendor OEV Integration Framework adopted in [VIP-586](https://app.venus.io/#/governance/proposal/586) by expanding RedStone oracle coverage across the BSC Core Pool and adding fallback oracles for additional assets.
 
-It registers new RedStone price feeds for 13 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, USDe, and USD1.
+It registers new RedStone price feeds for 14 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, and USD1.
 
 **Actions:**
 
-- **Register new RedStone oracle feeds** for: XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL
+- **Register new RedStone oracle feeds** for: XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL, USDe
 - **Update resilient oracle configurations:**
     - For XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, SOL: Set MAIN=Chainlink, PIVOT=Binance, FALLBACK=RedStone
     - For TWT: Set MAIN=Binance, PIVOT=RedStone
+    - For USDe: Set MAIN=USDT Chainlink, PIVOT=Chainlink, FALLBACK=RedStone
 - **Set BoundValidator config** for TWT (required since TWT previously had no PIVOT oracle)
 - **Add fallback oracles:**
     - BTCB: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
     - TRX: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
-    - USDe: Update FALLBACK to RedStone (MAIN=USDT Chainlink, PIVOT=Chainlink, FALLBACK=RedStone)
     - USD1: Update FALLBACK to Binance (MAIN=RedStone, PIVOT=Chainlink, FALLBACK=Binance)
 - **Configure Binance Oracle** for BTCB (symbol override BTCB→BTC), TRX, and USD1 feeds`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -471,7 +472,7 @@ It registers new RedStone price feeds for 13 additional assets, updates their re
       {
         target: BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
-        params: ["BTC", BINANCE_HEARTBEAT],
+        params: ["BTC", BTC_BINANCE_STALE_PERIOD],
       },
       {
         target: BINANCE_ORACLE,
@@ -484,7 +485,7 @@ It registers new RedStone price feeds for 13 additional assets, updates their re
         params: ["USD1", BINANCE_HEARTBEAT],
       },
 
-      /* ============ Resilient Oracle: Update fallback configs for BTCB, TRX, USDe, USD1 ============ */
+      /* ============ Resilient Oracle: Update fallback configs for BTCB, TRX, USD1 ============ */
 
       ...NEW_FALLBACK_ORACLE_CONFIG.map(oracleData => {
         return {
