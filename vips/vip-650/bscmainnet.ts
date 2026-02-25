@@ -405,11 +405,11 @@ export const vip650 = () => {
 
 This proposal continues the Two-Vendor OEV Integration Framework adopted in [VIP-586](https://app.venus.io/#/governance/proposal/586) by expanding RedStone oracle coverage across the BSC Core Pool and adding fallback oracles for additional assets.
 
-It registers new RedStone price feeds for 14 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, and USD1.
+It registers new RedStone price feeds for 13 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, and USD1.
 
 **Actions:**
 
-- **Register new RedStone oracle feeds** for: XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL, USDe
+- **Register new RedStone oracle feeds** for: XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL
 - **Update resilient oracle configurations:**
     - For XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, SOL: Set MAIN=Chainlink, PIVOT=Binance, FALLBACK=RedStone
     - For TWT: Set MAIN=Binance, PIVOT=RedStone
