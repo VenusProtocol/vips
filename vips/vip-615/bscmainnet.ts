@@ -13,6 +13,9 @@ export const XAUM = "0x23AE4fd8E7844cdBc97775496eBd0E8248656028";
 export const vXAUM = "0x92e6Ea74a1A3047DabF4186405a21c7D63a0612A";
 export const RATE_MODEL = "0xCDAE733D8aB71cdD4D183CD25685500e8F502329";
 export const REDUCE_RESERVES_BLOCK_DELTA = "28800";
+export const XAUM_FEED = "0xfa54C1c5F62ea3a5653a0b1b7148E26008eA1501";
+export const CHAINLINK_MAX_STALE_PERIOD = 93600; // 26h
+const ONE_YEAR = 31536000;
 
 // Converters
 const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
@@ -103,7 +106,7 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip615 = () => {
+export const vip615 = (simulations: boolean) => {
   const meta = {
     version: "v2",
     title: "VIP-615 [BNB Chain] Add XAUM (Matrixdock Gold) market to the Core pool",
@@ -115,11 +118,10 @@ export const vip615 = () => {
 
   return makeProposal(
     [
-      // TODO update Oracle Feed
       {
         target: CHAINLINK_ORACLE,
-        signature: "setDirectPrice(address,uint256)",
-        params: [marketSpecs.vToken.underlying.address, parseUnits("1", 18)],
+        signature: "setTokenConfig((address,address,uint256))",
+        params: [[XAUM, XAUM_FEED, simulations ? ONE_YEAR : CHAINLINK_MAX_STALE_PERIOD]],
       },
       {
         target: RESILIENT_ORACLE,

@@ -31,7 +31,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 const XAUM_HOLDER = "0x5C7B4ad5293F1BEf3f1C57EF5640375Bc0a08013";
 
-forking(82142040, async () => {
+forking(83293506, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let XAUM: Contract;
@@ -44,6 +44,7 @@ forking(82142040, async () => {
     vXAUM = new ethers.Contract(marketSpecs.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
 
+    // TODO: REMOVE Once Treasury get the Fund
     const xaumHolder = await initMainnetUser(XAUM_HOLDER, ethers.utils.parseEther("1"));
     await XAUM.connect(xaumHolder).transfer(bscmainnet.VTREASURY, marketSpecs.initialSupply.amount);
   });
@@ -55,7 +56,7 @@ forking(82142040, async () => {
     });
   });
 
-  testVip("VIP-615", await vip615(), {
+  testVip("VIP-615", await vip615(true), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
@@ -102,7 +103,7 @@ forking(82142040, async () => {
 
     it("get correct price from oracle ", async () => {
       const price = await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address);
-      expect(price).to.equal(parseUnits("1", 18));
+      expect(price).to.equal(parseUnits("5239.577", 18));
     });
 
     it("market have correct owner", async () => {
