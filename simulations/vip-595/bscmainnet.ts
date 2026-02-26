@@ -10,7 +10,7 @@ import {
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip650, {
+import vip595, {
   BOUND_VALIDATOR,
   NEW_FALLBACK_ORACLE_CONFIG,
   NEW_ORACLE_CONFIG,
@@ -22,7 +22,7 @@ import vip650, {
   PRICE_LOWER_BOUND,
   PRICE_UPPER_BOUND,
   USDT_CHAINLINK_ORACLE,
-} from "../../vips/vip-650/bscmainnet";
+} from "../../vips/vip-595/bscmainnet";
 import BOUND_VALIDATOR_ABI from "./abi/boundValidator.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/resilientOracle.json";
@@ -89,7 +89,7 @@ forking(80964126, async () => {
     });
   });
 
-  testVip("VIP-650 bscmainnet", await vip650(), {
+  testVip("VIP-595 bscmainnet", await vip595(), {
     callbackAfterExecution: async txResponse => {
       const totalTokenConfigAdded =
         NEW_REDSTONE_ORACLE_FEEDS.length + NEW_ORACLE_CONFIG.length + NEW_FALLBACK_ORACLE_CONFIG.length;

@@ -397,29 +397,66 @@ export const NEW_TWT_ORACLE_CONFIG = {
 
 export const NEW_ORACLE_CONFIG = [...NEW_STANDARD_ORACLE_CONFIG, NEW_TWT_ORACLE_CONFIG];
 
-export const vip650 = () => {
+export const vip595 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-650 [BNB Chain] Two-Vendor OEV Integration - RedStone Oracle Feed Expansion",
+    title: "VIP-595 [BNB Chain] RedStone Oracle Integration and Resilient Oracle Configuration Updates",
     description: `**Description:**
 
-This proposal continues the Two-Vendor OEV Integration Framework adopted in [VIP-586](https://app.venus.io/#/governance/proposal/586) by expanding RedStone oracle coverage across the BSC Core Pool and adding fallback oracles for additional assets.
+This proposal is informed by the Venus community forum publication **RedStone Oracle Integration and Resilient Oracle Configuration Updates**.
 
-It registers new RedStone price feeds for 13 additional assets, updates their resilient oracle configurations, and adds fallback oracle redundancy for BTCB, TRX, and USD1.
+It aims to strengthen price reliability and improve oracle redundancy on the BNB Chain Core Pool by introducing additional oracle sources and updating existing configurations.
+
+As part of ongoing risk management improvements, this proposal continues the **Two-Vendor OEV Integration Framework** adopted in **VIP-586**, expanding multi-vendor coverage and enhancing fallback mechanisms across supported assets.
+
+These changes introduce **RedStone** as an additional oracle provider and update **Resilient Oracle configurations** to ensure redundancy across **Chainlink, Binance, and RedStone**, reducing reliance on any single oracle source and improving protocol resilience against price discrepancies or oracle failures.
 
 **Actions:**
 
-- **Register new RedStone oracle feeds** for: XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL
-- **Update resilient oracle configurations:**
-    - For XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, SOL: Set MAIN=Chainlink, PIVOT=Binance, FALLBACK=RedStone
-    - For TWT: Set MAIN=Binance, PIVOT=RedStone
-    - For USDe: Set MAIN=USDT Chainlink, PIVOT=Chainlink, FALLBACK=RedStone
-- **Set BoundValidator config** for TWT (required since TWT previously had no PIVOT oracle)
-- **Add fallback oracles:**
-    - BTCB: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
-    - TRX: Add Binance as FALLBACK (MAIN=Chainlink, PIVOT=RedStone, FALLBACK=Binance)
-    - USD1: Update FALLBACK to Binance (MAIN=RedStone, PIVOT=Chainlink, FALLBACK=Binance)
-- **Configure Binance Oracle** for BTCB (symbol override BTCB→BTC), TRX, and USD1 feeds`,
+1. Register **13 new RedStone price feeds** with a **7-hour stale period** for the following assets: **XVS, LTC, BCH, DOT, LINK, DAI, FIL, DOGE, AAVE, UNI, FDUSD, TWT, SOL**
+2. Update **Resilient Oracle configurations** for standard assets:
+    - **MAIN:** Chainlink
+    - **PIVOT:** Binance
+    - **FALLBACK:** RedStone
+3. Apply **asset-specific configurations:**
+    - **TWT**
+        - MAIN: Binance
+        - PIVOT: RedStone
+        - (No Chainlink USD feed available)
+    - **USDe**
+        - MAIN: Chainlink (via USDT)
+        - PIVOT: Chainlink
+        - FALLBACK: RedStone
+4. Add **BoundValidator configuration for TWT** to support the PIVOT oracle
+5. Introduce or update **fallback oracle configurations:**
+    - **BTCB**
+        - MAIN: Chainlink
+        - PIVOT: RedStone
+        - FALLBACK: Binance
+    - **TRX**
+        - MAIN: Chainlink
+        - PIVOT: RedStone
+        - FALLBACK: Binance
+    - **USD1**
+        - MAIN: RedStone
+        - PIVOT: Chainlink
+        - FALLBACK: Binance
+6. Update **Binance Oracle configuration:**
+    - Symbol override: **BTCB → BTC**
+    - Stale periods:
+        - **BTC:** 25 minutes
+        - **TRX / USD1:** 25 hours
+
+**Summary:**
+
+If approved, this VIP will:
+- Integrate **RedStone** as an additional oracle provider across multiple assets
+- Enhance **multi-vendor redundancy** using Chainlink, Binance, and RedStone
+- Improve **fallback coverage** for BTCB, TRX, and USD1
+- Strengthen **price validation mechanisms** with updated configurations and validators
+- Continue the rollout of the **Two-Vendor OEV Integration Framework** to improve protocol resilience
+
+These updates aim to increase oracle reliability, reduce single-source dependency, and enhance the overall safety of the Venus Protocol.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -507,4 +544,4 @@ It registers new RedStone price feeds for 13 additional assets, updates their re
   );
 };
 
-export default vip650;
+export default vip595;
