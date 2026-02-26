@@ -199,7 +199,7 @@ export const vip615 = (simulations: boolean) => {
         signature: "approve(address,uint256)",
         params: [marketSpecs.vToken.address, 0],
       },
-      
+
       // Transfer vTokens to receiver
       {
         target: marketSpecs.vToken.address,

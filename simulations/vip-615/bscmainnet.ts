@@ -29,8 +29,6 @@ import VTREASURY_ABI from "./abi/VTreasury.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const XAUM_HOLDER = "0x5C7B4ad5293F1BEf3f1C57EF5640375Bc0a08013";
-
 forking(83432607, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
