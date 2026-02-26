@@ -74,9 +74,9 @@ export const marketSpecs = {
     borrowCap: parseUnits("0", 18),
   },
   initialSupply: {
-    amount: parseUnits("0.025", 18),
+    amount: parseUnits("0.0195", 18), // Approx $100
     vTokenReceiver: bscmainnet.VTREASURY,
-    vTokensToBurn: parseUnits("0.02", 8),
+    vTokensToBurn: parseUnits("0", 8), // Transfer all minted vTokens to receiver, no burn
   },
 };
 
@@ -85,7 +85,7 @@ export const convertAmountToVTokens = (amount: BigNumber, exchangeRate: BigNumbe
   return amount.mul(EXP_SCALE).div(exchangeRate);
 };
 
-const vTokensMinted = convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate);
+export const vTokensMinted = convertAmountToVTokens(marketSpecs.initialSupply.amount, marketSpecs.vToken.exchangeRate);
 export const vTokensRemaining = vTokensMinted.sub(marketSpecs.initialSupply.vTokensToBurn);
 
 const configureConverters = (fromAssets: string[], incentive: BigNumberish = CONVERSION_INCENTIVE) => {
@@ -183,11 +183,7 @@ export const vip615 = (simulations: boolean) => {
       },
 
       // initial liquidity
-      {
-        target: bscmainnet.VTREASURY,
-        signature: "withdrawTreasuryBEP20(address,uint256,address)",
-        params: [marketSpecs.vToken.underlying.address, marketSpecs.initialSupply.amount, bscmainnet.NORMAL_TIMELOCK],
-      },
+      // TimeLock already has the fund, so no need to withdraw from Treasury
       {
         target: marketSpecs.vToken.underlying.address,
         signature: "approve(address,uint256)",
@@ -203,17 +199,12 @@ export const vip615 = (simulations: boolean) => {
         signature: "approve(address,uint256)",
         params: [marketSpecs.vToken.address, 0],
       },
-      // Burn some vTokens to prevents exchange rate manipulation at market launch.
+      
+      // Transfer vTokens to receiver
       {
         target: marketSpecs.vToken.address,
         signature: "transfer(address,uint256)",
-        params: [ethers.constants.AddressZero, marketSpecs.initialSupply.vTokensToBurn],
-      },
-      // Transfer leftover vTokens to receiver
-      {
-        target: marketSpecs.vToken.address,
-        signature: "transfer(address,uint256)",
-        params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
+        params: [marketSpecs.initialSupply.vTokenReceiver, vTokensMinted],
       },
 
       // Pause Borrow actions for vXAUM market

@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { expectEvents, initMainnetUser } from "src/utils";
+import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 import { checkRiskParameters } from "src/vip-framework/checks/checkRiskParameters";
 import { checkVToken } from "src/vip-framework/checks/checkVToken";
@@ -17,7 +17,7 @@ import {
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
-  vTokensRemaining,
+  vTokensMinted,
   vip615,
 } from "../../vips/vip-615/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -31,7 +31,7 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 
 const XAUM_HOLDER = "0x5C7B4ad5293F1BEf3f1C57EF5640375Bc0a08013";
 
-forking(83293506, async () => {
+forking(83432607, async () => {
   let comptroller: Contract;
   let resilientOracle: Contract;
   let XAUM: Contract;
@@ -43,10 +43,6 @@ forking(83293506, async () => {
     XAUM = new ethers.Contract(marketSpecs.vToken.underlying.address, ERC20_ABI, provider);
     vXAUM = new ethers.Contract(marketSpecs.vToken.address, VTOKEN_ABI, provider);
     resilientOracle = new ethers.Contract(bscmainnet.RESILIENT_ORACLE, RESILIENT_ORACLE_ABI, ethers.provider);
-
-    // TODO: REMOVE Once Treasury get the Fund
-    const xaumHolder = await initMainnetUser(XAUM_HOLDER, ethers.utils.parseEther("1"));
-    await XAUM.connect(xaumHolder).transfer(bscmainnet.VTREASURY, marketSpecs.initialSupply.amount);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -103,7 +99,7 @@ forking(83293506, async () => {
 
     it("get correct price from oracle ", async () => {
       const price = await resilientOracle.getUnderlyingPrice(marketSpecs.vToken.address);
-      expect(price).to.equal(parseUnits("5239.577", 18));
+      expect(price).to.equal(parseUnits("5240.367", 18));
     });
 
     it("market have correct owner", async () => {
@@ -135,19 +131,14 @@ forking(83293506, async () => {
       expect(XAUMBalance).to.equal(marketSpecs.initialSupply.amount);
     });
 
-    it("should burn vTokens", async () => {
-      const vXAUMBalanceBurned = await vXAUM.balanceOf(ethers.constants.AddressZero);
-      expect(vXAUMBalanceBurned).to.equal(marketSpecs.initialSupply.vTokensToBurn);
-    });
-
     it("should not leave any vTokens in the timelock", async () => {
       const vXAUMTimelockBalance = await vXAUM.balanceOf(bscmainnet.NORMAL_TIMELOCK);
       expect(vXAUMTimelockBalance).to.equal(0);
     });
 
-    it("should send remaining vTokens to vTokenReceiver", async () => {
+    it("should send All vTokens to vTokenReceiver", async () => {
       const vXAUMReceiverBalance = await vXAUM.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
-      expect(vXAUMReceiverBalance).to.equal(vTokensRemaining);
+      expect(vXAUMReceiverBalance).to.equal(vTokensMinted);
     });
 
     it("should pause Borrow on vXAUM market", async () => {
