@@ -103,11 +103,15 @@ const configureConverters = (fromAssets: string[], incentive: BigNumberish = CON
   });
 };
 
-export const vip615 = () => {
+export const vip596 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-615 [BNB Chain] Add XAUM (Matrixdock Gold) market to the Core pool",
-    description: "VIP-615 [BNB Chain] Add XAUM (Matrixdock Gold) market to the Core pool",
+    title: "VIP-596 [BNB Chain] Listing of XAUm in Venus Core",
+    description: `This VIP seeks to list XAUm, Matrixdock's tokenized gold asset, in the Venus Core Pool on BNB Chain as a non-borrowable collateral asset.
+
+XAUm represents one troy ounce of fully allocated LBMA-accredited physical gold, enabling users to borrow against gold-backed collateral while maintaining exposure to the underlying asset.
+
+XAUm has grown to over $80M in assets under management and is deployed across multiple chains. On BNB Chain, liquidity is currently concentrated on PancakeSwap, with plans to deepen liquidity over time.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -233,4 +237,4 @@ export const vip615 = () => {
   );
 };
 
-export default vip615;
+export default vip596;

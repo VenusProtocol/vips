@@ -18,8 +18,8 @@ import {
   converterBaseAssets,
   marketSpecs,
   vTokensRemaining,
-  vip615,
-} from "../../vips/vip-615/bsctestnet";
+  vip596,
+} from "../../vips/vip-596/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -50,7 +50,7 @@ forking(91993997, async () => {
     });
   });
 
-  testVip("VIP-615", await vip615(), {
+  testVip("VIP-596", await vip596(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,
