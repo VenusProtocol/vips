@@ -107,11 +107,45 @@ export const vip596 = () => {
   const meta = {
     version: "v2",
     title: "VIP-596 [BNB Chain] Listing of XAUm in Venus Core",
-    description: `This VIP seeks to list XAUm, Matrixdock's tokenized gold asset, in the Venus Core Pool on BNB Chain as a non-borrowable collateral asset.
+    description: `## Description
+
+This VIP seeks to list XAUm, Matrixdock's tokenized gold asset, in the Venus Core Pool on BNB Chain as a non-borrowable collateral asset.
 
 XAUm represents one troy ounce of fully allocated LBMA-accredited physical gold, enabling users to borrow against gold-backed collateral while maintaining exposure to the underlying asset.
 
-XAUm has grown to over $80M in assets under management and is deployed across multiple chains. On BNB Chain, liquidity is currently concentrated on PancakeSwap, with plans to deepen liquidity over time.`,
+XAUm has grown to over $80M in assets under management and is deployed across multiple chains. On BNB Chain, liquidity is currently concentrated on PancakeSwap, with plans to deepen liquidity over time.
+
+## Specification
+
+If approved, XAUm will be listed in the Venus Core Pool with the following initial parameters:
+
+- Asset: XAUm (Matrixdock Gold)
+- Chain: BNB Chain
+- Pool: Core Pool
+- Collateral Factor: 65%
+- Liquidation Bonus: 10%
+- Supply Cap: 200 XAUm (~$1M)
+- Borrow Cap: Not enabled
+- Borrowable: No
+- Reserve Factor: 20%
+
+Interest Rate Model:
+
+- Base Rate: 0%
+- Multiplier: 2%
+- Jump Multiplier: 4%
+- Kink: 80%
+
+Oracle:
+
+- Chainlink integration via Resilient Oracle
+
+## Summary
+
+If approved, this VIP will:
+
+- List XAUm as a non-borrowable collateral asset in the Venus Core Pool
+- Integrate Chainlink Oracle via Resilient Oracle`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
