@@ -17,7 +17,7 @@ import {
   convertAmountToVTokens,
   converterBaseAssets,
   marketSpecs,
-  vTokensMinted,
+  vTokensRemaining,
   vip615,
 } from "../../vips/vip-615/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
@@ -134,9 +134,14 @@ forking(83432607, async () => {
       expect(vXAUMTimelockBalance).to.equal(0);
     });
 
-    it("should send All vTokens to vTokenReceiver", async () => {
+    it("should burn vTokens", async () => {
+      const vXAUMBalanceBurned = await vXAUM.balanceOf(ethers.constants.AddressZero);
+      expect(vXAUMBalanceBurned).to.equal(marketSpecs.initialSupply.vTokensToBurn);
+    });
+
+    it("should send remaining vTokens to vTokenReceiver", async () => {
       const vXAUMReceiverBalance = await vXAUM.balanceOf(marketSpecs.initialSupply.vTokenReceiver);
-      expect(vXAUMReceiverBalance).to.equal(vTokensMinted);
+      expect(vXAUMReceiverBalance).to.equal(vTokensRemaining);
     });
 
     it("should pause Borrow on vXAUM market", async () => {

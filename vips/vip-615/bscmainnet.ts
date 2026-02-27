@@ -76,7 +76,7 @@ export const marketSpecs = {
   initialSupply: {
     amount: parseUnits("0.0195", 18), // Approx $100
     vTokenReceiver: bscmainnet.VTREASURY,
-    vTokensToBurn: parseUnits("0", 8), // Transfer all minted vTokens to receiver, no burn
+    vTokensToBurn: parseUnits("0.00195", 8), // Burn 10% of minted vTokens to prevent exchange rate manipulation
   },
 };
 
@@ -200,11 +200,17 @@ export const vip615 = (simulations: boolean) => {
         params: [marketSpecs.vToken.address, 0],
       },
 
-      // Transfer vTokens to receiver
+      // Burn 10% vTokens to prevent exchange rate manipulation
       {
         target: marketSpecs.vToken.address,
         signature: "transfer(address,uint256)",
-        params: [marketSpecs.initialSupply.vTokenReceiver, vTokensMinted],
+        params: [ethers.constants.AddressZero, marketSpecs.initialSupply.vTokensToBurn],
+      },
+      // Transfer remaining vTokens to receiver
+      {
+        target: marketSpecs.vToken.address,
+        signature: "transfer(address,uint256)",
+        params: [marketSpecs.initialSupply.vTokenReceiver, vTokensRemaining],
       },
 
       // Pause Borrow actions for vXAUM market
