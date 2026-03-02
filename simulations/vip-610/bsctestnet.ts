@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip596Testnet, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-596/bsctestnet";
+import vip596Testnet, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-610/bsctestnet";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 
 // TODO: Set the correct block number

@@ -14,7 +14,7 @@ import {
 import { forking, testVip } from "src/vip-framework";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
-import vip596, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-596/bscmainnet";
+import vip596, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-610/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 import VTOKEN_ABI from "./abi/VToken.json";
