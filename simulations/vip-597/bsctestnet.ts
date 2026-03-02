@@ -49,7 +49,7 @@ forking(93334375, async () => {
       expect(market.liquidationThresholdMantissa).to.equal(parseUnits("0", 18));
     });
 
-    it("vslisBNB should have LI = 0%", async () => {
+    it("vslisBNB should have LI = 100% (no incentive bonus)", async () => {
       const market = await comptroller.markets(vslisBNB);
       expect(market.liquidationIncentiveMantissa).to.equal(parseUnits("1", 18));
     });
@@ -77,7 +77,7 @@ forking(93334375, async () => {
       expect(market.liquidationThresholdMantissa).to.equal(NEW_LT);
     });
 
-    it("vslisBNB should have LI = 10%", async () => {
+    it("vslisBNB should have LI = 110%", async () => {
       const market = await comptroller.markets(vslisBNB);
       expect(market.liquidationIncentiveMantissa).to.equal(NEW_LI);
     });

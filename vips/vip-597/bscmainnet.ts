@@ -31,7 +31,7 @@ To leverage Binance Wallet's distribution channel, Venus Protocol will enable BN
 |---|---|---|
 | Collateral Factor (CF) | 0% | 80% |
 | Liquidation Threshold (LT) | 0% | 80% |
-| Liquidation Incentive (LI) | 0% | 10% |
+| Liquidation Incentive (LI) | 100% | 110% |
 
 **Rationale**
 
@@ -46,7 +46,7 @@ To leverage Binance Wallet's distribution channel, Venus Protocol will enable BN
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/XXX)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/677)
 - [Community post](https://community.venus.io/)
 - [vslisBNB market](https://bscscan.com/address/0x89c910Eb8c90df818b4649b508Ba22130Dc73Adc)
 
