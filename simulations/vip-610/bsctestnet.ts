@@ -7,7 +7,7 @@ import { forking, testVip } from "src/vip-framework";
 import vip610Testnet, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-610/bsctestnet";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 
-const BLOCK_NUMBER = 93334375;
+const BLOCK_NUMBER = 93362756;
 
 forking(BLOCK_NUMBER, async () => {
   describe("Pre-VIP state", async () => {

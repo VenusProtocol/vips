@@ -1,7 +1,7 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const NEW_VBEP20_DELEGATE_IMPL = "0x469E286EA3a0A38358004AADbD54E52097aeD9B3";
+export const NEW_VBEP20_DELEGATE_IMPL = "0x1be1CE8352328278Ac4e0488436c0f1607282550";
 
 export const CORE_MARKETS = [
   {
