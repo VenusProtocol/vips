@@ -14,7 +14,7 @@ import {
 import { forking, testVip } from "src/vip-framework";
 import { checkCorePoolComptroller } from "src/vip-framework/checks/checkCorePoolComptroller";
 
-import vip596, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-610/bscmainnet";
+import vip610, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-610/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -97,7 +97,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-596 Mainnet", await vip596(), {
+  testVip("VIP-610 Mainnet", await vip610(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets]);
