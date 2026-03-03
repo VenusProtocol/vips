@@ -58,7 +58,7 @@ Following the community recommendation in [Risk Stewards Deployment Parameters R
 **Rationale:**
 
 - **Supply/Borrow Caps (24h debounce):** Ceiling parameters that don't affect existing positions. Reducing the debounce to 24h enables more responsive risk management while the 24h frequency control prevents excessive compounding of adjustments.
-- **Collateral Factors (48h debounce, 5% safe delta):** Directly determine how much a user can borrow and affect liquidation eligibility. Tighter safe delta (5%) and longer debounce (48h) ensure meaningful changes remain subject to rigorous review. Any adjustment beyond 5% will require going through the standard governance process.
+- **Collateral Factors (48h debounce, 5% safe delta):** Directly determine how much a user can borrow and affect liquidation eligibility. Tighter safe delta (5%) and longer debounce (48h) ensure meaningful changes remain subject to rigorous review. Any adjustment beyond 5% will require additional approval from the Venus whitelisted team.
 - **Interest Rate Model:** No change — the debounce remains at 72h since a new IRM contract can contain arbitrary rate curve logic, making automated safety assessment infeasible on-chain.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",

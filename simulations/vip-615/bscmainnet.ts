@@ -15,7 +15,7 @@ import vip615, {
 import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import RSR_ABI from "./abi/RiskStewardReceiver.json";
 
-const BLOCK_NUMBER = 84228546;
+const BLOCK_NUMBER = 84424323;
 
 forking(BLOCK_NUMBER, async () => {
   const provider = ethers.provider;
@@ -49,7 +49,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await cfSteward.safeDeltaBps()).to.equal(COLLATERAL_FACTORS_CONFIG.old.safeDeltaBps);
     });
 
-    it("interestRateModel config is unchanged", async () => {
+    it("interestRateModel has current config", async () => {
       const config = await rsr.getRiskParameterConfig(IRM_CONFIG.updateType);
       expect(config.riskSteward).to.equal(IRM_CONFIG.steward);
       expect(config.debounce).to.equal(IRM_CONFIG.old.debounce);
@@ -57,7 +57,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(config.active).to.be.true;
     });
 
-    it("market cap steward safe delta is unchanged", async () => {
+    it("market cap steward safe delta is 50%", async () => {
       expect(await mcSteward.safeDeltaBps()).to.equal(MARKETCAP_STEWARD_SAFE_DELTA);
     });
   });
@@ -99,7 +99,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(await cfSteward.safeDeltaBps()).to.equal(COLLATERAL_FACTORS_CONFIG.new.safeDeltaBps);
     });
 
-    it("interestRateModel config remains same as before", async () => {
+    it("interestRateModel config remains unchanged", async () => {
       const config = await rsr.getRiskParameterConfig(IRM_CONFIG.updateType);
       expect(config.riskSteward).to.equal(IRM_CONFIG.steward);
       expect(config.debounce).to.equal(IRM_CONFIG.old.debounce);
@@ -107,7 +107,7 @@ forking(BLOCK_NUMBER, async () => {
       expect(config.active).to.be.true;
     });
 
-    it("market cap steward safe delta is unchanged", async () => {
+    it("market cap steward safe delta remains unchanged", async () => {
       expect(await mcSteward.safeDeltaBps()).to.equal(MARKETCAP_STEWARD_SAFE_DELTA);
     });
   });
