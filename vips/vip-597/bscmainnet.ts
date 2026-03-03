@@ -233,6 +233,10 @@ Currently, only a repayment of type(uint256).max is treated as a full repayment.
 
 This update generalises the logic so that **any repayment exceeding the borrower's debt is capped**, improving safety and user experience across repayment and liquidation scenarios.
 
+#### Proposed Change
+
+**Update in VToken.sol (repayBorrowFresh):**
+
 The technical details of the proposed change (including before/after code diff) can be found in the [community post](https://community.venus.io/t/proposal-vtoken-repayment-logic-improvement/5688).
 
 #### Impact
@@ -241,6 +245,13 @@ The technical details of the proposed change (including before/after code diff) 
 - **Liquidations**: Repayments are capped, avoiding overpayment during liquidation
 - **Events**: RepayBorrow events now reflect the actual repaid amount
 - **Math Safety**: Prevents underflow in repayment calculations
+
+#### Scope
+
+- **Contract:** VToken
+- **Function:** repayBorrowFresh
+- **Change Type:** Single-line logic update
+- **Code Impact:** Minimal (2 additions, 6 deletions)
 
 #### Summary
 

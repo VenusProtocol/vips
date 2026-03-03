@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip610Testnet, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-597/bsctestnet";
+import vip597Testnet, { CORE_MARKETS, NEW_VBEP20_DELEGATE_IMPL } from "../../vips/vip-597/bsctestnet";
 import VBEP20_DELEGATOR_ABI from "./abi/VBep20Delegator.json";
 
 const BLOCK_NUMBER = 93362756;
@@ -20,7 +20,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-610 testnet", await vip610Testnet(), {
+  testVip("VIP-597 testnet", await vip597Testnet(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       const totalMarkets = CORE_MARKETS.length;
       await expectEvents(txResponse, [VBEP20_DELEGATOR_ABI], ["NewImplementation"], [totalMarkets]);

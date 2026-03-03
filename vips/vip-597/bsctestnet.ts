@@ -158,10 +158,10 @@ export const CORE_MARKETS = [
   },
 ];
 
-const vip610Testnet = () => {
+const vip597Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-610 [BNB Chain] Repay Logic Improvement - VToken Implementation Upgrade",
+    title: "VIP-597 [BNB Chain] VToken Repayment Logic Improvement",
     description: `This VIP upgrades the VBep20Delegate implementation for all core pool markets on BNB Chain testnet to include the repay logic improvement.
 
 The updated implementation caps the repayment amount to the borrower's actual outstanding debt, preventing over-repayment scenarios. Previously, only \`type(uint256).max\` was treated as "repay full balance". Now, any amount exceeding the actual borrow balance is automatically capped.
@@ -188,4 +188,4 @@ The updated implementation caps the repayment amount to the borrower's actual ou
   );
 };
 
-export default vip610Testnet;
+export default vip597Testnet;
