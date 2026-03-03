@@ -221,23 +221,60 @@ export const CORE_MARKETS = [
   },
 ];
 
-export const vip610 = () => {
+export const vip597 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-610 [BNB Chain] Repay Logic Improvement - VToken Implementation Upgrade",
-    description: `#### Summary
+    title: "VIP-597 [BNB Chain] VToken Repayment Logic Improvement",
+    description: `This proposal updates the repayment logic in VToken to automatically cap repayments at the borrower's outstanding debt. The change improves safety, simplifies repayment flows, and prevents unintended over-repayment.
 
-If passed, this VIP will upgrade the VBep20Delegate implementation for all core pool markets on BNB Chain to include the repay logic improvement.
+#### Context
 
-#### Description
+Currently, only a repayment of \`type(uint256).max\` is treated as a full repayment. All other over-estimates are processed as-is, which can cause wasteful transactions and requires users to calculate exact debt amounts.
 
-The updated VToken implementation modifies the \`repayBorrowFresh\` function to cap the repayment amount to the borrower's actual outstanding debt. Previously, only \`type(uint256).max\` was treated as "repay full balance". With this change, any repayment amount exceeding the borrower's actual borrow balance is automatically capped to the outstanding debt.
+This update generalises the logic so that **any repayment exceeding the borrower's debt is capped**, improving safety and user experience across repayment and liquidation scenarios.
 
-This change:
-- Prevents over-repayment scenarios where users pass amounts greater than their actual debt
-- Improves safety for \`repayBorrow\`, \`repayBorrowBehalf\`, and \`liquidateBorrowFresh\` flows
-- Ensures the \`RepayBorrow\` event always reflects the actual repaid amount
-- Provides additional mathematical safety for balance subtraction operations
+#### Proposed Change
+
+Update in \`VToken.sol\` (\`repayBorrowFresh\`):
+
+**Before:**
+
+\`\`\`solidity
+if (repayAmount == type(uint256).max) {
+    vars.repayAmount = vars.accountBorrows;
+} else {
+    vars.repayAmount = repayAmount;
+}
+\`\`\`
+
+**After:**
+
+\`\`\`solidity
+vars.repayAmount = repayAmount >= vars.accountBorrows ? vars.accountBorrows : repayAmount;
+\`\`\`
+
+#### Impact
+
+- **Repayment Functions**: Users can safely over-estimate repayments for \`repayBorrow\` and \`repayBorrowBehalf\`
+- **Liquidations**: Repayments are capped, avoiding overpayment during liquidation
+- **Events**: \`RepayBorrow\` events now reflect the actual repaid amount
+- **Math Safety**: Prevents underflow in repayment calculations
+
+#### Scope
+
+- **Contract:** VToken
+- **Function:** \`repayBorrowFresh\`
+- **Change Type:** Single-line logic update
+- **Code Impact:** Minimal (2 additions, 6 deletions)
+
+#### Summary
+
+If approved, this VIP will:
+
+- Cap repayments at the borrower's outstanding debt
+- Simplify repayment logic and improve user safety
+- Prevent overpayment during normal or liquidation flows
+- Maintain backward compatibility for standard repayment scenarios
 
 #### Security and additional considerations
 
@@ -273,4 +310,4 @@ We applied the following security procedures for this upgrade:
   );
 };
 
-export default vip610;
+export default vip597;
