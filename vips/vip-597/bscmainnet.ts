@@ -229,43 +229,18 @@ export const vip597 = () => {
 
 #### Context
 
-Currently, only a repayment of \`type(uint256).max\` is treated as a full repayment. All other over-estimates are processed as-is, which can cause wasteful transactions and requires users to calculate exact debt amounts.
+Currently, only a repayment of type(uint256).max is treated as a full repayment. All other over-estimates are processed as-is, which can cause wasteful transactions and requires users to calculate exact debt amounts.
 
 This update generalises the logic so that **any repayment exceeding the borrower's debt is capped**, improving safety and user experience across repayment and liquidation scenarios.
 
-#### Proposed Change
-
-Update in \`VToken.sol\` (\`repayBorrowFresh\`):
-
-**Before:**
-
-\`\`\`solidity
-if (repayAmount == type(uint256).max) {
-    vars.repayAmount = vars.accountBorrows;
-} else {
-    vars.repayAmount = repayAmount;
-}
-\`\`\`
-
-**After:**
-
-\`\`\`solidity
-vars.repayAmount = repayAmount >= vars.accountBorrows ? vars.accountBorrows : repayAmount;
-\`\`\`
+The technical details of the proposed change (including before/after code diff) can be found in the [community post](https://community.venus.io/t/proposal-vtoken-repayment-logic-improvement/5688).
 
 #### Impact
 
-- **Repayment Functions**: Users can safely over-estimate repayments for \`repayBorrow\` and \`repayBorrowBehalf\`
+- **Repayment Functions**: Users can safely over-estimate repayments for repayBorrow and repayBorrowBehalf
 - **Liquidations**: Repayments are capped, avoiding overpayment during liquidation
-- **Events**: \`RepayBorrow\` events now reflect the actual repaid amount
+- **Events**: RepayBorrow events now reflect the actual repaid amount
 - **Math Safety**: Prevents underflow in repayment calculations
-
-#### Scope
-
-- **Contract:** VToken
-- **Function:** \`repayBorrowFresh\`
-- **Change Type:** Single-line logic update
-- **Code Impact:** Minimal (2 additions, 6 deletions)
 
 #### Summary
 
@@ -289,6 +264,7 @@ We applied the following security procedures for this upgrade:
 
 #### References
 
+- [Community post](https://community.venus.io/t/proposal-vtoken-repayment-logic-improvement/5688)
 - [Venus Protocol PR #646](https://github.com/VenusProtocol/venus-protocol/pull/646)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
