@@ -1,10 +1,12 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
+export const RISK_ORACLE = "0x0E3E51958b0Daa8C57c949675975CBEDd7b5a1a1";
 export const RISK_STEWARD_RECEIVER = "0x47856bFa74B71d24a5545c7506862B8FddE52baB";
 export const MARKETCAP_STEWARD = "0x816FfD00A274EDE0091421F77817ca260Db3a3E3";
 export const COLLATERALFACTORS_STEWARD = "0x1414ADf007E324ec1D0A77b9F1A8759Ad33d2879";
 export const IRM_STEWARD = "0x8acaBc42Bb98E2e2b091902a7E23f60CcB730aaa";
+export const ALLEZ_LABS = "0xcF2c06dDd24dd92EC35f60Bab9D7f206330e2abE";
 
 const SIX_HOURS = 21600; // timelock — unchanged across all update types
 
@@ -59,7 +61,11 @@ Following the community recommendation in [Risk Stewards Deployment Parameters R
 
 - **Supply/Borrow Caps (24h debounce):** Ceiling parameters that don't affect existing positions. Reducing the debounce to 24h enables more responsive risk management while the 24h frequency control prevents excessive compounding of adjustments.
 - **Collateral Factors (48h debounce, 5% safe delta):** Directly determine how much a user can borrow and affect liquidation eligibility. Tighter safe delta (5%) and longer debounce (48h) ensure meaningful changes remain subject to rigorous review. Any adjustment beyond 5% will require additional approval from the Venus whitelisted team.
-- **Interest Rate Model:** No change — the debounce remains at 72h since a new IRM contract can contain arbitrary rate curve logic, making automated safety assessment infeasible on-chain.`,
+- **Interest Rate Model:** No change — the debounce remains at 72h since a new IRM contract can contain arbitrary rate curve logic, making automated safety assessment infeasible on-chain.
+
+**Allez Labs Onboarding:**
+
+This VIP also onboards [Allez Labs](https://community.venus.io/t/proposed-risk-stewards-framework-for-more-efficient-risk-management/5606) (\`${ALLEZ_LABS}\`) as an authorized sender on the Risk Oracle, enabling them to publish risk parameter updates.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -101,6 +107,13 @@ Following the community recommendation in [Risk Stewards Deployment Parameters R
         target: COLLATERALFACTORS_STEWARD,
         signature: "setSafeDeltaBps(uint256)",
         params: [COLLATERAL_FACTORS_CONFIG.new.safeDeltaBps],
+      },
+
+      // Onboard Allez Labs as authorized sender on Risk Oracle
+      {
+        target: RISK_ORACLE,
+        signature: "addAuthorizedSender(address)",
+        params: [ALLEZ_LABS],
       },
     ],
     meta,
