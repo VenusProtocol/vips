@@ -72,8 +72,9 @@ export const FLUX_FLA = "0xe620726686B480d955E63b9c7c1f93c2f8c1aCf4";
 export const vip598 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
-    description: `This VIP consolidates three governance initiatives on BNB Chain.
+    title:
+      "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
+    description: `This VIP consolidates four governance initiatives on BNB Chain.
 
 ---
 
@@ -177,17 +178,32 @@ The Fluid team has already updated their implementation to be compatible with th
       {
         target: RISK_STEWARD_RECEIVER,
         signature: "setRiskParameterConfig(string,address,uint256,uint256)",
-        params: [SUPPLY_CAP_CONFIG.updateType, SUPPLY_CAP_CONFIG.steward, SUPPLY_CAP_CONFIG.new.debounce, SUPPLY_CAP_CONFIG.new.timelock],
+        params: [
+          SUPPLY_CAP_CONFIG.updateType,
+          SUPPLY_CAP_CONFIG.steward,
+          SUPPLY_CAP_CONFIG.new.debounce,
+          SUPPLY_CAP_CONFIG.new.timelock,
+        ],
       },
       {
         target: RISK_STEWARD_RECEIVER,
         signature: "setRiskParameterConfig(string,address,uint256,uint256)",
-        params: [BORROW_CAP_CONFIG.updateType, BORROW_CAP_CONFIG.steward, BORROW_CAP_CONFIG.new.debounce, BORROW_CAP_CONFIG.new.timelock],
+        params: [
+          BORROW_CAP_CONFIG.updateType,
+          BORROW_CAP_CONFIG.steward,
+          BORROW_CAP_CONFIG.new.debounce,
+          BORROW_CAP_CONFIG.new.timelock,
+        ],
       },
       {
         target: RISK_STEWARD_RECEIVER,
         signature: "setRiskParameterConfig(string,address,uint256,uint256)",
-        params: [COLLATERAL_FACTORS_CONFIG.updateType, COLLATERAL_FACTORS_CONFIG.steward, COLLATERAL_FACTORS_CONFIG.new.debounce, COLLATERAL_FACTORS_CONFIG.new.timelock],
+        params: [
+          COLLATERAL_FACTORS_CONFIG.updateType,
+          COLLATERAL_FACTORS_CONFIG.steward,
+          COLLATERAL_FACTORS_CONFIG.new.debounce,
+          COLLATERAL_FACTORS_CONFIG.new.timelock,
+        ],
       },
       {
         target: COLLATERALFACTORS_STEWARD,

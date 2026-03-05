@@ -27,10 +27,10 @@ import vip598, {
 } from "../../vips/vip-598/bscmainnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import ERC20_ABI from "./abi/ERC20.json";
+import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
-import STEWARD_ABI from "./abi/MarketCapSteward.json";
 import RISK_ORACLE_ABI from "./abi/RiskOracle.json";
 import RSR_ABI from "./abi/RiskStewardReceiver.json";
 import VTOKEN_ABI from "./abi/VToken.json";
@@ -172,28 +172,32 @@ forking(FORK_BLOCK, async () => {
     });
   });
 
-  testVip("VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist", await vip598(), {
-    callbackAfterExecution: async txResponse => {
-      // slisBNB risk parameter events
-      await expectEvents(
-        txResponse,
-        [COMPTROLLER_ABI],
-        ["NewCollateralFactor", "NewLiquidationThreshold", "NewLiquidationIncentive"],
-        [1, 1, 1],
-      );
-      // Prime rewards speed event
-      await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
-      // Risk steward config events
-      await expectEvents(
-        txResponse,
-        [RSR_ABI, STEWARD_ABI, RISK_ORACLE_ABI],
-        ["RiskParameterConfigUpdated", "SafeDeltaBpsUpdated", "AuthorizedSenderAdded"],
-        [3, 1, 1],
-      );
-      // Flux flash loan whitelist event
-      await expectEvents(txResponse, [COMPTROLLER_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
+  testVip(
+    "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
+    await vip598(),
+    {
+      callbackAfterExecution: async txResponse => {
+        // slisBNB risk parameter events
+        await expectEvents(
+          txResponse,
+          [COMPTROLLER_ABI],
+          ["NewCollateralFactor", "NewLiquidationThreshold", "NewLiquidationIncentive"],
+          [1, 1, 1],
+        );
+        // Prime rewards speed event
+        await expectEvents(txResponse, [PRIME_LIQUIDITY_PROVIDER_ABI], ["TokenDistributionSpeedUpdated"], [1]);
+        // Risk steward config events
+        await expectEvents(
+          txResponse,
+          [RSR_ABI, STEWARD_ABI, RISK_ORACLE_ABI],
+          ["RiskParameterConfigUpdated", "SafeDeltaBpsUpdated", "AuthorizedSenderAdded"],
+          [3, 1, 1],
+        );
+        // Flux flash loan whitelist event
+        await expectEvents(txResponse, [COMPTROLLER_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
+      },
     },
-  });
+  );
 
   describe("Post-VIP behavior", () => {
     // -------------------------------------------------------
@@ -397,19 +401,31 @@ forking(FORK_BLOCK, async () => {
             expect(cap).to.be.gt(0);
 
             const cap1 = cap.mul(120).div(100);
-            const id1 = await publishUpdate("supplyCap", vBTC, ethers.utils.defaultAbiCoder.encode(["uint256"], [cap1]));
+            const id1 = await publishUpdate(
+              "supplyCap",
+              vBTC,
+              ethers.utils.defaultAbiCoder.encode(["uint256"], [cap1]),
+            );
             await expect(rsr.connect(exec).processUpdate(id1)).to.emit(rsr, "UpdateExecuted").withArgs(id1);
             expect(await comptroller.supplyCaps(vBTC)).to.equal(cap1);
 
             const cap2 = cap1.mul(110).div(100);
-            const id2 = await publishUpdate("supplyCap", vBTC, ethers.utils.defaultAbiCoder.encode(["uint256"], [cap2]));
+            const id2 = await publishUpdate(
+              "supplyCap",
+              vBTC,
+              ethers.utils.defaultAbiCoder.encode(["uint256"], [cap2]),
+            );
             await expect(rsr.connect(exec).processUpdate(id2)).to.be.revertedWithCustomError(rsr, "UpdateTooFrequent");
 
             await ethers.provider.send("evm_increaseTime", [ONE_DAY + 1]);
             await ethers.provider.send("evm_mine", []);
 
             const cap3 = cap1.mul(110).div(100);
-            const id3 = await publishUpdate("supplyCap", vBTC, ethers.utils.defaultAbiCoder.encode(["uint256"], [cap3]));
+            const id3 = await publishUpdate(
+              "supplyCap",
+              vBTC,
+              ethers.utils.defaultAbiCoder.encode(["uint256"], [cap3]),
+            );
             await expect(rsr.connect(exec).processUpdate(id3)).to.emit(rsr, "UpdateExecuted").withArgs(id3);
             expect(await comptroller.supplyCaps(vBTC)).to.equal(cap3);
           });
@@ -421,7 +437,11 @@ forking(FORK_BLOCK, async () => {
             expect(cap).to.be.gt(0);
 
             const cap1 = cap.mul(120).div(100);
-            const id1 = await publishUpdate("borrowCap", vETH, ethers.utils.defaultAbiCoder.encode(["uint256"], [cap1]));
+            const id1 = await publishUpdate(
+              "borrowCap",
+              vETH,
+              ethers.utils.defaultAbiCoder.encode(["uint256"], [cap1]),
+            );
             await expect(rsr.connect(exec).processUpdate(id1)).to.emit(rsr, "UpdateExecuted").withArgs(id1);
             expect(await comptroller.borrowCaps(vETH)).to.equal(cap1);
 
@@ -429,7 +449,11 @@ forking(FORK_BLOCK, async () => {
             await ethers.provider.send("evm_mine", []);
 
             const cap2 = cap1.mul(110).div(100);
-            const id2 = await publishUpdate("borrowCap", vETH, ethers.utils.defaultAbiCoder.encode(["uint256"], [cap2]));
+            const id2 = await publishUpdate(
+              "borrowCap",
+              vETH,
+              ethers.utils.defaultAbiCoder.encode(["uint256"], [cap2]),
+            );
             await expect(rsr.connect(exec).processUpdate(id2)).to.emit(rsr, "UpdateExecuted").withArgs(id2);
             expect(await comptroller.borrowCaps(vETH)).to.equal(cap2);
           });
