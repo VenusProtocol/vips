@@ -4,17 +4,20 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-export const vslisBNB = "0xaB5504A3cde0d8253E8F981D663c7Ff7128B3e56";
 
+// -------------------------------------------------------
+// VIP-598-A: slisBNB Core Pool Risk Parameter Update
+// -------------------------------------------------------
+export const vslisBNB = "0xaB5504A3cde0d8253E8F981D663c7Ff7128B3e56";
 export const NEW_CF = parseUnits("0.8", 18);
 export const NEW_LT = parseUnits("0.8", 18);
 export const NEW_LI = parseUnits("1.1", 18);
 
-export const vip698 = () => {
+export const vip598 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-698 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
-    description: "VIP-698 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
+    title: "VIP-598 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
+    description: "VIP-598 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -22,6 +25,9 @@ export const vip698 = () => {
 
   return makeProposal(
     [
+      // -------------------------------------------------------
+      // VIP-598-A: slisBNB Core Pool Risk Parameter Update
+      // -------------------------------------------------------
       {
         target: bsctestnet.UNITROLLER,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -38,4 +44,4 @@ export const vip698 = () => {
   );
 };
 
-export default vip698;
+export default vip598;
