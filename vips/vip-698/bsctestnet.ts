@@ -10,11 +10,11 @@ export const NEW_CF = parseUnits("0.8", 18);
 export const NEW_LT = parseUnits("0.8", 18);
 export const NEW_LI = parseUnits("1.1", 18);
 
-export const vip597 = () => {
+export const vip698 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-597 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
-    description: "VIP-597 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
+    title: "VIP-698 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
+    description: "VIP-698 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -38,4 +38,4 @@ export const vip597 = () => {
   );
 };
 
-export default vip597;
+export default vip698;

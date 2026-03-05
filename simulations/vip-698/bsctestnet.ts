@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip597, { NEW_CF, NEW_LI, NEW_LT, vslisBNB } from "../../vips/vip-597/bsctestnet";
+import vip698, { NEW_CF, NEW_LI, NEW_LT, vslisBNB } from "../../vips/vip-698/bsctestnet";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import REDSTONE_ORACLE_ABI from "./abi/RedstoneOracle.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
@@ -55,7 +55,7 @@ forking(93334375, async () => {
     });
   });
 
-  testVip("VIP-597 testnet [BNB Chain] slisBNB Core Pool Risk Parameter Update", await vip597(), {
+  testVip("VIP-698 testnet [BNB Chain] slisBNB Core Pool Risk Parameter Update", await vip698(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(
         txResponse,

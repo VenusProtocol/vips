@@ -11,10 +11,10 @@ export const NEW_CF = parseUnits("0.8", 18);
 export const NEW_LT = parseUnits("0.8", 18);
 export const NEW_LI = parseUnits("1.1", 18);
 
-export const vip597 = () => {
+export const vip698 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-597 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
+    title: "VIP-698 [BNB Chain] slisBNB Core Pool Risk Parameter Update",
     description: `#### Summary
 
 If passed, this VIP will update the risk parameters for the [slisBNB](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B) market in the Venus Core Pool on BNB Chain, enabling it as productive collateral to support BNB looping strategies for Binance Wallet users.
@@ -78,4 +78,4 @@ To leverage Binance Wallet's distribution channel, Venus Protocol will enable BN
   );
 };
 
-export default vip597;
+export default vip698;
