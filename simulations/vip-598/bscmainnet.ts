@@ -10,6 +10,7 @@ import vip598, {
   ALLEZ_LABS,
   BORROW_CAP_CONFIG,
   COLLATERAL_FACTORS_CONFIG,
+  FLUX_FLA,
   IRM_CONFIG,
   MARKETCAP_STEWARD,
   MARKETCAP_STEWARD_SAFE_DELTA,
@@ -160,9 +161,18 @@ forking(FORK_BLOCK, async () => {
         expect(await riskOracle.authorizedSenders(ALLEZ_LABS)).to.be.false;
       });
     });
+
+    // -------------------------------------------------------
+    // VIP-598-D: Flux Flash Loan Aggregator Whitelist
+    // -------------------------------------------------------
+    describe("Flux Flash Loan Aggregator Whitelist", () => {
+      it("FLUX_FLA should NOT be whitelisted for flash loans", async () => {
+        expect(await comptroller.authorizedFlashLoan(FLUX_FLA)).to.be.false;
+      });
+    });
   });
 
-  testVip("VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, and Risk Stewards Update", await vip598(), {
+  testVip("VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist", await vip598(), {
     callbackAfterExecution: async txResponse => {
       // slisBNB risk parameter events
       await expectEvents(
@@ -180,6 +190,8 @@ forking(FORK_BLOCK, async () => {
         ["RiskParameterConfigUpdated", "SafeDeltaBpsUpdated", "AuthorizedSenderAdded"],
         [3, 1, 1],
       );
+      // Flux flash loan whitelist event
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
     },
   });
 
@@ -492,6 +504,15 @@ forking(FORK_BLOCK, async () => {
             expect(await cfSteward.isSafeForDirectExecution(update)).to.be.false;
           });
         });
+      });
+    });
+
+    // -------------------------------------------------------
+    // VIP-598-D: Flux Flash Loan Aggregator Whitelist
+    // -------------------------------------------------------
+    describe("Flux Flash Loan Aggregator Whitelist", () => {
+      it("FLUX_FLA should be whitelisted for flash loans", async () => {
+        expect(await comptroller.authorizedFlashLoan(FLUX_FLA)).to.be.true;
       });
     });
   });

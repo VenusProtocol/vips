@@ -64,10 +64,15 @@ export const IRM_CONFIG = {
 // MC steward safe delta is not changed by this VIP — exported for simulation sanity check
 export const MARKETCAP_STEWARD_SAFE_DELTA = 5000; // 50%
 
+// -------------------------------------------------------
+// VIP-598-D: Flux Flash Loan Aggregator Whitelist
+// -------------------------------------------------------
+export const FLUX_FLA = "0xe620726686B480d955E63b9c7c1f93c2f8c1aCf4";
+
 export const vip598 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, and Risk Stewards Update",
+    title: "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
     description: `This VIP consolidates three governance initiatives on BNB Chain.
 
 ---
@@ -125,7 +130,17 @@ Following the [community recommendation](https://community.venus.io/t/risk-stewa
 - **Collateral Factors (48h debounce, 5% safe delta):** Directly affect liquidation eligibility. Tighter safe delta (5%) and longer debounce (48h) ensure meaningful changes remain subject to rigorous review. Any adjustment beyond 5% requires additional approval from the Venus whitelisted team.
 - **Interest Rate Model:** No change — debounce remains at 3 days since new IRM contracts can contain arbitrary rate curve logic.
 
-**Allez Labs Onboarding:** This VIP also onboards [Allez Labs](https://community.venus.io/t/proposed-risk-stewards-framework-for-more-efficient-risk-management/5606) (\`${ALLEZ_LABS}\`) as an authorized sender on the Risk Oracle, enabling them to publish risk parameter updates.`,
+**Allez Labs Onboarding:** This VIP also onboards [Allez Labs](https://community.venus.io/t/proposed-risk-stewards-framework-for-more-efficient-risk-management/5606) (\`${ALLEZ_LABS}\`) as an authorized sender on the Risk Oracle, enabling them to publish risk parameter updates.
+
+---
+
+### 4. Flux Flash Loan Aggregator Whitelist
+
+Currently, Flux relies on AAVE as its default flash loan provider, which introduces a 0.05% fee for users. This dependency is not aligned with the Venus brand identity and undermines the goal of providing a fully native lending experience.
+
+The Fluid team has already updated their implementation to be compatible with the Venus native flash loan contract. This VIP completes the integration by whitelisting the Flux Flash Loan Aggregator (FLA) on the Venus Core Pool, removing the AAVE dependency and enabling fee-free flash loans through Venus.
+
+**Action:** Whitelist the Flux Flash Loan Aggregator at [\`${FLUX_FLA}\`](https://bscscan.com/address/${FLUX_FLA}) on the Venus Core Pool.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -183,6 +198,15 @@ Following the [community recommendation](https://community.venus.io/t/risk-stewa
         target: RISK_ORACLE,
         signature: "addAuthorizedSender(address)",
         params: [ALLEZ_LABS],
+      },
+
+      // -------------------------------------------------------
+      // VIP-598-D: Flux Flash Loan Aggregator Whitelist
+      // -------------------------------------------------------
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "setWhiteListFlashLoanAccount(address,bool)",
+        params: [FLUX_FLA, true],
       },
     ],
     meta,
