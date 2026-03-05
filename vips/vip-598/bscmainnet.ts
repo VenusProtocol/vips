@@ -73,75 +73,73 @@ export const vip598 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
-    description: `This VIP consolidates four governance initiatives on BNB Chain.
+      "VIP-598 [BNB Chain] Risk Parameter Updates, Prime Rewards Allocation, slisBNB Update, and Flux Flash Loan Whitelist",
+    description: `#### Summary
 
----
+If passed, this VIP will implement several operational updates on BNB Chain to improve risk management, optimize Prime rewards distribution, enable **slisBNB** as collateral in the Core Pool, and whitelist the **Flux Flash Loan Aggregator** to use Venus's native flash loan infrastructure.
 
-### 1. slisBNB Core Pool Risk Parameter Update
+#### Description
 
-If passed, this VIP will update the risk parameters for the [slisBNB](https://bscscan.com/address/0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B) market in the Venus Core Pool on BNB Chain, enabling it as productive collateral to support BNB looping strategies for Binance Wallet users.
+This proposal introduces four protocol updates on BNB Chain:
 
-**Parameter Changes**
+1. **Risk Steward Framework Update** – Onboard **Allez Labs** as Risk Steward and update the framework parameters governing risk adjustments.
+2. **Prime Rewards Allocation (March 2026)** – Allocate **$22,000 in Prime rewards** to **USDT suppliers on BNB Chain**.
+3. **slisBNB Core Pool Update** – Enable **slisBNB** as collateral in the Core Pool.
+4. **Flux Flash Loan Aggregator Whitelist** – Allow the Flux aggregator to access Venus's native flash loan contract.
 
-| Parameter | Current | New |
-|---|---|---|
-| Collateral Factor (CF) | 0% | 80% |
-| Liquidation Threshold (LT) | 0% | 80% |
-| Liquidation Incentive (LI) | 100% | 110% |
+These changes aim to improve operational efficiency, strengthen liquidity incentives, and expand protocol integrations.
 
-**Rationale**
+#### Proposed Changes
 
-- **Unlock utility for slisBNB**: Moving CF/LT from 0% to 80% allows slisBNB to be used as productive collateral in Core Pool, enabling users to borrow against their slisBNB holdings.
-- **Support Binance Wallet-native looping**: Users can execute BNB looping strategies directly via Binance Wallet's distribution channel without switching platforms.
-- **Maintain liquidation motivation**: LI of 110% provides sufficient incentive for liquidators during stress conditions. The 10% liquidation penalty balances protocol safety and user cost.
+#### 1. Risk Steward Onboarding
 
----
+Whitelist **Allez Labs** as Risk Steward.
 
-### 2. March 2026 Prime Rewards Adjustment
+- **Address:** ${ALLEZ_LABS}
 
-This VIP allocates Prime Rewards on BNB Chain for March 2026 based on available funds. In February 2026, Venus generated $143.6K in reserves revenue, of which $28.7K (20%) is allocated to Prime.
+Updated Risk Steward parameters:
 
-**Allocation strategy**
+- **Supply Cap** — Safe Delta: 50%, Debounce: 24 hours, Timelock: 6 hours
+- **Borrow Cap** — Safe Delta: 50%, Debounce: 24 hours, Timelock: 6 hours
+- **Collateral Factors** — Safe Delta: 5%, Debounce: 48 hours, Timelock: 6 hours
+- **Interest Rate Model** — Safe Delta: N/A, Debounce: 72 hours, Timelock: 6 hours
 
-- Allocate $22K in Prime rewards (maintaining a 20% buffer for market price fluctuations).
-- Rewards directed exclusively to USDT suppliers — focusing on the supply side strengthens liquidity and creates conditions for lower borrow rates.
-- USDC distribution speed remains at 0 (unchanged from VIP-589).
+- **Safe Delta**: the maximum relative change that executes immediately without a timelock. Changes exceeding this threshold are registered on-chain and subject to the timelock period.
+- **Debounce**: the minimum time that must elapse after the last executed update before a new update of the same type can be registered for the same market.
+- **Timelock**: the waiting period between when a non-safe update is registered on-chain and when it becomes eligible for execution by a whitelisted executor.
 
-Distribution speed: $22,000 over 31 days at 192,000 blocks/day ≈ 0.003696 USDT/block.
+#### 2. Prime Rewards Allocation — March 2026
 
----
+- Allocate **$22,000 in Prime rewards**, distributed to **USDT suppliers on BNB Chain**
+- Above allocation accounts for a **20% reserve buffer** to avoid full depletion due to market price fluctuations
 
-### 3. Risk Stewards Parameter Update
+#### 3. slisBNB Core Pool Parameter Update
 
-Following the [community recommendation](https://community.venus.io/t/risk-stewards-deployment-parameters-recommendation/5687), this VIP updates the Risk Stewards framework parameters on BNB Chain to better align debounce windows and safe delta bounds with the risk profile of each parameter type.
+- **Collateral Factor** — Current: 0%, Proposed: 80%
+- **Liquidation Threshold** — Current: 0%, Proposed: 80%
+- **Liquidation Penalty** — Current: 0%, Proposed: 10%
+- **Liquidation Incentive** — Current: 100%, Proposed: 110%
 
-**Changes**
+This enables **slisBNB** as collateral in the Core Pool.
 
-| Parameter | Old Debounce | New Debounce | Old Safe Delta | New Safe Delta |
-|---|---|---|---|---|
-| supplyCap | 259200 (3 days) | 86400 (24h) | 5000 bps (50%) | unchanged |
-| borrowCap | 259200 (3 days) | 86400 (24h) | 5000 bps (50%) | unchanged |
-| collateralFactors | 259200 (3 days) | 172800 (48h) | 1000 bps (10%) | 500 bps (5%) |
-| interestRateModel | unchanged | unchanged | N/A | N/A |
+#### 4. Flux Flash Loan Aggregator Whitelist
 
-**Rationale**
+Whitelist the **Flux Flash Loan Aggregator**:
 
-- **Supply/Borrow Caps (24h debounce):** Ceiling parameters that don't affect existing positions. Reducing debounce to 24h enables more responsive risk management.
-- **Collateral Factors (48h debounce, 5% safe delta):** Directly affect liquidation eligibility. Tighter safe delta (5%) and longer debounce (48h) ensure meaningful changes remain subject to rigorous review. Any adjustment beyond 5% requires additional approval from the Venus whitelisted team.
-- **Interest Rate Model:** No change — debounce remains at 3 days since new IRM contracts can contain arbitrary rate curve logic.
+- **Address:** ${FLUX_FLA}
 
-**Allez Labs Onboarding:** This VIP also onboards [Allez Labs](https://community.venus.io/t/proposed-risk-stewards-framework-for-more-efficient-risk-management/5606) (\`${ALLEZ_LABS}\`) as an authorized sender on the Risk Oracle, enabling them to publish risk parameter updates.
+This allows Flux to use Venus's native flash loan contract and removes reliance on external providers charging a **0.05% fee**.
 
----
+#### Conclusion
 
-### 4. Flux Flash Loan Aggregator Whitelist
+If approved, this VIP will:
 
-Currently, Flux relies on AAVE as its default flash loan provider, which introduces a 0.05% fee for users. This dependency is not aligned with the Venus brand identity and undermines the goal of providing a fully native lending experience.
+- Onboard **Allez Labs** as Risk Steward and update the risk steward framework
+- Allocate **$22K Prime rewards** to **USDT suppliers on BNB Chain**
+- Enable **slisBNB as Core Pool collateral**
+- Whitelist the **Flux Flash Loan Aggregator** for Venus native flash loans
 
-The Fluid team has already updated their implementation to be compatible with the Venus native flash loan contract. This VIP completes the integration by whitelisting the Flux Flash Loan Aggregator (FLA) on the Venus Core Pool, removing the AAVE dependency and enabling fee-free flash loans through Venus.
-
-**Action:** Whitelist the Flux Flash Loan Aggregator at [\`${FLUX_FLA}\`](https://bscscan.com/address/${FLUX_FLA}) on the Venus Core Pool.`,
+These updates improve risk operations, liquidity incentives, collateral utility, and protocol integrations on Venus.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

@@ -173,7 +173,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   testVip(
-    "VIP-598 [BNB Chain] slisBNB Risk Parameters, March 2026 Prime Rewards, Risk Stewards Update, and Flux Flash Loan Whitelist",
+    "VIP-598 [BNB Chain] Risk Parameter Updates, Prime Rewards Allocation, slisBNB Update, and Flux Flash Loan Whitelist",
     await vip598(),
     {
       callbackAfterExecution: async txResponse => {
