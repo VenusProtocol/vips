@@ -6,14 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import {
-  ALL_MARKETS,
-  BORROW_ACTION,
-  CORE_POOL_ID,
-  MINT_ACTION,
-  TUSD_MARKET,
-  vip630,
-} from "../../vips/vip-630/bscmainnet";
+import { ALL_MARKETS, CORE_POOL_ID, vip630 } from "../../vips/vip-630/bscmainnet";
 import COMPTROLLER_ABI from "../vip-587/abi/Comptroller.json";
 import VTOKEN_ABI from "../vip-587/abi/VToken.json";
 
@@ -95,12 +88,6 @@ const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals:
     whale: "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D",
     decimals: 18,
   },
-  // TUSD
-  "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E": {
-    underlying: "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9",
-    whale: "0x3DdfA8eC3052539b6C9549F12cEA2C295cfF5296",
-    decimals: 18,
-  },
 };
 
 forking(BLOCK_NUMBER, async () => {
@@ -151,16 +138,6 @@ forking(BLOCK_NUMBER, async () => {
       });
     }
 
-    describe("TUSD — fully paused (no e-mode migration)", () => {
-      it("should have mint action paused", async () => {
-        expect(await comptroller.actionPaused(TUSD_MARKET.vToken, MINT_ACTION)).to.equal(true);
-      });
-
-      it("should have borrow action paused", async () => {
-        expect(await comptroller.actionPaused(TUSD_MARKET.vToken, BORROW_ACTION)).to.equal(true);
-      });
-    });
-
     describe("Functional tests: borrow should be blocked", () => {
       let user: Signer;
       let userAddress: string;
@@ -178,7 +155,10 @@ forking(BLOCK_NUMBER, async () => {
           const vToken = new ethers.Contract(market.vToken, VTOKEN_ABI, ethers.provider);
           const borrowAmount = parseUnits("1", info.decimals);
 
-          await expect(vToken.connect(user).borrow(borrowAmount)).to.be.reverted;
+          await expect(vToken.connect(user).borrow(borrowAmount)).to.be.revertedWithCustomError(
+            comptroller,
+            "BorrowNotAllowedInPool",
+          );
         });
       }
     });
