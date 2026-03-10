@@ -29,11 +29,11 @@ export const MARKETS_TO_DISABLE = [
 
 export const CORE_POOL_ID = 0;
 
-export const vip630 = () => {
+export const vip599 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-630 [BNB Chain] Asset Migration from Core Pool to Isolated E-Mode — Phase 2 (Final Switch)",
-    description: "VIP-630 [BNB Chain] Asset Migration from Core Pool to Isolated E-Mode — Phase 2 (Final Switch)",
+    title: "VIP-599 [BNB Chain] Phase 2 Asset Migration to Isolation Mode Pools + Pause TUSD",
+    description: "VIP-599 [BNB Chain] Phase 2 Asset Migration to Isolation Mode Pools + Pause TUSD",
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -59,4 +59,4 @@ export const vip630 = () => {
   );
 };
 
-export default vip630;
+export default vip599;

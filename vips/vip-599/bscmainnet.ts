@@ -52,29 +52,69 @@ export const ALL_MARKETS = [...MARKETS_TO_DISABLE, TUSD_MARKET];
 
 export const CORE_POOL_ID = 0;
 
-export const vip630 = () => {
+export const vip599 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-630 [BNB Chain] Asset Migration from Core Pool to Isolated E-Mode — Phase 2 (Final Switch)",
-    description: `## Summary
+    title: "VIP-599 [BNB Chain] Phase 2 Asset Migration to Isolation Mode Pools + Pause TUSD",
+    description: `This proposal implements **Phase 2** of the asset migration discussed in the [Venus community forum](https://community.venus.io/t/asset-migration-from-core-pool-to-isolated-e-mode/5648), moving selected assets from the **Core Pool** to **Isolated E-Mode pools (Isolation Mode)**, and pausing **TUSD** in the Core Pool.
 
-This VIP executes **Phase 2 (Final Switch)** of the asset migration from the Venus Core Pool to Isolated E-Mode.
+Phase 2 continues the migration process by moving a group of lower-utilisation or higher-volatility assets out of the Core Pool and into an **Isolation Mode group**. This approach allows the protocol to retain support for these assets while reducing systemic risk to the Core Pool.
 
-In Phase 1 (VIP-587), the following 12 assets were added to Isolated E-Mode pools alongside USDT and USDC, while remaining active in the Core Pool:
+After the migration, the **Isolation group** will consist of the migrated assets together with **USDT and USDC**, allowing users to continue interacting with these markets while leveraging stablecoin liquidity from the Core Pool.
 
-- LINK, UNI, AAVE, DOGE, BCH, TWT, ADA (Part 1 — VIP-587)
-- LTC, FIL, TRX, DOT, THE (Part 2 - VIP-587)
+In addition, **TUSD** will be **paused in the Core Pool** due to its **very low supply and borrow levels**.
 
-This VIP completes the migration by disabling these assets in the Core Pool:
+#### Changes
 
-- **Set Collateral Factor to 0** in Core Pool for all 12 migrated assets + TUSD
-- **Disable borrowing** in Core Pool for all 12 migrated assets + TUSD
-- **Pause mint action** for TUSD in the Core Pool (no e-mode migration for TUSD)
-- **Liquidation Thresholds remain unchanged** to allow orderly wind-down of existing positions
+#### 1. Asset Migration to Isolation Mode
 
-After this VIP, users must enable Isolated E-Mode to use these assets as collateral or to borrow them. TUSD is fully paused in the Core Pool. Existing Core Pool positions remain unaffected and can be repaid/withdrawn normally.
+The following assets will be migrated from the **Core Pool** to the **Isolation Mode group**:
 
-## References
+- **LINK**
+- **UNI**
+- **AAVE**
+- **DOGE**
+- **BCH**
+- **TWT**
+- **ADA**
+- **LTC**
+- **FIL**
+- **MATIC**
+- **TRX**
+- **DOT**
+- **THE**
+
+For all migrated assets, the following adjustments will be applied in the **Core Pool**:
+
+- **Loan-to-Value (LTV)** will be set to **0**
+- **Borrowable status** will be set to **false**
+
+The corresponding markets in **Isolation Mode** will retain the same parameters previously used in the Core Pool:
+
+- **Loan-to-Value (LTV)** in the corresponding Isolation Mode
+- **Liquidation Threshold (LT)**
+- **Supply Cap**
+- **Borrow Cap**
+- **Collateral Cap**
+- **Borrowable status** in the corresponding Isolation Mode
+- **Collateral status**
+- **Interest Rate Model (IRM)**
+
+#### 2. Pause TUSD in the Core Pool
+
+**TUSD** will be **paused in the Core Pool** and will **not be migrated** to an Isolation Mode group.
+
+Given the **very low utilisation and limited activity**, pausing the market helps streamline the Core Pool while reducing maintenance overhead for underutilised assets.
+
+#### Summary
+
+If approved, this VIP will:
+
+- Migrate **13 assets** from the **Core Pool** to **Isolation Mode pools** and maintain existing parameters for all migrated markets
+- **Pause the TUSD market** in the Core Pool due to low utilisation
+- Improve **risk segmentation** while preserving user access to migrated assets via isolated markets
+
+#### References
 
 - [VIP-587: Phase 1](https://github.com/VenusProtocol/vips/pull/661)
 - [Community post](https://community.venus.io/t/asset-migration-from-core-pool-to-isolated-e-mode/5648)`,
@@ -109,4 +149,4 @@ After this VIP, users must enable Isolated E-Mode to use these assets as collate
   );
 };
 
-export default vip630;
+export default vip599;

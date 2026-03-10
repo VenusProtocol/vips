@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { ALL_MARKETS, Actions, CORE_POOL_ID, TUSD_MARKET, vLINK, vip630 } from "../../vips/vip-630/bscmainnet";
+import { ALL_MARKETS, Actions, CORE_POOL_ID, TUSD_MARKET, vLINK, vip599 } from "../../vips/vip-599/bscmainnet";
 import COMPTROLLER_ABI from "../vip-587/abi/Comptroller.json";
 import ERC20_ABI from "../vip-587/abi/ERC20.json";
 import VTOKEN_ABI from "../vip-587/abi/VToken.json";
@@ -191,7 +191,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-630", await vip630(), {
+  testVip("VIP-599", await vip599(), {
     callbackAfterExecution: async txResponse => {
       await expect(txResponse).to.emit(comptroller, "NewCollateralFactor");
       await expect(txResponse).to.emit(comptroller, "BorrowAllowedUpdated");

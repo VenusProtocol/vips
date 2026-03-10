@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import { CORE_POOL_ID, MARKETS_TO_DISABLE, vip630 } from "../../vips/vip-630/bsctestnet";
+import { CORE_POOL_ID, MARKETS_TO_DISABLE, vip599 } from "../../vips/vip-599/bsctestnet";
 import COMPTROLLER_ABI from "../vip-587/abi/Comptroller.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -32,7 +32,7 @@ forking(BLOCK_NUMBER, async () => {
     }
   });
 
-  testVip("VIP-630", await vip630(), {
+  testVip("VIP-599", await vip599(), {
     callbackAfterExecution: async txResponse => {
       await expect(txResponse).to.emit(comptroller, "NewCollateralFactor");
       await expect(txResponse).to.emit(comptroller, "BorrowAllowedUpdated");
