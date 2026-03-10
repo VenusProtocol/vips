@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { ALL_MARKETS, CORE_POOL_ID, vLINK, vip630 } from "../../vips/vip-630/bscmainnet";
+import { ALL_MARKETS, Actions, CORE_POOL_ID, TUSD_MARKET, vLINK, vip630 } from "../../vips/vip-630/bscmainnet";
 import COMPTROLLER_ABI from "../vip-587/abi/Comptroller.json";
 import ERC20_ABI from "../vip-587/abi/ERC20.json";
 import VTOKEN_ABI from "../vip-587/abi/VToken.json";
@@ -217,6 +217,23 @@ forking(BLOCK_NUMBER, async () => {
         });
       });
     }
+
+    describe("TUSD should have mint action paused", () => {
+      it("should have mint action paused", async () => {
+        const paused = await comptroller.actionPaused(TUSD_MARKET.vToken, Actions.MINT);
+        expect(paused).to.be.true;
+      });
+
+      it("should revert when trying to mint vTUSD", async () => {
+        const tusdWhale = await initMainnetUser(TUSD_WHALE, parseUnits("1", 18));
+        const tusdToken = new ethers.Contract(TUSD, ERC20_ABI, ethers.provider);
+        const vTusdToken = new ethers.Contract(vTUSD, VTOKEN_ABI, ethers.provider);
+        const mintAmount = parseUnits("1", 18);
+
+        await tusdToken.connect(tusdWhale).approve(vTUSD, mintAmount);
+        await expect(vTusdToken.connect(tusdWhale).mint(mintAmount)).to.be.reverted;
+      });
+    });
 
     describe("Functional tests: borrow should be blocked", () => {
       let user: Signer;

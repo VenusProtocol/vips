@@ -43,6 +43,10 @@ export const MARKETS_TO_DISABLE = [
 // TUSD — fully paused in Core Pool (no e-mode migration, safe to pause actions)
 export const TUSD_MARKET = { symbol: "TUSD", vToken: vTUSD, liquidationThreshold: parseUnits("0.75", 18) };
 
+export const Actions = {
+  MINT: 0,
+};
+
 // All markets whose CF and borrow will be disabled
 export const ALL_MARKETS = [...MARKETS_TO_DISABLE, TUSD_MARKET];
 
@@ -65,9 +69,10 @@ This VIP completes the migration by disabling these assets in the Core Pool:
 
 - **Set Collateral Factor to 0** in Core Pool for all 12 migrated assets + TUSD
 - **Disable borrowing** in Core Pool for all 12 migrated assets + TUSD
+- **Pause mint action** for TUSD in the Core Pool (no e-mode migration for TUSD)
 - **Liquidation Thresholds remain unchanged** to allow orderly wind-down of existing positions
 
-After this VIP, users must enable Isolated E-Mode to use these assets as collateral or to borrow them. Existing Core Pool positions remain unaffected and can be repaid/withdrawn normally.
+After this VIP, users must enable Isolated E-Mode to use these assets as collateral or to borrow them. TUSD is fully paused in the Core Pool. Existing Core Pool positions remain unaffected and can be repaid/withdrawn normally.
 
 ## References
 
@@ -92,6 +97,12 @@ After this VIP, users must enable Isolated E-Mode to use these assets as collate
         signature: "setIsBorrowAllowed(uint96,address,bool)",
         params: [CORE_POOL_ID, market.vToken, false],
       })),
+      // Pause mint action for TUSD in Core Pool
+      {
+        target: bscmainnet.UNITROLLER,
+        signature: "_setActionsPaused(address[],uint8[],bool)",
+        params: [[vTUSD], [Actions.MINT], true],
+      },
     ],
     meta,
     ProposalType.REGULAR,
