@@ -1,25 +1,41 @@
 import { expect } from "chai";
-import { Contract, Signer } from "ethers";
+import { BigNumber, Contract, Signer } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
+import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { ALL_MARKETS, CORE_POOL_ID, vip630 } from "../../vips/vip-630/bscmainnet";
+import { ALL_MARKETS, CORE_POOL_ID, vLINK, vip630 } from "../../vips/vip-630/bscmainnet";
 import COMPTROLLER_ABI from "../vip-587/abi/Comptroller.json";
+import ERC20_ABI from "../vip-587/abi/ERC20.json";
 import VTOKEN_ABI from "../vip-587/abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 const BLOCK_NUMBER = 85550618;
 
+// E-Mode pool IDs (created in VIP-587)
+const EMODE_LINK_POOL_ID = 4;
+
+// Stablecoin addresses (Core Pool)
+const USDT = "0x55d398326f99059fF775485246999027B3197955";
+const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+// LINK underlying
+const LINK = "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD";
+const LINK_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+
+// TUSD underlying
+const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
+const vTUSD = "0xBf762cd5991cA1DCdDaC9ae5C638F5B5Dc3Bee6E";
+const TUSD_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
+
 // Map vToken address to underlying info (from vip-587 simulations)
 const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals: number }> = {
   // LINK
   "0x650b940a1033B8A1b1873f78730FcFC73ec11f1f": {
-    underlying: "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
-    whale: "0xF977814e90dA44bFA03b6295A0616a897441aceC",
+    underlying: LINK,
+    whale: LINK_WHALE,
     decimals: 18,
   },
   // UNI
@@ -88,13 +104,72 @@ const MARKET_INFO: Record<string, { underlying: string; whale: string; decimals:
     whale: "0xfBBF371C9B0B994EebFcC977CEf603F7f31c070D",
     decimals: 18,
   },
+  // TUSD
+  [vTUSD]: {
+    underlying: TUSD,
+    whale: TUSD_WHALE,
+    decimals: 18,
+  },
 };
+
+// Oracle staleness period (100 years)
+const MAX_STALE_PERIOD = 3153600000;
 
 forking(BLOCK_NUMBER, async () => {
   let comptroller: Contract;
+  let linkToken: Contract;
+  let vLinkToken: Contract;
+  let usdtToken: Contract;
+  let vUsdtToken: Contract;
+
+  // Pre-VIP borrower: supplies LINK collateral + borrows LINK in Core Pool (before VIP disables borrowing)
+  let corePoolBorrower: Signer;
+  let corePoolBorrowerAddress: string;
+  const linkBorrowAmount = parseUnits("1", 18);
 
   before(async () => {
     comptroller = new ethers.Contract(bscmainnet.UNITROLLER, COMPTROLLER_ABI, ethers.provider);
+    linkToken = new ethers.Contract(LINK, ERC20_ABI, ethers.provider);
+    vLinkToken = new ethers.Contract(vLINK, VTOKEN_ABI, ethers.provider);
+    usdtToken = new ethers.Contract(USDT, ERC20_ABI, ethers.provider);
+    vUsdtToken = new ethers.Contract(vUSDT, VTOKEN_ABI, ethers.provider);
+
+    // Set oracle staleness for assets used in functional tests
+    const oracleAssets = [
+      { underlying: LINK, symbol: "LINK" },
+      { underlying: USDT, symbol: "USDT" },
+    ];
+    for (const asset of oracleAssets) {
+      await setMaxStalePeriodInChainlinkOracle(
+        bscmainnet.CHAINLINK_ORACLE,
+        asset.underlying,
+        ethers.constants.AddressZero,
+        bscmainnet.NORMAL_TIMELOCK,
+        MAX_STALE_PERIOD,
+      );
+      await setMaxStalePeriodInChainlinkOracle(
+        bscmainnet.REDSTONE_ORACLE,
+        asset.underlying,
+        ethers.constants.AddressZero,
+        bscmainnet.NORMAL_TIMELOCK,
+        MAX_STALE_PERIOD,
+      );
+      await setMaxStalePeriodInBinanceOracle(bscmainnet.BINANCE_ORACLE, asset.symbol, MAX_STALE_PERIOD);
+    }
+
+    // Setup Core Pool borrower BEFORE VIP (while borrowing is still allowed)
+    corePoolBorrowerAddress = "0x0000000000000000000000000000000000000099";
+    corePoolBorrower = await initMainnetUser(corePoolBorrowerAddress, parseUnits("10", 18));
+
+    const linkWhale = await initMainnetUser(LINK_WHALE, parseUnits("1", 18));
+    const supplyAmount = parseUnits("100", 18);
+    await linkToken.connect(linkWhale).transfer(corePoolBorrowerAddress, supplyAmount);
+    await linkToken.connect(corePoolBorrower).approve(vLINK, supplyAmount);
+    await comptroller.connect(corePoolBorrower).enterMarkets([vLINK]);
+    await vLinkToken.connect(corePoolBorrower).mint(supplyAmount);
+
+    // Borrow a small amount of LINK against LINK collateral (CF=0.63 pre-VIP)
+    await vLinkToken.connect(corePoolBorrower).borrow(linkBorrowAmount);
   });
 
   describe("Pre-VIP behavior", async () => {
@@ -109,6 +184,11 @@ forking(BLOCK_NUMBER, async () => {
         expect(data.isBorrowAllowed).to.equal(true);
       });
     }
+
+    it("Core Pool borrower should have an active LINK borrow", async () => {
+      const borrowBalance = await vLinkToken.callStatic.borrowBalanceCurrent(corePoolBorrowerAddress);
+      expect(borrowBalance).to.be.gte(linkBorrowAmount);
+    });
   });
 
   testVip("VIP-630", await vip630(), {
@@ -161,6 +241,172 @@ forking(BLOCK_NUMBER, async () => {
           );
         });
       }
+    });
+
+    describe("E-Mode pools remain functional after Core Pool changes", () => {
+      let emodeUser: Signer;
+      let emodeUserAddress: string;
+
+      before(async () => {
+        emodeUserAddress = "0x0000000000000000000000000000000000000001";
+        emodeUser = await initMainnetUser(emodeUserAddress, parseUnits("10", 18));
+
+        // Fund user with LINK
+        const linkWhale = await initMainnetUser(LINK_WHALE, parseUnits("1", 18));
+        await linkToken.connect(linkWhale).transfer(emodeUserAddress, parseUnits("50", 18));
+
+        // Enter LINK E-Mode pool (pool 4)
+        await comptroller.connect(emodeUser).enterPool(EMODE_LINK_POOL_ID);
+
+        // Supply LINK as collateral in E-Mode
+        await linkToken.connect(emodeUser).approve(vLINK, parseUnits("50", 18));
+        await comptroller.connect(emodeUser).enterMarkets([vLINK]);
+        await vLinkToken.connect(emodeUser).mint(parseUnits("50", 18));
+      });
+
+      it("should allow supplying LINK in E-Mode pool", async () => {
+        expect(await vLinkToken.balanceOf(emodeUserAddress)).to.be.gt(0);
+      });
+
+      it("LINK should retain non-zero CF in E-Mode pool (pool 4)", async () => {
+        const data = await comptroller.poolMarkets(EMODE_LINK_POOL_ID, vLINK);
+        expect(data.collateralFactorMantissa).to.equal(parseUnits("0.63", 18));
+        expect(data.isBorrowAllowed).to.equal(true);
+      });
+
+      it("should allow borrowing USDT against LINK collateral in E-Mode", async () => {
+        const borrowAmount = parseUnits("1", 18);
+        await expect(vUsdtToken.connect(emodeUser).borrow(borrowAmount)).to.not.be.reverted;
+        expect(await usdtToken.balanceOf(emodeUserAddress)).to.be.gte(borrowAmount);
+      });
+
+      it("should have positive account liquidity in E-Mode", async () => {
+        const [error, liquidity, shortfall] = await comptroller.getAccountLiquidity(emodeUserAddress);
+        expect(error).to.equal(0);
+        expect(liquidity).to.be.gt(0);
+        expect(shortfall).to.equal(0);
+      });
+    });
+
+    describe("Core Pool: supply works, LT > 0 increases health factor", () => {
+      let supplier: Signer;
+      let supplierAddress: string;
+
+      before(async () => {
+        supplierAddress = "0x0000000000000000000000000000000000000002";
+        supplier = await initMainnetUser(supplierAddress, parseUnits("10", 18));
+
+        // Fund user with LINK
+        const linkWhale = await initMainnetUser(LINK_WHALE, parseUnits("1", 18));
+        await linkToken.connect(linkWhale).transfer(supplierAddress, parseUnits("50", 18));
+      });
+
+      it("should allow minting vLINK (supply) in Core Pool", async () => {
+        const mintAmount = parseUnits("50", 18);
+        await linkToken.connect(supplier).approve(vLINK, mintAmount);
+        await comptroller.connect(supplier).enterMarkets([vLINK]);
+
+        await expect(vLinkToken.connect(supplier).mint(mintAmount)).to.not.be.reverted;
+        expect(await vLinkToken.balanceOf(supplierAddress)).to.be.gt(0);
+      });
+
+      it("should have positive health margin despite CF=0 (getAccountLiquidity uses LT)", async () => {
+        // getAccountLiquidity uses LT for the health calculation, NOT CF.
+        // With CF=0 and LT=0.63, supply still contributes to account health.
+        const [error, liquidity, shortfall] = await comptroller.getAccountLiquidity(supplierAddress);
+        expect(error).to.equal(0);
+        expect(liquidity).to.be.gt(0); // LT > 0 → positive health margin
+        expect(shortfall).to.equal(0);
+      });
+
+      it("supplying more should increase health factor for existing borrowers (LT > 0)", async () => {
+        // The Core Pool borrower (set up pre-VIP) has 100 LINK supply + 1 LINK borrow.
+        // After VIP, CF=0 but LT=0.63 — supply still contributes to health factor.
+        const [error, , shortfall] = await comptroller.getAccountLiquidity(corePoolBorrowerAddress);
+        expect(error).to.equal(0);
+        expect(shortfall).to.equal(0); // Position is healthy (LT-based health margin)
+
+        // Record health margin before additional supply
+        const [, liquidityBefore] = await comptroller.getAccountLiquidity(corePoolBorrowerAddress);
+        expect(liquidityBefore).to.be.gt(0);
+
+        // Supply additional LINK to the borrower's position
+        const additionalAmount = parseUnits("50", 18);
+        const linkWhale = await initMainnetUser(LINK_WHALE, parseUnits("1", 18));
+        await linkToken.connect(linkWhale).transfer(corePoolBorrowerAddress, additionalAmount);
+        await linkToken.connect(corePoolBorrower).approve(vLINK, additionalAmount);
+        await vLinkToken.connect(corePoolBorrower).mint(additionalAmount);
+
+        // Health margin should increase: more supply with LT > 0 → better health
+        const [errorAfter, liquidityAfter, shortfallAfter] = await comptroller.getAccountLiquidity(
+          corePoolBorrowerAddress,
+        );
+        expect(errorAfter).to.equal(0);
+        expect(shortfallAfter).to.equal(0);
+        expect(liquidityAfter).to.be.gt(liquidityBefore);
+      });
+    });
+
+    describe("Core Pool: existing debt can be repaid", () => {
+      it("should still have an active LINK borrow after VIP", async () => {
+        const borrowBalance = await vLinkToken.callStatic.borrowBalanceCurrent(corePoolBorrowerAddress);
+        expect(borrowBalance).to.be.gt(0);
+      });
+
+      it("should allow repaying existing LINK borrow", async () => {
+        // Ensure borrower has enough LINK to cover debt + interest
+        const borrowBalance: BigNumber = await vLinkToken.callStatic.borrowBalanceCurrent(corePoolBorrowerAddress);
+        const buffer = borrowBalance.add(parseUnits("1", 18)); // extra buffer for interest accrual
+        const currentBalance: BigNumber = await linkToken.balanceOf(corePoolBorrowerAddress);
+        if (currentBalance.lt(buffer)) {
+          const linkWhale = await initMainnetUser(LINK_WHALE, parseUnits("1", 18));
+          await linkToken.connect(linkWhale).transfer(corePoolBorrowerAddress, buffer.sub(currentBalance));
+        }
+
+        // Use MaxUint256 to repay exact outstanding balance (avoids dust from interest accrual)
+        await linkToken.connect(corePoolBorrower).approve(vLINK, ethers.constants.MaxUint256);
+        await expect(vLinkToken.connect(corePoolBorrower).repayBorrow(ethers.constants.MaxUint256)).to.not.be.reverted;
+
+        const borrowBalanceAfter = await vLinkToken.callStatic.borrowBalanceCurrent(corePoolBorrowerAddress);
+        expect(borrowBalanceAfter).to.equal(0);
+      });
+
+      it("should NOT allow new borrows after repaying", async () => {
+        await expect(vLinkToken.connect(corePoolBorrower).borrow(parseUnits("1", 18))).to.be.revertedWithCustomError(
+          comptroller,
+          "BorrowNotAllowedInPool",
+        );
+      });
+    });
+
+    describe("Core Pool: users can still withdraw", () => {
+      it("should allow redeeming vLINK (withdraw) from Core Pool", async () => {
+        // The Core Pool borrower has repaid all debt above, so they can freely redeem
+        const vTokenBalance: BigNumber = await vLinkToken.balanceOf(corePoolBorrowerAddress);
+        expect(vTokenBalance).to.be.gt(0);
+
+        const linkBalanceBefore: BigNumber = await linkToken.balanceOf(corePoolBorrowerAddress);
+        await expect(vLinkToken.connect(corePoolBorrower).redeem(vTokenBalance)).to.not.be.reverted;
+
+        const linkBalanceAfter: BigNumber = await linkToken.balanceOf(corePoolBorrowerAddress);
+        expect(linkBalanceAfter).to.be.gt(linkBalanceBefore);
+
+        const vTokenBalanceAfter = await vLinkToken.balanceOf(corePoolBorrowerAddress);
+        expect(vTokenBalanceAfter).to.equal(0);
+      });
+
+      it("should allow partial redeem via redeemUnderlying", async () => {
+        // Use the supplier (from borrow-power test) who still has vLINK
+        const supplierAddress = "0x0000000000000000000000000000000000000002";
+        const supplier = await initMainnetUser(supplierAddress, parseUnits("1", 18));
+
+        const redeemAmount = parseUnits("10", 18);
+        const linkBalanceBefore: BigNumber = await linkToken.balanceOf(supplierAddress);
+        await expect(vLinkToken.connect(supplier).redeemUnderlying(redeemAmount)).to.not.be.reverted;
+
+        const linkBalanceAfter: BigNumber = await linkToken.balanceOf(supplierAddress);
+        expect(linkBalanceAfter.sub(linkBalanceBefore)).to.equal(redeemAmount);
+      });
     });
   });
 });
