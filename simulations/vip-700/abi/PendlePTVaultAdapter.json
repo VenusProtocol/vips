@@ -141,6 +141,17 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "vToken",
+        "type": "address"
+      }
+    ],
+    "name": "VTokenNotListed",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "errorCode",
         "type": "uint256"
@@ -160,6 +171,11 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ZeroVTokensMinted",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -175,7 +191,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "tokenIn",
         "type": "address"
@@ -187,7 +203,7 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "ptAmount",
         "type": "uint256"
@@ -332,22 +348,22 @@
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "vTokenAmount",
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "ptAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "tokenOut",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -357,6 +373,50 @@
       }
     ],
     "name": "RedeemedAtMaturity",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "SweepNative",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "SweepTokens",
     "type": "event"
   },
   {
@@ -388,22 +448,22 @@
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenOut",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "vTokenAmount",
         "type": "uint256"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "ptAmount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "tokenOut",
-        "type": "address"
       },
       {
         "indexed": false,
@@ -485,11 +545,6 @@
         "internalType": "address",
         "name": "pendleMarket",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -1092,52 +1147,6 @@
         "internalType": "address[]",
         "name": "",
         "type": "address[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "pendleMarket",
-        "type": "address"
-      }
-    ],
-    "name": "getMarketConfig",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "pt",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "sy",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "yt",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "vToken",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "maturity",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IPendlePTVaultAdapter.MarketConfig",
-        "name": "",
-        "type": "tuple"
       }
     ],
     "stateMutability": "view",
