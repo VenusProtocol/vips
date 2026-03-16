@@ -117,7 +117,7 @@ Interactive script that generates a Gnosis Safe TX Builder JSON for pause-action
 Before running, ensure `ARCHIVE_NODE_<network>` is set in `.env` (needed to fetch markets and liquidation thresholds on-chain).
 
 ```
-npx hardhat run scripts/generateSafeMultisigJson.ts --network <networkName>
+npx hardhat run scripts/generateSafePauseJson.ts --network <networkName>
 ```
 
 The script will prompt you to:

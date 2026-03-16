@@ -15,7 +15,7 @@ import { forking } from "src/vip-framework";
 
 const jsonPath = path.resolve(__dirname, "..", "gnosisTXBuilder.json");
 if (!fs.existsSync(jsonPath)) {
-  throw new Error(`${jsonPath} not found. Run generateSafeMultisigJson.ts first.`);
+  throw new Error(`${jsonPath} not found. Run generateSafePauseJson.ts first.`);
 }
 const batchFile = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
 const transactions: { to: string; data: string; value: string }[] = batchFile.transactions;
