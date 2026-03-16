@@ -110,6 +110,33 @@ Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => 000
 
 The script should output a file `gnosisTXBuilder.json` that you can import in your Gnosis Safe UI.
 
+### Generate Safe Multisig JSON (Pause / CF=0)
+
+Interactive script that generates a Gnosis Safe TX Builder JSON for pause-action or set-collateral-factor-to-zero proposals.
+
+Before running, ensure `ARCHIVE_NODE_<network>` is set in `.env` (needed to fetch markets and liquidation thresholds on-chain).
+
+```
+npx hardhat run scripts/generateSafeMultisigJson.ts --network <networkName>
+```
+
+The script will prompt you to:
+
+1. Confirm or override the comptroller address (pre-filled from `src/networkAddresses.ts`)
+2. Load markets — fetch from comptroller, use `scripts/data/markets.json`, or enter manually
+3. Select operation — pause actions, set collateral factor to 0, or both
+4. If pausing, select which actions to pause (MINT, REDEEM, BORROW, REPAY, SEIZE, LIQUIDATE, TRANSFER, ENTER_MARKET, EXIT_MARKET)
+
+**Output:** `gnosisTXBuilder.json` — Safe TX Builder JSON to import in Gnosis Safe UI.
+
+To simulate the generated JSON against a fork before submitting:
+
+```
+npx hardhat test scripts/simulateSafeJson.ts --fork <networkName>
+```
+
+This impersonates the Guardian (Safe) address from the JSON and executes each transaction on a forked network, verifying they all succeed.
+
 ### Make proposal for multiple networks
 
 Procedure to make vip:
