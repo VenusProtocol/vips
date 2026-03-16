@@ -137,7 +137,7 @@ const saveMarketsToFile = (addresses: string[]) => {
   console.log(`Markets saved to ${MARKETS_FILE} (${addresses.length} addresses)`);
 };
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Network helpers ────────────────────────────────────────────────────────
 
 const getComptrollerAddress = (networkName: string): string => {
   const config = (NETWORK_ADDRESSES as Record<string, Record<string, string>>)[networkName] || {};
@@ -284,12 +284,12 @@ const main = async () => {
     return;
   }
 
-  // 6. Build Proposal and Safe TX Builder JSON
+  // 6. Build Proposal and generate Safe TX Builder JSON
   const proposal: Proposal = await makeProposal(commands);
   const multisigTxData = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId });
 
-  // 8. Write gnosisTXBuilder.json (include blockNumber for simulation)
+  // 7. Write gnosisTXBuilder.json (include blockNumber for simulation)
   const blockNumber = await ethers.provider.getBlockNumber();
   const outputJson = { ...batchJson, blockNumber };
   const outputPath = path.resolve(__dirname, "..", "gnosisTXBuilder.json");
