@@ -31,6 +31,9 @@ const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
 const BSC_COMPTROLLER_ABI = [
   "function getAllMarkets() view returns (address[])",
   "function markets(address) view returns (bool isListed, uint256 collateralFactorMantissa, bool isVenus, uint256 liquidationThresholdMantissa, uint256 liquidationIncentiveMantissa, uint96 marketPoolId, bool isBorrowAllowed)",
+  "function corePoolId() view returns (uint96)",
+  "function lastPoolId() view returns (uint96)",
+  "function poolMarkets(uint96,address) view returns (bool isListed, uint256 collateralFactorMantissa, bool isVenus, uint256 liquidationThresholdMantissa, uint256 liquidationIncentiveMantissa, uint96 marketPoolId, bool isBorrowAllowed)",
 ];
 
 // Remote chain comptrollers (isolated pool style)
@@ -77,50 +80,107 @@ const pickMultiple = async (prompt: string, options: { name: string; value: stri
 
 // ─── On-chain queries ───────────────────────────────────────────────────────
 
-const fetchAllMarkets = async (comptroller: string, abi: string[]): Promise<string[]> => {
+const VTOKEN_ABI = ["function symbol() view returns (string)"];
+
+const fetchSymbol = async (vToken: string): Promise<string> => {
+  try {
+    const contract = new ethers.Contract(vToken, VTOKEN_ABI, ethers.provider);
+    return await contract.symbol();
+  } catch {
+    return `MARKET_${vToken.slice(2, 8).toUpperCase()}`;
+  }
+};
+
+/**
+ * Fetches all listed markets from the comptroller along with their symbols in a single pass.
+ */
+const fetchAllMarketsWithMetadata = async (
+  comptroller: string,
+  abi: string[],
+): Promise<{ addresses: string[]; symbols: Map<string, string> }> => {
   const contract = new ethers.Contract(comptroller, abi, ethers.provider);
   const allMarkets: string[] = await contract.getAllMarkets();
-  console.log(`Found ${allMarkets.length} market(s), checking isListed...`);
-  const listed: string[] = [];
+  console.log(`Found ${allMarkets.length} market(s), loading market data...`);
+  const addresses: string[] = [];
+  const symbols = new Map<string, string>();
   for (let i = 0; i < allMarkets.length; i++) {
     const market = allMarkets[i];
     const { isListed } = await contract.markets(market);
-    if (isListed) listed.push(market);
-    // Overwrite the same line to show a loading indicator
+    if (isListed) {
+      addresses.push(market);
+      const symbol = await fetchSymbol(market);
+      symbols.set(market, symbol);
+    }
     const pct = Math.round(((i + 1) / allMarkets.length) * 100);
-    process.stdout.write(`\r  Progress: ${i + 1}/${allMarkets.length} (${pct}%) — ${listed.length} listed`);
+    process.stdout.write(`\r  Progress: ${i + 1}/${allMarkets.length} (${pct}%) — ${addresses.length} listed`);
   }
   process.stdout.write("\n");
-  return listed;
+  return { addresses, symbols };
 };
 
-const fetchLiquidationThreshold = async (comptroller: string, vToken: string, abi: string[]): Promise<string> => {
-  const contract = new ethers.Contract(comptroller, abi, ethers.provider);
-  const marketData = await contract.markets(vToken);
-  return marketData.liquidationThresholdMantissa.toString();
-};
-
-const VTOKEN_ABI = ["function symbol() view returns (string)"];
-
-const fetchSymbols = async (marketAddresses: string[]): Promise<Map<string, string>> => {
+/**
+ * Fetches symbols for a pre-known list of market addresses.
+ */
+const fetchMarketMetadata = async (marketAddresses: string[]): Promise<Map<string, string>> => {
   const symbols = new Map<string, string>();
-  console.log(`Fetching symbols for ${marketAddresses.length} market(s)...`);
+  console.log(`Loading market data for ${marketAddresses.length} market(s)...`);
   for (let i = 0; i < marketAddresses.length; i++) {
-    const addr = marketAddresses[i];
-    try {
-      const contract = new ethers.Contract(addr, VTOKEN_ABI, ethers.provider);
-      const symbol: string = await contract.symbol();
-      symbols.set(addr, symbol);
-    } catch {
-      // Fallback to address-based name if symbol() fails
-      symbols.set(addr, `MARKET_${addr.slice(2, 8).toUpperCase()}`);
-    }
-    // Overwrite the same line to show a loading indicator
+    const symbol = await fetchSymbol(marketAddresses[i]);
+    symbols.set(marketAddresses[i], symbol);
     const pct = Math.round(((i + 1) / marketAddresses.length) * 100);
     process.stdout.write(`\r  Progress: ${i + 1}/${marketAddresses.length} (${pct}%)`);
   }
   process.stdout.write("\n");
   return symbols;
+};
+
+const fetchMarketFactors = async (
+  comptroller: string,
+  vToken: string,
+  abi: string[],
+): Promise<{ cf: string; lt: string }> => {
+  const contract = new ethers.Contract(comptroller, abi, ethers.provider);
+  const marketData = await contract.markets(vToken);
+  return {
+    cf: marketData.collateralFactorMantissa.toString(),
+    lt: marketData.liquidationThresholdMantissa.toString(),
+  };
+};
+
+// ─── E-mode helpers (BSC core pool) ─────────────────────────────────────────
+
+interface EmodePoolInfo {
+  poolId: number;
+  collateralFactorMantissa: string;
+  liquidationThresholdMantissa: string;
+}
+
+const fetchEmodeRange = async (comptroller: string): Promise<{ corePoolId: number; lastPoolId: number }> => {
+  const contract = new ethers.Contract(comptroller, BSC_COMPTROLLER_ABI, ethers.provider);
+  const coreId = (await contract.corePoolId()).toNumber();
+  const lastId = (await contract.lastPoolId()).toNumber();
+  return { corePoolId: coreId, lastPoolId: lastId };
+};
+
+const fetchEmodePoolsForMarket = async (
+  comptroller: string,
+  vToken: string,
+  corePoolId: number,
+  lastPoolId: number,
+): Promise<EmodePoolInfo[]> => {
+  const contract = new ethers.Contract(comptroller, BSC_COMPTROLLER_ABI, ethers.provider);
+  const pools: EmodePoolInfo[] = [];
+  for (let poolId = corePoolId; poolId <= lastPoolId; poolId++) {
+    const data = await contract.poolMarkets(poolId, vToken);
+    if (data.isListed) {
+      pools.push({
+        poolId,
+        collateralFactorMantissa: data.collateralFactorMantissa.toString(),
+        liquidationThresholdMantissa: data.liquidationThresholdMantissa.toString(),
+      });
+    }
+  }
+  return pools;
 };
 
 // ─── Markets file ───────────────────────────────────────────────────────────
@@ -182,12 +242,15 @@ const main = async () => {
   ]);
 
   let marketAddresses: string[] = [];
+  let symbols = new Map<string, string>();
 
   if (marketMode.startsWith("Fetch")) {
     console.log("\nQuerying comptroller for all markets...");
-    marketAddresses = await fetchAllMarkets(comptroller, comptrollerAbi);
-    console.log(`Found ${marketAddresses.length} market(s)`);
-    marketAddresses.forEach(addr => console.log(`  ${addr}`));
+    const result = await fetchAllMarketsWithMetadata(comptroller, comptrollerAbi);
+    marketAddresses = result.addresses;
+    symbols = result.symbols;
+    console.log(`Found ${marketAddresses.length} listed market(s):`);
+    marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
     saveMarketsToFile(marketAddresses);
   } else if (marketMode.startsWith("Use")) {
     marketAddresses = loadMarketsFromFile();
@@ -197,8 +260,9 @@ const main = async () => {
       rl.close();
       return;
     }
-    console.log(`\nLoaded ${marketAddresses.length} address(es) from ${MARKETS_FILE}:`);
-    marketAddresses.forEach(addr => console.log(`  ${addr}`));
+    console.log(`\nLoaded ${marketAddresses.length} address(es) from ${MARKETS_FILE}`);
+    symbols = await fetchMarketMetadata(marketAddresses);
+    marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
   } else {
     console.log("\nEnter market addresses (comma-separated):");
     const input = await ask("> ");
@@ -211,12 +275,10 @@ const main = async () => {
       rl.close();
       return;
     }
+    symbols = await fetchMarketMetadata(marketAddresses);
     console.log(`\nUsing ${marketAddresses.length} address(es):`);
-    marketAddresses.forEach(addr => console.log(`  ${addr}`));
+    marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
   }
-
-  // Fetch vToken symbols for display
-  const symbols = await fetchSymbols(marketAddresses);
 
   // 3. Select operation
   console.log("\n--- Actions ---");
@@ -252,16 +314,53 @@ const main = async () => {
 
   // CF=0 commands
   if (selectedAction === "cf_zero" || selectedAction === "both") {
-    console.log("\nQuerying liquidation thresholds from comptroller...");
+    console.log("\nQuerying market factors from comptroller...");
     for (const vToken of marketAddresses) {
       const symbol = symbols.get(vToken) || vToken;
-      const lt = await fetchLiquidationThreshold(comptroller, vToken, comptrollerAbi);
-      console.log(`  ${symbol} (${vToken}) → LT: ${lt}`);
+      const { cf, lt } = await fetchMarketFactors(comptroller, vToken, comptrollerAbi);
+      if (cf === "0") {
+        console.log(`  ${symbol} (${vToken}) → CF already 0, skipping`);
+        continue;
+      }
+      console.log(`  ${symbol} (${vToken}) → CF: ${cf}, LT: ${lt}`);
       commands.push({
         target: comptroller,
         signature: "setCollateralFactor(address,uint256,uint256)",
         params: [vToken, 0, lt],
       });
+    }
+
+    // E-mode CF=0 (BSC core pool only)
+    if (networkName === "bscmainnet") {
+      const emodeAnswer = await ask("\nAlso set CF to 0 for e-mode pools? (y/n): ");
+      if (emodeAnswer.toLowerCase() === "y" || emodeAnswer.toLowerCase() === "yes") {
+        console.log("\nFetching e-mode pool range...");
+        const { corePoolId, lastPoolId } = await fetchEmodeRange(comptroller);
+        console.log(`  E-mode pools: ${corePoolId} to ${lastPoolId} (${lastPoolId - corePoolId + 1} pool(s))`);
+
+        for (const vToken of marketAddresses) {
+          const symbol = symbols.get(vToken) || vToken;
+          const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
+          if (pools.length === 0) {
+            console.log(`  ${symbol} — not listed in any e-mode pool, skipping`);
+            continue;
+          }
+          for (const pool of pools) {
+            if (pool.collateralFactorMantissa === "0") {
+              console.log(`  ${symbol} — pool ${pool.poolId}: CF already 0, skipping`);
+              continue;
+            }
+            console.log(
+              `  ${symbol} — pool ${pool.poolId}: CF=${pool.collateralFactorMantissa}, LT=${pool.liquidationThresholdMantissa}`,
+            );
+            commands.push({
+              target: comptroller,
+              signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+              params: [pool.poolId, vToken, 0, pool.liquidationThresholdMantissa],
+            });
+          }
+        }
+      }
     }
   }
 
