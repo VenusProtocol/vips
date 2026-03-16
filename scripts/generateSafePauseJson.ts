@@ -26,6 +26,16 @@ const Actions: Record<string, number> = {
 const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
 
 const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
+const METADATA_FILE = path.resolve(__dirname, "..", "safePauseMetadata.json");
+
+interface PauseMetadata {
+  comptroller: string;
+  network: string;
+  symbols: Record<string, string>;
+  cfZeroMarkets: string[];
+  emodeCfZero: { vToken: string; poolId: number }[];
+  pausedActions: { markets: string[]; actions: number[] };
+}
 
 // BSC core pool markets() returns extra fields (isVenus, liquidationIncentive, etc.)
 const BSC_COMPTROLLER_ABI = [
@@ -311,6 +321,18 @@ const main = async () => {
 
   // 5. Build Command[] array
   const commands: Command[] = [];
+  const symbolsRecord: Record<string, string> = {};
+  symbols.forEach((sym, addr) => {
+    symbolsRecord[addr] = sym;
+  });
+  const metadata: PauseMetadata = {
+    comptroller,
+    network: networkName,
+    symbols: symbolsRecord,
+    cfZeroMarkets: [],
+    emodeCfZero: [],
+    pausedActions: { markets: [], actions: [] },
+  };
 
   // CF=0 commands
   if (selectedAction === "cf_zero" || selectedAction === "both") {
@@ -323,6 +345,7 @@ const main = async () => {
         continue;
       }
       console.log(`  ${symbol} (${vToken}) → CF: ${cf}, LT: ${lt}`);
+      metadata.cfZeroMarkets.push(vToken);
       commands.push({
         target: comptroller,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -353,6 +376,7 @@ const main = async () => {
             console.log(
               `  ${symbol} — pool ${pool.poolId}: CF=${pool.collateralFactorMantissa}, LT=${pool.liquidationThresholdMantissa}`,
             );
+            metadata.emodeCfZero.push({ vToken, poolId: pool.poolId });
             commands.push({
               target: comptroller,
               signature: "setCollateralFactor(uint96,address,uint256,uint256)",
@@ -366,6 +390,7 @@ const main = async () => {
 
   // Pause commands
   if ((selectedAction === "pause" || selectedAction === "both") && pauseActions.length > 0) {
+    metadata.pausedActions = { markets: marketAddresses, actions: pauseActions };
     for (const action of pauseActions) {
       const actionName = Object.entries(Actions).find(([, v]) => v === action)?.[0] || String(action);
       console.log(`\nAdding pause ${actionName} for ${marketAddresses.length} market(s)`);
@@ -394,8 +419,12 @@ const main = async () => {
   const outputPath = path.resolve(__dirname, "..", "gnosisTXBuilder.json");
   fs.writeFileSync(outputPath, JSON.stringify(outputJson, null, 2));
 
+  // 8. Write metadata for simulation verification
+  fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
+
   console.log(`\n--- Output ---`);
   console.log(`  Safe TX Builder JSON: ${outputPath}`);
+  console.log(`  Pause metadata: ${METADATA_FILE}`);
   console.log(`  Transactions: ${commands.length} for ${networkName} (chain ${chainId})`);
   console.log(`\nTo simulate: npx hardhat test scripts/simulateSafeJson.ts --fork ${networkName}`);
 
