@@ -6,20 +6,15 @@ import { initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
-  LEVERAGE_STRATEGIES_MANAGER,
   POSITION_ACCOUNT,
   RELATIVE_POSITION_MANAGER,
-  SWAP_HELPER,
   TIMELOCKS_AND_GUARDIAN,
-  vip610 as vip610Testnet,
-} from "../../vips/vip-610/bsctestnet";
+  vip610,
+} from "../../vips/vip-610/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
-import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
-import LEVERAGE_MANAGER_ABI from "./abi/LeverageStrategiesManager.json";
 import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
-import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
+const { bscmainnet } = NETWORK_ADDRESSES;
 
 const ACM_FUNCTION_SIGNATURES = [
   "partialPause()",
@@ -33,39 +28,19 @@ const ACM_FUNCTION_SIGNATURES = [
   "executePositionAccountCall(address,address[],bytes[])",
 ] as const;
 
-forking(96276916, async () => {
-  let comptroller: Contract;
+forking(87147067, async () => {
   let accessControlManager: Contract;
-  let leverageStrategiesManager: Contract;
-  let swapHelper: Contract;
   let relativePositionManager: Contract;
 
   before(async () => {
-    comptroller = await ethers.getContractAt(FLASHLOAN_FACET_ABI, bsctestnet.UNITROLLER);
-    accessControlManager = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, bsctestnet.ACCESS_CONTROL_MANAGER);
-    leverageStrategiesManager = await ethers.getContractAt(LEVERAGE_MANAGER_ABI, LEVERAGE_STRATEGIES_MANAGER);
-    swapHelper = await ethers.getContractAt(SWAP_HELPER_ABI, SWAP_HELPER);
+    accessControlManager = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, bscmainnet.ACCESS_CONTROL_MANAGER);
     relativePositionManager = await ethers.getContractAt(RELATIVE_POSITION_MANAGER_ABI, RELATIVE_POSITION_MANAGER);
   });
 
   describe("Pre-VIP behavior", () => {
-    it("LeverageStrategiesManager should not be whitelisted for flash loans", async () => {
-      expect(await comptroller.authorizedFlashLoan(LEVERAGE_STRATEGIES_MANAGER)).to.equal(false);
-    });
-
-    it("SwapHelper should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
-      expect(await swapHelper.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await swapHelper.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-    });
-
-    it("LeverageStrategiesManager should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
-      expect(await leverageStrategiesManager.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await leverageStrategiesManager.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-    });
-
     it("RelativePositionManager should have NORMAL_TIMELOCK as pending owner and not yet as owner", async () => {
-      expect(await relativePositionManager.owner()).not.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await relativePositionManager.pendingOwner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await relativePositionManager.owner()).not.equal(bscmainnet.NORMAL_TIMELOCK);
+      expect(await relativePositionManager.pendingOwner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
     });
 
     it("RPM should not have Position Account implementation set", async () => {
@@ -75,47 +50,33 @@ forking(96276916, async () => {
     it("Timelocks/Guardian should not have ACM permissions on RelativePositionManager", async () => {
       for (const timelockOrGuardian of TIMELOCKS_AND_GUARDIAN) {
         for (const fnSignature of ACM_FUNCTION_SIGNATURES) {
-          expect(
-            await accessControlManager.hasPermission(timelockOrGuardian, RELATIVE_POSITION_MANAGER, fnSignature),
-          ).to.equal(false);
+          const role = ethers.utils.solidityPack(["address", "string"], [RELATIVE_POSITION_MANAGER, fnSignature]);
+          const roleHash = ethers.utils.keccak256(role);
+          expect(await accessControlManager.hasRole(roleHash, timelockOrGuardian)).to.equal(false);
         }
       }
     });
   });
 
-  testVip("VIP-610 [BNB Chain] Testnet", await vip610Testnet());
+  testVip("VIP-610 [BNB Chain] Configure Relative Position Manager", await vip610());
 
   describe("Post-VIP behavior", () => {
-    it("LeverageStrategiesManager should be whitelisted for flash loans", async () => {
-      expect(await comptroller.authorizedFlashLoan(LEVERAGE_STRATEGIES_MANAGER)).to.equal(true);
-    });
-
-    it("SwapHelper should have NORMAL_TIMELOCK as owner and no pending owner", async () => {
-      expect(await swapHelper.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await swapHelper.pendingOwner()).to.equal(ethers.constants.AddressZero);
-    });
-
-    it("LeverageStrategiesManager should have NORMAL_TIMELOCK as owner and no pending owner", async () => {
-      expect(await leverageStrategiesManager.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
-      expect(await leverageStrategiesManager.pendingOwner()).to.equal(ethers.constants.AddressZero);
-    });
-
     it("RelativePositionManager should have NORMAL_TIMELOCK as owner and no pending owner", async () => {
-      expect(await relativePositionManager.owner()).to.equal(bsctestnet.NORMAL_TIMELOCK);
+      expect(await relativePositionManager.owner()).to.equal(bscmainnet.NORMAL_TIMELOCK);
       expect(await relativePositionManager.pendingOwner()).to.equal(ethers.constants.AddressZero);
     });
 
     it("Timelocks/Guardian should have ACM permissions on RelativePositionManager", async () => {
       for (const timelockOrGuardian of TIMELOCKS_AND_GUARDIAN) {
         for (const fnSignature of ACM_FUNCTION_SIGNATURES) {
-          expect(
-            await accessControlManager.hasPermission(timelockOrGuardian, RELATIVE_POSITION_MANAGER, fnSignature),
-          ).to.equal(true);
+          const role = ethers.utils.solidityPack(["address", "string"], [RELATIVE_POSITION_MANAGER, fnSignature]);
+          const roleHash = ethers.utils.keccak256(role);
+          expect(await accessControlManager.hasRole(roleHash, timelockOrGuardian)).to.equal(true);
         }
       }
     });
 
-    it("RPM should have Position account implementation stored in the state", async () => {
+    it("RPM should have Position Account implementation stored in the state", async () => {
       expect(await relativePositionManager.POSITION_ACCOUNT_IMPLEMENTATION()).to.equals(POSITION_ACCOUNT);
     });
 

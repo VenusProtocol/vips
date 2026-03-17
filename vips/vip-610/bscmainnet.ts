@@ -2,22 +2,20 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { bsctestnet } = NETWORK_ADDRESSES;
-export const SWAP_HELPER = "0x3Bf0Eb0663BeCe17d95FE33736762bFD20f488b2";
-export const LEVERAGE_STRATEGIES_MANAGER = "0xfc8810B0f1144D5A1F6231aFDb8B51F31c0bc8A7";
-export const RELATIVE_POSITION_MANAGER = "0xF01CA5Ad6152d932Ed19FB28b285529399dA8166";
-export const POSITION_ACCOUNT = "0x599B79742AB82700Bc828cc44e0Ae22FBbB88e7c";
+const { bscmainnet } = NETWORK_ADDRESSES;
+export const RELATIVE_POSITION_MANAGER = "0xedcD8725D08585A7B61eE77A22D9cf591C1171c1";
+export const POSITION_ACCOUNT = "0x18970e10B39BDf6981334b5DC0873d85CFdB9aa0";
 
 export const TIMELOCKS_AND_GUARDIAN = [
-  bsctestnet.NORMAL_TIMELOCK,
-  bsctestnet.FAST_TRACK_TIMELOCK,
-  bsctestnet.CRITICAL_TIMELOCK,
-  bsctestnet.GUARDIAN,
+  bscmainnet.NORMAL_TIMELOCK,
+  bscmainnet.FAST_TRACK_TIMELOCK,
+  bscmainnet.CRITICAL_TIMELOCK,
+  bscmainnet.GUARDIAN,
 ];
 
 const giveAcmPermissions = (fnSignature: string, timelocks = TIMELOCKS_AND_GUARDIAN) =>
   timelocks.map(timelock => ({
-    target: bsctestnet.ACCESS_CONTROL_MANAGER,
+    target: bscmainnet.ACCESS_CONTROL_MANAGER,
     signature: "giveCallPermission(address,string,address)",
     params: [RELATIVE_POSITION_MANAGER, fnSignature, timelock],
   }));
@@ -34,26 +32,10 @@ export const vip610 = () => {
 
   return makeProposal(
     [
-      // Extra testnet setup: accept ownership of SwapHelper, LeverageStrategiesManager and whitelist for flash loans
-      {
-        target: SWAP_HELPER,
-        signature: "acceptOwnership()",
-        params: [],
-      },
-      {
-        target: LEVERAGE_STRATEGIES_MANAGER,
-        signature: "acceptOwnership()",
-        params: [],
-      },
       {
         target: RELATIVE_POSITION_MANAGER,
         signature: "acceptOwnership()",
         params: [],
-      },
-      {
-        target: bsctestnet.UNITROLLER,
-        signature: "setWhiteListFlashLoanAccount(address,bool)",
-        params: [LEVERAGE_STRATEGIES_MANAGER, true],
       },
       // ACM permissions
       ...giveAcmPermissions("partialPause()"),
