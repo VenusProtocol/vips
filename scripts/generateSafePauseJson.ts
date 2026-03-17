@@ -104,46 +104,44 @@ const fetchSymbol = async (vToken: string): Promise<string> => {
 };
 
 /**
- * Fetches all listed markets from the comptroller along with their symbols in a single pass.
+ * Fetches all market addresses from the comptroller via getAllMarkets().
  */
-const fetchAllMarketsWithMetadata = async (
-  comptroller: string,
-  abi: string[],
-): Promise<{ addresses: string[]; symbols: Map<string, string> }> => {
+const fetchAllMarkets = async (comptroller: string, abi: string[]): Promise<string[]> => {
   const contract = new ethers.Contract(comptroller, abi, ethers.provider);
   const allMarkets: string[] = await contract.getAllMarkets();
-  console.log(`Found ${allMarkets.length} market(s), loading market data...`);
+  console.log(`Found ${allMarkets.length} market(s) on comptroller.`);
+  return allMarkets;
+};
+
+/**
+ * Filters markets to only listed ones and fetches their symbols.
+ * When logUnlisted is true (user-provided addresses), logs any unlisted markets that are removed.
+ */
+const filterListedAndFetchSymbols = async (
+  comptroller: string,
+  abi: string[],
+  markets: string[],
+  logUnlisted: boolean,
+): Promise<{ addresses: string[]; symbols: Map<string, string> }> => {
+  const contract = new ethers.Contract(comptroller, abi, ethers.provider);
   const addresses: string[] = [];
   const symbols = new Map<string, string>();
-  for (let i = 0; i < allMarkets.length; i++) {
-    const market = allMarkets[i];
+  console.log(`Checking ${markets.length} market(s)...`);
+  for (let i = 0; i < markets.length; i++) {
+    const market = markets[i];
     const { isListed } = await contract.markets(market);
     if (isListed) {
       addresses.push(market);
       const symbol = await fetchSymbol(market);
       symbols.set(market, symbol);
+    } else if (logUnlisted) {
+      console.log(`  Skipping unlisted market: ${market}`);
     }
-    const pct = Math.round(((i + 1) / allMarkets.length) * 100);
-    process.stdout.write(`\r  Progress: ${i + 1}/${allMarkets.length} (${pct}%) — ${addresses.length} listed`);
+    const pct = Math.round(((i + 1) / markets.length) * 100);
+    process.stdout.write(`\r  Progress: ${i + 1}/${markets.length} (${pct}%) — ${addresses.length} listed`);
   }
   process.stdout.write("\n");
   return { addresses, symbols };
-};
-
-/**
- * Fetches symbols for a pre-known list of market addresses.
- */
-const fetchMarketMetadata = async (marketAddresses: string[]): Promise<Map<string, string>> => {
-  const symbols = new Map<string, string>();
-  console.log(`Loading market data for ${marketAddresses.length} market(s)...`);
-  for (let i = 0; i < marketAddresses.length; i++) {
-    const symbol = await fetchSymbol(marketAddresses[i]);
-    symbols.set(marketAddresses[i], symbol);
-    const pct = Math.round(((i + 1) / marketAddresses.length) * 100);
-    process.stdout.write(`\r  Progress: ${i + 1}/${marketAddresses.length} (${pct}%)`);
-  }
-  process.stdout.write("\n");
-  return symbols;
 };
 
 const fetchMarketFactors = async (
@@ -258,38 +256,49 @@ const main = async () => {
 
   if (marketMode.startsWith("Fetch")) {
     console.log("\nQuerying comptroller for all markets...");
-    const result = await fetchAllMarketsWithMetadata(comptroller, comptrollerAbi);
+    const allMarkets = await fetchAllMarkets(comptroller, comptrollerAbi);
+    const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, allMarkets, false);
     marketAddresses = result.addresses;
     symbols = result.symbols;
     console.log(`Found ${marketAddresses.length} listed market(s):`);
     marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
     saveMarketsToFile(marketAddresses);
   } else if (marketMode.startsWith("Use")) {
-    marketAddresses = loadMarketsFromFile();
-    if (marketAddresses.length === 0) {
+    const loaded = loadMarketsFromFile();
+    if (loaded.length === 0) {
       console.error(`\nNo addresses found in ${MARKETS_FILE}.`);
       console.log("Add vToken addresses to the file and run again.");
       rl.close();
       return;
     }
-    console.log(`\nLoaded ${marketAddresses.length} address(es) from ${MARKETS_FILE}`);
-    symbols = await fetchMarketMetadata(marketAddresses);
+    console.log(`\nLoaded ${loaded.length} address(es) from ${MARKETS_FILE}`);
+    const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, loaded, true);
+    marketAddresses = result.addresses;
+    symbols = result.symbols;
     marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
   } else {
     console.log("\nEnter market addresses (comma-separated):");
     const input = await ask("> ");
-    marketAddresses = input
+    const entered = input
       .split(",")
       .map(a => a.trim())
       .filter(a => ethers.utils.isAddress(a));
-    if (marketAddresses.length === 0) {
+    if (entered.length === 0) {
       console.error("No valid addresses provided.");
       rl.close();
       return;
     }
-    symbols = await fetchMarketMetadata(marketAddresses);
+    const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, entered, true);
+    marketAddresses = result.addresses;
+    symbols = result.symbols;
     console.log(`\nUsing ${marketAddresses.length} address(es):`);
     marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
+  }
+
+  if (marketAddresses.length === 0) {
+    console.error("\nNo listed markets found. Exiting.");
+    rl.close();
+    return;
   }
 
   // 3. Select operation
@@ -321,7 +330,16 @@ const main = async () => {
     }
   }
 
-  // 5. Build Command[] array
+  // 5. If CF=0 on BSC, ask about e-mode upfront
+  let includeEmode = false;
+  if ((selectedAction === "cf_zero" || selectedAction === "both") && networkName === "bscmainnet") {
+    const emodeAnswer = await ask("\nAlso set CF to 0 for e-mode pools? (y/n): ");
+    includeEmode = emodeAnswer.toLowerCase() === "y" || emodeAnswer.toLowerCase() === "yes";
+  }
+
+  console.log("\n--- Processing ---");
+
+  // 6. Build Command[] array
   const commands: Command[] = [];
   const symbolsRecord: Record<string, string> = {};
   symbols.forEach((sym, addr) => {
@@ -355,34 +373,31 @@ const main = async () => {
     }
 
     // E-mode CF=0 (BSC core pool only)
-    if (networkName === "bscmainnet") {
-      const emodeAnswer = await ask("\nAlso set CF to 0 for e-mode pools? (y/n): ");
-      if (emodeAnswer.toLowerCase() === "y" || emodeAnswer.toLowerCase() === "yes") {
-        console.log("\nFetching e-mode pool range...");
-        const { corePoolId, lastPoolId } = await fetchEmodeRange(comptroller);
-        console.log(`  E-mode pools: ${corePoolId} to ${lastPoolId} (${lastPoolId - corePoolId + 1} pool(s))`);
+    if (includeEmode) {
+      console.log("\nFetching e-mode pool range...");
+      const { corePoolId, lastPoolId } = await fetchEmodeRange(comptroller);
+      console.log(`  E-mode pools: ${corePoolId} to ${lastPoolId} (${lastPoolId - corePoolId + 1} pool(s))`);
 
-        for (const vToken of marketAddresses) {
-          const symbol = symbols.get(vToken) || vToken;
-          const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
-          if (pools.length === 0) {
-            console.log(`  ${symbol} — not listed in any e-mode pool, skipping`);
+      for (const vToken of marketAddresses) {
+        const symbol = symbols.get(vToken) || vToken;
+        const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
+        if (pools.length === 0) {
+          console.log(`  ${symbol} — not listed in any e-mode pool, skipping`);
+          continue;
+        }
+        for (const pool of pools) {
+          if (pool.collateralFactorMantissa === "0") {
+            console.log(`  ${symbol} — pool ${pool.poolId}: CF already 0, skipping`);
             continue;
           }
-          for (const pool of pools) {
-            if (pool.collateralFactorMantissa === "0") {
-              console.log(`  ${symbol} — pool ${pool.poolId}: CF already 0, skipping`);
-              continue;
-            }
-            console.log(
-              `  ${symbol} — pool ${pool.poolId}: CF=${pool.collateralFactorMantissa}, LT=${pool.liquidationThresholdMantissa}`,
-            );
-            commands.push({
-              target: comptroller,
-              signature: "setCollateralFactor(uint96,address,uint256,uint256)",
-              params: [pool.poolId, vToken, 0, pool.liquidationThresholdMantissa],
-            });
-          }
+          console.log(
+            `  ${symbol} — pool ${pool.poolId}: CF=${pool.collateralFactorMantissa}, LT=${pool.liquidationThresholdMantissa}`,
+          );
+          commands.push({
+            target: comptroller,
+            signature: "setCollateralFactor(uint96,address,uint256,uint256)",
+            params: [pool.poolId, vToken, 0, pool.liquidationThresholdMantissa],
+          });
         }
       }
     }
@@ -428,7 +443,8 @@ const main = async () => {
   }
   const next = last + 1;
   const recordFile = path.resolve(RECORDS_DIR, `${String(next).padStart(3, "0")}_${networkName}.json`);
-  fs.writeFileSync(recordFile, JSON.stringify(metadata, null, 2));
+  const record = { metadata, safeTxBuilder: outputJson };
+  fs.writeFileSync(recordFile, JSON.stringify(record, null, 2));
   fs.writeFileSync(counterFile, JSON.stringify({ last: next }, null, 2));
 
   console.log(`\n--- Output ---`);
