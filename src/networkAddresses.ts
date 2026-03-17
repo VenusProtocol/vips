@@ -32,6 +32,7 @@ export const NETWORK_ADDRESSES = {
     FAST_TRACK_TIMELOCK: govBscmainnetContracts.addresses.FastTrackTimelock,
     CRITICAL_TIMELOCK: govBscmainnetContracts.addresses.CriticalTimelock,
     GUARDIAN: "0x1C2CAc6ec528c20800B2fe734820D87b581eAA6B",
+    CRITICAL_GUARDIAN: "0x7B1AE5Ea599bC56734624b95589e7E8E64C351c9",
     ETH_CHAINLINK_FEED: "0x9ef1B8c0E4F7dc8bF5719Ea496883DC6401d5b2e",
     USDT_CHAINLINK_FEED: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
     CHAINLINK_ORACLE: oracleBscmainnetContracts.addresses.ChainlinkOracle,

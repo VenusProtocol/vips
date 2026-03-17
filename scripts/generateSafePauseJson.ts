@@ -3,9 +3,9 @@ import * as fs from "fs";
 import { ethers, network } from "hardhat";
 import * as path from "path";
 import * as readline from "readline";
-import { buildMultiSigTx, getSafeAddress } from "src/multisig/utils";
+import { buildMultiSigTx } from "src/multisig/utils";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { Command, Proposal, SUPPORTED_NETWORKS } from "src/types";
+import { Command, Proposal } from "src/types";
 import { makeProposal } from "src/utils";
 
 // ─── Configuration ──────────────────────────────────────────────────────────
@@ -27,8 +27,6 @@ const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
 
 const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
 const OUTPUT_DIR = path.resolve(__dirname, "data");
-const TX_BUILDER_FILE = path.resolve(OUTPUT_DIR, "safePauseTxBuilder.json");
-const METADATA_FILE = path.resolve(OUTPUT_DIR, "safePauseTxMetadata.json");
 const RECORDS_DIR = path.resolve(OUTPUT_DIR, "safePauseTXRecords");
 
 interface PauseMetadata {
@@ -37,6 +35,19 @@ interface PauseMetadata {
   blockNumber: number;
   createdAt: string;
   symbols: Record<string, string>;
+}
+
+interface PauseInput {
+  comptroller: string;
+  comptrollerAbi: string[];
+  network: string;
+  chainId: number;
+  marketAddresses: string[];
+  symbols: Map<string, string>;
+  selectedAction: string;
+  pauseActions: number[];
+  includeEmode: boolean;
+  blockNumber: number;
 }
 
 // BSC core pool markets() returns extra fields (isVenus, liquidationIncentive, etc.)
@@ -214,15 +225,23 @@ const getComptrollerAddress = (networkName: string): string => {
   return config.UNITROLLER || config.CORE_COMPTROLLER || "";
 };
 
-// ─── Main ───────────────────────────────────────────────────────────────────
+const getGuardianAddress = (networkName: string): string => {
+  const config = (NETWORK_ADDRESSES as Record<string, Record<string, string>>)[networkName] || {};
+  return config.GUARDIAN || "";
+};
 
-const main = async () => {
+const getCriticalGuardianAddress = (networkName: string): string => {
+  const config = (NETWORK_ADDRESSES as Record<string, Record<string, string>>)[networkName] || {};
+  return config.CRITICAL_GUARDIAN || "";
+};
+
+// ─── Phase 1: Gather Input ──────────────────────────────────────────────────
+
+const gatherInput = async (): Promise<PauseInput> => {
   const networkName = network.name;
-  const chainId = network.config.chainId;
+  const chainId = network.config.chainId!;
 
   console.log(`=== Safe Pause JSON Generator (${networkName}, chain ${chainId}) ===\n`);
-
-  const safeAddress = getSafeAddress(networkName as SUPPORTED_NETWORKS);
 
   // 1. Comptroller address
   const defaultComptroller = getComptrollerAddress(networkName);
@@ -238,7 +257,7 @@ const main = async () => {
   if (!ethers.utils.isAddress(comptroller)) {
     console.error("Invalid address!");
     rl.close();
-    return;
+    process.exit(1);
   }
 
   const comptrollerAbi = getComptrollerAbi(networkName);
@@ -269,7 +288,7 @@ const main = async () => {
       console.error(`\nNo addresses found in ${MARKETS_FILE}.`);
       console.log("Add vToken addresses to the file and run again.");
       rl.close();
-      return;
+      process.exit(1);
     }
     console.log(`\nLoaded ${loaded.length} address(es) from ${MARKETS_FILE}`);
     const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, loaded, true);
@@ -286,7 +305,7 @@ const main = async () => {
     if (entered.length === 0) {
       console.error("No valid addresses provided.");
       rl.close();
-      return;
+      process.exit(1);
     }
     const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, entered, true);
     marketAddresses = result.addresses;
@@ -298,7 +317,7 @@ const main = async () => {
   if (marketAddresses.length === 0) {
     console.error("\nNo listed markets found. Exiting.");
     rl.close();
-    return;
+    process.exit(1);
   }
 
   // 3. Select operation
@@ -325,7 +344,7 @@ const main = async () => {
       console.log("No pause actions selected.");
       if (selectedAction === "pause") {
         rl.close();
-        return;
+        process.exit(1);
       }
     }
   }
@@ -337,25 +356,29 @@ const main = async () => {
     includeEmode = emodeAnswer.toLowerCase() === "y" || emodeAnswer.toLowerCase() === "yes";
   }
 
-  console.log("\n--- Processing ---");
-
-  // 6. Build Command[] array
-  const commands: Command[] = [];
-  const symbolsRecord: Record<string, string> = {};
-  symbols.forEach((sym, addr) => {
-    symbolsRecord[addr] = sym;
-  });
   const blockNumber = await ethers.provider.getBlockNumber();
-  const metadata: PauseMetadata = {
-    comptroller,
-    network: networkName,
-    blockNumber,
-    createdAt: new Date().toISOString(),
-    symbols: symbolsRecord,
-  };
 
-  // CF=0 commands
-  if (selectedAction === "cf_zero" || selectedAction === "both") {
+  return {
+    comptroller,
+    comptrollerAbi,
+    network: networkName,
+    chainId,
+    marketAddresses,
+    symbols,
+    selectedAction,
+    pauseActions,
+    includeEmode,
+    blockNumber,
+  };
+};
+
+// ─── Phase 2: Generate Commands ─────────────────────────────────────────────
+
+const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero"): Promise<Command[]> => {
+  const { comptroller, comptrollerAbi, marketAddresses, symbols, pauseActions, includeEmode } = input;
+  const commands: Command[] = [];
+
+  if (operation === "cf_zero") {
     console.log("\nQuerying market factors from comptroller...");
     for (const vToken of marketAddresses) {
       const symbol = symbols.get(vToken) || vToken;
@@ -403,8 +426,7 @@ const main = async () => {
     }
   }
 
-  // Pause commands
-  if ((selectedAction === "pause" || selectedAction === "both") && pauseActions.length > 0) {
+  if (operation === "pause") {
     for (const action of pauseActions) {
       const actionName = Object.entries(Actions).find(([, v]) => v === action)?.[0] || String(action);
       console.log(`\nAdding pause ${actionName} for ${marketAddresses.length} market(s)`);
@@ -416,25 +438,58 @@ const main = async () => {
     }
   }
 
+  return commands;
+};
+
+// ─── Phase 3: Export JSON ───────────────────────────────────────────────────
+
+interface ExportResult {
+  label: string;
+  txBuilderFile: string;
+  metadataFile: string;
+  recordFile: string;
+  txCount: number;
+  safeAddress: string;
+}
+
+const exportJson = async (
+  commands: Command[],
+  input: PauseInput,
+  safeAddress: string,
+  suffix?: string,
+): Promise<ExportResult | null> => {
   if (commands.length === 0) {
-    console.log("No commands generated.");
-    rl.close();
-    return;
+    console.log(`No commands generated${suffix ? ` for ${suffix}` : ""}. Skipping.`);
+    return null;
   }
 
-  // 6. Build Proposal and generate Safe TX Builder JSON
+  const label = suffix || "";
+  const txBuilderFile = path.resolve(OUTPUT_DIR, `safePauseTxBuilder${label}.json`);
+  const metadataFile = path.resolve(OUTPUT_DIR, `safePauseTxMetadata${label}.json`);
+
+  const symbolsRecord: Record<string, string> = {};
+  input.symbols.forEach((sym, addr) => {
+    symbolsRecord[addr] = sym;
+  });
+
+  const metadata: PauseMetadata = {
+    comptroller: input.comptroller,
+    network: input.network,
+    blockNumber: input.blockNumber,
+    createdAt: new Date().toISOString(),
+    symbols: symbolsRecord,
+  };
+
+  // Build Proposal and generate Safe TX Builder JSON
   const proposal: Proposal = await makeProposal(commands);
   const multisigTxData = await buildMultiSigTx(proposal);
-  const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId });
+  const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId: input.chainId });
 
-  // 7. Write safePauseTxBuilder.json (include blockNumber for simulation)
-  const outputJson = { ...batchJson, blockNumber };
-  fs.writeFileSync(TX_BUILDER_FILE, JSON.stringify(outputJson, null, 2));
+  const outputJson = { ...batchJson, blockNumber: input.blockNumber };
+  fs.writeFileSync(txBuilderFile, JSON.stringify(outputJson, null, 2));
+  fs.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2));
 
-  // 8. Write metadata for simulation verification
-  fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
-
-  // 9. Save a numbered record
+  // Save a numbered record
   fs.mkdirSync(RECORDS_DIR, { recursive: true });
   const counterFile = path.resolve(RECORDS_DIR, "counter.json");
   let last = 0;
@@ -442,17 +497,62 @@ const main = async () => {
     last = JSON.parse(fs.readFileSync(counterFile, "utf-8")).last || 0;
   }
   const next = last + 1;
-  const recordFile = path.resolve(RECORDS_DIR, `${String(next).padStart(3, "0")}_${networkName}.json`);
+  const recordFile = path.resolve(RECORDS_DIR, `${String(next).padStart(3, "0")}_${input.network}${label}.json`);
   const record = { metadata, safeTxBuilder: outputJson };
   fs.writeFileSync(recordFile, JSON.stringify(record, null, 2));
   fs.writeFileSync(counterFile, JSON.stringify({ last: next }, null, 2));
 
-  console.log(`\n--- Output ---`);
-  console.log(`  Safe TX Builder JSON: ${TX_BUILDER_FILE}`);
-  console.log(`  Pause metadata: ${METADATA_FILE}`);
-  console.log(`  Record: ${recordFile}`);
-  console.log(`  Transactions: ${commands.length} for ${networkName} (chain ${chainId})`);
-  console.log(`\nTo simulate: npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
+  return { label, txBuilderFile, metadataFile, recordFile, txCount: commands.length, safeAddress };
+};
+
+// ─── Main ───────────────────────────────────────────────────────────────────
+
+const printResults = (results: ExportResult[], networkName: string) => {
+  console.log("\n=== Output ===");
+  for (const r of results) {
+    console.log(`\n  ${r.label || "(default)"}`);
+    console.log(`    Safe TX Builder JSON: ${r.txBuilderFile}`);
+    console.log(`    Metadata:             ${r.metadataFile}`);
+    console.log(`    Record:               ${r.recordFile}`);
+    console.log(`    Transactions:         ${r.txCount}`);
+    console.log(`    Safe address:         ${r.safeAddress}`);
+    console.log(`    Simulate:             npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
+  }
+};
+
+const main = async () => {
+  const input = await gatherInput();
+
+  console.log("\n--- Processing ---");
+
+  const results: ExportResult[] = [];
+  const guardianAddress = getGuardianAddress(input.network);
+
+  if (input.network === "bscmainnet" && input.selectedAction === "both") {
+    const criticalGuardianAddress = getCriticalGuardianAddress(input.network);
+
+    const pauseCmds = await generateCommands(input, "pause");
+    const pauseResult = await exportJson(pauseCmds, input, guardianAddress);
+    if (pauseResult) results.push(pauseResult);
+
+    const cfCmds = await generateCommands(input, "cf_zero");
+    const cfResult = await exportJson(cfCmds, input, criticalGuardianAddress, "_cf");
+    if (cfResult) results.push(cfResult);
+  } else if (input.network === "bscmainnet" && input.selectedAction === "cf_zero") {
+    const criticalGuardianAddress = getCriticalGuardianAddress(input.network);
+
+    const cmds = await generateCommands(input, "cf_zero");
+    const result = await exportJson(cmds, input, criticalGuardianAddress);
+    if (result) results.push(result);
+  } else {
+    const cmds = await generateCommands(input, input.selectedAction as "pause" | "cf_zero");
+    const result = await exportJson(cmds, input, guardianAddress);
+    if (result) results.push(result);
+  }
+
+  if (results.length > 0) {
+    printResults(results, input.network);
+  }
 
   rl.close();
 };

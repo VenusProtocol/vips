@@ -30,15 +30,9 @@ const symbolOf = (vToken: string): string => metadata?.symbols?.[vToken] || vTok
 
 // ─── ABI-decode helpers for TX labels ─────────────────────────────────────
 
-const CF_IFACE = new ethers.utils.Interface([
-  "function setCollateralFactor(address,uint256,uint256)",
-]);
-const EMODE_CF_IFACE = new ethers.utils.Interface([
-  "function setCollateralFactor(uint96,address,uint256,uint256)",
-]);
-const PAUSE_IFACE = new ethers.utils.Interface([
-  "function setActionsPaused(address[],uint8[],bool)",
-]);
+const CF_IFACE = new ethers.utils.Interface(["function setCollateralFactor(address,uint256,uint256)"]);
+const EMODE_CF_IFACE = new ethers.utils.Interface(["function setCollateralFactor(uint96,address,uint256,uint256)"]);
+const PAUSE_IFACE = new ethers.utils.Interface(["function setActionsPaused(address[],uint8[],bool)"]);
 
 const ActionNames: Record<number, string> = {
   0: "MINT",
@@ -111,7 +105,7 @@ const verifyCfZero = (comptroller: string, markets: string[], isBsc: boolean) =>
       const data = await contract.markets(vToken);
       const cf = data.collateralFactorMantissa.toString();
       const lt = data.liquidationThresholdMantissa.toString();
-      console.log(`        CF: ${cf}, LT: ${lt}`);
+      console.log(`        Current factors: CF: ${cf}, LT: ${lt}`);
       expect(data.collateralFactorMantissa).to.equal(0);
     });
   }
@@ -124,7 +118,7 @@ const verifyEmodeCfZero = (comptroller: string, entries: { vToken: string; poolI
       const data = await contract.poolMarkets(poolId, vToken);
       const cf = data.collateralFactorMantissa.toString();
       const lt = data.liquidationThresholdMantissa.toString();
-      console.log(`        CF: ${cf}, LT: ${lt}`);
+      console.log(`        Current factors: CF: ${cf}, LT: ${lt}`);
       expect(data.collateralFactorMantissa).to.equal(0);
     });
   }
@@ -190,7 +184,10 @@ const verifyActionsPaused = (comptroller: string, markets: string[], actions: nu
           const decoded = CF_IFACE.decodeFunctionData("setCollateralFactor(address,uint256,uint256)", tx.data);
           cfZeroMarkets.push(decoded[0]);
         } else if (selector === emodeCfSighash) {
-          const decoded = EMODE_CF_IFACE.decodeFunctionData("setCollateralFactor(uint96,address,uint256,uint256)", tx.data);
+          const decoded = EMODE_CF_IFACE.decodeFunctionData(
+            "setCollateralFactor(uint96,address,uint256,uint256)",
+            tx.data,
+          );
           emodeCfZero.push({ vToken: decoded[1], poolId: decoded[0].toNumber() });
         } else if (selector === pauseSighash) {
           const decoded = PAUSE_IFACE.decodeFunctionData("setActionsPaused", tx.data);
