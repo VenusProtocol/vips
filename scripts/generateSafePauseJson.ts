@@ -528,7 +528,9 @@ const printResults = (results: ExportResult[], networkName: string) => {
     console.log(`    Transactions:         ${r.txCount}`);
     console.log(`    Safe address:         ${r.safeAddress}`);
     const cfPrefix = r.label === "_cf" ? "TEST_CF=true " : "";
-    console.log(`    Simulate:             ${cfPrefix}npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
+    console.log(
+      `    Simulate:             ${cfPrefix}npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`,
+    );
   }
 };
 
