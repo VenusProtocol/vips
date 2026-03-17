@@ -31,7 +31,8 @@ yarn-error.log*
 # Generated files
 venusApp.json
 gnosisTXBuilder.json
-safePauseMetadata.json
+scripts/data/safePauseTxBuilder.json
+scripts/data/safePauseTxMetadata.json
 
 .DS_Store
 **/.DS_Store

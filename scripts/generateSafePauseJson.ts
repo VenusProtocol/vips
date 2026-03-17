@@ -26,15 +26,17 @@ const Actions: Record<string, number> = {
 const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
 
 const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
-const METADATA_FILE = path.resolve(__dirname, "..", "safePauseMetadata.json");
+const OUTPUT_DIR = path.resolve(__dirname, "data");
+const TX_BUILDER_FILE = path.resolve(OUTPUT_DIR, "safePauseTxBuilder.json");
+const METADATA_FILE = path.resolve(OUTPUT_DIR, "safePauseTxMetadata.json");
+const RECORDS_DIR = path.resolve(OUTPUT_DIR, "safePauseTXRecords");
 
 interface PauseMetadata {
   comptroller: string;
   network: string;
+  blockNumber: number;
+  createdAt: string;
   symbols: Record<string, string>;
-  cfZeroMarkets: string[];
-  emodeCfZero: { vToken: string; poolId: number }[];
-  pausedActions: { markets: string[]; actions: number[] };
 }
 
 // BSC core pool markets() returns extra fields (isVenus, liquidationIncentive, etc.)
@@ -220,7 +222,7 @@ const main = async () => {
   const networkName = network.name;
   const chainId = network.config.chainId;
 
-  console.log(`=== Safe Multisig JSON Generator (${networkName}, chain ${chainId}) ===\n`);
+  console.log(`=== Safe Pause JSON Generator (${networkName}, chain ${chainId}) ===\n`);
 
   const safeAddress = getSafeAddress(networkName as SUPPORTED_NETWORKS);
 
@@ -325,13 +327,13 @@ const main = async () => {
   symbols.forEach((sym, addr) => {
     symbolsRecord[addr] = sym;
   });
+  const blockNumber = await ethers.provider.getBlockNumber();
   const metadata: PauseMetadata = {
     comptroller,
     network: networkName,
+    blockNumber,
+    createdAt: new Date().toISOString(),
     symbols: symbolsRecord,
-    cfZeroMarkets: [],
-    emodeCfZero: [],
-    pausedActions: { markets: [], actions: [] },
   };
 
   // CF=0 commands
@@ -345,7 +347,6 @@ const main = async () => {
         continue;
       }
       console.log(`  ${symbol} (${vToken}) → CF: ${cf}, LT: ${lt}`);
-      metadata.cfZeroMarkets.push(vToken);
       commands.push({
         target: comptroller,
         signature: "setCollateralFactor(address,uint256,uint256)",
@@ -376,7 +377,6 @@ const main = async () => {
             console.log(
               `  ${symbol} — pool ${pool.poolId}: CF=${pool.collateralFactorMantissa}, LT=${pool.liquidationThresholdMantissa}`,
             );
-            metadata.emodeCfZero.push({ vToken, poolId: pool.poolId });
             commands.push({
               target: comptroller,
               signature: "setCollateralFactor(uint96,address,uint256,uint256)",
@@ -390,7 +390,6 @@ const main = async () => {
 
   // Pause commands
   if ((selectedAction === "pause" || selectedAction === "both") && pauseActions.length > 0) {
-    metadata.pausedActions = { markets: marketAddresses, actions: pauseActions };
     for (const action of pauseActions) {
       const actionName = Object.entries(Actions).find(([, v]) => v === action)?.[0] || String(action);
       console.log(`\nAdding pause ${actionName} for ${marketAddresses.length} market(s)`);
@@ -413,20 +412,31 @@ const main = async () => {
   const multisigTxData = await buildMultiSigTx(proposal);
   const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId });
 
-  // 7. Write gnosisTXBuilder.json (include blockNumber for simulation)
-  const blockNumber = await ethers.provider.getBlockNumber();
+  // 7. Write safePauseTxBuilder.json (include blockNumber for simulation)
   const outputJson = { ...batchJson, blockNumber };
-  const outputPath = path.resolve(__dirname, "..", "gnosisTXBuilder.json");
-  fs.writeFileSync(outputPath, JSON.stringify(outputJson, null, 2));
+  fs.writeFileSync(TX_BUILDER_FILE, JSON.stringify(outputJson, null, 2));
 
   // 8. Write metadata for simulation verification
   fs.writeFileSync(METADATA_FILE, JSON.stringify(metadata, null, 2));
 
+  // 9. Save a numbered record
+  fs.mkdirSync(RECORDS_DIR, { recursive: true });
+  const counterFile = path.resolve(RECORDS_DIR, "counter.json");
+  let last = 0;
+  if (fs.existsSync(counterFile)) {
+    last = JSON.parse(fs.readFileSync(counterFile, "utf-8")).last || 0;
+  }
+  const next = last + 1;
+  const recordFile = path.resolve(RECORDS_DIR, `${String(next).padStart(3, "0")}_${networkName}.json`);
+  fs.writeFileSync(recordFile, JSON.stringify(metadata, null, 2));
+  fs.writeFileSync(counterFile, JSON.stringify({ last: next }, null, 2));
+
   console.log(`\n--- Output ---`);
-  console.log(`  Safe TX Builder JSON: ${outputPath}`);
+  console.log(`  Safe TX Builder JSON: ${TX_BUILDER_FILE}`);
   console.log(`  Pause metadata: ${METADATA_FILE}`);
+  console.log(`  Record: ${recordFile}`);
   console.log(`  Transactions: ${commands.length} for ${networkName} (chain ${chainId})`);
-  console.log(`\nTo simulate: npx hardhat test scripts/simulateSafeJson.ts --fork ${networkName}`);
+  console.log(`\nTo simulate: npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
 
   rl.close();
 };
