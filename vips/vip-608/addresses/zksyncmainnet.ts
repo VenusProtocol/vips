@@ -1,0 +1,18 @@
+import { LzChainId } from "src/types";
+
+export const ZKSYNCMAINNET_CORE_COMPTROLLER = "0xddE4D098D9995B659724ae6d5E3FB9681Ac941B1";
+export const ZKSYNCMAINNET_VTOKEN_BEACON = "0x53523537aa330640B80400EB8B309fF5896E7eb5";
+export const ZKSYNCMAINNET_NEW_VTOKEN_IMPLEMENTATION = "TODO"; // Not yet deployed
+export const ZKSYNCMAINNET_DST_CHAIN_ID = LzChainId.zksyncmainnet;
+
+export const ZKSYNCMAINNET_CORE_VTOKENS = [
+  "0xaf8fd83cfcbe963211faaf1847f0f217f80b4719", // vWBTC_Core
+  "0x1fa916c27c7c2c4602124a14c77dbb40a5ff1be8", // vWETH_Core
+  "0x1af23bd57c62a99c59ad48236553d0dd11e49d2d", // vUSDC.e_Core
+  "0x69cda960e3b20dfd480866fffd377ebe40bd0a46", // vUSDT_Core
+  "0x697a70779c1a03ba2bd28b7627a902bff831b616", // vZK_Core
+  "0x84064c058f2efea4ab648bb6bd7e40f83ffde39a", // vUSDC_Core
+  "0x183de3c349fcf546aae925e1c7f364ea6fb4033c", // vwUSDM_Core
+  "0x03cad66259f7f34ee075f8b62d133563d249eda4", // vwstETH_Core
+  "0xceb7da150d16ace58f090754fef2775c23c8b631", // vzkETH_Core
+];

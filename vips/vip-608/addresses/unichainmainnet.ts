@@ -1,0 +1,16 @@
+import { LzChainId } from "src/types";
+
+export const UNICHAINMAINNET_CORE_COMPTROLLER = "0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe";
+export const UNICHAINMAINNET_VTOKEN_BEACON = "0x42c1Efb9Dd9424c5ac8e6EcEa4eb03940c4a15Fc";
+export const UNICHAINMAINNET_NEW_VTOKEN_IMPLEMENTATION = "TODO"; // Not yet deployed
+export const UNICHAINMAINNET_DST_CHAIN_ID = LzChainId.unichainmainnet;
+
+export const UNICHAINMAINNET_CORE_VTOKENS = [
+  "0xc219bc179c7cdb37eacb03f993f9fdc2495e3374", // vWETH_Core
+  "0xb953f92b9f759d97d2f2dec10a8a3cf75fce3a95", // vUSDC_Core
+  "0x67716d6bf76170af816f5735e14c4d44d0b05ed2", // vUNI_Core
+  "0x0170398083eb0d0387709523bafca6426146c218", // vweETH_Core
+  "0xbec19bef402c697a7be315d3e59e5f65b89fa1bb", // vwstETH_Core
+  "0x68e2a6f7257fac2f5a557b9e83e1fe6d5b408ce5", // vWBTC_Core
+  "0xda7ce7ba016d266645712e2e4ebc6cc75ea8e4cd", // vUSD₮0_Core
+];

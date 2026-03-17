@@ -1,0 +1,14 @@
+import { LzChainId } from "src/types";
+
+export const OPBNBMAINNET_CORE_COMPTROLLER = "0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd";
+export const OPBNBMAINNET_VTOKEN_BEACON = "0xfeD1d3a13597c5aBc893Af41ED5cb17e64c847c7";
+export const OPBNBMAINNET_NEW_VTOKEN_IMPLEMENTATION = "TODO"; // Not yet deployed
+export const OPBNBMAINNET_DST_CHAIN_ID = LzChainId.opbnbmainnet;
+
+export const OPBNBMAINNET_CORE_VTOKENS = [
+  "0xed827b80bd838192ea95002c01b5c6da8354219a", // vBTCB_Core
+  "0x509e81ef638d489936fa85bc58f52df01190d26c", // vETH_Core
+  "0xb7a01ba126830692238521a1aa7e7a7509410b8e", // vUSDT_Core
+  "0x53d11cb8a0e5320cd7229c3acc80d1a0707f2672", // vWBNB_Core
+  "0x13b492b8a03d072bab5c54ac91dba5b830a50917", // vFDUSD_Core
+];

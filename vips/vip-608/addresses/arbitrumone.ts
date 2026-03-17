@@ -1,0 +1,16 @@
+import { LzChainId } from "src/types";
+
+export const ARBITRUMONE_CORE_COMPTROLLER = "0x317c1A5739F39046E20b08ac9BeEa3f10fD43326";
+export const ARBITRUMONE_VTOKEN_BEACON = "0xE9381D8CA7006c12Ae9eB97890575E705996fa66";
+export const ARBITRUMONE_NEW_VTOKEN_IMPLEMENTATION = "TODO"; // Not yet deployed
+export const ARBITRUMONE_DST_CHAIN_ID = LzChainId.arbitrumone;
+
+export const ARBITRUMONE_CORE_VTOKENS = [
+  "0xada57840b372d4c28623e87fc175de8490792811", // vWBTC_Core
+  "0x68a34332983f4bf866768dd6d6e638b02ef5e1f0", // vWETH_Core
+  "0x7d8609f8da70ff9027e9bc5229af4f6727662707", // vUSDC_Core
+  "0xb9f9117d4200dc296f9acd1e8be1937df834a2fd", // vUSDT_Core
+  "0xaeb0fed69354f34831fe1d16475d9a83ddacada6", // vARB_Core
+  "0x9bb8cec9c0d46f53b4f2173bb2a0221f66c353cc", // vgmWETH-USDC_Core
+  "0x4f3a73f318c5ea67a86eaace24309f29f89900df", // vgmBTC-USDC_Core
+];
