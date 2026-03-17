@@ -14,7 +14,8 @@ import { forking } from "src/vip-framework";
  *   npx hardhat test scripts/simulateSafePauseTx.ts --fork <networkName>
  */
 
-const jsonPath = path.resolve(__dirname, "data", "safePauseTxBuilder.json");
+const suffix = process.env.TEST_CF === "true" ? "_cf" : "";
+const jsonPath = path.resolve(__dirname, "data", `safePauseTxBuilder${suffix}.json`);
 if (!fs.existsSync(jsonPath)) {
   throw new Error(`${jsonPath} not found. Run generateSafePauseJson.ts first.`);
 }
@@ -22,7 +23,7 @@ const batchFile = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
 const transactions: { to: string; data: string; value: string }[] = batchFile.transactions;
 const safeAddress = batchFile.meta.createdFromSafeAddress;
 
-const metadataPath = path.resolve(__dirname, "data", "safePauseTxMetadata.json");
+const metadataPath = path.resolve(__dirname, "data", `safePauseTxMetadata${suffix}.json`);
 const hasMetadata = fs.existsSync(metadataPath);
 const metadata = hasMetadata ? JSON.parse(fs.readFileSync(metadataPath, "utf-8")) : null;
 
@@ -148,7 +149,7 @@ const verifyActionsPaused = (comptroller: string, markets: string[], actions: nu
   console.log(`Latest block: ${blockNumber}`);
 
   forking(blockNumber, async () => {
-    describe(`Simulate safePauseTxBuilder.json (${transactions.length} txs)`, () => {
+    describe(`Simulate safePauseTxBuilder${suffix}.json (${transactions.length} txs)`, () => {
       for (let i = 0; i < transactions.length; i++) {
         const tx = transactions[i];
 

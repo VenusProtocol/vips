@@ -79,26 +79,37 @@ const ask = (question: string): Promise<string> =>
 const pickOne = async (prompt: string, options: string[]): Promise<string> => {
   console.log(`\n${prompt}`);
   options.forEach((opt, i) => console.log(`  ${i + 1}. ${opt}`));
-  const answer = await ask("Enter number: ");
-  const idx = parseInt(answer) - 1;
-  if (idx < 0 || idx >= options.length) {
-    console.log("Invalid selection, defaulting to first option.");
-    return options[0];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const answer = await ask("Enter number: ");
+    const idx = parseInt(answer) - 1;
+    if (idx >= 0 && idx < options.length) {
+      return options[idx];
+    }
+    console.log(`Invalid selection "${answer}". Please enter a number between 1 and ${options.length}.`);
   }
-  return options[idx];
 };
 
 const pickMultiple = async (prompt: string, options: { name: string; value: string }[]): Promise<string[]> => {
   console.log(`\n${prompt}`);
   options.forEach(opt => console.log(`  ${opt.value}. ${opt.name}`));
-  console.log("Enter comma-separated values (e.g., 0,2,6) or 'all' for all:");
-  const answer = await ask("> ");
-  if (answer.toLowerCase() === "all") return options.map(o => o.value);
   const validValues = new Set(options.map(o => o.value));
-  return answer
-    .split(",")
-    .map(n => n.trim())
-    .filter(v => validValues.has(v));
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    console.log("Enter comma-separated values (e.g., 0,2,6) or 'all' for all:");
+    const answer = await ask("> ");
+    if (answer.toLowerCase() === "all") return options.map(o => o.value);
+    const selected = answer
+      .split(",")
+      .map(n => n.trim())
+      .filter(v => validValues.has(v));
+    if (selected.length > 0) return selected;
+    const invalid = answer
+      .split(",")
+      .map(n => n.trim())
+      .filter(v => !validValues.has(v));
+    console.log(`Invalid value(s): ${invalid.join(", ")}. Valid options are: ${[...validValues].join(", ")}.`);
+  }
 };
 
 // ─── On-chain queries ───────────────────────────────────────────────────────
@@ -516,7 +527,8 @@ const printResults = (results: ExportResult[], networkName: string) => {
     console.log(`    Record:               ${r.recordFile}`);
     console.log(`    Transactions:         ${r.txCount}`);
     console.log(`    Safe address:         ${r.safeAddress}`);
-    console.log(`    Simulate:             npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
+    const cfPrefix = r.label === "_cf" ? "TEST_CF=true " : "";
+    console.log(`    Simulate:             ${cfPrefix}npx hardhat test scripts/simulateSafePauseTx.ts --fork ${networkName}`);
   }
 };
 
