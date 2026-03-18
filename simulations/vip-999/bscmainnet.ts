@@ -18,6 +18,8 @@ import vip999, {
   REDSTONE_ORACLE_CONFIGS,
   SUSDE_ORACLE_CONFIG,
   TOKENS,
+  USDT_CHAINLINK_ORACLE,
+  USDT_CHAINLINK_ORACLE_CONFIG,
   asBNB_ORACLE,
   sUSDe,
   slisBNB_ORACLE,
@@ -34,7 +36,6 @@ const BLOCK_NUMBER = 87272909;
 const SECONDS_PER_YEAR = 31_536_000;
 const PRICE_CHANGE_TOLERANCE_BPS = 300; // 3%
 const STALE_PERIOD_OVERRIDE = 315_360_000; // 10 years
-const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
 
 const annualizedRateToPerSecond = (annualizedRate: BigNumber) => annualizedRate.div(SECONDS_PER_YEAR);
 const bpsToRatio = (value: BigNumber, bps: number) => value.mul(bps).div(10_000);
@@ -45,6 +46,7 @@ forking(BLOCK_NUMBER, async () => {
   let chainlinkOracle: Contract;
   let redstoneOracle: Contract;
   let binanceOracle: Contract;
+  let usdtChainlinkOracle: Contract;
   let asBNBOracleContract: Contract;
   let slisBNBOracleContract: Contract;
   const preVipPrices: Record<string, BigNumber> = {};
@@ -57,6 +59,7 @@ forking(BLOCK_NUMBER, async () => {
     chainlinkOracle = new ethers.Contract(bscmainnet.CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     redstoneOracle = new ethers.Contract(bscmainnet.REDSTONE_ORACLE, REDSTONE_ORACLE_ABI, provider);
     binanceOracle = new ethers.Contract(bscmainnet.BINANCE_ORACLE, BINANCE_ORACLE_ABI, provider);
+    usdtChainlinkOracle = new ethers.Contract(USDT_CHAINLINK_ORACLE, CHAINLINK_ORACLE_ABI, provider);
     asBNBOracleContract = new ethers.Contract(asBNB_ORACLE, CAPPED_ORACLE_ABI, provider);
     slisBNBOracleContract = new ethers.Contract(slisBNB_ORACLE, CAPPED_ORACLE_ABI, provider);
   });
@@ -79,6 +82,12 @@ forking(BLOCK_NUMBER, async () => {
         expect(config.feed).to.equal(feed);
         expect(config.maxStalePeriod).to.equal(oldMaxStalePeriod);
       }
+    });
+
+    it("should match pre-VIP maxStalePeriod for USDe Main ChainlinkOracle", async () => {
+      const config = await usdtChainlinkOracle.tokenConfigs(TOKENS.USDe);
+      expect(config.feed).to.equal(USDT_CHAINLINK_ORACLE_CONFIG.USDe.feed);
+      expect(config.maxStalePeriod).to.equal(USDT_CHAINLINK_ORACLE_CONFIG.USDe.oldMaxStalePeriod);
     });
 
     it("should match pre-VIP maxStalePeriod values for RedStone feeds", async () => {
@@ -122,14 +131,9 @@ forking(BLOCK_NUMBER, async () => {
         txResponse,
         [CHAINLINK_ORACLE_ABI],
         ["TokenConfigAdded"],
-        [chainlinkConfigs.length + redstoneConfigs.length],
+        [chainlinkConfigs.length + 1 + redstoneConfigs.length] // +1 for USDT ChainlinkOracle (USDe Main),
       );
-      await expectEvents(
-        txResponse,
-        [REDSTONE_ORACLE_ABI],
-        ["TokenConfigAdded"],
-        [chainlinkConfigs.length + redstoneConfigs.length],
-      );
+
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [binanceStalePeriods.length]);
       await expectEvents(txResponse, [CAPPED_ORACLE_ABI], ["GrowthRateUpdated"], [2]);
     },
@@ -143,6 +147,12 @@ forking(BLOCK_NUMBER, async () => {
           expect(config.feed).to.equal(feed);
           expect(config.maxStalePeriod).to.equal(newMaxStalePeriod);
         }
+      });
+
+      it("should match post-VIP maxStalePeriod for USDe Main ChainlinkOracle", async () => {
+        const config = await usdtChainlinkOracle.tokenConfigs(TOKENS.USDe);
+        expect(config.feed).to.equal(USDT_CHAINLINK_ORACLE_CONFIG.USDe.feed);
+        expect(config.maxStalePeriod).to.equal(USDT_CHAINLINK_ORACLE_CONFIG.USDe.newMaxStalePeriod);
       });
 
       it("should match post-VIP maxStalePeriod values for RedStone feeds", async () => {

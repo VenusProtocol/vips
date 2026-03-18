@@ -14,6 +14,9 @@ export const slisBNB = "0xB0b84D294e0C75A6abe60171b70edEb2EFd14A1B";
 export const SUSDE_ONEJUMP_REDSTONE_ORACLE = "0x2B2895104f958E1EC042E6Ba5cbfeCbAD3C5beDb";
 export const SUSDE_ONEJUMP_CHAINLINK_ORACLE = "0xA67F01322AF8EBa444D788Ee398775b446de51a0";
 
+// ===== USDT ChainlinkOracle (used by USDe Main) =====
+export const USDT_CHAINLINK_ORACLE = "0x22Dc2BAEa32E95AB07C2F5B8F63336CbF61aB6b8";
+
 // ===== CAPO Oracle addresses =====
 export const asBNB_ORACLE = "0x652B90D1d45a7cD5BE82c5Fb61a4A00bA126dde5";
 export const slisBNB_ORACLE = "0xDDE6446E66c786afF4cd3D183a908bCDa57DF9c1";
@@ -59,6 +62,10 @@ export const TOKENS = {
   U: "0xcE24439F2D9C6a2289F741120FE202248B666666",
 };
 
+
+export const USDT_CHAINLINK_ORACLE_CONFIG = {
+  USDe: { asset: TOKENS.USDe, feed: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
+};
 
 export const SUSDE_ORACLE_CONFIG = {
   old: {
@@ -211,7 +218,7 @@ Note: \`updateSnapshot()\` should be called on the asBNB oracle immediately befo
 
 **3. maxStalePeriod Updates**
 
-Updates maxStalePeriod for 74 oracle slots based on the following formula:
+Updates maxStalePeriod for 75 oracle slots based on the following formula:
 - Heartbeat ≤ 30s → 60s
 - Heartbeat ≤ 60s → 120s
 - 60s < heartbeat < 200s → heartbeat + 100s
@@ -269,6 +276,15 @@ Updates maxStalePeriod for 74 oracle slots based on the following formula:
         target: bscmainnet.CHAINLINK_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
         params: [chainlinkOracleConfigs.map(({ asset, feed, newMaxStalePeriod }) => [asset, feed, newMaxStalePeriod])],
+      },
+
+      // ===== 3. maxStalePeriod — USDT ChainlinkOracle (USDe Main) =====
+      {
+        target: USDT_CHAINLINK_ORACLE,
+        signature: "setTokenConfigs((address,address,uint256)[])",
+        params: [
+          Object.values(USDT_CHAINLINK_ORACLE_CONFIG).map(({ asset, feed, newMaxStalePeriod }) => [asset, feed, newMaxStalePeriod]),
+        ],
       },
 
       // ===== 3. maxStalePeriod — RedStoneOracle feeds =====
