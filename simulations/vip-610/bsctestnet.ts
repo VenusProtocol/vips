@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
-import { initMainnetUser } from "src/utils";
+import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import {
@@ -20,6 +20,13 @@ import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
+
+const DSA_VTOKENS = [
+  "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7", // vUSDC
+  "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A", // vUSDT
+  "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4", // vBUSD
+  "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C", // vWBNB
+];
 
 const ACM_FUNCTION_SIGNATURES = [
   "partialPause()",
@@ -83,7 +90,19 @@ forking(96276916, async () => {
     });
   });
 
-  testVip("VIP-610 [BNB Chain] Testnet", await vip610Testnet());
+  testVip("VIP-610 [BNB Chain] Testnet", await vip610Testnet(), {
+    callbackAfterExecution: async txResponse => {
+      await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["OwnershipTransferred"], [3]);
+      await expectEvents(txResponse, [FLASHLOAN_FACET_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [36]);
+      await expectEvents(
+        txResponse,
+        [RELATIVE_POSITION_MANAGER_ABI],
+        ["PositionAccountImplementationSet"],
+        [1],
+      );
+    },
+  });
 
   describe("Post-VIP behavior", () => {
     it("LeverageStrategiesManager should be whitelisted for flash loans", async () => {
@@ -119,13 +138,23 @@ forking(96276916, async () => {
       expect(await relativePositionManager.POSITION_ACCOUNT_IMPLEMENTATION()).to.equals(POSITION_ACCOUNT);
     });
 
+    it("Setting Position Account implementation again should revert", async () => {
+      const signer = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
+      await expect(
+        relativePositionManager.connect(signer).setPositionAccountImplementation(POSITION_ACCOUNT),
+      ).to.be.revertedWithCustomError(relativePositionManager, "PositionAccountImplementationLocked");
+    });
+
+    let dsaVTokenIndex = 0;
     for (const timelockOrGuardian of TIMELOCKS_AND_GUARDIAN) {
       describe(`ACM-gated functions should be callable by ${timelockOrGuardian}`, () => {
         let rpmAsCaller: Contract;
+        let currentDsaIndex: number;
 
         before(async () => {
           const signer = await initMainnetUser(timelockOrGuardian, ethers.utils.parseEther("1"));
           rpmAsCaller = relativePositionManager.connect(signer);
+          currentDsaIndex = dsaVTokenIndex++;
         });
 
         it("partialPause and partialUnpause", async () => {
@@ -147,6 +176,21 @@ forking(96276916, async () => {
           const newValue = current.add(1);
           await rpmAsCaller.setProportionalCloseTolerance(newValue);
           expect(await relativePositionManager.proportionalCloseTolerance()).to.equal(newValue);
+        });
+
+        it("addDSAVToken and setDSAVTokenActive", async () => {
+          await rpmAsCaller.addDSAVToken(DSA_VTOKENS[currentDsaIndex]);
+          expect(await relativePositionManager.dsaVTokens(currentDsaIndex)).to.equal(DSA_VTOKENS[currentDsaIndex]);
+          expect(await relativePositionManager.isDsaVTokenActive(DSA_VTOKENS[currentDsaIndex])).to.equal(true);
+          await rpmAsCaller.setDSAVTokenActive(currentDsaIndex, false);
+          expect(await relativePositionManager.isDsaVTokenActive(DSA_VTOKENS[currentDsaIndex])).to.equal(false);
+        });
+
+        it("executePositionAccountCall", async () => {
+          // Reverts with InvalidCallsLength (not Unauthorized) — proves ACM permission passed
+          await expect(
+            rpmAsCaller.executePositionAccountCall(POSITION_ACCOUNT, [], []),
+          ).to.be.revertedWithCustomError(relativePositionManager, "InvalidCallsLength");
         });
       });
     }

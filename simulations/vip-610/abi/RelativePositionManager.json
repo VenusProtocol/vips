@@ -680,5 +680,10 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCallsLength",
+    "type": "error"
   }
 ]
