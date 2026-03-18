@@ -20,6 +20,7 @@ import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
+import VTOKEN_ABI from "./abi/VToken.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -195,8 +196,6 @@ forking(87147067, async () => {
       "function approve(address spender, uint256 amount) returns (bool)",
       "function balanceOf(address account) view returns (uint256)",
     ];
-
-    const VTOKEN_ABI = require("./abi/VToken.json");
 
     let saltCounter = 0;
     let comptroller: Contract;
