@@ -13,7 +13,7 @@ import vip608_2 from "../../vips/vip-608/bscmainnet-2";
 import VTOKEN_ABI from "./abi/ILVToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-const BLOCK_NUMBER = 43514761;
+const BLOCK_NUMBER = 43518812;
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 
