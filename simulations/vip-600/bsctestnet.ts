@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import { CORE_MARKETS, vip822 } from "../../vips/vip-822/bsctestnet";
+import { CORE_MARKETS, vip600 } from "../../vips/vip-600/bsctestnet";
 import COMPTROLLER_ABI from "../vip-567/abi/Comptroller.json";
 import VTOKEN_ABI from "../vip-567/abi/VToken.json";
 
@@ -37,7 +37,7 @@ forking(96416541, async () => {
   });
 
   // 3 markets already have zero fees (vE, vPT-clisBNB-25JUN2026, vXAUM) — no event emitted for those
-  testVip("VIP-822 flash loan fee reset", await vip822(), {
+  testVip("VIP-600 flash loan fee reset", await vip600(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["FlashLoanFeeUpdated"], [CORE_MARKETS.length - 3]);
     },

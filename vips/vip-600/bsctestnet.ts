@@ -6,7 +6,6 @@ export const CORE_MARKETS = [
   { name: "vUSDT", address: "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A" },
   { name: "vBUSD", address: "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4" },
   { name: "vSXP", address: "0x74469281310195A04840Daf6EdF576F559a3dE80" },
-  // vBNB (0x2E7222e51c0f6e98610A1543Aa3836E092CDe62c) excluded — native BNB market, does not support setFlashLoanFeeMantissa
   { name: "vXVS", address: "0x6d6F697e34145Bb95c54E77482d97cc261Dc237E" },
   { name: "vETH", address: "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab" },
   { name: "vLTC", address: "0xAfc13BC065ABeE838540823431055D2ea52eBA52" },
@@ -46,10 +45,10 @@ export const CORE_MARKETS = [
   { name: "vXAUM", address: "0xc93CBF6CA7F3124737F2f4daDa8dBBC7be56d125" },
 ];
 
-export const vip822 = () => {
+export const vip600 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-822 flash loan fee reset",
+    title: "VIP-617 flash loan fee reset",
     description: "Set flash loan fee and protocol share to zero for all core markets on BSC Testnet.",
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -68,4 +67,4 @@ export const vip822 = () => {
   );
 };
 
-export default vip822;
+export default vip600;
