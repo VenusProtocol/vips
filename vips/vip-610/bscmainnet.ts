@@ -6,6 +6,9 @@ const { bscmainnet } = NETWORK_ADDRESSES;
 export const RELATIVE_POSITION_MANAGER = "0xedcD8725D08585A7B61eE77A22D9cf591C1171c1";
 export const POSITION_ACCOUNT = "0x18970e10B39BDf6981334b5DC0873d85CFdB9aa0";
 
+export const vUSDC = "0xecA88125a5ADbe82614ffC12D0DB554E2e2867C8";
+export const vUSDT = "0xfD5840Cd36d94D7229439859C0112a4185BC0255";
+
 export const TIMELOCKS_AND_GUARDIAN = [
   bscmainnet.NORMAL_TIMELOCK,
   bscmainnet.FAST_TRACK_TIMELOCK,
@@ -51,6 +54,17 @@ export const vip610 = () => {
         target: RELATIVE_POSITION_MANAGER,
         signature: "setPositionAccountImplementation(address)",
         params: [POSITION_ACCOUNT],
+      },
+      // Add DSA vTokens (USDC, USDT)
+      {
+        target: RELATIVE_POSITION_MANAGER,
+        signature: "addDSAVToken(address)",
+        params: [vUSDC],
+      },
+      {
+        target: RELATIVE_POSITION_MANAGER,
+        signature: "addDSAVToken(address)",
+        params: [vUSDT],
       },
     ],
     meta,

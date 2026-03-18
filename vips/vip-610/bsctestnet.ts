@@ -8,6 +8,9 @@ export const LEVERAGE_STRATEGIES_MANAGER = "0xfc8810B0f1144D5A1F6231aFDb8B51F31c
 export const RELATIVE_POSITION_MANAGER = "0xF01CA5Ad6152d932Ed19FB28b285529399dA8166";
 export const POSITION_ACCOUNT = "0x03590ef916d538049Ed15f2690A01F70c2A02954";
 
+export const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
+export const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
+
 export const TIMELOCKS_AND_GUARDIAN = [
   bsctestnet.NORMAL_TIMELOCK,
   bsctestnet.FAST_TRACK_TIMELOCK,
@@ -69,6 +72,17 @@ export const vip610 = () => {
         target: RELATIVE_POSITION_MANAGER,
         signature: "setPositionAccountImplementation(address)",
         params: [POSITION_ACCOUNT],
+      },
+      // Add DSA vTokens (USDC, USDT)
+      {
+        target: RELATIVE_POSITION_MANAGER,
+        signature: "addDSAVToken(address)",
+        params: [vUSDC],
+      },
+      {
+        target: RELATIVE_POSITION_MANAGER,
+        signature: "addDSAVToken(address)",
+        params: [vUSDT],
       },
     ],
     meta,

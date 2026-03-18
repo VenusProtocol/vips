@@ -11,6 +11,8 @@ import {
   RELATIVE_POSITION_MANAGER,
   SWAP_HELPER,
   TIMELOCKS_AND_GUARDIAN,
+  vUSDC,
+  vUSDT,
   vip610 as vip610Testnet,
 } from "../../vips/vip-610/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
@@ -20,13 +22,6 @@ import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-
-const DSA_VTOKENS = [
-  "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7", // vUSDC
-  "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A", // vUSDT
-  "0x08e0A5575De71037aE36AbfAfb516595fE68e5e4", // vBUSD
-  "0xd9E77847ec815E56ae2B9E69596C69b6972b0B1C", // vWBNB
-];
 
 const ACM_FUNCTION_SIGNATURES = [
   "partialPause()",
@@ -79,6 +74,14 @@ forking(96276916, async () => {
       expect(await relativePositionManager.POSITION_ACCOUNT_IMPLEMENTATION()).to.equal(ethers.constants.AddressZero);
     });
 
+    it("vUSDC should not be an active DSA vToken", async () => {
+      expect(await relativePositionManager.isDsaVTokenActive(vUSDC)).to.equal(false);
+    });
+
+    it("vUSDT should not be an active DSA vToken", async () => {
+      expect(await relativePositionManager.isDsaVTokenActive(vUSDT)).to.equal(false);
+    });
+
     it("Timelocks/Guardian should not have ACM permissions on RelativePositionManager", async () => {
       for (const timelockOrGuardian of TIMELOCKS_AND_GUARDIAN) {
         for (const fnSignature of ACM_FUNCTION_SIGNATURES) {
@@ -95,12 +98,8 @@ forking(96276916, async () => {
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["OwnershipTransferred"], [3]);
       await expectEvents(txResponse, [FLASHLOAN_FACET_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [36]);
-      await expectEvents(
-        txResponse,
-        [RELATIVE_POSITION_MANAGER_ABI],
-        ["PositionAccountImplementationSet"],
-        [1],
-      );
+      await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["PositionAccountImplementationSet"], [1]);
+      await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["DSAVTokenAdded"], [2]);
     },
   });
 
@@ -138,6 +137,16 @@ forking(96276916, async () => {
       expect(await relativePositionManager.POSITION_ACCOUNT_IMPLEMENTATION()).to.equals(POSITION_ACCOUNT);
     });
 
+    it("vUSDC should be an active DSA vToken at index 0", async () => {
+      expect(await relativePositionManager.dsaVTokens(0)).to.equal(vUSDC);
+      expect(await relativePositionManager.isDsaVTokenActive(vUSDC)).to.equal(true);
+    });
+
+    it("vUSDT should be an active DSA vToken at index 1", async () => {
+      expect(await relativePositionManager.dsaVTokens(1)).to.equal(vUSDT);
+      expect(await relativePositionManager.isDsaVTokenActive(vUSDT)).to.equal(true);
+    });
+
     it("Setting Position Account implementation again should revert", async () => {
       const signer = await initMainnetUser(bsctestnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
       await expect(
@@ -145,16 +154,13 @@ forking(96276916, async () => {
       ).to.be.revertedWithCustomError(relativePositionManager, "PositionAccountImplementationLocked");
     });
 
-    let dsaVTokenIndex = 0;
     for (const timelockOrGuardian of TIMELOCKS_AND_GUARDIAN) {
       describe(`ACM-gated functions should be callable by ${timelockOrGuardian}`, () => {
         let rpmAsCaller: Contract;
-        let currentDsaIndex: number;
 
         before(async () => {
           const signer = await initMainnetUser(timelockOrGuardian, ethers.utils.parseEther("1"));
           rpmAsCaller = relativePositionManager.connect(signer);
-          currentDsaIndex = dsaVTokenIndex++;
         });
 
         it("partialPause and partialUnpause", async () => {
@@ -178,19 +184,12 @@ forking(96276916, async () => {
           expect(await relativePositionManager.proportionalCloseTolerance()).to.equal(newValue);
         });
 
-        it("addDSAVToken and setDSAVTokenActive", async () => {
-          await rpmAsCaller.addDSAVToken(DSA_VTOKENS[currentDsaIndex]);
-          expect(await relativePositionManager.dsaVTokens(currentDsaIndex)).to.equal(DSA_VTOKENS[currentDsaIndex]);
-          expect(await relativePositionManager.isDsaVTokenActive(DSA_VTOKENS[currentDsaIndex])).to.equal(true);
-          await rpmAsCaller.setDSAVTokenActive(currentDsaIndex, false);
-          expect(await relativePositionManager.isDsaVTokenActive(DSA_VTOKENS[currentDsaIndex])).to.equal(false);
-        });
-
         it("executePositionAccountCall", async () => {
           // Reverts with InvalidCallsLength (not Unauthorized) — proves ACM permission passed
-          await expect(
-            rpmAsCaller.executePositionAccountCall(POSITION_ACCOUNT, [], []),
-          ).to.be.revertedWithCustomError(relativePositionManager, "InvalidCallsLength");
+          await expect(rpmAsCaller.executePositionAccountCall(POSITION_ACCOUNT, [], [])).to.be.revertedWithCustomError(
+            relativePositionManager,
+            "InvalidCallsLength",
+          );
         });
       });
     }
