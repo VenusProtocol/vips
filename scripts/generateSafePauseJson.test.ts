@@ -256,15 +256,13 @@ describe("generateSafePauseJson", () => {
           liquidationThresholdMantissa: "500000000000000000",
         },
       ]);
-      fetchEmodePoolsForMarket
-        .withArgs(COMPTROLLER, MARKET_B, 0, 3)
-        .resolves([
-          {
-            poolId: 2,
-            collateralFactorMantissa: "300000000000000000",
-            liquidationThresholdMantissa: "400000000000000000",
-          },
-        ]);
+      fetchEmodePoolsForMarket.withArgs(COMPTROLLER, MARKET_B, 0, 3).resolves([
+        {
+          poolId: 2,
+          collateralFactorMantissa: "300000000000000000",
+          liquidationThresholdMantissa: "400000000000000000",
+        },
+      ]);
 
       const deps = makeGenDeps({
         fetchMarketFactors: sinon.stub().resolves({ cf: "500000000000000000", lt: "600000000000000000" }),
