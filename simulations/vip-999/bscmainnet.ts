@@ -131,7 +131,7 @@ forking(BLOCK_NUMBER, async () => {
         txResponse,
         [CHAINLINK_ORACLE_ABI],
         ["TokenConfigAdded"],
-        [chainlinkConfigs.length + 1 + redstoneConfigs.length] // +1 for USDT ChainlinkOracle (USDe Main),
+        [chainlinkConfigs.length + 1 + redstoneConfigs.length], // +1 for USDT ChainlinkOracle (USDe Main),
       );
 
       await expectEvents(txResponse, [BINANCE_ORACLE_ABI], ["MaxStalePeriodAdded"], [binanceStalePeriods.length]);

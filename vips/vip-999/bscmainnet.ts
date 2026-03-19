@@ -62,9 +62,13 @@ export const TOKENS = {
   U: "0xcE24439F2D9C6a2289F741120FE202248B666666",
 };
 
-
 export const USDT_CHAINLINK_ORACLE_CONFIG = {
-  USDe: { asset: TOKENS.USDe, feed: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
+  USDe: {
+    asset: TOKENS.USDe,
+    feed: "0xB97Ad0E74fa7d920791E90258A6E2085088b4320",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
 };
 
 export const SUSDE_ORACLE_CONFIG = {
@@ -105,57 +109,292 @@ export const CAPO_GROWTH_RATE_CONFIGS = {
 
 // ===== ChainlinkOracle configurations (asset, feed, maxStalePeriod) =====
 export const CHAINLINK_ORACLE_CONFIGS = {
-  FDUSD: { asset: TOKENS.FDUSD, feed: "0x390180e80058A8499930F0c13963AD3E0d86Bfc9", oldMaxStalePeriod: 88200, newMaxStalePeriod: 86700 },
-  USDC: { asset: TOKENS.USDC, feed: "0x51597f405303C4377E36123cBc172b13269EA163", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  DAI: { asset: TOKENS.DAI, feed: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  TUSD: { asset: TOKENS.TUSD, feed: "0xa3334A9762090E827413A7495AfeCE76F41dFc06", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  DOT: { asset: TOKENS.DOT, feed: "0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592", oldMaxStalePeriod: 86400, newMaxStalePeriod: 900 },
-  USDT: { asset: TOKENS.USDT, feed: "0xb631F3Cb6B3a5EebF72C97e30c377de061C6a87c", oldMaxStalePeriod: 1800, newMaxStalePeriod: 1200 },
-  USD1: { asset: TOKENS.USD1, feed: "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0", oldMaxStalePeriod: 93600, newMaxStalePeriod: 86700 },
-  XVS: { asset: TOKENS.XVS, feed: "0x04C584Ce3EF042f32818ecFEEDC625A353a0960A", oldMaxStalePeriod: 1800, newMaxStalePeriod: 1200 },
-  USDe: { asset: TOKENS.USDe, feed: "0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC", oldMaxStalePeriod: 93600, newMaxStalePeriod: 86700 },
-  XRP: { asset: TOKENS.XRP, feed: "0x93A67D414896A280bF8FFB3b389fE3686E014fda", oldMaxStalePeriod: 86400, newMaxStalePeriod: 900 },
-  BCH: { asset: TOKENS.BCH, feed: "0x43d80f616DAf0b0B42a928EeD32147dC59027D41", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  TRX: { asset: TOKENS.TRX, feed: "0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be", oldMaxStalePeriod: 86400, newMaxStalePeriod: 900 },
-  BNB: { asset: TOKENS.BNB, feed: "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE", oldMaxStalePeriod: 100, newMaxStalePeriod: 60 },
-  WBNB: { asset: TOKENS.WBNB, feed: "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE", oldMaxStalePeriod: 300, newMaxStalePeriod: 60 },
-  FIL: { asset: TOKENS.FIL, feed: "0xE5dbFD9003bFf9dF5feB2f4F445Ca00fb121fb83", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  CAKE: { asset: TOKENS.CAKE, feed: "0xB6064eD41d4f67e353768aA239cA86f4F73665a1", oldMaxStalePeriod: 86400, newMaxStalePeriod: 120 },
-  ADA: { asset: TOKENS.ADA, feed: "0xa767f745331D267c7751297D982b050c93985627", oldMaxStalePeriod: 86400, newMaxStalePeriod: 900 },
-  LTC: { asset: TOKENS.LTC, feed: "0x74E72F37A8c415c8f1a98Ed42E78Ff997435791D", oldMaxStalePeriod: 86400, newMaxStalePeriod: 1200 },
-  LINK: { asset: TOKENS.LINK, feed: "0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8", oldMaxStalePeriod: 86400, newMaxStalePeriod: 900 },
-  AAVE: { asset: TOKENS.AAVE, feed: "0x1Fa0D75D5b90d230da2A610F2B1B2Eaf9a44Dd5f", oldMaxStalePeriod: 1200, newMaxStalePeriod: 900 },
-  UNI: { asset: TOKENS.UNI, feed: "0x97E87D0c607Ca16E90073D723FEAd83d3882F4b7", oldMaxStalePeriod: 1200, newMaxStalePeriod: 900 },
-  XAUm: { asset: TOKENS.XAUm, feed: "0xfa54C1c5F62ea3a5653a0b1b7148E26008eA1501", oldMaxStalePeriod: 93600, newMaxStalePeriod: 86700 },
-  U: { asset: TOKENS.U, feed: "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0", oldMaxStalePeriod: 93600, newMaxStalePeriod: 86700 },
+  FDUSD: {
+    asset: TOKENS.FDUSD,
+    feed: "0x390180e80058A8499930F0c13963AD3E0d86Bfc9",
+    oldMaxStalePeriod: 88200,
+    newMaxStalePeriod: 86700,
+  },
+  USDC: {
+    asset: TOKENS.USDC,
+    feed: "0x51597f405303C4377E36123cBc172b13269EA163",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  DAI: {
+    asset: TOKENS.DAI,
+    feed: "0x132d3C0B1D2cEa0BC552588063bdBb210FDeecfA",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  TUSD: {
+    asset: TOKENS.TUSD,
+    feed: "0xa3334A9762090E827413A7495AfeCE76F41dFc06",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  DOT: {
+    asset: TOKENS.DOT,
+    feed: "0xC333eb0086309a16aa7c8308DfD32c8BBA0a2592",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 900,
+  },
+  USDT: {
+    asset: TOKENS.USDT,
+    feed: "0xb631F3Cb6B3a5EebF72C97e30c377de061C6a87c",
+    oldMaxStalePeriod: 1800,
+    newMaxStalePeriod: 1200,
+  },
+  USD1: {
+    asset: TOKENS.USD1,
+    feed: "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0",
+    oldMaxStalePeriod: 93600,
+    newMaxStalePeriod: 86700,
+  },
+  XVS: {
+    asset: TOKENS.XVS,
+    feed: "0x04C584Ce3EF042f32818ecFEEDC625A353a0960A",
+    oldMaxStalePeriod: 1800,
+    newMaxStalePeriod: 1200,
+  },
+  USDe: {
+    asset: TOKENS.USDe,
+    feed: "0x10402B01cD2E6A9ed6DBe683CbC68f78Ff02f8FC",
+    oldMaxStalePeriod: 93600,
+    newMaxStalePeriod: 86700,
+  },
+  XRP: {
+    asset: TOKENS.XRP,
+    feed: "0x93A67D414896A280bF8FFB3b389fE3686E014fda",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 900,
+  },
+  BCH: {
+    asset: TOKENS.BCH,
+    feed: "0x43d80f616DAf0b0B42a928EeD32147dC59027D41",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  TRX: {
+    asset: TOKENS.TRX,
+    feed: "0xF4C5e535756D11994fCBB12Ba8adD0192D9b88be",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 900,
+  },
+  BNB: {
+    asset: TOKENS.BNB,
+    feed: "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
+    oldMaxStalePeriod: 100,
+    newMaxStalePeriod: 60,
+  },
+  WBNB: {
+    asset: TOKENS.WBNB,
+    feed: "0x0567F2323251f0Aab15c8dFb1967E4e8A7D42aeE",
+    oldMaxStalePeriod: 300,
+    newMaxStalePeriod: 60,
+  },
+  FIL: {
+    asset: TOKENS.FIL,
+    feed: "0xE5dbFD9003bFf9dF5feB2f4F445Ca00fb121fb83",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  CAKE: {
+    asset: TOKENS.CAKE,
+    feed: "0xB6064eD41d4f67e353768aA239cA86f4F73665a1",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 120,
+  },
+  ADA: {
+    asset: TOKENS.ADA,
+    feed: "0xa767f745331D267c7751297D982b050c93985627",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 900,
+  },
+  LTC: {
+    asset: TOKENS.LTC,
+    feed: "0x74E72F37A8c415c8f1a98Ed42E78Ff997435791D",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 1200,
+  },
+  LINK: {
+    asset: TOKENS.LINK,
+    feed: "0xca236E327F629f9Fc2c30A4E95775EbF0B89fac8",
+    oldMaxStalePeriod: 86400,
+    newMaxStalePeriod: 900,
+  },
+  AAVE: {
+    asset: TOKENS.AAVE,
+    feed: "0x1Fa0D75D5b90d230da2A610F2B1B2Eaf9a44Dd5f",
+    oldMaxStalePeriod: 1200,
+    newMaxStalePeriod: 900,
+  },
+  UNI: {
+    asset: TOKENS.UNI,
+    feed: "0x97E87D0c607Ca16E90073D723FEAd83d3882F4b7",
+    oldMaxStalePeriod: 1200,
+    newMaxStalePeriod: 900,
+  },
+  XAUm: {
+    asset: TOKENS.XAUm,
+    feed: "0xfa54C1c5F62ea3a5653a0b1b7148E26008eA1501",
+    oldMaxStalePeriod: 93600,
+    newMaxStalePeriod: 86700,
+  },
+  U: {
+    asset: TOKENS.U,
+    feed: "0xaD8b4e59A7f25B68945fAf0f3a3EAF027832FFB0",
+    oldMaxStalePeriod: 93600,
+    newMaxStalePeriod: 86700,
+  },
 };
 
 // ===== RedStoneOracle configurations (asset, feed, maxStalePeriod) =====
-export const REDSTONE_ORACLE_CONFIGS= {
-  FDUSD: { asset: TOKENS.FDUSD, feed: "0x98DC6E90D4c2f212ed9d124aD2aFBa4833268633", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  USDC: { asset: TOKENS.USDC, feed: "0xeA2511205b959548459A01e358E0A30424dc0B70", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  DAI: { asset: TOKENS.DAI, feed: "0x0bE6929FD4ad87347e97A525DB6ac8E884FCDCeC", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  DOT: { asset: TOKENS.DOT, feed: "0xa75CC459De167De5BC21ccdecCdB85e86377B00f", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  USDT: { asset: TOKENS.USDT, feed: "0xf57bA29437C130e155Ca4b65128630777638F05D", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  USD1: { asset: TOKENS.USD1, feed: "0x6A1c87d11dDe3D1d52c24f8EC59B91019f14170D", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  XVS: { asset: TOKENS.XVS, feed: "0xED2B1ca5D7E246f615c2291De309643D41FeC97e", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  USDe: { asset: TOKENS.USDe, feed: "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  XRP: { asset: TOKENS.XRP, feed: "0xeC7C6AdcC867E1C22713D14797339750E36538E4", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  BCH: { asset: TOKENS.BCH, feed: "0x98ECE0D516f891a35278E3186772fb1545b274eB", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  SOL: { asset: TOKENS.SOL, feed: "0x90196F6D52fce394C79D1614265d36D3F0033Ccf", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  TRX: { asset: TOKENS.TRX, feed: "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916", oldMaxStalePeriod: 1500, newMaxStalePeriod: 900 },
-  ETH: { asset: TOKENS.ETH, feed: "0x9cF19D284862A66378c304ACAcB0E857EBc3F856", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  THE: { asset: TOKENS.THE, feed: "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5", oldMaxStalePeriod: 1800, newMaxStalePeriod: 1200 },
-  FIL: { asset: TOKENS.FIL, feed: "0xe49df9f60D6B1Dd1D5fdfCAB29216f4a8582dA86", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  CAKE: { asset: TOKENS.CAKE, feed: "0x1102D8C7A6021e45cCddEC4912dc998Bc5ebD8e5", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  ADA: { asset: TOKENS.ADA, feed: "0xc44be6D00307c3565FDf753e852Fc003036cBc13", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  LTC: { asset: TOKENS.LTC, feed: "0x7A9b672fc20b5C89D6774514052b3e0899E5E263", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  LINK: { asset: TOKENS.LINK, feed: "0x1b0FDa12D125B864756Bbf191ad20eaB10915a6F", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  AAVE: { asset: TOKENS.AAVE, feed: "0xe4630835eA31ABD4247e449A550Fb92c8a5a4E96", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  DOGE: { asset: TOKENS.DOGE, feed: "0x6f57Ff507735BcD3d86af83aF77ABD10395b2904", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  TWT: { asset: TOKENS.TWT, feed: "0xefe76D1C11F267d8735D240f53317F238D8C77c9", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  UNI: { asset: TOKENS.UNI, feed: "0x22d47686b3AEC9068768f84EFD8Ce2637a347B0A", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
-  SolvBTC: { asset: TOKENS.SolvBTC, feed: "0xF5F641fF3c7E39876A76e77E84041C300DFa4550", oldMaxStalePeriod: 25200, newMaxStalePeriod: 21900 },
+export const REDSTONE_ORACLE_CONFIGS = {
+  FDUSD: {
+    asset: TOKENS.FDUSD,
+    feed: "0x98DC6E90D4c2f212ed9d124aD2aFBa4833268633",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  USDC: {
+    asset: TOKENS.USDC,
+    feed: "0xeA2511205b959548459A01e358E0A30424dc0B70",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  DAI: {
+    asset: TOKENS.DAI,
+    feed: "0x0bE6929FD4ad87347e97A525DB6ac8E884FCDCeC",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  DOT: {
+    asset: TOKENS.DOT,
+    feed: "0xa75CC459De167De5BC21ccdecCdB85e86377B00f",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  USDT: {
+    asset: TOKENS.USDT,
+    feed: "0xf57bA29437C130e155Ca4b65128630777638F05D",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  USD1: {
+    asset: TOKENS.USD1,
+    feed: "0x6A1c87d11dDe3D1d52c24f8EC59B91019f14170D",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  XVS: {
+    asset: TOKENS.XVS,
+    feed: "0xED2B1ca5D7E246f615c2291De309643D41FeC97e",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  USDe: {
+    asset: TOKENS.USDe,
+    feed: "0x0d9b42a2a73Ec528759701D0B70Ccf974a327EBb",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  XRP: {
+    asset: TOKENS.XRP,
+    feed: "0xeC7C6AdcC867E1C22713D14797339750E36538E4",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  BCH: {
+    asset: TOKENS.BCH,
+    feed: "0x98ECE0D516f891a35278E3186772fb1545b274eB",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  SOL: {
+    asset: TOKENS.SOL,
+    feed: "0x90196F6D52fce394C79D1614265d36D3F0033Ccf",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  TRX: {
+    asset: TOKENS.TRX,
+    feed: "0xa17362dd9AD6d0aF646D7C8f8578fddbfc90B916",
+    oldMaxStalePeriod: 1500,
+    newMaxStalePeriod: 900,
+  },
+  ETH: {
+    asset: TOKENS.ETH,
+    feed: "0x9cF19D284862A66378c304ACAcB0E857EBc3F856",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  THE: {
+    asset: TOKENS.THE,
+    feed: "0xFB1267A29C0aa19daae4a483ea895862A69e4AA5",
+    oldMaxStalePeriod: 1800,
+    newMaxStalePeriod: 1200,
+  },
+  FIL: {
+    asset: TOKENS.FIL,
+    feed: "0xe49df9f60D6B1Dd1D5fdfCAB29216f4a8582dA86",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  CAKE: {
+    asset: TOKENS.CAKE,
+    feed: "0x1102D8C7A6021e45cCddEC4912dc998Bc5ebD8e5",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  ADA: {
+    asset: TOKENS.ADA,
+    feed: "0xc44be6D00307c3565FDf753e852Fc003036cBc13",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  LTC: {
+    asset: TOKENS.LTC,
+    feed: "0x7A9b672fc20b5C89D6774514052b3e0899E5E263",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  LINK: {
+    asset: TOKENS.LINK,
+    feed: "0x1b0FDa12D125B864756Bbf191ad20eaB10915a6F",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  AAVE: {
+    asset: TOKENS.AAVE,
+    feed: "0xe4630835eA31ABD4247e449A550Fb92c8a5a4E96",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  DOGE: {
+    asset: TOKENS.DOGE,
+    feed: "0x6f57Ff507735BcD3d86af83aF77ABD10395b2904",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  TWT: {
+    asset: TOKENS.TWT,
+    feed: "0xefe76D1C11F267d8735D240f53317F238D8C77c9",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  UNI: {
+    asset: TOKENS.UNI,
+    feed: "0x22d47686b3AEC9068768f84EFD8Ce2637a347B0A",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
+  SolvBTC: {
+    asset: TOKENS.SolvBTC,
+    feed: "0xF5F641fF3c7E39876A76e77E84041C300DFa4550",
+    oldMaxStalePeriod: 25200,
+    newMaxStalePeriod: 21900,
+  },
 };
 
 // ===== BinanceOracle configurations (by symbol) =====
@@ -249,18 +488,21 @@ Updates maxStalePeriod for 75 oracle slots based on the following formula:
         ],
       },
 
-      // ===== 2. Update asBNB snapshot =====
+      // ===== 2a. Update asBNB snapshot =====
       {
         target: asBNB_ORACLE,
         signature: "updateSnapshot()",
         params: [],
       },
 
-      // ===== 2. CAPO Growth Rate Recalibration =====
+      // ===== 2b. CAPO Growth Rate Recalibration =====
       {
         target: asBNB_ORACLE,
         signature: "setGrowthRate(uint256,uint256)",
-        params: [CAPO_GROWTH_RATE_CONFIGS.asBNB.growthRatePerYear.new, CAPO_GROWTH_RATE_CONFIGS.asBNB.snapshotInterval.new],
+        params: [
+          CAPO_GROWTH_RATE_CONFIGS.asBNB.growthRatePerYear.new,
+          CAPO_GROWTH_RATE_CONFIGS.asBNB.snapshotInterval.new,
+        ],
       },
       {
         target: slisBNB_ORACLE,
@@ -271,30 +513,34 @@ Updates maxStalePeriod for 75 oracle slots based on the following formula:
         ],
       },
 
-      // ===== 3. maxStalePeriod — ChainlinkOracle feeds =====
+      // ===== 3a. maxStalePeriod — ChainlinkOracle feeds =====
       {
         target: bscmainnet.CHAINLINK_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
         params: [chainlinkOracleConfigs.map(({ asset, feed, newMaxStalePeriod }) => [asset, feed, newMaxStalePeriod])],
       },
 
-      // ===== 3. maxStalePeriod — USDT ChainlinkOracle (USDe Main) =====
+      // ===== 3b. maxStalePeriod — USDT ChainlinkOracle (USDe Main) =====
       {
         target: USDT_CHAINLINK_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
         params: [
-          Object.values(USDT_CHAINLINK_ORACLE_CONFIG).map(({ asset, feed, newMaxStalePeriod }) => [asset, feed, newMaxStalePeriod]),
+          Object.values(USDT_CHAINLINK_ORACLE_CONFIG).map(({ asset, feed, newMaxStalePeriod }) => [
+            asset,
+            feed,
+            newMaxStalePeriod,
+          ]),
         ],
       },
 
-      // ===== 3. maxStalePeriod — RedStoneOracle feeds =====
+      // ===== 3c. maxStalePeriod — RedStoneOracle feeds =====
       {
         target: bscmainnet.REDSTONE_ORACLE,
         signature: "setTokenConfigs((address,address,uint256)[])",
         params: [redstoneOracleConfigs.map(({ asset, feed, newMaxStalePeriod }) => [asset, feed, newMaxStalePeriod])],
       },
 
-      // ===== 3. maxStalePeriod — BinanceOracle (by symbol) =====
+      // ===== 3d. maxStalePeriod — BinanceOracle (by symbol) =====
       ...binanceStalePeriods.map(({ symbol, newMaxStalePeriod }) => ({
         target: bscmainnet.BINANCE_ORACLE,
         signature: "setMaxStalePeriod(string,uint256)",
