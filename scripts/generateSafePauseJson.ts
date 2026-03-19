@@ -8,6 +8,27 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { Command, Proposal } from "src/types";
 import { makeProposal } from "src/utils";
 
+// ─── Retry helper ────────────────────────────────────────────────────────────
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function retry<T = any>(fn: () => Promise<T>, retries = 3, delayMs = 1000): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        console.log(`  RPC call failed (attempt ${attempt}/${retries}), retrying in ${delayMs / 1000}s...`);
+        await sleep(delayMs);
+      }
+    }
+  }
+  throw lastError;
+}
+
 // ─── Configuration ──────────────────────────────────────────────────────────
 
 // Matches the Action enum in the Comptroller contract exactly
@@ -165,7 +186,7 @@ const VTOKEN_ABI = ["function symbol() view returns (string)"];
 const fetchSymbol = async (vToken: string): Promise<string> => {
   try {
     const contract = new ethers.Contract(vToken, VTOKEN_ABI, ethers.provider);
-    return await contract.symbol();
+    return await retry(() => contract.symbol());
   } catch {
     return `MARKET_${vToken.slice(2, 8).toUpperCase()}`;
   }
@@ -176,7 +197,7 @@ const fetchSymbol = async (vToken: string): Promise<string> => {
  */
 const fetchAllMarkets = async (comptroller: string, abi: string[]): Promise<string[]> => {
   const contract = new ethers.Contract(comptroller, abi, ethers.provider);
-  const allMarkets: string[] = await contract.getAllMarkets();
+  const allMarkets: string[] = await retry(() => contract.getAllMarkets());
   console.log(`Found ${allMarkets.length} market(s) on comptroller.`);
   return allMarkets;
 };
@@ -195,7 +216,7 @@ const filterListedAndFetchSymbols = async (
   console.log(`Checking ${markets.length} market(s)...`);
   const results = await Promise.all(
     markets.map(async market => {
-      const { isListed } = await contract.markets(market);
+      const { isListed } = await retry(() => contract.markets(market));
       if (isListed) {
         const symbol = await fetchSymbol(market);
         return { market, isListed: true, symbol };
@@ -223,7 +244,7 @@ const fetchMarketFactors = async (
   abi: string[],
 ): Promise<{ cf: string; lt: string }> => {
   const contract = new ethers.Contract(comptroller, abi, ethers.provider);
-  const marketData = await contract.markets(vToken);
+  const marketData = await retry(() => contract.markets(vToken));
   return {
     cf: marketData.collateralFactorMantissa.toString(),
     lt: marketData.liquidationThresholdMantissa.toString(),
@@ -234,8 +255,8 @@ const fetchMarketFactors = async (
 
 const fetchEmodeRange = async (comptroller: string): Promise<{ corePoolId: number; lastPoolId: number }> => {
   const contract = new ethers.Contract(comptroller, BSC_COMPTROLLER_ABI, ethers.provider);
-  const coreId = (await contract.corePoolId()).toNumber();
-  const lastId = (await contract.lastPoolId()).toNumber();
+  const coreId = (await retry(() => contract.corePoolId())).toNumber();
+  const lastId = (await retry(() => contract.lastPoolId())).toNumber();
   return { corePoolId: coreId, lastPoolId: lastId };
 };
 
@@ -249,7 +270,7 @@ const fetchEmodePoolsForMarket = async (
   const poolIds = Array.from({ length: lastPoolId - corePoolId + 1 }, (_, i) => corePoolId + i);
   const results = await Promise.all(
     poolIds.map(async poolId => {
-      const data = await contract.poolMarkets(poolId, vToken);
+      const data = await retry(() => contract.poolMarkets(poolId, vToken));
       if (data.isListed) {
         return {
           poolId,
