@@ -531,4 +531,3 @@ describe("generateSafePauseJson", () => {
 
 // delay: true in mocha config requires run() to be deferred until after mocha finishes loading
 setTimeout(run, 100);
-
