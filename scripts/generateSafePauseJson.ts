@@ -23,7 +23,7 @@ const Actions: Record<string, number> = {
   EXIT_MARKET: 8,
 };
 
-const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
+export const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
 
 const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
 const OUTPUT_DIR = path.resolve(__dirname, "data");
@@ -36,7 +36,7 @@ interface PauseMetadata {
   symbols: Record<string, string>;
 }
 
-interface PauseInput {
+export interface PauseInput {
   comptroller: string;
   comptrollerAbi: string[];
   network: string;
@@ -47,6 +47,49 @@ interface PauseInput {
   pauseActions: number[];
   includeEmode: boolean;
   blockNumber: number;
+}
+
+export interface GenerateCommandsDeps {
+  fetchMarketFactors: (comptroller: string, vToken: string, abi: string[]) => Promise<{ cf: string; lt: string }>;
+  fetchEmodeRange: (comptroller: string) => Promise<{ corePoolId: number; lastPoolId: number }>;
+  fetchEmodePoolsForMarket: (
+    comptroller: string,
+    vToken: string,
+    corePoolId: number,
+    lastPoolId: number,
+  ) => Promise<EmodePoolInfo[]>;
+}
+
+export interface EmodePoolInfo {
+  poolId: number;
+  collateralFactorMantissa: string;
+  liquidationThresholdMantissa: string;
+}
+
+export interface ExportResult {
+  label: string;
+  txBuilderFile: string;
+  metadataFile: string;
+  txCount: number;
+  safeAddress: string;
+}
+
+export interface ExportJsonDeps {
+  makeProposal: (...args: any[]) => Promise<any>;
+  buildMultiSigTx: (...args: any[]) => Promise<any[]>;
+  batchTx: (safeAddress: string, txData: any[], options: any) => any;
+  writeFileSync: (...args: any[]) => void;
+  mkdirSync: (...args: any[]) => void;
+}
+
+export interface OrchestrateDeps {
+  generateCommands: (input: PauseInput, operation: "pause" | "cf_zero") => Promise<Command[]>;
+  exportJson: (
+    commands: Command[],
+    input: PauseInput,
+    safeAddress: string,
+    suffix?: string,
+  ) => Promise<ExportResult | null>;
 }
 
 // BSC core pool markets() returns extra fields (isVenus, liquidationIncentive, etc.)
@@ -189,12 +232,6 @@ const fetchMarketFactors = async (
 
 // ─── E-mode helpers (BSC core pool) ─────────────────────────────────────────
 
-interface EmodePoolInfo {
-  poolId: number;
-  collateralFactorMantissa: string;
-  liquidationThresholdMantissa: string;
-}
-
 const fetchEmodeRange = async (comptroller: string): Promise<{ corePoolId: number; lastPoolId: number }> => {
   const contract = new ethers.Contract(comptroller, BSC_COMPTROLLER_ABI, ethers.provider);
   const coreId = (await contract.corePoolId()).toNumber();
@@ -268,7 +305,7 @@ const getCriticalGuardianAddress = (networkName: string): string => {
 
 // ─── Phase 1: Gather Input ──────────────────────────────────────────────────
 
-const gatherInput = async (): Promise<PauseInput> => {
+export const gatherInput = async (): Promise<PauseInput> => {
   const networkName = network.name;
   const chainId = network.config.chainId;
   if (!chainId) {
@@ -415,7 +452,15 @@ const gatherInput = async (): Promise<PauseInput> => {
 
 // ─── Phase 2: Generate Commands ─────────────────────────────────────────────
 
-const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero"): Promise<Command[]> => {
+export const generateCommands = async (
+  input: PauseInput,
+  operation: "pause" | "cf_zero",
+  deps: GenerateCommandsDeps = {
+    fetchMarketFactors,
+    fetchEmodeRange,
+    fetchEmodePoolsForMarket,
+  },
+): Promise<Command[]> => {
   const { comptroller, comptrollerAbi, marketAddresses, symbols, pauseActions, includeEmode } = input;
   const commands: Command[] = [];
 
@@ -424,7 +469,7 @@ const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero
     const factorResults = await Promise.all(
       marketAddresses.map(async vToken => {
         const symbol = symbols.get(vToken) || vToken;
-        const { cf, lt } = await fetchMarketFactors(comptroller, vToken, comptrollerAbi);
+        const { cf, lt } = await deps.fetchMarketFactors(comptroller, vToken, comptrollerAbi);
         return { vToken, symbol, cf, lt };
       }),
     );
@@ -444,13 +489,13 @@ const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero
     // E-mode CF=0 (BSC core pool only)
     if (includeEmode) {
       console.log("\nFetching e-mode pool range...");
-      const { corePoolId, lastPoolId } = await fetchEmodeRange(comptroller);
+      const { corePoolId, lastPoolId } = await deps.fetchEmodeRange(comptroller);
       console.log(`  E-mode pools: ${corePoolId} to ${lastPoolId} (${lastPoolId - corePoolId + 1} pool(s))`);
 
       const emodeResults = await Promise.all(
         marketAddresses.map(async vToken => {
           const symbol = symbols.get(vToken) || vToken;
-          const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
+          const pools = await deps.fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
           return { vToken, symbol, pools };
         }),
       );
@@ -494,19 +539,18 @@ const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero
 
 // ─── Phase 3: Export JSON ───────────────────────────────────────────────────
 
-interface ExportResult {
-  label: string;
-  txBuilderFile: string;
-  metadataFile: string;
-  txCount: number;
-  safeAddress: string;
-}
-
-const exportJson = async (
+export const exportJson = async (
   commands: Command[],
   input: PauseInput,
   safeAddress: string,
-  suffix?: string,
+  suffix: string | undefined,
+  deps: ExportJsonDeps = {
+    makeProposal,
+    buildMultiSigTx,
+    batchTx: TxBuilder.batch,
+    writeFileSync: fs.writeFileSync,
+    mkdirSync: fs.mkdirSync,
+  },
 ): Promise<ExportResult | null> => {
   if (commands.length === 0) {
     console.log(`No commands generated${suffix ? ` for ${suffix}` : ""}. Skipping.`);
@@ -531,16 +575,50 @@ const exportJson = async (
   };
 
   // Build Proposal and generate Safe TX Builder JSON
-  const proposal: Proposal = await makeProposal(commands);
-  const multisigTxData = await buildMultiSigTx(proposal);
-  const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId: input.chainId });
+  const proposal: Proposal = await deps.makeProposal(commands);
+  const multisigTxData = await deps.buildMultiSigTx(proposal);
+  const batchJson = deps.batchTx(safeAddress, multisigTxData, { chainId: input.chainId });
 
   const outputJson = { ...batchJson, blockNumber: input.blockNumber };
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-  fs.writeFileSync(txBuilderFile, JSON.stringify(outputJson, null, 2));
-  fs.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2));
+  deps.mkdirSync(OUTPUT_DIR, { recursive: true });
+  deps.writeFileSync(txBuilderFile, JSON.stringify(outputJson, null, 2));
+  deps.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2));
 
   return { label, txBuilderFile, metadataFile, txCount: commands.length, safeAddress };
+};
+
+// ─── Phase 4: Orchestration (pure, testable) ──────────────────────────────────
+
+export const orchestrate = async (input: PauseInput, deps: OrchestrateDeps): Promise<ExportResult[]> => {
+  const results: ExportResult[] = [];
+  const guardianAddress = getGuardianAddress(input.network);
+
+  if (input.network === "bscmainnet") {
+    if (input.selectedAction === "pause" || input.selectedAction === "both") {
+      const pauseCmds = await deps.generateCommands(input, "pause");
+      const pauseResult = await deps.exportJson(pauseCmds, input, guardianAddress);
+      if (pauseResult) results.push(pauseResult);
+    }
+    if (input.selectedAction === "cf_zero" || input.selectedAction === "both") {
+      const cfGuardianAddress = getCriticalGuardianAddress(input.network);
+      const cfCmds = await deps.generateCommands(input, "cf_zero");
+      const cfResult = await deps.exportJson(cfCmds, input, cfGuardianAddress, "_cf");
+      if (cfResult) results.push(cfResult);
+    }
+  } else {
+    const cmds = [
+      ...(input.selectedAction === "pause" || input.selectedAction === "both"
+        ? await deps.generateCommands(input, "pause")
+        : []),
+      ...(input.selectedAction === "cf_zero" || input.selectedAction === "both"
+        ? await deps.generateCommands(input, "cf_zero")
+        : []),
+    ];
+    const result = await deps.exportJson(cmds, input, guardianAddress);
+    if (result) results.push(result);
+  }
+
+  return results;
 };
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -560,37 +638,15 @@ const printResults = (results: ExportResult[], networkName: string) => {
   }
 };
 
-const main = async () => {
+export const main = async () => {
   const input = await gatherInput();
 
   console.log("\n--- Processing ---");
 
-  const results: ExportResult[] = [];
-  const guardianAddress = getGuardianAddress(input.network);
-  if (input.network === "bscmainnet") {
-    if (input.selectedAction === "pause" || input.selectedAction === "both") {
-      const pauseCmds = await generateCommands(input, "pause");
-      const pauseResult = await exportJson(pauseCmds, input, guardianAddress);
-      if (pauseResult) results.push(pauseResult);
-    }
-    if (input.selectedAction === "cf_zero" || input.selectedAction === "both") {
-      const cfGuardianAddress = getCriticalGuardianAddress(input.network);
-      const cfCmds = await generateCommands(input, "cf_zero");
-      const cfResult = await exportJson(cfCmds, input, cfGuardianAddress, "_cf");
-      if (cfResult) results.push(cfResult);
-    }
-  } else {
-    const cmds = [
-      ...(input.selectedAction === "pause" || input.selectedAction === "both"
-        ? await generateCommands(input, "pause")
-        : []),
-      ...(input.selectedAction === "cf_zero" || input.selectedAction === "both"
-        ? await generateCommands(input, "cf_zero")
-        : []),
-    ];
-    const result = await exportJson(cmds, input, guardianAddress);
-    if (result) results.push(result);
-  }
+  const results = await orchestrate(input, {
+    generateCommands,
+    exportJson,
+  });
 
   if (results.length > 0) {
     printResults(results, input.network);
