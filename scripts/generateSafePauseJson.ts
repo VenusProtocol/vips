@@ -145,23 +145,28 @@ const filterListedAndFetchSymbols = async (
   logUnlisted: boolean,
 ): Promise<{ addresses: string[]; symbols: Map<string, string> }> => {
   const contract = new ethers.Contract(comptroller, abi, ethers.provider);
+  console.log(`Checking ${markets.length} market(s)...`);
+  const results = await Promise.all(
+    markets.map(async market => {
+      const { isListed } = await contract.markets(market);
+      if (isListed) {
+        const symbol = await fetchSymbol(market);
+        return { market, isListed: true, symbol };
+      }
+      return { market, isListed: false, symbol: "" };
+    }),
+  );
   const addresses: string[] = [];
   const symbols = new Map<string, string>();
-  console.log(`Checking ${markets.length} market(s)...`);
-  for (let i = 0; i < markets.length; i++) {
-    const market = markets[i];
-    const { isListed } = await contract.markets(market);
+  for (const { market, isListed, symbol } of results) {
     if (isListed) {
       addresses.push(market);
-      const symbol = await fetchSymbol(market);
       symbols.set(market, symbol);
     } else if (logUnlisted) {
       console.log(`  Skipping unlisted market: ${market}`);
     }
-    const pct = Math.round(((i + 1) / markets.length) * 100);
-    process.stdout.write(`\r  Progress: ${i + 1}/${markets.length} (${pct}%) — ${addresses.length} listed`);
   }
-  process.stdout.write("\n");
+  console.log(`  Found ${addresses.length} listed market(s)`);
   return { addresses, symbols };
 };
 
@@ -200,18 +205,21 @@ const fetchEmodePoolsForMarket = async (
   lastPoolId: number,
 ): Promise<EmodePoolInfo[]> => {
   const contract = new ethers.Contract(comptroller, BSC_COMPTROLLER_ABI, ethers.provider);
-  const pools: EmodePoolInfo[] = [];
-  for (let poolId = corePoolId; poolId <= lastPoolId; poolId++) {
-    const data = await contract.poolMarkets(poolId, vToken);
-    if (data.isListed) {
-      pools.push({
-        poolId,
-        collateralFactorMantissa: data.collateralFactorMantissa.toString(),
-        liquidationThresholdMantissa: data.liquidationThresholdMantissa.toString(),
-      });
-    }
-  }
-  return pools;
+  const poolIds = Array.from({ length: lastPoolId - corePoolId + 1 }, (_, i) => corePoolId + i);
+  const results = await Promise.all(
+    poolIds.map(async poolId => {
+      const data = await contract.poolMarkets(poolId, vToken);
+      if (data.isListed) {
+        return {
+          poolId,
+          collateralFactorMantissa: data.collateralFactorMantissa.toString(),
+          liquidationThresholdMantissa: data.liquidationThresholdMantissa.toString(),
+        };
+      }
+      return null;
+    }),
+  );
+  return results.filter((p): p is EmodePoolInfo => p !== null);
 };
 
 // ─── Markets file ───────────────────────────────────────────────────────────
@@ -408,9 +416,14 @@ const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero
 
   if (operation === "cf_zero") {
     console.log("\nQuerying market factors from comptroller...");
-    for (const vToken of marketAddresses) {
-      const symbol = symbols.get(vToken) || vToken;
-      const { cf, lt } = await fetchMarketFactors(comptroller, vToken, comptrollerAbi);
+    const factorResults = await Promise.all(
+      marketAddresses.map(async vToken => {
+        const symbol = symbols.get(vToken) || vToken;
+        const { cf, lt } = await fetchMarketFactors(comptroller, vToken, comptrollerAbi);
+        return { vToken, symbol, cf, lt };
+      }),
+    );
+    for (const { vToken, symbol, cf, lt } of factorResults) {
       if (cf === "0") {
         console.log(`  ${symbol} (${vToken}) → CF already 0, skipping`);
         continue;
@@ -429,9 +442,14 @@ const generateCommands = async (input: PauseInput, operation: "pause" | "cf_zero
       const { corePoolId, lastPoolId } = await fetchEmodeRange(comptroller);
       console.log(`  E-mode pools: ${corePoolId} to ${lastPoolId} (${lastPoolId - corePoolId + 1} pool(s))`);
 
-      for (const vToken of marketAddresses) {
-        const symbol = symbols.get(vToken) || vToken;
-        const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
+      const emodeResults = await Promise.all(
+        marketAddresses.map(async vToken => {
+          const symbol = symbols.get(vToken) || vToken;
+          const pools = await fetchEmodePoolsForMarket(comptroller, vToken, corePoolId, lastPoolId);
+          return { vToken, symbol, pools };
+        }),
+      );
+      for (const { vToken, symbol, pools } of emodeResults) {
         if (pools.length === 0) {
           console.log(`  ${symbol} — not listed in any e-mode pool, skipping`);
           continue;
