@@ -145,7 +145,7 @@ const pickOne = async (prompt: string, options: string[]): Promise<string> => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const answer = await ask("Enter number: ");
-    const idx = parseInt(answer) - 1;
+    const idx = parseInt(answer, 10) - 1;
     if (idx >= 0 && idx < options.length) {
       return options[idx];
     }
@@ -173,6 +173,39 @@ const pickMultiple = async (prompt: string, options: { name: string; value: stri
     const invalid = tokens.filter(v => !validValues.has(v));
     if (invalid.length > 0) {
       console.log(`Invalid value(s): ${invalid.join(", ")}. Valid options are: ${[...validValues].join(", ")}.`);
+      continue;
+    }
+    return [...new Set(tokens)];
+  }
+};
+
+const askYesNo = async (prompt: string): Promise<boolean> => {
+  console.log(`\n${prompt}`);
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const answer = (await ask("(y/n): ")).toLowerCase();
+    if (answer === "y" || answer === "yes") return true;
+    if (answer === "n" || answer === "no") return false;
+    console.log(`Invalid input "${answer}". Please enter y or n.`);
+  }
+};
+
+const pickValidAddresses = async (prompt: string): Promise<string[]> => {
+  console.log(`\n${prompt}`);
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const answer = await ask("> ");
+    const tokens = answer
+      .split(",")
+      .map(a => a.trim())
+      .filter(a => a.length > 0);
+    if (tokens.length === 0) {
+      console.log("No addresses entered. Please try again.");
+      continue;
+    }
+    const invalid = tokens.filter(a => !ethers.utils.isAddress(a));
+    if (invalid.length > 0) {
+      console.log(`Invalid address(es): ${invalid.join(", ")}. Please enter valid Ethereum addresses.`);
       continue;
     }
     return [...new Set(tokens)];
@@ -293,10 +326,22 @@ const loadMarketsFromFile = (): string[] => {
     content = JSON.parse(fs.readFileSync(MARKETS_FILE, "utf-8"));
   } catch (error) {
     console.error(`Failed to parse ${MARKETS_FILE}: ${(error as Error).message}`);
-    return [];
+    rl.close();
+    process.exit(1);
   }
-  if (!Array.isArray(content)) return [];
-  return content.filter((addr: string) => ethers.utils.isAddress(addr));
+  if (!Array.isArray(content)) {
+    console.error(`${MARKETS_FILE} must contain a JSON array of addresses.`);
+    rl.close();
+    process.exit(1);
+  }
+  const invalid = content.filter((addr: string) => !ethers.utils.isAddress(addr));
+  if (invalid.length > 0) {
+    console.error(`Invalid address(es) in ${MARKETS_FILE}: ${invalid.join(", ")}`);
+    console.error("Fix the file and run again.");
+    rl.close();
+    process.exit(1);
+  }
+  return [...new Set(content as string[])];
 };
 
 const saveMarketsToFile = (addresses: string[]) => {
@@ -396,17 +441,7 @@ export const gatherInput = async (): Promise<PauseInput> => {
     symbols = result.symbols;
     marketAddresses.forEach(addr => console.log(`  ${symbols.get(addr)} (${addr})`));
   } else {
-    console.log("\nEnter market addresses (comma-separated):");
-    const input = await ask("> ");
-    const entered = input
-      .split(",")
-      .map(a => a.trim())
-      .filter(a => ethers.utils.isAddress(a));
-    if (entered.length === 0) {
-      console.error("No valid addresses provided.");
-      rl.close();
-      process.exit(1);
-    }
+    const entered = await pickValidAddresses("Enter market addresses (comma-separated):");
     const result = await filterListedAndFetchSymbols(comptroller, comptrollerAbi, entered, true);
     marketAddresses = result.addresses;
     symbols = result.symbols;
@@ -446,7 +481,7 @@ export const gatherInput = async (): Promise<PauseInput> => {
     pauseActions = selected.map(Number);
 
     if (pauseActions.length === 0) {
-      console.log("No pause actions selected.");
+      console.error("No pause actions selected.");
       if (selectedAction === "pause") {
         rl.close();
         process.exit(1);
@@ -457,8 +492,7 @@ export const gatherInput = async (): Promise<PauseInput> => {
   // 5. If CF=0 on BSC, ask about e-mode upfront
   let includeEmode = false;
   if ((selectedAction === "cf_zero" || selectedAction === "both") && networkName === "bscmainnet") {
-    const emodeAnswer = await ask("\nAlso set CF to 0 for e-mode pools? (y/n): ");
-    includeEmode = emodeAnswer.toLowerCase() === "y" || emodeAnswer.toLowerCase() === "yes";
+    includeEmode = await askYesNo("Also set CF to 0 for e-mode pools?");
   }
 
   const blockNumber = await ethers.provider.getBlockNumber();
