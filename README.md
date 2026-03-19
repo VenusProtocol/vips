@@ -126,13 +126,23 @@ The script will prompt you to:
 2. Load markets — fetch from comptroller, use `scripts/data/markets.json`, or enter manually
 3. Select operation — pause actions, set collateral factor to 0, or both
 4. If pausing, select which actions to pause (MINT, REDEEM, BORROW, REPAY, SEIZE, LIQUIDATE, TRANSFER, ENTER_MARKET, EXIT_MARKET)
+5. If setting CF=0 on BSC mainnet, select whether to also include e-mode pools
 
-**Output:** `scripts/data/safePauseTxBuilder.json` — Safe TX Builder JSON to import in Gnosis Safe UI.
+**Output:**
+
+- For BSC mainnet with "both": two separate files are generated — `safePauseTxBuilder.json` (pause commands, under GUARDIAN) and `safePauseTxBuilder_cf.json` (CF=0 commands, under CRITICAL_GUARDIAN).
+- For all other networks: a single `safePauseTxBuilder.json` containing all commands under the GUARDIAN address.
 
 To simulate the generated JSON against a fork before submitting:
 
 ```
 npx hardhat test scripts/simulateSafePauseTx.ts --fork <networkName>
+```
+
+For BSC mainnet CF=0 simulation, use the `TEST_CF` flag to pick the `_cf` file:
+
+```
+TEST_CF=true npx hardhat test scripts/simulateSafePauseTx.ts --fork bscmainnet
 ```
 
 This impersonates the Guardian (Safe) address from the JSON and executes each transaction on a forked network, verifying they all succeed.

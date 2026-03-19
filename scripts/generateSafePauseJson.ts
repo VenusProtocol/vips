@@ -238,19 +238,32 @@ const getComptrollerAddress = (networkName: string): string => {
 
 const getGuardianAddress = (networkName: string): string => {
   const config = (NETWORK_ADDRESSES as Record<string, Record<string, string>>)[networkName] || {};
-  return config.GUARDIAN || "";
+  const guardian = config.GUARDIAN;
+  if (!guardian) {
+    throw new Error(`No GUARDIAN address found for network "${networkName}".`);
+  }
+  return guardian;
 };
 
 const getCriticalGuardianAddress = (networkName: string): string => {
   const config = (NETWORK_ADDRESSES as Record<string, Record<string, string>>)[networkName] || {};
-  return config.CRITICAL_GUARDIAN || "";
+  const guardian = config.CRITICAL_GUARDIAN;
+  if (!guardian) {
+    throw new Error(`No CRITICAL_GUARDIAN address found for network "${networkName}".`);
+  }
+  return guardian;
 };
 
 // ─── Phase 1: Gather Input ──────────────────────────────────────────────────
 
 const gatherInput = async (): Promise<PauseInput> => {
   const networkName = network.name;
-  const chainId = network.config.chainId!;
+  const chainId = network.config.chainId;
+  if (!chainId) {
+    console.error(`No chainId configured for network "${networkName}".`);
+    rl.close();
+    process.exit(1);
+  }
 
   console.log(`=== Safe Pause JSON Generator (${networkName}, chain ${chainId}) ===\n`);
 
@@ -276,8 +289,8 @@ const gatherInput = async (): Promise<PauseInput> => {
   // 2. Load markets
   console.log("\n--- Market Selection ---");
   const marketMode = await pickOne("How to load markets?", [
-    "Fetch all markets from comptroller (saves to markets.json)",
-    "Use addresses from markets.json (edit the file manually first)",
+    "Fetch all markets from comptroller (saves to scripts/data/markets.json)",
+    "Use addresses from scripts/data/markets.json (edit the file manually first)",
     "Enter addresses manually in CLI",
   ]);
 
@@ -342,7 +355,12 @@ const gatherInput = async (): Promise<PauseInput> => {
     "What do you want to do?",
     actionChoices.map(a => a.name),
   );
-  const selectedAction = actionChoices.find(a => a.name === actionMode)?.value || "pause";
+  const selectedAction = actionChoices.find(a => a.name === actionMode)?.value;
+  if (!selectedAction) {
+    console.error("Invalid action selection.");
+    rl.close();
+    process.exit(1);
+  }
 
   // 4. If pausing, which actions?
   let pauseActions: number[] = [];
@@ -555,8 +573,12 @@ const main = async () => {
     }
   } else {
     const cmds = [
-      ...(input.selectedAction === "pause" || input.selectedAction === "both" ? await generateCommands(input, "pause") : []),
-      ...(input.selectedAction === "cf_zero" || input.selectedAction === "both" ? await generateCommands(input, "cf_zero") : []),
+      ...(input.selectedAction === "pause" || input.selectedAction === "both"
+        ? await generateCommands(input, "pause")
+        : []),
+      ...(input.selectedAction === "cf_zero" || input.selectedAction === "both"
+        ? await generateCommands(input, "cf_zero")
+        : []),
     ];
     const result = await exportJson(cmds, input, guardianAddress);
     if (result) results.push(result);
