@@ -267,7 +267,13 @@ const fetchEmodePoolsForMarket = async (
 
 const loadMarketsFromFile = (): string[] => {
   if (!fs.existsSync(MARKETS_FILE)) return [];
-  const content = JSON.parse(fs.readFileSync(MARKETS_FILE, "utf-8"));
+  let content: unknown;
+  try {
+    content = JSON.parse(fs.readFileSync(MARKETS_FILE, "utf-8"));
+  } catch (error) {
+    console.error(`Failed to parse ${MARKETS_FILE}: ${(error as Error).message}`);
+    return [];
+  }
   if (!Array.isArray(content)) return [];
   return content.filter((addr: string) => ethers.utils.isAddress(addr));
 };
