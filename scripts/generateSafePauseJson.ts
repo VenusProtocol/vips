@@ -27,7 +27,6 @@ const PAUSE_SIGNATURE = "setActionsPaused(address[],uint8[],bool)";
 
 const MARKETS_FILE = path.resolve(__dirname, "data", "markets.json");
 const OUTPUT_DIR = path.resolve(__dirname, "data");
-const RECORDS_DIR = path.resolve(OUTPUT_DIR, "safePauseTXRecords");
 
 interface PauseMetadata {
   comptroller: string;
@@ -476,7 +475,6 @@ interface ExportResult {
   label: string;
   txBuilderFile: string;
   metadataFile: string;
-  recordFile: string;
   txCount: number;
   safeAddress: string;
 }
@@ -518,20 +516,7 @@ const exportJson = async (
   fs.writeFileSync(txBuilderFile, JSON.stringify(outputJson, null, 2));
   fs.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2));
 
-  // Save a numbered record
-  fs.mkdirSync(RECORDS_DIR, { recursive: true });
-  const counterFile = path.resolve(RECORDS_DIR, "counter.json");
-  let last = 0;
-  if (fs.existsSync(counterFile)) {
-    last = JSON.parse(fs.readFileSync(counterFile, "utf-8")).last || 0;
-  }
-  const next = last + 1;
-  const recordFile = path.resolve(RECORDS_DIR, `${String(next).padStart(3, "0")}_${input.network}${label}.json`);
-  const record = { metadata, safeTxBuilder: outputJson };
-  fs.writeFileSync(recordFile, JSON.stringify(record, null, 2));
-  fs.writeFileSync(counterFile, JSON.stringify({ last: next }, null, 2));
-
-  return { label, txBuilderFile, metadataFile, recordFile, txCount: commands.length, safeAddress };
+  return { label, txBuilderFile, metadataFile, txCount: commands.length, safeAddress };
 };
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -542,7 +527,6 @@ const printResults = (results: ExportResult[], networkName: string) => {
     console.log(`\n  ${r.label || "(default)"}`);
     console.log(`    Safe TX Builder JSON: ${r.txBuilderFile}`);
     console.log(`    Metadata:             ${r.metadataFile}`);
-    console.log(`    Record:               ${r.recordFile}`);
     console.log(`    Transactions:         ${r.txCount}`);
     console.log(`    Safe address:         ${r.safeAddress}`);
     const cfPrefix = r.label === "_cf" ? "TEST_CF=true " : "";
