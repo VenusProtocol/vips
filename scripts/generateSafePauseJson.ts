@@ -98,16 +98,20 @@ const pickMultiple = async (prompt: string, options: { name: string; value: stri
     console.log("Enter comma-separated values (e.g., 0,2,6) or 'all' for all:");
     const answer = await ask("> ");
     if (answer.toLowerCase() === "all") return options.map(o => o.value);
-    const selected = answer
+    const tokens = answer
       .split(",")
       .map(n => n.trim())
-      .filter(v => validValues.has(v));
-    if (selected.length > 0) return selected;
-    const invalid = answer
-      .split(",")
-      .map(n => n.trim())
-      .filter(v => !validValues.has(v));
-    console.log(`Invalid value(s): ${invalid.join(", ")}. Valid options are: ${[...validValues].join(", ")}.`);
+      .filter(v => v.length > 0);
+    if (tokens.length === 0) {
+      console.log("No values entered. Please try again.");
+      continue;
+    }
+    const invalid = tokens.filter(v => !validValues.has(v));
+    if (invalid.length > 0) {
+      console.log(`Invalid value(s): ${invalid.join(", ")}. Valid options are: ${[...validValues].join(", ")}.`);
+      continue;
+    }
+    return [...new Set(tokens)];
   }
 };
 
@@ -232,6 +236,7 @@ const loadMarketsFromFile = (): string[] => {
 };
 
 const saveMarketsToFile = (addresses: string[]) => {
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(MARKETS_FILE, JSON.stringify(addresses, null, 2));
   console.log(`Markets saved to ${MARKETS_FILE} (${addresses.length} addresses)`);
 };
@@ -531,6 +536,7 @@ const exportJson = async (
   const batchJson = TxBuilder.batch(safeAddress, multisigTxData, { chainId: input.chainId });
 
   const outputJson = { ...batchJson, blockNumber: input.blockNumber };
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(txBuilderFile, JSON.stringify(outputJson, null, 2));
   fs.writeFileSync(metadataFile, JSON.stringify(metadata, null, 2));
 
