@@ -541,25 +541,23 @@ const main = async () => {
 
   const results: ExportResult[] = [];
   const guardianAddress = getGuardianAddress(input.network);
-
-  if (input.network === "bscmainnet" && input.selectedAction === "both") {
-    const criticalGuardianAddress = getCriticalGuardianAddress(input.network);
-
-    const pauseCmds = await generateCommands(input, "pause");
-    const pauseResult = await exportJson(pauseCmds, input, guardianAddress);
-    if (pauseResult) results.push(pauseResult);
-
-    const cfCmds = await generateCommands(input, "cf_zero");
-    const cfResult = await exportJson(cfCmds, input, criticalGuardianAddress, "_cf");
-    if (cfResult) results.push(cfResult);
-  } else if (input.network === "bscmainnet" && input.selectedAction === "cf_zero") {
-    const criticalGuardianAddress = getCriticalGuardianAddress(input.network);
-
-    const cmds = await generateCommands(input, "cf_zero");
-    const result = await exportJson(cmds, input, criticalGuardianAddress);
-    if (result) results.push(result);
+  if (input.network === "bscmainnet") {
+    if (input.selectedAction === "pause" || input.selectedAction === "both") {
+      const pauseCmds = await generateCommands(input, "pause");
+      const pauseResult = await exportJson(pauseCmds, input, guardianAddress);
+      if (pauseResult) results.push(pauseResult);
+    }
+    if (input.selectedAction === "cf_zero" || input.selectedAction === "both") {
+      const cfGuardianAddress = getCriticalGuardianAddress(input.network);
+      const cfCmds = await generateCommands(input, "cf_zero");
+      const cfResult = await exportJson(cfCmds, input, cfGuardianAddress, "_cf");
+      if (cfResult) results.push(cfResult);
+    }
   } else {
-    const cmds = await generateCommands(input, input.selectedAction as "pause" | "cf_zero");
+    const cmds = [
+      ...(input.selectedAction === "pause" || input.selectedAction === "both" ? await generateCommands(input, "pause") : []),
+      ...(input.selectedAction === "cf_zero" || input.selectedAction === "both" ? await generateCommands(input, "cf_zero") : []),
+    ];
     const result = await exportJson(cmds, input, guardianAddress);
     if (result) results.push(result);
   }
