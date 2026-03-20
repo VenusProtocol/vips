@@ -5,12 +5,14 @@ import { expectEvents } from "src/utils";
 import { forking, testForkedNetworkVipCommands } from "src/vip-framework";
 
 import {
+  UNICHAINMAINNET_CORE_COMPTROLLER,
   UNICHAINMAINNET_CORE_VTOKENS,
   UNICHAINMAINNET_NEW_VTOKEN_IMPLEMENTATION,
   UNICHAINMAINNET_VTOKEN_BEACON,
 } from "../../vips/vip-608/addresses/unichainmainnet";
 import vip608_2 from "../../vips/vip-608/bscmainnet-2";
 import vip608_3 from "../../vips/vip-608/bscmainnet-3";
+import COMPTROLLER_ABI from "./abi/ILComptroller.json";
 import VTOKEN_ABI from "./abi/ILVToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
@@ -23,6 +25,15 @@ forking(BLOCK_NUMBER, async () => {
   const vTokenBeacon = new ethers.Contract(UNICHAINMAINNET_VTOKEN_BEACON, VTOKEN_BEACON_ABI, provider);
 
   describe("Pre-VIP behaviour", () => {
+    it("CORE_VTOKENS should cover all on-chain markets", async () => {
+      const comptroller = new ethers.Contract(UNICHAINMAINNET_CORE_COMPTROLLER, COMPTROLLER_ABI, provider);
+      const allMarkets: string[] = await comptroller.getAllMarkets();
+      expect(UNICHAINMAINNET_CORE_VTOKENS.length).to.equal(
+        allMarkets.length,
+        "CORE_VTOKENS does not cover all markets",
+      );
+    });
+
     it("VToken beacon should not point to new implementation", async () => {
       const currentImplementation = await vTokenBeacon.implementation();
       expect(currentImplementation).to.not.equal(UNICHAINMAINNET_NEW_VTOKEN_IMPLEMENTATION);

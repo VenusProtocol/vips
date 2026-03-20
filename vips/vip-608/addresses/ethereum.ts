@@ -17,8 +17,8 @@ export const ETHEREUM_CORE_VTOKENS = [
   "0x13eb80fdbe5c5f4a7039728e258a6f05fb3b912b", // vTUSD_Core
   "0x4fafbdc4f2a9876bd1764827b26fb8dc4fd1db95", // vFRAX_Core, Paused
   "0x17142a05fe678e9584fa1d88efac1bf181bf7abe", // vsFRAX_Core
-  "0x256addbe0a387c98f487e44b85c29eb983413c5e", // vEIGEN, have differenet proxy
-  "0x325ceb02fe1c2ff816a83a5770ea0e88e2faecf2", // veBTC, have different proxy
+  "0x256addbe0a387c98f487e44b85c29eb983413c5e", // vEIGEN_Core
+  "0x325ceb02fe1c2ff816a83a5770ea0e88e2faecf2", // veBTC_Core
   "0x25c20e6e110a1ce3febacc8b7e48368c7b2f0c91", // vLBTC_Core
   "0x0c6b19287999f1e31a5c0a44393b24b62d2c0468", // vUSDS_Core
   "0xe36ae842dbbd7ae372eba02c8239cd431cc063d6", // vsUSDS_Core
