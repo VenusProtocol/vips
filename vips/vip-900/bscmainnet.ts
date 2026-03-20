@@ -4,7 +4,7 @@ import { makeProposal } from "../../src/utils";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-export const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
+export const ACM = bscmainnet.ACCESS_CONTROL_MANAGER;
 export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
 export const FAST_TRACK_TIMELOCK = bscmainnet.FAST_TRACK_TIMELOCK;
 export const CRITICAL_TIMELOCK = bscmainnet.CRITICAL_TIMELOCK;

@@ -28,6 +28,10 @@ forking(87722692, async () => {
   });
 
   describe("Pre-VIP behavior", async () => {
+    it("should have ACM configured correctly", async () => {
+      expect(await adapter.accessControlManager()).to.equal(ACM);
+    });
+
     it("pending owner should be the Normal Timelock", async () => {
       expect(await adapter.pendingOwner()).to.equal(NORMAL_TIMELOCK);
     });
@@ -72,9 +76,10 @@ forking(87722692, async () => {
       expect(markets).to.include(PENDLE_MARKET_SLISBNB);
     });
 
-    it("market config should have correct vToken", async () => {
+    it("market config should have correct vToken and maturity", async () => {
       const config = await adapter.markets(PENDLE_MARKET_SLISBNB);
       expect(config.vToken).to.equal(VTOKEN_PT_CLISBNBX);
+      expect(config.maturity).to.equal(1782345600); // June 25, 2026 00:00:00 UTC
     });
 
     ALL_TIMELOCKS.forEach(timelock => {
