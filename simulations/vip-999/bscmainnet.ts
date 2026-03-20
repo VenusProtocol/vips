@@ -105,14 +105,18 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("should match pre-VIP CAPO growth rates", async () => {
+    it("should match pre-VIP CAPO growth rates and snapshot intervals", async () => {
       const asBNBGrowthRate = await asBNBOracleContract.growthRatePerSecond();
       const slisBNBGrowthRate = await slisBNBOracleContract.growthRatePerSecond();
+      const asBNBSnapshotInterval = await asBNBOracleContract.snapshotInterval();
+      const slisBNBSnapshotInterval = await slisBNBOracleContract.snapshotInterval();
 
       expect(asBNBGrowthRate).to.equal(annualizedRateToPerSecond(CAPO_GROWTH_RATE_CONFIGS.asBNB.growthRatePerYear.old));
       expect(slisBNBGrowthRate).to.equal(
         annualizedRateToPerSecond(CAPO_GROWTH_RATE_CONFIGS.slisBNB.growthRatePerYear.old),
       );
+      expect(asBNBSnapshotInterval).to.equal(CAPO_GROWTH_RATE_CONFIGS.asBNB.snapshotInterval.old);
+      expect(slisBNBSnapshotInterval).to.equal(CAPO_GROWTH_RATE_CONFIGS.slisBNB.snapshotInterval.old);
     });
 
     it("should cache pre-VIP resilient oracle prices for all validation assets", async () => {
