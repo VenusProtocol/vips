@@ -45,7 +45,7 @@ export const vip610 = () => {
       ...giveAcmPermissions("partialUnpause()"),
       ...giveAcmPermissions("completePause()"),
       ...giveAcmPermissions("completeUnpause()"),
-      ...giveAcmPermissions("setPositionAccountImplementation(address)"),
+      ...giveAcmPermissions("setPositionAccountImplementation(address)", [bscmainnet.NORMAL_TIMELOCK]),
       ...giveAcmPermissions("setProportionalCloseTolerance(uint256)"),
       ...giveAcmPermissions("addDSAVToken(address)"),
       ...giveAcmPermissions("setDSAVTokenActive(uint8,bool)"),

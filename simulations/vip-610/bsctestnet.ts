@@ -28,14 +28,13 @@ const ACM_FUNCTION_SIGNATURES = [
   "partialUnpause()",
   "completePause()",
   "completeUnpause()",
-  "setPositionAccountImplementation(address)",
   "setProportionalCloseTolerance(uint256)",
   "addDSAVToken(address)",
   "setDSAVTokenActive(uint8,bool)",
   "executePositionAccountCall(address,address[],bytes[])",
 ] as const;
 
-forking(96276916, async () => {
+forking(96763094, async () => {
   let comptroller: Contract;
   let accessControlManager: Contract;
   let leverageStrategiesManager: Contract;
@@ -90,6 +89,13 @@ forking(96276916, async () => {
           ).to.equal(false);
         }
       }
+      expect(
+        await accessControlManager.hasPermission(
+          bsctestnet.NORMAL_TIMELOCK,
+          RELATIVE_POSITION_MANAGER,
+          "setPositionAccountImplementation(address)",
+        ),
+      ).to.equal(false);
     });
   });
 
@@ -97,7 +103,7 @@ forking(96276916, async () => {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["OwnershipTransferred"], [3]);
       await expectEvents(txResponse, [FLASHLOAN_FACET_ABI], ["IsAccountFlashLoanWhitelisted"], [1]);
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [36]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [33]);
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["PositionAccountImplementationSet"], [1]);
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["DSAVTokenAdded"], [2]);
     },
@@ -131,6 +137,13 @@ forking(96276916, async () => {
           ).to.equal(true);
         }
       }
+      expect(
+        await accessControlManager.hasPermission(
+          bsctestnet.NORMAL_TIMELOCK,
+          RELATIVE_POSITION_MANAGER,
+          "setPositionAccountImplementation(address)",
+        ),
+      ).to.equal(true);
     });
 
     it("RPM should have Position account implementation stored in the state", async () => {

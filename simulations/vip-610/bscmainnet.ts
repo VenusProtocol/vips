@@ -29,14 +29,13 @@ const ACM_FUNCTION_SIGNATURES = [
   "partialUnpause()",
   "completePause()",
   "completeUnpause()",
-  "setPositionAccountImplementation(address)",
   "setProportionalCloseTolerance(uint256)",
   "addDSAVToken(address)",
   "setDSAVTokenActive(uint8,bool)",
   "executePositionAccountCall(address,address[],bytes[])",
 ] as const;
 
-forking(87147067, async () => {
+forking(87632849, async () => {
   let accessControlManager: Contract;
   let relativePositionManager: Contract;
 
@@ -71,13 +70,20 @@ forking(87147067, async () => {
           expect(await accessControlManager.hasRole(roleHash, timelockOrGuardian)).to.equal(false);
         }
       }
+      const setImplRole = ethers.utils.solidityPack(
+        ["address", "string"],
+        [RELATIVE_POSITION_MANAGER, "setPositionAccountImplementation(address)"],
+      );
+      expect(
+        await accessControlManager.hasRole(ethers.utils.keccak256(setImplRole), bscmainnet.NORMAL_TIMELOCK),
+      ).to.equal(false);
     });
   });
 
   testVip("VIP-610 [BNB Chain] Configure Relative Position Manager", await vip610(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["OwnershipTransferred"], [1]);
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [36]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [33]);
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["PositionAccountImplementationSet"], [1]);
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["DSAVTokenAdded"], [2]);
     },
@@ -97,6 +103,13 @@ forking(87147067, async () => {
           expect(await accessControlManager.hasRole(roleHash, timelockOrGuardian)).to.equal(true);
         }
       }
+      const setImplRole = ethers.utils.solidityPack(
+        ["address", "string"],
+        [RELATIVE_POSITION_MANAGER, "setPositionAccountImplementation(address)"],
+      );
+      expect(
+        await accessControlManager.hasRole(ethers.utils.keccak256(setImplRole), bscmainnet.NORMAL_TIMELOCK),
+      ).to.equal(true);
     });
 
     it("RPM should have Position Account implementation stored in the state", async () => {

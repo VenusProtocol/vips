@@ -3,10 +3,10 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
-export const SWAP_HELPER = "0x3Bf0Eb0663BeCe17d95FE33736762bFD20f488b2";
-export const LEVERAGE_STRATEGIES_MANAGER = "0xfc8810B0f1144D5A1F6231aFDb8B51F31c0bc8A7";
-export const RELATIVE_POSITION_MANAGER = "0xF01CA5Ad6152d932Ed19FB28b285529399dA8166";
-export const POSITION_ACCOUNT = "0x03590ef916d538049Ed15f2690A01F70c2A02954";
+export const SWAP_HELPER = "0xf7Cfd0eDfAC7AA473813559b372297332EdEbB8B";
+export const LEVERAGE_STRATEGIES_MANAGER = "0x5187226337C95c4BE683D37Ffc66D41f5b6cE38f";
+export const RELATIVE_POSITION_MANAGER = "0x25dbA64B28F93cC40e9cAf9691266043fe1000a2";
+export const POSITION_ACCOUNT = "0xC9A5f1598e434E3E52CE25D7ff290E4CF167ee52";
 
 export const vUSDC = "0xD5C4C2e2facBEB59D0216D0595d63FcDc6F9A1a7";
 export const vUSDT = "0xb7526572FFE56AB9D7489838Bf2E18e3323b441A";
@@ -63,7 +63,7 @@ export const vip610 = () => {
       ...giveAcmPermissions("partialUnpause()"),
       ...giveAcmPermissions("completePause()"),
       ...giveAcmPermissions("completeUnpause()"),
-      ...giveAcmPermissions("setPositionAccountImplementation(address)"),
+      ...giveAcmPermissions("setPositionAccountImplementation(address)", [bsctestnet.NORMAL_TIMELOCK]),
       ...giveAcmPermissions("setProportionalCloseTolerance(uint256)"),
       ...giveAcmPermissions("addDSAVToken(address)"),
       ...giveAcmPermissions("setDSAVTokenActive(uint8,bool)"),
