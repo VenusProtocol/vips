@@ -118,6 +118,11 @@ Before running, ensure `ARCHIVE_NODE_<network>` is set in `.env` (needed to fetc
 npx hardhat run scripts/generateSafePauseJson.ts --network <networkName>
 ```
 
+For ZKsync, add the zksync hardhat config file in the --config flag when running the command.
+```bash
+npx hardhat run scripts/generateSafePauseJson.ts --network zksyncmainnet --config ./hardhat.config.zksync.ts 
+```
+
 The script will prompt you to:
 
 1. Confirm or override the comptroller address (pre-filled from `src/networkAddresses.ts`)
@@ -142,6 +147,8 @@ For BSC mainnet CF=0 simulation, use the `TEST_CF` flag to pick the `_cf` file:
 ```bash
 TEST_CF=true npx hardhat test scripts/simulateSafePauseTx.ts --fork bscmainnet
 ```
+
+For zksync, add the zksync config file after the hardhat command like `--config ./hardhat.config.zksync.ts `
 
 This impersonates the Safe address (GUARDIAN or CRITICAL_GUARDIAN) from the JSON and executes each transaction on a forked network, verifying they all succeed.
 
