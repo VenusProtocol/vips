@@ -10,10 +10,11 @@ import {
   ARBITRUMONE_VTOKEN_BEACON,
 } from "../../vips/vip-608/addresses/arbitrumone";
 import vip608_2 from "../../vips/vip-608/bscmainnet-2";
+import vip608_3 from "../../vips/vip-608/bscmainnet-3";
 import VTOKEN_ABI from "./abi/ILVToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
-const BLOCK_NUMBER = 443434569;
+const BLOCK_NUMBER = 443758428;
 
 const ERC20_ABI = ["function balanceOf(address) view returns (uint256)"];
 
@@ -28,7 +29,9 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-608 Isolated Pool VToken Upgrade", await vip608_2(), {
+  testForkedNetworkVipCommands("VIP-608 Grant syncCash permissions", await vip608_2());
+
+  testForkedNetworkVipCommands("VIP-608 Upgrade VToken beacon and syncCash", await vip608_3(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_BEACON_ABI], ["Upgraded"], [1]);
     },

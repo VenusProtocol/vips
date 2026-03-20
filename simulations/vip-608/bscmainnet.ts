@@ -6,7 +6,7 @@ import { forking, testVip } from "src/vip-framework";
 import vip608 from "../../vips/vip-608/bscmainnet";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
 
-const BLOCK_NUMBER = 87126359;
+const BLOCK_NUMBER = 87684581;
 
 const NEW_VBEP20_DELEGATE_IMPL = "0xb25b57599BA969c4829699F7E4Fc4076D14745E1";
 
