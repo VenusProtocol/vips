@@ -1,7 +1,6 @@
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-// TODO: Replace with the deployed VBep20Delegate implementation address
 const NEW_VBEP20_DELEGATE_IMPL = "0xb25b57599BA969c4829699F7E4Fc4076D14745E1";
 
 // VBep20Delegator proxy addresses (43 markets, excludes vBNB)
@@ -50,7 +49,6 @@ const vPT_clisBNB_25JUN2026 = "0x6d3BD68E90B42615cb5abF4B8DE92b154ADc435e";
 const vXAUM = "0x92e6Ea74a1A3047DabF4186405a21c7D63a0612A";
 
 // Markets and their excess token amounts to sweep before syncing
-// TODO: Verify excess amounts on-chain before proposal. Use 0 for markets with no excess.
 interface MarketConfig {
   vToken: string;
   name: string;
