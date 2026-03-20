@@ -104,13 +104,42 @@ const NETWORKS: NetworkConfig[] = [
   },
 ];
 
-export const vip608_2 = () => {
+export const vip601 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-608 Grant syncCash permissions for isolated pool VToken upgrade (all networks)",
-    description:
-      "Grant syncCash() call permission to the Normal Timelock for each VToken on all remote networks: " +
-      "Ethereum, Arbitrum, Optimism, Base, opBNB, Unichain, and ZkSync.",
+    title: "VIP-601 [Non-BNB Chain] VToken Inflation Attack Patch and Pause Borrowing Across All Markets (part2)",
+    description: `This VIP upgrades all VToken market implementations across the seven non-BNB Chain Venus Isolated Pool deployments to patch the donation (exchange rate inflation) attack vulnerability identified following the THE token incident on BNB Chain (March 15, 2026). The companion BNB Chain fix is covered in a separate VIP.
+
+The root cause is that _getCashPrior() previously returned IERC20(underlying).balanceOf(address(this)), which allowed any party to artificially inflate the reported cash — and therefore the exchange rate — by transferring tokens directly to a VToken contract without minting shares.
+
+The fix replaces this with an internalCash storage variable that is only updated by _doTransferIn, _doTransferOut, and badDebtRecovered(). A one-time syncCash() function, gated by the AccessControlManager (ACM), initializes internalCash to the real underlying balance after the upgrade. syncCash() remains callable post-migration for future reconciliation (e.g., airdrops or direct transfers).
+
+A secondary measure, pausing borrowing across all affected markets, was deployed to limit exposure while this patch is prepared. Supply, repay, and withdraw functions were not affected by that pause and continue to operate normally. If this VIP passes, borrowing will be restored across all previously paused non-BNB-chain VToken markets.
+
+#### Changes
+
+**1. Grant syncCash() permission to the Normal Timelock for each VToken on all non-BNB Chain Isolated Pool deployments**
+
+Networks: Arbitrum One, Base Mainnet, Ethereum Mainnet, opBNB Mainnet, OP Mainnet, Unichain Mainnet, zkSync Mainnet
+
+- **Function**: AccessControlManager.giveCallPermission(vToken, "syncCash()", normalTimelock)
+- **Effect**: Authorizes the Normal Timelock to call syncCash() on each VToken market, which is required before the implementation upgrade and cash initialization in VIP-602
+
+#### Summary
+
+If approved, this VIP will:
+- Grant syncCash() call permissions to the Normal Timelock for all VToken markets on Arbitrum One, Base Mainnet, Ethereum Mainnet, opBNB Mainnet, OP Mainnet, Unichain Mainnet, and zkSync Mainnet
+- Enable the subsequent VIP-602 to upgrade the VToken beacon and initialize internalCash via syncCash() on all affected markets
+
+#### References
+
+- GitHub PR (Isolated Pools patch): [https://github.com/VenusProtocol/isolated-pools/pull/551](https://github.com/VenusProtocol/isolated-pools/pull/551)
+- Allez Labs Post-Mortem: [https://community.venus.io/t/the-market-incident-post-mortem/5712](https://community.venus.io/t/the-market-incident-post-mortem/5712)
+
+**Voting options**
+- For - I agree that Venus Protocol should proceed with this proposal
+- Against - I do not think that Venus Protocol should proceed with this proposal
+- Abstain - I am indifferent to whether Venus Protocol proceeds or not`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -131,4 +160,4 @@ export const vip608_2 = () => {
   );
 };
 
-export default vip608_2;
+export default vip601;

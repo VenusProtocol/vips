@@ -3,7 +3,7 @@ import { BigNumber, Contract } from "ethers";
 import { ethers } from "hardhat";
 import { forking, testVip } from "src/vip-framework";
 
-import vip608 from "../../vips/vip-608/bscmainnet";
+import vip600 from "../../vips/vip-600/bscmainnet";
 import VBEP20_DELEGATE_ABI from "./abi/VBep20Delegate.json";
 
 const BLOCK_NUMBER = 87684581;
@@ -130,7 +130,7 @@ forking(BLOCK_NUMBER, async () => {
     }
   });
 
-  testVip("VIP-608 Upgrade VBep20Delegate for Core Pool", await vip608());
+  testVip("VIP-600 Upgrade VBep20Delegate for Core Pool", await vip600());
 
   describe("Post-VIP behavior", async () => {
     for (let i = 0; i < MARKET_ADDRESSES.length; i++) {

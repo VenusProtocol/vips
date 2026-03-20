@@ -9,11 +9,10 @@ import {
   UNICHAINMAINNET_CORE_VTOKENS,
   UNICHAINMAINNET_NEW_VTOKEN_IMPLEMENTATION,
   UNICHAINMAINNET_VTOKEN_BEACON,
-} from "../../vips/vip-608/addresses/unichainmainnet";
-import vip608_2 from "../../vips/vip-608/bscmainnet-2";
-import vip608_3 from "../../vips/vip-608/bscmainnet-3";
-import COMPTROLLER_ABI from "./abi/ILComptroller.json";
-import VTOKEN_ABI from "./abi/ILVToken.json";
+} from "../../vips/vip-600/addresses/unichainmainnet";
+import vip601 from "../../vips/vip-600/bscmainnet-2";
+import vip602 from "../../vips/vip-600/bscmainnet-3";
+import COMPTROLLER_ABI from "./abi/ILComptroller.json";import VTOKEN_ABI from "./abi/ILVToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 const BLOCK_NUMBER = 43258056;
@@ -40,9 +39,9 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testForkedNetworkVipCommands("VIP-608 Grant syncCash permissions", await vip608_2());
+  testForkedNetworkVipCommands("VIP-601 Grant syncCash permissions", await vip601());
 
-  testForkedNetworkVipCommands("VIP-608 Upgrade VToken beacon and syncCash", await vip608_3(), {
+  testForkedNetworkVipCommands("VIP-602 Upgrade VToken beacon and syncCash", await vip602(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [VTOKEN_BEACON_ABI], ["Upgraded"], [1]);
     },

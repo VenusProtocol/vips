@@ -101,14 +101,45 @@ const MARKETS: MarketConfig[] = [
   { vToken: vXAUM, name: "vXAUM", excessAmount: "0" },
 ];
 
-export const vip608 = () => {
+export const vip600 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-608 Upgrade VBep20Delegate implementation for Core Pool markets",
-    description:
-      "Upgrade all 43 VBep20Delegator core pool markets on BSC mainnet to the new VBep20Delegate implementation. " +
-      "For each market: (1) set the new implementation, (2) call sweepTokenAndSync to initialize internalCash. " +
-      "Markets with excess tokens have their excess swept to the Timelock before syncing.",
+    title: "VIP-600 [BNB Chain] VToken Inflation Attack Patch (part1)",
+    description: `This VIP upgrades the VBep20Delegate implementation across all 43 BNB Chain core pool VBep20 markets to patch the donation attack vulnerability identified in the THE market incident. The root cause is in getCashPrior() within VBep20.sol, which previously returned IERC20(underlying).balanceOf(address(this)) — an actual on-chain balance that any external actor can inflate by transferring tokens directly to the vToken contract address. The inflated cash distorts the exchange rate formula ((getCashPrior() + totalBorrows - totalReserves) / totalSupply), enabling exchange rate manipulation and first-depositor attacks.
+
+The fix replaces balance-based cash accounting with an internalCash storage variable that is only updated through protocol-controlled operations (doTransferIn and doTransferOut). Direct token donations can no longer affect getCashPrior() or the exchange rate. A new admin-gated sweepTokenAndSync() function is called atomically in the same VIP to initialise internalCash after each market's implementation upgrade, and to recover any excess donated tokens to the Timelock.
+
+The 43 affected markets are all VBep20Delegator core pool proxies on BSC mainnet. vBNB is excluded as it is a native BNB market and not subject to this vulnerability.
+
+#### Changes
+
+1. **Upgrade VBep20Delegate implementation for all 43 core pool markets**
+   - Function: proxy._setImplementation(newImpl, false, "0x")
+   - Points each VBep20Delegator proxy to the new VBep20Delegate implementation containing internal cash tracking
+   - Markets covered include major stablecoins (vUSDC, vUSDT, vBUSD, vFDUSD, vTUSD, vDAI, vUSDe, vsUSDe, vUSD1), blue-chip assets (vBTC, vETH, vBNB-variants), DeFi tokens (vXVS, vCAKE, vAAVE, vUNI, vLINK), LST/LRT products (vWBETH, vasBNB, vslisBNB, vSolvBTC, vxSolvBTC), and others including vTHE.
+2. **Call sweepTokenAndSync(excessAmount) on each upgraded market**
+   - Function: proxy.sweepTokenAndSync(uint256 transferAmount)
+   - Must be executed atomically in the same VIP as the implementation upgrade
+   - Pass 0 for markets with no excess tokens; pass the excess amount for markets with prior donations (e.g. vTHE) to transfer excess to the Timelock before syncing
+   - Initialises internalCash to match balanceOf(address(this)) post-upgrade
+
+#### Summary
+
+If approved, this VIP will:
+- Upgrade the VBep20Delegate implementation for all 43 BNB Chain core pool VBep20 markets to use internal cash tracking
+- Close the donation attack vector by making getCashPrior() immune to direct token transfers
+- Initialise internalCash on all upgraded markets via sweepTokenAndSync() in the same transaction
+- Recover any excess donated tokens (including from the vTHE exploit) to the Timelock
+
+#### References
+
+- GitHub PR (Core Pool): [https://github.com/VenusProtocol/venus-protocol/pull/664](https://github.com/VenusProtocol/venus-protocol/pull/664)
+- Allez Labs Post-Mortem: [https://community.venus.io/t/the-market-incident-post-mortem/5712](https://community.venus.io/t/the-market-incident-post-mortem/5712)
+
+**Voting options**
+- For - I agree that Venus Protocol should proceed with this proposal
+- Against - I do not think that Venus Protocol should proceed with this proposal
+- Abstain - I am indifferent to whether Venus Protocol proceeds or not`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -132,4 +163,4 @@ export const vip608 = () => {
   );
 };
 
-export default vip608;
+export default vip600;
