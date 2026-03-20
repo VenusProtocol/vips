@@ -12,7 +12,8 @@ import {
 } from "../../vips/vip-600/addresses/opmainnet";
 import vip601 from "../../vips/vip-600/bscmainnet-2";
 import vip602 from "../../vips/vip-600/bscmainnet-3";
-import COMPTROLLER_ABI from "./abi/ILComptroller.json";import VTOKEN_ABI from "./abi/ILVToken.json";
+import COMPTROLLER_ABI from "./abi/ILComptroller.json";
+import VTOKEN_ABI from "./abi/ILVToken.json";
 import VTOKEN_BEACON_ABI from "./abi/vtokenBeacon.json";
 
 const BLOCK_NUMBER = 149203740;
