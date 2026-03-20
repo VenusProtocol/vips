@@ -1,10 +1,13 @@
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { Command, ProposalType } from "../../src/types";
 import { makeProposal } from "../../src/utils";
 
+const { bscmainnet } = NETWORK_ADDRESSES;
+
 export const ACM = "0x4788629ABc6cFCA10F9f969efdEAa1cF70c23555";
-export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
-export const FAST_TRACK_TIMELOCK = "0x555ba73dB1b006F3f2C7dB7126d6e4343aDBce02";
-export const CRITICAL_TIMELOCK = "0x213c446ec11e45b15a6E29C1C1b402B8897f606d";
+export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
+export const FAST_TRACK_TIMELOCK = bscmainnet.FAST_TRACK_TIMELOCK;
+export const CRITICAL_TIMELOCK = bscmainnet.CRITICAL_TIMELOCK;
 export const PENDLE_PT_VAULT_ADAPTER = "0x60Db419d8ea13C5827072Cf693D13cA1Ec6E0B4a";
 
 // Pendle market (PT-clisBNBx-25JUN2026)
