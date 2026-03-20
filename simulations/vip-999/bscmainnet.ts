@@ -22,6 +22,7 @@ import vip999, {
   USDT_CHAINLINK_ORACLE_CONFIG,
   asBNB_ORACLE,
   sUSDe,
+  slisBNB,
   slisBNB_ORACLE,
 } from "../../vips/vip-999/bscmainnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
@@ -74,6 +75,14 @@ forking(BLOCK_NUMBER, async () => {
       expect(tokenConfig.enableFlagsForOracles[1]).to.equal(SUSDE_ORACLE_CONFIG.old.enableFlagsForOracles[1]);
       expect(tokenConfig.enableFlagsForOracles[2]).to.equal(SUSDE_ORACLE_CONFIG.old.enableFlagsForOracles[2]);
       expect(tokenConfig.cachingEnabled).to.equal(SUSDE_ORACLE_CONFIG.old.cachingEnabled);
+    });
+
+    it("should match pre-VIP CAPO oracle addresses in resilient oracle", async () => {
+      const asBNBTokenConfig = await resilientOracle.getTokenConfig(TOKENS.asBNB);
+      expect(asBNBTokenConfig.oracles[0]).to.equal(asBNB_ORACLE);
+
+      const slisBNBTokenConfig = await resilientOracle.getTokenConfig(slisBNB);
+      expect(slisBNBTokenConfig.oracles[0]).to.equal(slisBNB_ORACLE);
     });
 
     it("should match pre-VIP maxStalePeriod values for Chainlink feeds", async () => {
