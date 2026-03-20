@@ -430,39 +430,59 @@ export const BINANCE_STALE_PERIODS = {
 
 export const ORACLE_PRICE_VALIDATION_ASSETS = [...new Set([...Object.values(TOKENS)])];
 
-export const vip999 = () => {
+export const vip603 = () => {
   const chainlinkOracleConfigs = Object.values(CHAINLINK_ORACLE_CONFIGS);
   const redstoneOracleConfigs = Object.values(REDSTONE_ORACLE_CONFIGS);
   const binanceStalePeriods = Object.values(BINANCE_STALE_PERIODS);
 
   const meta = {
     version: "v2",
-    title: "VIP-999 [BNB Chain] Oracle Configuration Update — Core Pool",
-    description: `#### Summary
+    title: "VIP-603 [BNB Chain] Oracle Configuration Improvements and CAPO Rate Recalibration",
+    description: `#### Description
 
-This VIP performs oracle configuration updates for the Core Pool on BNB Chain as recommended by Chaos Labs.
+This proposal introduces **oracle configuration improvements** and **CAPO rate recalibrations** to enhance pricing reliability, remove redundancy, and better align growth assumptions with real market conditions.
 
-#### Changes
+This VIP addresses several inefficiencies in the current oracle and yield configuration:
+- Redundant oracle fallback setups that provide no additional safety
+- CAPO growth rates that are misaligned with actual on-chain yields
+- Inconsistent maxStalePeriod values relative to oracle heartbeat intervals
 
-**1. sUSDe — Remove Duplicate Fallback Slot**
+These changes aim to improve pricing accuracy, standardise oracle behaviour, and ensure safer parameters across the protocol.
 
-The Pivot and Fallback oracles for sUSDe currently point to the same CorrelatedTokenOracle contract, providing no additional protection. This VIP disables the Fallback slot.
+#### Proposed Changes
+
+**1. sUSDe Oracle Configuration**
+
+- Disable the **Fallback oracle slot** for **sUSDe**
+- Pivot and Fallback currently point to the same contract, making the fallback redundant
 
 **2. CAPO Growth Rate Recalibration**
 
-- **asBNB**: Change growth rate from 30.49%/yr to 5%/yr (actual APY is ~1%)
-- **slisBNB**: Change growth rate from 4.12%/yr to 5%/yr (current cap barely above actual APY of ~3.5-4%)
+- **asBNB**: Adjust from **30.49% → ~5%** — aligns with actual staking APY (~1%) while maintaining reasonable headroom
+- **slisBNB**: Adjust from **4.12% → ~5%** — provides sufficient buffer above current ~3.5–4% APY to prevent unnecessary liquidations
 
-Note: \`updateSnapshot()\` should be called on the asBNB oracle immediately before VIP execution (permissionless).
+**3. maxStalePeriod Standardization**
 
-**3. maxStalePeriod Updates**
+Update maxStalePeriod across oracle feeds using a standardised heartbeat-based formula:
+- Existing tighter values are preserved
+- Slots currently set to **0** will be assigned appropriate limits
 
-Updates maxStalePeriod for 75 oracle slots based on the following formula:
-- Heartbeat ≤ 30s → 60s
-- Heartbeat ≤ 60s → 120s
-- 60s < heartbeat < 200s → heartbeat + 100s
-- 200s ≤ heartbeat < 250s → heartbeat + 250s
-- Heartbeat ≥ 250s → heartbeat + 300s`,
+These updates apply across key assets including **USDT, USDC, DAI, FDUSD, TUSD, BNB, BTCB, ETH, XRP, LINK, AAVE, UNI, and others**, ensuring consistent and reliable price validation.
+
+Details:
+- ≤ 30s → 60s
+- ≤ 60s → 120s
+- 60s–200s → heartbeat + 100s
+- 200s–250s → heartbeat + 250s
+- ≥ 250s → heartbeat + 300s
+
+#### Summary
+
+If approved, this VIP will:
+- Remove redundant oracle configuration for **sUSDe**
+- Recalibrate CAPO growth rates for **asBNB** and **slisBNB**
+- Standardise maxStalePeriod across oracle feeds
+- Improve overall oracle reliability and parameter consistency across the protocol`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -552,4 +572,4 @@ Updates maxStalePeriod for 75 oracle slots based on the following formula:
   );
 };
 
-export default vip999;
+export default vip603;

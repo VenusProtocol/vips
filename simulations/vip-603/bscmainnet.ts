@@ -10,7 +10,7 @@ import {
 } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip999, {
+import vip603, {
   BINANCE_STALE_PERIODS,
   CAPO_GROWTH_RATE_CONFIGS,
   CHAINLINK_ORACLE_CONFIGS,
@@ -24,7 +24,7 @@ import vip999, {
   sUSDe,
   slisBNB,
   slisBNB_ORACLE,
-} from "../../vips/vip-999/bscmainnet";
+} from "../../vips/vip-603/bscmainnet";
 import CAPPED_ORACLE_ABI from "./abi/CappedOracle.json";
 import BINANCE_ORACLE_ABI from "./abi/binanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/chainlinkOracle.json";
@@ -137,7 +137,7 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  testVip("VIP-999 [BNB Chain] Oracle Configuration Update — Core Pool", await vip999(), {
+  testVip("VIP-603 [BNB Chain] Oracle Configuration Improvements and CAPO Rate Recalibration", await vip603(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RESILIENT_ORACLE_ABI], ["TokenConfigAdded", "CachedEnabled"], [1, 1]);
       await expectEvents(
