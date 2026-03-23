@@ -10,10 +10,8 @@
 
 ### Installing
 
-```
-
+```bash
 yarn install
-
 ```
 
 ### Repo structure
@@ -22,7 +20,7 @@ The simulations and create commands require the function creating the VIP to be 
 
 ### Run Simulations
 
-```
+```bash
 npx hardhat test simulations/<simulation-path> --fork <network>
 ```
 
@@ -30,7 +28,7 @@ npx hardhat test simulations/<simulation-path> --fork <network>
 
 Simulations for multisig transactions can be run individually or sequentially. Running test for proposals can be done by passing in the index file of the network's simulation dir where each proposal test is imported.
 
-```
+```bash
 npx hardhat test multisig/simulations/<path> --fork <network>
 ```
 
@@ -40,7 +38,7 @@ Script to generate proposal data for multiple destinations such as venusApp bsce
 
 Procedure for Creating a Proposal
 
-```
+```bash
 npx hardhat createProposal --network <networkName>
 
 Enter the number of vip for which you require proposal data.
@@ -54,7 +52,7 @@ Script to build vip calldata and target.
 
 Procedure for Propose vip
 
-```
+```bash
 npx hardhat run scripts/proposeVIP.ts
 ```
 
@@ -68,7 +66,7 @@ In .env, make sure that `DEPLOYER_PRIVATE_KEY` is the one of the multisig owner 
 
 Proceed by executing the following command:
 
-```
+```bash
 npx hardhat multisig <path to multisig vip relative to multisig/proposal> --network <network>
 ```
 
@@ -78,7 +76,7 @@ Script to calculate the Safe TX hash associated with a multisig VIP, and the cal
 
 It requires the address of the `MultiSend` and `MultiSendCallOnly` contracts, defined in `src/multisig/utils.ts` too.
 
-```
+```bash
 npx hardhat safeTxData <path to multisig vip relative to multisig/proposal> [--nonce n] --network <network>
 ```
 
@@ -93,14 +91,14 @@ Before executing this script make sure that:
 
 Proceed by executing the following command:
 
-```
+```bash
 npx hardhat run scripts/createProposal.ts --network <networkName>
 ```
 
 After executing the command, enter the needed information for the script.
 Here is example input for exporting Multisig VIP 000 (`multisig/proposals/vip-000/vip-000-sepolia.ts`) into a JSON Gnosis Safe format:
 
-```
+```bash
 npx hardhat run scripts/createProposal.ts --network sepolia
 Number of the VIP to propose (if using gnosisTXBuilder press enter to skip ) => <blank>
 Type of the proposal txBuilder/venusApp/bsc/gnosisTXBuilder => gnosisTXBuilder
@@ -109,6 +107,51 @@ Multisig VIP ID (located at ./multisig/proposals/vip-{id}) to process => 000
 ```
 
 The script should output a file `gnosisTXBuilder.json` that you can import in your Gnosis Safe UI.
+
+### Generate Safe Multisig JSON (Pause / CF=0)
+
+Interactive script that generates a Gnosis Safe TX Builder JSON for pause-action or set-collateral-factor-to-zero proposals.
+
+Before running, ensure `ARCHIVE_NODE_<network>` is set in `.env` (needed to fetch markets and liquidation thresholds on-chain).
+
+```bash
+npx hardhat run scripts/generateSafePauseJson.ts --network <networkName>
+```
+
+For ZKsync, add the zksync hardhat config file in the --config flag when running the command.
+
+```bash
+npx hardhat run scripts/generateSafePauseJson.ts --network zksyncmainnet --config ./hardhat.config.zksync.ts
+```
+
+The script will prompt you to:
+
+1. Confirm or override the comptroller address (pre-filled from `src/networkAddresses.ts`)
+2. Load markets — fetch from comptroller, use `scripts/data/markets.json`, or enter manually
+3. Select operation — pause actions, set collateral factor to 0, or both
+4. If pausing, select which actions to pause (MINT, REDEEM, BORROW, REPAY, SEIZE, LIQUIDATE, TRANSFER, ENTER_MARKET, EXIT_MARKET)
+5. If setting CF=0 on BSC mainnet, select whether to also include e-mode pools
+
+**Output:**
+
+- For BSC mainnet with "cf_zero" or "both": `safePauseTxBuilder_cf.json` is generated with CF=0 commands under the CRITICAL_GUARDIAN Safe. When "both" is selected, a separate `safePauseTxBuilder.json` with pause commands under the GUARDIAN Safe is also generated.
+- For all other networks: a single `safePauseTxBuilder.json` containing all commands under the GUARDIAN Safe.
+
+To simulate the generated JSON against a fork before submitting:
+
+```bash
+npx hardhat test scripts/simulateSafePauseTx.ts --fork <networkName>
+```
+
+For BSC mainnet CF=0 simulation, use the `TEST_CF` flag to pick the `_cf` file:
+
+```bash
+TEST_CF=true npx hardhat test scripts/simulateSafePauseTx.ts --fork bscmainnet
+```
+
+For zksync, add the zksync config file after the hardhat command like `--config ./hardhat.config.zksync.ts `
+
+This impersonates the Safe address (GUARDIAN or CRITICAL_GUARDIAN) from the JSON and executes each transaction on a forked network, verifying they all succeed.
 
 ### Make proposal for multiple networks
 
@@ -124,7 +167,7 @@ Make different simulations for different networks. Use `testForkedNetworkVipComm
 
 To run simulations use this command
 
-```
+```bash
 npx hardhat test simulations/<simulation-path> --fork <network>
 ```
 
@@ -132,12 +175,12 @@ npx hardhat test simulations/<simulation-path> --fork <network>
 
 Procedure to propose VIP using tasks
 
-```
+```bash
 npx hardhat propose <path to vip relative to vips> --network bscmainnet
 ```
 
 For testnet
 
-```
+```bash
 npx hardhat proposeOnTestnet <path to vip relative to vips> --network bsctestnet
 ```
