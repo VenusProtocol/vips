@@ -119,8 +119,9 @@ npx hardhat run scripts/generateSafePauseJson.ts --network <networkName>
 ```
 
 For ZKsync, add the zksync hardhat config file in the --config flag when running the command.
+
 ```bash
-npx hardhat run scripts/generateSafePauseJson.ts --network zksyncmainnet --config ./hardhat.config.zksync.ts 
+npx hardhat run scripts/generateSafePauseJson.ts --network zksyncmainnet --config ./hardhat.config.zksync.ts
 ```
 
 The script will prompt you to:
