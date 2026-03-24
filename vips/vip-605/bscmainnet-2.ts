@@ -33,11 +33,11 @@ Withdraws native BNB from Treasury and repays BNB debts for 5 accounts via \`rep
 
 **Treasury reimbursement**
 
-Sweeps ~529,067 USDT from the Risk Fund to the Treasury to reimburse the tokens withdrawn across both VIPs.
+Sweeps ~182,602 USDT from the Risk Fund to the Treasury to reimburse the tokens withdrawn across both VIPs (THE excluded, handled in VIP-690).
 
 **OTC for remaining shortfall**
 
-Sweeps ~1,668,406 USDT from the Risk Fund to the [Development Team wallet](https://bscscan.com/address/0x5e7bb1f600e42bc227755527895a282f782555ec) for OTC conversion to cover the remaining CAKE (~$1,560,706), THE (~$67,181), and DAI (~$40,518) shortfall.
+Sweeps ~1,601,225 USDT from the Risk Fund to the [Development Team wallet](https://bscscan.com/address/0x5e7bb1f600e42bc227755527895a282f782555ec) for OTC conversion to cover the remaining CAKE (~$1,560,706) and DAI (~$40,518) shortfall. THE repayment is handled separately in VIP-690.
 
 #### References
 

@@ -5,7 +5,6 @@ import { parseUnits } from "ethers/lib/utils";
 // Token addresses (underlying)
 // ──────────────────────────────────────────────────────────
 export const CAKE = "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82";
-export const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 export const DAI = "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3";
 export const ETH = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8";
 export const USDT = "0x55d398326f99059fF775485246999027B3197955";
@@ -27,7 +26,6 @@ export const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
 // vToken addresses (Core Pool)
 // ──────────────────────────────────────────────────────────
 export const vCAKE = "0x86aC3974e2BD0d60825230fa6F355fF11409df5c";
-export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
 export const vDAI = "0x334b3eCB4DCa3593BCCC3c7EBD1A1C1d1780FBF1";
 export const vBNB = "0xA07c5b74C9B40447a954e1466938b865b6BBea36";
 export const vETH = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8";
@@ -150,7 +148,8 @@ export const REPAYMENTS_FROM_RISK_FUND: TokenRepayment[] = [
 // Treasury tokens withdrawn → Timelock repays → Risk Fund reimburses Treasury with USDT
 // ──────────────────────────────────────────────────────────
 
-// BEP20 tokens from Treasury — Part 1 (VIP-605): CAKE, THE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE
+// BEP20 tokens from Treasury — Part 1 (VIP-605): CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE
+// NOTE: THE repayment is handled separately in VIP-690 via sweepTokenAndSync
 export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
   // Partially covered tokens (remaining sourced via OTC in Part 3)
   {
@@ -160,23 +159,6 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     borrowers: [
       // Account 1 has 1,184,192.16 CAKE debt, Treasury has ~146,760.416 CAKE → partial repayment
       { address: ACCOUNT_1, amount: parseUnits("146760.416", 18) },
-    ],
-  },
-  {
-    name: "THE",
-    underlying: THE,
-    vToken: vTHE,
-    borrowers: [
-      // Repay smaller accounts fully first, then partially repay account 2
-      { address: ACCOUNT_13, amount: parseUnits("356.68", 18) },
-      { address: ACCOUNT_12, amount: parseUnits("423.55", 18) },
-      { address: ACCOUNT_11, amount: parseUnits("674.13", 18) },
-      { address: ACCOUNT_10, amount: parseUnits("1147.12", 18) },
-      { address: ACCOUNT_9, amount: parseUnits("2741.99", 18) },
-      { address: ACCOUNT_7, amount: parseUnits("11460.45", 18) },
-      { address: ACCOUNT_5, amount: parseUnits("53746.05", 18) },
-      // Account 2: 1,848,578.98 total, partial repay with remaining 1,477,797.99
-      { address: ACCOUNT_2, amount: parseUnits("1477797.99", 18) },
     ],
   },
   {
@@ -309,14 +291,14 @@ export const BNB_REPAYMENTS: NativeBNBRepayment[] = [
 // Part 3: OTC — tokens that cannot be fully sourced
 // Sweep USDT from Risk Fund to Dev Wallet for OTC conversion
 // ──────────────────────────────────────────────────────────
-// Shortfall: CAKE ~$1,560,706 + THE ~$67,181 + DAI ~$40,518 = ~$1,668,405
-export const USDT_TO_OTC = parseUnits("1668406", 18);
+// Shortfall: CAKE ~$1,560,706 + DAI ~$40,518 = ~$1,601,224 (THE handled in VIP-690)
+export const USDT_TO_OTC = parseUnits("1601225", 18);
 
 // ──────────────────────────────────────────────────────────
 // Treasury reimbursement — USDT equivalent of all tokens withdrawn from Treasury
 // ──────────────────────────────────────────────────────────
-// Estimated ~$529,067 based on token prices at time of analysis
-export const USDT_TREASURY_REIMBURSEMENT = parseUnits("529067", 18);
+// Estimated ~$182,602 based on token prices at time of analysis (THE portion removed, handled in VIP-690)
+export const USDT_TREASURY_REIMBURSEMENT = parseUnits("182602", 18);
 
 // ──────────────────────────────────────────────────────────
 // Helper to compute total amount per token

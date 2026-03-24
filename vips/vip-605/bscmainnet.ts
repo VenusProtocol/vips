@@ -62,10 +62,9 @@ Tokens available in the Risk Fund (ETH, USDT, WBNB, BTCB) are swept to the Norma
 
 **Repayment from Treasury**
 
-For tokens not available in the Risk Fund (CAKE, THE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE), the Treasury provides the tokens for repayment.
+For tokens not available in the Risk Fund (CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE), the Treasury provides the tokens for repayment. THE repayment is handled separately in VIP-690.
 
 - CAKE: partial repayment (~146,760 of 1,184,192 needed)
-- THE: partial repayment (~1,548,348 of 1,919,129 needed)
 - DAI: partial repayment (~17,316 of 57,834 needed)
 - All other tokens: fully covered
 
@@ -90,7 +89,8 @@ The remaining Treasury BEP20 repayments (SXP, FIL, TUSD), native BNB repayments,
 
       // ════════════════════════════════════════════════════════
       // Repay from Treasury — BEP20 tokens Part 1
-      // (CAKE, THE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE)
+      // (CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE)
+      // NOTE: THE repayment handled separately in VIP-690
       // ════════════════════════════════════════════════════════
       ...REPAYMENTS_FROM_TREASURY_PART1.flatMap(token => bep20RepayCommands(token, "treasury")),
     ],

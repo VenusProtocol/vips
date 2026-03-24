@@ -8,18 +8,11 @@ import { forking, testVip } from "src/vip-framework";
 
 import {
   ACCOUNT_1,
-  ACCOUNT_2,
   ACCOUNT_3,
   ACCOUNT_4,
   ACCOUNT_5,
   ACCOUNT_6,
-  ACCOUNT_7,
   ACCOUNT_8,
-  ACCOUNT_9,
-  ACCOUNT_10,
-  ACCOUNT_11,
-  ACCOUNT_12,
-  ACCOUNT_13,
   ACCOUNT_14,
   ACCOUNT_15,
   ACCOUNT_16,
@@ -53,7 +46,6 @@ import {
   vLINK,
   vLTC,
   vSXP,
-  vTHE,
   vTUSD,
   vUSDC,
   vUSDT,
@@ -77,8 +69,7 @@ const ALL_DEBTS: [string, string, string, boolean][] = [
   [ACCOUNT_1, vBTC, "BTCB", false],
   [ACCOUNT_1, vBNB, "BNB", false],
   [ACCOUNT_1, vUSDC, "USDC", false],
-  // Account 2: THE partial
-  [ACCOUNT_2, vTHE, "THE", true],
+  // Account 2: THE handled separately in VIP-690
   // Account 3: DAI partial, rest full
   [ACCOUNT_3, vDAI, "DAI", true],
   [ACCOUNT_3, vETH, "ETH", false],
@@ -88,20 +79,13 @@ const ALL_DEBTS: [string, string, string, boolean][] = [
   // Account 4
   [ACCOUNT_4, vBNB, "BNB", false],
   // Account 5
-  [ACCOUNT_5, vTHE, "THE", false],
   [ACCOUNT_5, vUSDT, "USDT", false],
   // Account 6
   [ACCOUNT_6, vETH, "ETH", false],
-  // Account 7
-  [ACCOUNT_7, vTHE, "THE", false],
+  // Account 7: THE handled separately in VIP-690
   // Account 8
   [ACCOUNT_8, vUSDT, "USDT", false],
-  // Accounts 9-13
-  [ACCOUNT_9, vTHE, "THE", false],
-  [ACCOUNT_10, vTHE, "THE", false],
-  [ACCOUNT_11, vTHE, "THE", false],
-  [ACCOUNT_12, vTHE, "THE", false],
-  [ACCOUNT_13, vTHE, "THE", false],
+  // Accounts 9-13: THE handled separately in VIP-690
   // Account 14
   [ACCOUNT_14, vBNB, "BNB", false],
   [ACCOUNT_14, vBCH, "BCH", false],
