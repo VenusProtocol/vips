@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -9,32 +11,51 @@ export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
 // Target address for final THE transfer
 export const TARGET_RECEIVER = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
-// Amount to sweep from vTHE — all available liquidity (getCash on-chain)
-// NOTE: Interest accrues until execution — re-verify at proposal block
-export const FIRST_SWEEP_AMOUNT = "2102141932899755916354273";
-
-// Bad debt accounts with THE borrows — on-chain borrowBalanceStored values
-export const BAD_DEBT_ACCOUNTS: { borrower: string; amount: string }[] = [
-  { borrower: "0x737bc98f1d34e19539c074b8ad1169d5d45da619", amount: "1869957969844181369954986" },
-  { borrower: "0x85ca0dff027102ea3fbf1c077524eab21d1f7927", amount: "54367629301048665356227" },
-  { borrower: "0xa72e1756426100c6207421471449e2ba9a917e86", amount: "11592990367594691742001" },
-  { borrower: "0x9958ed7f2441c208821ea14643224812a006d221", amount: "2773704020174865593808" },
-  { borrower: "0x6efee96287b5e1a2ef966e25bae15a54bde9b83e", amount: "1160386668110966235257" },
-  { borrower: "0x2c58d31559d65242cf7915a4fd89fcab9c96f7df", amount: "681925074117371795420" },
-  { borrower: "0xdff9e1b12dfb7103231128940a19c2896f049de8", amount: "428451855349073421880" },
-  { borrower: "0xa87f0d31846211ce417128a770c681fc342d3a74", amount: "360805013246330005639" },
+// Bad debt accounts with THE borrows
+export const BAD_DEBT_BORROWERS: string[] = [
+  "0x737bc98f1d34e19539c074b8ad1169d5d45da619",
+  "0x85ca0dff027102ea3fbf1c077524eab21d1f7927",
+  "0xa72e1756426100c6207421471449e2ba9a917e86",
+  "0x9958ed7f2441c208821ea14643224812a006d221",
+  "0x6efee96287b5e1a2ef966e25bae15a54bde9b83e",
+  "0x2c58d31559d65242cf7915a4fd89fcab9c96f7df",
+  "0xdff9e1b12dfb7103231128940a19c2896f049de8",
+  "0xa87f0d31846211ce417128a770c681fc342d3a74",
 ];
 
-// Total THE bad debt: ~1,941,323.86 THE
-export const TOTAL_THE_BAD_DEBT = "1941323862143823334105218";
+/**
+ * Fetch live on-chain values for the VIP at the current (or forked) block.
+ * Returns sweep amount, per-borrower debts, and total bad debt.
+ */
+export async function fetchVipValues() {
+  const vTokenContract = new ethers.Contract(
+    vTHE,
+    ["function getCash() view returns (uint256)", "function borrowBalanceStored(address) view returns (uint256)"],
+    ethers.provider,
+  );
 
-// Second sweep: after repayBorrowBehalf, THE flows back into vTHE — sweep it out again
-export const SECOND_SWEEP_AMOUNT = TOTAL_THE_BAD_DEBT;
+  const [cash, ...debts]: BigNumber[] = await Promise.all([
+    vTokenContract.getCash(),
+    ...BAD_DEBT_BORROWERS.map((borrower: string) => vTokenContract.borrowBalanceStored(borrower)),
+  ]);
 
-// Final transfer amount: all THE held by Timelock (first sweep + second sweep - repayments = getCash)
-export const FINAL_TRANSFER_AMOUNT = FIRST_SWEEP_AMOUNT;
+  const badDebtAccounts = BAD_DEBT_BORROWERS.map((borrower, i) => ({
+    borrower,
+    amount: debts[i],
+  }));
 
-export const vipVPD854 = () => {
+  const totalBadDebt = debts.reduce((sum, debt) => sum.add(debt), BigNumber.from(0));
+
+  return {
+    sweepAmount: cash,
+    badDebtAccounts,
+    totalBadDebt,
+  };
+}
+
+export const vipVPD854 = async () => {
+  const { sweepAmount, badDebtAccounts, totalBadDebt } = await fetchVipValues();
+
   const meta = {
     version: "v2",
     title: "VIP-690 [BNB Chain] $THE Market Resume and Bad Debt Handling",
@@ -72,22 +93,22 @@ export const vipVPD854 = () => {
 
   return makeProposal(
     [
-      // Step 1: Sweep excess THE from vTHE to Normal Timelock (restores exchange rate)
+      // Step 1: Sweep all THE from vTHE to Normal Timelock
       {
         target: vTHE,
         signature: "sweepTokenAndSync(uint256)",
-        params: [FIRST_SWEEP_AMOUNT],
+        params: [sweepAmount],
       },
 
       // Step 2: Approve vTHE to spend THE for bad debt repayment
       {
         target: THE,
         signature: "approve(address,uint256)",
-        params: [vTHE, TOTAL_THE_BAD_DEBT],
+        params: [vTHE, totalBadDebt],
       },
 
       // Step 3: Repay THE bad debt for each account
-      ...BAD_DEBT_ACCOUNTS.map(({ borrower, amount }) => ({
+      ...badDebtAccounts.map(({ borrower, amount }) => ({
         target: vTHE,
         signature: "repayBorrowBehalf(address,uint256)",
         params: [borrower, amount],
@@ -104,14 +125,14 @@ export const vipVPD854 = () => {
       {
         target: vTHE,
         signature: "sweepTokenAndSync(uint256)",
-        params: [SECOND_SWEEP_AMOUNT],
+        params: [totalBadDebt],
       },
 
       // Step 6: Transfer remaining THE to target address
       {
         target: THE,
         signature: "transfer(address,uint256)",
-        params: [TARGET_RECEIVER, FINAL_TRANSFER_AMOUNT],
+        params: [TARGET_RECEIVER, sweepAmount],
       },
     ],
     meta,
