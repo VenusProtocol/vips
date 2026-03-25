@@ -1,63 +1,100 @@
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
+import {
+  REPAYMENTS_FROM_RISK_FUND,
+  REPAYMENTS_FROM_TREASURY_PART1,
+  REPAYMENTS_FROM_TREASURY_PART2,
+  TokenRepayment,
+  USDT,
+  USDT_TO_OTC,
+  USDT_TREASURY_REIMBURSEMENT,
+  totalBNB,
+  totalForToken,
+} from "./amounts";
+
+const { bscmainnet } = NETWORK_ADDRESSES;
+
+export const NORMAL_TIMELOCK = bscmainnet.NORMAL_TIMELOCK;
 
 export const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
-export const TARGET_RECEIVER = "0x5e7bb1f600e42bc227755527895a282f782555ec";
+
+export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
+export const DEV_WALLET = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
 // TODO: Replace with deployed helper contract address
-export const THE_BAD_DEBT_HELPER = "0x0000000000000000000000000000000000000000";
+export const BAD_DEBT_HELPER = "0xb1f27c2abe2AaeB7E02f0f1d55fD23c4F5A07a67";
 
-export const BAD_DEBT_BORROWERS: string[] = [
-  "0x737bc98f1d34e19539c074b8ad1169d5d45da619",
-  "0x85ca0dff027102ea3fbf1c077524eab21d1f7927",
-  "0xa72e1756426100c6207421471449e2ba9a917e86",
-  "0x9958ed7f2441c208821ea14643224812a006d221",
-  "0x6efee96287b5e1a2ef966e25bae15a54bde9b83e",
-  "0x2c58d31559d65242cf7915a4fd89fcab9c96f7df",
-  "0xdff9e1b12dfb7103231128940a19c2896f049de8",
-  "0xa87f0d31846211ce417128a770c681fc342d3a74",
-];
+/**
+ * Source tokens to Timelock from Risk Fund or Treasury, then transfer to helper.
+ */
+const sourceAndTransferCommands = (token: TokenRepayment, source: "riskFund" | "treasury") => {
+  const total = totalForToken(token);
+  return [
+    // Source tokens to Timelock
+    ...(source === "riskFund"
+      ? [
+          {
+            target: RISK_FUND,
+            signature: "sweepTokenFromPool(address,address,address,uint256)",
+            params: [token.underlying, bscmainnet.UNITROLLER, NORMAL_TIMELOCK, total],
+          },
+        ]
+      : [
+          {
+            target: bscmainnet.VTREASURY,
+            signature: "withdrawTreasuryBEP20(address,uint256,address)",
+            params: [token.underlying, total, NORMAL_TIMELOCK],
+          },
+        ]),
+    // Transfer tokens from Timelock to helper
+    {
+      target: token.underlying,
+      signature: "transfer(address,uint256)",
+      params: [BAD_DEBT_HELPER, total],
+    },
+  ];
+};
 
-export const vipVPD854 = () => {
+export const vip690 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-690 [BNB Chain] $THE Market Resume and Bad Debt Handling",
-    description: `This VIP handles the recovery of the $THE market following the March 16 donation attack. It uses a helper contract (THEBadDebtHelper) to read live on-chain values at execution time, ensuring accurate repayment amounts regardless of interest accrual during the timelock delay.
+    title: "VIP-690 [BNB Chain] Bad Debt Repayment and $THE Market Recovery",
+    description: `This VIP repays all bad debt exceeding $10 in the BSC Core Pool (27 accounts, 19 tokens + native BNB) and handles recovery of the $THE market following the March 16 donation attack.
 
-The VIP performs the following steps:
+It uses a helper contract (BadDebtHelper) to execute all repayments atomically with live on-chain borrow balances, ensuring accurate repayment amounts regardless of interest accrual during the timelock delay.
 
-1. **Set helper as pending admin of vTHE**: Allow the helper contract to temporarily become admin.
+### Flow
 
-2. **Execute helper**: The helper atomically:
-   - Accepts admin of vTHE
-   - Sweeps all available THE liquidity from vTHE (live balance)
-   - Repays THE bad debt for all 8 accounts using live borrow balances
-   - Performs a second sweep to recover THE that flowed back via repayments
-   - Transfers all remaining THE to the designated receiver
-   - Sets timelock back as pending admin of vTHE
+1. **Source tokens to Timelock**: Sweep from Risk Fund (ETH, USDT, WBNB, BTCB) and withdraw from Treasury (CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE, SXP, FIL, TUSD, BNB).
 
-3. **Reclaim admin**: Timelock accepts admin of vTHE, restoring normal governance control.
+2. **Transfer BEP20 tokens to helper**: All sourced tokens are transferred to the BadDebtHelper contract.
 
-#### Bad Debt Accounts (THE)
+3. **THE market recovery**: Set helper as pending admin of vTHE so it can sweep THE liquidity.
 
-| Account | THE Debt |
-|---------|----------|
-| 0x737b...a619 | 1,869,957.97 |
-| 0x85ca...7927 | 54,367.63 |
-| 0xa72e...7e86 | 11,592.99 |
-| 0x9958...d221 | 2,773.70 |
-| 0x6efe...b83e | 1,160.39 |
-| 0x2c58...7df | 681.93 |
-| 0xdff9...9de8 | 428.45 |
-| 0xa87f...d3a74 | 360.81 |
+4. **Execute helper**: The helper atomically:
+   - Accepts admin of vTHE and sweeps all THE liquidity
+   - Repays bad debt for all 27 accounts across all 19 BEP20 tokens + THE using live borrow balances
+   - Repays native BNB debts
+   - Performs a second vTHE sweep to recover THE from repayments
+   - Transfers remaining THE to the designated receiver
+   - Returns any unused BEP20 tokens to the Timelock
+   - Hands vTHE admin back to Timelock
+
+5. **Reclaim admin**: Timelock accepts admin of vTHE.
+
+6. **Treasury reimbursement**: ~182,602 USDT swept from Risk Fund to Treasury.
+
+7. **OTC for shortfall**: ~1,601,225 USDT swept from Risk Fund to Dev Wallet for OTC conversion (CAKE + DAI shortfall).
 
 #### References
 
 - [THE Market Incident Post-Mortem](https://community.venus.io/t/the-market-incident-post-mortem/5712)
-- [VIP-600 Inflation Attack Patch](https://app.venus.io/#/governance/proposal/600?chainId=56)`,
+- [VIP-600 Inflation Attack Patch](https://app.venus.io/#/governance/proposal/600?chainId=56)
+- [Bad debt accounts reference](https://app.hex.tech/10609151-106a-4740-8982-17a9a4e59699/app/Venus-Bad-Debt-List-032iucgPVlHlorte5tRP4R/latest)
+- [VIP-564: Previous bad debt repayment](https://app.venus.io/#/governance/proposal/564?chainId=56)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -65,25 +102,71 @@ The VIP performs the following steps:
 
   return makeProposal(
     [
-      // Step 1: Set helper as pending admin of vTHE
+      // ════════════════════════════════════════════════════════
+      // Source tokens from Risk Fund → Timelock → Helper
+      // ════════════════════════════════════════════════════════
+      ...REPAYMENTS_FROM_RISK_FUND.flatMap(token => sourceAndTransferCommands(token, "riskFund")),
+
+      // ════════════════════════════════════════════════════════
+      // Source tokens from Treasury → Timelock → Helper
+      // ════════════════════════════════════════════════════════
+      ...REPAYMENTS_FROM_TREASURY_PART1.flatMap(token => sourceAndTransferCommands(token, "treasury")),
+      ...REPAYMENTS_FROM_TREASURY_PART2.flatMap(token => sourceAndTransferCommands(token, "treasury")),
+
+      // ════════════════════════════════════════════════════════
+      // Source native BNB from Treasury → Timelock
+      // (sent to helper via execute() call value)
+      // ════════════════════════════════════════════════════════
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBNB(uint256,address)",
+        params: [totalBNB(), NORMAL_TIMELOCK],
+      },
+
+      // ════════════════════════════════════════════════════════
+      // THE market: set helper as pending admin of vTHE
+      // ════════════════════════════════════════════════════════
       {
         target: vTHE,
         signature: "_setPendingAdmin(address)",
-        params: [THE_BAD_DEBT_HELPER],
+        params: [BAD_DEBT_HELPER],
       },
 
-      // Step 2: Helper accepts admin, sweeps, repays bad debt, transfers remainder, hands admin back
+      // ════════════════════════════════════════════════════════
+      // Execute helper — repays all bad debt atomically
+      // ════════════════════════════════════════════════════════
       {
-        target: THE_BAD_DEBT_HELPER,
+        target: BAD_DEBT_HELPER,
         signature: "execute()",
         params: [],
+        value: totalBNB().toString(),
       },
 
-      // Step 3: Timelock reclaims admin of vTHE
+      // ════════════════════════════════════════════════════════
+      // Timelock reclaims admin of vTHE
+      // ════════════════════════════════════════════════════════
       {
         target: vTHE,
         signature: "_acceptAdmin()",
         params: [],
+      },
+
+      // ════════════════════════════════════════════════════════
+      // Reimburse Treasury — sweep USDT from Risk Fund
+      // ════════════════════════════════════════════════════════
+      {
+        target: RISK_FUND,
+        signature: "sweepTokenFromPool(address,address,address,uint256)",
+        params: [USDT, bscmainnet.UNITROLLER, bscmainnet.VTREASURY, USDT_TREASURY_REIMBURSEMENT],
+      },
+
+      // ════════════════════════════════════════════════════════
+      // OTC — sweep USDT to Dev Wallet for CAKE+DAI shortfall
+      // ════════════════════════════════════════════════════════
+      {
+        target: RISK_FUND,
+        signature: "sweepTokenFromPool(address,address,address,uint256)",
+        params: [USDT, bscmainnet.UNITROLLER, DEV_WALLET, USDT_TO_OTC],
       },
     ],
     meta,
@@ -91,4 +174,4 @@ The VIP performs the following steps:
   );
 };
 
-export default vipVPD854;
+export default vip690;
