@@ -1,5 +1,3 @@
-import { BigNumber } from "ethers";
-import { ethers } from "hardhat";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -7,11 +5,11 @@ export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 export const THE = "0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11";
 export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
-
-// Target address for final THE transfer
 export const TARGET_RECEIVER = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
-// Bad debt accounts with THE borrows
+// TODO: Replace with deployed helper contract address
+export const THE_BAD_DEBT_HELPER = "0x0000000000000000000000000000000000000000";
+
 export const BAD_DEBT_BORROWERS: string[] = [
   "0x737bc98f1d34e19539c074b8ad1169d5d45da619",
   "0x85ca0dff027102ea3fbf1c077524eab21d1f7927",
@@ -23,51 +21,25 @@ export const BAD_DEBT_BORROWERS: string[] = [
   "0xa87f0d31846211ce417128a770c681fc342d3a74",
 ];
 
-/**
- * Fetch live on-chain values for the VIP at the current (or forked) block.
- * Returns sweep amount, per-borrower debts, and total bad debt.
- */
-export async function fetchVipValues() {
-  const vTokenContract = new ethers.Contract(
-    vTHE,
-    ["function getCash() view returns (uint256)", "function borrowBalanceStored(address) view returns (uint256)"],
-    ethers.provider,
-  );
-
-  const [cash, ...debts]: BigNumber[] = await Promise.all([
-    vTokenContract.getCash(),
-    ...BAD_DEBT_BORROWERS.map((borrower: string) => vTokenContract.borrowBalanceStored(borrower)),
-  ]);
-
-  const badDebtAccounts = BAD_DEBT_BORROWERS.map((borrower, i) => ({
-    borrower,
-    amount: debts[i],
-  }));
-
-  const totalBadDebt = debts.reduce((sum, debt) => sum.add(debt), BigNumber.from(0));
-
-  return {
-    sweepAmount: cash,
-    badDebtAccounts,
-    totalBadDebt,
-  };
-}
-
-export const vipVPD854 = async () => {
-  const { sweepAmount, badDebtAccounts, totalBadDebt } = await fetchVipValues();
-
+export const vipVPD854 = () => {
   const meta = {
     version: "v2",
     title: "VIP-690 [BNB Chain] $THE Market Resume and Bad Debt Handling",
-    description: `This VIP handles the recovery of the $THE market following the March 16 donation attack. The VIP performs the following steps:
+    description: `This VIP handles the recovery of the $THE market following the March 16 donation attack. It uses a helper contract (THEBadDebtHelper) to read live on-chain values at execution time, ensuring accurate repayment amounts regardless of interest accrual during the timelock delay.
 
-1. **Sweep available THE liquidity from vTHE**: Call sweepTokenAndSync on the vTHE contract to withdraw all available liquidity (~2M THE) to the Normal Timelock.
+The VIP performs the following steps:
 
-2. **Repay THE bad debt**: Using the recovered THE tokens, repay the THE borrows for all 8 accounts with THE-denominated bad debt (totalling ~1,941,323.86 THE). The THE tokens flow back into the vTHE contract through repayBorrowBehalf.
+1. **Set helper as pending admin of vTHE**: Allow the helper contract to temporarily become admin.
 
-3. **Second sweep**: After bad debt repayment, the THE liquidity flows back to vTHE. Call sweepTokenAndSync again to withdraw the remaining excess.
+2. **Execute helper**: The helper atomically:
+   - Accepts admin of vTHE
+   - Sweeps all available THE liquidity from vTHE (live balance)
+   - Repays THE bad debt for all 8 accounts using live borrow balances
+   - Performs a second sweep to recover THE that flowed back via repayments
+   - Transfers all remaining THE to the designated receiver
+   - Sets timelock back as pending admin of vTHE
 
-4. **Transfer remaining THE**: Transfer the recovered THE tokens to the designated address.
+3. **Reclaim admin**: Timelock accepts admin of vTHE, restoring normal governance control.
 
 #### Bad Debt Accounts (THE)
 
@@ -93,46 +65,25 @@ export const vipVPD854 = async () => {
 
   return makeProposal(
     [
-      // Step 1: Sweep all THE from vTHE to Normal Timelock
+      // Step 1: Set helper as pending admin of vTHE
       {
         target: vTHE,
-        signature: "sweepTokenAndSync(uint256)",
-        params: [sweepAmount],
+        signature: "_setPendingAdmin(address)",
+        params: [THE_BAD_DEBT_HELPER],
       },
 
-      // Step 2: Approve vTHE to spend THE for bad debt repayment
+      // Step 2: Helper accepts admin, sweeps, repays bad debt, transfers remainder, hands admin back
       {
-        target: THE,
-        signature: "approve(address,uint256)",
-        params: [vTHE, totalBadDebt],
+        target: THE_BAD_DEBT_HELPER,
+        signature: "execute()",
+        params: [],
       },
 
-      // Step 3: Repay THE bad debt for each account
-      ...badDebtAccounts.map(({ borrower, amount }) => ({
-        target: vTHE,
-        signature: "repayBorrowBehalf(address,uint256)",
-        params: [borrower, amount],
-      })),
-
-      // Step 4: Reset approval
-      {
-        target: THE,
-        signature: "approve(address,uint256)",
-        params: [vTHE, 0],
-      },
-
-      // Step 5: Second sweep — THE flowed back into vTHE via repayBorrowBehalf
+      // Step 3: Timelock reclaims admin of vTHE
       {
         target: vTHE,
-        signature: "sweepTokenAndSync(uint256)",
-        params: [totalBadDebt],
-      },
-
-      // Step 6: Transfer remaining THE to target address
-      {
-        target: THE,
-        signature: "transfer(address,uint256)",
-        params: [TARGET_RECEIVER, sweepAmount],
+        signature: "_acceptAdmin()",
+        params: [],
       },
     ],
     meta,

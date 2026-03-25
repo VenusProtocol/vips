@@ -9,7 +9,7 @@ import {
   NORMAL_TIMELOCK,
   TARGET_RECEIVER,
   THE,
-  fetchVipValues,
+  THE_BAD_DEBT_HELPER,
   vTHE,
   vipVPD854,
 } from "../../vips/vip-690/bscmainnet";
@@ -21,23 +21,15 @@ const BLOCK_NUMBER = 88459653;
 forking(BLOCK_NUMBER, async () => {
   let theToken: Contract;
   let vTheToken: Contract;
-  let timelockTheBalancePrev: BigNumber;
   let receiverTheBalancePrev: BigNumber;
   let exchangeRatePrev: BigNumber;
   let vTheCashPrev: BigNumber;
-  let sweepAmount: BigNumber;
-  let totalBadDebt: BigNumber;
   const borrowerDebtsPrev: Map<string, BigNumber> = new Map();
 
   before(async () => {
     theToken = new ethers.Contract(THE, IERC20_ABI, ethers.provider);
     vTheToken = new ethers.Contract(vTHE, VTOKEN_ABI, ethers.provider);
 
-    const vipValues = await fetchVipValues();
-    sweepAmount = vipValues.sweepAmount;
-    totalBadDebt = vipValues.totalBadDebt;
-
-    timelockTheBalancePrev = await theToken.balanceOf(NORMAL_TIMELOCK);
     receiverTheBalancePrev = await theToken.balanceOf(TARGET_RECEIVER);
     exchangeRatePrev = await vTheToken.exchangeRateStored();
     vTheCashPrev = await vTheToken.getCash();
@@ -49,9 +41,8 @@ forking(BLOCK_NUMBER, async () => {
   });
 
   describe("Pre-VIP behavior", () => {
-    it("should have THE cash in vTHE matching sweep amount", async () => {
+    it("should have THE cash in vTHE", async () => {
       expect(vTheCashPrev).to.be.gt(0);
-      expect(vTheCashPrev).to.equal(sweepAmount);
     });
 
     it("should have non-zero bad debt for all accounts", async () => {
@@ -62,12 +53,21 @@ forking(BLOCK_NUMBER, async () => {
     });
 
     it("should have sufficient cash to cover all bad debt", async () => {
-      expect(sweepAmount).to.be.gt(totalBadDebt);
+      let totalDebt = BigNumber.from(0);
+      for (const borrower of BAD_DEBT_BORROWERS) {
+        totalDebt = totalDebt.add(borrowerDebtsPrev.get(borrower)!);
+      }
+      expect(vTheCashPrev).to.be.gt(totalDebt);
     });
 
     it("should have inflated exchange rate", async () => {
       // Pre-attack fair rate was ~1.044e28; inflated rate is ~4.465e28
       expect(exchangeRatePrev).to.be.gt(ethers.utils.parseUnits("2", 28));
+    });
+
+    it("should have Normal Timelock as admin of vTHE", async () => {
+      const admin = await vTheToken.admin();
+      expect(admin).to.equal(NORMAL_TIMELOCK);
     });
   });
 
@@ -76,11 +76,15 @@ forking(BLOCK_NUMBER, async () => {
       await expectEvents(txResponse, [VTOKEN_ABI], ["RepayBorrow"], [BAD_DEBT_BORROWERS.length]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["TokenSwept"], [2]);
       await expectEvents(txResponse, [VTOKEN_ABI], ["CashSynced"], [2]);
-      await expectEvents(txResponse, [IERC20_ABI], ["Transfer"], [BAD_DEBT_BORROWERS.length + 4]);
     },
   });
 
   describe("Post-VIP behavior", () => {
+    it("should have Normal Timelock as admin of vTHE", async () => {
+      const admin = await vTheToken.admin();
+      expect(admin).to.equal(NORMAL_TIMELOCK);
+    });
+
     it("should have reduced exchange rate towards pre-attack fair rate", async () => {
       const exchangeRatePost = await vTheToken.exchangeRateStored();
       expect(exchangeRatePost).to.be.lt(exchangeRatePrev);
@@ -88,38 +92,26 @@ forking(BLOCK_NUMBER, async () => {
       expect(exchangeRatePost).to.be.gt(ethers.utils.parseUnits("1", 28));
     });
 
-    it("should have repaid THE bad debt for all accounts", async () => {
+    it("should have fully repaid THE bad debt for all accounts", async () => {
       for (const borrower of BAD_DEBT_BORROWERS) {
-        const debtPrev = borrowerDebtsPrev.get(borrower)!;
         const debtPost = await vTheToken.borrowBalanceStored(borrower);
-        // Debt should have decreased by approximately the full amount
-        expect(debtPrev.sub(debtPost)).to.be.closeTo(debtPrev, debtPrev.div(100));
+        expect(debtPost).to.equal(0);
       }
     });
 
-    it("should have near-zero bad debt remaining for all accounts", async () => {
-      for (const borrower of BAD_DEBT_BORROWERS) {
-        const debtPost = await vTheToken.borrowBalanceStored(borrower);
-        const debtPrev = borrowerDebtsPrev.get(borrower)!;
-        // Remaining debt should be small relative to original (only interest accrual during 48h timelock)
-        expect(debtPost).to.be.lt(debtPrev.div(10));
-      }
-    });
-
-    it("should have zero THE approval remaining on vTHE", async () => {
-      const allowance = await theToken.allowance(NORMAL_TIMELOCK, vTHE);
+    it("should have zero THE approval from helper on vTHE", async () => {
+      const allowance = await theToken.allowance(THE_BAD_DEBT_HELPER, vTHE);
       expect(allowance).to.equal(0);
     });
 
     it("should have transferred THE to target receiver", async () => {
       const receiverBalance = await theToken.balanceOf(TARGET_RECEIVER);
-      const received = receiverBalance.sub(receiverTheBalancePrev);
-      expect(received).to.be.closeTo(sweepAmount, sweepAmount.div(100));
+      expect(receiverBalance.sub(receiverTheBalancePrev)).to.be.gt(0);
     });
 
-    it("should have no THE remaining on the Normal Timelock", async () => {
-      const timelockBalance = await theToken.balanceOf(NORMAL_TIMELOCK);
-      expect(timelockBalance.sub(timelockTheBalancePrev)).to.be.lt(ethers.utils.parseEther("1"));
+    it("should have no THE remaining on the helper contract", async () => {
+      const helperBalance = await theToken.balanceOf(THE_BAD_DEBT_HELPER);
+      expect(helperBalance).to.equal(0);
     });
 
     it("should have updated vTHE cash after sweeps and repayments", async () => {
