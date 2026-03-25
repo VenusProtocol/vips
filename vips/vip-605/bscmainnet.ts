@@ -7,8 +7,6 @@ import { REPAYMENTS_FROM_RISK_FUND, REPAYMENTS_FROM_TREASURY_PART1, TokenRepayme
 const { bscmainnet } = NETWORK_ADDRESSES;
 
 export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
-export const CORE_COMPTROLLER = "0xfD36E2c2a6789Db23113685031d7F16329158384";
-export const NORMAL_TIMELOCK = "0x939bD8d64c0A9583A7Dcea9933f7b21697ab6396";
 
 export const bep20RepayCommands = (token: TokenRepayment, source: "riskFund" | "treasury") => {
   const total = totalForToken(token);
@@ -19,14 +17,14 @@ export const bep20RepayCommands = (token: TokenRepayment, source: "riskFund" | "
           {
             target: RISK_FUND,
             signature: "sweepTokenFromPool(address,address,address,uint256)",
-            params: [token.underlying, CORE_COMPTROLLER, NORMAL_TIMELOCK, total],
+            params: [token.underlying, bscmainnet.UNITROLLER, bscmainnet.NORMAL_TIMELOCK, total],
           },
         ]
       : [
           {
             target: bscmainnet.VTREASURY,
             signature: "withdrawTreasuryBEP20(address,uint256,address)",
-            params: [token.underlying, total, NORMAL_TIMELOCK],
+            params: [token.underlying, total, bscmainnet.NORMAL_TIMELOCK],
           },
         ]),
     // Approve vToken to spend underlying
@@ -72,7 +70,7 @@ The remaining Treasury BEP20 repayments (SXP, FIL, TUSD), native BNB repayments,
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/XXX)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/682)
 - [Bad debt accounts reference](https://app.hex.tech/10609151-106a-4740-8982-17a9a4e59699/app/Venus-Bad-Debt-List-032iucgPVlHlorte5tRP4R/latest)
 - [VIP-564: Previous bad debt repayment](https://app.venus.io/#/governance/proposal/564?chainId=56)`,
     forDescription: "Execute this proposal",

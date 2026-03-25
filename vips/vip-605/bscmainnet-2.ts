@@ -11,7 +11,7 @@ import {
   totalBNB,
   vBNB,
 } from "./amounts";
-import { CORE_COMPTROLLER, NORMAL_TIMELOCK, RISK_FUND, bep20RepayCommands } from "./bscmainnet";
+import { RISK_FUND, bep20RepayCommands } from "./bscmainnet";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
@@ -41,8 +41,7 @@ Sweeps ~1,601,225 USDT from the Risk Fund to the [Development Team wallet](https
 
 #### References
 
-- [VIP simulation](https://github.com/VenusProtocol/vips/pull/XXX)
-- [VIP-605 (1/2): Bad debt repayment part 1](https://app.venus.io/#/governance/proposal/605?chainId=56)
+- [VIP simulation](https://github.com/VenusProtocol/vips/pull/682)
 - [Bad debt accounts reference](https://app.hex.tech/10609151-106a-4740-8982-17a9a4e59699/app/Venus-Bad-Debt-List-032iucgPVlHlorte5tRP4R/latest)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
@@ -62,7 +61,7 @@ Sweeps ~1,601,225 USDT from the Risk Fund to the [Development Team wallet](https
       {
         target: bscmainnet.VTREASURY,
         signature: "withdrawTreasuryBNB(uint256,address)",
-        params: [totalBNB(), NORMAL_TIMELOCK],
+        params: [totalBNB(), bscmainnet.NORMAL_TIMELOCK],
       },
       ...BNB_REPAYMENTS.map(b => ({
         target: vBNB,
@@ -77,7 +76,7 @@ Sweeps ~1,601,225 USDT from the Risk Fund to the [Development Team wallet](https
       {
         target: RISK_FUND,
         signature: "sweepTokenFromPool(address,address,address,uint256)",
-        params: [USDT, CORE_COMPTROLLER, bscmainnet.VTREASURY, USDT_TREASURY_REIMBURSEMENT],
+        params: [USDT, bscmainnet.UNITROLLER, bscmainnet.VTREASURY, USDT_TREASURY_REIMBURSEMENT],
       },
 
       // ════════════════════════════════════════════════════════
@@ -86,7 +85,7 @@ Sweeps ~1,601,225 USDT from the Risk Fund to the [Development Team wallet](https
       {
         target: RISK_FUND,
         signature: "sweepTokenFromPool(address,address,address,uint256)",
-        params: [USDT, CORE_COMPTROLLER, DEV_WALLET, USDT_TO_OTC],
+        params: [USDT, bscmainnet.UNITROLLER, DEV_WALLET, USDT_TO_OTC],
       },
     ],
     meta,
