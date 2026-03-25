@@ -332,9 +332,10 @@ forking(BLOCK_NUMBER, async () => {
           // Some tokens may have been returned as dust, so allow small increase.
           if (balancePost.gt(balancePrev)) {
             const increase = balancePost.sub(balancePrev);
+            const decimals = await token.decimals();
             // Dust returned from helper should be < 1 token unit
             expect(increase).to.be.lt(
-              ethers.utils.parseUnits("1", 18),
+              ethers.utils.parseUnits("1", decimals),
               `Timelock should not have gained significant ${repayment.name}`,
             );
           }
@@ -347,15 +348,27 @@ forking(BLOCK_NUMBER, async () => {
         expect(balancePost).to.be.lte(balancePrev);
       });
 
-      it("should not have significant BNB change on Timelock", async () => {
-        const balancePost = await ethers.provider.getBalance(NORMAL_TIMELOCK);
+      it("should log BNB flow through Timelock and Helper", async () => {
+        const timelockBnbBalancePost = await ethers.provider.getBalance(NORMAL_TIMELOCK);
+        const helperBnbBalancePost = await ethers.provider.getBalance(BAD_DEBT_HELPER);
+
+        console.log(`    Total BNB sent to helper for repayment: ${ethers.utils.formatEther(totalBNB())} BNB`);
         console.log(
-          `    Timelock BNB: ${ethers.utils.formatEther(timelockBnbBalancePrev)} → ${ethers.utils.formatEther(
-            balancePost,
+          `    Helper BNB: ${ethers.utils.formatEther(helperBnbBalancePrev)} → ${ethers.utils.formatEther(
+            helperBnbBalancePost,
           )}`,
         );
-        // Timelock receives BNB from Treasury, sends to helper, gets unused back.
-        // May also receive BNB from other protocol interactions during execution.
+        console.log(
+          `    Timelock BNB: ${ethers.utils.formatEther(timelockBnbBalancePrev)} → ${ethers.utils.formatEther(
+            timelockBnbBalancePost,
+          )}`,
+        );
+        // Note: Timelock's on-chain BNB balance (~12 BNB) is overwritten to 40 BNB by
+        // initMainnetUser (src/vip-framework/index.ts:144) via hardhat_setBalance to provide
+        // gas for proposal execution during simulation. The original 12 BNB is not lost on-chain —
+        // it only appears overwritten in the forked test environment. On the real chain, the
+        // Timelock's BNB stays untouched by this — it only receives/sends BNB as the VIP
+        // specifies (Treasury → Timelock → Helper → vBNB repayments).
       });
     });
 

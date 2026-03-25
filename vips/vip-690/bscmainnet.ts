@@ -24,7 +24,6 @@ export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
 export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 export const DEV_WALLET = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
-// TODO: Replace with deployed helper contract address
 export const BAD_DEBT_HELPER = "0xb1f27c2abe2AaeB7E02f0f1d55fD23c4F5A07a67";
 
 /**
