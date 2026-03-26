@@ -15,7 +15,7 @@ import {
   totalBNB,
   totalForToken,
   vBNB,
-} from "../../vips/vip-690/amounts";
+} from "../../vips/vip-604/amounts";
 import {
   BAD_DEBT_HELPER,
   DEV_WALLET,
@@ -23,8 +23,8 @@ import {
   RISK_FUND,
   THE,
   vTHE,
-  vip690,
-} from "../../vips/vip-690/bscmainnet";
+  vip604,
+} from "../../vips/vip-604/bscmainnet";
 import IERC20_ABI from "./abi/IERC20UpgradableAbi.json";
 import VTOKEN_ABI from "./abi/VBep20Abi.json";
 
@@ -212,7 +212,7 @@ forking(BLOCK_NUMBER, async () => {
   // Execute VIP
   // ══════════════════════════════════════════════════════════
 
-  testVip("VIP-690 Bad Debt Repayment and $THE Market Recovery", await vip690());
+  testVip("VIP-604 Bad Debt Repayment and THE Market Recovery", await vip604());
 
   // ══════════════════════════════════════════════════════════
   // Post-VIP checks

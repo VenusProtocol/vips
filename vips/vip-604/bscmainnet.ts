@@ -56,43 +56,80 @@ const sourceAndTransferCommands = (token: TokenRepayment, source: "riskFund" | "
   ];
 };
 
-export const vip690 = () => {
+export const vip604 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-690 [BNB Chain] Bad Debt Repayment and $THE Market Recovery",
-    description: `This VIP repays all bad debt exceeding $10 in the BSC Core Pool (27 accounts, 19 tokens + native BNB) and handles recovery of the $THE market following the March 16 donation attack.
+    title: "VIP-604 [BNB Chain] Bad Debt Repayment and THE Market Recovery",
+    description: `This proposal resolves all outstanding bad debt in Venus Protocol's BNB Chain Core Pool (~**$2,203,024 across 19 assets**) in a single VIP.
+The repayment covers:
+- Positions directly attributable to the THE market incident
+- All accumulated bad debt from prior protocol events
 
-It uses a helper contract (BadDebtHelper) to execute all repayments atomically with live on-chain borrow balances, ensuring accurate repayment amounts regardless of interest accrual during the timelock delay.
+The intent of this arrangement is to prioritise repayment using available native tokens across both the Treasury and Risk Fund, while ensuring that the end state leaves the Risk Fund as the sole source of funds consumed, with the Treasury restored to its pre-execution balance.
 
-### Flow
+Execution details:
+1. THE bad debt will be repaid as part of the vTHE exchange rate recovery operation: the VIP will call sweepTokenAndSync to remove the attacker-donated tokens, repay the ~1,919,129 THE bad debt to allow a second sweep, and restore the exchange rate from 4.466e28 to ~1.04e28.
+2. A portion of CAKE bad debt will be transferred directly from the Venus Treasury. Only the shortfall will be repaid after OTC swap is completed.
+3. For the remaining CAKE and the full amount of DAI, USDT will be transferred from the Risk Fund to the finance team, who will acquire the required CAKE and DAI via OTC swaps before repayment.
+4. The remaining 16 assets will be covered using native tokens from the Venus Risk Fund or Treasury.
+5. Reinstate any Treasury funds drawn down during the repayment, an equivalent amount of USDT (~182,602 USDT) will be transferred from the Risk Fund back to the Treasury following execution.
 
-1. **Source tokens to Timelock**: Sweep from Risk Fund (ETH, USDT, WBNB, BTCB) and withdraw from Treasury (CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE, SXP, FIL, TUSD, BNB).
+Upon the above execution, the BNB Chain Core Pool balance sheet will be fully restored to a clean state.
 
-2. **Transfer BEP20 tokens to helper**: All sourced tokens are transferred to the BadDebtHelper contract.
+> ⚠️ **Price Disclaimer**: All USD values shown in this proposal are indicative only. Amounts are derived from snapshot data taken at the time of analysis and do not reflect current market prices. Actual token quantities to be transferred are fixed; USD equivalents will vary at time of execution.
 
-3. **THE market recovery**: Set helper as pending admin of vTHE so it can sweep THE liquidity.
+**Changes**
 
-4. **Execute helper**: The helper atomically:
-   - Accepts admin of vTHE and sweeps all THE liquidity
-   - Repays bad debt for all 27 accounts across all 19 BEP20 tokens + THE using live borrow balances
-   - Repays native BNB debts
-   - Performs a second vTHE sweep to recover THE from repayments
-   - Transfers remaining THE to the designated receiver
-   - Returns any unused BEP20 tokens to the Timelock
-   - Hands vTHE admin back to Timelock
+1. **Restore vTHE exchange rate and repay THE bad debt via sweepTokenAndSync**
+   - Sweep all available THE (~2,102,142 THE) out of the vTHE contract to reduce the inflated cash balance
+   - Repay 1,919,128.96 THE of bad debt (~$347,724), recycling tokens back into the contract
+   - Sweep again to bring the exchange rate from 4.466e28 → ~1.04e28 (within ~2% of fair pre-attack value)
+   - All Supply, Borrow, and Liquidation actions on the vTHE market will be paused during execution and resumed after the rate stabilises
 
-5. **Reclaim admin**: Timelock accepts admin of vTHE.
+2. **Transfer CAKE from the Venus Treasury and source remaining CAKE via OTC to repay CAKE bad debt**
+   - 146,760.42 CAKE transferred directly from the Venus Treasury
+   - Remaining 1,037,431.74 CAKE (~$1,560,706) sourced by transferring USDT from the Risk Fund and swapping via OTC
+   - Total CAKE needed: 1,184,192.16 CAKE (~$1,781,492)
 
-6. **Treasury reimbursement**: ~237,000 USDT swept from Risk Fund to Treasury.
+3. **Transfer USDT from the Risk Fund to repay DAI bad debt via OTC**
+   - USDT transferred from the Venus Risk Fund and swapped to DAI via OTC arrangement coordinated by the finance team
+   - DAI needed: 57,834.42 DAI (~$57,833)
+   - Source: Venus Risk Fund
 
-7. **OTC for shortfall**: ~1,520,000 USDT swept from Risk Fund to Dev Wallet for OTC conversion (CAKE + DAI shortfall).
+4. **Transfer native tokens from the Risk Fund or Treasury to repay remaining asset bad debt**
+   - BNB: 15.15 (~$10,231)
+   - ETH: 1.60 (~$3,720)
+   - USDT: 1,611.07 (~$1,611)
+   - WBNB: 0.21 (~$139)
+   - XRP: 89.67 (~$138)
+   - BTCB: 0.0011 (~$83)
+   - BCH: 0.0365 (~$17)
+   - LTC: 0.137 (~$8)
+   - LINK: 0.729 (~$7)
+   - ADA: 24.70 (~$7)
+   - USDC: 4.72 (~$5)
+   - AAVE: 0.0376 (~$5)
+   - DOGE: 38.93 (~$4)
+   - SXP: 16.77 (~$0.21)
+   - FIL: 0.168 (~$0.16)
+   - TUSD: 0.014 (~$0.01)
+   - Source: Venus Risk Fund / Venus Treasury
 
-#### References
+**Summary**
 
-- [THE Market Incident Post-Mortem](https://community.venus.io/t/the-market-incident-post-mortem/5712)
-- [VIP-600 Inflation Attack Patch](https://app.venus.io/#/governance/proposal/600?chainId=56)
-- [Bad debt accounts reference](https://app.hex.tech/10609151-106a-4740-8982-17a9a4e59699/app/Venus-Bad-Debt-List-032iucgPVlHlorte5tRP4R/latest)
-- [VIP-564: Previous bad debt repayment](https://app.venus.io/#/governance/proposal/564?chainId=56)`,
+If approved, this VIP will Fully repay **~$2,203,024 in total outstanding bad debt across 19 assets:**
+- Restore the **vTHE exchange rate** from 4.466e28 to ~1.04e28 via sweepTokenAndSync, clearing 1,919,128.96 THE (~$347,724) bad debt
+- Transfer **146,760.42 CAKE** from the Venus Treasury and source the remaining **1,037,431.74 CAKE** (~$1,560,706) via OTC swap funded by USDT from the Risk Fund, fully repaying the CAKE bad debt position
+- Cover the **DAI bad debt** (57,834.42 DAI) via USDT transferred from the Risk Fund and swapped via OTC by the finance team
+- Transfer **native tokens** from the Venus Risk Fund or Treasury to repay bad debt across the remaining **16 asset positions** (~$15,975) in the BNB Chain Core Pool
+- Transfer **~182,602 USDT from the Venus Risk Fund back to the Venus Treasury** to reinstate all Treasury funds used during repayment, ensuring the Risk Fund bears the full cost and the Treasury is restored to its pre-execution balance
+
+**References**
+
+- THE event Community Post: [[BNB Chain] THE Market Bad Debt Repayment](https://community.venus.io/t/bnb-chain-the-market-bad-debt-repayment/5719)
+- THE exchange Rate Recovery: [THE Exchange Rate Recovery — Mechanism & Impact Analysis](https://community.venus.io/t/the-exchange-rate-recovery-mechanism-impact-analysis/5728)
+- THE Market Incident Post-Mortem: https://community.venus.io/t/the-market-incident-post-mortem/5712
+- GitHub PR: [https://github.com/VenusProtocol/vips/pull/689](https://github.com/VenusProtocol/vips/pull/689)`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -171,4 +208,4 @@ It uses a helper contract (BadDebtHelper) to execute all repayments atomically w
   );
 };
 
-export default vip690;
+export default vip604;
