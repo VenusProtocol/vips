@@ -72,7 +72,7 @@ Execution details:
 2. A portion of CAKE bad debt will be transferred directly from the Venus Treasury. Only the shortfall will be repaid after OTC swap is completed.
 3. For the remaining CAKE and the full amount of DAI, USDT will be transferred from the Risk Fund to the finance team, who will acquire the required CAKE and DAI via OTC swaps before repayment.
 4. The remaining 16 assets will be covered using native tokens from the Venus Risk Fund or Treasury.
-5. Reinstate any Treasury funds drawn down during the repayment, an equivalent amount of USDT (~182,602 USDT) will be transferred from the Risk Fund back to the Treasury following execution.
+5. Reinstate any Treasury funds drawn down during the repayment, an equivalent amount of USDT (~237,000 USDT) will be transferred from the Risk Fund back to the Treasury following execution.
 
 Upon the above execution, the BNB Chain Core Pool balance sheet will be fully restored to a clean state.
 
@@ -122,7 +122,7 @@ If approved, this VIP will Fully repay **~$2,203,024 in total outstanding bad de
 - Transfer **146,760.42 CAKE** from the Venus Treasury and source the remaining **1,037,431.74 CAKE** (~$1,560,706) via OTC swap funded by USDT from the Risk Fund, fully repaying the CAKE bad debt position
 - Cover the **DAI bad debt** (57,834.42 DAI) via USDT transferred from the Risk Fund and swapped via OTC by the finance team
 - Transfer **native tokens** from the Venus Risk Fund or Treasury to repay bad debt across the remaining **16 asset positions** (~$15,975) in the BNB Chain Core Pool
-- Transfer **~182,602 USDT from the Venus Risk Fund back to the Venus Treasury** to reinstate all Treasury funds used during repayment, ensuring the Risk Fund bears the full cost and the Treasury is restored to its pre-execution balance
+- Transfer **~237,000 USDT from the Venus Risk Fund back to the Venus Treasury** to reinstate all Treasury funds used during repayment, ensuring the Risk Fund bears the full cost and the Treasury is restored to its pre-execution balance
 
 **References**
 
