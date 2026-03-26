@@ -4,8 +4,7 @@ import { makeProposal } from "src/utils";
 
 import {
   REPAYMENTS_FROM_RISK_FUND,
-  REPAYMENTS_FROM_TREASURY_PART1,
-  REPAYMENTS_FROM_TREASURY_PART2,
+  REPAYMENTS_FROM_TREASURY,
   TokenRepayment,
   USDT,
   USDT_TO_OTC,
@@ -109,8 +108,7 @@ It uses a helper contract (BadDebtHelper) to execute all repayments atomically w
       // ════════════════════════════════════════════════════════
       // Source tokens from Treasury → Timelock → Helper
       // ════════════════════════════════════════════════════════
-      ...REPAYMENTS_FROM_TREASURY_PART1.flatMap(token => sourceAndTransferCommands(token, "treasury")),
-      ...REPAYMENTS_FROM_TREASURY_PART2.flatMap(token => sourceAndTransferCommands(token, "treasury")),
+      ...REPAYMENTS_FROM_TREASURY.flatMap(token => sourceAndTransferCommands(token, "treasury")),
 
       // ════════════════════════════════════════════════════════
       // Source native BNB from Treasury → Timelock

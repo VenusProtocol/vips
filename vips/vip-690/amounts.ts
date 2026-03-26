@@ -151,9 +151,9 @@ export const REPAYMENTS_FROM_RISK_FUND: TokenRepayment[] = [
 // Treasury tokens withdrawn → Timelock repays → Risk Fund reimburses Treasury with USDT
 // ──────────────────────────────────────────────────────────
 
-// BEP20 tokens from Treasury — Part 1 (VIP-605): CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE
-// NOTE: THE repayment is handled separately in VIP-690 via sweepTokenAndSync
-export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
+// BEP20 tokens from Treasury: CAKE, DAI, XRP, BCH, LTC, LINK, ADA, USDC, AAVE, DOGE, SXP, FIL, TUSD
+// NOTE: THE repayment is handled separately via sweepTokenAndSync
+export const REPAYMENTS_FROM_TREASURY: TokenRepayment[] = [
   // Partially covered tokens (remaining sourced via OTC in Part 3)
   {
     name: "CAKE",
@@ -250,10 +250,6 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     vToken: vDOGE,
     borrowers: [{ address: ACCOUNT_19, amount: withOverhead(parseUnits("38.931", 8)) }],
   },
-];
-
-// BEP20 tokens from Treasury — Part 2: SXP, FIL, TUSD
-export const REPAYMENTS_FROM_TREASURY_PART2: TokenRepayment[] = [
   {
     name: "SXP",
     underlying: SXP,

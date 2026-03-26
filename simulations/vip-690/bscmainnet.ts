@@ -7,8 +7,7 @@ import { forking, testVip } from "src/vip-framework";
 import {
   BNB_REPAYMENTS,
   REPAYMENTS_FROM_RISK_FUND,
-  REPAYMENTS_FROM_TREASURY_PART1,
-  REPAYMENTS_FROM_TREASURY_PART2,
+  REPAYMENTS_FROM_TREASURY,
   TokenRepayment,
   USDT,
   USDT_TO_OTC,
@@ -46,11 +45,7 @@ const THE_BORROWERS: string[] = [
   "0xa87f0d31846211ce417128a770c681fc342d3a74",
 ];
 
-const ALL_BEP20_REPAYMENTS: TokenRepayment[] = [
-  ...REPAYMENTS_FROM_RISK_FUND,
-  ...REPAYMENTS_FROM_TREASURY_PART1,
-  ...REPAYMENTS_FROM_TREASURY_PART2,
-];
+const ALL_BEP20_REPAYMENTS: TokenRepayment[] = [...REPAYMENTS_FROM_RISK_FUND, ...REPAYMENTS_FROM_TREASURY];
 
 const shortAddr = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
@@ -183,7 +178,7 @@ forking(BLOCK_NUMBER, async () => {
         });
       }
 
-      const allTreasuryRepayments = [...REPAYMENTS_FROM_TREASURY_PART1, ...REPAYMENTS_FROM_TREASURY_PART2];
+      const allTreasuryRepayments = REPAYMENTS_FROM_TREASURY;
       for (const repayment of allTreasuryRepayments) {
         it(`should have sufficient ${repayment.name} in Treasury`, async () => {
           const token = new ethers.Contract(repayment.underlying, IERC20_ABI, ethers.provider);
