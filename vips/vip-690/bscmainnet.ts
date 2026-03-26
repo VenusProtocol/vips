@@ -84,9 +84,9 @@ It uses a helper contract (BadDebtHelper) to execute all repayments atomically w
 
 5. **Reclaim admin**: Timelock accepts admin of vTHE.
 
-6. **Treasury reimbursement**: ~182,602 USDT swept from Risk Fund to Treasury.
+6. **Treasury reimbursement**: ~237,000 USDT swept from Risk Fund to Treasury.
 
-7. **OTC for shortfall**: ~1,601,225 USDT swept from Risk Fund to Dev Wallet for OTC conversion (CAKE + DAI shortfall).
+7. **OTC for shortfall**: ~1,520,000 USDT swept from Risk Fund to Dev Wallet for OTC conversion (CAKE + DAI shortfall).
 
 #### References
 

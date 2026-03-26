@@ -299,8 +299,8 @@ export const USDT_TO_OTC = parseUnits("1520000", 18);
 // ──────────────────────────────────────────────────────────
 // Treasury reimbursement — USDT equivalent of all tokens withdrawn from Treasury
 // ──────────────────────────────────────────────────────────
-// Estimated ~$182,602 based on token prices at time of analysis (THE portion removed, handled in VIP-690)
-export const USDT_TREASURY_REIMBURSEMENT = parseUnits("182602", 18);
+// ~$237,000: CAKE ~$210k + DAI ~$17.3k + BNB ~$10.1k + others ~$177
+export const USDT_TREASURY_REIMBURSEMENT = parseUnits("237000", 18);
 
 // ──────────────────────────────────────────────────────────
 // Helper to compute total amount per token
