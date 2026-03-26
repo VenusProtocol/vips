@@ -30,7 +30,7 @@ import VTOKEN_ABI from "./abi/VBep20Abi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 88782079;
+const BLOCK_NUMBER = 88804635;
 
 const THE_TARGET_RECEIVER = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
@@ -262,10 +262,24 @@ forking(BLOCK_NUMBER, async () => {
         console.log(`    │ Component        │ Before                   │ After                    │`);
         console.log(`    ├──────────────────┼──────────────────────────┼──────────────────────────┤`);
         console.log(`    │ cash             │ ${fmt(vTheCashPrev, 18).padEnd(24)} │ ${fmt(cashPost, 18).padEnd(24)} │`);
-        console.log(`    │ totalBorrows     │ ${fmt(vTheTotalBorrowsPrev, 18).padEnd(24)} │ ${fmt(borrowsPost, 18).padEnd(24)} │`);
-        console.log(`    │ totalReserves    │ ${fmt(vTheTotalReservesPrev, 18).padEnd(24)} │ ${fmt(reservesPost, 18).padEnd(24)} │`);
-        console.log(`    │ totalSupply      │ ${vTheTotalSupplyPrev.toString().padEnd(24)} │ ${supplyPost.toString().padEnd(24)} │`);
-        console.log(`    │ exchangeRate     │ ${fmt(exchangeRatePrev, 28).padEnd(24)} │ ${fmt(exchangeRatePost, 28).padEnd(24)} │`);
+        console.log(
+          `    │ totalBorrows     │ ${fmt(vTheTotalBorrowsPrev, 18).padEnd(24)} │ ${fmt(borrowsPost, 18).padEnd(24)} │`,
+        );
+        console.log(
+          `    │ totalReserves    │ ${fmt(vTheTotalReservesPrev, 18).padEnd(24)} │ ${fmt(reservesPost, 18).padEnd(
+            24,
+          )} │`,
+        );
+        console.log(
+          `    │ totalSupply      │ ${vTheTotalSupplyPrev.toString().padEnd(24)} │ ${supplyPost
+            .toString()
+            .padEnd(24)} │`,
+        );
+        console.log(
+          `    │ exchangeRate     │ ${fmt(exchangeRatePrev, 28).padEnd(24)} │ ${fmt(exchangeRatePost, 28).padEnd(
+            24,
+          )} │`,
+        );
         const borrowsRepaid = vTheTotalBorrowsPrev.sub(borrowsPost);
         const totalSwept = received.add(borrowsRepaid);
         console.log(`    ├──────────────────┼──────────────────────────┴──────────────────────────┤`);
