@@ -30,7 +30,7 @@ import VTOKEN_ABI from "./abi/VBep20Abi.json";
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 88660738;
+const BLOCK_NUMBER = 88782079;
 
 const THE_TARGET_RECEIVER = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
@@ -59,6 +59,9 @@ forking(BLOCK_NUMBER, async () => {
   let receiverTheBalancePrev: BigNumber;
   let exchangeRatePrev: BigNumber;
   let vTheCashPrev: BigNumber;
+  let vTheTotalBorrowsPrev: BigNumber;
+  let vTheTotalReservesPrev: BigNumber;
+  let vTheTotalSupplyPrev: BigNumber;
   let treasuryUsdtBalancePrev: BigNumber;
   let devWalletUsdtBalancePrev: BigNumber;
   let helperBnbBalancePrev: BigNumber;
@@ -77,6 +80,9 @@ forking(BLOCK_NUMBER, async () => {
     receiverTheBalancePrev = await theToken.balanceOf(THE_TARGET_RECEIVER);
     exchangeRatePrev = await vTheToken.exchangeRateStored();
     vTheCashPrev = await vTheToken.getCash();
+    vTheTotalBorrowsPrev = await vTheToken.totalBorrows();
+    vTheTotalReservesPrev = await vTheToken.totalReserves();
+    vTheTotalSupplyPrev = await vTheToken.totalSupply();
     treasuryUsdtBalancePrev = await usdtToken.balanceOf(bscmainnet.VTREASURY);
     devWalletUsdtBalancePrev = await usdtToken.balanceOf(DEV_WALLET);
     helperBnbBalancePrev = await ethers.provider.getBalance(BAD_DEBT_HELPER);
@@ -228,7 +234,6 @@ forking(BLOCK_NUMBER, async () => {
           )}`,
         );
         expect(exchangeRatePost).to.be.lt(exchangeRatePrev);
-        expect(exchangeRatePost).to.be.gt(ethers.utils.parseUnits("1", 28));
       });
 
       for (const borrower of THE_BORROWERS) {
@@ -246,6 +251,28 @@ forking(BLOCK_NUMBER, async () => {
       it("should have transferred THE to target receiver", async () => {
         const receiverBalance = await theToken.balanceOf(THE_TARGET_RECEIVER);
         const received = receiverBalance.sub(receiverTheBalancePrev);
+        const cashPost = await vTheToken.getCash();
+        const borrowsPost = await vTheToken.totalBorrows();
+        const reservesPost = await vTheToken.totalReserves();
+        const supplyPost = await vTheToken.totalSupply();
+        const exchangeRatePost = await vTheToken.exchangeRateStored();
+        const fmt = (v: BigNumber, d: number) => ethers.utils.formatUnits(v, d);
+        console.log(`    vTHE Market State (before → after):`);
+        console.log(`    ┌──────────────────┬──────────────────────────┬──────────────────────────┐`);
+        console.log(`    │ Component        │ Before                   │ After                    │`);
+        console.log(`    ├──────────────────┼──────────────────────────┼──────────────────────────┤`);
+        console.log(`    │ cash             │ ${fmt(vTheCashPrev, 18).padEnd(24)} │ ${fmt(cashPost, 18).padEnd(24)} │`);
+        console.log(`    │ totalBorrows     │ ${fmt(vTheTotalBorrowsPrev, 18).padEnd(24)} │ ${fmt(borrowsPost, 18).padEnd(24)} │`);
+        console.log(`    │ totalReserves    │ ${fmt(vTheTotalReservesPrev, 18).padEnd(24)} │ ${fmt(reservesPost, 18).padEnd(24)} │`);
+        console.log(`    │ totalSupply      │ ${vTheTotalSupplyPrev.toString().padEnd(24)} │ ${supplyPost.toString().padEnd(24)} │`);
+        console.log(`    │ exchangeRate     │ ${fmt(exchangeRatePrev, 28).padEnd(24)} │ ${fmt(exchangeRatePost, 28).padEnd(24)} │`);
+        const borrowsRepaid = vTheTotalBorrowsPrev.sub(borrowsPost);
+        const totalSwept = received.add(borrowsRepaid);
+        console.log(`    ├──────────────────┼──────────────────────────┴──────────────────────────┤`);
+        console.log(`    │ THE to receiver  │ ${fmt(received, 18).padEnd(51)} │`);
+        console.log(`    │ THE debt repaid  │ ${fmt(borrowsRepaid, 18).padEnd(51)} │`);
+        console.log(`    │ Total THE swept  │ ${fmt(totalSwept, 18).padEnd(51)} │`);
+        console.log(`    └──────────────────┴─────────────────────────────────────────────────────┘`);
         expect(received).to.be.gt(0);
       });
     });

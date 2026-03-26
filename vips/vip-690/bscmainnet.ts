@@ -23,7 +23,7 @@ export const vTHE = "0x86e06EAfa6A1eA631Eab51DE500E3D474933739f";
 export const RISK_FUND = "0xdF31a28D68A2AB381D42b380649Ead7ae2A76E42";
 export const DEV_WALLET = "0x5e7bb1f600e42bc227755527895a282f782555ec";
 
-export const BAD_DEBT_HELPER = "0xb1f27c2abe2AaeB7E02f0f1d55fD23c4F5A07a67";
+export const BAD_DEBT_HELPER = "0x94D914515a303A9CD8Fa7e23e578b8d653630A12";
 
 /**
  * Source tokens to Timelock from Risk Fund or Treasury, then transfer to helper.
