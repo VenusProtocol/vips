@@ -293,8 +293,8 @@ export const BNB_REPAYMENTS: NativeBNBRepayment[] = [
 // Part 3: OTC — tokens that cannot be fully sourced
 // Sweep USDT from Risk Fund to Dev Wallet for OTC conversion
 // ──────────────────────────────────────────────────────────
-// Shortfall: CAKE ~$1,560,706 + DAI ~$40,518 = ~$1,601,224 (THE handled in VIP-690)
-export const USDT_TO_OTC = parseUnits("1601225", 18);
+// Shortfall based on current prices; THE portion self-covered via vTHE sweep
+export const USDT_TO_OTC = parseUnits("1520000", 18);
 
 // ──────────────────────────────────────────────────────────
 // Treasury reimbursement — USDT equivalent of all tokens withdrawn from Treasury
