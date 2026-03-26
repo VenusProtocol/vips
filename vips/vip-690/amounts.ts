@@ -95,6 +95,9 @@ export interface NativeBNBRepayment {
   amount: BigNumber;
 }
 
+// 3% overhead to cover interest accrual during ~48h timelock delay
+const withOverhead = (amount: BigNumber): BigNumber => amount.mul(103).div(100);
+
 // ──────────────────────────────────────────────────────────
 // Part 1: Repayments sourced from Risk Fund
 // Tokens available in Risk Fund: ETH, USDT, WBNB, BTCB
@@ -105,10 +108,10 @@ export const REPAYMENTS_FROM_RISK_FUND: TokenRepayment[] = [
     underlying: ETH,
     vToken: vETH,
     borrowers: [
-      { address: ACCOUNT_3, amount: parseUnits("0.013", 18) },
-      { address: ACCOUNT_6, amount: parseUnits("1.579", 18) },
-      { address: ACCOUNT_15, amount: parseUnits("0.0022", 18) },
-      { address: ACCOUNT_23, amount: parseUnits("0.0015", 18) },
+      { address: ACCOUNT_3, amount: withOverhead(parseUnits("0.013", 18)) },
+      { address: ACCOUNT_6, amount: withOverhead(parseUnits("1.579", 18)) },
+      { address: ACCOUNT_15, amount: withOverhead(parseUnits("0.0022", 18)) },
+      { address: ACCOUNT_23, amount: withOverhead(parseUnits("0.0015", 18)) },
     ],
   },
   {
@@ -116,29 +119,29 @@ export const REPAYMENTS_FROM_RISK_FUND: TokenRepayment[] = [
     underlying: USDT,
     vToken: vUSDT,
     borrowers: [
-      { address: ACCOUNT_3, amount: parseUnits("0.111", 18) },
-      { address: ACCOUNT_5, amount: parseUnits("7.644", 18) },
-      { address: ACCOUNT_8, amount: parseUnits("1581.51", 18) },
-      { address: ACCOUNT_14, amount: parseUnits("0.352", 18) },
-      { address: ACCOUNT_18, amount: parseUnits("21.447", 18) },
-      { address: ACCOUNT_26, amount: parseUnits("0.007", 18) },
+      { address: ACCOUNT_3, amount: withOverhead(parseUnits("0.111", 18)) },
+      { address: ACCOUNT_5, amount: withOverhead(parseUnits("7.644", 18)) },
+      { address: ACCOUNT_8, amount: withOverhead(parseUnits("1581.51", 18)) },
+      { address: ACCOUNT_14, amount: withOverhead(parseUnits("0.352", 18)) },
+      { address: ACCOUNT_18, amount: withOverhead(parseUnits("21.447", 18)) },
+      { address: ACCOUNT_26, amount: withOverhead(parseUnits("0.007", 18)) },
     ],
   },
   {
     name: "WBNB",
     underlying: WBNB,
     vToken: vWBNB,
-    borrowers: [{ address: ACCOUNT_1, amount: parseUnits("0.206", 18) }],
+    borrowers: [{ address: ACCOUNT_1, amount: withOverhead(parseUnits("0.206", 18)) }],
   },
   {
     name: "BTCB",
     underlying: BTCB,
     vToken: vBTC,
     borrowers: [
-      { address: ACCOUNT_1, amount: parseUnits("0.00096", 18) },
-      { address: ACCOUNT_3, amount: parseUnits("0.000048", 18) },
-      { address: ACCOUNT_14, amount: parseUnits("0.000008", 18) },
-      { address: ACCOUNT_15, amount: parseUnits("0.000098", 18) },
+      { address: ACCOUNT_1, amount: withOverhead(parseUnits("0.00096", 18)) },
+      { address: ACCOUNT_3, amount: withOverhead(parseUnits("0.000048", 18)) },
+      { address: ACCOUNT_14, amount: withOverhead(parseUnits("0.000008", 18)) },
+      { address: ACCOUNT_15, amount: withOverhead(parseUnits("0.000098", 18)) },
     ],
   },
 ];
@@ -178,18 +181,18 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     underlying: XRP,
     vToken: vXRP,
     borrowers: [
-      { address: ACCOUNT_15, amount: parseUnits("4.096", 18) },
-      { address: ACCOUNT_16, amount: parseUnits("16.505", 18) },
-      { address: ACCOUNT_17, amount: parseUnits("13.704", 18) },
-      { address: ACCOUNT_19, amount: parseUnits("6.425", 18) },
-      { address: ACCOUNT_20, amount: parseUnits("6.194", 18) },
-      { address: ACCOUNT_21, amount: parseUnits("4.003", 18) },
-      { address: ACCOUNT_22, amount: parseUnits("9.225", 18) },
-      { address: ACCOUNT_23, amount: parseUnits("3.781", 18) },
-      { address: ACCOUNT_24, amount: parseUnits("8.343", 18) },
-      { address: ACCOUNT_25, amount: parseUnits("2.833", 18) },
-      { address: ACCOUNT_26, amount: parseUnits("7.020", 18) },
-      { address: ACCOUNT_27, amount: parseUnits("7.547", 18) },
+      { address: ACCOUNT_15, amount: withOverhead(parseUnits("4.096", 18)) },
+      { address: ACCOUNT_16, amount: withOverhead(parseUnits("16.505", 18)) },
+      { address: ACCOUNT_17, amount: withOverhead(parseUnits("13.704", 18)) },
+      { address: ACCOUNT_19, amount: withOverhead(parseUnits("6.425", 18)) },
+      { address: ACCOUNT_20, amount: withOverhead(parseUnits("6.194", 18)) },
+      { address: ACCOUNT_21, amount: withOverhead(parseUnits("4.003", 18)) },
+      { address: ACCOUNT_22, amount: withOverhead(parseUnits("9.225", 18)) },
+      { address: ACCOUNT_23, amount: withOverhead(parseUnits("3.781", 18)) },
+      { address: ACCOUNT_24, amount: withOverhead(parseUnits("8.343", 18)) },
+      { address: ACCOUNT_25, amount: withOverhead(parseUnits("2.833", 18)) },
+      { address: ACCOUNT_26, amount: withOverhead(parseUnits("7.020", 18)) },
+      { address: ACCOUNT_27, amount: withOverhead(parseUnits("7.547", 18)) },
     ],
   },
   {
@@ -197,8 +200,8 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     underlying: BCH,
     vToken: vBCH,
     borrowers: [
-      { address: ACCOUNT_14, amount: parseUnits("0.0155", 18) },
-      { address: ACCOUNT_15, amount: parseUnits("0.021", 18) },
+      { address: ACCOUNT_14, amount: withOverhead(parseUnits("0.0155", 18)) },
+      { address: ACCOUNT_15, amount: withOverhead(parseUnits("0.021", 18)) },
     ],
   },
   {
@@ -206,23 +209,23 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     underlying: LTC,
     vToken: vLTC,
     borrowers: [
-      { address: ACCOUNT_21, amount: parseUnits("0.137", 18) },
-      { address: ACCOUNT_23, amount: parseUnits("0.000001", 18) },
+      { address: ACCOUNT_21, amount: withOverhead(parseUnits("0.137", 18)) },
+      { address: ACCOUNT_23, amount: withOverhead(parseUnits("0.000001", 18)) },
     ],
   },
   {
     name: "LINK",
     underlying: LINK,
     vToken: vLINK,
-    borrowers: [{ address: ACCOUNT_14, amount: parseUnits("0.729", 18) }],
+    borrowers: [{ address: ACCOUNT_14, amount: withOverhead(parseUnits("0.729", 18)) }],
   },
   {
     name: "ADA",
     underlying: ADA,
     vToken: vADA,
     borrowers: [
-      { address: ACCOUNT_19, amount: parseUnits("14.151", 18) },
-      { address: ACCOUNT_21, amount: parseUnits("10.546", 18) },
+      { address: ACCOUNT_19, amount: withOverhead(parseUnits("14.151", 18)) },
+      { address: ACCOUNT_21, amount: withOverhead(parseUnits("10.546", 18)) },
     ],
   },
   {
@@ -230,22 +233,22 @@ export const REPAYMENTS_FROM_TREASURY_PART1: TokenRepayment[] = [
     underlying: USDC,
     vToken: vUSDC,
     borrowers: [
-      { address: ACCOUNT_1, amount: parseUnits("2.33", 18) },
-      { address: ACCOUNT_3, amount: parseUnits("0.000024", 18) },
-      { address: ACCOUNT_20, amount: parseUnits("2.391", 18) },
+      { address: ACCOUNT_1, amount: withOverhead(parseUnits("2.33", 18)) },
+      { address: ACCOUNT_3, amount: withOverhead(parseUnits("0.000024", 18)) },
+      { address: ACCOUNT_20, amount: withOverhead(parseUnits("2.391", 18)) },
     ],
   },
   {
     name: "AAVE",
     underlying: AAVE,
     vToken: vAAVE,
-    borrowers: [{ address: ACCOUNT_14, amount: parseUnits("0.038", 18) }],
+    borrowers: [{ address: ACCOUNT_14, amount: withOverhead(parseUnits("0.038", 18)) }],
   },
   {
     name: "DOGE",
     underlying: DOGE,
     vToken: vDOGE,
-    borrowers: [{ address: ACCOUNT_19, amount: parseUnits("38.931", 8) }],
+    borrowers: [{ address: ACCOUNT_19, amount: withOverhead(parseUnits("38.931", 8)) }],
   },
 ];
 
@@ -256,35 +259,34 @@ export const REPAYMENTS_FROM_TREASURY_PART2: TokenRepayment[] = [
     underlying: SXP,
     vToken: vSXP,
     borrowers: [
-      { address: ACCOUNT_17, amount: parseUnits("0.678", 18) },
-      { address: ACCOUNT_20, amount: parseUnits("2.427", 18) },
-      { address: ACCOUNT_21, amount: parseUnits("0.561", 18) },
-      { address: ACCOUNT_22, amount: parseUnits("13.101", 18) },
+      { address: ACCOUNT_17, amount: withOverhead(parseUnits("0.678", 18)) },
+      { address: ACCOUNT_20, amount: withOverhead(parseUnits("2.427", 18)) },
+      { address: ACCOUNT_21, amount: withOverhead(parseUnits("0.561", 18)) },
+      { address: ACCOUNT_22, amount: withOverhead(parseUnits("13.101", 18)) },
     ],
   },
   {
     name: "FIL",
     underlying: FIL,
     vToken: vFIL,
-    borrowers: [{ address: ACCOUNT_15, amount: parseUnits("0.168", 18) }],
+    borrowers: [{ address: ACCOUNT_15, amount: withOverhead(parseUnits("0.168", 18)) }],
   },
   {
     name: "TUSD",
     underlying: TUSD,
     vToken: vTUSD,
-    borrowers: [{ address: ACCOUNT_20, amount: parseUnits("0.014", 18) }],
+    borrowers: [{ address: ACCOUNT_20, amount: withOverhead(parseUnits("0.014", 18)) }],
   },
 ];
 
 // Native BNB repayments from Treasury (uses withdrawTreasuryBNB + repayBorrowBehalf with value)
-// NOTE: vBNB (old Compound contract) does NOT allow over-repayment unlike upgraded vBEP20 contracts.
-// Amounts must be ≤ actual borrow balance. Use on-chain values rounded down.
+// 3% overhead ensures sufficient BNB is withdrawn; the helper contract returns any unused BNB to Timelock.
 export const BNB_REPAYMENTS: NativeBNBRepayment[] = [
-  { address: ACCOUNT_1, amount: parseUnits("0.00926", 18) },
-  { address: ACCOUNT_4, amount: parseUnits("15.1157", 18) },
-  { address: ACCOUNT_14, amount: parseUnits("0.01397", 18) },
-  { address: ACCOUNT_20, amount: parseUnits("0.00672", 18) },
-  { address: ACCOUNT_23, amount: parseUnits("0.00558", 18) },
+  { address: ACCOUNT_1, amount: withOverhead(parseUnits("0.00926", 18)) },
+  { address: ACCOUNT_4, amount: withOverhead(parseUnits("15.1157", 18)) },
+  { address: ACCOUNT_14, amount: withOverhead(parseUnits("0.01397", 18)) },
+  { address: ACCOUNT_20, amount: withOverhead(parseUnits("0.00672", 18)) },
+  { address: ACCOUNT_23, amount: withOverhead(parseUnits("0.00558", 18)) },
 ];
 
 // ──────────────────────────────────────────────────────────
