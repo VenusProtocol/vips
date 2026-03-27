@@ -430,14 +430,14 @@ export const BINANCE_STALE_PERIODS = {
 
 export const ORACLE_PRICE_VALIDATION_ASSETS = [...new Set([...Object.values(TOKENS)])];
 
-export const vip603 = () => {
+export const vip605 = () => {
   const chainlinkOracleConfigs = Object.values(CHAINLINK_ORACLE_CONFIGS);
   const redstoneOracleConfigs = Object.values(REDSTONE_ORACLE_CONFIGS);
   const binanceStalePeriods = Object.values(BINANCE_STALE_PERIODS);
 
   const meta = {
     version: "v2",
-    title: "VIP-603 [BNB Chain] Oracle Configuration Improvements and CAPO Rate Recalibration",
+    title: "VIP-605 [BNB Chain] Oracle Configuration Improvements and CAPO Rate Recalibration",
     description: `#### Description
 
 This proposal introduces **oracle configuration improvements** and **CAPO rate recalibrations** to enhance pricing reliability, remove redundancy, and better align growth assumptions with real market conditions.
@@ -572,4 +572,4 @@ If approved, this VIP will:
   );
 };
 
-export default vip603;
+export default vip605;
