@@ -17,6 +17,7 @@ import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
 import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
+import POSITION_ACCOUNT_ABI from "./abi/PositionAccount.json";
 import RELATIVE_POSITION_MANAGER_ABI from "./abi/RelativePositionManager.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";
 import SWAP_HELPER_ABI from "./abi/SwapHelperAbi.json";
@@ -165,8 +166,9 @@ forking(89004570, async () => {
 
         it("executePositionAccountCall", async () => {
           // Reverts with InvalidCallsLength (not Unauthorized) — proves ACM permission passed
+          const positionAccountContract = await ethers.getContractAt(POSITION_ACCOUNT_ABI, POSITION_ACCOUNT);
           await expect(rpmAsCaller.executePositionAccountCall(POSITION_ACCOUNT, [], [])).to.be.revertedWithCustomError(
-            relativePositionManager,
+            positionAccountContract,
             "InvalidCallsLength",
           );
         });
@@ -195,8 +197,8 @@ forking(89004570, async () => {
     const SHORT_ADDRESS = "0x2170Ed0880ac9A755fd29B2688956BD959F933F8"; // ETH
     const vSHORT_ADDRESS = "0xf508fCD89b8bd15579dc79A6827cB4686A3592c8"; // vETH
 
-    const DSA_WHALE = DSA_ADDRESS;
-    const SHORT_WHALE = "0x8894E0a0c962CB723c1976a4421c95949bE2D4E3"; // Binance 8 (for ETH)
+    const DSA_WHALE = "0xf322942f644a996a617bd29c16bd7d231d9f35e9"; // Venus Treasury
+    const SHORT_WHALE = "0xf322942f644a996a617bd29c16bd7d231d9f35e9"; // Venus Treasury (for ETH)
 
     // Oracles
     const REDSTONE_ORACLE = "0x8455EFA4D7Ff63b8BFD96AdD889483Ea7d39B70a";
@@ -680,18 +682,16 @@ forking(89004570, async () => {
       const dsaBalanceBefore = await dsa.balanceOf(profitDeactUser.address);
 
       // Execute atomic close + deactivate
-      await relativePositionManager.connect(profitDeactUser).closeWithProfitAndDeactivate(
-        vLONG_ADDRESS,
-        vSHORT_ADDRESS,
-        {
+      await relativePositionManager
+        .connect(profitDeactUser)
+        .closeWithProfitAndDeactivate(vLONG_ADDRESS, vSHORT_ADDRESS, {
           longAmountToRedeemForRepay: longForRepay,
           minAmountOutRepay: shortRepayAmount,
           swapDataRepay: repaySwapData,
           longAmountToRedeemForProfit: longForProfit,
           minAmountOutProfit: estimatedProfitDsa.mul(98).div(100),
           swapDataProfit: profitSwapData,
-        },
-      );
+        });
 
       // Verify full close
       const shortDebtAfterClose = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
@@ -756,11 +756,7 @@ forking(89004570, async () => {
           openSwapData,
         );
 
-      const position = await relativePositionManager.getPosition(
-        lossDeactUser.address,
-        vLONG_ADDRESS,
-        vSHORT_ADDRESS,
-      );
+      const position = await relativePositionManager.getPosition(lossDeactUser.address, vLONG_ADDRESS, vSHORT_ADDRESS);
       expect(position.isActive).to.eq(true);
       const positionAccount = position.positionAccount;
 
@@ -799,19 +795,15 @@ forking(89004570, async () => {
       const dsaBalanceBefore = await dsa.balanceOf(lossDeactUser.address);
 
       // Execute atomic close + deactivate
-      await relativePositionManager.connect(lossDeactUser).closeWithLossAndDeactivate(
-        vLONG_ADDRESS,
-        vSHORT_ADDRESS,
-        {
-          longAmountToRedeemForFirstSwap: longBalanceAfterOpen,
-          shortAmountToRepayForFirstSwap: shortAmountFromLongSwap,
-          minAmountOutFirst: shortAmountFromLongSwap,
-          swapDataFirst: firstSwapData,
-          dsaAmountToRedeemForSecondSwap: dsaAmountToSwap,
-          minAmountOutSecond: shortFromDsaSwap,
-          swapDataSecond: secondSwapData,
-        },
-      );
+      await relativePositionManager.connect(lossDeactUser).closeWithLossAndDeactivate(vLONG_ADDRESS, vSHORT_ADDRESS, {
+        longAmountToRedeemForFirstSwap: longBalanceAfterOpen,
+        shortAmountToRepayForFirstSwap: shortAmountFromLongSwap,
+        minAmountOutFirst: shortAmountFromLongSwap,
+        swapDataFirst: firstSwapData,
+        dsaAmountToRedeemForSecondSwap: dsaAmountToSwap,
+        minAmountOutSecond: shortFromDsaSwap,
+        swapDataSecond: secondSwapData,
+      });
 
       // Verify full close
       const shortDebtAfterClose = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
