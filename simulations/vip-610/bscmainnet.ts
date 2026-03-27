@@ -35,7 +35,7 @@ const ACM_FUNCTION_SIGNATURES = [
   "executePositionAccountCall(address,address[],bytes[])",
 ] as const;
 
-forking(87632849, async () => {
+forking(89004570, async () => {
   let accessControlManager: Contract;
   let relativePositionManager: Contract;
 
@@ -595,6 +595,249 @@ forking(87632849, async () => {
       await relativePositionManager.connect(bob).deactivatePosition(vLONG_ADDRESS, vSHORT_ADDRESS);
       const positionAfter = await relativePositionManager.getPosition(bob.address, vLONG_ADDRESS, vSHORT_ADDRESS);
       expect(positionAfter.isActive).to.eq(false);
+    });
+
+    it("closeWithProfitAndDeactivate", async function () {
+      const [, , , , , , , , profitDeactUser] = await ethers.getSigners();
+      const INITIAL_PRINCIPAL = ethers.utils.parseEther("9000");
+      const SHORT_AMOUNT = ethers.utils.parseEther("4"); // 4 ETH
+      const LONG_AMOUNT = ethers.utils.parseEther("30"); // 30 WBNB
+      const leverage = ethers.utils.parseEther("1.5");
+
+      // Fund user with USDC (DSA)
+      const whaleSigner = await initMainnetUser(DSA_WHALE, ethers.utils.parseEther("1"));
+      await dsa.connect(whaleSigner).transfer(profitDeactUser.address, INITIAL_PRINCIPAL);
+      await dsa.connect(profitDeactUser).approve(RELATIVE_POSITION_MANAGER, INITIAL_PRINCIPAL);
+
+      // Open position with manipulated swap (SHORT -> LONG)
+      const minLong = LONG_AMOUNT.mul(98).div(100);
+      const openSwapData = await getManipulatedSwapData(
+        SHORT_ADDRESS,
+        LONG_ADDRESS,
+        SHORT_AMOUNT,
+        LONG_AMOUNT,
+        LEVERAGE_STRATEGIES_MANAGER_ADDRESS,
+        vLONG_ADDRESS,
+      );
+
+      await relativePositionManager
+        .connect(profitDeactUser)
+        .activateAndOpenPosition(
+          vLONG_ADDRESS,
+          vSHORT_ADDRESS,
+          0,
+          INITIAL_PRINCIPAL,
+          leverage,
+          SHORT_AMOUNT,
+          minLong,
+          openSwapData,
+        );
+
+      // Verify position is active
+      const position = await relativePositionManager.getPosition(
+        profitDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+      expect(position.isActive).to.eq(true);
+      const positionAccount = position.positionAccount;
+
+      // Record state after open
+      const shortDebtAfterOpen = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
+      const longBalanceAfterOpen = await relativePositionManager.callStatic.getLongCollateralBalance(
+        profitDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+
+      expect(shortDebtAfterOpen).to.be.gt(0, "Should have short debt");
+      expect(longBalanceAfterOpen).to.be.gt(0, "Should have long collateral");
+
+      // Close with profit: favorable price — use 75% of long to repay all debt, 25% is profit
+      const longForRepay = longBalanceAfterOpen.mul(75).div(100);
+      const longForProfit = longBalanceAfterOpen.sub(longForRepay);
+
+      const shortRepayAmount = shortDebtAfterOpen.mul(FULL_CLOSE_BUFFER_BPS).div(1000);
+
+      const repaySwapData = await getManipulatedSwapData(
+        LONG_ADDRESS,
+        SHORT_ADDRESS,
+        longForRepay,
+        shortRepayAmount,
+        LEVERAGE_STRATEGIES_MANAGER_ADDRESS,
+      );
+
+      // Profit: LONG -> DSA (goes to RPM, then supplied as principal)
+      const estimatedProfitDsa = longForProfit.mul(500); // ~7.5 WBNB * 500 USDC/WBNB ≈ 3750 USDC
+      const profitSwapData = await getManipulatedSwapData(
+        LONG_ADDRESS,
+        DSA_ADDRESS,
+        longForProfit,
+        estimatedProfitDsa,
+        RELATIVE_POSITION_MANAGER, // RPM receives profit, supplies as principal
+      );
+
+      const dsaBalanceBefore = await dsa.balanceOf(profitDeactUser.address);
+
+      // Execute atomic close + deactivate
+      await relativePositionManager.connect(profitDeactUser).closeWithProfitAndDeactivate(
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+        {
+          longAmountToRedeemForRepay: longForRepay,
+          minAmountOutRepay: shortRepayAmount,
+          swapDataRepay: repaySwapData,
+          longAmountToRedeemForProfit: longForProfit,
+          minAmountOutProfit: estimatedProfitDsa.mul(98).div(100),
+          swapDataProfit: profitSwapData,
+        },
+      );
+
+      // Verify full close
+      const shortDebtAfterClose = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
+      const longBalanceAfterClose = await relativePositionManager.callStatic.getLongCollateralBalance(
+        profitDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+
+      expect(shortDebtAfterClose).to.eq(0, "All debt repaid");
+      expect(longBalanceAfterClose).to.eq(0, "All long redeemed");
+
+      // Position should be deactivated and principal returned to user
+      const positionAfterClose = await relativePositionManager.getPosition(
+        profitDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+      expect(positionAfterClose.isActive).to.eq(false, "Position should be deactivated");
+
+      // All position account balances should be zeroed
+      expect(await dsaVToken.callStatic.balanceOfUnderlying(positionAccount)).to.eq(0, "DSA balance zeroed");
+
+      // User should have received principal + profit
+      const dsaBalanceAfter = await dsa.balanceOf(profitDeactUser.address);
+      expect(dsaBalanceAfter).to.be.gt(dsaBalanceBefore, "User received DSA tokens back");
+    });
+
+    it("closeWithLossAndDeactivate", async function () {
+      const [, , , , , , , , , lossDeactUser] = await ethers.getSigners();
+      const INITIAL_PRINCIPAL = ethers.utils.parseEther("15000");
+      const SHORT_AMOUNT = ethers.utils.parseEther("3"); // 3 ETH
+      const LONG_AMOUNT = ethers.utils.parseEther("25"); // 25 WBNB
+      const leverage = ethers.utils.parseEther("3");
+
+      // Fund user with USDC (DSA)
+      const whaleSigner = await initMainnetUser(DSA_WHALE, ethers.utils.parseEther("1"));
+      await dsa.connect(whaleSigner).transfer(lossDeactUser.address, INITIAL_PRINCIPAL);
+      await dsa.connect(lossDeactUser).approve(RELATIVE_POSITION_MANAGER, INITIAL_PRINCIPAL);
+
+      // Open position
+      const minLong = LONG_AMOUNT.mul(98).div(100);
+      const openSwapData = await getManipulatedSwapData(
+        SHORT_ADDRESS,
+        LONG_ADDRESS,
+        SHORT_AMOUNT,
+        LONG_AMOUNT,
+        LEVERAGE_STRATEGIES_MANAGER_ADDRESS,
+        vLONG_ADDRESS,
+      );
+
+      await relativePositionManager
+        .connect(lossDeactUser)
+        .activateAndOpenPosition(
+          vLONG_ADDRESS,
+          vSHORT_ADDRESS,
+          0,
+          INITIAL_PRINCIPAL,
+          leverage,
+          SHORT_AMOUNT,
+          minLong,
+          openSwapData,
+        );
+
+      const position = await relativePositionManager.getPosition(
+        lossDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+      expect(position.isActive).to.eq(true);
+      const positionAccount = position.positionAccount;
+
+      const shortDebtAfterOpen = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
+      const longBalanceAfterOpen = await relativePositionManager.callStatic.getLongCollateralBalance(
+        lossDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+
+      // Simulate 20% loss: swapping all LONG only gets 80% of SHORT needed
+      const shortAmountFromLongSwap = shortDebtAfterOpen.mul(80).div(100);
+      const shortfall = shortDebtAfterOpen.sub(shortAmountFromLongSwap);
+
+      // First swap: LONG -> SHORT (all WBNB -> ETH, but 20% short)
+      const firstSwapData = await getManipulatedSwapData(
+        LONG_ADDRESS,
+        SHORT_ADDRESS,
+        longBalanceAfterOpen,
+        shortAmountFromLongSwap,
+        LEVERAGE_STRATEGIES_MANAGER_ADDRESS,
+      );
+
+      // Second swap: DSA -> SHORT (25% of USDC principal -> ETH to cover shortfall)
+      const dsaAmountToSwap = INITIAL_PRINCIPAL.mul(25).div(100); // 3750 USDC
+      const shortFromDsaSwap = shortfall.mul(FULL_CLOSE_BUFFER_BPS).div(1000);
+
+      const secondSwapData = await getManipulatedSwapData(
+        DSA_ADDRESS,
+        SHORT_ADDRESS,
+        dsaAmountToSwap,
+        shortFromDsaSwap,
+        LEVERAGE_STRATEGIES_MANAGER_ADDRESS,
+      );
+
+      const dsaBalanceBefore = await dsa.balanceOf(lossDeactUser.address);
+
+      // Execute atomic close + deactivate
+      await relativePositionManager.connect(lossDeactUser).closeWithLossAndDeactivate(
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+        {
+          longAmountToRedeemForFirstSwap: longBalanceAfterOpen,
+          shortAmountToRepayForFirstSwap: shortAmountFromLongSwap,
+          minAmountOutFirst: shortAmountFromLongSwap,
+          swapDataFirst: firstSwapData,
+          dsaAmountToRedeemForSecondSwap: dsaAmountToSwap,
+          minAmountOutSecond: shortFromDsaSwap,
+          swapDataSecond: secondSwapData,
+        },
+      );
+
+      // Verify full close
+      const shortDebtAfterClose = await shortVToken.callStatic.borrowBalanceCurrent(positionAccount);
+      const longBalanceAfterClose = await relativePositionManager.callStatic.getLongCollateralBalance(
+        lossDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+
+      expect(shortDebtAfterClose).to.eq(0, "All debt repaid");
+      expect(longBalanceAfterClose).to.eq(0, "All long redeemed");
+
+      // Position should be deactivated and remaining principal returned to user
+      const positionAfterClose = await relativePositionManager.getPosition(
+        lossDeactUser.address,
+        vLONG_ADDRESS,
+        vSHORT_ADDRESS,
+      );
+      expect(positionAfterClose.isActive).to.eq(false, "Position should be deactivated");
+
+      // All position account balances should be zeroed
+      expect(await dsaVToken.callStatic.balanceOfUnderlying(positionAccount)).to.eq(0, "DSA balance zeroed");
+
+      // User should have received remaining principal (reduced by loss)
+      const dsaBalanceAfter = await dsa.balanceOf(lossDeactUser.address);
+      expect(dsaBalanceAfter).to.be.gt(dsaBalanceBefore, "User received remaining DSA tokens back");
     });
 
     it("scale position (increase leverage)", async function () {
