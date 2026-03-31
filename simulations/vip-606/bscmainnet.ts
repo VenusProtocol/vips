@@ -8,11 +8,11 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import { expectEvents, initMainnetUser } from "../../src/utils";
 import { forking, testVip } from "../../src/vip-framework";
-import vip700, {
+import vip606, {
   PENDLE_MARKET_SLISBNB,
   PENDLE_PT_VAULT_ADAPTER,
   vPT_clisBNB_25JUN2026,
-} from "../../vips/vip-700/bscmainnet";
+} from "../../vips/vip-606/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import ADAPTER_ABI from "./abi/PendlePTVaultAdapter.json";
 
@@ -169,7 +169,7 @@ forking(85953737, async () => {
     });
   });
 
-  testVip("VIP-700 PendlePTVaultAdapter", await vip700(), {
+  testVip("VIP-606 PendlePTVaultAdapter", await vip606(), {
     callbackAfterExecution: async (txResponse: TransactionResponse) => {
       await expectEvents(
         txResponse,
