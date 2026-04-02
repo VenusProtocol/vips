@@ -3,8 +3,8 @@ import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
 // New deployments
-export const EBRAKE = "0x73f0d19A34e466286f909346F2EF08A18D0228D2";
-export const NEW_DEVIATION_SENTINEL_IMPL = "0x10716E3Bde7770BD84C4A3d7EC06BB0885C0a891";
+export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
+export const NEW_DEVIATION_SENTINEL_IMPL = "0xBC7249c0ABb89a374CD2AA2bEEd0820E2E189e03";
 
 // Existing testnet addresses
 export const DEVIATION_SENTINEL = "0x9245d72712548707809D66848e63B8E2B169F3c1";
