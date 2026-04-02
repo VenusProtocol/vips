@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
+import { NETWORK_ADDRESSES } from "../../src/networkAddresses";
 import {
   ACM,
   DEVIATION_SENTINEL,
@@ -15,6 +16,8 @@ import {
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
+
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
 forking(99316719, async () => {
   let accessControlManager: Contract;
@@ -62,6 +65,38 @@ forking(99316719, async () => {
           "_setMarketSupplyCaps(address[],uint256[])",
         ),
       ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+        ),
+      ).to.equal(false);
+      expect(
+        await accessControlManager.hasPermission(EBRAKE, ethers.constants.AddressZero, "setFlashLoanPaused(bool)"),
+      ).to.equal(false);
+    });
+
+    it("Timelocks should not have resetMarketState permission", async () => {
+      for (const timelock of [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK]) {
+        expect(
+          await accessControlManager.hasPermission(timelock, ethers.constants.AddressZero, "resetMarketState(address)"),
+        ).to.equal(false);
+      }
     });
 
     it("DeviationSentinel should not have permissions on EBrake", async () => {
@@ -110,7 +145,7 @@ forking(99316719, async () => {
 
   testVip("VIP-661 Configure EBrake-integrated DeviationSentinel", await vip661Testnet(), {
     callbackAfterExecution: async txResponse => {
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [7]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [14]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [4]);
     },
   });
@@ -154,6 +189,38 @@ forking(99316719, async () => {
           "_setMarketSupplyCaps(address[],uint256[])",
         ),
       ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setCollateralFactor(address,uint256,uint256)",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setMarketBorrowCaps(address[],uint256[])",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(
+          EBRAKE,
+          ethers.constants.AddressZero,
+          "setMarketSupplyCaps(address[],uint256[])",
+        ),
+      ).to.equal(true);
+      expect(
+        await accessControlManager.hasPermission(EBRAKE, ethers.constants.AddressZero, "setFlashLoanPaused(bool)"),
+      ).to.equal(true);
+    });
+
+    it("Timelocks should have resetMarketState permission", async () => {
+      for (const timelock of [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK]) {
+        expect(
+          await accessControlManager.hasPermission(timelock, ethers.constants.AddressZero, "resetMarketState(address)"),
+        ).to.equal(true);
+      }
     });
 
     it("DeviationSentinel should have permissions on EBrake", async () => {

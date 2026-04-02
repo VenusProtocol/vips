@@ -1,6 +1,9 @@
 import { ethers } from "hardhat";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
+
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
 // New deployments
 export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
@@ -14,7 +17,7 @@ export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 export const vip661Testnet = () => {
   const meta = {
     version: "v2",
-    title: "VIP-661 Configure EBrake-integrated DeviationSentinel on BSC Testnet",
+    title: "VIP-661 Configure EBrake-integrated DeviationSentinel",
     description: `#### Summary
 
 This VIP configures the EBrake-integrated DeviationSentinel system on BSC Testnet by:
@@ -67,12 +70,51 @@ This architecture change adds an additional safety layer and standardizes emerge
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setCollateralFactor(address,uint256,uint256)", EBRAKE],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "_setMarketBorrowCaps(address[],uint256[])", EBRAKE],
       },
       {
         target: ACM,
         signature: "giveCallPermission(address,string,address)",
         params: [ethers.constants.AddressZero, "_setMarketSupplyCaps(address[],uint256[])", EBRAKE],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMarketBorrowCaps(address[],uint256[])", EBRAKE],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setMarketSupplyCaps(address[],uint256[])", EBRAKE],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "setFlashLoanPaused(bool)", EBRAKE],
+      },
+
+      // ========================================
+      // 2b. Grant resetMarketState permission to timelocks
+      // ========================================
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resetMarketState(address)", NORMAL_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resetMarketState(address)", FAST_TRACK_TIMELOCK],
+      },
+      {
+        target: ACM,
+        signature: "giveCallPermission(address,string,address)",
+        params: [ethers.constants.AddressZero, "resetMarketState(address)", CRITICAL_TIMELOCK],
       },
 
       // ========================================
