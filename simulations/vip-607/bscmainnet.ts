@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { forking, testVip } from "src/vip-framework";
 
-import vip900, {
+import vip607, {
   BSC_SPEED,
   BSC_XVS_AMOUNT,
   BSC_XVS_STORE,
@@ -21,7 +21,7 @@ import vip900, {
   USDT,
   USDT_PRIME_CONVERTER,
   XVS_VAULT_CONVERTER,
-} from "../../vips/vip-900/bscmainnet";
+} from "../../vips/vip-607/bscmainnet";
 import PRIME_LIQUIDITY_PROVIDER_ABI from "./abi/PrimeLiquidityProvider.json";
 import XVS_ABI from "./abi/XVS.json";
 import XVS_VAULT_ABI from "./abi/XVSVault.json";
@@ -66,7 +66,7 @@ forking(90183539, async () => {
     xvsStoreXvsBefore = await xvs.balanceOf(BSC_XVS_STORE);
   });
 
-  testVip("vip-900", await vip900());
+  testVip("vip-607", await vip607());
 
   describe("Post-VIP behavior", async () => {
     // ════════════════════════════════════════════════════════
