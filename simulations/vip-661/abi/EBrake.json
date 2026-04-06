@@ -7,11 +7,6 @@
         "type": "address"
       },
       {
-        "internalType": "address",
-        "name": "accessControlManager_",
-        "type": "address"
-      },
-      {
         "internalType": "bool",
         "name": "isIsolatedPool_",
         "type": "bool"
@@ -256,6 +251,19 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      }
+    ],
+    "name": "MarketStateReset",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "address",
         "name": "oldAccessControlManager",
@@ -381,6 +389,82 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      },
+      {
+        "internalType": "uint96",
+        "name": "poolId",
+        "type": "uint96"
+      }
+    ],
+    "name": "getMarketCFSnapshot",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "cf",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lt",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "accessControlManager_",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "marketStates",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "borrowCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "supplyCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "borrowCapSnapshotted",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "supplyCapSnapshotted",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -486,6 +570,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "market",
+        "type": "address"
+      }
+    ],
+    "name": "resetMarketState",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
