@@ -6,7 +6,7 @@ import { makeProposal } from "src/utils";
 export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
 export const COMPTROLLER = "0x94d1820b2D1c7c7452A163983Dc888CEC546b77D";
 export const VETH_CORE = "0x162D005F0Fff510E54958Cfc5CF32A3180A84aab";
-export const KEEPER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706";
+export const KEEPER_ADDRESS = "0x2Ce1d0ffD7E869D9DF33e28552b12DdDed326706"; // bsctestnet Guardian address
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
 
 export const CF = "800000000000000000";
