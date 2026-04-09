@@ -4,17 +4,11 @@ import { makeProposal } from "src/utils";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 
-// ============================================================
-// New deployments — TODO: fill in once contracts are deployed
-// ============================================================
 // EBrake (TransparentUpgradeableProxy) — emergency action router
 export const EBRAKE = "0x0000000000000000000000000000000000000000"; // TODO: set after deployment
 // New DeviationSentinel implementation that routes through EBrake
 export const NEW_DEVIATION_SENTINEL_IMPL = "0x0000000000000000000000000000000000000000"; // TODO: set after deployment
 
-// ============================================================
-// Existing BSC Mainnet addresses
-// ============================================================
 // DeviationSentinel proxy (deployed in VIP-590)
 export const DEVIATION_SENTINEL = "0x6599C15cc8407046CD91E5c0F8B7f765fF914870";
 // Default Proxy Admin that owns the DeviationSentinel proxy (admin slot read on-chain;
@@ -27,6 +21,63 @@ export const ACM = NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER;
 
 const TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
+// Comptroller functions EBrake is allowed to call
+const EBRAKE_COMPTROLLER_PERMS = [
+  "_setActionsPaused(address[],uint8[],bool)",
+  "setCollateralFactor(uint96,address,uint256,uint256)",
+  "setCollateralFactor(address,uint256,uint256)",
+  "_setMarketBorrowCaps(address[],uint256[])",
+  "_setMarketSupplyCaps(address[],uint256[])",
+  "setFlashLoanPaused(bool)",
+  "setIsBorrowAllowed(uint96,address,bool)", // disablePoolBorrow
+  "setWhiteListFlashLoanAccount(address,bool)", // revokeFlashLoanAccess
+];
+
+// Granular snapshot-reset functions governance timelocks and Guardian can call on EBrake
+const RESET_PERMS = ["resetCFSnapshot(address)", "resetBorrowCapSnapshot(address)", "resetSupplyCapSnapshot(address)"];
+
+// EBrake functions DeviationSentinel calls via handleDeviation
+const SENTINEL_EBRAKE_PERMS = ["pauseBorrow(address)", "pauseSupply(address)", "decreaseCF(address,uint256)"];
+
+// All EBrake action functions governance timelocks and Guardian can call directly.
+// Lets a Critical VIP (~1h delay) route through EBrake and get snapshot coverage,
+// making recovery via resetXxxSnapshot trivial. Without this, governance would call
+// the comptroller directly (no snapshot stored).
+const GOVERNANCE_EBRAKE_PERMS = [
+  "pauseBorrow(address)",
+  "pauseSupply(address)",
+  "pauseRedeem(address)",
+  "pauseTransfer(address)",
+  "pauseFlashLoan()",
+  "pauseActions(address[],uint8[])",
+  "setMarketBorrowCaps(address[],uint256[])",
+  "setMarketSupplyCaps(address[],uint256[])",
+  "disablePoolBorrow(uint96,address)",
+  "revokeFlashLoanAccess(address)",
+  "decreaseCF(address,uint256)",
+  "decreaseCF(address,uint96,uint256)",
+];
+
+// DeviationSentinel direct comptroller permissions granted in VIP-590 — revoked here
+// since the sentinel now routes all emergency actions through EBrake
+const SENTINEL_COMPTROLLER_PERMS_TO_REVOKE = [
+  "setActionsPaused(address[],uint8[],bool)",
+  "_setActionsPaused(address[],uint8[],bool)",
+  "setCollateralFactor(uint96,address,uint256,uint256)",
+];
+
+const giveCallPermission = (contract: string, sig: string, account: string) => ({
+  target: ACM,
+  signature: "giveCallPermission(address,string,address)",
+  params: [contract, sig, account],
+});
+
+const revokeCallPermission = (contract: string, sig: string, account: string) => ({
+  target: ACM,
+  signature: "revokeCallPermission(address,string,address)",
+  params: [contract, sig, account],
+});
+
 export const vip661 = () => {
   const meta = {
     version: "v2",
@@ -38,16 +89,22 @@ emergency actions through it. EBrake is a thin emergency-action router that expo
 collateral-factor / cap functions behind ACM permissions, snapshots pre-incident state for safe recovery, and is
 called by DeviationSentinel when a price deviation is detected.
 
+This VIP incorporates Phase-0 Hashdit audit fixes (venus-periphery#62): \`setCFZero\` replaced by
+\`decreaseCF(address,uint256)\`, \`resetMarketState\` split into three granular snapshot-reset functions, and two
+new surgical controls (\`disablePoolBorrow\`, \`revokeFlashLoanAccess\`) added to EBrake.
+
 If approved, this VIP will:
 
 1. Upgrade the DeviationSentinel proxy to the new implementation that routes actions through EBrake
-2. Grant EBrake permissions on the Core Pool Comptroller (so EBrake can pause actions, zero collateral factors,
-   decrease borrow/supply caps, and pause flash loans)
-3. Grant the Normal, FastTrack and Critical Timelocks (and Guardian) permission to call \`resetMarketState\` on
-   EBrake (the only path to clear EBrake's snapshots after a recovery VIP)
-4. Grant DeviationSentinel permission to call \`pauseBorrow\`, \`pauseSupply\` and \`setCFZero\` on EBrake (the
+2. Grant EBrake permissions on the Core Pool Comptroller (so EBrake can pause actions, decrease collateral
+   factors, decrease borrow/supply caps, pause flash loans, disable per-pool borrows, and revoke flash loan access)
+3. Grant the Normal, FastTrack and Critical Timelocks (and Guardian) permission to call the three granular
+   snapshot-reset functions on EBrake (\`resetCFSnapshot\`, \`resetBorrowCapSnapshot\`, \`resetSupplyCapSnapshot\`)
+4. Grant DeviationSentinel permission to call \`pauseBorrow\`, \`pauseSupply\` and \`decreaseCF\` on EBrake (the
    three functions \`handleDeviation\` invokes)
-5. Revoke DeviationSentinel's existing direct comptroller permissions (granted in VIP-590), since the sentinel
+5. Grant the Normal, FastTrack and Critical Timelocks (and Guardian) permission to call all EBrake action
+   functions directly, so a Critical VIP can route through EBrake and benefit from its snapshot mechanism
+6. Revoke DeviationSentinel's existing direct comptroller permissions (granted in VIP-590), since the sentinel
    now goes through EBrake
 
 #### Description
@@ -55,10 +112,10 @@ If approved, this VIP will:
 **EBrake** (\`EmergencyBrake/EBrake.sol\`) is the new emergency action router. It holds no detection logic — it
 only exposes Comptroller emergency functions behind ACM checks and snapshots the pre-incident state of every
 market it touches (collateral factors per pool, borrow/supply caps) so a recovery VIP can restore exact prior
-values. Snapshots are first-write-wins and cleared via \`resetMarketState\`.
+values. Snapshots are first-write-wins and cleared via the three granular reset functions.
 
 **DeviationSentinel** has been refactored so that \`handleDeviation\` calls EBrake (\`pauseBorrow\`,
-\`pauseSupply\`, \`setCFZero\`) instead of the comptroller directly. This adds an additional safety layer
+\`pauseSupply\`, \`decreaseCF\`) instead of the comptroller directly. This adds an additional safety layer
 (snapshot + idempotency live in EBrake) and standardizes emergency action routing across the protocol.
 
 #### References
@@ -74,104 +131,31 @@ values. Snapshots are first-write-wins and cleared via \`resetMarketState\`.
 
   return makeProposal(
     [
-      // ========================================
       // 1. Upgrade DeviationSentinel proxy to new (EBrake-integrated) implementation
-      // ========================================
       {
         target: PROXY_ADMIN,
         signature: "upgrade(address,address)",
         params: [DEVIATION_SENTINEL, NEW_DEVIATION_SENTINEL_IMPL],
       },
 
-      // ========================================
       // 2. Grant EBrake permissions on the Core Pool Comptroller
-      //    (the functions EBrake invokes when tightening a market)
-      // ========================================
+      ...EBRAKE_COMPTROLLER_PERMS.map(sig => giveCallPermission(CORE_POOL_COMPTROLLER, sig, EBRAKE)),
 
-      // pauseActions / pauseSupply / pauseRedeem / pauseBorrow / pauseTransfer → comptroller.setActionsPaused
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", EBRAKE],
-      },
+      // 3. Grant granular snapshot-reset permissions to governance timelocks and Guardian
+      ...[GUARDIAN, ...TIMELOCKS].flatMap(account => RESET_PERMS.map(sig => giveCallPermission(EBRAKE, sig, account))),
 
-      // setCFZero(address) / setCFZero(address,uint96) → Diamond comptroller (with poolId)
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "setCollateralFactor(uint96,address,uint256,uint256)", EBRAKE],
-      },
+      // 4. Grant DeviationSentinel permissions on EBrake (the three functions handleDeviation invokes)
+      ...SENTINEL_EBRAKE_PERMS.map(sig => giveCallPermission(EBRAKE, sig, DEVIATION_SENTINEL)),
 
-      // setMarketBorrowCaps → comptroller.setMarketBorrowCaps
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "_setMarketBorrowCaps(address[],uint256[])", EBRAKE],
-      },
+      // 5. Grant governance timelocks and Guardian permissions on all EBrake action functions
+      ...[GUARDIAN, ...TIMELOCKS].flatMap(account =>
+        GOVERNANCE_EBRAKE_PERMS.map(sig => giveCallPermission(EBRAKE, sig, account)),
+      ),
 
-      // setMarketSupplyCaps → comptroller.setMarketSupplyCaps
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "_setMarketSupplyCaps(address[],uint256[])", EBRAKE],
-      },
-
-      // pauseFlashLoan → comptroller.setFlashLoanPaused
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "setFlashLoanPaused(bool)", EBRAKE],
-      },
-
-      // ========================================
-      // 3. Grant resetMarketState permission to governance timelocks and Guardian
-      //    (the only path to clear EBrake's stored snapshots during recovery)
-      // ========================================
-      ...[GUARDIAN, ...TIMELOCKS].map((account: string) => ({
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [EBRAKE, "resetMarketState(address)", account],
-      })),
-
-      // ========================================
-      // 4. Grant DeviationSentinel permissions on EBrake
-      //    (the three functions handleDeviation invokes)
-      // ========================================
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [EBRAKE, "pauseBorrow(address)", DEVIATION_SENTINEL],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [EBRAKE, "pauseSupply(address)", DEVIATION_SENTINEL],
-      },
-      {
-        target: ACM,
-        signature: "giveCallPermission(address,string,address)",
-        params: [EBRAKE, "setCFZero(address)", DEVIATION_SENTINEL],
-      },
-
-      // ========================================
-      // 5. Revoke DeviationSentinel's old direct comptroller permissions (granted in VIP-590)
-      //    Sentinel now routes everything through EBrake.
-      // ========================================
-      {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
-      },
-      {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "_setActionsPaused(address[],uint8[],bool)", DEVIATION_SENTINEL],
-      },
-      {
-        target: ACM,
-        signature: "revokeCallPermission(address,string,address)",
-        params: [CORE_POOL_COMPTROLLER, "setCollateralFactor(uint96,address,uint256,uint256)", DEVIATION_SENTINEL],
-      },
+      // 6. Revoke DeviationSentinel's old direct comptroller permissions (granted in VIP-590)
+      ...SENTINEL_COMPTROLLER_PERMS_TO_REVOKE.map(sig =>
+        revokeCallPermission(CORE_POOL_COMPTROLLER, sig, DEVIATION_SENTINEL),
+      ),
     ],
     meta,
     ProposalType.REGULAR,

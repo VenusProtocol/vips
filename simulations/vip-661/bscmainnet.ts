@@ -22,19 +22,42 @@ import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 const TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
-// Permissions EBrake needs on the Core Pool Comptroller (host = comptroller)
+// Permissions EBrake needs on the Core Pool Comptroller
 const EBRAKE_COMPTROLLER_PERMS = [
   "_setActionsPaused(address[],uint8[],bool)",
+  "setCollateralFactor(address,uint256,uint256)",
   "setCollateralFactor(uint96,address,uint256,uint256)",
   "_setMarketBorrowCaps(address[],uint256[])",
   "_setMarketSupplyCaps(address[],uint256[])",
   "setFlashLoanPaused(bool)",
+  "setIsBorrowAllowed(uint96,address,bool)",
+  "setWhiteListFlashLoanAccount(address,bool)",
 ];
 
-// Permissions DeviationSentinel will have on EBrake (host = EBrake)
-const SENTINEL_EBRAKE_PERMS = ["pauseBorrow(address)", "pauseSupply(address)", "setCFZero(address)"];
+// Permissions DeviationSentinel will have on EBrake
+const SENTINEL_EBRAKE_PERMS = ["pauseBorrow(address)", "pauseSupply(address)", "decreaseCF(address,uint256)"];
 
-// Permissions DeviationSentinel had directly on the comptroller in VIP-590 and that this VIP revokes
+// Granular snapshot-reset functions governance/guardian can call on EBrake
+const RESET_PERMS = ["resetCFSnapshot(address)", "resetBorrowCapSnapshot(address)", "resetSupplyCapSnapshot(address)"];
+
+// All EBrake action functions governance/guardian can call directly
+// (so a Critical VIP can route through EBrake and get snapshot coverage)
+const GOVERNANCE_EBRAKE_PERMS = [
+  "pauseBorrow(address)",
+  "pauseSupply(address)",
+  "pauseRedeem(address)",
+  "pauseTransfer(address)",
+  "pauseFlashLoan()",
+  "pauseActions(address[],uint8[])",
+  "setMarketBorrowCaps(address[],uint256[])",
+  "setMarketSupplyCaps(address[],uint256[])",
+  "disablePoolBorrow(uint96,address)",
+  "revokeFlashLoanAccess(address)",
+  "decreaseCF(address,uint256)",
+  "decreaseCF(address,uint96,uint256)",
+];
+
+// Permissions DeviationSentinel had directly on the comptroller in VIP-590 — this VIP revokes them
 const SENTINEL_COMPTROLLER_PERMS_TO_REVOKE = [
   "setActionsPaused(address[],uint8[],bool)",
   "_setActionsPaused(address[],uint8[],bool)",
@@ -46,8 +69,8 @@ forking(91124514, async () => {
   let deviationSentinel: Contract;
   let proxyAdmin: Contract;
 
-  // Impersonated host contracts — BSC mainnet ACM exposes isAllowedToCall(account, sig)
-  // where the host contract MUST be msg.sender. So we impersonate the host and call from it.
+  // BSC mainnet ACM checks msg.sender (the host contract) against the stored contract address.
+  // We impersonate the host so isAllowedToCall returns the correct result.
   let impersonatedComptroller: SignerWithAddress;
   let impersonatedEBrake: SignerWithAddress;
 
@@ -68,41 +91,58 @@ forking(91124514, async () => {
     it("EBrake should not yet have any permissions on the Core Pool Comptroller", async () => {
       const acm = accessControlManager.connect(impersonatedComptroller);
       for (const sig of EBRAKE_COMPTROLLER_PERMS) {
-        expect(await acm.isAllowedToCall(EBRAKE, sig)).to.equal(false);
+        expect(await acm.isAllowedToCall(EBRAKE, sig)).to.equal(false, `unexpected permission: ${sig}`);
       }
     });
 
-    it("Guardian and governance timelocks should not yet have resetMarketState permission on EBrake", async () => {
+    it("Guardian and governance timelocks should not yet have granular reset permissions on EBrake", async () => {
       const acm = accessControlManager.connect(impersonatedEBrake);
       for (const account of [GUARDIAN, ...TIMELOCKS]) {
-        expect(await acm.isAllowedToCall(account, "resetMarketState(address)")).to.equal(false);
+        for (const sig of RESET_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(
+            false,
+            `unexpected permission: ${sig} for ${account}`,
+          );
+        }
+      }
+    });
+
+    it("Guardian and governance timelocks should not yet have new EBrake function permissions", async () => {
+      const acm = accessControlManager.connect(impersonatedEBrake);
+      for (const account of [GUARDIAN, ...TIMELOCKS]) {
+        for (const sig of GOVERNANCE_EBRAKE_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(
+            false,
+            `unexpected permission: ${sig} for ${account}`,
+          );
+        }
       }
     });
 
     it("DeviationSentinel should not yet have any permissions on EBrake", async () => {
       const acm = accessControlManager.connect(impersonatedEBrake);
       for (const sig of SENTINEL_EBRAKE_PERMS) {
-        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(false);
+        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(false, `unexpected permission: ${sig}`);
       }
     });
 
     it("DeviationSentinel should still have direct comptroller permissions from VIP-590", async () => {
       const acm = accessControlManager.connect(impersonatedComptroller);
       for (const sig of SENTINEL_COMPTROLLER_PERMS_TO_REVOKE) {
-        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(true);
+        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(true, `expected permission: ${sig}`);
       }
     });
   });
 
   testVip("VIP-661 [BNB Chain] Configure EBrake-integrated DeviationSentinel", await vip661(), {
     callbackAfterExecution: async txResponse => {
-      // 12 giveCallPermission calls:
-      //  - 5 EBrake on Core Pool Comptroller
-      //  - 4 resetMarketState (Guardian + 3 timelocks)
-      //  - 3 DeviationSentinel on EBrake
-      // 3 revokeCallPermission calls (DeviationSentinel direct comptroller perms from VIP-590)
-      // BSC mainnet ACM emits RoleGranted/RoleRevoked from the underlying AccessControl base.
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [12]);
+      // RoleGranted breakdown:
+      //  - 8  EBrake on Core Pool Comptroller (6 original + setIsBorrowAllowed + setWhiteListFlashLoanAccount)
+      //  - 12 granular reset functions (3 × 4 accounts: Guardian + 3 timelocks)
+      //  - 3  DeviationSentinel on EBrake (pauseBorrow, pauseSupply, decreaseCF)
+      //  - 48 governance EBrake action functions (12 functions × 4 accounts)
+      // RoleRevoked: 3 (DeviationSentinel direct comptroller perms from VIP-590)
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [71]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleRevoked"], [3]);
     },
   });
@@ -115,32 +155,42 @@ forking(91124514, async () => {
     it("EBrake should have all required permissions on the Core Pool Comptroller", async () => {
       const acm = accessControlManager.connect(impersonatedComptroller);
       for (const sig of EBRAKE_COMPTROLLER_PERMS) {
-        expect(await acm.isAllowedToCall(EBRAKE, sig)).to.equal(true);
+        expect(await acm.isAllowedToCall(EBRAKE, sig)).to.equal(true, `missing permission: ${sig}`);
       }
     });
 
-    it("Guardian and governance timelocks should have resetMarketState permission on EBrake", async () => {
+    it("Guardian and governance timelocks should have granular reset permissions on EBrake", async () => {
       const acm = accessControlManager.connect(impersonatedEBrake);
       for (const account of [GUARDIAN, ...TIMELOCKS]) {
-        expect(await acm.isAllowedToCall(account, "resetMarketState(address)")).to.equal(true);
+        for (const sig of RESET_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(true, `missing permission: ${sig} for ${account}`);
+        }
       }
     });
 
-    it("DeviationSentinel should have pauseBorrow / pauseSupply / setCFZero permissions on EBrake", async () => {
+    it("Guardian and governance timelocks should have new EBrake function permissions", async () => {
+      const acm = accessControlManager.connect(impersonatedEBrake);
+      for (const account of [GUARDIAN, ...TIMELOCKS]) {
+        for (const sig of GOVERNANCE_EBRAKE_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(true, `missing permission: ${sig} for ${account}`);
+        }
+      }
+    });
+
+    it("DeviationSentinel should have pauseBorrow / pauseSupply / decreaseCF permissions on EBrake", async () => {
       const acm = accessControlManager.connect(impersonatedEBrake);
       for (const sig of SENTINEL_EBRAKE_PERMS) {
-        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(true);
+        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(true, `missing permission: ${sig}`);
       }
     });
 
     it("DeviationSentinel should no longer have direct comptroller permissions (revoked)", async () => {
       const acm = accessControlManager.connect(impersonatedComptroller);
       for (const sig of SENTINEL_COMPTROLLER_PERMS_TO_REVOKE) {
-        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(false);
+        expect(await acm.isAllowedToCall(DEVIATION_SENTINEL, sig)).to.equal(false, `unexpected permission: ${sig}`);
       }
     });
 
-    // Smoke tests on the wired-up contracts
     it("EBrake.COMPTROLLER should equal the Core Pool Comptroller", async () => {
       const eBrake = await ethers.getContractAt(EBRAKE_ABI, EBRAKE);
       expect(await eBrake.COMPTROLLER()).to.equal(CORE_POOL_COMPTROLLER);
