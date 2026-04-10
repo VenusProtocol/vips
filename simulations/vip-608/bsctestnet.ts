@@ -14,7 +14,7 @@ import {
   vUSDC,
   vUSDT,
   vip610 as vip610Testnet,
-} from "../../vips/vip-610/bsctestnet";
+} from "../../vips/vip-608/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import FLASHLOAN_FACET_ABI from "./abi/FlashLoanFacet.json";
 import LEVERAGE_MANAGER_ABI from "./abi/LeverageStrategiesManager.json";
