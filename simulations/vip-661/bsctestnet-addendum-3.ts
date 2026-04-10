@@ -50,8 +50,7 @@ const NEW_EBRAKE_COMPTROLLER_PERMS = [
   "setWhiteListFlashLoanAccount(address,bool)",
 ];
 
-// TODO: update this block number to one after VIP-661 Addendum 2 executed and before Addendum 3
-forking(0, async () => {
+forking(100849419, async () => {
   let accessControlManager: Contract;
   let proxyAdmin: Contract;
   let deviationSentinel: Contract;
@@ -114,9 +113,14 @@ forking(0, async () => {
       }
     });
 
-    it("Timelocks and keeper should not yet have new EBrake function permissions", async () => {
+    it("Timelocks and keeper should not yet have new EBrake-unique function permissions", async () => {
+      // setMarketBorrowCaps/setMarketSupplyCaps share names with comptroller functions that timelocks
+      // already have granted at address(0) from prior governance VIPs — skip those here.
+      const ebrakeUnique = GOVERNANCE_EBRAKE_PERMS.filter(
+        sig => sig !== "setMarketBorrowCaps(address[],uint256[])" && sig !== "setMarketSupplyCaps(address[],uint256[])",
+      );
       for (const account of RESET_ACCOUNTS) {
-        for (const sig of GOVERNANCE_EBRAKE_PERMS) {
+        for (const sig of ebrakeUnique) {
           expect(await accessControlManager.hasPermission(account, ethers.constants.AddressZero, sig)).to.equal(
             false,
             `unexpected permission: ${sig} for ${account}`,
@@ -126,26 +130,22 @@ forking(0, async () => {
     });
   });
 
-  testVip(
-    "VIP-661 Addendum 3: Apply Phase-0 Hashdit Audit Fixes (EBrake) on BSC Testnet",
-    await vip661TestnetAddendum3(),
-    {
-      callbackAfterExecution: async txResponse => {
-        // PermissionRevoked breakdown:
-        //  - 1  setCFZero from DeviationSentinel on EBrake
-        //  - 3  resetMarketState from [3 timelocks] at address(0)  (bsctestnet.ts grants)
-        //  - 1  resetMarketState from NormalTimelock at EBRAKE     (Addendum 1 grant)
-        //  - 1  resetMarketState from Keeper at EBRAKE             (Addendum 1 grant)
-        // PermissionGranted breakdown:
-        //  - 1  decreaseCF(address,uint256) for DeviationSentinel on EBrake
-        //  - 12 granular reset functions (3 × 4 accounts)
-        //  - 2  new Comptroller permissions for EBrake (setIsBorrowAllowed, setWhiteListFlashLoanAccount)
-        //  - 48 governance EBrake action functions (12 functions × 4 accounts)
-        await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [63]);
-        await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [6]);
-      },
+  testVip("VIP-661 Addendum 3: Apply Phase-0 Audit Fixes (EBrake) on BSC Testnet", await vip661TestnetAddendum3(), {
+    callbackAfterExecution: async txResponse => {
+      // PermissionRevoked breakdown:
+      //  - 1  setCFZero from DeviationSentinel on EBrake
+      //  - 3  resetMarketState from [3 timelocks] at address(0)  (bsctestnet.ts grants)
+      //  - 1  resetMarketState from NormalTimelock at EBRAKE     (Addendum 1 grant)
+      //  - 1  resetMarketState from Keeper at EBRAKE             (Addendum 1 grant)
+      // PermissionGranted breakdown:
+      //  - 1  decreaseCF(address,uint256) for DeviationSentinel on EBrake
+      //  - 12 granular reset functions (3 × 4 accounts)
+      //  - 2  new Comptroller permissions for EBrake (setIsBorrowAllowed, setWhiteListFlashLoanAccount)
+      //  - 48 governance EBrake action functions (12 functions × 4 accounts)
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionGranted"], [63]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["PermissionRevoked"], [6]);
     },
-  );
+  });
 
   describe("Post-VIP behavior", () => {
     it("EBrake proxy should point to the audit-fixed implementation", async () => {

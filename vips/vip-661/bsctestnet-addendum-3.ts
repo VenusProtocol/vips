@@ -5,10 +5,8 @@ import { makeProposal } from "src/utils";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
 
-// New EBrake implementation — TODO: set after PR #62 deployment
-export const NEW_EBRAKE_IMPL = "0x0000000000000000000000000000000000000000";
-// New DeviationSentinel implementation (calls decreaseCF instead of setCFZero) — TODO: set after deployment
-export const NEW_DEVIATION_SENTINEL_IMPL = "0x0000000000000000000000000000000000000000";
+export const NEW_EBRAKE_IMPL = "0x9cA0f0C412d2E8a2c4323c04214D811375c17B24";
+export const NEW_DEVIATION_SENTINEL_IMPL = "0x455C09D6BA46e7C9f80f29506DcC8E5F8378832a";
 
 export const EBRAKE = "0x957c09e3Ac3d9e689244DC74307c94111FBa8B42";
 export const DEVIATION_SENTINEL = "0x9245d72712548707809D66848e63B8E2B169F3c1";

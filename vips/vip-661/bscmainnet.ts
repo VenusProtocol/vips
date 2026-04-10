@@ -4,10 +4,8 @@ import { makeProposal } from "src/utils";
 
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 
-// EBrake (TransparentUpgradeableProxy) — emergency action router
-export const EBRAKE = "0x0000000000000000000000000000000000000000"; // TODO: set after deployment
-// New DeviationSentinel implementation that routes through EBrake
-export const NEW_DEVIATION_SENTINEL_IMPL = "0x0000000000000000000000000000000000000000"; // TODO: set after deployment
+export const EBRAKE = "0x35eBaBB99c7Fb7ba0C90bCc26e5d55Cdf89C23Ec";
+export const NEW_DEVIATION_SENTINEL_IMPL = "0xc86153Ae39fc9B60Ff59E99cA75aAD5Ab9d28a87";
 
 // DeviationSentinel proxy (deployed in VIP-590)
 export const DEVIATION_SENTINEL = "0x6599C15cc8407046CD91E5c0F8B7f765fF914870";
