@@ -11,6 +11,7 @@ import vip661, {
   CORE_POOL_COMPTROLLER,
   DEVIATION_SENTINEL,
   EBRAKE,
+  MULTISIG,
   NEW_DEVIATION_SENTINEL_IMPL,
   PROXY_ADMIN,
 } from "../../vips/vip-661/bscmainnet";
@@ -119,6 +120,13 @@ forking(91124514, async () => {
       }
     });
 
+    it("Multisig should not yet have EBrake action permissions", async () => {
+      const acm = accessControlManager.connect(impersonatedEBrake);
+      for (const sig of GOVERNANCE_EBRAKE_PERMS) {
+        expect(await acm.isAllowedToCall(MULTISIG, sig)).to.equal(false, `unexpected permission: ${sig} for multisig`);
+      }
+    });
+
     it("DeviationSentinel should not yet have any permissions on EBrake", async () => {
       const acm = accessControlManager.connect(impersonatedEBrake);
       for (const sig of SENTINEL_EBRAKE_PERMS) {
@@ -141,8 +149,9 @@ forking(91124514, async () => {
       //  - 12 granular reset functions (3 × 4 accounts: Guardian + 3 timelocks)
       //  - 3  DeviationSentinel on EBrake (pauseBorrow, pauseSupply, decreaseCF)
       //  - 48 governance EBrake action functions (12 functions × 4 accounts)
+      //  - 12 EBrake action functions for Venus team multisig (emergency pausing, Phase 0)
       // RoleRevoked: 3 (DeviationSentinel direct comptroller perms from VIP-590)
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [71]);
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [83]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleRevoked"], [3]);
     },
   });
@@ -174,6 +183,13 @@ forking(91124514, async () => {
         for (const sig of GOVERNANCE_EBRAKE_PERMS) {
           expect(await acm.isAllowedToCall(account, sig)).to.equal(true, `missing permission: ${sig} for ${account}`);
         }
+      }
+    });
+
+    it("Multisig should have all EBrake action permissions for emergency pausing", async () => {
+      const acm = accessControlManager.connect(impersonatedEBrake);
+      for (const sig of GOVERNANCE_EBRAKE_PERMS) {
+        expect(await acm.isAllowedToCall(MULTISIG, sig)).to.equal(true, `missing permission: ${sig} for multisig`);
       }
     });
 

@@ -18,6 +18,8 @@ export const PROXY_ADMIN = "0x6beb6d2695b67feb73ad4f172e8e2975497187e4";
 export const CORE_POOL_COMPTROLLER = NETWORK_ADDRESSES.bscmainnet.UNITROLLER;
 // Access Control Manager
 export const ACM = NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER;
+// Venus team multisig — can call EBrake action functions directly for emergency pausing (Phase 0)
+export const MULTISIG = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948";
 
 const TIMELOCKS = [NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
@@ -106,6 +108,8 @@ If approved, this VIP will:
    functions directly, so a Critical VIP can route through EBrake and benefit from its snapshot mechanism
 6. Revoke DeviationSentinel's existing direct comptroller permissions (granted in VIP-590), since the sentinel
    now goes through EBrake
+7. Grant the Venus team multisig (\`${MULTISIG}\`) permission to call all EBrake action functions directly,
+   enabling the team to pause the protocol in emergency conditions (Phase 0)
 
 #### Description
 
@@ -123,7 +127,8 @@ values. Snapshots are first-write-wins and cleared via the three granular reset 
 - [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/694)
 - [DeviationSentinel Proxy](https://bscscan.com/address/${DEVIATION_SENTINEL})
 - [New DeviationSentinel Implementation](https://bscscan.com/address/${NEW_DEVIATION_SENTINEL_IMPL})
-- [EBrake Contract](https://bscscan.com/address/${EBRAKE})`,
+- [EBrake Contract](https://bscscan.com/address/${EBRAKE})
+- [Venus Team Multisig](https://bscscan.com/address/${MULTISIG})`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
@@ -156,6 +161,9 @@ values. Snapshots are first-write-wins and cleared via the three granular reset 
       ...SENTINEL_COMPTROLLER_PERMS_TO_REVOKE.map(sig =>
         revokeCallPermission(CORE_POOL_COMPTROLLER, sig, DEVIATION_SENTINEL),
       ),
+
+      // 7. Grant Venus team multisig permission on all EBrake action functions (emergency pausing, Phase 0)
+      ...GOVERNANCE_EBRAKE_PERMS.map(sig => giveCallPermission(EBRAKE, sig, MULTISIG)),
     ],
     meta,
     ProposalType.REGULAR,
