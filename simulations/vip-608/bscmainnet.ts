@@ -11,8 +11,8 @@ import {
   TIMELOCKS_AND_GUARDIAN,
   vUSDC,
   vUSDT,
-  vip610,
-} from "../../vips/vip-610/bscmainnet";
+  vip608,
+} from "../../vips/vip-608/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import BINANCE_ORACLE_ABI from "./abi/BinanceOracle.json";
 import CHAINLINK_ORACLE_ABI from "./abi/ChainlinkOracle.json";
@@ -81,7 +81,7 @@ forking(89004570, async () => {
     });
   });
 
-  testVip("VIP-610 [BNB Chain] Configure Relative Position Manager", await vip610(), {
+  testVip("VIP-608 [BNB Chain] Configure Relative Position Manager", await vip608(), {
     callbackAfterExecution: async txResponse => {
       await expectEvents(txResponse, [RELATIVE_POSITION_MANAGER_ABI], ["OwnershipTransferred"], [1]);
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [33]);
