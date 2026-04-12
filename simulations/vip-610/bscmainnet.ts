@@ -6,7 +6,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, initMainnetUser } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip661, {
+import vip610, {
   ACM,
   CORE_POOL_COMPTROLLER,
   DEVIATION_SENTINEL,
@@ -14,7 +14,7 @@ import vip661, {
   MULTISIG,
   NEW_DEVIATION_SENTINEL_IMPL,
   PROXY_ADMIN,
-} from "../../vips/vip-661/bscmainnet";
+} from "../../vips/vip-610/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
@@ -147,7 +147,7 @@ forking(91721610, async () => {
     });
   });
 
-  testVip("VIP-661 [BNB Chain] Configure EBrake-integrated DeviationSentinel", await vip661(), {
+  testVip("VIP-610 [BNB Chain] Configure Emergency Brake (EBrakeV2) with DeviationSentinel", await vip610(), {
     callbackAfterExecution: async txResponse => {
       // RoleGranted breakdown:
       //  - 8  EBrake on Core Pool Comptroller (6 original + setIsBorrowAllowed + setWhiteListFlashLoanAccount)
