@@ -12,7 +12,7 @@ import {
   NEW_DEVIATION_SENTINEL_IMPL,
   PROXY_ADMIN,
   vip661Testnet,
-} from "../../vips/vip-661/bsctestnet";
+} from "../../vips/vip-610/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import PROXY_ADMIN_ABI from "./abi/ProxyAdmin.json";

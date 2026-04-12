@@ -14,7 +14,7 @@ import {
   NEW_EBRAKE_IMPL,
   PROXY_ADMIN,
   vip661TestnetAddendum3,
-} from "../../vips/vip-661/bsctestnet-addendum-3";
+} from "../../vips/vip-610/bsctestnet-addendum-3";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import EBRAKE_ABI from "./abi/EBrake.json";

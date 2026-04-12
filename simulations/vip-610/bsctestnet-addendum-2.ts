@@ -12,7 +12,7 @@ import {
   LT,
   VETH_CORE,
   vip661TestnetAddendum2,
-} from "../../vips/vip-661/bsctestnet-addendum-2";
+} from "../../vips/vip-610/bsctestnet-addendum-2";
 import EBRAKE_ABI from "./abi/EBrake.json";
 import ERC20_ABI from "./abi/ERC20.json";
 import RESILIENT_ORACLE_ABI from "./abi/ResilientOracle.json";

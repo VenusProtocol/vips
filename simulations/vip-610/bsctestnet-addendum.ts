@@ -14,7 +14,7 @@ import {
   LT,
   VETH_CORE,
   vip661TestnetAddendum,
-} from "../../vips/vip-661/bsctestnet-addendum";
+} from "../../vips/vip-610/bsctestnet-addendum";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import EBRAKE_ABI from "./abi/EBrake.json";
 import ERC20_ABI from "./abi/ERC20.json";
