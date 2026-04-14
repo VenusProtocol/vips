@@ -113,9 +113,9 @@ This VIP performs three independent actions on BNB Chain:
 
 Configures a three-tier resilient oracle for SolvBTC/USD pricing using the OneJump pattern
 (SolvBTC/BTC rate × BTCB/USD = SolvBTC/USD):
-- **MAIN**: OneJumpOracle (SolvBTCOneJumpRedStoneOracle) using the RedStone cross-market feed
+- **MAIN**: CorrelatedTokenOracle (SolvBTCOneJumpFundamentalOracle) using the Solv self-reported fundamental rate
 - **PIVOT**: OneJumpOracle (SolvBTCOneJumpChainlinkOracle) using the Chainlink ER feed
-- **FALLBACK**: CorrelatedTokenOracle (SolvBTCOneJumpFundamentalOracle) using the Solv self-reported fundamental feed
+- **FALLBACK**: OneJumpOracle (SolvBTCOneJumpRedStoneOracle) using the RedStone cross-market feed (disabled)
 
 Also grants ACM permissions to the Normal Timelock for the freshly deployed SolvBTCFundamentalChainlinkOracle.
 

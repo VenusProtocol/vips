@@ -67,7 +67,7 @@ const setMaxStaleForSolvBTC = async () => {
   }
 };
 
-const setDirectPriceForSSolvBTCFundamental = async () => {
+const setDirectPriceForSolvBTCFundamental = async () => {
   const timelockSigner = await initMainnetUser(bscmainnet.NORMAL_TIMELOCK, ethers.utils.parseEther("1"));
 
   const acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, timelockSigner);
@@ -313,9 +313,9 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
-  describe("set direct price for fundamental and redstore for there feed as they haev internal staenss chaeck", () => {
+  describe("set direct price for fundamental and RedStone feeds as they have internal staleness checks", () => {
     it("set Fundamnetal oracle direct price for SolvBTC", async () => {
-      await setDirectPriceForSSolvBTCFundamental();
+      await setDirectPriceForSolvBTCFundamental();
     });
 
     it("set RedStone oracle direct price for SolvBTC", async () => {
