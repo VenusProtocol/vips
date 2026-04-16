@@ -6,6 +6,8 @@ import { initMainnetUser, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInC
 import { forking, testVip } from "src/vip-framework";
 
 import vip612, {
+  ALLEZ_LABS,
+  ALLEZ_LABS_USDT_AMOUNT,
   ATLAS_ORACLE,
   ATLAS_U_CONFIG,
   CHAINLINK_SOLVBTC_CONFIG,
@@ -16,6 +18,7 @@ import vip612, {
   SOLVBTC_FUNDAMENTAL_CHAINLINK_ORACLE,
   SOLVBTC_RESILIENT_ORACLE_CONFIG,
   U,
+  USDT,
   USDT_CHAINLINK_ORACLE,
   U_RESILIENT_ORACLE_CONFIG,
   XVS_GRANT_AMOUNT,
@@ -35,7 +38,7 @@ const U_LOWER_BOUND_RATIO = ethers.utils.parseUnits("0.99", 18);
 
 const { bscmainnet } = NETWORK_ADDRESSES;
 
-const BLOCK_NUMBER = 92480808;
+const BLOCK_NUMBER = 92819471;
 
 const STALE_PERIOD_OVERRIDE = 315360000;
 
@@ -145,10 +148,13 @@ forking(BLOCK_NUMBER, async () => {
   let boundValidator: Contract;
   let acm: Contract;
   let xvs: Contract;
+  let usdt: Contract;
   let preVipPrice: BigNumber;
   let preVipSolvBTCPrice: BigNumber;
   let xvsStoreBalanceBefore: BigNumber;
   let xvsUnitrollerBalanceBefore: BigNumber;
+  let allezLabsUsdtBalanceBefore: BigNumber;
+  let treasuryUsdtBalanceBefore: BigNumber;
 
   before(async () => {
     acm = new ethers.Contract(bscmainnet.ACCESS_CONTROL_MANAGER, ACM_ABI, provider);
@@ -164,9 +170,12 @@ forking(BLOCK_NUMBER, async () => {
       provider,
     );
     xvs = new ethers.Contract(bscmainnet.XVS, XVS_ABI, provider);
+    usdt = new ethers.Contract(USDT, XVS_ABI, provider);
 
     xvsStoreBalanceBefore = await xvs.balanceOf(XVS_STORE);
     xvsUnitrollerBalanceBefore = await xvs.balanceOf(bscmainnet.UNITROLLER);
+    allezLabsUsdtBalanceBefore = await usdt.balanceOf(ALLEZ_LABS);
+    treasuryUsdtBalanceBefore = await usdt.balanceOf(bscmainnet.VTREASURY);
     preVipPrice = await resilientOracle.getPrice(U);
     preVipSolvBTCPrice = await resilientOracle.getPrice(SOLVBTC);
 
@@ -301,6 +310,12 @@ forking(BLOCK_NUMBER, async () => {
     });
   });
 
+  describe("Pre-VIP Allez Labs payment", () => {
+    it("Treasury USDT balance should be recorded before VIP", async () => {
+      expect(treasuryUsdtBalanceBefore).to.be.gte(ALLEZ_LABS_USDT_AMOUNT);
+    });
+  });
+
   describe("Pre-VIP BoundValidator configs", () => {
     it("SolvBTC should have upperBoundRatio = 1.05e18", async () => {
       const config = await boundValidator.validateConfigs(SOLVBTC);
@@ -432,6 +447,18 @@ forking(BLOCK_NUMBER, async () => {
     it("Unitroller XVS balance should decrease by XVS_GRANT_AMOUNT", async () => {
       const xvsUnitrollerBalanceAfter = await xvs.balanceOf(bscmainnet.UNITROLLER);
       expect(xvsUnitrollerBalanceBefore.sub(xvsUnitrollerBalanceAfter)).to.equal(XVS_GRANT_AMOUNT);
+    });
+  });
+
+  describe("Post-VIP Allez Labs payment", () => {
+    it("Allez Labs USDT balance should increase by 105,000 USDT", async () => {
+      const allezLabsUsdtBalanceAfter = await usdt.balanceOf(ALLEZ_LABS);
+      expect(allezLabsUsdtBalanceAfter.sub(allezLabsUsdtBalanceBefore)).to.equal(ALLEZ_LABS_USDT_AMOUNT);
+    });
+
+    it("Treasury USDT balance should decrease by 105,000 USDT", async () => {
+      const treasuryUsdtBalanceAfter = await usdt.balanceOf(bscmainnet.VTREASURY);
+      expect(treasuryUsdtBalanceBefore.sub(treasuryUsdtBalanceAfter)).to.equal(ALLEZ_LABS_USDT_AMOUNT);
     });
   });
 

@@ -53,7 +53,7 @@ export const SOLVBTC_RESILIENT_ORACLE_CONFIG = {
       SOLVBTC_ONE_JUMP_CHAINLINK_ORACLE,
       SOLVBTC_ONE_JUMP_REDSTONE_ORACLE,
     ] as [string, string, string],
-    enableFlagsForOracles: [true, true, false] as [boolean, boolean, boolean],
+    enableFlagsForOracles: [true, true, true] as [boolean, boolean, boolean],
     cachingEnabled: false,
   },
 };
@@ -101,13 +101,21 @@ export const U_RESILIENT_ORACLE_CONFIG = {
 export const XVS_STORE = "0x1e25CF968f12850003Db17E0Dba32108509C4359";
 export const XVS_GRANT_AMOUNT = parseUnits("55875", 18);
 
+// ================================================================================
+// ===== Allez Labs Quarterly Payment =====
+// ================================================================================
+export const USDT = "0x55d398326f99059fF775485246999027B3197955";
+export const ALLEZ_LABS = "0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e";
+export const ALLEZ_LABS_USDT_AMOUNT = parseUnits("105000", 18);
+
 export const vip612 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-612 [BNB Chain] SolvBTC Oracle Setup + U Oracle Switch to Dedicated Feeds + XVS Base Reward Grant",
+    title:
+      "VIP-612 [BNB Chain] SolvBTC Oracle Setup + U Oracle Switch to Dedicated Feeds + XVS Base Reward Grant + Allez Labs Quarterly Payment",
     description: `## Summary
 
-This VIP performs three independent actions on BNB Chain:
+This VIP performs four independent actions on BNB Chain:
 
 ### 1. SolvBTC Oracle Setup
 
@@ -115,7 +123,7 @@ Configures a three-tier resilient oracle for SolvBTC/USD pricing using the OneJu
 (SolvBTC/BTC rate × BTCB/USD = SolvBTC/USD):
 - **MAIN**: CorrelatedTokenOracle (SolvBTCOneJumpFundamentalOracle) using the Solv self-reported fundamental rate
 - **PIVOT**: OneJumpOracle (SolvBTCOneJumpChainlinkOracle) using the Chainlink ER feed
-- **FALLBACK**: OneJumpOracle (SolvBTCOneJumpRedStoneOracle) using the RedStone cross-market feed (disabled)
+- **FALLBACK**: OneJumpOracle (SolvBTCOneJumpRedStoneOracle) using the RedStone cross-market feed
 
 Also grants ACM permissions to the Normal Timelock for the freshly deployed SolvBTCFundamentalChainlinkOracle.
 
@@ -138,7 +146,11 @@ Outstanding amounts:
 - Q2 2026: 91 days × 308.7 = 28,092 XVS
 - Total: 55,875 XVS
 
-This VIP calls _grantXVS on the Core Pool Comptroller to transfer 55,875 XVS directly to XVSStore.`,
+This VIP calls _grantXVS on the Core Pool Comptroller to transfer 55,875 XVS directly to XVSStore.
+
+### 4. Allez Labs Quarterly Payment
+
+Transfers 105,000 USDT from the Venus Treasury to Allez Labs (0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e) as their quarterly payment.`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -247,6 +259,16 @@ This VIP calls _grantXVS on the Core Pool Comptroller to transfer 55,875 XVS dir
         target: bscmainnet.UNITROLLER,
         signature: "_grantXVS(address,uint256)",
         params: [XVS_STORE, XVS_GRANT_AMOUNT],
+      },
+
+      // ================================================================================
+      // ===== 4. Allez Labs Quarterly Payment =====
+      // ================================================================================
+
+      {
+        target: bscmainnet.VTREASURY,
+        signature: "withdrawTreasuryBEP20(address,uint256,address)",
+        params: [USDT, ALLEZ_LABS_USDT_AMOUNT, ALLEZ_LABS],
       },
     ],
     meta,
