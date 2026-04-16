@@ -7,7 +7,6 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip664, {
-  ADAPTER_FAST_TRACK_FUNCTIONS,
   ADAPTER_FUNCTIONS,
   ADAPTER_GUARDIAN_FUNCTIONS,
   CONTROLLER_FUNCTIONS,
@@ -191,8 +190,17 @@ forking(FORK_BLOCK, async () => {
       }
     });
 
+    describe("LiquidationAdapter — CRITICAL_TIMELOCK permissions", () => {
+      for (const funcSig of ADAPTER_FUNCTIONS) {
+        it(`CRITICAL_TIMELOCK should have permission: ${funcSig}`, async () => {
+          const allowed = await accessControlManager.hasPermission(CRITICAL_TIMELOCK, LIQUIDATION_ADAPTER, funcSig);
+          expect(allowed).to.be.true;
+        });
+      }
+    });
+
     describe("LiquidationAdapter — FAST_TRACK_TIMELOCK permissions", () => {
-      for (const funcSig of ADAPTER_FAST_TRACK_FUNCTIONS) {
+      for (const funcSig of ADAPTER_FUNCTIONS) {
         it(`FAST_TRACK_TIMELOCK should have permission: ${funcSig}`, async () => {
           const allowed = await accessControlManager.hasPermission(FAST_TRACK_TIMELOCK, LIQUIDATION_ADAPTER, funcSig);
           expect(allowed).to.be.true;

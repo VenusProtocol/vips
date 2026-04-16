@@ -60,12 +60,14 @@ export const ADAPTER_FUNCTIONS = [
   "sweepProtocolShareToReserve(address)",
 ];
 
-export const ADAPTER_FAST_TRACK_FUNCTIONS = ["setProtocolLiquidationShare(uint256)", "setCloseFactor(uint256)"];
+export const ADAPTER_GUARDIAN_FUNCTIONS = [
+  "sweepProtocolShareToReserve(address)",
+  "setSettlerWhitelist(address,bool)",
+  "setLiquidatorWhitelist(address,bool)",
+];
 
-export const ADAPTER_GUARDIAN_FUNCTIONS = ["sweepProtocolShareToReserve(address)"];
-
-// Total PermissionGranted events: 19*3 + 6 + 5 + 2 + 1 = 71
-export const EXPECTED_PERMISSION_GRANTED_EVENTS = 71;
+// Total PermissionGranted events: 19*3 + 6 + 5*3 + 3 = 81
+export const EXPECTED_PERMISSION_GRANTED_EVENTS = 81;
 
 /**
  * Returns a giveCallPermission command for the ACM.
@@ -87,10 +89,12 @@ export const vip664 = () => {
 
 If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain Testnet:
 
-1. Grant ACM permissions to governance timelocks for all access-controlled functions on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
-2. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
-3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
-4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
+1. Grant ACM permissions to all three governance timelocks (Normal, Fast-track, Critical) for all access-controlled functions on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
+2. Grant ACM permissions to the Guardian for operational functions on \`InstitutionalVaultController\` (pause/unpause, open/close, sweep) and \`LiquidationAdapter\` (sweep, whitelist management).
+3. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
+4. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
+5. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
+6. Whitelist the Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
 
 #### Deployed Contracts
 
@@ -105,9 +109,11 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
 | Normal | InstitutionalVaultController | 19 functions (all operational + setter functions) |
 | Fast-track | InstitutionalVaultController | 19 functions (all operational + setter functions) |
 | Critical | InstitutionalVaultController | 19 functions (all operational + setter functions) |
-| Guardian | InstitutionalVaultController | 6 functions (pause + open/close/sweep) |
+| Guardian | InstitutionalVaultController | 6 functions (pause/unpause + open/close/sweep) |
 | Normal | LiquidationAdapter | 5 functions (all setter functions) |
-| Fast-track | LiquidationAdapter | 2 functions (risk params) |`,
+| Fast-track | LiquidationAdapter | 5 functions (all setter functions) |
+| Critical | LiquidationAdapter | 5 functions (all setter functions) |
+| Guardian | LiquidationAdapter | 3 functions (sweep + whitelist management) |`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
@@ -138,8 +144,11 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       // NORMAL_TIMELOCK — all 5 ACM-gated adapter functions
       ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, NORMAL_TIMELOCK)),
 
-      // FAST_TRACK_TIMELOCK — risk parameter functions
-      ...ADAPTER_FAST_TRACK_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, FAST_TRACK_TIMELOCK)),
+      // FAST_TRACK_TIMELOCK — all 5 ACM-gated adapter functions
+      ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, FAST_TRACK_TIMELOCK)),
+
+      // CRITICAL_TIMELOCK — all 5 ACM-gated adapter functions
+      ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, CRITICAL_TIMELOCK)),
 
       // GUARDIAN — sweep protocol share to reserve
       ...ADAPTER_GUARDIAN_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, GUARDIAN)),
@@ -176,6 +185,21 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
         target: INSTITUTIONAL_VAULT_CONTROLLER,
         signature: "acceptPositionTokenOwnership()",
         params: [],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────
+      // Phase 5 — Guardian whitelist configuration
+      // ──────────────────────────────────────────────────────────────────────
+
+      {
+        target: LIQUIDATION_ADAPTER,
+        signature: "setLiquidatorWhitelist(address,bool)",
+        params: [GUARDIAN, true],
+      },
+      {
+        target: LIQUIDATION_ADAPTER,
+        signature: "setSettlerWhitelist(address,bool)",
+        params: [GUARDIAN, true],
       },
     ],
     meta,
