@@ -18,8 +18,8 @@ import vip664, {
   LIQUIDATION_ADAPTER,
 } from "../../vips/vip-664/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
-import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
+import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
 import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
@@ -203,11 +203,7 @@ forking(FORK_BLOCK, async () => {
     describe("LiquidationAdapter — GUARDIAN permissions", () => {
       for (const funcSig of ADAPTER_GUARDIAN_FUNCTIONS) {
         it(`GUARDIAN should have permission: ${funcSig}`, async () => {
-          const allowed = await accessControlManager.hasPermission(
-            GUARDIAN,
-            LIQUIDATION_ADAPTER,
-            funcSig,
-          );
+          const allowed = await accessControlManager.hasPermission(GUARDIAN, LIQUIDATION_ADAPTER, funcSig);
           expect(allowed).to.be.true;
         });
       }
