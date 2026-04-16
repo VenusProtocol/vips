@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents } from "src/utils";
@@ -8,26 +9,28 @@ import { forking, testVip } from "src/vip-framework";
 import vip664, {
   ADAPTER_FAST_TRACK_FUNCTIONS,
   ADAPTER_FUNCTIONS,
-  CONTROLLER_CRITICAL_FUNCTIONS,
-  CONTROLLER_FAST_TRACK_FUNCTIONS,
+  ADAPTER_GUARDIAN_FUNCTIONS,
   CONTROLLER_FUNCTIONS,
+  CONTROLLER_GUARDIAN_FUNCTIONS,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
   INSTITUTIONAL_VAULT_CONTROLLER,
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
 } from "../../vips/vip-664/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
-import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
+import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
+import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 
 const { bsctestnet } = NETWORK_ADDRESSES;
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER } = bsctestnet;
 
-const FORK_BLOCK = 101981562;
+const FORK_BLOCK = 102008713;
 
 forking(FORK_BLOCK, async () => {
   let accessControlManager: Contract;
   let controller: Contract;
+  let liquidationAdapter: Contract;
   let positionToken: Contract;
 
   before(async () => {
@@ -37,6 +40,7 @@ forking(FORK_BLOCK, async () => {
       INSTITUTIONAL_VAULT_CONTROLLER_ABI,
       ethers.provider,
     );
+    liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, LIQUIDATION_ADAPTER_ABI, ethers.provider);
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
   });
 
@@ -85,6 +89,26 @@ forking(FORK_BLOCK, async () => {
       expect(allowed).to.be.false;
     });
 
+    it("controller pendingOwner should be NORMAL_TIMELOCK (transferOwnership was called in deploy script)", async () => {
+      const pendingOwner = await controller.pendingOwner();
+      expect(pendingOwner).to.equal(NORMAL_TIMELOCK);
+    });
+
+    it("liquidationAdapter pendingOwner should be NORMAL_TIMELOCK (transferOwnership was called in deploy script)", async () => {
+      const pendingOwner = await liquidationAdapter.pendingOwner();
+      expect(pendingOwner).to.equal(NORMAL_TIMELOCK);
+    });
+
+    it("liquidationAdapter protocolLiquidationShare should be 0.5e18", async () => {
+      const share = await liquidationAdapter.protocolLiquidationShare();
+      expect(share).to.equal(parseEther("0.5"));
+    });
+
+    it("liquidationAdapter closeFactor should be 0.5e18", async () => {
+      const factor = await liquidationAdapter.closeFactor();
+      expect(factor).to.equal(parseEther("0.5"));
+    });
+
     it("controller liquidationAdapter should be address(0) before VIP", async () => {
       const adapter = await controller.liquidationAdapter();
       expect(adapter).to.equal(ethers.constants.AddressZero);
@@ -106,7 +130,7 @@ forking(FORK_BLOCK, async () => {
   });
 
   // ──────────────────────────────────────────────────────────────────────
-  // Post-VIP: ACM permission checks
+  // Post-VIP: ACM permission and system wiring checks
   // ──────────────────────────────────────────────────────────────────────
 
   describe("Post-VIP: verify setup", () => {
@@ -124,7 +148,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     describe("InstitutionalVaultController — FAST_TRACK_TIMELOCK permissions", () => {
-      for (const funcSig of CONTROLLER_FAST_TRACK_FUNCTIONS) {
+      for (const funcSig of CONTROLLER_FUNCTIONS) {
         it(`FAST_TRACK_TIMELOCK should have permission: ${funcSig}`, async () => {
           const allowed = await accessControlManager.hasPermission(
             FAST_TRACK_TIMELOCK,
@@ -137,7 +161,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     describe("InstitutionalVaultController — CRITICAL_TIMELOCK permissions", () => {
-      for (const funcSig of CONTROLLER_CRITICAL_FUNCTIONS) {
+      for (const funcSig of CONTROLLER_FUNCTIONS) {
         it(`CRITICAL_TIMELOCK should have permission: ${funcSig}`, async () => {
           const allowed = await accessControlManager.hasPermission(
             CRITICAL_TIMELOCK,
@@ -150,7 +174,7 @@ forking(FORK_BLOCK, async () => {
     });
 
     describe("InstitutionalVaultController — GUARDIAN permissions", () => {
-      for (const funcSig of CONTROLLER_CRITICAL_FUNCTIONS) {
+      for (const funcSig of CONTROLLER_GUARDIAN_FUNCTIONS) {
         it(`GUARDIAN should have permission: ${funcSig}`, async () => {
           const allowed = await accessControlManager.hasPermission(GUARDIAN, INSTITUTIONAL_VAULT_CONTROLLER, funcSig);
           expect(allowed).to.be.true;
@@ -174,6 +198,31 @@ forking(FORK_BLOCK, async () => {
           expect(allowed).to.be.true;
         });
       }
+    });
+
+    describe("LiquidationAdapter — GUARDIAN permissions", () => {
+      for (const funcSig of ADAPTER_GUARDIAN_FUNCTIONS) {
+        it(`GUARDIAN should have permission: ${funcSig}`, async () => {
+          const allowed = await accessControlManager.hasPermission(
+            GUARDIAN,
+            LIQUIDATION_ADAPTER,
+            funcSig,
+          );
+          expect(allowed).to.be.true;
+        });
+      }
+    });
+
+    describe("Ownership acceptance", () => {
+      it("controller owner should be NORMAL_TIMELOCK", async () => {
+        const owner = await controller.owner();
+        expect(owner).to.equal(NORMAL_TIMELOCK);
+      });
+
+      it("liquidationAdapter owner should be NORMAL_TIMELOCK", async () => {
+        const owner = await liquidationAdapter.owner();
+        expect(owner).to.equal(NORMAL_TIMELOCK);
+      });
     });
 
     describe("System wiring", () => {

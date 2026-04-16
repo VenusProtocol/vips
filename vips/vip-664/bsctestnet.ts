@@ -39,16 +39,14 @@ export const CONTROLLER_FUNCTIONS = [
   "setTreasury(address)",
 ];
 
-export const CONTROLLER_FAST_TRACK_FUNCTIONS = [
+export const CONTROLLER_GUARDIAN_FUNCTIONS = [
   "partialPauseVault(address)",
   "completePauseVault(address)",
   "unpauseVault(address)",
-  "setLiquidationThreshold(address,uint256)",
-  "setLiquidationIncentive(address,uint256)",
-  "setLatePenaltyRate(address,uint256)",
+  "openVault(address)",
+  "closeVault(address)",
+  "sweep(address,address)",
 ];
-
-export const CONTROLLER_CRITICAL_FUNCTIONS = ["partialPauseVault(address)", "completePauseVault(address)"];
 
 // ──────────────────────────────────────────────────────────────────────
 // ACM-gated function signatures — LiquidationAdapter
@@ -64,8 +62,10 @@ export const ADAPTER_FUNCTIONS = [
 
 export const ADAPTER_FAST_TRACK_FUNCTIONS = ["setProtocolLiquidationShare(uint256)", "setCloseFactor(uint256)"];
 
-// Total PermissionGranted events: 19 + 6 + 2 + 2 + 5 + 2 = 36
-export const EXPECTED_PERMISSION_GRANTED_EVENTS = 36;
+export const ADAPTER_GUARDIAN_FUNCTIONS = ["sweepProtocolShareToReserve(address)"];
+
+// Total PermissionGranted events: 19*3 + 6 + 5 + 2 + 1 = 71
+export const EXPECTED_PERMISSION_GRANTED_EVENTS = 71;
 
 /**
  * Returns a giveCallPermission command for the ACM.
@@ -88,8 +88,9 @@ export const vip664 = () => {
 If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain Testnet:
 
 1. Grant ACM permissions to governance timelocks for all access-controlled functions on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
-2. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
-3. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
+2. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
+3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
+4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
 
 #### Deployed Contracts
 
@@ -102,9 +103,9 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
 | Timelock | Contract | Permissions |
 |---|---|---|
 | Normal | InstitutionalVaultController | 19 functions (all operational + setter functions) |
-| Fast-track | InstitutionalVaultController | 6 functions (pause + risk params) |
-| Critical | InstitutionalVaultController | 2 functions (pause only) |
-| Guardian | InstitutionalVaultController | 2 functions (pause only) |
+| Fast-track | InstitutionalVaultController | 19 functions (all operational + setter functions) |
+| Critical | InstitutionalVaultController | 19 functions (all operational + setter functions) |
+| Guardian | InstitutionalVaultController | 6 functions (pause + open/close/sweep) |
 | Normal | LiquidationAdapter | 5 functions (all setter functions) |
 | Fast-track | LiquidationAdapter | 2 functions (risk params) |`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
@@ -121,16 +122,14 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       // NORMAL_TIMELOCK — all 19 ACM-gated controller functions
       ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, NORMAL_TIMELOCK)),
 
-      // FAST_TRACK_TIMELOCK — emergency pause + risk parameter functions
-      ...CONTROLLER_FAST_TRACK_FUNCTIONS.map(sig =>
-        permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, FAST_TRACK_TIMELOCK),
-      ),
+      // FAST_TRACK_TIMELOCK — all 19 ACM-gated controller functions
+      ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, FAST_TRACK_TIMELOCK)),
 
-      // CRITICAL_TIMELOCK — critical pause functions only
-      ...CONTROLLER_CRITICAL_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, CRITICAL_TIMELOCK)),
+      // CRITICAL_TIMELOCK — all 19 ACM-gated controller functions
+      ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, CRITICAL_TIMELOCK)),
 
-      // GUARDIAN — critical pause functions
-      ...CONTROLLER_CRITICAL_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, GUARDIAN)),
+      // GUARDIAN — pause + operational functions
+      ...CONTROLLER_GUARDIAN_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, GUARDIAN)),
 
       // ──────────────────────────────────────────────────────────────────────
       // Phase 2 — LiquidationAdapter permissions
@@ -142,8 +141,28 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       // FAST_TRACK_TIMELOCK — risk parameter functions
       ...ADAPTER_FAST_TRACK_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, FAST_TRACK_TIMELOCK)),
 
+      // GUARDIAN — sweep protocol share to reserve
+      ...ADAPTER_GUARDIAN_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, GUARDIAN)),
+
       // ──────────────────────────────────────────────────────────────────────
-      // Phase 3 — System wiring
+      // Phase 3 — Ownership acceptance
+      // ──────────────────────────────────────────────────────────────────────
+      // Deploy script called transferOwnership(NORMAL_TIMELOCK) on both contracts.
+      // acceptOwnership() completes the Ownable2Step transfer.
+
+      {
+        target: INSTITUTIONAL_VAULT_CONTROLLER,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+      {
+        target: LIQUIDATION_ADAPTER,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+
+      // ──────────────────────────────────────────────────────────────────────
+      // Phase 4 — System wiring
       // ──────────────────────────────────────────────────────────────────────
       // Note: NORMAL_TIMELOCK must have the ACM permission for both calls below,
       // which is granted in Phase 1 above. Commands execute atomically in order.
