@@ -112,45 +112,115 @@ export const vip612 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-612 [BNB Chain] SolvBTC Oracle Setup + U Oracle Switch to Dedicated Feeds + XVS Base Reward Grant + Allez Labs Quarterly Payment",
-    description: `## Summary
+      "VIP-612 [BNB Chain] 2026 Week 16 VIP: solvBTC & U Oracle Upgrades, Allez Labs Q2 Payment & XVS Vault Base Reward Top-up",
+    description: `#### Summary
 
-This VIP performs four independent actions on BNB Chain:
+This VIP bundles four protocol actions on BNB Chain:
 
-### 1. SolvBTC Oracle Setup
+1. **Switch solvBTC oracle** from RedStone market price feed to a manipulation-resistant CorrelatedTokenOracle (RedStone exchange rate feed), replace BinanceOracle PIVOT with Chainlink Exchange Rate feed, and add a RedStone cross-market FALLBACK — upgrading from Tier 2 to Full (3 oracles).
+2. **Switch U oracle** from non-dedicated Chainlink USDT/USD1 feeds to dedicated Chainlink U/USD (MAIN) and Atlas U/USD (PIVOT) feeds.
+3. **Transfer $105,000 USDT** from Venus Treasury to Allez Labs for Q2 2026 risk management services.
+4. **Fund XVS Vault base rewards** by calling _grantXVS to transfer ~55,875 XVS from the Core Pool Comptroller to the XVS Store, covering Q1–Q2 2026.
 
-Configures a three-tier resilient oracle for SolvBTC/USD pricing using the OneJump pattern
-(SolvBTC/BTC rate × BTCB/USD = SolvBTC/USD):
-- **MAIN**: CorrelatedTokenOracle (SolvBTCOneJumpFundamentalOracle) using the Solv self-reported fundamental rate
-- **PIVOT**: OneJumpOracle (SolvBTCOneJumpChainlinkOracle) using the Chainlink ER feed
-- **FALLBACK**: OneJumpOracle (SolvBTCOneJumpRedStoneOracle) using the RedStone cross-market feed
+#### Description
 
-Also grants ACM permissions to the Normal Timelock for the freshly deployed SolvBTCFundamentalChainlinkOracle.
+#### 1. [BNB Chain] solvBTC Oracle Switch to Exchange Rate Feed
 
-### 2. U Oracle Update (VPD-996)
+**Context**
 
-Venus currently prices U using non-dedicated oracle feeds (USDT Chainlink as MAIN, USD1 Chainlink as PIVOT).
-Both Chainlink and Atlas (formerly CMC) have deployed dedicated U/USD feeds on BNB Chain.
-This VIP switches to the dedicated feeds:
-- **MAIN**: ChainlinkOracle with dedicated Chainlink U/USD feed (0x2Ab73dc1C8A23bcDDb4850Ff811850E0d2a0c72f)
-- **PIVOT**: AtlasOracle with dedicated Atlas U/USD feed (0x14a20eafffada4d78afeef1185e7317cf98f6a1f)
-- maxStalePeriod: 86,700s (24h + 5min), deviation: 0.5%
+solvBTC has low spot trading volume on BSC DEXs, making the current RedStone market price feed vulnerable to manipulation. Solv has requested switching to exchange rate feeds. Chainlink ER feed is now live on BNB Chain.
 
-### 3. XVS Base Reward Grant (VPD-1024)
+**Current Configuration**
 
-The fixed Base Reward allocation of 308.7 XVS/day on BNB Chain has not been funded for any period in 2026.
-Last grant was VIP-529 (July 2025), covering through 2025-12-31.
+- MAIN: RedStoneOracle, RS:SolvBTC (0xF5F6...a550), deviation 0.5%, heartbeat 6h, max_stale 21,900s
+- PIVOT: BinanceOracle, BN:SOLVBTC, deviation 1.0%, heartbeat 12h, max_stale 43,500s
+- FALLBACK: N/A
 
-Outstanding amounts:
+**Proposed Configuration**
+
+- MAIN: CorrelatedTokenOracle, [RS:SolvBTC_FUNDAMENTAL](https://app.redstone.finance/app/feeds/bnb-chain/solvbtc_fundamental/), address 0x77471661568DC65d4574EAd9544DfF1e618Adfb2, deviation 0.01%, heartbeat 24h, max_stale 86,700s
+- PIVOT: ChainlinkOracle, CL:solvBTC/BTC Exchange Rate, address 0xf93b9B23c46331704EC550c24CB4110975057863, deviation 1.0%, heartbeat 24h, max_stale 86,700s
+- FALLBACK: RedStoneOracle, SolvBTC/BTC cross-market (~14 CEX), address 0x8D89d6c114193154f111D7C83299D285C9cC5BBC, deviation 0.5%, heartbeat 6h, max_stale 21,900s
+
+Tier: Full (MAIN + PIVOT + FALLBACK)
+
+**Key Changes**
+
+- MAIN: RedStone SolvBTC_FUNDAMENTAL exchange rate feed via CorrelatedTokenOracle — immune to spot market manipulation
+- PIVOT: Chainlink solvBTC/BTC Exchange Rate feed — replaces BinanceOracle to align with Solv's migration away from market rate feeds
+- FALLBACK: RedStone cross-market feed aggregating ~14 CEX sources — provides market price backup
+- max_stale = provider heartbeat + 300s (consistent with protocol-wide oracle audit recommendation)
+
+**Actions**
+
+- Configure CorrelatedTokenOracle for solvBTC with SolvBTC_FUNDAMENTAL feed
+- Set MAIN oracle to CorrelatedTokenOracle, max_stale = 86,700s
+- Set PIVOT oracle to ChainlinkOracle with solvBTC/BTC ER feed, max_stale = 86,700s
+- Configure FALLBACK oracle to RedStoneOracle with SolvBTC/BTC cross-market feed, max_stale = 21,900s
+
+#### 2. [BNB Chain] U Oracle — Switch to Dedicated Feeds
+
+**Context**
+
+Venus currently prices U using non-dedicated oracles (Chainlink USDT and USD1 as proxies). Both Chainlink and Atlas (formerly CMC) have now deployed dedicated U/USD feeds on BNB Chain.
+
+**Current Configuration**
+
+- MAIN: ChainlinkOracle (capped), Stabilized USDT Price Feed (non-dedicated), address 0xF884002406Ac6Fd93FF5C989506220f781A97eEA, max_stale 100s
+- PIVOT: ChainlinkOracle, USD1/USD (non-dedicated), max_stale 86,700s
+- FALLBACK: N/A
+
+Tier: 2 (MAIN + PIVOT only)
+
+**Proposed Configuration**
+
+- MAIN: ChainlinkOracle, [U/USD (dedicated)](https://data.chain.link/feeds/bsc/mainnet/u-usd), address 0x2Ab73dc1C8A23bcDDb4850Ff811850E0d2a0c72f, deviation 0.5%, heartbeat 24h, max_stale 86,700s
+- PIVOT: Atlas (formerly CMC), [U/USD (dedicated)](https://bscscan.com/address/0x14a20eafffada4d78afeef1185e7317cf98f6a1f), address 0x14a20eafffada4d78afeef1185e7317cf98f6a1f, deviation 0.5%, heartbeat 24h, max_stale 86,700s
+
+Tier: 2 (MAIN + PIVOT)
+
+**Actions**
+
+- Set MAIN oracle to ChainlinkOracle with dedicated U/USD feed, max_stale = 86,700s
+- Set PIVOT oracle to Atlas with dedicated U/USD feed, max_stale = 86,700s
+
+#### 3. [BNB Chain] Allez Labs Q2 2026 Risk Services Payment
+
+**Context**
+
+Allez Labs provides risk management services to Venus Protocol. Per the contract terms, fees are paid quarterly in advance starting Q2 2026. This is the payment covering Q2 2026 (26 April 2026 – 25 July 2026).
+
+**Transfer Details**
+
+- Amount: 105,000 USDT
+- Source: Venus Treasury (0xf322942f644a996a617bd29c16bd7d231d9f35e9)
+- Destination: Allez Labs (0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e)
+- Period: Q2 2026 (April – July)
+- Basis: $35,000/month × 3 months
+
+**Actions**
+
+- Direct Transfer 105,000 USDT from Venus Treasury to Allez Labs at 0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e
+
+#### 4. [BNB Chain] Fund XVS Vault Base Rewards for H1 2026
+
+The fixed Base Reward allocation of 308.7 XVS/day on BNB Chain has not been funded from the Core Pool Comptroller since [VIP-529](https://app.venus.io/#/governance/proposal/529?chainId=56) (July 2025), which only covered through 2025-12-31. Both Q1 and Q2 2026 base rewards are outstanding.
+
+**Outstanding Amount**
+
 - Q1 2026: 90 days × 308.7 = 27,783 XVS
 - Q2 2026: 91 days × 308.7 = 28,092 XVS
-- Total: 55,875 XVS
+- Total: ~55,875 XVS
 
-This VIP calls _grantXVS on the Core Pool Comptroller to transfer 55,875 XVS directly to XVSStore.
+**Actions**
 
-### 4. Allez Labs Quarterly Payment
+- Call _grantXVS(XVS_STORE, ~55,875) on the Core Pool Comptroller to transfer XVS to the [XVS Store](https://bscscan.com/address/0x1e25CF968f12850003Db17E0Dba32108509C4359)
 
-Transfers 105,000 USDT from the Venus Treasury to Allez Labs (0x1757564C8C9a2c3cbE12620ea21B97d6E149F98e) as their quarterly payment.`,
+#### Voting options
+
+- **For** — Execute this proposal
+- **Against** — Do not execute this proposal
+- **Abstain** — Indifferent to execution`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
