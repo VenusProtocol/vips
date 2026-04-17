@@ -14,6 +14,14 @@ export const LIQUIDATION_ADAPTER = "0x69d79D60abD5A7080C9f178a44c5f1bf1A461541";
 export const INSTITUTION_POSITION_TOKEN = "0x377180882397718D4061d815Df32CF7DF8492f4F";
 
 // ──────────────────────────────────────────────────────────────────────
+// ACM Aggregator
+// ──────────────────────────────────────────────────────────────────────
+
+export const ACM_AGGREGATOR = "0xB59523628D92f914ec6624Be4281397E8aFD71EF";
+export const DEFAULT_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const ACM_AGGREGATOR_INDEX = 1;
+
+// ──────────────────────────────────────────────────────────────────────
 // ACM-gated function signatures — InstitutionalVaultController
 // ──────────────────────────────────────────────────────────────────────
 
@@ -69,17 +77,33 @@ export const ADAPTER_GUARDIAN_FUNCTIONS = [
 // Total PermissionGranted events: 19*3 + 6 + 5*3 + 3 = 81
 export const EXPECTED_PERMISSION_GRANTED_EVENTS = 81;
 
-/**
- * Returns a giveCallPermission command for the ACM.
- * @param contract  Target contract the permission applies to.
- * @param funcSig   Exact Solidity function signature string (must match _checkAccessAllowed).
- * @param account   Address being granted the permission.
- */
-const permission = (contract: string, funcSig: string, account: string) => ({
-  target: ACCESS_CONTROL_MANAGER,
-  signature: "giveCallPermission(address,string,address)",
-  params: [contract, funcSig, account],
-});
+// ──────────────────────────────────────────────────────────────────────
+// Full permissions array (pre-loaded into ACM Aggregator via script)
+// ──────────────────────────────────────────────────────────────────────
+
+export const PERMISSIONS: [string, string, string][] = [
+  // InstitutionalVaultController — all 19 functions × 3 timelocks
+  ...CONTROLLER_FUNCTIONS.flatMap(sig => [
+    [INSTITUTIONAL_VAULT_CONTROLLER, sig, NORMAL_TIMELOCK] as [string, string, string],
+    [INSTITUTIONAL_VAULT_CONTROLLER, sig, FAST_TRACK_TIMELOCK] as [string, string, string],
+    [INSTITUTIONAL_VAULT_CONTROLLER, sig, CRITICAL_TIMELOCK] as [string, string, string],
+  ]),
+
+  // InstitutionalVaultController — 6 guardian functions
+  ...CONTROLLER_GUARDIAN_FUNCTIONS.map(
+    sig => [INSTITUTIONAL_VAULT_CONTROLLER, sig, GUARDIAN] as [string, string, string],
+  ),
+
+  // LiquidationAdapter — all 5 functions × 3 timelocks
+  ...ADAPTER_FUNCTIONS.flatMap(sig => [
+    [LIQUIDATION_ADAPTER, sig, NORMAL_TIMELOCK] as [string, string, string],
+    [LIQUIDATION_ADAPTER, sig, FAST_TRACK_TIMELOCK] as [string, string, string],
+    [LIQUIDATION_ADAPTER, sig, CRITICAL_TIMELOCK] as [string, string, string],
+  ]),
+
+  // LiquidationAdapter — 3 guardian functions
+  ...ADAPTER_GUARDIAN_FUNCTIONS.map(sig => [LIQUIDATION_ADAPTER, sig, GUARDIAN] as [string, string, string]),
+];
 
 export const vip664 = () => {
   const meta = {
@@ -89,12 +113,11 @@ export const vip664 = () => {
 
 If passed, this VIP will configure the Institutional Fixed Rate Vault system on BNB Chain Testnet:
 
-1. Grant ACM permissions to all three governance timelocks (Normal, Fast-track, Critical) for all access-controlled functions on \`InstitutionalVaultController\` and \`LiquidationAdapter\`.
-2. Grant ACM permissions to the Guardian for operational functions on \`InstitutionalVaultController\` (pause/unpause, open/close, sweep) and \`LiquidationAdapter\` (sweep, whitelist management).
-3. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
-4. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
-5. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
-6. Whitelist the Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
+1. Grant ACM permissions (81 total) via \`ACMCommandsAggregator\` to all three governance timelocks (Normal, Fast-track, Critical) for all access-controlled functions on \`InstitutionalVaultController\` and \`LiquidationAdapter\`, and to the Guardian for operational functions on both contracts.
+2. Accept ownership of \`InstitutionalVaultController\` and \`LiquidationAdapter\` (two-step Ownable2Step transfer initiated in deploy script).
+3. Set the \`LiquidationAdapter\` on the controller via \`setLiquidationAdapter()\`.
+4. Complete the two-step position token ownership transfer via \`acceptPositionTokenOwnership()\`.
+5. Whitelist the Guardian as a liquidator and settler on the \`LiquidationAdapter\`.
 
 #### Deployed Contracts
 
@@ -122,39 +145,29 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
   return makeProposal(
     [
       // ──────────────────────────────────────────────────────────────────────
-      // Phase 1 — InstitutionalVaultController permissions
+      // Phase 1 — ACM permissions via Aggregator
       // ──────────────────────────────────────────────────────────────────────
+      // Permissions were pre-loaded into ACM Aggregator via addGrantPermissions.ts.
+      // Grant admin role, execute batched permissions, then revoke admin role.
 
-      // NORMAL_TIMELOCK — all 19 ACM-gated controller functions
-      ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, NORMAL_TIMELOCK)),
-
-      // FAST_TRACK_TIMELOCK — all 19 ACM-gated controller functions
-      ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, FAST_TRACK_TIMELOCK)),
-
-      // CRITICAL_TIMELOCK — all 19 ACM-gated controller functions
-      ...CONTROLLER_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, CRITICAL_TIMELOCK)),
-
-      // GUARDIAN — pause + operational functions
-      ...CONTROLLER_GUARDIAN_FUNCTIONS.map(sig => permission(INSTITUTIONAL_VAULT_CONTROLLER, sig, GUARDIAN)),
-
-      // ──────────────────────────────────────────────────────────────────────
-      // Phase 2 — LiquidationAdapter permissions
-      // ──────────────────────────────────────────────────────────────────────
-
-      // NORMAL_TIMELOCK — all 5 ACM-gated adapter functions
-      ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, NORMAL_TIMELOCK)),
-
-      // FAST_TRACK_TIMELOCK — all 5 ACM-gated adapter functions
-      ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, FAST_TRACK_TIMELOCK)),
-
-      // CRITICAL_TIMELOCK — all 5 ACM-gated adapter functions
-      ...ADAPTER_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, CRITICAL_TIMELOCK)),
-
-      // GUARDIAN — sweep protocol share to reserve
-      ...ADAPTER_GUARDIAN_FUNCTIONS.map(sig => permission(LIQUIDATION_ADAPTER, sig, GUARDIAN)),
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "grantRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+      },
+      {
+        target: ACM_AGGREGATOR,
+        signature: "executeGrantPermissions(uint256)",
+        params: [ACM_AGGREGATOR_INDEX],
+      },
+      {
+        target: ACCESS_CONTROL_MANAGER,
+        signature: "revokeRole(bytes32,address)",
+        params: [DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR],
+      },
 
       // ──────────────────────────────────────────────────────────────────────
-      // Phase 3 — Ownership acceptance
+      // Phase 2 — Ownership acceptance
       // ──────────────────────────────────────────────────────────────────────
       // Deploy script called transferOwnership(NORMAL_TIMELOCK) on both contracts.
       // acceptOwnership() completes the Ownable2Step transfer.
@@ -171,7 +184,7 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       },
 
       // ──────────────────────────────────────────────────────────────────────
-      // Phase 4 — System wiring
+      // Phase 3 — System wiring
       // ──────────────────────────────────────────────────────────────────────
       // Note: NORMAL_TIMELOCK must have the ACM permission for both calls below,
       // which is granted in Phase 1 above. Commands execute atomically in order.
@@ -188,7 +201,7 @@ If passed, this VIP will configure the Institutional Fixed Rate Vault system on 
       },
 
       // ──────────────────────────────────────────────────────────────────────
-      // Phase 5 — Guardian whitelist configuration
+      // Phase 4 — Guardian whitelist configuration
       // ──────────────────────────────────────────────────────────────────────
 
       {

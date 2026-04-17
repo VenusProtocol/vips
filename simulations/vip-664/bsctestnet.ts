@@ -7,15 +7,20 @@ import { expectEvents } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
 import vip664, {
+  ACM_AGGREGATOR,
+  ACM_AGGREGATOR_INDEX,
   ADAPTER_FUNCTIONS,
   ADAPTER_GUARDIAN_FUNCTIONS,
   CONTROLLER_FUNCTIONS,
   CONTROLLER_GUARDIAN_FUNCTIONS,
+  DEFAULT_ADMIN_ROLE,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
   INSTITUTIONAL_VAULT_CONTROLLER,
   INSTITUTION_POSITION_TOKEN,
   LIQUIDATION_ADAPTER,
+  PERMISSIONS,
 } from "../../vips/vip-664/bsctestnet";
+import ACM_AGGREGATOR_ABI from "./abi/ACMAggregator.json";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import INSTITUTION_POSITION_TOKEN_ABI from "./abi/InstitutionPositionToken.json";
 import INSTITUTIONAL_VAULT_CONTROLLER_ABI from "./abi/InstitutionalVaultController.json";
@@ -24,13 +29,14 @@ import LIQUIDATION_ADAPTER_ABI from "./abi/LiquidationAdapter.json";
 const { bsctestnet } = NETWORK_ADDRESSES;
 const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN, ACCESS_CONTROL_MANAGER } = bsctestnet;
 
-const FORK_BLOCK = 102008713;
+const FORK_BLOCK = 102151520;
 
 forking(FORK_BLOCK, async () => {
   let accessControlManager: Contract;
   let controller: Contract;
   let liquidationAdapter: Contract;
   let positionToken: Contract;
+  let acmAggregator: Contract;
 
   before(async () => {
     accessControlManager = new ethers.Contract(ACCESS_CONTROL_MANAGER, ACCESS_CONTROL_MANAGER_ABI, ethers.provider);
@@ -41,6 +47,7 @@ forking(FORK_BLOCK, async () => {
     );
     liquidationAdapter = new ethers.Contract(LIQUIDATION_ADAPTER, LIQUIDATION_ADAPTER_ABI, ethers.provider);
     positionToken = new ethers.Contract(INSTITUTION_POSITION_TOKEN, INSTITUTION_POSITION_TOKEN_ABI, ethers.provider);
+    acmAggregator = new ethers.Contract(ACM_AGGREGATOR, ACM_AGGREGATOR_ABI, ethers.provider);
   });
 
   // ──────────────────────────────────────────────────────────────────────
@@ -112,6 +119,21 @@ forking(FORK_BLOCK, async () => {
       const adapter = await controller.liquidationAdapter();
       expect(adapter).to.equal(ethers.constants.AddressZero);
     });
+
+    it("ACM Aggregator stored permissions should match PERMISSIONS array", async () => {
+      for (let i = 0; i < PERMISSIONS.length; i++) {
+        const stored = await acmAggregator.grantPermissions(ACM_AGGREGATOR_INDEX, i);
+        expect(stored.contractAddress.toLowerCase()).to.equal(
+          PERMISSIONS[i][0].toLowerCase(),
+          `Permission ${i} contractAddress mismatch`,
+        );
+        expect(stored.functionSig).to.equal(PERMISSIONS[i][1], `Permission ${i} functionSig mismatch`);
+        expect(stored.account.toLowerCase()).to.equal(
+          PERMISSIONS[i][2].toLowerCase(),
+          `Permission ${i} account mismatch`,
+        );
+      }
+    });
   });
 
   // ──────────────────────────────────────────────────────────────────────
@@ -122,9 +144,10 @@ forking(FORK_BLOCK, async () => {
       await expectEvents(
         txResponse,
         [ACCESS_CONTROL_MANAGER_ABI],
-        ["PermissionGranted"],
-        [EXPECTED_PERMISSION_GRANTED_EVENTS],
+        ["PermissionGranted", "RoleGranted", "RoleRevoked"],
+        [EXPECTED_PERMISSION_GRANTED_EVENTS, EXPECTED_PERMISSION_GRANTED_EVENTS + 1, 1],
       );
+      await expectEvents(txResponse, [ACM_AGGREGATOR_ABI], ["GrantPermissionsExecuted"], [1]);
     },
   });
 
@@ -226,6 +249,12 @@ forking(FORK_BLOCK, async () => {
       it("liquidationAdapter owner should be NORMAL_TIMELOCK", async () => {
         const owner = await liquidationAdapter.owner();
         expect(owner).to.equal(NORMAL_TIMELOCK);
+      });
+    });
+
+    describe("ACM Aggregator cleanup", () => {
+      it("DEFAULT_ADMIN_ROLE should be revoked from ACM Aggregator", async () => {
+        expect(await accessControlManager.hasRole(DEFAULT_ADMIN_ROLE, ACM_AGGREGATOR)).to.be.false;
       });
     });
 
