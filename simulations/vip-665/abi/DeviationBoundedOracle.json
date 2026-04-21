@@ -1,0 +1,73 @@
+[
+  {
+    "type": "function",
+    "name": "owner",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "pendingOwner",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "acceptOwnership",
+    "stateMutability": "nonpayable",
+    "inputs": [],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "accessControlManager",
+    "stateMutability": "view",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address" }]
+  },
+  {
+    "type": "function",
+    "name": "setThresholds",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "asset", "type": "address" },
+      { "name": "triggerThreshold", "type": "uint256" },
+      { "name": "resetThreshold", "type": "uint256" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "setCooldownPeriod",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "asset", "type": "address" },
+      { "name": "cooldownPeriod", "type": "uint64" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "setTokenConfig",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      { "name": "asset", "type": "address" },
+      { "name": "cooldownPeriod", "type": "uint64" },
+      { "name": "triggerThreshold", "type": "uint256" },
+      { "name": "resetThreshold", "type": "uint256" },
+      { "name": "enableBoundedPricing", "type": "bool" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "anonymous": false,
+    "inputs": [
+      { "name": "previousOwner", "type": "address", "indexed": true },
+      { "name": "newOwner", "type": "address", "indexed": true }
+    ]
+  }
+]
