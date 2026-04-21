@@ -21,6 +21,7 @@ const {
 export const DEVIATION_BOUNDED_ORACLE = "0xE0dafC97895B3c98d3B96D3f8739AaC73166beB8";
 export const COMPTROLLER_LENS = "0xdBD0992dEd0a1EC14CE0532e60ea023F79372eD9";
 export const VAI_CONTROLLER_IMPL = "0xd2848305b0ee7646C930240D79549D50d6Ed024F";
+export const UNITROLLER_IMPLEMENTATION = "0xf00Ba2930E43C96719Ca40c8B5a48F4c9A004c52";
 
 // ──────────────────────────────────────────────────────────────────────────
 // ACM-gated function signatures — DeviationBoundedOracle
@@ -63,6 +64,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
 - **DeviationBoundedOracle** (proxy): ${DEVIATION_BOUNDED_ORACLE}
 - **ComptrollerLens**: ${COMPTROLLER_LENS}
 - **VAIController implementation**: ${VAI_CONTROLLER_IMPL}
+- **Unitroller implementation (new Diamond)**: ${UNITROLLER_IMPLEMENTATION}
 - **Unitroller**: ${UNITROLLER}
 - **VaiUnitroller**: ${VAI_UNITROLLER}
 
@@ -78,13 +80,15 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
 
 **Phase 2 — Accept DBO ownership.** The deployment script calls \`transferOwnership(NORMAL_TIMELOCK)\`; this VIP completes the Ownable2Step handshake with \`acceptOwnership()\`.
 
-**Phase 3 — Comptroller facet upgrade (\`diamondCut\`).** Installs the new Diamond implementation and the five upgraded facets (PolicyFacet, SetterFacet, MarketFacet, RewardFacet, FlashLoanFacet). The new \`setDeviationBoundedOracle(address)\` selector is added to the new SetterFacet; every other existing selector on the five facets is replaced to point at its new facet address.
+**Phase 3 — Unitroller implementation upgrade.** The Unitroller proxy is repointed at the freshly deployed \`Unitroller_Implementation\` (Diamond) that inherits the new \`ComptrollerV19Storage\`. Uses the classic \`_setPendingImplementation\` + \`_become\` handshake. Must land before \`diamondCut\` so the new Diamond's cut logic processes the facet installation.
 
-**Phase 4 — Wire the new ComptrollerLens.** The new \`ComptrollerLens\` uses DBO-bounded prices on the CF path; it is installed via the admin-gated \`_setComptrollerLens\` setter.
+**Phase 4 — Comptroller facet upgrade (\`diamondCut\`).** Installs the five upgraded facets (PolicyFacet, SetterFacet, MarketFacet, RewardFacet, FlashLoanFacet). The new \`setDeviationBoundedOracle(address)\` selector is added to the new SetterFacet; every other existing selector on the five facets is replaced to point at its new facet address.
 
-**Phase 5 — VAIController implementation upgrade.** \`VAIController.mintVAI\` and \`getMintableVAI\` now read \`comptroller.deviationBoundedOracle()\`, so the logic contract behind the \`VaiUnitroller\` proxy is upgraded via \`_setPendingImplementation\` + \`_become\`.
+**Phase 5 — Wire the new ComptrollerLens.** The new \`ComptrollerLens\` uses DBO-bounded prices on the CF path; it is installed via the admin-gated \`_setComptrollerLens\` setter.
 
-**Phase 6 — Wire the DBO into Comptroller.** Calls \`setDeviationBoundedOracle\` on the Unitroller to set the V19 storage slot consumed by the upgraded facets and VAIController.
+**Phase 6 — VAIController implementation upgrade.** \`VAIController.mintVAI\` and \`getMintableVAI\` now read \`comptroller.deviationBoundedOracle()\`, so the logic contract behind the \`VaiUnitroller\` proxy is upgraded via \`_setPendingImplementation\` + \`_become\`.
+
+**Phase 7 — Wire the DBO into Comptroller.** Calls \`setDeviationBoundedOracle\` on the Unitroller to set the V19 storage slot consumed by the upgraded facets and VAIController.
 `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -135,9 +139,23 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       },
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 3 — Comptroller facet upgrade (diamondCut)
-      //   Installs the new Diamond impl + 5 upgraded facets and adds the
-      //   new `setDeviationBoundedOracle(address)` selector.
+      // PHASE 3 — Unitroller implementation upgrade (new Diamond)
+      // ──────────────────────────────────────────────────────────────────
+      {
+        target: UNITROLLER,
+        signature: "_setPendingImplementation(address)",
+        params: [UNITROLLER_IMPLEMENTATION],
+      },
+      {
+        target: UNITROLLER_IMPLEMENTATION,
+        signature: "_become(address)",
+        params: [UNITROLLER],
+      },
+
+      // ──────────────────────────────────────────────────────────────────
+      // PHASE 4 — Comptroller facet upgrade (diamondCut)
+      //   Installs the 5 upgraded facets and adds the new
+      //   `setDeviationBoundedOracle(address)` selector.
       // ──────────────────────────────────────────────────────────────────
       {
         target: UNITROLLER,
@@ -146,7 +164,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       },
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 4 — Wire new ComptrollerLens
+      // PHASE 5 — Wire new ComptrollerLens
       //   `_setComptrollerLens` is admin-gated (not ACM); the timelock is
       //   the Unitroller admin so no permission grant is required.
       // ──────────────────────────────────────────────────────────────────
@@ -157,10 +175,10 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       },
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 5 — VAIController implementation upgrade
+      // PHASE 6 — VAIController implementation upgrade
       //   VAIController.mintVAI and getMintableVAI read
       //   comptroller.deviationBoundedOracle(); swap in the new logic
-      //   before the DBO is wired on the Comptroller (Phase 6).
+      //   before the DBO is wired on the Comptroller (Phase 7).
       // ──────────────────────────────────────────────────────────────────
       {
         target: VAI_UNITROLLER,
@@ -174,7 +192,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       },
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 6 — Wire DBO into Comptroller
+      // PHASE 7 — Wire DBO into Comptroller
       //   Uses the ACM permission granted in Phase 1c.
       // ──────────────────────────────────────────────────────────────────
       {

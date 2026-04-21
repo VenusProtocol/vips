@@ -14,6 +14,7 @@ import vip665, {
   DEVIATION_BOUNDED_ORACLE,
   EXPECTED_PERMISSION_GRANTED_EVENTS,
   TIMELOCKS,
+  UNITROLLER_IMPLEMENTATION,
   VAI_CONTROLLER_IMPL,
 } from "../../vips/vip-665/bsctestnet";
 import ACM_ABI from "./abi/AccessControlManager.json";
@@ -42,6 +43,7 @@ forking(FORK_BLOCK, async () => {
 
   let oldComptrollerLens: string;
   let oldVaiImpl: string;
+  let oldDiamondImpl: string;
   let oldFacetAddresses: string[];
 
   before(async () => {
@@ -52,6 +54,7 @@ forking(FORK_BLOCK, async () => {
 
     oldComptrollerLens = await comptroller.comptrollerLens();
     oldVaiImpl = await vaiUnitroller.vaiControllerImplementation();
+    oldDiamondImpl = await comptroller.comptrollerImplementation();
     oldFacetAddresses = [...(await comptroller.facetAddresses())];
   });
 
@@ -100,7 +103,17 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 3 — new facet selectors are NOT yet installed", () => {
+    describe("Phase 3 — Unitroller implementation has NOT been swapped", () => {
+      it("Unitroller does not yet point at the new Diamond implementation", async () => {
+        expect(oldDiamondImpl).to.not.equal(UNITROLLER_IMPLEMENTATION);
+      });
+
+      it("Unitroller has no pending implementation set", async () => {
+        expect(await comptroller.pendingComptrollerImplementation()).to.equal(ethers.constants.AddressZero);
+      });
+    });
+
+    describe("Phase 4 — new facet selectors are NOT yet installed", () => {
       it("setDeviationBoundedOracle selector resolves to the zero address", async () => {
         const facet = await comptroller.facetAddress(SET_DBO_SELECTOR);
 
@@ -108,13 +121,13 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 4 — ComptrollerLens is still the old one", () => {
+    describe("Phase 5 — ComptrollerLens is still the old one", () => {
       it("current comptrollerLens is NOT the newly deployed one", async () => {
         expect(oldComptrollerLens).to.not.equal(COMPTROLLER_LENS);
       });
     });
 
-    describe("Phase 5 — VAIController implementation has not been swapped", () => {
+    describe("Phase 6 — VAIController implementation has not been swapped", () => {
       it("VaiUnitroller does not yet point at the new implementation", async () => {
         expect(oldVaiImpl).to.not.equal(VAI_CONTROLLER_IMPL);
       });
@@ -124,8 +137,8 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 6 — DBO is not yet wired on Comptroller", () => {
-      it("deviationBoundedOracle() reverts — selector not installed pre-Phase 3", async () => {
+    describe("Phase 7 — DBO is not yet wired on Comptroller", () => {
+      it("deviationBoundedOracle() reverts — selector not installed pre-Phase 4", async () => {
         await expect(comptroller.deviationBoundedOracle()).to.be.reverted;
       });
     });
@@ -143,17 +156,18 @@ forking(FORK_BLOCK, async () => {
       // Phase 2 — DBO OwnershipTransferred
       await expectEvents(txResponse, [DBO_ABI], ["OwnershipTransferred"], [1]);
 
-      // Phase 3 — DiamondCut
+      // Phase 3 + Phase 6 — Unitroller and VaiUnitroller impl swaps.
+      //     NewImplementation         = 2 (Unitroller + VaiUnitroller)
+      //     NewPendingImplementation  = 4 (2 per proxy)
+      await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewImplementation", "NewPendingImplementation"], [2, 4]);
+
+      // Phase 4 — DiamondCut
       await expectEvents(txResponse, [DIAMOND_ABI], ["DiamondCut"], [1]);
 
-      // Phase 4 — NewComptrollerLens (Comptroller emits this)
+      // Phase 5 — NewComptrollerLens (Comptroller emits this)
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewComptrollerLens"], [1]);
 
-      // Phase 5 — VaiUnitroller (fires NewPendingImplementation 2 times  and NewImplementation 1 time)
-      await expectEvents(txResponse, [VAI_UNITROLLER_ABI], ["NewImplementation"], [1]);
-      await expectEvents(txResponse, [VAI_UNITROLLER_ABI], ["NewPendingImplementation"], [2]);
-
-      // Phase 6 — NewDeviationBoundedOracle
+      // Phase 7 — NewDeviationBoundedOracle
       await expectEvents(txResponse, [COMPTROLLER_ABI], ["NewDeviationBoundedOracle"], [1]);
     },
   });
@@ -203,7 +217,17 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 3 — diamondCut applied", () => {
+    describe("Phase 3 — Unitroller implementation swapped", () => {
+      it("Unitroller points at the new Diamond implementation", async () => {
+        expect(await comptroller.comptrollerImplementation()).to.equal(UNITROLLER_IMPLEMENTATION);
+      });
+
+      it("pending implementation slot is cleared", async () => {
+        expect(await comptroller.pendingComptrollerImplementation()).to.equal(ethers.constants.AddressZero);
+      });
+    });
+
+    describe("Phase 4 — diamondCut applied", () => {
       it("every selector in cutParams resolves to its new facet address", async () => {
         for (const [facetAddr, , selectors] of cutParams as [string, number, string[]][]) {
           for (const sel of selectors) {
@@ -226,13 +250,13 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 4 — ComptrollerLens swapped", () => {
+    describe("Phase 5 — ComptrollerLens swapped", () => {
       it("comptrollerLens points at the new contract", async () => {
         expect(await comptroller.comptrollerLens()).to.equal(COMPTROLLER_LENS);
       });
     });
 
-    describe("Phase 5 — VAIController implementation swapped", () => {
+    describe("Phase 6 — VAIController implementation swapped", () => {
       it("VaiUnitroller points at the new implementation", async () => {
         expect(await vaiUnitroller.vaiControllerImplementation()).to.equal(VAI_CONTROLLER_IMPL);
       });
@@ -242,7 +266,7 @@ forking(FORK_BLOCK, async () => {
       });
     });
 
-    describe("Phase 6 — DBO wired on Comptroller", () => {
+    describe("Phase 7 — DBO wired on Comptroller", () => {
       it("Comptroller.deviationBoundedOracle() returns the deployed DBO", async () => {
         expect(await comptroller.deviationBoundedOracle()).to.equal(DEVIATION_BOUNDED_ORACLE);
       });
