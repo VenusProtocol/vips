@@ -29,13 +29,13 @@ import VTOKEN_UNDERLYING_ABI from "./abi/VToken.json";
 // VIP-590 wired CAKE to the CAKE/BUSD 0.25% pool; this VIP repoints CAKE to CAKE/WBNB 0.25%.
 const OLD_CAKE_BUSD_POOL = "0x7f51c8AaA6B0599aBd16674e2b17FEc7a9f674A1";
 
-// CAKE is pre-configured from VIP-590; the remaining 28 markets are untouched.
+// CAKE is pre-configured from VIP-590; the remaining 24 markets are untouched.
 const NON_CAKE_MARKETS = MARKETS.filter(m => m.symbol !== "CAKE");
 
 // Used to cross-check every MARKETS[i].token against the live Core Pool vToken underlyings.
 const CORE_POOL_COMPTROLLER = NETWORK_ADDRESSES.bscmainnet.UNITROLLER;
 
-// Reference tokens used by the 29 pools. PancakeSwapOracle.getPrice(market) calls
+// Reference tokens used by the 25 pools. PancakeSwapOracle.getPrice(market) calls
 // RESILIENT_ORACLE.getPrice(referenceToken) — where referenceToken is the pool's other side.
 // Across all 29 pools the reference set is {USDT, WBNB, BTCB, ETH}; extending stale periods
 // on these keeps the post-VIP getPrice sanity check honest after testVip advances fork time
@@ -69,7 +69,7 @@ forking(93782100, async () => {
   });
 
   describe("Config sanity", () => {
-    // Guards the 29 hand-entered token addresses in config.ts. Pulls the live list of
+    // Guards the 25 hand-entered token addresses in config.ts. Pulls the live list of
     // Core Pool vToken underlyings from the Comptroller and asserts every MARKETS[i].token
     // is one of them. Prevents a typo (wrong checksum, copy-paste from the wrong chain)
     // from silently binding a Sentinel pool to a random address.
@@ -96,7 +96,7 @@ forking(93782100, async () => {
       }
     });
 
-    // Guards the 28 hand-entered PCS V3 pool addresses in config.ts. For each market, reads
+    // Guards the 24 hand-entered PCS V3 pool addresses in config.ts. For each market, reads
     // token0()/token1() from the pool and asserts one of them equals MARKETS[i].token. Catches
     // wrong-pool-address, wrong-chain-pool, and non-PCS-V3 addresses — any of which would make
     // PancakeSwapOracle return a garbage price for that market.
@@ -156,10 +156,10 @@ forking(93782100, async () => {
     });
   });
 
-  testVip("VIP-666 [BNB Chain] Expand DeviationSentinel coverage to 29 Core Pool markets", await vip666(), {
+  testVip("VIP-666 [BNB Chain] Expand DeviationSentinel coverage to 25 Core Pool markets", await vip666(), {
     callbackAfterExecution: async txResponse => {
-      // 29 PoolConfigUpdated (PancakeSwapOracle) + 29 TokenOracleConfigUpdated (SentinelOracle)
-      //   + 29 TokenConfigUpdated (DeviationSentinel) = 87 events.
+      // 25 PoolConfigUpdated (PancakeSwapOracle) + 25 TokenOracleConfigUpdated (SentinelOracle)
+      //   + 25 TokenConfigUpdated (DeviationSentinel) = 75 events.
       await expectEvents(txResponse, [PANCAKESWAP_ORACLE_ABI], ["PoolConfigUpdated"], [MARKETS.length]);
       await expectEvents(txResponse, [SENTINEL_ORACLE_ABI], ["TokenOracleConfigUpdated"], [MARKETS.length]);
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [MARKETS.length]);

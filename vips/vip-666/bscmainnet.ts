@@ -6,14 +6,14 @@ import { DEVIATION_SENTINEL, DEVIATION_THRESHOLD, MARKETS, PANCAKESWAP_ORACLE, S
 export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-666 [BNB Chain] Expand DeviationSentinel coverage to 29 Core Pool markets",
+    title: "VIP-666 [BNB Chain] Expand DeviationSentinel coverage to 25 Core Pool markets",
     description: `## Summary
 
-This VIP expands **DeviationSentinel** oracle-deviation monitoring on BNB Chain mainnet from a single market (CAKE) to **29 Core Pool markets**, applying a unified **10%** deviation threshold and routing every market through the existing **PancakeSwapOracle** configured in [VIP-590](https://app.venus.io/governance/proposal/590) and re-wired through EBrakeV2 in [VIP-610](https://app.venus.io/governance/proposal/610).
+This VIP expands **DeviationSentinel** oracle-deviation monitoring on BNB Chain mainnet from a single market (CAKE) to **25 Core Pool markets**, applying a unified **10%** deviation threshold and routing every market through the existing **PancakeSwapOracle** configured in [VIP-590](https://app.venus.io/governance/proposal/590) and re-wired through EBrakeV2 in [VIP-610](https://app.venus.io/governance/proposal/610).
 
 ## What This VIP Does
 
-For each of the 29 markets the VIP performs three configuration calls:
+For each of the 25 markets the VIP performs three configuration calls:
 
 1. **PancakeSwapOracle.setPoolConfig(token, pool)** — bind the underlying token to its PancakeSwap V3 pool.
 2. **SentinelOracle.setTokenOracleConfig(token, PancakeSwapOracle)** — route SentinelOracle price queries for the token to PancakeSwapOracle.
@@ -21,7 +21,7 @@ For each of the 29 markets the VIP performs three configuration calls:
 
 All three permissions were granted to the Normal Timelock in VIP-590; no additional permission changes are required.
 
-### 29-Market Configuration
+### 25-Market Configuration
 
 | Market  | Pool          | Fee   | Pool Address                                   |
 | ------- | ------------- | ----- | ---------------------------------------------- |
@@ -41,7 +41,6 @@ All three permissions were granted to the Normal Timelock in VIP-590; no additio
 | TUSD    | TUSD / USDT   | 0.01% | \`0xd881d9d0e0767719701305c614903f555d589586\` |
 | LINK    | LINK / WBNB   | 0.25% | \`0x0e1893beeb4d0913d26b9614b18aea29c56d94b9\` |
 | DOGE    | DOGE / WBNB   | 0.25% | \`0xce6160bb594fc055c943f59de92cee30b8c6b32c\` |
-| TWT     | TWT / WBNB    | 0.25% | \`0x8ccb4544b3030dacf3d4d71c658f04e8688e25b1\` |
 | XAUM    | XAUM / USDT   | 0.05% | \`0x497e224d7008fe47349035ddd98bedb773e1f4c5\` |
 | ADA     | ADA / USDT    | 0.25% | \`0x29c5ba7dbb67a4af999a28cc380ad234fe7c1b86\` |
 | lisUSD  | lisUSD / USDT | 0.05% | \`0x12e79eb21dcc5852f9c6ac1736d977312925da33\` |
@@ -51,9 +50,6 @@ All three permissions were granted to the Normal Timelock in VIP-590; no additio
 | UNI     | UNI / WBNB    | 0.25% | \`0x647d99772863e09f47435782cbb6c96ec4a75f12\` |
 | DAI     | DAI / USDT    | 0.01% | \`0xe043558b77e2b4c262d7d6e579b005ceb7f4591c\` |
 | XVS     | XVS / WBNB    | 0.25% | \`0x77d5b2560e4b84b3fc58875cb0133f39560e8ae3\` |
-| DOT     | DOT / WBNB    | 0.25% | \`0x62f0546cbcd684f7c394d8549119e072527c41bc\` |
-| FIL     | FIL / WBNB    | 0.05% | \`0x16d7c51e9c59be9f18b19b608d53b37fa9890b8a\` |
-| BCH     | BCH / WBNB    | 0.25% | \`0x14cfad9a4fcb5fb4f702f5d0e90dcc633e1ded9a\` |
 
 ### Notes
 

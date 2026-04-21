@@ -27,7 +27,6 @@ export const SOL = "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF";
 export const TUSD = "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9";
 export const LINK = "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD";
 export const DOGE = "0xbA2aE424d960c26247Dd6c32edC70B295c744C43";
-export const TWT = "0x4B0F1812e5Df2A09796481Ff14017e6005508003";
 export const XAUM = "0x23AE4fd8E7844cdBc97775496eBd0E8248656028";
 export const ADA = "0x3EE2200Efb3400fAbB9AacF31297cBdD1d435D47";
 export const LISUSD = "0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5";
@@ -37,9 +36,6 @@ export const FDUSD = "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409";
 export const UNI = "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1";
 export const DAI = "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3";
 export const XVS = "0xcF6BB5389c92Bdda8a3747Ddb454cB7a64626C63";
-export const DOT = "0x7083609fCE4d1d8Dc0C979AAb8c869Ea2C873402";
-export const FIL = "0x0D8Ce2A99Bb6e3B7Db580eD848240e4a0F9aE153";
-export const BCH = "0x8fF795a6F4D97E7887C79beA79aba5cc76444aDf";
 
 // ============================================================
 // PancakeSwap V3 pool addresses (sourced from PCS V3 Factory)
@@ -66,7 +62,6 @@ export const POOL_SOL_WBNB_005 = "0xbffec96e8f3b5058b1817c14e4380758fada01ef";
 export const POOL_TUSD_USDT_001 = "0xd881d9d0e0767719701305c614903f555d589586";
 export const POOL_LINK_WBNB_025 = "0x0e1893beeb4d0913d26b9614b18aea29c56d94b9";
 export const POOL_DOGE_WBNB_025 = "0xce6160bb594fc055c943f59de92cee30b8c6b32c";
-export const POOL_TWT_WBNB_025 = "0x8ccb4544b3030dacf3d4d71c658f04e8688e25b1";
 export const POOL_XAUM_USDT_005 = "0x497e224d7008fe47349035ddd98bedb773e1f4c5";
 export const POOL_ADA_USDT_025 = "0x29c5ba7dbb67a4af999a28cc380ad234fe7c1b86";
 export const POOL_LISUSD_USDT_005 = "0x12e79eb21dcc5852f9c6ac1736d977312925da33";
@@ -76,9 +71,6 @@ export const POOL_FDUSD_USDT_001 = "0xbf72b6485e4b31601afe7b0a1210be2004d2b1d6";
 export const POOL_UNI_WBNB_025 = "0x647d99772863e09f47435782cbb6c96ec4a75f12";
 export const POOL_DAI_USDT_001 = "0xe043558b77e2b4c262d7d6e579b005ceb7f4591c";
 export const POOL_XVS_WBNB_025 = "0x77d5b2560e4b84b3fc58875cb0133f39560e8ae3";
-export const POOL_DOT_WBNB_025 = "0x62f0546cbcd684f7c394d8549119e072527c41bc";
-export const POOL_FIL_WBNB_005 = "0x16d7c51e9c59be9f18b19b608d53b37fa9890b8a";
-export const POOL_BCH_WBNB_025 = "0x14cfad9a4fcb5fb4f702f5d0e90dcc633e1ded9a";
 
 export interface Market {
   symbol: string;
@@ -86,7 +78,7 @@ export interface Market {
   pool: string;
 }
 
-// 29 Core Pool markets with eligible PCS V3 pools.
+// 25 Core Pool markets with eligible PCS V3 pools.
 // CAKE is re-configured (pool changed, threshold tightened from 20% to 10%).
 export const MARKETS: Market[] = [
   { symbol: "USDC", token: USDC, pool: POOL_USDT_USDC_001 },
@@ -105,7 +97,6 @@ export const MARKETS: Market[] = [
   { symbol: "TUSD", token: TUSD, pool: POOL_TUSD_USDT_001 },
   { symbol: "LINK", token: LINK, pool: POOL_LINK_WBNB_025 },
   { symbol: "DOGE", token: DOGE, pool: POOL_DOGE_WBNB_025 },
-  { symbol: "TWT", token: TWT, pool: POOL_TWT_WBNB_025 },
   { symbol: "XAUM", token: XAUM, pool: POOL_XAUM_USDT_005 },
   { symbol: "ADA", token: ADA, pool: POOL_ADA_USDT_025 },
   { symbol: "lisUSD", token: LISUSD, pool: POOL_LISUSD_USDT_005 },
@@ -115,7 +106,4 @@ export const MARKETS: Market[] = [
   { symbol: "UNI", token: UNI, pool: POOL_UNI_WBNB_025 },
   { symbol: "DAI", token: DAI, pool: POOL_DAI_USDT_001 },
   { symbol: "XVS", token: XVS, pool: POOL_XVS_WBNB_025 },
-  { symbol: "DOT", token: DOT, pool: POOL_DOT_WBNB_025 },
-  { symbol: "FIL", token: FIL, pool: POOL_FIL_WBNB_005 },
-  { symbol: "BCH", token: BCH, pool: POOL_BCH_WBNB_025 },
 ];
