@@ -121,7 +121,8 @@ forking(93782100, async () => {
     });
 
     it("CAKE on PancakeSwapOracle is still bound to the old CAKE/BUSD pool", async () => {
-      expect(await pancakeSwapOracle.tokenPools(CAKE)).to.equal(OLD_CAKE_BUSD_POOL);
+      const bound: string = await pancakeSwapOracle.tokenPools(CAKE);
+      expect(bound.toLowerCase()).to.equal(OLD_CAKE_BUSD_POOL.toLowerCase());
     });
 
     it("CAKE on SentinelOracle is already routed to PancakeSwapOracle (from VIP-590)", async () => {
