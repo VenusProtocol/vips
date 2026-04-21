@@ -21,7 +21,39 @@ For each of the 29 markets the VIP performs three configuration calls:
 
 All three permissions were granted to the Normal Timelock in VIP-590; no additional permission changes are required.
 
-The full 29-market list with pool addresses, TVL and volume is in the VIP pull request and the accompanying spec.
+### 29-Market Configuration
+
+| Market  | Pool          | Fee   | Pool Address                                   |
+| ------- | ------------- | ----- | ---------------------------------------------- |
+| USDC    | USDT / USDC   | 0.01% | \`0x92b7807bf19b7dddf89b706143896d05228f3121\` |
+| U       | U / USDT      | 0.01% | \`0xa0909f81785f87f3e79309f0e73a7d82208094e4\` |
+| WBNB    | USDT / WBNB   | 0.01% | \`0x172fcd41e0913e95784454622d1c3724f546f849\` |
+| USDT    | USDT / WBNB   | 0.01% | \`0x172fcd41e0913e95784454622d1c3724f546f849\` |
+| BTCB    | BTCB / WBNB   | 0.05% | \`0x6bbc40579ad1bbd243895ca0acb086bb6300d636\` |
+| ETH     | ETH / WBNB    | 0.05% | \`0xd0e226f674bbf064f54ab47f42473ff80db98cba\` |
+| CAKE    | CAKE / WBNB   | 0.25% | \`0x133b3d95bad5405d14d53473671200e9342896bf\` |
+| solvBTC | solvBTC / BTCB | 0.05% | \`0x12197d7a4fe2d67f9f97ae64d82a44c24b7ad407\` |
+| USD1    | USD1 / USDT   | 0.01% | \`0x9c4ee895e4f6ce07ada631c508d1306db7502cce\` |
+| slisBNB | slisBNB / WBNB | 0.05% | \`0x9474e972f49605315763c296b122cbb998b615cf\` |
+| wBETH   | wBETH / ETH   | 0.05% | \`0x379044e32f5a162233e82de19da852255d0951b8\` |
+| XRP     | XRP / USDT    | 0.25% | \`0x71f5a8f7d448e59b1ede00a19fe59e05d125e742\` |
+| SOL     | SOL / WBNB    | 0.05% | \`0xbffec96e8f3b5058b1817c14e4380758fada01ef\` |
+| TUSD    | TUSD / USDT   | 0.01% | \`0xd881d9d0e0767719701305c614903f555d589586\` |
+| LINK    | LINK / WBNB   | 0.25% | \`0x0e1893beeb4d0913d26b9614b18aea29c56d94b9\` |
+| DOGE    | DOGE / WBNB   | 0.25% | \`0xce6160bb594fc055c943f59de92cee30b8c6b32c\` |
+| TWT     | TWT / WBNB    | 0.25% | \`0x8ccb4544b3030dacf3d4d71c658f04e8688e25b1\` |
+| XAUM    | XAUM / USDT   | 0.05% | \`0x497e224d7008fe47349035ddd98bedb773e1f4c5\` |
+| ADA     | ADA / USDT    | 0.25% | \`0x29c5ba7dbb67a4af999a28cc380ad234fe7c1b86\` |
+| lisUSD  | lisUSD / USDT | 0.05% | \`0x12e79eb21dcc5852f9c6ac1736d977312925da33\` |
+| LTC     | LTC / WBNB    | 0.25% | \`0xe3cbe4dd1bd2f7101f17d586f44bab944091d383\` |
+| TRX     | TRX / WBNB    | 0.25% | \`0xf683113764e4499c473acd38fc4b37e71554e4ad\` |
+| FDUSD   | FDUSD / USDT  | 0.01% | \`0xbf72b6485e4b31601afe7b0a1210be2004d2b1d6\` |
+| UNI     | UNI / WBNB    | 0.25% | \`0x647d99772863e09f47435782cbb6c96ec4a75f12\` |
+| DAI     | DAI / USDT    | 0.01% | \`0xe043558b77e2b4c262d7d6e579b005ceb7f4591c\` |
+| XVS     | XVS / WBNB    | 0.25% | \`0x77d5b2560e4b84b3fc58875cb0133f39560e8ae3\` |
+| DOT     | DOT / WBNB    | 0.25% | \`0x62f0546cbcd684f7c394d8549119e072527c41bc\` |
+| FIL     | FIL / WBNB    | 0.05% | \`0x16d7c51e9c59be9f18b19b608d53b37fa9890b8a\` |
+| BCH     | BCH / WBNB    | 0.25% | \`0x14cfad9a4fcb5fb4f702f5d0e90dcc633e1ded9a\` |
 
 ### Notes
 
@@ -31,7 +63,7 @@ The full 29-market list with pool addresses, TVL and volume is in the VIP pull r
 
 #### References
 
-- [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/666)
+- [VIP Pull Request](https://github.com/VenusProtocol/vips/pull/698)
 - [VIP-590 — Initial DeviationSentinel deployment](https://app.venus.io/governance/proposal/590)
 - [VIP-610 — EBrakeV2 wiring](https://app.venus.io/governance/proposal/610)
 - [DeviationSentinel](https://bscscan.com/address/${DEVIATION_SENTINEL})
