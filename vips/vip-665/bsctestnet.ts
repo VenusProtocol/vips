@@ -85,12 +85,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
 **Phase 5 — VAIController implementation upgrade.** \`VAIController.mintVAI\` and \`getMintableVAI\` now read \`comptroller.deviationBoundedOracle()\`, so the logic contract behind the \`VaiUnitroller\` proxy is upgraded via \`_setPendingImplementation\` + \`_become\`.
 
 **Phase 6 — Wire the DBO into Comptroller.** Calls \`setDeviationBoundedOracle\` on the Unitroller to set the V19 storage slot consumed by the upgraded facets and VAIController.
-
-#### References
-
-- Feature spec: internal doc 177_DeviationBoundedOracle
-- Oracle source: \`DeviationBoundedOracle.sol\` (venus-protocol/oracle)
-- Comptroller setter: \`SetterFacet.setDeviationBoundedOracle\` (venus-protocol-lts)`,
+`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
