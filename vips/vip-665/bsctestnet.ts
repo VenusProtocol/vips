@@ -72,23 +72,23 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
 
 **Phase 1 — ACM permissions (30 grants)**
 
-| Target                | Signatures (count)                    | Callers                                 | Grants |
-|-----------------------|---------------------------------------|-----------------------------------------|--------|
-| DeviationBoundedOracle| 5 governance setters                  | 3 timelocks                             | 15     |
-| DeviationBoundedOracle| 3 keeper actions                      | 3 timelocks + Guardian                  | 12     |
-| Unitroller            | \`setDeviationBoundedOracle(address)\`| 3 timelocks                             | 3      |
+| Step | Target                 | Signatures (count)                     | Callers                 | Grants |
+|------|------------------------|----------------------------------------|-------------------------|--------|
+| 1    | DeviationBoundedOracle | 5 governance setters                   | 3 timelocks             | 15     |
+| 2    | DeviationBoundedOracle | 3 keeper actions                       | 3 timelocks + Guardian  | 12     |
+| 3    | Unitroller             | \`setDeviationBoundedOracle(address)\` | 3 timelocks             | 3      |
 
-**Phase 2 — Accept DBO ownership.** The deployment script calls \`transferOwnership(NORMAL_TIMELOCK)\`; this VIP completes the Ownable2Step handshake with \`acceptOwnership()\`.
+**Phase 2 — Comptroller updates**
 
-**Phase 3 — Unitroller implementation upgrade.** The Unitroller proxy is repointed at the freshly deployed \`Unitroller_Implementation\` (Diamond) that inherits the new \`ComptrollerV19Storage\`. Uses the classic \`_setPendingImplementation\` + \`_become\` handshake. Must land before \`diamondCut\` so the new Diamond's cut logic processes the facet installation.
+- **Step 1 — Unitroller implementation upgrade.** The Unitroller proxy is repointed at the freshly deployed \`Unitroller_Implementation\` (Diamond) that inherits the new \`ComptrollerV19Storage\`. Uses the classic \`_setPendingImplementation\` + \`_become\` handshake. Must land before \`diamondCut\` so the new Diamond's cut logic processes the facet installation.
+- **Step 2 — Comptroller facet upgrade (\`diamondCut\`).** Installs the five upgraded facets (PolicyFacet, SetterFacet, MarketFacet, RewardFacet, FlashLoanFacet). The new \`setDeviationBoundedOracle(address)\` selector is added to the new SetterFacet; every other existing selector on the five facets is replaced to point at its new facet address, preserving the pre-VIP selector → facet-role assignment exactly.
+- **Step 3 — Wire the new ComptrollerLens.** The new \`ComptrollerLens\` uses DBO-bounded prices on the CF path; it is installed via the admin-gated \`_setComptrollerLens\` setter.
+- **Step 4 — VAIController implementation upgrade.** \`VAIController.mintVAI\` and \`getMintableVAI\` now read \`comptroller.deviationBoundedOracle()\`, so the logic contract behind the \`VaiUnitroller\` proxy is upgraded via \`_setPendingImplementation\` + \`_become\`.
 
-**Phase 4 — Comptroller facet upgrade (\`diamondCut\`).** Installs the five upgraded facets (PolicyFacet, SetterFacet, MarketFacet, RewardFacet, FlashLoanFacet). The new \`setDeviationBoundedOracle(address)\` selector is added to the new SetterFacet; every other existing selector on the five facets is replaced to point at its new facet address.
+**Phase 3 — Wiring**
 
-**Phase 5 — Wire the new ComptrollerLens.** The new \`ComptrollerLens\` uses DBO-bounded prices on the CF path; it is installed via the admin-gated \`_setComptrollerLens\` setter.
-
-**Phase 6 — VAIController implementation upgrade.** \`VAIController.mintVAI\` and \`getMintableVAI\` now read \`comptroller.deviationBoundedOracle()\`, so the logic contract behind the \`VaiUnitroller\` proxy is upgraded via \`_setPendingImplementation\` + \`_become\`.
-
-**Phase 7 — Wire the DBO into Comptroller.** Calls \`setDeviationBoundedOracle\` on the Unitroller to set the V19 storage slot consumed by the upgraded facets and VAIController.
+- **Step 1 — Accept DBO ownership.** The deployment script calls \`transferOwnership(NORMAL_TIMELOCK)\`; this step completes the Ownable2Step handshake with \`acceptOwnership()\`.
+- **Step 2 — Wire the DBO into the Comptroller.** Calls \`setDeviationBoundedOracle\` on the Unitroller to set the V19 storage slot consumed by the upgraded facets and VAIController. Uses the ACM permission granted in Phase 1 Step 3.
 `,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
@@ -99,12 +99,12 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
     [
       // ──────────────────────────────────────────────────────────────────
       // PHASE 1 — ACM permissions (30 grants)
-      //   1a. DBO governance setters → 3 timelocks               (15)
-      //   1b. DBO keeper actions     → 3 timelocks + Guardian    (12)
-      //   1c. Comptroller DBO setter → 3 timelocks                (3)
+      //   Step 1. DBO governance setters → 3 timelocks             (15)
+      //   Step 2. DBO keeper actions     → 3 timelocks + Guardian  (12)
+      //   Step 3. Comptroller DBO setter → 3 timelocks              (3)
       // ──────────────────────────────────────────────────────────────────
 
-      // 1a — DBO governance setters for 3 timelocks
+      // Step 1 — DBO governance setters for 3 timelocks
       ...DBO_GOVERNANCE_FUNCTIONS.flatMap(sig =>
         TIMELOCKS.map(caller => ({
           target: ACCESS_CONTROL_MANAGER,
@@ -113,7 +113,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
         })),
       ),
 
-      // 1b — DBO keeper actions for 3 timelocks + Guardian
+      // Step 2 — DBO keeper actions for 3 timelocks + Guardian
       ...DBO_KEEPER_FUNCTIONS.flatMap(sig =>
         [...TIMELOCKS, GUARDIAN].map(caller => ({
           target: ACCESS_CONTROL_MANAGER,
@@ -122,7 +122,7 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
         })),
       ),
 
-      // 1c — Comptroller setDeviationBoundedOracle for 3 timelocks
+      // Step 3 — Comptroller setDeviationBoundedOracle for 3 timelocks
       ...TIMELOCKS.map(timelock => ({
         target: ACCESS_CONTROL_MANAGER,
         signature: "giveCallPermission(address,string,address)",
@@ -130,17 +130,14 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       })),
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 2 — Accept DBO ownership (Ownable2Step handshake)
+      // PHASE 2 — Comptroller updates
+      //   Step 1. Unitroller implementation upgrade (new Diamond)
+      //   Step 2. diamondCut (5 facets + new DBO setter)
+      //   Step 3. Wire new ComptrollerLens
+      //   Step 4. VAIController implementation upgrade
       // ──────────────────────────────────────────────────────────────────
-      {
-        target: DEVIATION_BOUNDED_ORACLE,
-        signature: "acceptOwnership()",
-        params: [],
-      },
 
-      // ──────────────────────────────────────────────────────────────────
-      // PHASE 3 — Unitroller implementation upgrade (new Diamond)
-      // ──────────────────────────────────────────────────────────────────
+      // Step 1 — Unitroller implementation upgrade
       {
         target: UNITROLLER,
         signature: "_setPendingImplementation(address)",
@@ -152,34 +149,21 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
         params: [UNITROLLER],
       },
 
-      // ──────────────────────────────────────────────────────────────────
-      // PHASE 4 — Comptroller facet upgrade (diamondCut)
-      //   Installs the 5 upgraded facets and adds the new
-      //   `setDeviationBoundedOracle(address)` selector.
-      // ──────────────────────────────────────────────────────────────────
+      // Step 2 — diamondCut: 5 facets replaced + new `setDeviationBoundedOracle` selector added
       {
         target: UNITROLLER,
         signature: "diamondCut((address,uint8,bytes4[])[])",
         params: [cutParams],
       },
 
-      // ──────────────────────────────────────────────────────────────────
-      // PHASE 5 — Wire new ComptrollerLens
-      //   `_setComptrollerLens` is admin-gated (not ACM); the timelock is
-      //   the Unitroller admin so no permission grant is required.
-      // ──────────────────────────────────────────────────────────────────
+      // Step 3 — Wire new ComptrollerLens (admin-gated; timelock is Unitroller admin)
       {
         target: UNITROLLER,
         signature: "_setComptrollerLens(address)",
         params: [COMPTROLLER_LENS],
       },
 
-      // ──────────────────────────────────────────────────────────────────
-      // PHASE 6 — VAIController implementation upgrade
-      //   VAIController.mintVAI and getMintableVAI read
-      //   comptroller.deviationBoundedOracle(); swap in the new logic
-      //   before the DBO is wired on the Comptroller (Phase 7).
-      // ──────────────────────────────────────────────────────────────────
+      // Step 4 — VAIController implementation upgrade
       {
         target: VAI_UNITROLLER,
         signature: "_setPendingImplementation(address)",
@@ -192,9 +176,19 @@ The DBO maintains a per-market rolling min/max price window and, when the spot p
       },
 
       // ──────────────────────────────────────────────────────────────────
-      // PHASE 7 — Wire DBO into Comptroller
-      //   Uses the ACM permission granted in Phase 1c.
+      // PHASE 3 — Wiring
+      //   Step 1. Accept DBO ownership (Ownable2Step handshake)
+      //   Step 2. Wire DBO into Comptroller
       // ──────────────────────────────────────────────────────────────────
+
+      // Step 1 — Accept DBO ownership
+      {
+        target: DEVIATION_BOUNDED_ORACLE,
+        signature: "acceptOwnership()",
+        params: [],
+      },
+
+      // Step 2 — Wire DBO into Comptroller (uses ACM permission granted in Phase 1 Step 3)
       {
         target: UNITROLLER,
         signature: "setDeviationBoundedOracle(address)",
