@@ -17,7 +17,8 @@ import vip701Testnet, {
 } from "../../vips/vip-701/bsctestnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 
-const { NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bsctestnet;
+const EXECUTOR_GOVERNANCE_ACCOUNTS = [GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK];
 
 // TODO: set to a block after Executor is deployed on BSC testnet
 const BLOCK_NUMBER = 0;
@@ -50,18 +51,23 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("Normal Timelock should not yet have setMarketConfig permission on Executor", async () => {
+    it("Guardian and Timelocks should not yet have setMarketConfig permission on Executor", async () => {
       const acm = accessControlManager.connect(impersonatedExecutor);
-      for (const sig of EXECUTOR_GOVERNANCE_PERMS) {
-        expect(await acm.isAllowedToCall(NORMAL_TIMELOCK, sig)).to.equal(false, `unexpected permission: ${sig}`);
+      for (const account of EXECUTOR_GOVERNANCE_ACCOUNTS) {
+        for (const sig of EXECUTOR_GOVERNANCE_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(
+            false,
+            `unexpected permission ${sig} for ${account}`,
+          );
+        }
       }
     });
   });
 
   testVip("VIP-701 [BNB Testnet] Configure tighten-only Executor", await vip701Testnet(), {
     callbackAfterExecution: async txResponse => {
-      // RoleGranted: 4 (monitor on Executor) + 5 (Executor on EBrake) + 1 (timelock setMarketConfig) = 10
-      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [10]);
+      // RoleGranted: 4 (monitor on Executor) + 5 (Executor on EBrake) + 4 (Guardian + 3 timelocks setMarketConfig) = 13
+      await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [13]);
     },
   });
 
@@ -80,10 +86,12 @@ forking(BLOCK_NUMBER, async () => {
       }
     });
 
-    it("Normal Timelock should have setMarketConfig permission on Executor", async () => {
+    it("Guardian and Timelocks should have setMarketConfig permission on Executor", async () => {
       const acm = accessControlManager.connect(impersonatedExecutor);
-      for (const sig of EXECUTOR_GOVERNANCE_PERMS) {
-        expect(await acm.isAllowedToCall(NORMAL_TIMELOCK, sig)).to.equal(true, `missing permission: ${sig}`);
+      for (const account of EXECUTOR_GOVERNANCE_ACCOUNTS) {
+        for (const sig of EXECUTOR_GOVERNANCE_PERMS) {
+          expect(await acm.isAllowedToCall(account, sig)).to.equal(true, `missing permission ${sig} for ${account}`);
+        }
       }
     });
   });

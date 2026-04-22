@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bsctestnet;
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bsctestnet;
 
 // Access Control Manager (BSC testnet)
 export const ACM = "0x45f8a08F534f34A97187626E05d4b6648Eeaa9AA";
@@ -21,11 +21,11 @@ export const SIGNAL_MONITOR = "0x0000000000000000000000000000000000000000";
 export const EXECUTOR_MONITOR_PERMS = [
   "handleLTVAdjust(address,uint256)",
   "handleCapAdjust(address,uint8,uint256)",
-  "handleSupplyHalt(address)",
-  "handleBorrowHalt(address)",
+  "handleSupplyCapExceeding(address)",
+  "handleBorrowCapExceeding(address)",
 ];
 
-export const EXECUTOR_GOVERNANCE_PERMS = ["setMarketConfig(address,(uint256,uint256,uint256,uint256,uint256,bool))"];
+export const EXECUTOR_GOVERNANCE_PERMS = ["setMarketConfig(address,(uint256,uint256,bool))"];
 
 export const EBRAKE_EXECUTOR_PERMS = [
   "pauseBorrow(address)",
@@ -49,9 +49,9 @@ export const vip701Testnet = () => {
 
 Configures the **Executor** contract on BSC testnet — tighten-only validation layer between off-chain signal monitors and EBrake.
 
-1. Grant signal monitor permissions on Executor action handlers (handleLTVAdjust, handleCapAdjust, handleSupplyHalt, handleBorrowHalt)
+1. Grant signal monitor permissions on Executor action handlers (handleLTVAdjust, handleCapAdjust, handleSupplyCapExceeding, handleBorrowCapExceeding)
 2. Grant Executor permissions on EBrake (pauseBorrow, pauseSupply, decreaseCF, setMarketBorrowCaps, setMarketSupplyCaps)
-3. Grant Normal Timelock permission to call setMarketConfig on Executor
+3. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call setMarketConfig on Executor
 
 #### References
 
@@ -70,8 +70,10 @@ Configures the **Executor** contract on BSC testnet — tighten-only validation 
       // 2. Executor → EBrake
       ...EBRAKE_EXECUTOR_PERMS.map(sig => giveCallPermission(EBRAKE, sig, EXECUTOR)),
 
-      // 3. Normal Timelock → Executor governance function
-      ...EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, NORMAL_TIMELOCK)),
+      // 3. Guardian + all timelocks → Executor governance function
+      ...[GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].flatMap(account =>
+        EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, account)),
+      ),
     ],
     meta,
     ProposalType.REGULAR,

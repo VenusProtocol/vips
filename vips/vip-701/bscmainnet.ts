@@ -2,7 +2,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-const { NORMAL_TIMELOCK } = NETWORK_ADDRESSES.bscmainnet;
+const { NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK, GUARDIAN } = NETWORK_ADDRESSES.bscmainnet;
 
 // Access Control Manager
 export const ACM = NETWORK_ADDRESSES.bscmainnet.ACCESS_CONTROL_MANAGER;
@@ -22,13 +22,12 @@ export const SIGNAL_MONITOR = "0x0000000000000000000000000000000000000000";
 export const EXECUTOR_MONITOR_PERMS = [
   "handleLTVAdjust(address,uint256)",
   "handleCapAdjust(address,uint8,uint256)",
-  "handleSupplyHalt(address)",
-  "handleBorrowHalt(address)",
+  "handleSupplyCapExceeding(address)",
+  "handleBorrowCapExceeding(address)",
 ];
 
-// Executor governance function — sets per-market bounds (originalLTV, minBorrowCap,
-// minSupplyCap, originalBorrowCap, originalSupplyCap, enabled)
-export const EXECUTOR_GOVERNANCE_PERMS = ["setMarketConfig(address,(uint256,uint256,uint256,uint256,uint256,bool))"];
+// Executor governance function — sets per-market bounds (minBorrowCap, minSupplyCap, enabled)
+export const EXECUTOR_GOVERNANCE_PERMS = ["setMarketConfig(address,(uint256,uint256,bool))"];
 
 // EBrake functions the Executor calls
 export const EBRAKE_EXECUTOR_PERMS = [
@@ -59,15 +58,15 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
 
 **1. Grant Signal Monitor permissions on Executor action handlers**
 
-- Authorize the off-chain monitor to call \`handleLTVAdjust\`, \`handleCapAdjust\`, \`handleSupplyHalt\`, \`handleBorrowHalt\`
+- Authorize the off-chain monitor to call \`handleLTVAdjust\`, \`handleCapAdjust\`, \`handleSupplyCapExceeding\`, \`handleBorrowCapExceeding\`
 
 **2. Grant Executor permissions on EBrake**
 
 - Authorize the Executor to call \`pauseBorrow\`, \`pauseSupply\`, \`decreaseCF\`, \`setMarketBorrowCaps\`, \`setMarketSupplyCaps\` on EBrake
 
-**3. Grant Normal Timelock permission to call \`setMarketConfig\` on Executor**
+**3. Grant Guardian and all three Timelocks (Normal, Fast Track, Critical) permission to call \`setMarketConfig\` on Executor**
 
-- Lets governance set per-market bounds (\`originalLTV\`, \`minBorrowCap\`, \`minSupplyCap\`, \`originalBorrowCap\`, \`originalSupplyCap\`, \`enabled\`)
+- Lets governance set per-market bounds (\`minBorrowCap\`, \`minSupplyCap\`, \`enabled\`). Granting to all three timelocks + Guardian mirrors VIP-610 and lets Critical (~1h) disable a compromised market's automation instead of waiting 48h on Normal.
 
 #### References
 
@@ -86,8 +85,10 @@ Depends on: VIP-610 (EBrake configuration), VPD-984 (EBrake Phase-0).
       // 2. Executor → EBrake
       ...EBRAKE_EXECUTOR_PERMS.map(sig => giveCallPermission(EBRAKE, sig, EXECUTOR)),
 
-      // 3. Normal Timelock → Executor governance function
-      ...EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, NORMAL_TIMELOCK)),
+      // 3. Guardian + all timelocks → Executor governance function
+      ...[GUARDIAN, NORMAL_TIMELOCK, FAST_TRACK_TIMELOCK, CRITICAL_TIMELOCK].flatMap(account =>
+        EXECUTOR_GOVERNANCE_PERMS.map(sig => giveCallPermission(EXECUTOR, sig, account)),
+      ),
     ],
     meta,
     ProposalType.REGULAR,
