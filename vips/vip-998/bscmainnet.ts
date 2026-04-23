@@ -129,8 +129,7 @@ const generatePoolCommands = (pool: Pool, dstChainId: LzChainId) => {
 
   // CF = 0, LT preserved. Drops borrowing power of existing collateral to 0
   // (healthy users are pushed to exit) while keeping the liquidation threshold
-  // intact so unhealthy positions can still be liquidated. `liquidationThreshold`
-  // is dropped to 0 later in Phase 2 alongside `unlistMarket`.
+  // intact so unhealthy positions can still be liquidated. 
   for (const market of markets.filter(m => m.collateralFactor !== "0")) {
     commands.push({
       target: comptroller,
@@ -149,7 +148,7 @@ export const vip998 = () => {
     title: "VIP-998 Core Pool Sunset Phase 1 Step 1 — Block New Activity on opBNB, Unichain, Optimism",
     description: `#### Summary
 
-First VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. This proposal blocks **new** supply, borrow, and enter-as-collateral activity on every Core Pool market across the three chains. Redeem, repay, liquidate, exit-market, and transfer remain fully open so existing positions can unwind safely during the exit window.
+VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. This proposal blocks **new** supply, borrow, and enter-as-collateral activity on every Core Pool market across the three chains. Redeem, repay, liquidate, exit-market, and transfer remain fully open so existing positions can unwind safely during the exit window.
 
 Sunset plan reference: a two-step market sunset is mandatory. Step 1 (this VIP) blocks new activity only. Step 2 (Phase 2, future VIP) pauses the remaining user actions, drops \`liquidationThreshold\` to 0, and calls \`unlistMarket\`.
 
@@ -169,17 +168,7 @@ Each sub-call is data-driven against a pre-run snapshot (\`marketData_<chain>.js
 - **opBNB** Comptroller_Core (\`0xD6e3E2A1d8d95caE355D15b3b9f8E5c2511874dd\`): vWBNB, vBTCB, vETH, vUSDT, vFDUSD — 5 markets.
 - **Unichain** Comptroller_Core (\`0xe22af1e6b78318e1Fe1053Edbd7209b8Fc62c4Fe\`): vWETH, vWBTC, vUSDC, vUSD₮0, vUNI, vweETH, vwstETH — 7 markets.
 - **Optimism** Comptroller_Core (\`0x5593FF68bE84C966821eEf5F0a988C285D5B7CeC\`): vWETH, vWBTC, vUSDC, vUSDT, vOP — 5 markets.
-
-#### Out of scope for this VIP
-
-- **RewardsDistributor**: Unichain's \`RewardsDistributor_Core_0\` already has all reward speeds at 0; opBNB and Optimism have no RewardsDistributor configured. The residual ~445.36 XVS sitting in Unichain's distributor is reclaimed in Phase 2 via \`grantRewardToken(VTreasuryV8, …)\` paired with \`unlistMarket\`.
-- **Prime / PrimeLiquidityProvider**: deployed but inert on Unichain and Optimism per the sunset plan — no action needed.
-- **Drain to Treasury**: reserves are moved to \`VTreasuryV8\` in VIP-999 (immediately following this proposal).
-- **Full action pause, \`LT = 0\`, \`unlistMarket\`, \`removeDistributionConfig\`, \`OmnichainGovernanceExecutor.pause()\`** — all Phase 2.
-
-#### Execution path
-
-Commands targeting each remote chain are grouped by \`dstChainId\` into a single LayerZero payload per chain by \`makeProposal\`, sent through \`OmnichainProposalSender\` on BSC, and executed after the remote 48h timelock delay by the local \`OmnichainGovernanceExecutor\`. Total end-to-end timeline ≈ 5 days per chain.`,
+`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",

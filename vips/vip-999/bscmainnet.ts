@@ -93,8 +93,6 @@ export const opmainnet = {
 //   B. releaseFunds then pushes PSR balances to their distribution targets
 //      (VTreasuryV8 per the current on-chain config on all three chains),
 //   C. sweepNative clears any residual native dust held by the gateway.
-// Re-ordering would leak value (e.g. releasing before reducing leaves the
-// fresh reserves stranded in PSR until a subsequent release).
 const chainSection = (
   chain: typeof opbnbmainnet | typeof unichainmainnet | typeof opmainnet,
   nativeGateway: string | null,
@@ -109,11 +107,6 @@ const chainSection = (
   }[] = [];
 
   // (A) Push VToken reserves → PSR.
-  // `reduceReserves` is permissionless (callable by any keeper) but we include
-  // it in the VIP for atomicity: the release in (B) should see the reserves
-  // we just pushed, not a stale PSR balance. Amount is the snapshotted
-  // `totalReserves` — safe because totalReserves only grows between snapshot
-  // and execution (see header note). Markets with 0 reserves emit no call.
   for (const m of chain.markets) {
     const snapshot = state.markets[m.vToken];
     const reserves = snapshot?.totalReserves ?? "0";
@@ -128,11 +121,6 @@ const chainSection = (
   }
 
   // (B) Release PSR → configured distribution targets.
-  // Permissionless (nonReentrant only). PSR routes per-asset balances to the
-  // destinations registered via `addOrUpdateDistributionConfig`. On all three
-  // target chains today, every destination resolves to `VTreasuryV8` (verified
-  // in `chainState.json.psrDistribution`). One call per chain covers every
-  // Core Pool underlying at once.
   commands.push({
     target: chain.protocolShareReserve,
     signature: "releaseFunds(address,address[])",
@@ -141,11 +129,6 @@ const chainSection = (
   });
 
   // (C) Sweep NativeTokenGateway native balance to its owner.
-  // `sweepNative()` is `onlyOwner`; the owner is the remote NormalTimelock
-  // (which is what's running this batch), so the call is authorised. Funds
-  // land on the NormalTimelock rather than VTreasuryV8 — forwarding to
-  // treasury happens in Phase 2 to avoid needing a bespoke timelock selector
-  // today. No-op when the gateway holds 0 native balance.
   if (nativeGateway) {
     commands.push({
       target: nativeGateway,
@@ -164,7 +147,7 @@ export const vip999 = () => {
     title: "VIP-999 Core Pool Sunset Phase 1 Step 2 — Drain Reserves to Treasury (opBNB, Unichain, Optimism)",
     description: `#### Summary
 
-Second VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. Follows VIP-998 (which blocked new supply/borrow/enter-market and zeroed caps + collateral factor on every Core Pool market). This proposal drains protocol-held funds from the Core Pool into each chain's \`VTreasuryV8\`.
+VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. Follows VIP-998 (which blocked new supply/borrow/enter-market and zeroed caps + collateral factor on every Core Pool market). This proposal drains protocol-held funds from the Core Pool into each chain's \`VTreasuryV8\`.
 
 #### Actions (per chain)
 
@@ -182,25 +165,7 @@ Second VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optim
 - **opBNB** (PSR \`0xA2EDD515B75aBD009161B15909C19959484B0C1e\`, gateway \`0x7bAf6019C90B93aD30f8aD6a2EcCD2B11427b29f\`): vWBNB, vBTCB, vETH, vUSDT, vFDUSD.
 - **Unichain** (PSR \`0x0A93fBcd7B53CE6D335cAB6784927082AD75B242\`, gateway \`0x4441aE3bCEd3210edbA35d0F7348C493E79F1C52\`): vWETH, vWBTC, vUSDC, vUSD₮0, vUNI, vweETH, vwstETH.
 - **Optimism** (PSR \`0x735ed037cB0dAcf90B133370C33C08764f88140a\`, gateway \`0x5B1b7465cfDE450e267b562792b434277434413c\`): vWETH, vWBTC, vUSDC, vUSDT, vOP.
-
-#### Out of scope for this VIP
-
-Deferred to separate Guardian multisig proposals (ACM permissions for these selectors live on the per-chain Guardian multisig, not the remote NormalTimelock — executing them here would take the wrong path authority-wise regardless of whether the batch would fit):
-
-- \`XVSVault.pause()\` on each chain.
-- \`XVSBridgeAdmin.setMaxDailyReceiveLimit(102, 0)\` and \`setMaxSingleReceiveTransactionLimit(102, 0)\` (\`102\` is the LayerZero srcChainId for BNB Chain).
-
-Deferred to **Phase 2**:
-
-- Full action pause (REDEEM/REPAY/LIQUIDATE/SEIZE/TRANSFER/EXIT_MARKET), \`liquidationThreshold = 0\`, and \`unlistMarket\` on every Core Pool market.
-- \`ProtocolShareReserve.removeDistributionConfig\` + final \`sweepToken\` dust cleanup.
-- Unichain \`RewardsDistributor_Core_0.grantRewardToken(VTreasuryV8, 445355991426314711171)\` to reclaim residual XVS (~445.36 XVS), paired with \`unlistMarket\`.
-- \`OmnichainGovernanceExecutor.pause()\` on Unichain and opBNB (last cross-chain action ever — after this, those chains can no longer receive VIPs; Optimism has no LZ executor to pause).
-- Forward the \`NativeTokenGateway\` sweeps from the remote NormalTimelocks to \`VTreasuryV8\`.
-
-#### Execution path
-
-Commands targeting each remote chain are grouped by \`dstChainId\` into a single LayerZero payload per chain by \`makeProposal\`, sent through \`OmnichainProposalSender\` on BSC, and executed after the remote 48h timelock delay by the local \`OmnichainGovernanceExecutor\`.`,
+`,
     forDescription: "I agree that Venus Protocol should proceed with this proposal",
     againstDescription: "I do not think that Venus Protocol should proceed with this proposal",
     abstainDescription: "I am indifferent to whether Venus Protocol proceeds or not",
