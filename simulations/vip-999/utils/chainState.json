@@ -1,0 +1,101 @@
+{
+  "opbnbmainnet": {
+    "markets": {
+      "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672": {
+        "totalReserves": "0"
+      },
+      "0xED827b80Bd838192EA95002C01B5c6dA8354219a": {
+        "totalReserves": "0"
+      },
+      "0x509e81eF638D489936FA85BC58F52Df01190d26C": {
+        "totalReserves": "705582056"
+      },
+      "0xb7a01Ba126830692238521a1aA7E7A7509410b8e": {
+        "totalReserves": "1166491332554893"
+      },
+      "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917": {
+        "totalReserves": "0"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52"
+      }
+    ]
+  },
+  "unichainmainnet": {
+    "markets": {
+      "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374": {
+        "totalReserves": "439516986231"
+      },
+      "0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5": {
+        "totalReserves": "0"
+      },
+      "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95": {
+        "totalReserves": "1829"
+      },
+      "0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD": {
+        "totalReserves": "0"
+      },
+      "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2": {
+        "totalReserves": "151257119526712"
+      },
+      "0x0170398083eb0D0387709523baFCA6426146C218": {
+        "totalReserves": "0"
+      },
+      "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB": {
+        "totalReserves": "6490"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B"
+      }
+    ]
+  },
+  "opmainnet": {
+    "markets": {
+      "0x66d5AE25731Ce99D46770745385e662C8e0B4025": {
+        "totalReserves": "2614831784"
+      },
+      "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46": {
+        "totalReserves": "0"
+      },
+      "0x1C9406ee95B7af55F005996947b19F91B6D55b15": {
+        "totalReserves": "0"
+      },
+      "0x37ac9731B0B02df54975cd0c7240e0977a051721": {
+        "totalReserves": "0"
+      },
+      "0x6b846E3418455804C1920fA4CC7a31A51C659A2D": {
+        "totalReserves": "3759158423337695"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0x104c01EB7b4664551BE6A9bdB26a8C5c6Be7d3da"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0x104c01EB7b4664551BE6A9bdB26a8C5c6Be7d3da"
+      }
+    ]
+  }
+}
