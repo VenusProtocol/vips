@@ -1,5 +1,4 @@
 import { BigNumber } from "ethers";
-
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -307,10 +306,7 @@ const chainSection = (
   // (E) Stop XVS distribution on the remote XVSVault. Only emitted when
   //     both the chain config names the vault and the snapshotted speed
   //     is non-zero — so opBNB and Optimism (already 0) are skipped.
-  if (
-    state.xvsVaultRewardSpeed &&
-    state.xvsVaultRewardSpeed !== "0"
-  ) {
+  if (state.xvsVaultRewardSpeed && state.xvsVaultRewardSpeed !== "0") {
     commands.push({
       target: chain.xvsVaultProxy,
       signature: "setRewardAmountPerBlockOrSecond(address,uint256)",
@@ -325,7 +321,8 @@ const chainSection = (
 export const vip999 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-999 Core Pool Sunset Phase 1 Step 2 — Drain Reserves and Treasury Supply Positions (opBNB, Unichain, Optimism)",
+    title:
+      "VIP-999 Core Pool Sunset Phase 1 Step 2 — Drain Reserves and Treasury Supply Positions (opBNB, Unichain, Optimism)",
     description: `#### Summary
 
 VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. Follows VIP-998 (which blocked new supply/borrow/enter-market and zeroed caps + collateral factor on every Core Pool market). This proposal drains protocol-held value from the Core Pool into each chain's \`VTreasuryV8\`: protocol reserves, PSR balances, the treasury's own seed-liquidity supply positions, and native-token-gateway dust.

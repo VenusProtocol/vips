@@ -40,9 +40,7 @@ interface MarketSnapshot {
   psrPreBalance: string;
 }
 
-const XVS_VAULT_ABI = [
-  "function rewardTokenAmountsPerBlock(address rewardToken) view returns (uint256)",
-];
+const XVS_VAULT_ABI = ["function rewardTokenAmountsPerBlock(address rewardToken) view returns (uint256)"];
 
 async function fetchOne(network: ChainKey) {
   const provider = ethers.provider;

@@ -122,7 +122,9 @@ export const describeChainExecution = async (
           const tracked: BigNumber = await psr.assetsReserves(chain.comptrollerCore, m.underlying, schema);
           expect(tracked.toString()).to.equal(
             "0",
-            `${m.name} schema=${schema}: assetsReserves=${tracked.toString()}, expected 0 (releaseFunds should have cleared the tracked ledger)`,
+            `${
+              m.name
+            } schema=${schema}: assetsReserves=${tracked.toString()}, expected 0 (releaseFunds should have cleared the tracked ledger)`,
           );
         }
       }
@@ -138,9 +140,7 @@ export const describeChainExecution = async (
         const vToken = new ethers.Contract(m.vToken, VTOKEN_ABI, provider);
         const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
 
-        const timelockGained = (await tok.balanceOf(extras.normalTimelock)).sub(
-          timelockUnderlyingBefore[m.underlying],
-        );
+        const timelockGained = (await tok.balanceOf(extras.normalTimelock)).sub(timelockUnderlyingBefore[m.underlying]);
 
         const cashBefore = BigNumber.from(snap.redeemCapacity).add(BigNumber.from(snap.totalReserves));
         const cashAfter: BigNumber = await vToken.getCash();
@@ -283,7 +283,9 @@ export const describeChainExecution = async (
 
         const underlyingAfter: BigNumber = await tok.balanceOf(extras.normalTimelock);
         const underlyingDelta = underlyingAfter.sub(timelockUnderlyingBefore[m.underlying]);
-        const expectedUnderlyingFloor = safeRedeem.mul(BigNumber.from(snap.exchangeRate)).div(BigNumber.from(10).pow(18));
+        const expectedUnderlyingFloor = safeRedeem
+          .mul(BigNumber.from(snap.exchangeRate))
+          .div(BigNumber.from(10).pow(18));
         expect(underlyingDelta.gte(expectedUnderlyingFloor)).to.equal(
           true,
           `${
@@ -352,9 +354,7 @@ export const describeChainExecution = async (
 
       // (E) block output.
       if ("xvsVaultProxy" in chain && chain.xvsVaultProxy && snapshot.xvsVaultRewardSpeed) {
-        console.log(
-          `  (3) XVSVault rewardTokenAmountsPerBlock(XVS): ${snapshot.xvsVaultRewardSpeed} → 0`,
-        );
+        console.log(`  (3) XVSVault rewardTokenAmountsPerBlock(XVS): ${snapshot.xvsVaultRewardSpeed} → 0`);
       }
     });
   });
