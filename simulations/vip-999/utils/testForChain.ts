@@ -4,8 +4,15 @@ import { formatUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip999, { opbnbmainnet, opmainnet, unichainmainnet } from "../../../vips/vip-999/bscmainnet";
+import vip999, {
+  MarketSnapshot,
+  computeSafeRedeem,
+  opbnbmainnet,
+  opmainnet,
+  unichainmainnet,
+} from "../../../vips/vip-999/bscmainnet";
 import ERC20_ABI from "../abi/ERC20.json";
+import PSR_ABI from "../abi/protocolShareReserve.json";
 import VTOKEN_ABI from "../abi/vtoken.json";
 import chainStateJson from "./chainState.json";
 
@@ -18,14 +25,17 @@ interface DistributionTarget {
   destination: string;
 }
 interface ChainSnapshot {
-  markets: Record<string, { totalReserves: string }>;
+  markets: Record<string, MarketSnapshot>;
   psrDistribution: DistributionTarget[];
+  xvsVaultRewardSpeed?: string;
+  gatewayNativeBalance?: string;
 }
 const CHAIN_STATE = chainStateJson as Record<ChainKey, ChainSnapshot>;
 
 interface ChainExtras {
   vTreasury: string;
   nativeGateway: string;
+  normalTimelock: string;
 }
 
 export const describeChainExecution = async (
@@ -44,6 +54,9 @@ export const describeChainExecution = async (
   const reservesBefore: Record<string, BigNumber> = {};
   const psrBefore: Record<string, BigNumber> = {};
   const destBalancesBefore: Record<string, Record<string, BigNumber>> = {};
+  const treasuryVBalBefore: Record<string, BigNumber> = {};
+  const timelockVBalBefore: Record<string, BigNumber> = {};
+  const timelockUnderlyingBefore: Record<string, BigNumber> = {};
   let gatewayNativeBefore = BigNumber.from(0);
 
   describe(`Pre-VIP snapshot (${description})`, async () => {
@@ -57,6 +70,9 @@ export const describeChainExecution = async (
         for (const d of allDestinations) {
           destBalancesBefore[m.underlying][d] = await tok.balanceOf(d);
         }
+        treasuryVBalBefore[m.vToken] = await vToken.balanceOf(extras.vTreasury);
+        timelockVBalBefore[m.vToken] = await vToken.balanceOf(extras.normalTimelock);
+        timelockUnderlyingBefore[m.underlying] = await tok.balanceOf(extras.normalTimelock);
       }
       gatewayNativeBefore = await provider.getBalance(extras.nativeGateway);
     });
@@ -98,15 +114,42 @@ export const describeChainExecution = async (
       }
     });
 
-    it("PSR underlying balance == 0 for every Core Pool asset (released out)", async () => {
+    it("PSR tracked ledger (assetsReserves) is zero after releaseFunds for every market × schema", async () => {
+      const psr = new ethers.Contract(chain.protocolShareReserve, PSR_ABI, provider);
+      const schemas = Array.from(new Set(snapshot.psrDistribution.map(d => d.schema)));
       for (const m of chain.markets) {
+        for (const schema of schemas) {
+          const tracked: BigNumber = await psr.assetsReserves(chain.comptrollerCore, m.underlying, schema);
+          expect(tracked.toString()).to.equal(
+            "0",
+            `${m.name} schema=${schema}: assetsReserves=${tracked.toString()}, expected 0 (releaseFunds should have cleared the tracked ledger)`,
+          );
+        }
+      }
+    });
+
+    it("VToken cash decreased by at least the redeemed underlying (source-side check on redeem)", async () => {
+      for (const m of chain.markets) {
+        const snap = snapshot.markets[m.vToken];
+        if (!snap) continue;
+        const safeRedeem = computeSafeRedeem(snap);
+        if (safeRedeem.isZero()) continue;
+
+        const vToken = new ethers.Contract(m.vToken, VTOKEN_ABI, provider);
         const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
-        const after: BigNumber = await tok.balanceOf(chain.protocolShareReserve);
-        expect(after.toString()).to.equal(
-          "0",
-          `${m.name} (underlying ${
-            m.underlying
-          }): PSR still holds ${after.toString()}; releaseFunds did not fully release`,
+
+        const timelockGained = (await tok.balanceOf(extras.normalTimelock)).sub(
+          timelockUnderlyingBefore[m.underlying],
+        );
+
+        const cashBefore = BigNumber.from(snap.redeemCapacity).add(BigNumber.from(snap.totalReserves));
+        const cashAfter: BigNumber = await vToken.getCash();
+        const cashDrop = cashBefore.sub(cashAfter);
+        expect(cashDrop.gte(timelockGained)).to.equal(
+          true,
+          `${
+            m.name
+          }: VToken cash dropped by ${cashDrop.toString()} but timelock gained ${timelockGained.toString()} underlying — source decrease should be >= destination increase`,
         );
       }
     });
@@ -117,9 +160,6 @@ export const describeChainExecution = async (
       // acceptable and comes from (a) yield-bearing underlyings that rebase
       // during fork mining (opBNB `ETH`, wstETH, etc.), and (b) interest
       // accrual inside reduceReserves between the snapshot and the VIP run.
-      // A negative drift — destinations received *less* than R + P — would
-      // indicate a real regression (partial drain, bad distribution config,
-      // tokens stuck somewhere).
       for (const m of chain.markets) {
         const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
         let destSumAfter = BigNumber.from(0);
@@ -170,26 +210,152 @@ export const describeChainExecution = async (
     it("NativeTokenGateway native balance == 0 (swept to remote NormalTimelock)", async () => {
       const bal = await provider.getBalance(extras.nativeGateway);
       expect(bal.toString()).to.equal("0");
-      // Referenced so TS doesn't warn if no assertion yet uses gatewayNativeBefore.
-      void gatewayNativeBefore;
     });
 
-    it("prints per-market drained amount for reviewer visibility", async () => {
-      console.log(`\n  ── ${description} — per-market drained amounts ──`);
+    it("treasury vToken balance decreased by withdrawTreasuryToken amount", async () => {
+      // For every market the VIP emits (B), VTreasuryV8 should end up holding
+      // 0 vTokens of that market (the full snapshotted balance was withdrawn
+      // to the timelock). For markets the VIP skipped, the balance is
+      // unchanged.
+      for (const m of chain.markets) {
+        const snap = snapshot.markets[m.vToken];
+        // if (!snap) continue;
+        const vToken = new ethers.Contract(m.vToken, VTOKEN_ABI, provider);
+        const after: BigNumber = await vToken.balanceOf(extras.vTreasury);
+        const safeRedeem = computeSafeRedeem(snap);
+        if (safeRedeem.isZero()) {
+          // VIP skipped this market — treasury balance unchanged.
+          expect(after.toString()).to.equal(
+            treasuryVBalBefore[m.vToken].toString(),
+            `${m.name}: treasury vToken balance changed unexpectedly for a skipped market`,
+          );
+        } else {
+          // VIP withdrew the full snapshotted treasury balance; any live
+          // balance >= snapshot would be pulled in full.
+          expect(after.toString()).to.equal(
+            "0",
+            `${m.name}: treasury still holds ${after.toString()} vTokens; withdrawTreasuryToken did not fully drain`,
+          );
+        }
+      }
+    });
+
+    it("XVSVault reward speed for XVS == 0 when chain has a vault in scope", async () => {
+      // (E) only emits a command on chains that expose xvsVaultProxy + xvs in
+      // their chain config. For chains without those fields, we skip the check.
+      if (!("xvsVaultProxy" in chain) || !chain.xvsVaultProxy || !chain.xvs) return;
+      const vault = new ethers.Contract(
+        chain.xvsVaultProxy,
+        ["function rewardTokenAmountsPerBlock(address) view returns (uint256)"],
+        provider,
+      );
+      const speedAfter: BigNumber = await vault.rewardTokenAmountsPerBlock(chain.xvs);
+      expect(speedAfter.toString()).to.equal(
+        "0",
+        `${chainKey}: XVSVault reward speed for XVS is ${speedAfter.toString()} != 0; setRewardAmountPerBlockOrSecond did not execute`,
+      );
+    });
+
+    it("timelock holds the treasury-redeem leftovers and released underlying", async () => {
+      // For each market the VIP redeemed:
+      //   1. Timelock vToken balance delta == treasuryVBalBefore − safeRedeem
+      //      (what was withdrawn minus what was redeemed).
+      //   2. Timelock underlying balance delta >= safeRedeem × exchangeRateStored / 1e18
+      //      (redeem pays out at the live rate, which is ≥ snapshot rate due
+      //      to accrual — so the actual payout is a lower-bounded estimate).
+      for (const m of chain.markets) {
+        const snap = snapshot.markets[m.vToken];
+        if (!snap) continue;
+        const safeRedeem = computeSafeRedeem(snap);
+        if (safeRedeem.isZero()) continue;
+
+        const vToken = new ethers.Contract(m.vToken, VTOKEN_ABI, provider);
+        const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
+
+        const vBalAfter: BigNumber = await vToken.balanceOf(extras.normalTimelock);
+        const vBalDelta = vBalAfter.sub(timelockVBalBefore[m.vToken]);
+        const snappedTreasuryBal = BigNumber.from(snap.treasuryVTokenBalance);
+        const expectedVDelta = snappedTreasuryBal.sub(safeRedeem);
+        expect(vBalDelta.toString()).to.equal(
+          expectedVDelta.toString(),
+          `${m.name}: timelock vToken delta ${vBalDelta.toString()} != expected ${expectedVDelta.toString()}`,
+        );
+
+        const underlyingAfter: BigNumber = await tok.balanceOf(extras.normalTimelock);
+        const underlyingDelta = underlyingAfter.sub(timelockUnderlyingBefore[m.underlying]);
+        const expectedUnderlyingFloor = safeRedeem.mul(BigNumber.from(snap.exchangeRate)).div(BigNumber.from(10).pow(18));
+        expect(underlyingDelta.gte(expectedUnderlyingFloor)).to.equal(
+          true,
+          `${
+            m.name
+          }: timelock received ${underlyingDelta.toString()} underlying, expected >= ${expectedUnderlyingFloor.toString()} (= safeRedeem × snapshotRate)`,
+        );
+      }
+    });
+
+    it("prints Treasury Accounting summary for visibility", async () => {
+      // Two sections per chain:
+      //   (1) "Phase 1 — direct to VTreasuryV8" — what lands on the
+      //       treasury in this VIP via reduceReserves + PSR.releaseFunds.
+      //       For each asset this is R (reserves drained now) + P (PSR
+      //       pre-balance already sitting there).
+      //   (2) "Phase 1 — lands on NormalTimelock (forwarded in Phase 2)" —
+      //       underlying that the timelock gains from treasury-vToken
+      //       redemptions plus native from the gateway sweep. None of
+      //       this reaches VTreasuryV8 until a Phase 2 cross-chain VIP
+      //       emits ERC20/native transfers back to treasury.
+      console.log(`\n  ═══ ${description} — Treasury Accounting ═══`);
+      console.log(`  (1) Phase 1 — direct to VTreasuryV8 (via PSR.releaseFunds):`);
       for (const m of chain.markets) {
         const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
         const decimals: number = await tok.decimals();
+        const symbol: string = await tok.symbol().catch(() => m.name.replace(/^v/, ""));
         const reserves = reservesBefore[m.vToken];
         const psr = psrBefore[m.underlying];
         const total = reserves.add(psr);
+        if (total.isZero()) continue;
         console.log(
-          `  ${m.name.padEnd(14)} R=${formatUnits(reserves, decimals).padStart(22)} +P=${formatUnits(
-            psr,
+          `    ${m.name.padEnd(14)} ${formatUnits(total, decimals).padStart(26)} ${symbol}    (reserves=${formatUnits(
+            reserves,
             decimals,
-          ).padStart(22)} =total ${formatUnits(total, decimals)}`,
+          )}, PSR-pre=${formatUnits(psr, decimals)})`,
         );
       }
-      console.log(`  nativeGateway pre-sweep balance = ${formatUnits(gatewayNativeBefore, 18)} (native)\n`);
+
+      console.log(`  (2) Phase 1 — lands on NormalTimelock (forwarded to VTreasuryV8 in Phase 2):`);
+      let redeemEmittedAny = false;
+      for (const m of chain.markets) {
+        const snap = snapshot.markets[m.vToken];
+        if (!snap) continue;
+        const safeRedeem = computeSafeRedeem(snap);
+        if (safeRedeem.isZero()) continue;
+        const tok = new ethers.Contract(m.underlying, ERC20_ABI, provider);
+        const decimals: number = await tok.decimals();
+        const symbol: string = await tok.symbol().catch(() => m.name.replace(/^v/, ""));
+        const redeemUnderlying = safeRedeem.mul(BigNumber.from(snap.exchangeRate)).div(BigNumber.from(10).pow(18));
+        const leftoverVTokens = BigNumber.from(snap.treasuryVTokenBalance).sub(safeRedeem);
+        redeemEmittedAny = true;
+        console.log(
+          `    ${m.name.padEnd(14)} ${formatUnits(redeemUnderlying, decimals).padStart(26)} ${symbol}    ` +
+            `(safeRedeem=${safeRedeem.toString()} vTokens, leftover=${leftoverVTokens.toString()} vTokens on timelock)`,
+        );
+      }
+      if (!redeemEmittedAny) {
+        console.log(`    (no treasury vToken redemptions emitted on this chain)`);
+      }
+      if (!gatewayNativeBefore.isZero()) {
+        console.log(
+          `    gateway-sweep   ${formatUnits(gatewayNativeBefore, 18).padStart(26)} native   ` +
+            `(swept to NormalTimelock)`,
+        );
+      }
+
+      // (E) block output.
+      if ("xvsVaultProxy" in chain && chain.xvsVaultProxy && snapshot.xvsVaultRewardSpeed) {
+        console.log(
+          `  (3) XVSVault rewardTokenAmountsPerBlock(XVS): ${snapshot.xvsVaultRewardSpeed} → 0`,
+        );
+      }
     });
   });
 };
