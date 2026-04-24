@@ -5,7 +5,7 @@ import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { expectEvents, setMaxStalePeriodInBinanceOracle, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { forking, testVip } from "src/vip-framework";
 
-import vip666 from "../../vips/vip-666/bscmainnet";
+import vip613 from "../../vips/vip-613/bscmainnet";
 import {
   BTCB,
   CAKE,
@@ -18,7 +18,7 @@ import {
   SENTINEL_ORACLE,
   USDT,
   WBNB,
-} from "../../vips/vip-666/config";
+} from "../../vips/vip-613/config";
 import COMPTROLLER_ABI from "./abi/Comptroller.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
 import PANCAKESWAP_ORACLE_ABI from "./abi/PancakeSwapOracle.json";
@@ -156,7 +156,7 @@ forking(93782100, async () => {
     });
   });
 
-  testVip("VIP-666 [BNB Chain] Expand DeviationSentinel coverage to 25 Core Pool markets", await vip666(), {
+  testVip("VIP-613 [BNB Chain] DeviationSentinel Expansion — Emergency Brake Step 1", await vip613(), {
     callbackAfterExecution: async txResponse => {
       // 25 PoolConfigUpdated (PancakeSwapOracle) + 25 TokenOracleConfigUpdated (SentinelOracle)
       //   + 25 TokenConfigUpdated (DeviationSentinel) = 75 events.
