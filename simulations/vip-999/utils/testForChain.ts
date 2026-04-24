@@ -38,9 +38,7 @@ export const describeChainExecution = async (
   const snapshot = CHAIN_STATE[chainKey];
 
   // Destinations that receive from PSR.releaseFunds.
-  const allDestinations = Array.from(
-    new Set([extras.vTreasury, ...snapshot.psrDistribution.map(d => d.destination)]),
-  );
+  const allDestinations = Array.from(new Set([extras.vTreasury, ...snapshot.psrDistribution.map(d => d.destination)]));
 
   // Pre-VIP state captured here; mutated inside `before()` hooks.
   const reservesBefore: Record<string, BigNumber> = {};
@@ -106,7 +104,9 @@ export const describeChainExecution = async (
         const after: BigNumber = await tok.balanceOf(chain.protocolShareReserve);
         expect(after.toString()).to.equal(
           "0",
-          `${m.name} (underlying ${m.underlying}): PSR still holds ${after.toString()}; releaseFunds did not fully release`,
+          `${m.name} (underlying ${
+            m.underlying
+          }): PSR still holds ${after.toString()}; releaseFunds did not fully release`,
         );
       }
     });
@@ -133,7 +133,9 @@ export const describeChainExecution = async (
 
         expect(actualDelta.gte(expectedDelta)).to.equal(
           true,
-          `${m.name}: destinations received ${actualDelta.toString()} < expected floor R+P = ${expectedDelta.toString()}`,
+          `${
+            m.name
+          }: destinations received ${actualDelta.toString()} < expected floor R+P = ${expectedDelta.toString()}`,
         );
 
         if (!expectedDelta.isZero()) {
@@ -142,7 +144,9 @@ export const describeChainExecution = async (
           const onePercent = expectedDelta.div(100);
           if (excess.gt(onePercent)) {
             console.log(
-              `  ⚠ ${m.name}: destinations received ${actualDelta.toString()} vs expected R+P ${expectedDelta.toString()} (excess ${excess.toString()} > 1% of expected — investigate if this market uses a rebase/yield-bearing underlying)`,
+              `  ⚠ ${
+                m.name
+              }: destinations received ${actualDelta.toString()} vs expected R+P ${expectedDelta.toString()} (excess ${excess.toString()} > 1% of expected — investigate if this market uses a rebase/yield-bearing underlying)`,
             );
           }
         }
@@ -179,7 +183,10 @@ export const describeChainExecution = async (
         const psr = psrBefore[m.underlying];
         const total = reserves.add(psr);
         console.log(
-          `  ${m.name.padEnd(14)} R=${formatUnits(reserves, decimals).padStart(22)} +P=${formatUnits(psr, decimals).padStart(22)} =total ${formatUnits(total, decimals)}`,
+          `  ${m.name.padEnd(14)} R=${formatUnits(reserves, decimals).padStart(22)} +P=${formatUnits(
+            psr,
+            decimals,
+          ).padStart(22)} =total ${formatUnits(total, decimals)}`,
         );
       }
       console.log(`  nativeGateway pre-sweep balance = ${formatUnits(gatewayNativeBefore, 18)} (native)\n`);

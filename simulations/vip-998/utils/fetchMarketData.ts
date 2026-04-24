@@ -3,8 +3,8 @@ import fs from "fs";
 import { ethers } from "hardhat";
 import path from "path";
 
-import COMPTROLLER_ABI from "../abi/comptroller.json";
 import ERC20_ABI from "../abi/ERC20.json";
+import COMPTROLLER_ABI from "../abi/comptroller.json";
 
 const networkConfigs: {
   [key: string]: { address: string; name: string }[];
@@ -93,7 +93,10 @@ async function fetchPoolData(
   return { name: poolName, comptroller: comptrollerAddress, markets: marketDataList };
 }
 
-async function fetchMarketData(network: string, comptrollers: { address: string; name: string }[]): Promise<NetworkData> {
+async function fetchMarketData(
+  network: string,
+  comptrollers: { address: string; name: string }[],
+): Promise<NetworkData> {
   const pools: PoolData[] = [];
   for (const { address, name } of comptrollers) {
     pools.push(await fetchPoolData(address, name, ethers.provider));

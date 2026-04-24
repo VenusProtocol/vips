@@ -129,7 +129,7 @@ const generatePoolCommands = (pool: Pool, dstChainId: LzChainId) => {
 
   // CF = 0, LT preserved. Drops borrowing power of existing collateral to 0
   // (healthy users are pushed to exit) while keeping the liquidation threshold
-  // intact so unhealthy positions can still be liquidated. 
+  // intact so unhealthy positions can still be liquidated.
   for (const market of markets.filter(m => m.collateralFactor !== "0")) {
     commands.push({
       target: comptroller,

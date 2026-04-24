@@ -52,11 +52,31 @@ export const opbnbmainnet = {
   protocolShareReserve: "0xA2EDD515B75aBD009161B15909C19959484B0C1e",
   nativeTokenGateway_vWBNB: "0x7bAf6019C90B93aD30f8aD6a2EcCD2B11427b29f",
   markets: [
-    { name: "vWBNB_Core", vToken: "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672", underlying: "0x4200000000000000000000000000000000000006" },
-    { name: "vBTCB_Core", vToken: "0xED827b80Bd838192EA95002C01B5c6dA8354219a", underlying: "0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2" },
-    { name: "vETH_Core", vToken: "0x509e81eF638D489936FA85BC58F52Df01190d26C", underlying: "0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea" },
-    { name: "vUSDT_Core", vToken: "0xb7a01Ba126830692238521a1aA7E7A7509410b8e", underlying: "0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3" },
-    { name: "vFDUSD_Core", vToken: "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917", underlying: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb" },
+    {
+      name: "vWBNB_Core",
+      vToken: "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672",
+      underlying: "0x4200000000000000000000000000000000000006",
+    },
+    {
+      name: "vBTCB_Core",
+      vToken: "0xED827b80Bd838192EA95002C01B5c6dA8354219a",
+      underlying: "0x7c6b91D9Be155A6Db01f749217d76fF02A7227F2",
+    },
+    {
+      name: "vETH_Core",
+      vToken: "0x509e81eF638D489936FA85BC58F52Df01190d26C",
+      underlying: "0xE7798f023fC62146e8Aa1b36Da45fb70855a77Ea",
+    },
+    {
+      name: "vUSDT_Core",
+      vToken: "0xb7a01Ba126830692238521a1aA7E7A7509410b8e",
+      underlying: "0x9e5AAC1Ba1a2e6aEd6b32689DFcF62A509Ca96f3",
+    },
+    {
+      name: "vFDUSD_Core",
+      vToken: "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917",
+      underlying: "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+    },
   ],
 };
 
@@ -65,13 +85,41 @@ export const unichainmainnet = {
   protocolShareReserve: "0x0A93fBcd7B53CE6D335cAB6784927082AD75B242",
   nativeTokenGateway_vWETH: "0x4441aE3bCEd3210edbA35d0F7348C493E79F1C52",
   markets: [
-    { name: "vWETH_Core", vToken: "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374", underlying: "0x4200000000000000000000000000000000000006" },
-    { name: "vWBTC_Core", vToken: "0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5", underlying: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c" },
-    { name: "vUSDC_Core", vToken: "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95", underlying: "0x078D782b760474a361dDA0AF3839290b0EF57AD6" },
-    { name: "vUSDT0_Core", vToken: "0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD", underlying: "0x9151434b16b9763660705744891fA906F660EcC5" },
-    { name: "vUNI_Core", vToken: "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2", underlying: "0x8f187aA05619a017077f5308904739877ce9eA21" },
-    { name: "vweETH_Core", vToken: "0x0170398083eb0D0387709523baFCA6426146C218", underlying: "0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7" },
-    { name: "vwstETH_Core", vToken: "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB", underlying: "0xc02fE7317D4eb8753a02c35fe019786854A92001" },
+    {
+      name: "vWETH_Core",
+      vToken: "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374",
+      underlying: "0x4200000000000000000000000000000000000006",
+    },
+    {
+      name: "vWBTC_Core",
+      vToken: "0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5",
+      underlying: "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+    },
+    {
+      name: "vUSDC_Core",
+      vToken: "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95",
+      underlying: "0x078D782b760474a361dDA0AF3839290b0EF57AD6",
+    },
+    {
+      name: "vUSDT0_Core",
+      vToken: "0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD",
+      underlying: "0x9151434b16b9763660705744891fA906F660EcC5",
+    },
+    {
+      name: "vUNI_Core",
+      vToken: "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2",
+      underlying: "0x8f187aA05619a017077f5308904739877ce9eA21",
+    },
+    {
+      name: "vweETH_Core",
+      vToken: "0x0170398083eb0D0387709523baFCA6426146C218",
+      underlying: "0x7DCC39B4d1C53CB31e1aBc0e358b43987FEF80f7",
+    },
+    {
+      name: "vwstETH_Core",
+      vToken: "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB",
+      underlying: "0xc02fE7317D4eb8753a02c35fe019786854A92001",
+    },
   ],
 };
 
@@ -80,11 +128,31 @@ export const opmainnet = {
   protocolShareReserve: "0x735ed037cB0dAcf90B133370C33C08764f88140a",
   nativeTokenGateway_vWETH: "0x5B1b7465cfDE450e267b562792b434277434413c",
   markets: [
-    { name: "vWETH_Core", vToken: "0x66d5AE25731Ce99D46770745385e662C8e0B4025", underlying: "0x4200000000000000000000000000000000000006" },
-    { name: "vWBTC_Core", vToken: "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46", underlying: "0x68f180fcCe6836688e9084f035309E29Bf0A2095" },
-    { name: "vUSDC_Core", vToken: "0x1C9406ee95B7af55F005996947b19F91B6D55b15", underlying: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85" },
-    { name: "vUSDT_Core", vToken: "0x37ac9731B0B02df54975cd0c7240e0977a051721", underlying: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58" },
-    { name: "vOP_Core", vToken: "0x6b846E3418455804C1920fA4CC7a31A51C659A2D", underlying: "0x4200000000000000000000000000000000000042" },
+    {
+      name: "vWETH_Core",
+      vToken: "0x66d5AE25731Ce99D46770745385e662C8e0B4025",
+      underlying: "0x4200000000000000000000000000000000000006",
+    },
+    {
+      name: "vWBTC_Core",
+      vToken: "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46",
+      underlying: "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
+    },
+    {
+      name: "vUSDC_Core",
+      vToken: "0x1C9406ee95B7af55F005996947b19F91B6D55b15",
+      underlying: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+    },
+    {
+      name: "vUSDT_Core",
+      vToken: "0x37ac9731B0B02df54975cd0c7240e0977a051721",
+      underlying: "0x94b008aA00579c1307B0EF2c499aD98a8ce58e58",
+    },
+    {
+      name: "vOP_Core",
+      vToken: "0x6b846E3418455804C1920fA4CC7a31A51C659A2D",
+      underlying: "0x4200000000000000000000000000000000000042",
+    },
   ],
 };
 
@@ -185,12 +253,7 @@ VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. 
         LzChainId.unichainmainnet,
         CHAIN_STATE.unichainmainnet,
       ),
-      ...chainSection(
-        opmainnet,
-        opmainnet.nativeTokenGateway_vWETH,
-        LzChainId.opmainnet,
-        CHAIN_STATE.opmainnet,
-      ),
+      ...chainSection(opmainnet, opmainnet.nativeTokenGateway_vWETH, LzChainId.opmainnet, CHAIN_STATE.opmainnet),
     ],
     meta,
     ProposalType.REGULAR,
