@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 import { expectEvents } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip998, { ADDRESS_DATA, Actions } from "../../../vips/vip-998/bscmainnet";
+import vip614, { ADDRESS_DATA, Actions } from "../../../vips/vip-614/bscmainnet";
 import COMPTROLLER_ABI from "../abi/comptroller.json";
 
 type ChainKey = keyof typeof ADDRESS_DATA;
@@ -55,7 +55,7 @@ export const describeChainExecution = async (description: string, chainKey: Chai
     }
   });
 
-  testForkedNetworkVipCommands(description, await vip998(), {
+  testForkedNetworkVipCommands(description, await vip614(), {
     callbackAfterExecution: async txResponse => {
       const t = ADDRESS_DATA[chainKey].totals!;
       const actionPausedCount = t.totalMintPaused + t.totalBorrowPaused + t.totalEnterMarketPaused;

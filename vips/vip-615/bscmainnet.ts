@@ -2,11 +2,11 @@ import { BigNumber } from "ethers";
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import chainState from "../../simulations/vip-999/utils/chainState.json";
+import chainState from "../../simulations/vip-615/utils/chainState.json";
 
 // ──────────────────────────────────────────────────────────────────────
 // chainState shape — one entry per remote chain, produced by
-// simulations/vip-999/utils/fetchChainState.ts.
+// simulations/vip-615/utils/fetchChainState.ts.
 //
 //   markets[vToken] = {
 //     totalReserves, treasuryVTokenBalance, redeemCapacity, exchangeRate,
@@ -318,19 +318,19 @@ const chainSection = (
   return commands;
 };
 
-export const vip999 = () => {
+export const vip615 = () => {
   const meta = {
     version: "v2",
     title:
-      "VIP-999 Core Pool Sunset Phase 1 Step 2 — Drain Reserves and Treasury Supply Positions (opBNB, Unichain, Optimism)",
+      "VIP-615 [BNB Chain] Core Pool Sunset Phase 1 Step 2 — Drain Reserves and Treasury Supply Positions (opBNB, Unichain, Optimism)",
     description: `#### Summary
 
-VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. Follows VIP-998 (which blocked new supply/borrow/enter-market and zeroed caps + collateral factor on every Core Pool market). This proposal drains protocol-held value from the Core Pool into each chain's \`VTreasuryV8\`: protocol reserves, PSR balances, the treasury's own seed-liquidity supply positions, and native-token-gateway dust.
+VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. Follows VIP-614 (which blocked new supply/borrow/enter-market and zeroed caps + collateral factor on every Core Pool market). This proposal drains protocol-held value from the Core Pool into each chain's \`VTreasuryV8\`: protocol reserves, PSR balances, the treasury's own seed-liquidity supply positions, and native-token-gateway dust.
 
 #### Actions (per chain)
 
 1. **\`VToken.reduceReserves(snapshottedTotalReserves)\` on every Core Pool vToken.**
-   Pushes vToken-held reserves into the chain's \`ProtocolShareReserve\`. The amount is the \`totalReserves\` value snapshotted right before proposal build (see \`simulations/vip-999/utils/chainState.json\`). This is safe because \`totalReserves\` is monotonically non-decreasing between snapshot and execution — interest accrual and repayments can only grow it, and nothing except \`reduceReserves\` itself can shrink it. Any dust that accrues between snapshot and execution is collected in the Phase 2 final sweep. Markets with \`totalReserves = 0\` emit no call.
+   Pushes vToken-held reserves into the chain's \`ProtocolShareReserve\`. The amount is the \`totalReserves\` value snapshotted right before proposal build (see \`simulations/vip-615/utils/chainState.json\`). This is safe because \`totalReserves\` is monotonically non-decreasing between snapshot and execution — interest accrual and repayments can only grow it, and nothing except \`reduceReserves\` itself can shrink it. Any dust that accrues between snapshot and execution is collected in the Phase 2 final sweep. Markets with \`totalReserves = 0\` emit no call.
 
 2. **Redeem the Treasury's Core Pool supply positions — per market.**
    At deployment, each Core Pool market was seeded with initial liquidity via \`PoolRegistry.addMarket(..., supplier = VTreasuryV8, ...)\`, which minted vTokens directly to the Treasury. Those positions still sit on \`VTreasuryV8\` today and earn supply interest. We redeem them now — while the market still holds uncommitted cash — because Phase 2's unlisting announcement will trigger a user-redemption rush that outpaces slow borrower repayments, stranding the Treasury's position until repayments trickle back. Flow per market:
@@ -379,4 +379,4 @@ VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. 
   );
 };
 
-export default vip999;
+export default vip615;

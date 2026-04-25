@@ -1,12 +1,12 @@
 import { LzChainId, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
-import opbnbData from "../../simulations/vip-998/utils/marketData_opbnbmainnet.json";
-import opmainnetData from "../../simulations/vip-998/utils/marketData_opmainnet.json";
-import unichainData from "../../simulations/vip-998/utils/marketData_unichainmainnet.json";
+import opbnbData from "../../simulations/vip-614/utils/marketData_opbnbmainnet.json";
+import opmainnetData from "../../simulations/vip-614/utils/marketData_opmainnet.json";
+import unichainData from "../../simulations/vip-614/utils/marketData_unichainmainnet.json";
 
 // ──────────────────────────────────────────────────────────────────────
-// Per-market snapshot shape, produced by simulations/vip-998/utils/fetchMarketData.ts.
+// Per-market snapshot shape, produced by simulations/vip-614/utils/fetchMarketData.ts.
 // `generatePoolCommands` uses the booleans/numeric fields to skip no-op commands
 // (market already paused, cap already 0, CF already 0) so the cross-chain
 // payload only contains work that actually changes state.
@@ -142,10 +142,10 @@ const generatePoolCommands = (pool: Pool, dstChainId: LzChainId) => {
   return commands;
 };
 
-export const vip998 = () => {
+export const vip614 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-998 Core Pool Sunset Phase 1 Step 1 — Block New Activity on opBNB, Unichain, Optimism",
+    title: "VIP-614 [BNB Chain] Core Pool Sunset Phase 1 Step 1 — Block New Activity on opBNB, Unichain, Optimism",
     description: `#### Summary
 
 VIP of the Venus Core Pool sunset on **opBNB**, **Unichain**, and **Optimism**. This proposal blocks **new** supply, borrow, and enter-as-collateral activity on every Core Pool market across the three chains. Redeem, repay, liquidate, exit-market, and transfer remain fully open so existing positions can unwind safely during the exit window.
@@ -185,4 +185,4 @@ Each sub-call is data-driven against a pre-run snapshot (\`marketData_<chain>.js
   );
 };
 
-export default vip998;
+export default vip614;

@@ -4,13 +4,13 @@ import { formatUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip999, {
+import vip615, {
   MarketSnapshot,
   computeSafeRedeem,
   opbnbmainnet,
   opmainnet,
   unichainmainnet,
-} from "../../../vips/vip-999/bscmainnet";
+} from "../../../vips/vip-615/bscmainnet";
 import ERC20_ABI from "../abi/ERC20.json";
 import PSR_ABI from "../abi/protocolShareReserve.json";
 import VTOKEN_ABI from "../abi/vtoken.json";
@@ -100,7 +100,7 @@ export const describeChainExecution = async (
     });
   });
 
-  testForkedNetworkVipCommands(description, await vip999());
+  testForkedNetworkVipCommands(description, await vip615());
 
   describe(`Post-VIP state (${description})`, async () => {
     it("VToken totalReserves == 0 for every Core Pool market (drained to PSR)", async () => {
