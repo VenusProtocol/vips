@@ -1,0 +1,175 @@
+{
+  "opbnbmainnet": {
+    "markets": {
+      "0x53d11cB8A0e5320Cd7229C3acc80d1A0707F2672": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "488149960",
+        "redeemCapacity": "5320725997758900610",
+        "exchangeRate": "10237826973174032371839428325",
+        "psrPreBalance": "207179807126565003"
+      },
+      "0xED827b80Bd838192EA95002C01B5c6dA8354219a": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "3553143",
+        "redeemCapacity": "36269043252056866",
+        "exchangeRate": "10000626023758350888415851412",
+        "psrPreBalance": "442135468128407"
+      },
+      "0x509e81eF638D489936FA85BC58F52Df01190d26C": {
+        "totalReserves": "705582056",
+        "treasuryVTokenBalance": "61097887",
+        "redeemCapacity": "615367392081478484",
+        "exchangeRate": "10055551422237840098707126789",
+        "psrPreBalance": "1102090954090493"
+      },
+      "0xb7a01Ba126830692238521a1aA7E7A7509410b8e": {
+        "totalReserves": "1166491332554893",
+        "treasuryVTokenBalance": "180000000001",
+        "redeemCapacity": "2270819869538655884018",
+        "exchangeRate": "10435509106259047905583413268",
+        "psrPreBalance": "17270584397653104732"
+      },
+      "0x13B492B8A03d072Bab5C54AC91Dba5b830a50917": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "180000000001",
+        "redeemCapacity": "1841203543189954594814",
+        "exchangeRate": "10217414252387653411412117704",
+        "psrPreBalance": "9166994750946262460"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0xDDc9017F3073aa53a4A8535163b0bf7311F72C52"
+      }
+    ],
+    "xvsVaultRewardSpeed": "0",
+    "gatewayNativeBalance": "0"
+  },
+  "unichainmainnet": {
+    "markets": {
+      "0xc219BC179C7cDb37eACB03f993f9fDc2495e3374": {
+        "totalReserves": "439516986231",
+        "treasuryVTokenBalance": "99000000",
+        "redeemCapacity": "19933316326971700030",
+        "exchangeRate": "10083946092713584627691156622",
+        "psrPreBalance": "79954498370334621"
+      },
+      "0x68e2A6F7257FAc2F5a557b9E83E1fE6D5B408CE5": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "0",
+        "redeemCapacity": "3145834",
+        "exchangeRate": "1000136679632160145",
+        "psrPreBalance": "47497"
+      },
+      "0xB953f92B9f759d97d2F2Dec10A8A3cf75fcE3A95": {
+        "totalReserves": "1684197",
+        "treasuryVTokenBalance": "487460218000",
+        "redeemCapacity": "2623047936",
+        "exchangeRate": "10449636392052712",
+        "psrPreBalance": "195092496"
+      },
+      "0xDa7Ce7Ba016d266645712e2e4Ebc6cC75eA8E4CD": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "0",
+        "redeemCapacity": "2075412912",
+        "exchangeRate": "10121253821192213",
+        "psrPreBalance": "3902471"
+      },
+      "0x67716D6Bf76170Af816F5735e14c4d44D0B05eD2": {
+        "totalReserves": "151257119526712",
+        "treasuryVTokenBalance": "52846342798",
+        "redeemCapacity": "1887849846022945508219",
+        "exchangeRate": "10010770819351406925232797417",
+        "psrPreBalance": "28583065881181144082"
+      },
+      "0x0170398083eb0D0387709523baFCA6426146C218": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "357797547",
+        "redeemCapacity": "5033574140847806631",
+        "exchangeRate": "10001392816475314546432658795",
+        "psrPreBalance": "4293700535091"
+      },
+      "0xbEC19Bef402C697a7be315d3e59E5F65b89Fa1BB": {
+        "totalReserves": "6490",
+        "treasuryVTokenBalance": "317582624",
+        "redeemCapacity": "3505584020859599196",
+        "exchangeRate": "10000391990531256663551128785",
+        "psrPreBalance": "29409561470605"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0x958F4C84d3ad523Fa9936Dc465A123C7AD43D69B"
+      }
+    ],
+    "xvsVaultRewardSpeed": "35880000000000",
+    "gatewayNativeBalance": "100000000000000"
+  },
+  "opmainnet": {
+    "markets": {
+      "0x66d5AE25731Ce99D46770745385e662C8e0B4025": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "186273828",
+        "redeemCapacity": "3966280586550451969",
+        "exchangeRate": "10002611754230347262222205373",
+        "psrPreBalance": "4580243431873"
+      },
+      "0x9EfdCfC2373f81D3DF24647B1c46e15268884c46": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "7575825",
+        "redeemCapacity": "9315720",
+        "exchangeRate": "1000014169031392133",
+        "psrPreBalance": "0"
+      },
+      "0x1C9406ee95B7af55F005996947b19F91B6D55b15": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "500000000000",
+        "redeemCapacity": "4026176693",
+        "exchangeRate": "10280542337500161",
+        "psrPreBalance": "4497399"
+      },
+      "0x37ac9731B0B02df54975cd0c7240e0977a051721": {
+        "totalReserves": "0",
+        "treasuryVTokenBalance": "499860272500",
+        "redeemCapacity": "4112296644",
+        "exchangeRate": "10215719536602124",
+        "psrPreBalance": "6440220"
+      },
+      "0x6b846E3418455804C1920fA4CC7a31A51C659A2D": {
+        "totalReserves": "3759158423337695",
+        "treasuryVTokenBalance": "264114405837",
+        "redeemCapacity": "19511402957817813336306",
+        "exchangeRate": "10041043639674253125027142459",
+        "psrPreBalance": "159983990601156259685"
+      }
+    },
+    "psrDistribution": [
+      {
+        "schema": 0,
+        "percentage": 10000,
+        "destination": "0x104c01EB7b4664551BE6A9bdB26a8C5c6Be7d3da"
+      },
+      {
+        "schema": 1,
+        "percentage": 10000,
+        "destination": "0x104c01EB7b4664551BE6A9bdB26a8C5c6Be7d3da"
+      }
+    ],
+    "xvsVaultRewardSpeed": "0",
+    "gatewayNativeBalance": "0"
+  }
+}
