@@ -19,12 +19,37 @@ export const BASEMAINNET_UNISWAP_ORACLE = ZERO_ADDRESS;
 export const BASEMAINNET_MULTISIG_PAUSER = ZERO_ADDRESS;
 export const BASEMAINNET_KEEPER = ZERO_ADDRESS;
 
-// PLACEHOLDER — first monitored token + its Uniswap V3 pool. Leave as ZERO_ADDRESS to skip token wiring.
-export const BASEMAINNET_MONITORED_TOKEN = ZERO_ADDRESS;
-export const BASEMAINNET_MONITORED_POOL = ZERO_ADDRESS;
-export const BASEMAINNET_DEVIATION_PERCENT = 20;
-
 export const BASEMAINNET_DST_CHAIN_ID = LzChainId.basemainnet;
+
+// Eligible Core Pool markets — Aerodrome Slipstream + Uniswap V3 Base sources,
+// unified 10% threshold. Aerodrome Slipstream is a Uniswap V3 fork; pools are
+// V3-compatible and readable through UniswapOracle.sol's IUniswapV3Pool interface.
+export const BASEMAINNET_MONITORED_MARKETS = [
+  {
+    symbol: "WETH",
+    token: "0x4200000000000000000000000000000000000006",
+    pool: "0x6c561b446416e1a00e8e93e221854d6ea4171372", // WETH/USDC Uniswap V3 Base
+    deviationPercent: 10,
+  },
+  {
+    symbol: "USDC",
+    token: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    pool: "0x6c561b446416e1a00e8e93e221854d6ea4171372", // USDC/WETH Uniswap V3 Base
+    deviationPercent: 10,
+  },
+  {
+    symbol: "cbBTC",
+    token: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    pool: "0x4e962bb3889bf030368f56810a9c96b83cb3e778", // cbBTC/USDC Aerodrome Slipstream
+    deviationPercent: 10,
+  },
+  {
+    symbol: "wstETH",
+    token: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+    pool: "0x861a2922be165a5bd41b1e482b49216b465e1b5f", // wstETH/WETH Aerodrome Slipstream
+    deviationPercent: 10,
+  },
+];
 
 export const BASEMAINNET_CONFIG = {
   name: "Base",
@@ -41,7 +66,5 @@ export const BASEMAINNET_CONFIG = {
   uniswapOracle: BASEMAINNET_UNISWAP_ORACLE,
   multisigPauser: BASEMAINNET_MULTISIG_PAUSER,
   keeper: BASEMAINNET_KEEPER,
-  monitoredToken: BASEMAINNET_MONITORED_TOKEN,
-  monitoredPool: BASEMAINNET_MONITORED_POOL,
-  deviationPercent: BASEMAINNET_DEVIATION_PERCENT,
+  monitoredMarkets: BASEMAINNET_MONITORED_MARKETS,
 } as const;

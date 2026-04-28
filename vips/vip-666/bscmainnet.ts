@@ -7,6 +7,14 @@ import { BASEMAINNET_CONFIG } from "./addresses/basemainnet";
 import { ETHEREUM_CONFIG } from "./addresses/ethereum";
 import { ZKSYNCMAINNET_CONFIG } from "./addresses/zksyncmainnet";
 
+// Per-chain monitored market: token + DEX pool to read its price + deviation threshold.
+export interface MonitoredMarket {
+  symbol: string;
+  token: string;
+  pool: string;
+  deviationPercent: number;
+}
+
 // Per-chain configuration shape. Each chain bundles its ACM, governance accounts,
 // IL Comptroller, and the EBrake/DeviationSentinel stack addresses (placeholders
 // until contracts are deployed on the remote chain).
@@ -25,9 +33,7 @@ export interface ChainConfig {
   uniswapOracle: string;
   multisigPauser: string;
   keeper: string;
-  monitoredToken: string;
-  monitoredPool: string;
-  deviationPercent: number;
+  monitoredMarkets: MonitoredMarket[];
 }
 
 const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, ZKSYNCMAINNET_CONFIG, BASEMAINNET_CONFIG];
@@ -155,27 +161,29 @@ const buildChainCommands = (cfg: ChainConfig) => {
     ...GOVERNANCE_EBRAKE_PERMS_IL.map(sig => grant(acm, cfg.eBrake, sig, cfg.multisigPauser, dstChainId)),
   ];
 
-  // 11. Token-specific wiring. Skipped when no token is yet chosen for the chain
-  //     (monitoredToken == ZERO_ADDRESS) so the proposal stays executable
-  //     even with placeholder addresses.
-  if (cfg.monitoredToken !== ZERO_ADDRESS) {
+  // 11. Per-market wiring. For each eligible market, configure the DEX pool on the
+  //     UniswapOracle, point the SentinelOracle at the UniswapOracle for that token,
+  //     then enable deviation monitoring on the DeviationSentinel. Markets with a
+  //     ZERO_ADDRESS token or pool are skipped (placeholder safety).
+  for (const market of cfg.monitoredMarkets) {
+    if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
     commands.push(
       {
         target: cfg.uniswapOracle,
         signature: "setPoolConfig(address,address)",
-        params: [cfg.monitoredToken, cfg.monitoredPool],
+        params: [market.token, market.pool],
         dstChainId,
       },
       {
         target: cfg.sentinelOracle,
         signature: "setTokenOracleConfig(address,address)",
-        params: [cfg.monitoredToken, cfg.uniswapOracle],
+        params: [market.token, cfg.uniswapOracle],
         dstChainId,
       },
       {
         target: cfg.deviationSentinel,
         signature: "setTokenConfig(address,(uint8,bool))",
-        params: [cfg.monitoredToken, [cfg.deviationPercent, true]],
+        params: [market.token, [market.deviationPercent, true]],
         dstChainId,
       },
     );
@@ -205,6 +213,7 @@ If approved, this VIP will, for each of Ethereum, Arbitrum One, zkSync Era, and 
 - Grant **Guardian** and governance **Timelocks** the 8 IL-supported EBrake action functions and granular snapshot-reset permissions
 - Grant the **per-chain 1-of-1 Multisig Pauser** the 8 IL-supported EBrake action functions for manual emergency pausing (Phase 0)
 - Whitelist Keeper + Guardian + 3 Timelocks as trusted keepers on DeviationSentinel
+- Configure deviation monitoring (10% threshold) for the eligible Core Pool markets on each chain — 10 on Ethereum, 5 on Arbitrum One, 4 on Base, 1 on zkSync Era
 
 **Permission event summary**: 332 PermissionGranted (83 per chain × 4 chains), 0 PermissionRevoked
 

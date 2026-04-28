@@ -19,12 +19,19 @@ export const ZKSYNCMAINNET_UNISWAP_ORACLE = ZERO_ADDRESS;
 export const ZKSYNCMAINNET_MULTISIG_PAUSER = ZERO_ADDRESS;
 export const ZKSYNCMAINNET_KEEPER = ZERO_ADDRESS;
 
-// PLACEHOLDER — first monitored token + its DEX pool. Leave as ZERO_ADDRESS to skip token wiring.
-export const ZKSYNCMAINNET_MONITORED_TOKEN = ZERO_ADDRESS;
-export const ZKSYNCMAINNET_MONITORED_POOL = ZERO_ADDRESS;
-export const ZKSYNCMAINNET_DEVIATION_PERCENT = 20;
-
 export const ZKSYNCMAINNET_DST_CHAIN_ID = LzChainId.zksyncmainnet;
+
+// Eligible Core Pool markets — SyncSwap V3 (primary). Only WETH passes the
+// liquidity threshold; the rest of the spec's markets sit in "Thin Pool — Needs
+// Discussion" and are excluded from this VIP.
+export const ZKSYNCMAINNET_MONITORED_MARKETS = [
+  {
+    symbol: "WETH",
+    token: "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
+    pool: "0xe955c98e8411ee4c7332ebe48df7f0ca12711dc2", // WETH/USDC SyncSwap V3
+    deviationPercent: 10,
+  },
+];
 
 export const ZKSYNCMAINNET_CONFIG = {
   name: "zkSync Era",
@@ -41,7 +48,5 @@ export const ZKSYNCMAINNET_CONFIG = {
   uniswapOracle: ZKSYNCMAINNET_UNISWAP_ORACLE,
   multisigPauser: ZKSYNCMAINNET_MULTISIG_PAUSER,
   keeper: ZKSYNCMAINNET_KEEPER,
-  monitoredToken: ZKSYNCMAINNET_MONITORED_TOKEN,
-  monitoredPool: ZKSYNCMAINNET_MONITORED_POOL,
-  deviationPercent: ZKSYNCMAINNET_DEVIATION_PERCENT,
+  monitoredMarkets: ZKSYNCMAINNET_MONITORED_MARKETS,
 } as const;

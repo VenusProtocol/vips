@@ -23,7 +23,8 @@ import EBRAKE_ABI from "./abi/EBrake.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 import UNISWAP_ORACLE_ABI from "./abi/UniswapOracle.json";
 
-// Total RoleGranted events per chain when no token wiring runs:
+// Total RoleGranted events per chain (token wiring uses direct setter calls,
+// not ACM grants, so it doesn't affect this count):
 //   3 (sentinel admin) × 4 + 2 (sentinel oracle admin) × 4 + 1 (uniswap oracle admin) × 4
 //   + 4 (ebrake → comptroller) + 3 (reset) × 4 + 3 (sentinel → ebrake)
 //   + 8 (governance ebrake action) × 4 + 8 (multisig ebrake action)
@@ -184,25 +185,26 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
       }
     });
 
-    if (cfg.monitoredToken !== ZERO_ADDRESS) {
-      it("Monitored token has no pool configured on UniswapOracle yet", async () => {
-        expect(await uniswapOracle.tokenPools(cfg.monitoredToken)).to.equal(ZERO_ADDRESS);
+    for (const market of cfg.monitoredMarkets) {
+      if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
+      it(`${market.symbol} has no pool configured on UniswapOracle yet`, async () => {
+        expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
       });
 
-      it("Monitored token has no oracle configured on SentinelOracle yet", async () => {
-        const tc = await sentinelOracle.tokenConfigs(cfg.monitoredToken);
-        // tokenConfigs returns an address (the oracle address) packed as a struct;
-        // accessing .oracle works whether the ABI exposes it as a struct or just a single value.
+      it(`${market.symbol} has no oracle configured on SentinelOracle yet`, async () => {
+        const tc = await sentinelOracle.tokenConfigs(market.token);
         expect(tc.oracle ?? tc).to.equal(ZERO_ADDRESS);
       });
 
-      it("Monitored token has no deviation config on DeviationSentinel yet", async () => {
-        const tc = await deviationSentinel.tokenConfigs(cfg.monitoredToken);
+      it(`${market.symbol} has no deviation config on DeviationSentinel yet`, async () => {
+        const tc = await deviationSentinel.tokenConfigs(market.token);
         expect(tc.deviation).to.equal(0);
         expect(tc.enabled).to.equal(false);
       });
     }
   });
+
+  const effectiveMarkets = cfg.monitoredMarkets.filter(m => m.token !== ZERO_ADDRESS && m.pool !== ZERO_ADDRESS);
 
   testForkedNetworkVipCommands(`VIP-666 [${cfg.name}] Configure DeviationSentinel + EBrakeV2`, await vip666(), {
     callbackAfterExecution: async txResponse => {
@@ -210,8 +212,12 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["OwnershipTransferred"], [4]);
       // 5 trusted keepers whitelisted per chain
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [5]);
-      // 83 RoleGranted events per chain (token wiring not counted; gated by monitoredToken)
+      // 83 RoleGranted events per chain (token wiring uses direct setter calls, not ACM grants)
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [PERMS_GRANTED_PER_CHAIN]);
+      // 1 wiring event per market on each of UniswapOracle, SentinelOracle, DeviationSentinel
+      await expectEvents(txResponse, [UNISWAP_ORACLE_ABI], ["PoolConfigUpdated"], [effectiveMarkets.length]);
+      await expectEvents(txResponse, [SENTINEL_ORACLE_ABI], ["TokenOracleConfigUpdated"], [effectiveMarkets.length]);
+      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [effectiveMarkets.length]);
     },
   });
 
@@ -314,19 +320,20 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
       }
     });
 
-    if (cfg.monitoredToken !== ZERO_ADDRESS) {
-      it("Monitored token's pool is configured on UniswapOracle", async () => {
-        expect(await uniswapOracle.tokenPools(cfg.monitoredToken)).to.equal(cfg.monitoredPool);
+    for (const market of cfg.monitoredMarkets) {
+      if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
+      it(`${market.symbol} pool is configured on UniswapOracle`, async () => {
+        expect(await uniswapOracle.tokenPools(market.token)).to.equal(market.pool);
       });
 
-      it("Monitored token's oracle is configured on SentinelOracle", async () => {
-        const tc = await sentinelOracle.tokenConfigs(cfg.monitoredToken);
+      it(`${market.symbol} oracle is configured on SentinelOracle`, async () => {
+        const tc = await sentinelOracle.tokenConfigs(market.token);
         expect(tc.oracle ?? tc).to.equal(cfg.uniswapOracle);
       });
 
-      it("Monitored token's deviation threshold is configured on DeviationSentinel", async () => {
-        const tc = await deviationSentinel.tokenConfigs(cfg.monitoredToken);
-        expect(tc.deviation).to.equal(cfg.deviationPercent);
+      it(`${market.symbol} deviation threshold is configured on DeviationSentinel`, async () => {
+        const tc = await deviationSentinel.tokenConfigs(market.token);
+        expect(tc.deviation).to.equal(market.deviationPercent);
         expect(tc.enabled).to.equal(true);
       });
     }
