@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
 const { ethereum } = NETWORK_ADDRESSES;
@@ -11,13 +11,13 @@ export const ETHEREUM_FAST_TRACK_TIMELOCK = ethereum.FAST_TRACK_TIMELOCK;
 export const ETHEREUM_CRITICAL_TIMELOCK = ethereum.CRITICAL_TIMELOCK;
 export const ETHEREUM_CORE_COMPTROLLER = ethereum.CORE_COMPTROLLER;
 
-// PLACEHOLDERS — to be filled once the EBrake/DeviationSentinel stack is deployed on Ethereum
-export const ETHEREUM_DEVIATION_SENTINEL = ZERO_ADDRESS;
-export const ETHEREUM_EBRAKE = ZERO_ADDRESS;
-export const ETHEREUM_SENTINEL_ORACLE = ZERO_ADDRESS;
-export const ETHEREUM_UNISWAP_ORACLE = ZERO_ADDRESS;
-export const ETHEREUM_MULTISIG_PAUSER = ZERO_ADDRESS;
-export const ETHEREUM_KEEPER = ZERO_ADDRESS;
+// Deployed via venus-periphery PR #65 (feat/VPD-1134)
+export const ETHEREUM_DEVIATION_SENTINEL = "0x7D0EFA41eBF1aF242A37174E1E047bD6ea1b1B9c";
+export const ETHEREUM_EBRAKE = "0xCD09042c5DFFed762998Df9a058ec5944e39949B";
+export const ETHEREUM_SENTINEL_ORACLE = "0x444C53E194B40c272fAd683210e2cB1c16Ab132e";
+export const ETHEREUM_UNISWAP_ORACLE = "0x873993F8f5f5Ddbae0952e939ab3005Af363Af00";
+export const ETHEREUM_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
+export const ETHEREUM_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
 export const ETHEREUM_DST_CHAIN_ID = LzChainId.ethereum;
 
