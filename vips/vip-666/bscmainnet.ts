@@ -1,4 +1,3 @@
-import { ZERO_ADDRESS } from "src/networkAddresses";
 import { Command, ProposalType } from "src/types";
 import { makeProposal } from "src/utils";
 
@@ -6,7 +5,6 @@ import { ARBITRUMONE_CONFIG } from "./addresses/arbitrumone";
 import { BASEMAINNET_CONFIG } from "./addresses/basemainnet";
 import { ETHEREUM_CONFIG } from "./addresses/ethereum";
 
-// Per-chain monitored market: token + DEX pool to read its price + deviation threshold.
 export interface MonitoredMarket {
   symbol: string;
   token: string;
@@ -14,9 +12,6 @@ export interface MonitoredMarket {
   deviationPercent: number;
 }
 
-// Per-chain configuration shape. Each chain bundles its ACM, governance accounts,
-// IL Comptroller, and the EBrake/DeviationSentinel stack addresses (placeholders
-// until contracts are deployed on the remote chain).
 export interface ChainConfig {
   name: string;
   dstChainId: number;
@@ -35,10 +30,16 @@ export interface ChainConfig {
   monitoredMarkets: MonitoredMarket[];
 }
 
+export const governanceAccounts = (cfg: ChainConfig): string[] => [
+  cfg.guardian,
+  cfg.normalTimelock,
+  cfg.fastTrackTimelock,
+  cfg.criticalTimelock,
+];
+
 const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, BASEMAINNET_CONFIG];
 
-// DeviationSentinel access-controlled functions (3 total — setTokenConfig uses
-// the struct-tuple form (uint8,bool) verbatim, matching DeviationSentinel.sol).
+// setTokenConfig uses the struct-tuple form (uint8,bool), matching DeviationSentinel.sol.
 export const SENTINEL_ADMIN_PERMS = [
   "setTrustedKeeper(address,bool)",
   "setTokenConfig(address,(uint8,bool))",
@@ -94,19 +95,23 @@ export const DIAMOND_ONLY_EBRAKE_PERMS = [
   "decreaseCF(address,uint96,uint256)",
 ];
 
-const grant = (acm: string, contract: string, sig: string, account: string, dstChainId: number) => ({
+export const grant = (acm: string, contract: string, sig: string, account: string, dstChainId: number) => ({
   target: acm,
   signature: "giveCallPermission(address,string,address)",
   params: [contract, sig, account],
   dstChainId,
 });
 
-const buildChainCommands = (cfg: ChainConfig) => {
+// VIP-666 (Sub-A): bootstrap + permissions. Kept under each chain's block gas
+// limit by deferring governance EBrake action grants and market wiring to VIP-667.
+// Per-chain command count: 60 (acceptOwnership 4 + admin grants 24 + ebrake→comptroller 4
+// + reset 12 + sentinel→ebrake 3 + multisig ebrake action 8 + trusted keepers 5).
+const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
   const { acm, dstChainId } = cfg;
-  const governanceAccounts = [cfg.guardian, cfg.normalTimelock, cfg.fastTrackTimelock, cfg.criticalTimelock];
-  const trustedKeeperAccounts = [cfg.keeper, ...governanceAccounts];
+  const govAccounts = governanceAccounts(cfg);
+  const trustedKeeperAccounts = [cfg.keeper, ...govAccounts];
 
-  const commands: Command[] = [
+  return [
     // 1. Accept ownership of the four newly deployed contracts. The deployer
     //    transfers ownership to the local Normal Timelock prior to this VIP.
     ...[cfg.deviationSentinel, cfg.sentinelOracle, cfg.uniswapOracle, cfg.eBrake].map(target => ({
@@ -117,17 +122,17 @@ const buildChainCommands = (cfg: ChainConfig) => {
     })),
 
     // 2. Grant Guardian + governance Timelocks admin permissions on DeviationSentinel
-    ...governanceAccounts.flatMap(account =>
+    ...govAccounts.flatMap(account =>
       SENTINEL_ADMIN_PERMS.map(sig => grant(acm, cfg.deviationSentinel, sig, account, dstChainId)),
     ),
 
     // 3. Grant Guardian + governance Timelocks admin permissions on SentinelOracle
-    ...governanceAccounts.flatMap(account =>
+    ...govAccounts.flatMap(account =>
       SENTINEL_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.sentinelOracle, sig, account, dstChainId)),
     ),
 
     // 4. Grant Guardian + governance Timelocks admin permission on UniswapOracle
-    ...governanceAccounts.flatMap(account =>
+    ...govAccounts.flatMap(account =>
       UNISWAP_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.uniswapOracle, sig, account, dstChainId)),
     ),
 
@@ -135,15 +140,15 @@ const buildChainCommands = (cfg: ChainConfig) => {
     ...EBRAKE_COMPTROLLER_PERMS_IL.map(sig => grant(acm, cfg.comptroller, sig, cfg.eBrake, dstChainId)),
 
     // 6. Grant Guardian + governance Timelocks granular snapshot-reset perms on EBrake
-    ...governanceAccounts.flatMap(account => RESET_PERMS.map(sig => grant(acm, cfg.eBrake, sig, account, dstChainId))),
+    ...govAccounts.flatMap(account => RESET_PERMS.map(sig => grant(acm, cfg.eBrake, sig, account, dstChainId))),
 
     // 7. Grant DeviationSentinel the three EBrake actions handleDeviation invokes
     ...SENTINEL_EBRAKE_PERMS.map(sig => grant(acm, cfg.eBrake, sig, cfg.deviationSentinel, dstChainId)),
 
-    // 8. Grant Guardian + governance Timelocks the IL-supported EBrake action functions
-    ...governanceAccounts.flatMap(account =>
-      GOVERNANCE_EBRAKE_PERMS_IL.map(sig => grant(acm, cfg.eBrake, sig, account, dstChainId)),
-    ),
+    // 8. Grant the per-chain 1-of-1 Multisig Pauser the IL-supported EBrake action
+    //    functions, so the Venus team can manually trigger emergency actions during
+    //    the early operational phase (mirror of VIP-610 step 7).
+    ...GOVERNANCE_EBRAKE_PERMS_IL.map(sig => grant(acm, cfg.eBrake, sig, cfg.multisigPauser, dstChainId)),
 
     // 9. Whitelist Keeper + Guardian + governance Timelocks as trusted keepers on
     //    DeviationSentinel so VIPs (and the off-chain keeper) can invoke handleDeviation.
@@ -153,51 +158,22 @@ const buildChainCommands = (cfg: ChainConfig) => {
       params: [account, true],
       dstChainId,
     })),
-
-    // 10. Grant the per-chain 1-of-1 Multisig Pauser the same IL-supported EBrake
-    //     action functions, so the Venus team can manually trigger emergency
-    //     actions during the early operational phase (mirror of VIP-610 step 7).
-    ...GOVERNANCE_EBRAKE_PERMS_IL.map(sig => grant(acm, cfg.eBrake, sig, cfg.multisigPauser, dstChainId)),
   ];
-
-  // 11. Per-market wiring. For each eligible market, configure the DEX pool on the
-  //     UniswapOracle, point the SentinelOracle at the UniswapOracle for that token,
-  //     then enable deviation monitoring on the DeviationSentinel. Markets with a
-  //     ZERO_ADDRESS token or pool are skipped (placeholder safety).
-  for (const market of cfg.monitoredMarkets) {
-    if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
-    commands.push(
-      {
-        target: cfg.uniswapOracle,
-        signature: "setPoolConfig(address,address)",
-        params: [market.token, market.pool],
-        dstChainId,
-      },
-      {
-        target: cfg.sentinelOracle,
-        signature: "setTokenOracleConfig(address,address)",
-        params: [market.token, cfg.uniswapOracle],
-        dstChainId,
-      },
-      {
-        target: cfg.deviationSentinel,
-        signature: "setTokenConfig(address,(uint8,bool))",
-        params: [market.token, [market.deviationPercent, true]],
-        dstChainId,
-      },
-    );
-  }
-
-  return commands;
 };
 
 export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-666 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2",
+    title:
+      "VIP-666 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2 — Bootstrap & Permissions (1/2)",
     description: `#### Description
 
-This VIP configures the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
+This is the first of two VIPs that configure the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
+
+The configuration is split across two VIPs so each per-chain payload fits under the destination chain's block gas limit:
+
+- **VIP-666 (this VIP)** — accept ownership, grant admin/reset/sentinel→ebrake/ebrake→comptroller/multisig permissions, whitelist trusted keepers
+- **VIP-667 (follow-up)** — grant Guardian + Timelocks the IL-supported EBrake action permissions, then wire each monitored market on UniswapOracle, SentinelOracle, and DeviationSentinel
 
 Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comptroller, not the BSC Diamond), only the IL-supported subset of EBrake action functions is granted. Diamond-only functions (\`pauseFlashLoan\`, \`disablePoolBorrow\`, \`revokeFlashLoanAccess\`, \`decreaseCF(address,uint96,uint256)\`) are omitted as they revert on IL comptrollers.
 
@@ -209,25 +185,24 @@ If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
 - Grant admin permissions on DeviationSentinel, SentinelOracle, and UniswapOracle to Guardian + 3 Timelocks
 - Grant **EBrakeV2** the 4 IL-supported Comptroller permissions it needs to execute emergency actions
 - Authorize **DeviationSentinel** to call \`pauseBorrow\`, \`pauseSupply\`, and \`decreaseCF\` on EBrake
-- Grant **Guardian** and governance **Timelocks** the 8 IL-supported EBrake action functions and granular snapshot-reset permissions
+- Grant **Guardian** and governance **Timelocks** the granular snapshot-reset permissions on EBrake
 - Grant the **per-chain 1-of-1 Multisig Pauser** the 8 IL-supported EBrake action functions for manual emergency pausing (Phase 0)
 - Whitelist Keeper + Guardian + 3 Timelocks as trusted keepers on DeviationSentinel
-- Configure deviation monitoring (10% threshold) for the eligible Core Pool markets on each chain — 10 on Ethereum, 5 on Arbitrum One, 4 on Base
 
-**Permission event summary**: 249 PermissionGranted (83 per chain × 3 chains), 0 PermissionRevoked
+**Permission event summary**: 153 PermissionGranted (51 per chain × 3 chains), 0 PermissionRevoked
 
 #### References
 
 - [VIP-590 (BSC)](https://app.venus.io/governance/proposal/590)
 - [VIP-610 (BSC)](https://app.venus.io/governance/proposal/610)
 - [Original Proposal: Emergency Brake — Price Deviation Safeguard Mechanism](https://community.venus.io/t/proposal-emergency-brake-price-deviation-safeguard-mechanism/5668)
-- [GitHub PR](https://github.com/VenusProtocol/vips/pull/TODO)`,
+- [GitHub PR](https://github.com/VenusProtocol/vips/pull/702)`,
     forDescription: "Execute this proposal",
     againstDescription: "Do not execute this proposal",
     abstainDescription: "Indifferent to execution",
   };
 
-  return makeProposal(NETWORKS.flatMap(buildChainCommands), meta, ProposalType.REGULAR);
+  return makeProposal(NETWORKS.flatMap(buildChainCommandsA), meta, ProposalType.REGULAR);
 };
 
 export default vip666;

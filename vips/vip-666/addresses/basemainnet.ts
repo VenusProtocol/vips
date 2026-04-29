@@ -21,9 +21,8 @@ export const BASEMAINNET_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
 export const BASEMAINNET_DST_CHAIN_ID = LzChainId.basemainnet;
 
-// Eligible Core Pool markets — Aerodrome Slipstream + Uniswap V3 Base sources,
-// unified 10% threshold. Aerodrome Slipstream is a Uniswap V3 fork; pools are
-// V3-compatible and readable through UniswapOracle.sol's IUniswapV3Pool interface.
+// Eligible Core Pool markets — Uniswap V3 Base sources only, unified 10% threshold.
+// cbBTC and wstETH are excluded — see commented entries below for rationale.
 export const BASEMAINNET_MONITORED_MARKETS = [
   {
     symbol: "WETH",
@@ -37,18 +36,27 @@ export const BASEMAINNET_MONITORED_MARKETS = [
     pool: "0x6c561b446416e1a00e8e93e221854d6ea4171372", // USDC/WETH Uniswap V3 Base
     deviationPercent: 10,
   },
-  {
-    symbol: "cbBTC",
-    token: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
-    pool: "0x4e962bb3889bf030368f56810a9c96b83cb3e778", // cbBTC/USDC Aerodrome Slipstream
-    deviationPercent: 10,
-  },
-  {
-    symbol: "wstETH",
-    token: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
-    pool: "0x861a2922be165a5bd41b1e482b49216b465e1b5f", // wstETH/WETH Aerodrome Slipstream
-    deviationPercent: 10,
-  },
+  // cbBTC and wstETH are intentionally NOT wired in this VIP. The only liquid pools
+  // for these tokens on Base are Aerodrome Slipstream (cbBTC/USDC `0x4e96…e778`,
+  // wstETH/WETH `0x861a…1b5f`). Aerodrome Slipstream's `slot0()` returns a 6-tuple
+  // (no `feeProtocol`), but Venus' UniswapOracle uses the Uniswap V3 7-tuple
+  // `IUniswapV3Pool.slot0()` ABI — the Solidity decoder reverts when reading past
+  // the end of the Slipstream return data. handleDeviation would silently fail for
+  // these markets in production. Re-include in a follow-up VIP once either:
+  //   (a) a Slipstream-compatible oracle adapter is deployed in venus-periphery, or
+  //   (b) the market team selects a Uniswap V3 Base pool with adequate liquidity.
+  // {
+  //   symbol: "cbBTC",
+  //   token: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+  //   pool: "0x4e962bb3889bf030368f56810a9c96b83cb3e778",
+  //   deviationPercent: 10,
+  // },
+  // {
+  //   symbol: "wstETH",
+  //   token: "0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452",
+  //   pool: "0x861a2922be165a5bd41b1e482b49216b465e1b5f",
+  //   deviationPercent: 10,
+  // },
 ];
 
 export const BASEMAINNET_CONFIG = {

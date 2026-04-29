@@ -21,10 +21,9 @@ export const ETHEREUM_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
 export const ETHEREUM_DST_CHAIN_ID = LzChainId.ethereum;
 
-// Eligible Core Pool markets — Uniswap V3 + Curve sources, unified 10% threshold.
-// crvUSD and EIGEN are intentionally excluded (per market spec). eBTC source is
-// Curve; UniswapOracle.sol cannot read Curve pools, so price reads will fail at
-// handleDeviation time until a CurveOracle is deployed and wired separately.
+// Eligible Core Pool markets — Uniswap V3 sources, unified 10% threshold.
+// crvUSD and EIGEN are intentionally excluded per market spec.
+// eBTC is also excluded — see commented entry at the bottom of the array for rationale.
 export const ETHEREUM_MONITORED_MARKETS = [
   {
     symbol: "WETH",
@@ -62,12 +61,19 @@ export const ETHEREUM_MONITORED_MARKETS = [
     pool: "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a", // USDe/USDC Uniswap V3
     deviationPercent: 10,
   },
-  {
-    symbol: "eBTC",
-    token: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
-    pool: "0x7704d01908afd31bf647d969c295bb45230cd2d6", // eBTC/WBTC Curve — needs CurveOracle
-    deviationPercent: 10,
-  },
+  // eBTC is intentionally NOT wired in this VIP. The only liquid eBTC pool on Ethereum
+  // (0x7704…2d6) is a Curve StableSwap NG pool (Vyper), not a Uniswap V3 pool.
+  // UniswapOracle reads token0()/token1(), which revert on the Curve contract, so
+  // handleDeviation would always revert for eBTC and the keeper could never trigger
+  // monitoring for this market. Re-include in a follow-up VIP once either:
+  //   (a) a CurveOracle is deployed and wired into SentinelOracle for eBTC, or
+  //   (b) market team selects a V3-compatible eBTC pool to monitor instead.
+  // {
+  //   symbol: "eBTC",
+  //   token: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
+  //   pool: "0x7704d01908afd31bf647d969c295bb45230cd2d6",
+  //   deviationPercent: 10,
+  // },
   {
     symbol: "DAI",
     token: "0x6B175474E89094C44Da98b954EedeAC495271d0F",

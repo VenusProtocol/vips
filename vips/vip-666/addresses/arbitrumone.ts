@@ -1,4 +1,4 @@
-import { NETWORK_ADDRESSES, ZERO_ADDRESS } from "src/networkAddresses";
+import { NETWORK_ADDRESSES } from "src/networkAddresses";
 import { LzChainId } from "src/types";
 
 const { arbitrumone } = NETWORK_ADDRESSES;
@@ -22,9 +22,7 @@ export const ARBITRUMONE_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 export const ARBITRUMONE_DST_CHAIN_ID = LzChainId.arbitrumone;
 
 // Eligible Core Pool markets — Uniswap V3 (Arbitrum) sources, unified 10% threshold.
-// USD₮0 (Tether's bridged T-zero USDT) and the legacy USDT pool share the same
-// USDC/USDT pool address per market spec. USD₮0 token address is left as a TODO
-// placeholder — confirm and fill before proposing.
+// USDC and USD₮0 share the same Uniswap V3 pool (USDC/USD₮0 pair).
 export const ARBITRUMONE_MONITORED_MARKETS = [
   {
     symbol: "WETH",
@@ -46,7 +44,7 @@ export const ARBITRUMONE_MONITORED_MARKETS = [
   },
   {
     symbol: "USD₮0",
-    token: ZERO_ADDRESS, // TODO: confirm USD₮0 token address on Arbitrum One
+    token: "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
     pool: "0xbe3ad6a5669dc0b8b12febc03608860c31e2eef6", // USD₮0/USDC Uniswap V3
     deviationPercent: 10,
   },

@@ -16,6 +16,7 @@ import vip666, {
   SENTINEL_EBRAKE_PERMS,
   SENTINEL_ORACLE_ADMIN_PERMS,
   UNISWAP_ORACLE_ADMIN_PERMS,
+  governanceAccounts,
 } from "../../vips/vip-666/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "./abi/AccessControlManager.json";
 import DEVIATION_SENTINEL_ABI from "./abi/DeviationSentinel.json";
@@ -23,13 +24,10 @@ import EBRAKE_ABI from "./abi/EBrake.json";
 import SENTINEL_ORACLE_ABI from "./abi/SentinelOracle.json";
 import UNISWAP_ORACLE_ABI from "./abi/UniswapOracle.json";
 
-// Total RoleGranted events per chain (token wiring uses direct setter calls,
-// not ACM grants, so it doesn't affect this count):
-//   3 (sentinel admin) × 4 + 2 (sentinel oracle admin) × 4 + 1 (uniswap oracle admin) × 4
-//   + 4 (ebrake → comptroller) + 3 (reset) × 4 + 3 (sentinel → ebrake)
-//   + 8 (governance ebrake action) × 4 + 8 (multisig ebrake action)
-//   = 12 + 8 + 4 + 4 + 12 + 3 + 32 + 8 = 83
-const PERMS_GRANTED_PER_CHAIN = 83;
+// RoleGranted events emitted by VIP-666 (Sub-A) per chain.
+// Sum of: admin grants (12+8+4) + ebrake→comptroller (4) + reset (12) + sentinel→ebrake (3)
+// + multisig ebrake action (8) = 51. See buildChainCommandsA in vips/vip-666/bscmainnet.ts.
+const PERMS_GRANTED_PER_CHAIN = 51;
 
 const collectMissingPlaceholders = (cfg: ChainConfig): string[] => {
   const missing: string[] = [];
@@ -66,11 +64,10 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
   let impersonatedDeviationSentinel: SignerWithAddress;
   let impersonatedSentinelOracle: SignerWithAddress;
   let impersonatedUniswapOracle: SignerWithAddress;
-  let impersonatedEBrake: SignerWithAddress;
   let impersonatedComptroller: SignerWithAddress;
 
-  const governanceAccounts = [cfg.guardian, cfg.normalTimelock, cfg.fastTrackTimelock, cfg.criticalTimelock];
-  const trustedKeeperAccounts = [cfg.keeper, ...governanceAccounts];
+  const govAccounts = governanceAccounts(cfg);
+  const trustedKeeperAccounts = [cfg.keeper, ...govAccounts];
 
   before(async () => {
     acm = await ethers.getContractAt(ACCESS_CONTROL_MANAGER_ABI, cfg.acm);
@@ -82,7 +79,6 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     impersonatedDeviationSentinel = await initMainnetUser(cfg.deviationSentinel, ethers.utils.parseEther("1"));
     impersonatedSentinelOracle = await initMainnetUser(cfg.sentinelOracle, ethers.utils.parseEther("1"));
     impersonatedUniswapOracle = await initMainnetUser(cfg.uniswapOracle, ethers.utils.parseEther("1"));
-    impersonatedEBrake = await initMainnetUser(cfg.eBrake, ethers.utils.parseEther("1"));
     impersonatedComptroller = await initMainnetUser(cfg.comptroller, ethers.utils.parseEther("1"));
   });
 
@@ -115,7 +111,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have no admin permissions on DeviationSentinel yet", async () => {
       const a = acm.connect(impersonatedDeviationSentinel);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of SENTINEL_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
         }
@@ -124,7 +120,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have no admin permissions on SentinelOracle yet", async () => {
       const a = acm.connect(impersonatedSentinelOracle);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of SENTINEL_ORACLE_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
         }
@@ -133,7 +129,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have no admin permissions on UniswapOracle yet", async () => {
       const a = acm.connect(impersonatedUniswapOracle);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of UNISWAP_ORACLE_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
         }
@@ -148,26 +144,16 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     });
 
     it("Guardian + Timelocks have no reset permissions on EBrake yet", async () => {
-      const a = acm.connect(impersonatedEBrake);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of RESET_PERMS) {
-          expect(await a.isAllowedToCall(account, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
         }
       }
     });
 
     it("DeviationSentinel has no action permissions on EBrake yet", async () => {
-      const a = acm.connect(impersonatedEBrake);
       for (const sig of SENTINEL_EBRAKE_PERMS) {
-        expect(await a.isAllowedToCall(cfg.deviationSentinel, sig)).to.equal(false, `unexpected ${sig}`);
-      }
-    });
-
-    it("Guardian + Timelocks have no EBrake action permissions yet", async () => {
-      for (const account of governanceAccounts) {
-        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
-        }
+        expect(await acm.hasPermission(cfg.deviationSentinel, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig}`);
       }
     });
 
@@ -182,40 +168,16 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
         expect(await deviationSentinel.trustedKeepers(account)).to.equal(false);
       }
     });
-
-    for (const market of cfg.monitoredMarkets) {
-      if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
-      it(`${market.symbol} has no pool configured on UniswapOracle yet`, async () => {
-        expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
-      });
-
-      it(`${market.symbol} has no oracle configured on SentinelOracle yet`, async () => {
-        const tc = await sentinelOracle.tokenConfigs(market.token);
-        expect(tc.oracle ?? tc).to.equal(ZERO_ADDRESS);
-      });
-
-      it(`${market.symbol} has no deviation config on DeviationSentinel yet`, async () => {
-        const tc = await deviationSentinel.tokenConfigs(market.token);
-        expect(tc.deviation).to.equal(0);
-        expect(tc.enabled).to.equal(false);
-      });
-    }
   });
 
-  const effectiveMarkets = cfg.monitoredMarkets.filter(m => m.token !== ZERO_ADDRESS && m.pool !== ZERO_ADDRESS);
-
-  testForkedNetworkVipCommands(`VIP-666 [${cfg.name}] Configure DeviationSentinel + EBrakeV2`, await vip666(), {
+  testForkedNetworkVipCommands(`VIP-666 [${cfg.name}] Bootstrap & Permissions`, await vip666(), {
     callbackAfterExecution: async txResponse => {
       // 4 acceptOwnership() calls per chain
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["OwnershipTransferred"], [4]);
       // 5 trusted keepers whitelisted per chain
       await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TrustedKeeperUpdated"], [5]);
-      // 83 RoleGranted events per chain (token wiring uses direct setter calls, not ACM grants)
+      // 51 RoleGranted events per chain (Sub-A only — governance EBrake actions deferred to VIP-667)
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [PERMS_GRANTED_PER_CHAIN]);
-      // 1 wiring event per market on each of UniswapOracle, SentinelOracle, DeviationSentinel
-      await expectEvents(txResponse, [UNISWAP_ORACLE_ABI], ["PoolConfigUpdated"], [effectiveMarkets.length]);
-      await expectEvents(txResponse, [SENTINEL_ORACLE_ABI], ["TokenOracleConfigUpdated"], [effectiveMarkets.length]);
-      await expectEvents(txResponse, [DEVIATION_SENTINEL_ABI], ["TokenConfigUpdated"], [effectiveMarkets.length]);
     },
   });
 
@@ -236,7 +198,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have all admin permissions on DeviationSentinel", async () => {
       const a = acm.connect(impersonatedDeviationSentinel);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of SENTINEL_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(true, `missing ${sig} for ${account}`);
         }
@@ -245,7 +207,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have all admin permissions on SentinelOracle", async () => {
       const a = acm.connect(impersonatedSentinelOracle);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of SENTINEL_ORACLE_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(true, `missing ${sig} for ${account}`);
         }
@@ -254,7 +216,7 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
 
     it("Guardian + Timelocks have setPoolConfig permission on UniswapOracle", async () => {
       const a = acm.connect(impersonatedUniswapOracle);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of UNISWAP_ORACLE_ADMIN_PERMS) {
           expect(await a.isAllowedToCall(account, sig)).to.equal(true, `missing ${sig} for ${account}`);
         }
@@ -269,42 +231,29 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     });
 
     it("Guardian + Timelocks have all reset permissions on EBrake", async () => {
-      const a = acm.connect(impersonatedEBrake);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of RESET_PERMS) {
-          expect(await a.isAllowedToCall(account, sig)).to.equal(true, `missing ${sig} for ${account}`);
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(true, `missing ${sig} for ${account}`);
         }
       }
     });
 
     it("DeviationSentinel has the three handleDeviation permissions on EBrake", async () => {
-      const a = acm.connect(impersonatedEBrake);
       for (const sig of SENTINEL_EBRAKE_PERMS) {
-        expect(await a.isAllowedToCall(cfg.deviationSentinel, sig)).to.equal(true, `missing ${sig}`);
-      }
-    });
-
-    it("Guardian + Timelocks have all 8 IL-supported EBrake action permissions", async () => {
-      const a = acm.connect(impersonatedEBrake);
-      for (const account of governanceAccounts) {
-        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-          expect(await a.isAllowedToCall(account, sig)).to.equal(true, `missing ${sig} for ${account}`);
-        }
+        expect(await acm.hasPermission(cfg.deviationSentinel, cfg.eBrake, sig)).to.equal(true, `missing ${sig}`);
       }
     });
 
     it("Multisig Pauser has all 8 IL-supported EBrake action permissions", async () => {
-      const a = acm.connect(impersonatedEBrake);
       for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-        expect(await a.isAllowedToCall(cfg.multisigPauser, sig)).to.equal(true, `missing ${sig}`);
+        expect(await acm.hasPermission(cfg.multisigPauser, cfg.eBrake, sig)).to.equal(true, `missing ${sig}`);
       }
     });
 
     it("Diamond-only EBrake permissions are intentionally NOT granted", async () => {
-      const a = acm.connect(impersonatedEBrake);
-      for (const account of governanceAccounts) {
+      for (const account of govAccounts) {
         for (const sig of DIAMOND_ONLY_EBRAKE_PERMS) {
-          expect(await a.isAllowedToCall(account, sig)).to.equal(
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(
             false,
             `Diamond-only ${sig} unexpectedly granted to ${account}`,
           );
@@ -318,54 +267,29 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
       }
     });
 
+    // Sub-A intentionally does NOT grant governance EBrake action perms or wire markets
+    // — those land in VIP-667. Assert the deferred state explicitly so a regression is loud.
+    it("Guardian + Timelocks still have no EBrake-specific action permissions (deferred to VIP-667)", async () => {
+      for (const account of govAccounts) {
+        for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(
+            false,
+            `unexpected ${sig} for ${account} — should be granted by VIP-667`,
+          );
+        }
+      }
+    });
+
     for (const market of cfg.monitoredMarkets) {
       if (market.token === ZERO_ADDRESS || market.pool === ZERO_ADDRESS) continue;
-      it(`${market.symbol} pool is configured on UniswapOracle`, async () => {
-        expect(await uniswapOracle.tokenPools(market.token)).to.equal(market.pool);
-      });
-
-      it(`${market.symbol} oracle is configured on SentinelOracle`, async () => {
-        const tc = await sentinelOracle.tokenConfigs(market.token);
-        expect(tc.oracle ?? tc).to.equal(cfg.uniswapOracle);
-      });
-
-      it(`${market.symbol} deviation threshold is configured on DeviationSentinel`, async () => {
-        const tc = await deviationSentinel.tokenConfigs(market.token);
-        expect(tc.deviation).to.equal(market.deviationPercent);
-        expect(tc.enabled).to.equal(true);
+      it(`${market.symbol} is still not wired (deferred to VIP-667)`, async () => {
+        expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        const tcSentinel = await sentinelOracle.tokenConfigs(market.token);
+        expect(tcSentinel.oracle ?? tcSentinel).to.equal(ZERO_ADDRESS);
+        const tcDev = await deviationSentinel.tokenConfigs(market.token);
+        expect(tcDev.deviation).to.equal(0);
+        expect(tcDev.enabled).to.equal(false);
       });
     }
-  });
-
-  describe(`VIP-666 [${cfg.name}] — Functional sanity checks`, () => {
-    let randomEoa: SignerWithAddress;
-    let normalTimelockSigner: SignerWithAddress;
-
-    before(async () => {
-      [randomEoa] = await ethers.getSigners();
-      normalTimelockSigner = await initMainnetUser(cfg.normalTimelock, ethers.utils.parseEther("10"));
-    });
-
-    it("Random EOA cannot call DeviationSentinel.setTrustedKeeper (no ACM perm)", async () => {
-      await expect(deviationSentinel.connect(randomEoa).setTrustedKeeper(randomEoa.address, true)).to.be.reverted;
-    });
-
-    it("Normal Timelock can call DeviationSentinel.setTrustedKeeper (perm granted by VIP)", async () => {
-      const probe = ethers.Wallet.createRandom().address;
-      await expect(deviationSentinel.connect(normalTimelockSigner).setTrustedKeeper(probe, true))
-        .to.emit(deviationSentinel, "TrustedKeeperUpdated")
-        .withArgs(probe, true);
-      expect(await deviationSentinel.trustedKeepers(probe)).to.equal(true);
-    });
-
-    it("Random EOA cannot call EBrake.pauseBorrow (no ACM perm)", async () => {
-      const market = ethers.Wallet.createRandom().address;
-      await expect(eBrake.connect(randomEoa).pauseBorrow(market)).to.be.reverted;
-    });
-
-    it("DeviationSentinel.handleDeviation reverts UnauthorizedKeeper for a non-keeper EOA", async () => {
-      const market = ethers.Wallet.createRandom().address;
-      await expect(deviationSentinel.connect(randomEoa).handleDeviation(market)).to.be.reverted;
-    });
   });
 };
