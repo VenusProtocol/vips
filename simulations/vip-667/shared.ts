@@ -5,9 +5,16 @@ import { ZERO_ADDRESS } from "src/networkAddresses";
 import { expectEvents, getForkedNetworkAddress, setMaxStalePeriodInChainlinkOracle } from "src/utils";
 import { testForkedNetworkVipCommands } from "src/vip-framework";
 
-import vip666, { ChainConfig, GOVERNANCE_EBRAKE_PERMS_IL, governanceAccounts } from "../../vips/vip-666/bscmainnet";
+import vip666, {
+  ChainConfig,
+  GOVERNANCE_EBRAKE_PERMS_IL,
+  MonitoredMarket,
+  governanceAccounts,
+} from "../../vips/vip-666/bscmainnet";
 import vip667 from "../../vips/vip-667/bscmainnet";
 import ACCESS_CONTROL_MANAGER_ABI from "../vip-666/abi/AccessControlManager.json";
+import AERODROME_ORACLE_ABI from "../vip-666/abi/AerodromeSlipstreamOracle.json";
+import CURVE_ORACLE_ABI from "../vip-666/abi/CurveOracle.json";
 import DEVIATION_SENTINEL_ABI from "../vip-666/abi/DeviationSentinel.json";
 import IL_COMPTROLLER_ABI from "../vip-666/abi/ILComptroller.json";
 import RESILIENT_ORACLE_ABI from "../vip-666/abi/ResilientOracle.json";
@@ -19,12 +26,31 @@ import VTOKEN_ABI from "../vip-666/abi/VToken.json";
 //   8 (governance ebrake action) × 4 = 32 (token wiring uses direct setter calls)
 const PERMS_GRANTED_PER_CHAIN = 32;
 
+// Resolve the DEX-oracle address used to price a market based on its oracleType.
+// Mirrors `resolveDexOracle` in the VIP itself — kept inline (not imported) because
+// the VIP module throws on misconfig and the simulation's expressed intent is checking
+// post-state, not duplicating proposal-build validation.
+const dexOracleFor = (cfg: ChainConfig, market: MonitoredMarket): string => {
+  switch (market.oracleType ?? "uniswap") {
+    case "uniswap":
+      return cfg.uniswapOracle;
+    case "curve":
+      return cfg.curveOracle as string;
+    case "aerodrome":
+      return cfg.aerodromeOracle as string;
+  }
+};
+
+const countMarketsByOracle = (markets: MonitoredMarket[], type: MonitoredMarket["oracleType"]) =>
+  markets.filter(m => (m.oracleType ?? "uniswap") === (type ?? "uniswap")).length;
+
 // Tokens whose `DeviationSentinel.checkPriceDeviation` end-to-end check is fragile at
 // fork time only — typically wrapped/correlated oracles whose inner feeds expose
 // staleness windows we can't override from the simulation side. Production behaviour
 // is unaffected (verified at live timestamps).
 //   - LBTC: main oracle is OneJumpOracle (RedStone LBTC/BTC ratio + Chainlink BTC/USD).
-const SKIP_CHECK_PRICE_DEVIATION = new Set<string>(["LBTC"]);
+//   - eBTC: same OneJumpOracle pattern (eBTC/BTC ratio + BTC/USD), so matches LBTC's profile.
+const SKIP_CHECK_PRICE_DEVIATION = new Set<string>(["LBTC", "eBTC"]);
 
 const collectMissingPlaceholders = (cfg: ChainConfig): string[] => {
   const missing: string[] = [];
@@ -99,6 +125,8 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
   let deviationSentinel: Contract;
   let sentinelOracle: Contract;
   let uniswapOracle: Contract;
+  let curveOracle: Contract | undefined;
+  let aerodromeOracle: Contract | undefined;
   let resilientOracle: Contract;
   // underlying address (lowercased) → vToken address — built by walking IL Comptroller markets.
   let vTokenByUnderlying: Map<string, string>;
@@ -110,6 +138,8 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     deviationSentinel = await ethers.getContractAt(DEVIATION_SENTINEL_ABI, cfg.deviationSentinel);
     sentinelOracle = await ethers.getContractAt(SENTINEL_ORACLE_ABI, cfg.sentinelOracle);
     uniswapOracle = await ethers.getContractAt(UNISWAP_ORACLE_ABI, cfg.uniswapOracle);
+    if (cfg.curveOracle) curveOracle = await ethers.getContractAt(CURVE_ORACLE_ABI, cfg.curveOracle);
+    if (cfg.aerodromeOracle) aerodromeOracle = await ethers.getContractAt(AERODROME_ORACLE_ABI, cfg.aerodromeOracle);
     resilientOracle = await ethers.getContractAt(RESILIENT_ORACLE_ABI, getForkedNetworkAddress("RESILIENT_ORACLE"));
 
     await bumpAdapterStaleness(cfg);
@@ -156,7 +186,19 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
 
     for (const market of cfg.monitoredMarkets) {
       it(`${market.symbol} is not wired yet`, async () => {
-        expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        // Pre-VIP, the appropriate DEX oracle has no pool entry for this token.
+        // Each oracle uses a different storage shape for its pool config:
+        //   - UniswapOracle / AerodromeSlipstreamOracle: tokenPools(token) -> address
+        //   - CurveOracle: poolConfigs(token) -> { pool, coinIndex, referenceToken }
+        const oracleType = market.oracleType ?? "uniswap";
+        if (oracleType === "curve") {
+          const cfgEntry = await curveOracle!.poolConfigs(market.token);
+          expect(cfgEntry.pool).to.equal(ZERO_ADDRESS);
+        } else if (oracleType === "aerodrome") {
+          expect(await aerodromeOracle!.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        } else {
+          expect(await uniswapOracle.tokenPools(market.token)).to.equal(ZERO_ADDRESS);
+        }
         const tcSentinel = await sentinelOracle.tokenConfigs(market.token);
         expect(tcSentinel.oracle ?? tcSentinel).to.equal(ZERO_ADDRESS);
         const tcDev = await deviationSentinel.tokenConfigs(market.token);
@@ -170,8 +212,17 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     callbackAfterExecution: async txResponse => {
       // 32 RoleGranted events per chain (governance EBrake action perms)
       await expectEvents(txResponse, [ACCESS_CONTROL_MANAGER_ABI], ["RoleGranted"], [PERMS_GRANTED_PER_CHAIN]);
-      // 1 wiring event per market on each of UniswapOracle, SentinelOracle, DeviationSentinel
-      await expectEvents(txResponse, [UNISWAP_ORACLE_ABI], ["PoolConfigUpdated"], [cfg.monitoredMarkets.length]);
+      // PoolConfigUpdated counts. UniswapOracle and AerodromeSlipstreamOracle emit the
+      // identical 2-arg `PoolConfigUpdated(address,address)` event (same topic hash),
+      // so a UniswapOracle-ABI filter decodes both — assert against the combined count.
+      // CurveOracle emits its own 4-arg variant (distinct topic), checked separately.
+      const uniswapMarkets = countMarketsByOracle(cfg.monitoredMarkets, "uniswap");
+      const curveMarkets = countMarketsByOracle(cfg.monitoredMarkets, "curve");
+      const aerodromeMarkets = countMarketsByOracle(cfg.monitoredMarkets, "aerodrome");
+      await expectEvents(txResponse, [UNISWAP_ORACLE_ABI], ["PoolConfigUpdated"], [uniswapMarkets + aerodromeMarkets]);
+      if (cfg.curveOracle && curveMarkets > 0) {
+        await expectEvents(txResponse, [CURVE_ORACLE_ABI], ["PoolConfigUpdated"], [curveMarkets]);
+      }
       await expectEvents(
         txResponse,
         [SENTINEL_ORACLE_ABI],
@@ -192,15 +243,30 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
     });
 
     for (const market of cfg.monitoredMarkets) {
-      it(`${market.symbol} pool is configured on UniswapOracle`, async () => {
-        const actual = await uniswapOracle.tokenPools(market.token);
-        expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
+      const expectedDexOracle = dexOracleFor(cfg, market);
+
+      it(`${market.symbol} pool is configured on the routed DEX oracle`, async () => {
+        const oracleType = market.oracleType ?? "uniswap";
+        if (oracleType === "curve") {
+          const cfgEntry = await curveOracle!.poolConfigs(market.token);
+          expect(ethers.utils.getAddress(cfgEntry.pool)).to.equal(ethers.utils.getAddress(market.pool));
+          expect(cfgEntry.coinIndex).to.equal(market.coinIndex);
+          expect(ethers.utils.getAddress(cfgEntry.referenceToken)).to.equal(
+            ethers.utils.getAddress(market.referenceToken as string),
+          );
+        } else if (oracleType === "aerodrome") {
+          const actual = await aerodromeOracle!.tokenPools(market.token);
+          expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
+        } else {
+          const actual = await uniswapOracle.tokenPools(market.token);
+          expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
+        }
       });
 
       it(`${market.symbol} oracle is configured on SentinelOracle`, async () => {
         const tc = await sentinelOracle.tokenConfigs(market.token);
         const actual = tc.oracle ?? tc;
-        expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(cfg.uniswapOracle));
+        expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(expectedDexOracle));
       });
 
       it(`${market.symbol} deviation threshold is configured on DeviationSentinel`, async () => {

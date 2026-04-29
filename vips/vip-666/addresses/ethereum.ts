@@ -16,14 +16,19 @@ export const ETHEREUM_DEVIATION_SENTINEL = "0x7D0EFA41eBF1aF242A37174E1E047bD6ea
 export const ETHEREUM_EBRAKE = "0xCD09042c5DFFed762998Df9a058ec5944e39949B";
 export const ETHEREUM_SENTINEL_ORACLE = "0x444C53E194B40c272fAd683210e2cB1c16Ab132e";
 export const ETHEREUM_UNISWAP_ORACLE = "0x873993F8f5f5Ddbae0952e939ab3005Af363Af00";
+// Deployed via venus-periphery PR #66 — prices Curve StableSwap-NG assets that
+// UniswapOracle can't read (eBTC/WBTC pool, etc.).
+export const ETHEREUM_CURVE_ORACLE = "0x64a811bd0E91cf00D9CE0769eDA028026577A6D9";
 export const ETHEREUM_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
 export const ETHEREUM_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
+// Reference token for eBTC's CurveOracle entry — see CurveOracle.sol for the pricing math.
+const WBTC = "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599";
+
 export const ETHEREUM_DST_CHAIN_ID = LzChainId.ethereum;
 
-// Eligible Core Pool markets — Uniswap V3 sources, unified 10% threshold.
-// crvUSD and EIGEN are intentionally excluded per market spec.
-// eBTC is also excluded — see commented entry at the bottom of the array for rationale.
+// Eligible Core Pool markets — Uniswap V3 sources except eBTC (CurveOracle).
+// Unified 10% threshold. crvUSD and EIGEN are intentionally excluded per market spec.
 export const ETHEREUM_MONITORED_MARKETS = [
   {
     symbol: "WETH",
@@ -61,19 +66,17 @@ export const ETHEREUM_MONITORED_MARKETS = [
     pool: "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a", // USDe/USDC Uniswap V3
     deviationPercent: 10,
   },
-  // eBTC is intentionally NOT wired in this VIP. The only liquid eBTC pool on Ethereum
-  // (0x7704…2d6) is a Curve StableSwap NG pool (Vyper), not a Uniswap V3 pool.
-  // UniswapOracle reads token0()/token1(), which revert on the Curve contract, so
-  // handleDeviation would always revert for eBTC and the keeper could never trigger
-  // monitoring for this market. Re-include in a follow-up VIP once either:
-  //   (a) a CurveOracle is deployed and wired into SentinelOracle for eBTC, or
-  //   (b) market team selects a V3-compatible eBTC pool to monitor instead.
-  // {
-  //   symbol: "eBTC",
-  //   token: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
-  //   pool: "0x7704d01908afd31bf647d969c295bb45230cd2d6",
-  //   deviationPercent: 10,
-  // },
+  // eBTC routes through CurveOracle (eBTC/WBTC StableSwap-NG pool). coinIndex=0 because
+  // eBTC is coins[0] on this pool; referenceToken is the paired token (WBTC).
+  {
+    symbol: "eBTC",
+    token: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
+    pool: "0x7704d01908afd31bf647d969c295bb45230cd2d6",
+    deviationPercent: 10,
+    oracleType: "curve" as const,
+    coinIndex: 0,
+    referenceToken: WBTC,
+  },
   {
     symbol: "DAI",
     token: "0x6B175474E89094C44Da98b954EedeAC495271d0F",
@@ -107,6 +110,7 @@ export const ETHEREUM_CONFIG = {
   eBrake: ETHEREUM_EBRAKE,
   sentinelOracle: ETHEREUM_SENTINEL_ORACLE,
   uniswapOracle: ETHEREUM_UNISWAP_ORACLE,
+  curveOracle: ETHEREUM_CURVE_ORACLE,
   multisigPauser: ETHEREUM_MULTISIG_PAUSER,
   keeper: ETHEREUM_KEEPER,
   monitoredMarkets: ETHEREUM_MONITORED_MARKETS,

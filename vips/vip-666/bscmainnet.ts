@@ -5,11 +5,21 @@ import { ARBITRUMONE_CONFIG } from "./addresses/arbitrumone";
 import { BASEMAINNET_CONFIG } from "./addresses/basemainnet";
 import { ETHEREUM_CONFIG } from "./addresses/ethereum";
 
+export type OracleType = "uniswap" | "curve" | "aerodrome";
+
 export interface MonitoredMarket {
   symbol: string;
   token: string;
   pool: string;
   deviationPercent: number;
+  // Defaults to "uniswap" for the existing UniswapOracle path. "curve" routes through
+  // CurveOracle and requires coinIndex + referenceToken; "aerodrome" routes through
+  // AerodromeSlipstreamOracle and uses the Uniswap-shaped (token, pool) signature.
+  oracleType?: OracleType;
+  // Curve-only: index of the asset in the StableSwap-NG pool's coins() array.
+  coinIndex?: number;
+  // Curve-only: the paired token whose USD price is fetched from ResilientOracle.
+  referenceToken?: string;
 }
 
 export interface ChainConfig {
@@ -25,6 +35,10 @@ export interface ChainConfig {
   eBrake: string;
   sentinelOracle: string;
   uniswapOracle: string;
+  // Optional, per-chain DEX oracles. Present only on chains that need them; bootstrap
+  // permissions + ownership transfer are conditionally added when set.
+  curveOracle?: string;
+  aerodromeOracle?: string;
   multisigPauser: string;
   keeper: string;
   monitoredMarkets: MonitoredMarket[];
@@ -51,6 +65,13 @@ export const SENTINEL_ORACLE_ADMIN_PERMS = ["setTokenOracleConfig(address,addres
 
 // UniswapOracle access-controlled functions
 export const UNISWAP_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address)"];
+
+// CurveOracle access-controlled functions — distinct setPoolConfig signature
+// (StableSwap-NG needs coinIndex + referenceToken in addition to token + pool).
+export const CURVE_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address,uint8,address)"];
+
+// AerodromeSlipstreamOracle access-controlled functions — same shape as UniswapOracle.
+export const AERODROME_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address)"];
 
 // IL Comptroller permissions for EBrake.
 // setActionsPaused uses uint256[] (not uint8[]) in the IL Comptroller.
@@ -104,17 +125,25 @@ export const grant = (acm: string, contract: string, sig: string, account: strin
 
 // VIP-666 (Sub-A): bootstrap + permissions. Kept under each chain's block gas
 // limit by deferring governance EBrake action grants and market wiring to VIP-667.
-// Per-chain command count: 60 (acceptOwnership 4 + admin grants 24 + ebrake→comptroller 4
-// + reset 12 + sentinel→ebrake 3 + multisig ebrake action 8 + trusted keepers 5).
+// Per-chain command count varies with the optional CurveOracle (Ethereum) and
+// AerodromeSlipstreamOracle (Base): each adds 1 acceptOwnership + 4 admin grants.
+//   - Ethereum: 60 + 5 (CurveOracle)            = 65
+//   - Arbitrum: 60                              = 60
+//   - Base:     60 + 5 (AerodromeSlipstream)    = 65
 const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
   const { acm, dstChainId } = cfg;
   const govAccounts = governanceAccounts(cfg);
   const trustedKeeperAccounts = [cfg.keeper, ...govAccounts];
 
+  const ownershipTargets: string[] = [cfg.deviationSentinel, cfg.sentinelOracle, cfg.uniswapOracle, cfg.eBrake];
+  if (cfg.curveOracle) ownershipTargets.push(cfg.curveOracle);
+  if (cfg.aerodromeOracle) ownershipTargets.push(cfg.aerodromeOracle);
+
   return [
-    // 1. Accept ownership of the four newly deployed contracts. The deployer
-    //    transfers ownership to the local Normal Timelock prior to this VIP.
-    ...[cfg.deviationSentinel, cfg.sentinelOracle, cfg.uniswapOracle, cfg.eBrake].map(target => ({
+    // 1. Accept ownership of the newly deployed contracts. The deployer transfers
+    //    ownership to the local Normal Timelock prior to this VIP. Always 4 (the
+    //    base stack); +1 each for CurveOracle / AerodromeSlipstreamOracle when present.
+    ...ownershipTargets.map(target => ({
       target,
       signature: "acceptOwnership()",
       params: [],
@@ -135,6 +164,20 @@ const buildChainCommandsA = (cfg: ChainConfig): Command[] => {
     ...govAccounts.flatMap(account =>
       UNISWAP_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.uniswapOracle, sig, account, dstChainId)),
     ),
+
+    // 4b. Grant Guardian + governance Timelocks admin permission on CurveOracle (when present)
+    ...(cfg.curveOracle
+      ? govAccounts.flatMap(account =>
+          CURVE_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.curveOracle as string, sig, account, dstChainId)),
+        )
+      : []),
+
+    // 4c. Grant Guardian + governance Timelocks admin permission on AerodromeSlipstreamOracle (when present)
+    ...(cfg.aerodromeOracle
+      ? govAccounts.flatMap(account =>
+          AERODROME_ORACLE_ADMIN_PERMS.map(sig => grant(acm, cfg.aerodromeOracle as string, sig, account, dstChainId)),
+        )
+      : []),
 
     // 5. Grant EBrake the IL-Comptroller-supported emergency-action permissions
     ...EBRAKE_COMPTROLLER_PERMS_IL.map(sig => grant(acm, cfg.comptroller, sig, cfg.eBrake, dstChainId)),
@@ -173,7 +216,12 @@ This is the first of two VIPs that configure the **DeviationSentinel** + **EBrak
 The configuration is split across two VIPs so each per-chain payload fits under the destination chain's block gas limit:
 
 - **VIP-666 (this VIP)** — accept ownership, grant admin/reset/sentinel→ebrake/ebrake→comptroller/multisig permissions, whitelist trusted keepers
-- **VIP-667 (follow-up)** — grant Guardian + Timelocks the IL-supported EBrake action permissions, then wire each monitored market on UniswapOracle, SentinelOracle, and DeviationSentinel
+- **VIP-667 (follow-up)** — grant Guardian + Timelocks the IL-supported EBrake action permissions, then wire each monitored market on the appropriate DEX oracle (UniswapOracle / CurveOracle / AerodromeSlipstreamOracle), SentinelOracle, and DeviationSentinel
+
+In addition to UniswapOracle, two extra DEX oracles are bootstrapped on the chains that need them:
+
+- **CurveOracle (Ethereum only)** — prices eBTC against WBTC via the eBTC/WBTC Curve StableSwap-NG pool's EMA \`price_oracle\`. Required because Curve StableSwap-NG pools are not Uniswap V3 ABI-compatible.
+- **AerodromeSlipstreamOracle (Base only)** — prices cbBTC and wstETH on the most liquid Aerodrome Slipstream pools (cbBTC/USDC and wstETH/WETH). Aerodrome Slipstream's \`slot0()\` returns a 6-tuple (no \`feeProtocol\`) so the Solidity decoder reverts when read against the Uniswap V3 7-tuple ABI used by UniswapOracle.
 
 Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comptroller, not the BSC Diamond), only the IL-supported subset of EBrake action functions is granted. Diamond-only functions (\`pauseFlashLoan\`, \`disablePoolBorrow\`, \`revokeFlashLoanAccess\`, \`decreaseCF(address,uint96,uint256)\`) are omitted as they revert on IL comptrollers.
 
@@ -181,15 +229,15 @@ Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comp
 
 If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
 
-- Accept governance ownership of the **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **EBrakeV2** contracts
-- Grant admin permissions on DeviationSentinel, SentinelOracle, and UniswapOracle to Guardian + 3 Timelocks
+- Accept governance ownership of the **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **EBrakeV2** contracts (plus **CurveOracle** on Ethereum and **AerodromeSlipstreamOracle** on Base)
+- Grant admin permissions on DeviationSentinel, SentinelOracle, UniswapOracle, and (where present) CurveOracle / AerodromeSlipstreamOracle to Guardian + 3 Timelocks
 - Grant **EBrakeV2** the 4 IL-supported Comptroller permissions it needs to execute emergency actions
 - Authorize **DeviationSentinel** to call \`pauseBorrow\`, \`pauseSupply\`, and \`decreaseCF\` on EBrake
 - Grant **Guardian** and governance **Timelocks** the granular snapshot-reset permissions on EBrake
 - Grant the **per-chain 1-of-1 Multisig Pauser** the 8 IL-supported EBrake action functions for manual emergency pausing (Phase 0)
 - Whitelist Keeper + Guardian + 3 Timelocks as trusted keepers on DeviationSentinel
 
-**Permission event summary**: 153 PermissionGranted (51 per chain × 3 chains), 0 PermissionRevoked
+**Permission event summary**: 161 PermissionGranted (Ethereum 55 + Arbitrum One 51 + Base 55), 0 PermissionRevoked
 
 #### References
 
