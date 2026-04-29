@@ -164,18 +164,16 @@ export const runVip666Suite = async (cfg: ChainConfig) => {
     });
 
     it("Guardian + Timelocks have no EBrake action permissions yet", async () => {
-      const a = acm.connect(impersonatedEBrake);
       for (const account of governanceAccounts) {
         for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-          expect(await a.isAllowedToCall(account, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
+          expect(await acm.hasPermission(account, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig} for ${account}`);
         }
       }
     });
 
     it("Multisig Pauser has no EBrake action permissions yet", async () => {
-      const a = acm.connect(impersonatedEBrake);
       for (const sig of GOVERNANCE_EBRAKE_PERMS_IL) {
-        expect(await a.isAllowedToCall(cfg.multisigPauser, sig)).to.equal(false, `unexpected ${sig}`);
+        expect(await acm.hasPermission(cfg.multisigPauser, cfg.eBrake, sig)).to.equal(false, `unexpected ${sig}`);
       }
     });
 
