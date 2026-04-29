@@ -5,7 +5,6 @@ import { makeProposal } from "src/utils";
 import { ARBITRUMONE_CONFIG } from "./addresses/arbitrumone";
 import { BASEMAINNET_CONFIG } from "./addresses/basemainnet";
 import { ETHEREUM_CONFIG } from "./addresses/ethereum";
-import { ZKSYNCMAINNET_CONFIG } from "./addresses/zksyncmainnet";
 
 // Per-chain monitored market: token + DEX pool to read its price + deviation threshold.
 export interface MonitoredMarket {
@@ -36,7 +35,7 @@ export interface ChainConfig {
   monitoredMarkets: MonitoredMarket[];
 }
 
-const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, ZKSYNCMAINNET_CONFIG, BASEMAINNET_CONFIG];
+const NETWORKS: ChainConfig[] = [ETHEREUM_CONFIG, ARBITRUMONE_CONFIG, BASEMAINNET_CONFIG];
 
 // DeviationSentinel access-controlled functions (3 total — setTokenConfig uses
 // the struct-tuple form (uint8,bool) verbatim, matching DeviationSentinel.sol).
@@ -195,16 +194,16 @@ const buildChainCommands = (cfg: ChainConfig) => {
 export const vip666 = () => {
   const meta = {
     version: "v2",
-    title: "VIP-666 [Ethereum, Arbitrum One, zkSync Era, Base] Configure DeviationSentinel + EBrakeV2",
+    title: "VIP-666 [Ethereum, Arbitrum One, Base] Configure DeviationSentinel + EBrakeV2",
     description: `#### Description
 
-This VIP configures the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, **zkSync Era**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
+This VIP configures the **DeviationSentinel** + **EBrakeV2** Emergency Brake stack on **Ethereum**, **Arbitrum One**, and **Base**, mirroring the BSC setup from VIP-590 + VIP-610. Each chain's DeviationSentinel routes automated oracle-deviation enforcement through a local EBrakeV2, which applies per-action, per-market restrictions (pause borrow/supply, zero collateral factor) without manual intervention.
 
 Because EBrake on these chains uses \`isIsolatedPool=true\` (single-pool IL Comptroller, not the BSC Diamond), only the IL-supported subset of EBrake action functions is granted. Diamond-only functions (\`pauseFlashLoan\`, \`disablePoolBorrow\`, \`revokeFlashLoanAccess\`, \`decreaseCF(address,uint96,uint256)\`) are omitted as they revert on IL comptrollers.
 
 #### Summary
 
-If approved, this VIP will, for each of Ethereum, Arbitrum One, zkSync Era, and Base:
+If approved, this VIP will, for each of Ethereum, Arbitrum One, and Base:
 
 - Accept governance ownership of the **DeviationSentinel**, **SentinelOracle**, **UniswapOracle**, and **EBrakeV2** contracts
 - Grant admin permissions on DeviationSentinel, SentinelOracle, and UniswapOracle to Guardian + 3 Timelocks
@@ -213,9 +212,9 @@ If approved, this VIP will, for each of Ethereum, Arbitrum One, zkSync Era, and 
 - Grant **Guardian** and governance **Timelocks** the 8 IL-supported EBrake action functions and granular snapshot-reset permissions
 - Grant the **per-chain 1-of-1 Multisig Pauser** the 8 IL-supported EBrake action functions for manual emergency pausing (Phase 0)
 - Whitelist Keeper + Guardian + 3 Timelocks as trusted keepers on DeviationSentinel
-- Configure deviation monitoring (10% threshold) for the eligible Core Pool markets on each chain — 10 on Ethereum, 5 on Arbitrum One, 4 on Base, 1 on zkSync Era
+- Configure deviation monitoring (10% threshold) for the eligible Core Pool markets on each chain — 10 on Ethereum, 5 on Arbitrum One, 4 on Base
 
-**Permission event summary**: 332 PermissionGranted (83 per chain × 4 chains), 0 PermissionRevoked
+**Permission event summary**: 249 PermissionGranted (83 per chain × 3 chains), 0 PermissionRevoked
 
 #### References
 
