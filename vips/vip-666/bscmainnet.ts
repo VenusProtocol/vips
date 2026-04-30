@@ -13,13 +13,17 @@ export interface MonitoredMarket {
   pool: string;
   deviationPercent: number;
   // Defaults to "uniswap" for the existing UniswapOracle path. "curve" routes through
-  // CurveOracle and requires coinIndex + referenceToken; "aerodrome" routes through
-  // AerodromeSlipstreamOracle and uses the Uniswap-shaped (token, pool) signature.
+  // CurveOracle and requires coinIndex + refCoinIndex + referenceToken + assetDecimals;
+  // "aerodrome" routes through AerodromeSlipstreamOracle and uses the Uniswap-shaped (token, pool) signature.
   oracleType?: OracleType;
-  // Curve-only: index of the asset in the StableSwap-NG pool's coins() array.
+  // Curve-only: coins() index of the priced asset in the StableSwap-NG pool.
   coinIndex?: number;
-  // Curve-only: the paired token whose USD price is fetched from ResilientOracle.
+  // Curve-only: coins() index of the reference asset (whose USD price ResilientOracle supplies).
+  refCoinIndex?: number;
+  // Curve-only: address of the reference asset.
   referenceToken?: string;
+  // Curve-only: decimals of the priced asset (used to scale get_dy() output).
+  assetDecimals?: number;
 }
 
 export interface ChainConfig {
@@ -67,8 +71,8 @@ export const SENTINEL_ORACLE_ADMIN_PERMS = ["setTokenOracleConfig(address,addres
 export const UNISWAP_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address)"];
 
 // CurveOracle access-controlled functions — distinct setPoolConfig signature
-// (StableSwap-NG needs coinIndex + referenceToken in addition to token + pool).
-export const CURVE_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address,uint8,address)"];
+// (StableSwap-NG needs coinIndex + refCoinIndex + referenceToken + assetDecimals in addition to token + pool).
+export const CURVE_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address,uint8,uint8,address,uint8)"];
 
 // AerodromeSlipstreamOracle access-controlled functions — same shape as UniswapOracle.
 export const AERODROME_ORACLE_ADMIN_PERMS = ["setPoolConfig(address,address)"];

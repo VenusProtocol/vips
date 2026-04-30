@@ -243,9 +243,21 @@
       },
       {
         "indexed": false,
+        "internalType": "uint8",
+        "name": "refCoinIndex",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "referenceToken",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "assetDecimals",
+        "type": "uint8"
       }
     ],
     "name": "PoolConfigUpdated",
@@ -363,9 +375,19 @@
         "type": "uint8"
       },
       {
+        "internalType": "uint8",
+        "name": "refCoinIndex",
+        "type": "uint8"
+      },
+      {
         "internalType": "address",
         "name": "referenceToken",
         "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "assetDecimals",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -409,9 +431,19 @@
         "type": "uint8"
       },
       {
+        "internalType": "uint8",
+        "name": "refCoinIndex",
+        "type": "uint8"
+      },
+      {
         "internalType": "address",
         "name": "referenceToken",
         "type": "address"
+      },
+      {
+        "internalType": "uint8",
+        "name": "assetDecimals",
+        "type": "uint8"
       }
     ],
     "name": "setPoolConfig",

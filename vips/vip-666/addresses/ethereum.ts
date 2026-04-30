@@ -18,7 +18,7 @@ export const ETHEREUM_SENTINEL_ORACLE = "0x444C53E194B40c272fAd683210e2cB1c16Ab1
 export const ETHEREUM_UNISWAP_ORACLE = "0x873993F8f5f5Ddbae0952e939ab3005Af363Af00";
 // Deployed via venus-periphery PR #66 — prices Curve StableSwap-NG assets that
 // UniswapOracle can't read (eBTC/WBTC pool, etc.).
-export const ETHEREUM_CURVE_ORACLE = "0x64a811bd0E91cf00D9CE0769eDA028026577A6D9";
+export const ETHEREUM_CURVE_ORACLE = "0x9F508F3146cb03276282f9237c6eE64f76E3261D";
 export const ETHEREUM_MULTISIG_PAUSER = "0xCCa5a587eBDBe80f23c8610F2e53B03158e62948"; // Venus team multisig
 export const ETHEREUM_KEEPER = "0x57fa23f591203f61cef84a7bc892df69ca95c86e";
 
@@ -66,8 +66,9 @@ export const ETHEREUM_MONITORED_MARKETS = [
     pool: "0xe6d7ebb9f1a9519dc06d557e03c522d53520e76a", // USDe/USDC Uniswap V3
     deviationPercent: 10,
   },
-  // eBTC routes through CurveOracle (eBTC/WBTC StableSwap-NG pool). coinIndex=0 because
-  // eBTC is coins[0] on this pool; referenceToken is the paired token (WBTC).
+  // eBTC routes through CurveOracle (eBTC/WBTC StableSwap-NG pool).
+  // coinIndex=0 (eBTC is coins[0]), refCoinIndex=1 (WBTC is coins[1]).
+  // assetDecimals=8 matches eBTC's ERC-20 decimals; get_dy probes 10^8 units.
   {
     symbol: "eBTC",
     token: "0x657e8C867D8B37dCC18fA4Caead9C45EB088C642",
@@ -75,7 +76,9 @@ export const ETHEREUM_MONITORED_MARKETS = [
     deviationPercent: 10,
     oracleType: "curve" as const,
     coinIndex: 0,
+    refCoinIndex: 1,
     referenceToken: WBTC,
+    assetDecimals: 8,
   },
   {
     symbol: "DAI",
@@ -111,6 +114,7 @@ export const ETHEREUM_CONFIG = {
   sentinelOracle: ETHEREUM_SENTINEL_ORACLE,
   uniswapOracle: ETHEREUM_UNISWAP_ORACLE,
   curveOracle: ETHEREUM_CURVE_ORACLE,
+
   multisigPauser: ETHEREUM_MULTISIG_PAUSER,
   keeper: ETHEREUM_KEEPER,
   monitoredMarkets: ETHEREUM_MONITORED_MARKETS,

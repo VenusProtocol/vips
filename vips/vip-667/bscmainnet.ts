@@ -33,18 +33,32 @@ const resolveDexOracle = (cfg: ChainConfig, market: MonitoredMarket): string => 
 };
 
 // Build the DEX-side `setPoolConfig` call for a market. UniswapOracle and AerodromeSlipstreamOracle
-// share the (token, pool) signature; CurveOracle takes additional (coinIndex, referenceToken)
-// fields tied to its StableSwap-NG `price_oracle` indexing scheme.
+// share the (token, pool) signature; CurveOracle takes additional (coinIndex, refCoinIndex,
+// referenceToken, assetDecimals) fields for its get_dy()-based pricing scheme.
 const buildSetPoolCommand = (cfg: ChainConfig, market: MonitoredMarket, dstChainId: number): Command => {
   const oracle = resolveDexOracle(cfg, market);
   if ((market.oracleType ?? "uniswap") === "curve") {
-    if (market.coinIndex === undefined || !market.referenceToken) {
-      throw new Error(`${cfg.name}: ${market.symbol} (curve) requires coinIndex + referenceToken`);
+    if (
+      market.coinIndex === undefined ||
+      market.refCoinIndex === undefined ||
+      !market.referenceToken ||
+      market.assetDecimals === undefined
+    ) {
+      throw new Error(
+        `${cfg.name}: ${market.symbol} (curve) requires coinIndex + refCoinIndex + referenceToken + assetDecimals`,
+      );
     }
     return {
       target: oracle,
-      signature: "setPoolConfig(address,address,uint8,address)",
-      params: [market.token, market.pool, market.coinIndex, market.referenceToken],
+      signature: "setPoolConfig(address,address,uint8,uint8,address,uint8)",
+      params: [
+        market.token,
+        market.pool,
+        market.coinIndex,
+        market.refCoinIndex,
+        market.referenceToken,
+        market.assetDecimals,
+      ],
       dstChainId,
     };
   }

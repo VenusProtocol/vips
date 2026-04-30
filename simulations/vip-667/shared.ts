@@ -251,9 +251,11 @@ export const runVip667Suite = async (cfg: ChainConfig) => {
           const cfgEntry = await curveOracle!.poolConfigs(market.token);
           expect(ethers.utils.getAddress(cfgEntry.pool)).to.equal(ethers.utils.getAddress(market.pool));
           expect(cfgEntry.coinIndex).to.equal(market.coinIndex);
+          expect(cfgEntry.refCoinIndex).to.equal(market.refCoinIndex);
           expect(ethers.utils.getAddress(cfgEntry.referenceToken)).to.equal(
             ethers.utils.getAddress(market.referenceToken as string),
           );
+          expect(cfgEntry.assetDecimals).to.equal(market.assetDecimals);
         } else if (oracleType === "aerodrome") {
           const actual = await aerodromeOracle!.tokenPools(market.token);
           expect(ethers.utils.getAddress(actual)).to.equal(ethers.utils.getAddress(market.pool));
